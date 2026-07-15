@@ -4,7 +4,14 @@ import { adminDb } from '@/lib/firebaseAdmin';
 export async function GET(req) {
   // Bảo vệ route bằng CRON_SECRET nếu cấu hình trên Vercel
   const authHeader = req.headers.get('authorization');
-  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const { searchParams } = new URL(req.url);
+  const secretParam = searchParams.get('secret');
+
+  if (
+    process.env.CRON_SECRET && 
+    authHeader !== `Bearer ${process.env.CRON_SECRET}` && 
+    secretParam !== process.env.CRON_SECRET
+  ) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
