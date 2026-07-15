@@ -1,0 +1,956 @@
+[
+  {
+    "id": "phys_thi_thu_vstep",
+    "slug": "thi-thu-vstep",
+    "title": "Thi thu vstep",
+    "year": 2025,
+    "province": "Bộ GD&ĐT",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/thi-thu-vstep/"
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_1",
+    "slug": "de-on-tap-thi-thu-thpt-2026-mon-vat-ly-de-1",
+    "title": "De on tap thi thu THPT 2026 môn Vật lý de 1",
+    "year": 2026,
+    "province": "Bộ GD&ĐT",
+    "category": "bo-gddt",
+    "url": "https://dethitracnghiem.vn/de-on-tap-thi-thu-thpt-2026-mon-vat-ly-de-1/"
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_2",
+    "slug": "de-on-tap-thi-thu-thpt-2026-mon-vat-ly-de-2",
+    "title": "De on tap thi thu THPT 2026 môn Vật lý de 2",
+    "year": 2026,
+    "province": "Bộ GD&ĐT",
+    "category": "bo-gddt",
+    "url": "https://dethitracnghiem.vn/de-on-tap-thi-thu-thpt-2026-mon-vat-ly-de-2/"
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_3",
+    "slug": "de-on-tap-thi-thu-thpt-2026-mon-vat-ly-de-3",
+    "title": "De on tap thi thu THPT 2026 môn Vật lý de 3",
+    "year": 2026,
+    "province": "Bộ GD&ĐT",
+    "category": "bo-gddt",
+    "url": "https://dethitracnghiem.vn/de-on-tap-thi-thu-thpt-2026-mon-vat-ly-de-3/"
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_4",
+    "slug": "de-on-tap-thi-thu-thpt-2026-mon-vat-ly-de-4",
+    "title": "De on tap thi thu THPT 2026 môn Vật lý de 4",
+    "year": 2026,
+    "province": "Bộ GD&ĐT",
+    "category": "bo-gddt",
+    "url": "https://dethitracnghiem.vn/de-on-tap-thi-thu-thpt-2026-mon-vat-ly-de-4/"
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_5",
+    "slug": "de-on-tap-thi-thu-thpt-2026-mon-vat-ly-de-5",
+    "title": "De on tap thi thu THPT 2026 môn Vật lý de 5",
+    "year": 2026,
+    "province": "Bộ GD&ĐT",
+    "category": "bo-gddt",
+    "url": "https://dethitracnghiem.vn/de-on-tap-thi-thu-thpt-2026-mon-vat-ly-de-5/"
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_6",
+    "slug": "de-on-tap-thi-thu-thpt-2026-mon-vat-ly-de-6",
+    "title": "De on tap thi thu THPT 2026 môn Vật lý de 6",
+    "year": 2026,
+    "province": "Bộ GD&ĐT",
+    "category": "bo-gddt",
+    "url": "https://dethitracnghiem.vn/de-on-tap-thi-thu-thpt-2026-mon-vat-ly-de-6/"
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_7",
+    "slug": "de-on-tap-thi-thu-thpt-2026-mon-vat-ly-de-7",
+    "title": "De on tap thi thu THPT 2026 môn Vật lý de 7",
+    "year": 2026,
+    "province": "Bộ GD&ĐT",
+    "category": "bo-gddt",
+    "url": "https://dethitracnghiem.vn/de-on-tap-thi-thu-thpt-2026-mon-vat-ly-de-7/"
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_8",
+    "slug": "de-on-tap-thi-thu-thpt-2026-mon-vat-ly-de-8",
+    "title": "De on tap thi thu THPT 2026 môn Vật lý de 8",
+    "year": 2026,
+    "province": "Bộ GD&ĐT",
+    "category": "bo-gddt",
+    "url": "https://dethitracnghiem.vn/de-on-tap-thi-thu-thpt-2026-mon-vat-ly-de-8/"
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_9",
+    "slug": "de-on-tap-thi-thu-thpt-2026-mon-vat-ly-de-9",
+    "title": "De on tap thi thu THPT 2026 môn Vật lý de 9",
+    "year": 2026,
+    "province": "Bộ GD&ĐT",
+    "category": "bo-gddt",
+    "url": "https://dethitracnghiem.vn/de-on-tap-thi-thu-thpt-2026-mon-vat-ly-de-9/"
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_10",
+    "slug": "de-on-tap-thi-thu-thpt-2026-mon-vat-ly-de-10",
+    "title": "De on tap thi thu THPT 2026 môn Vật lý de 10",
+    "year": 2026,
+    "province": "Bộ GD&ĐT",
+    "category": "bo-gddt",
+    "url": "https://dethitracnghiem.vn/de-on-tap-thi-thu-thpt-2026-mon-vat-ly-de-10/"
+  },
+  {
+    "id": "phys_de_thi_chinh_thuc_thpt_2025_mon_vat_ly_ma_de_0213",
+    "slug": "de-thi-chinh-thuc-thpt-2025-mon-vat-ly-ma-de-0213",
+    "title": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0213",
+    "year": 2025,
+    "province": "Bộ GD&ĐT",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-chinh-thuc-thpt-2025-mon-vat-ly-ma-de-0213/"
+  },
+  {
+    "id": "phys_de_thi_chinh_thuc_thpt_2025_mon_vat_ly_ma_de_0214",
+    "slug": "de-thi-chinh-thuc-thpt-2025-mon-vat-ly-ma-de-0214",
+    "title": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0214",
+    "year": 2025,
+    "province": "Bộ GD&ĐT",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-chinh-thuc-thpt-2025-mon-vat-ly-ma-de-0214/"
+  },
+  {
+    "id": "phys_de_thi_chinh_thuc_thpt_2025_mon_vat_ly_ma_de_0215",
+    "slug": "de-thi-chinh-thuc-thpt-2025-mon-vat-ly-ma-de-0215",
+    "title": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0215",
+    "year": 2025,
+    "province": "Bộ GD&ĐT",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-chinh-thuc-thpt-2025-mon-vat-ly-ma-de-0215/"
+  },
+  {
+    "id": "phys_de_thi_chinh_thuc_thpt_2025_mon_vat_ly_ma_de_0240",
+    "slug": "de-thi-chinh-thuc-thpt-2025-mon-vat-ly-ma-de-0240",
+    "title": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0240",
+    "year": 2025,
+    "province": "Bộ GD&ĐT",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-chinh-thuc-thpt-2025-mon-vat-ly-ma-de-0240/"
+  },
+  {
+    "id": "phys_de_thi_chinh_thuc_thpt_2025_mon_vat_ly_ma_de_0244",
+    "slug": "de-thi-chinh-thuc-thpt-2025-mon-vat-ly-ma-de-0244",
+    "title": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0244",
+    "year": 2025,
+    "province": "Bộ GD&ĐT",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-chinh-thuc-thpt-2025-mon-vat-ly-ma-de-0244/"
+  },
+  {
+    "id": "phys_de_thi_thu_vat_ly_thpt_2026_so_gddt_thai_nguyen_lan_1",
+    "slug": "de-thi-thu-vat-ly-thpt-2026-so-gddt-thai-nguyen-lan-1",
+    "title": "Đề thi thử Vật lý THPT 2026 Sở GD&ĐT thai nguyen Lần 1",
+    "year": 2026,
+    "province": "Bộ GD&ĐT",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-vat-ly-thpt-2026-so-gddt-thai-nguyen-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_vat_ly_thpt_2026_cum_chuyen_mon_so_10_hai_phong",
+    "slug": "de-thi-thu-vat-ly-thpt-2026-cum-chuyen-mon-so-10-hai-phong",
+    "title": "Đề thi thử Vật lý THPT 2026 cum Chuyên môn so 10 hai phong",
+    "year": 2026,
+    "province": "Hải Phòng",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-vat-ly-thpt-2026-cum-chuyen-mon-so-10-hai-phong/"
+  },
+  {
+    "id": "phys_de_thi_thu_vat_ly_thpt_2026_lien_truong_thpt_nghe_an",
+    "slug": "de-thi-thu-vat-ly-thpt-2026-lien-truong-thpt-nghe-an",
+    "title": "Đề thi thử Vật lý THPT 2026 lien truong THPT nghe an",
+    "year": 2026,
+    "province": "Nghệ An",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-vat-ly-thpt-2026-lien-truong-thpt-nghe-an/"
+  },
+  {
+    "id": "phys_de_thi_thu_vat_ly_thpt_2026_lien_truong_thpt_nghe_an_lan_2",
+    "slug": "de-thi-thu-vat-ly-thpt-2026-lien-truong-thpt-nghe-an-lan-2",
+    "title": "Đề thi thử Vật lý THPT 2026 lien truong THPT nghe an Lần 2",
+    "year": 2026,
+    "province": "Nghệ An",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-vat-ly-thpt-2026-lien-truong-thpt-nghe-an-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_vat_ly_thpt_2026_thpt_chuyen_phan_boi_chau_nghe_an_dot_1",
+    "slug": "de-thi-thu-vat-ly-thpt-2026-thpt-chuyen-phan-boi-chau-nghe-an-dot-1",
+    "title": "Đề thi thử Vật lý THPT 2026 THPT Chuyên phan boi chau nghe an dot 1",
+    "year": 2026,
+    "province": "Nghệ An",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-vat-ly-thpt-2026-thpt-chuyen-phan-boi-chau-nghe-an-dot-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_vat_ly_thpt_2026_thpt_chuyen_khoa_hoc_tu_nhien_ha_noi",
+    "slug": "de-thi-thu-vat-ly-thpt-2026-thpt-chuyen-khoa-hoc-tu-nhien-ha-noi",
+    "title": "Đề thi thử Vật lý THPT 2026 THPT Chuyên khoa hoc tu nhien ha noi",
+    "year": 2026,
+    "province": "Hà Nội",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-vat-ly-thpt-2026-thpt-chuyen-khoa-hoc-tu-nhien-ha-noi/"
+  },
+  {
+    "id": "phys_de_thi_thu_vat_ly_thpt_2026_thpt_yen_hoa_ha_noi",
+    "slug": "de-thi-thu-vat-ly-thpt-2026-thpt-yen-hoa-ha-noi",
+    "title": "Đề thi thử Vật lý THPT 2026 THPT yen hoa ha noi",
+    "year": 2026,
+    "province": "Hà Nội",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-vat-ly-thpt-2026-thpt-yen-hoa-ha-noi/"
+  },
+  {
+    "id": "phys_de_thi_thu_vat_ly_thpt_2026_thpt_chuyen_khtn_ha_noi_lan_2",
+    "slug": "de-thi-thu-vat-ly-thpt-2026-thpt-chuyen-khtn-ha-noi-lan-2",
+    "title": "Đề thi thử Vật lý THPT 2026 THPT Chuyên khtn ha noi Lần 2",
+    "year": 2026,
+    "province": "Hà Nội",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-vat-ly-thpt-2026-thpt-chuyen-khtn-ha-noi-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_vat_ly_thpt_2026_cum_bac_ninh_lan_1",
+    "slug": "de-thi-thu-vat-ly-thpt-2026-cum-bac-ninh-lan-1",
+    "title": "Đề thi thử Vật lý THPT 2026 cum bac ninh Lần 1",
+    "year": 2026,
+    "province": "Bắc Ninh",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-vat-ly-thpt-2026-cum-bac-ninh-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_vat_ly_thpt_2026_thpt_que_vo_1_bac_ninh_lan_1",
+    "slug": "de-thi-thu-vat-ly-thpt-2026-thpt-que-vo-1-bac-ninh-lan-1",
+    "title": "Đề thi thử Vật lý THPT 2026 THPT que vo 1 bac ninh Lần 1",
+    "year": 2026,
+    "province": "Bắc Ninh",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-vat-ly-thpt-2026-thpt-que-vo-1-bac-ninh-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_vat_ly_thpt_2026_lien_truong_thpt_bac_ninh_lan_2",
+    "slug": "de-thi-thu-vat-ly-thpt-2026-lien-truong-thpt-bac-ninh-lan-2",
+    "title": "Đề thi thử Vật lý THPT 2026 lien truong THPT bac ninh Lần 2",
+    "year": 2026,
+    "province": "Bắc Ninh",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-vat-ly-thpt-2026-lien-truong-thpt-bac-ninh-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_vat_ly_thpt_2026_so_gddt_bac_ninh",
+    "slug": "de-thi-thu-vat-ly-thpt-2026-so-gddt-bac-ninh",
+    "title": "Đề thi thử Vật lý THPT 2026 Sở GD&ĐT bac ninh",
+    "year": 2026,
+    "province": "Bắc Ninh",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-vat-ly-thpt-2026-so-gddt-bac-ninh/"
+  },
+  {
+    "id": "phys_de_thi_thu_vat_ly_thpt_2026_thpt_ngo_gia_tu_phu_tho",
+    "slug": "de-thi-thu-vat-ly-thpt-2026-thpt-ngo-gia-tu-phu-tho",
+    "title": "Đề thi thử Vật lý THPT 2026 THPT ngo gia tu phu tho",
+    "year": 2026,
+    "province": "Bộ GD&ĐT",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-vat-ly-thpt-2026-thpt-ngo-gia-tu-phu-tho/"
+  },
+  {
+    "id": "phys_de_thi_thu_vat_ly_thpt_2026_so_gddt_phu_tho_dot_1",
+    "slug": "de-thi-thu-vat-ly-thpt-2026-so-gddt-phu-tho-dot-1",
+    "title": "Đề thi thử Vật lý THPT 2026 Sở GD&ĐT phu tho dot 1",
+    "year": 2026,
+    "province": "Bộ GD&ĐT",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-vat-ly-thpt-2026-so-gddt-phu-tho-dot-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_vat_ly_thpt_2026_thpt_le_thanh_tong_tphcm",
+    "slug": "de-thi-thu-vat-ly-thpt-2026-thpt-le-thanh-tong-tphcm",
+    "title": "Đề thi thử Vật lý THPT 2026 THPT le thanh tong tphcm",
+    "year": 2026,
+    "province": "Bộ GD&ĐT",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-vat-ly-thpt-2026-thpt-le-thanh-tong-tphcm/"
+  },
+  {
+    "id": "phys_de_thi_thu_vat_ly_thpt_2026_thpt_nguyen_khuyen_le_thanh_tong_tphcm_lan_18",
+    "slug": "de-thi-thu-vat-ly-thpt-2026-thpt-nguyen-khuyen-le-thanh-tong-tphcm-lan-18",
+    "title": "Đề thi thử Vật lý THPT 2026 THPT nguyen khuyen le thanh tong tphcm Lần 18",
+    "year": 2026,
+    "province": "Bộ GD&ĐT",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-vat-ly-thpt-2026-thpt-nguyen-khuyen-le-thanh-tong-tphcm-lan-18/"
+  },
+  {
+    "id": "phys_de_thi_thu_vat_ly_thpt_2026_so_gddt_ha_tinh",
+    "slug": "de-thi-thu-vat-ly-thpt-2026-so-gddt-ha-tinh",
+    "title": "Đề thi thử Vật lý THPT 2026 Sở GD&ĐT ha tinh",
+    "year": 2026,
+    "province": "Hà Tĩnh",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-vat-ly-thpt-2026-so-gddt-ha-tinh/"
+  },
+  {
+    "id": "phys_de_thi_thu_vat_ly_thpt_2026_so_gddt_tuyen_quang",
+    "slug": "de-thi-thu-vat-ly-thpt-2026-so-gddt-tuyen-quang",
+    "title": "Đề thi thử Vật lý THPT 2026 Sở GD&ĐT tuyen quang",
+    "year": 2026,
+    "province": "Tuyên Quang",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-vat-ly-thpt-2026-so-gddt-tuyen-quang/"
+  },
+  {
+    "id": "phys_de_thi_thu_vat_ly_thpt_2026_thpt_chuyen_ha_long_quang_ninh",
+    "slug": "de-thi-thu-vat-ly-thpt-2026-thpt-chuyen-ha-long-quang-ninh",
+    "title": "Đề thi thử Vật lý THPT 2026 THPT Chuyên ha long quang ninh",
+    "year": 2026,
+    "province": "Quảng Ninh",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-vat-ly-thpt-2026-thpt-chuyen-ha-long-quang-ninh/"
+  },
+  {
+    "id": "phys_de_thi_thu_vat_ly_thpt_2026_thpt_cam_pha_quang_ninh_lan_1",
+    "slug": "de-thi-thu-vat-ly-thpt-2026-thpt-cam-pha-quang-ninh-lan-1",
+    "title": "Đề thi thử Vật lý THPT 2026 THPT cam pha quang ninh Lần 1",
+    "year": 2026,
+    "province": "Quảng Ninh",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-vat-ly-thpt-2026-thpt-cam-pha-quang-ninh-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_ngo_quyen_hai_phong_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-ngo-quyen-hai-phong-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT ngo quyen hai phong Lần 1",
+    "year": 2025,
+    "province": "Hải Phòng",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-ngo-quyen-hai-phong-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_ngo_quyen_hai_phong_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-ngo-quyen-hai-phong-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT ngo quyen hai phong Lần 2",
+    "year": 2025,
+    "province": "Hải Phòng",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-ngo-quyen-hai-phong-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_tran_phu_hai_phong_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-tran-phu-hai-phong-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên tran phu hai phong Lần 1",
+    "year": 2025,
+    "province": "Hải Phòng",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-tran-phu-hai-phong-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_tran_phu_hai_phong_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-tran-phu-hai-phong-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên tran phu hai phong Lần 2",
+    "year": 2025,
+    "province": "Hải Phòng",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-tran-phu-hai-phong-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_so_hai_phong_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-hai-phong-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề so hai phong Lần 1",
+    "year": 2025,
+    "province": "Hải Phòng",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-hai-phong-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_so_hai_phong_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-hai-phong-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề so hai phong Lần 2",
+    "year": 2025,
+    "province": "Hải Phòng",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-hai-phong-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_phan_chau_trinh_da_nang_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-phan-chau-trinh-da-nang-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT phan chau trinh da nang Lần 1",
+    "year": 2025,
+    "province": "Đà Nẵng",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-phan-chau-trinh-da-nang-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_phan_chau_trinh_da_nang_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-phan-chau-trinh-da-nang-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT phan chau trinh da nang Lần 2",
+    "year": 2025,
+    "province": "Đà Nẵng",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-phan-chau-trinh-da-nang-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_le_quy_don_da_nang_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-le-quy-don-da-nang-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên le quy don da nang Lần 1",
+    "year": 2025,
+    "province": "Đà Nẵng",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-le-quy-don-da-nang-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_le_quy_don_da_nang_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-le-quy-don-da-nang-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên le quy don da nang Lần 2",
+    "year": 2025,
+    "province": "Đà Nẵng",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-le-quy-don-da-nang-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_so_da_nang_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-da-nang-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề so da nang Lần 1",
+    "year": 2025,
+    "province": "Đà Nẵng",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-da-nang-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_so_da_nang_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-da-nang-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề so da nang Lần 2",
+    "year": 2025,
+    "province": "Đà Nẵng",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-da-nang-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_nguyen_duc_canh_thai_binh_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-nguyen-duc-canh-thai-binh-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT nguyen duc canh thai binh Lần 1",
+    "year": 2025,
+    "province": "Thái Bình",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-nguyen-duc-canh-thai-binh-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_nguyen_duc_canh_thai_binh_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-nguyen-duc-canh-thai-binh-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT nguyen duc canh thai binh Lần 2",
+    "year": 2025,
+    "province": "Thái Bình",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-nguyen-duc-canh-thai-binh-lan-2/"
+  },
+  {
+    "id": "phys_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_thai_binh_lan_1",
+    "slug": "dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-thai-binh-lan-1",
+    "title": "Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên thai binh Lần 1",
+    "year": 2025,
+    "province": "Thái Bình",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-thai-binh-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_thai_binh_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-thai-binh-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên thai binh Lần 2",
+    "year": 2025,
+    "province": "Thái Bình",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-thai-binh-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_so_thai_binh_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-thai-binh-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề so thai binh Lần 1",
+    "year": 2025,
+    "province": "Thái Bình",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-thai-binh-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_so_thai_binh_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-thai-binh-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề so thai binh Lần 2",
+    "year": 2025,
+    "province": "Thái Bình",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-thai-binh-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_hong_quang_hai_duong_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-hong-quang-hai-duong-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT hong quang hai duong Lần 1",
+    "year": 2025,
+    "province": "Hải Dương",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-hong-quang-hai-duong-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_hong_quang_hai_duong_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-hong-quang-hai-duong-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT hong quang hai duong Lần 2",
+    "year": 2025,
+    "province": "Hải Dương",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-hong-quang-hai-duong-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_nguyen_trai_hai_duong_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-nguyen-trai-hai-duong-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên nguyen trai hai duong Lần 2",
+    "year": 2025,
+    "province": "Hải Dương",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-nguyen-trai-hai-duong-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_so_hai_duong_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-hai-duong-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề so hai duong Lần 1",
+    "year": 2025,
+    "province": "Hải Dương",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-hai-duong-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_so_hai_duong_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-hai-duong-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề so hai duong Lần 2",
+    "year": 2025,
+    "province": "Hải Dương",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-hai-duong-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_bac_ninh_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-bac-ninh-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên bac ninh Lần 1",
+    "year": 2025,
+    "province": "Bắc Ninh",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-bac-ninh-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_bac_ninh_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-bac-ninh-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên bac ninh Lần 2",
+    "year": 2025,
+    "province": "Bắc Ninh",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-bac-ninh-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_so_bac_ninh_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-bac-ninh-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề so bac ninh Lần 1",
+    "year": 2025,
+    "province": "Bắc Ninh",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-bac-ninh-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_so_bac_ninh_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-bac-ninh-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề so bac ninh Lần 2",
+    "year": 2025,
+    "province": "Bắc Ninh",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-bac-ninh-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_vinh_phuc_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-vinh-phuc-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên vinh phuc Lần 1",
+    "year": 2025,
+    "province": "Vĩnh Phúc",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-vinh-phuc-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_vinh_phuc_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-vinh-phuc-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên vinh phuc Lần 2",
+    "year": 2025,
+    "province": "Vĩnh Phúc",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-vinh-phuc-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_so_vinh_phuc_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-vinh-phuc-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề so vinh phuc Lần 1",
+    "year": 2025,
+    "province": "Vĩnh Phúc",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-vinh-phuc-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_so_vinh_phuc_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-vinh-phuc-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề so vinh phuc Lần 2",
+    "year": 2025,
+    "province": "Vĩnh Phúc",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-vinh-phuc-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_nguyen_khuyen_nam_dinh_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-nguyen-khuyen-nam-dinh-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT nguyen khuyen nam dinh Lần 2",
+    "year": 2025,
+    "province": "Nam Định",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-nguyen-khuyen-nam-dinh-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_le_hong_phong_nam_dinh_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-le-hong-phong-nam-dinh-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên le hong phong nam dinh Lần 1",
+    "year": 2025,
+    "province": "Nam Định",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-le-hong-phong-nam-dinh-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_le_hong_phong_nam_dinh_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-le-hong-phong-nam-dinh-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên le hong phong nam dinh Lần 2",
+    "year": 2025,
+    "province": "Nam Định",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-le-hong-phong-nam-dinh-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_so_nam_dinh_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-nam-dinh-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề so nam dinh Lần 1",
+    "year": 2025,
+    "province": "Nam Định",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-nam-dinh-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_so_nam_dinh_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-nam-dinh-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề so nam dinh Lần 2",
+    "year": 2025,
+    "province": "Nam Định",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-nam-dinh-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_ha_tinh_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-ha-tinh-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên ha tinh Lần 1",
+    "year": 2025,
+    "province": "Hà Tĩnh",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-ha-tinh-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_ha_tinh_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-ha-tinh-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên ha tinh Lần 2",
+    "year": 2025,
+    "province": "Hà Tĩnh",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-ha-tinh-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_so_ha_tinh_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-ha-tinh-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề so ha tinh Lần 1",
+    "year": 2025,
+    "province": "Hà Tĩnh",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-ha-tinh-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_so_ha_tinh_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-ha-tinh-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề so ha tinh Lần 2",
+    "year": 2025,
+    "province": "Hà Tĩnh",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-ha-tinh-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_phan_boi_chau_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-phan-boi-chau-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên phan boi chau Lần 1",
+    "year": 2025,
+    "province": "Bộ GD&ĐT",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-phan-boi-chau-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_phan_boi_chau_nghe_an_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-phan-boi-chau-nghe-an-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên phan boi chau nghe an Lần 2",
+    "year": 2025,
+    "province": "Nghệ An",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-phan-boi-chau-nghe-an-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_so_nghe_an_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-nghe-an-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề so nghe an Lần 1",
+    "year": 2025,
+    "province": "Nghệ An",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-nghe-an-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_so_nghe_an_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-nghe-an-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề so nghe an Lần 2",
+    "year": 2025,
+    "province": "Nghệ An",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-nghe-an-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_bui_thi_xuan_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-bui-thi-xuan-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT bui thi xuan Lần 1",
+    "year": 2025,
+    "province": "Bộ GD&ĐT",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-bui-thi-xuan-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_bui_thi_xuan_tp_hcm_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-bui-thi-xuan-tp-hcm-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT bui thi xuan tp hcm Lần 2",
+    "year": 2025,
+    "province": "TP.HCM",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-bui-thi-xuan-tp-hcm-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_gia_dinh_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-gia-dinh-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT gia dinh Lần 1",
+    "year": 2025,
+    "province": "Bộ GD&ĐT",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-gia-dinh-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_gia_dinh_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-gia-dinh-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT gia dinh Lần 2",
+    "year": 2025,
+    "province": "Bộ GD&ĐT",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-gia-dinh-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_nguyen_thi_minh_khai_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-nguyen-thi-minh-khai-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT nguyen thi minh khai Lần 1",
+    "year": 2025,
+    "province": "Bộ GD&ĐT",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-nguyen-thi-minh-khai-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_nguyen_thi_minh_khai_tp_hcm_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-nguyen-thi-minh-khai-tp-hcm-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT nguyen thi minh khai tp hcm Lần 2",
+    "year": 2025,
+    "province": "TP.HCM",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-nguyen-thi-minh-khai-tp-hcm-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_tran_dai_nghia_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-tran-dai-nghia-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên tran dai nghia Lần 1",
+    "year": 2025,
+    "province": "Bộ GD&ĐT",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-tran-dai-nghia-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_tran_dai_nghia_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-tran-dai-nghia-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên tran dai nghia Lần 2",
+    "year": 2025,
+    "province": "Bộ GD&ĐT",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-tran-dai-nghia-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_le_hong_phong_tp_hcm_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-le-hong-phong-tp-hcm-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên le hong phong tp hcm Lần 2",
+    "year": 2025,
+    "province": "TP.HCM",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-le-hong-phong-tp-hcm-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_so_tp_hcm_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-tp-hcm-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề so tp hcm Lần 1",
+    "year": 2025,
+    "province": "TP.HCM",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-tp-hcm-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_so_tp_hcm_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-tp-hcm-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề so tp hcm Lần 2",
+    "year": 2025,
+    "province": "TP.HCM",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-tp-hcm-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_kim_lien_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-kim-lien-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT kim lien Lần 1",
+    "year": 2025,
+    "province": "Bộ GD&ĐT",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-kim-lien-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_kim_lien_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-kim-lien-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT kim lien Lần 2",
+    "year": 2025,
+    "province": "Bộ GD&ĐT",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-kim-lien-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_phan_dinh_phung_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-phan-dinh-phung-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT phan dinh phung Lần 1",
+    "year": 2025,
+    "province": "Bộ GD&ĐT",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-phan-dinh-phung-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_phan_dinh_phung_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-phan-dinh-phung-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT phan dinh phung Lần 2",
+    "year": 2025,
+    "province": "Bộ GD&ĐT",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-phan-dinh-phung-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chu_van_an_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chu-van-an-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT chu van an Lần 1",
+    "year": 2025,
+    "province": "Bộ GD&ĐT",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chu-van-an-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chu_van_an_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chu-van-an-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT chu van an Lần 2",
+    "year": 2025,
+    "province": "Bộ GD&ĐT",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chu-van-an-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_ha_noi_amsterdam_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-ha-noi-amsterdam-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên ha noi amsterdam Lần 1",
+    "year": 2025,
+    "province": "Hà Nội",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-ha-noi-amsterdam-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_ha_noi_amsterdam_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-ha-noi-amsterdam-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên ha noi amsterdam Lần 2",
+    "year": 2025,
+    "province": "Hà Nội",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-ha-noi-amsterdam-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_dai_hoc_mon_su_pham_ha_noi_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-dai-hoc-mon-su-pham-ha-noi-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên Đại học môn su pham ha noi Lần 1",
+    "year": 2025,
+    "province": "Hà Nội",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-dai-hoc-mon-su-pham-ha-noi-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_dai_hoc_mon_su_pham_ha_noi_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-dai-hoc-mon-su-pham-ha-noi-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên Đại học môn su pham ha noi Lần 2",
+    "year": 2025,
+    "province": "Hà Nội",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-dai-hoc-mon-su-pham-ha-noi-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_khoa_hoc_mon_tu_nhien_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-khoa-hoc-mon-tu-nhien-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên khoa hoc môn tu nhien Lần 1",
+    "year": 2025,
+    "province": "Bộ GD&ĐT",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-khoa-hoc-mon-tu-nhien-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_khoa_hoc_tu_nhien_dhqg_ha_noi_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-khoa-hoc-tu-nhien-dhqg-ha-noi-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên khoa hoc tu nhien dhqg ha noi Lần 2",
+    "year": 2025,
+    "province": "Hà Nội",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-khoa-hoc-tu-nhien-dhqg-ha-noi-lan-2/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_truong_thpt_chuyen_ngoai_ngu_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-ngoai-ngu-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề truong THPT Chuyên ngoai ngu Lần 1",
+    "year": 2025,
+    "province": "Bộ GD&ĐT",
+    "category": "truong-chuyen",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-truong-thpt-chuyen-ngoai-ngu-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_so_ha_noi_lan_1",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-ha-noi-lan-1",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề so ha noi Lần 1",
+    "year": 2025,
+    "province": "Hà Nội",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-ha-noi-lan-1/"
+  },
+  {
+    "id": "phys_de_thi_thu_dai_hoc_mon_vat_ly_2025_bam_sat_de_so_ha_noi_lan_2",
+    "slug": "de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-ha-noi-lan-2",
+    "title": "Đề thi thử Đại học môn Vật lý 2025 bám sát đề so ha noi Lần 2",
+    "year": 2025,
+    "province": "Hà Nội",
+    "category": "so-gddt",
+    "url": "https://dethitracnghiem.vn/de-thi-thu-dai-hoc-mon-vat-ly-2025-bam-sat-de-so-ha-noi-lan-2/"
+  }
+]

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo Module Mới - Vật Lý Ảo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tailwind-config.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/global.css">
+</head>
+
+<body
+    class="bg-gray-50 dark:bg-lab-dark_bg text-slate-800 dark:text-lab-dark_text font-tech transition-colors duration-300">
+
+    <div class="min-h-screen p-4 md:p-8 flex items-center justify-center">
+        <div class="max-w-4xl w-full">
+
+            <a href="index.html"
+                class="inline-flex items-center gap-2 text-slate-500 hover:text-lab-cyan mb-6 transition-colors">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Quay lại Thư viện
+            </a>
+
+            <div
+                class="bg-white dark:bg-lab-dark_panel rounded-2xl shadow-xl border border-lab-accent/20 dark:border-slate-700 overflow-hidden">
+                <div class="p-8 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50">
+                    <h1 class="text-3xl font-bold flex items-center gap-3">
+                        <div class="p-2 bg-lab-cyan/10 rounded-lg text-lab-cyan">
+                            <i data-lucide="plus-square" class="w-8 h-8"></i>
+                        </div>
+                        Tạo Module Mới
+                    </h1>
+                    <p class="mt-2 text-slate-500 dark:text-slate-400">Nhập mã nguồn HTML/JS để tạo mô phỏng vật lý tùy
+                        chỉnh của bạn.</p>
+                </div>
+
+                <form id="create-module-form" class="p-8 space-y-6">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Name -->
+                        <div class="space-y-2">
+                            <label
+                                class="block text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Tên
+                                Module</label>
+                            <input type="text" id="module-name" required placeholder="Ví dụ: Mô phỏng Hố Đen"
+                                class="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 focus:border-lab-cyan focus:ring-2 focus:ring-lab-cyan/20 outline-none transition-all">
+                        </div>
+
+                        <!-- Icon Select -->
+                        <div class="space-y-2">
+                            <label
+                                class="block text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Icon</label>
+                            <select id="module-icon"
+                                class="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 focus:border-lab-cyan outline-none transition-all">
+                                <option value="box">Box (Mặc định)</option>
+                                <option value="activity">Activity (Đồ thị)</option>
+                                <option value="zap">Zap (Điện)</option>
+                                <option value="wind">Wind (Lưu chất)</option>
+                                <option value="triangle">Triangle (Hình học)</option>
+                                <option value="circle">Circle (Chuyển động tròn)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="space-y-2">
+                        <label
+                            class="block text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Mô
+                            tả ngắn</label>
+                        <input type="text" id="module-desc" required
+                            placeholder="Mô tả ngắn gọn về chức năng của mô phỏng..."
+                            class="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 focus:border-lab-cyan focus:ring-2 focus:ring-lab-cyan/20 outline-none transition-all">
+                    </div>
+
+                    <!-- Code Editor Area -->
+                    <div class="space-y-2">
+                        <label
+                            class="block text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex justify-between">
+                            HTML / JavaScript Source Code
+                            <span class="text-xs normal-case text-slate-400 font-normal">Hỗ trợ Tailwind CSS & Shared
+                                Assets tự động</span>
+                        </label>
+                        <div class="relative">
+                            <textarea id="module-code" required rows="15"
+                                class="w-full px-4 py-4 font-mono text-sm bg-slate-900 text-green-400 rounded-lg border border-slate-700 focus:border-lab-cyan outline-none resize-y leading-relaxed"
+                                placeholder="<!DOCTYPE html>... Paste your simulation code here"></textarea>
+                            <div class="absolute top-2 right-2 flex gap-2">
+                                <button type="button" onclick="loadSampleCode()"
+                                    class="px-2 py-1 text-xs bg-slate-700 hover:bg-slate-600 text-white rounded transition">Sample
+                                    Code</button>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 italic">* Lưu ý: Code sẽ được chạy trong môi trường cục bộ của
+                            trình duyệt.</p>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="pt-6 border-t border-gray-100 dark:border-slate-700 flex justify-end gap-4">
+                        <a href="index.html"
+                            class="px-6 py-2.5 rounded-lg border border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">Hủy
+                            bỏ</a>
+                        <button type="submit"
+                            class="px-8 py-2.5 rounded-lg bg-lab-cyan hover:bg-cyan-600 text-white font-bold shadow-lg shadow-cyan-500/30 transition transform hover:scale-105">
+                            Tạo Module
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/theme.js?v=4.0.8"></script>
+    <script src="js/module-manager.js"></script>
+    <script>
+        function loadSampleCode() {
+            const sample = `<!DOCTYPE html>
+<html>
+<head>
+    <style>body { font-family: sans-serif; padding: 20px; }</style>
+</head>
+<body>
+    <h1>Hello World Simulation</h1>
+    <p>This is a test module created dynamically.</p>
+    <button onclick="alert('It works!')" style="padding: 10px 20px; background: blue; color: white; border: none; border-radius: 5px;">Test Interaction</button>
+</body>
+</html>`;
+            document.getElementById('module-code').value = sample;
+        }
+
+        document.getElementById('create-module-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('module-name').value;
+            const desc = document.getElementById('module-desc').value;
+            const code = document.getElementById('module-code').value;
+            const icon = document.getElementById('module-icon').value;
+
+            ModuleManager.saveModule({
+                name,
+                description: desc,
+                code,
+                icon
+            });
+
+            alert('Module đã được tạo thành công!');
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+
+</html>

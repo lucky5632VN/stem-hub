@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đo Tốc Độ Sóng Âm - Ống Cộng Hưởng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tailwind-config.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- MathJax for Formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .font-tech {
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        /* Custom Range Inputs */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #10b981;
+            margin-top: -6px;
+            cursor: pointer;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+            border: 2px solid white;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #475569;
+            border-radius: 2px;
+        }
+
+        .dark input[type=range]::-webkit-slider-runnable-track {
+            background: #334155;
+        }
+
+        /* Piston Slider Specific Style */
+        #pistonSlider::-webkit-slider-thumb {
+            background: #f59e0b;
+            /* Amber */
+            border-radius: 2px;
+            width: 20px;
+            height: 24px;
+            margin-top: -10px;
+        }
+
+        .tab-btn.active {
+            color: #10b981;
+            /* emerald-500 */
+            border-bottom: 2px solid #10b981;
+        }
+    </style>
+</head>
+
+<body
+    class="h-screen flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-300 transition-colors duration-300">
+
+    <!-- HEADER -->
+    <header
+        class="h-14 flex-shrink-0 flex items-center justify-between px-6 bg-white dark:bg-[#1e293b] border-b border-slate-200 dark:border-slate-700 z-30 shadow-sm">
+        <div class="flex items-center gap-4">
+            <a href="index.html"
+                class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            </a>
+            <h1 class="font-tech font-bold text-xl text-green-500 uppercase tracking-wider">Thí Nghiệm Đo Tốc Độ Sóng Âm
+            </h1>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="flex gap-6 font-medium text-sm h-full">
+            <button onclick="switchTab('instruction')" id="tab-instruction"
+                class="tab-btn active px-2 h-full flex items-center gap-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
+                <i data-lucide="book-open" class="w-4 h-4"></i> Lý Thuyết & Hướng Dẫn
+            </button>
+            <button onclick="switchTab('simulation')" id="tab-simulation"
+                class="tab-btn px-2 h-full flex items-center gap-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
+                <i data-lucide="flask-conical" class="w-4 h-4"></i> Mô Phỏng Thí Nghiệm
+            </button>
+        </div>
+
+        <div class="w-8"></div> <!-- Spacer -->
+    </header>
+
+    <!-- CONTENT AREA -->
+    <div class="flex-1 overflow-hidden relative">
+
+        <!-- SECTION 1: INSTRUCTION (SCROLLABLE) -->
+        <div id="view-instruction"
+            class="absolute inset-0 overflow-y-auto p-8 bg-white dark:bg-slate-900 custom-scrollbar z-20">
+            <div class="max-w-4xl mx-auto space-y-8 pb-12">
+
+                <!-- I. Dụng cụ -->
+                <section class="space-y-4">
+                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span
+                            class="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 w-8 h-8 rounded flex items-center justify-center text-sm">I</span>
+                        Dụng Cụ Thí Nghiệm
+                    </h2>
+                    <ul class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <li
+                            class="flex items-start gap-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <i data-lucide="test-tube-2" class="w-5 h-5 text-blue-500 mt-0.5"></i>
+                            <div>
+                                <span class="font-bold block text-lg text-slate-900 dark:text-white">1. Ống cộng
+                                    hưởng</span>
+                                <span class="text-base font-medium text-slate-700 dark:text-slate-300">Ống thủy tinh
+                                    hình trụ có kèm pittông thay đổi
+                                    chiều dài cột khí.</span>
+                            </div>
+                        </li>
+                        <li
+                            class="flex items-start gap-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <i data-lucide="speaker" class="w-5 h-5 text-amber-500 mt-0.5"></i>
+                            <div>
+                                <span class="font-bold block text-lg text-slate-900 dark:text-white">2. Loa mini (Nguồn
+                                    âm)</span>
+                                <span class="text-base font-medium text-slate-700 dark:text-slate-300">Kết nối với máy
+                                    phát âm tần để tạo sóng âm.</span>
+                            </div>
+                        </li>
+                        <li
+                            class="flex items-start gap-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <i data-lucide="activity" class="w-5 h-5 text-green-500 mt-0.5"></i>
+                            <div>
+                                <span class="font-bold block text-lg text-slate-900 dark:text-white">3. Máy phát âm
+                                    tần</span>
+                                <span class="text-base font-medium text-slate-700 dark:text-slate-300">Tạo tín hiệu sine
+                                    dải 0.1 - 1000Hz.</span>
+                            </div>
+                        </li>
+                        <li
+                            class="flex items-start gap-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <i data-lucide="mic-2" class="w-5 h-5 text-red-500 mt-0.5"></i>
+                            <div>
+                                <span class="font-bold block text-lg text-slate-900 dark:text-white">4. Cảm biến & Bộ
+                                    thu</span>
+                                <span class="text-base font-medium text-slate-700 dark:text-slate-300">Đo cường độ âm
+                                    (dB) và hiển thị dữ liệu.</span>
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- II. Tiến hành -->
+                <section class="space-y-4">
+                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span
+                            class="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 w-8 h-8 rounded flex items-center justify-center text-sm">II</span>
+                        Cách Tiến Hành
+                    </h2>
+
+                    <div class="space-y-6 border-l-2 border-slate-200 dark:border-slate-700 ml-3 pl-6">
+                        <div class="relative">
+                            <span
+                                class="absolute -left-[33px] top-0 w-4 h-4 rounded-full bg-slate-300 dark:bg-slate-600 border-4 border-white dark:border-slate-900"></span>
+                            <h3 class="font-bold text-xl mb-2 text-slate-900 dark:text-white">1. Lắp đặt và chuẩn bị
+                            </h3>
+                            <ul
+                                class="list-disc list-inside space-y-1 text-slate-800 dark:text-slate-200 text-base font-medium">
+                                <li>Kết nối Cảm biến âm thanh và Loa vào hệ thống.</li>
+                                <li>Đặt Loa và Cảm biến ngay sát đầu hở của ống cộng hưởng.</li>
+                                <li>Đẩy Pittông về vị trí sát miệng ống (vạch số 0).</li>
+                            </ul>
+                        </div>
+
+                        <div class="relative">
+                            <span
+                                class="absolute -left-[33px] top-0 w-4 h-4 rounded-full bg-green-500 border-4 border-white dark:border-slate-900"></span>
+                            <h3 class="font-bold text-xl mb-2 text-slate-900 dark:text-white">2. Thực hiện đo đạc</h3>
+                            <div
+                                class="bg-blue-50 dark:bg-slate-800/50 p-4 rounded-lg border border-blue-100 dark:border-slate-700/50 text-base font-medium text-slate-800 dark:text-slate-200">
+                                <p class="mb-2"><strong>Bước 1:</strong> Chỉnh máy phát tần số <i>f</i> = 650 Hz.</p>
+                                <p class="mb-2"><strong>Bước 2:</strong> Kéo từ từ Pittông ra xa. Quan sát cường độ âm.
+                                </p>
+                                <p class="mb-2"><strong>Bước 3:</strong> Tìm vị trí <i>s</i><sub>1</sub> đầu tiên mà âm
+                                    thanh
+                                    <span class="text-red-500 font-bold">nhỏ nhất</span> (Nút sóng).
+                                </p>
+                                <p><strong>Bước 4:</strong> Tiếp tục kéo tìm nút sóng thứ hai <i>s</i><sub>2</sub>.</p>
+                            </div>
+                            <p class="mt-2 text-sm italic text-slate-500">Lặp lại quy trình với tần số <i>f</i> = 850
+                                Hz để kiểm chứng.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- III. Tính toán -->
+                <section class="space-y-4">
+                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span
+                            class="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 w-8 h-8 rounded flex items-center justify-center text-sm">III</span>
+                        Tính Toán Kết Quả
+                    </h2>
+                    <div class="bg-slate-100 dark:bg-slate-800 p-6 rounded-xl space-y-4">
+                        <p class="text-lg font-medium text-slate-900 dark:text-white">
+                            Khoảng cách giữa hai nút sóng liên tiếp bằng một nửa bước sóng (<i>&lambda;</i>/2).
+                        </p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div
+                                class="bg-white dark:bg-slate-900 p-4 rounded border border-slate-200 dark:border-slate-700">
+                                <h4 class="font-bold text-sm text-slate-500 uppercase mb-2">1. Tính Bước Sóng</h4>
+                                <p class="text-2xl font-bold font-mono text-center py-2 text-slate-900 dark:text-white">
+                                    $$ \lambda = \frac{2 \times |s_2 - s_1|}{n} $$
+                                </p>
+                                <p class="text-xs text-center text-slate-500 italic">(n: số bụng sóng giữa 2 nút)</p>
+                            </div>
+                            <div
+                                class="bg-white dark:bg-slate-900 p-4 rounded border border-slate-200 dark:border-slate-700">
+                                <h4 class="font-bold text-sm text-slate-500 uppercase mb-2">2. Tính Vận Tốc</h4>
+                                <p class="text-2xl font-bold font-mono text-center py-2 text-slate-900 dark:text-white">
+                                    $$ v = \lambda \times f $$
+                                </p>
+                            </div>
+                        </div>
+                        <p
+                            class="text-base font-bold text-slate-700 dark:text-slate-300 text-center italic mt-2 bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded">
+                            Ví dụ: Với <i>f</i>=650Hz, <i>s</i><sub>1</sub>=0.109m, <i>s</i><sub>2</sub>=0.375m
+                            (<i>n</i>=1)
+                            &rArr; <i>v</i> &approx; 346 m/s.
+                        </p>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- SECTION 2: SIMULATION (HIDDEN INITIALLY) -->
+        <div id="view-simulation" class="absolute inset-0 flex hidden bg-slate-50 dark:bg-black">
+
+            <!-- LEFT SIDEBAR: EXPERIMENT SETUP -->
+            <aside
+                class="w-[450px] flex-shrink-0 flex flex-col bg-white dark:bg-[#1e293b] border-r border-slate-200 dark:border-slate-700 z-20 shadow-xl overflow-y-auto custom-scrollbar">
+
+                <div class="p-6 space-y-8">
+                    <!-- Config -->
+                    <div class="space-y-4">
+                        <label
+                            class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest flex items-center gap-2">
+                            <i data-lucide="settings-2" class="w-4 h-4"></i> Thiết Lập
+                        </label>
+
+                        <!-- Frequency Gen -->
+                        <div
+                            class="p-4 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 space-y-4 shadow-sm">
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="text-base font-bold text-green-600 dark:text-green-400">Máy Phát Tần
+                                    Số</label>
+                                <button id="toneBtn"
+                                    class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 hover:bg-green-500 hover:text-white flex items-center justify-center transition-colors">
+                                    <i data-lucide="power" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-sm mb-1.5">
+                                    <label class="font-bold text-slate-700 dark:text-slate-300">Frequency (Hz)</label>
+                                    <span id="freqDisplay"
+                                        class="font-mono font-bold text-slate-900 dark:text-white">650</span>
+                                </div>
+                                <input type="range" id="freqInput" min="200" max="1500" step="10" value="650"
+                                    class="w-full">
+                                <div class="flex justify-between text-xs text-slate-400 mt-1">
+                                    <span>200Hz</span>
+                                    <span>1500Hz</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-sm mb-1.5">
+                                    <label class="font-bold text-slate-700 dark:text-slate-300">Volume</label>
+                                    <span id="volDisplay"
+                                        class="font-mono font-bold text-slate-900 dark:text-white">50%</span>
+                                </div>
+                                <input type="range" id="volInput" min="0" max="1" step="0.05" value="0.5"
+                                    class="w-full">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tools -->
+                    <div class="space-y-4">
+                        <label
+                            class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest flex items-center gap-2">
+                            <i data-lucide="tool" class="w-4 h-4"></i> Công Cụ Đo
+                        </label>
+
+                        <!-- Piston Control -->
+                        <div
+                            class="p-4 bg-amber-50 dark:bg-amber-900/10 rounded-lg border border-amber-200 dark:border-amber-800/30 space-y-4">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-amber-700 dark:text-amber-500 text-base">Vị Trí Pittông
+                                    (L)</span>
+                                <span id="pistonPosDisplay"
+                                    class="font-mono font-bold text-xl text-slate-900 dark:text-white">0.0 cm</span>
+                            </div>
+                            <input type="range" id="pistonSlider" min="0" max="100" step="0.1" value="0"
+                                class="w-full cursor-col-resize">
+                            <p class="text-sm font-bold text-amber-600 dark:text-amber-500 italic text-center">
+                                Kéo thanh trượt để thay đổi chiều dài cột khí
+                            </p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <button id="recordBtn"
+                                class="flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-green-500 hover:text-green-500 transition group shadow-sm">
+                                <i data-lucide="clipboard-edit"
+                                    class="w-6 h-6 mb-1 group-hover:scale-110 transition-transform"></i>
+                                <span class="text-xl font-bold uppercase tracking-wider">Ghi S₁</span>
+                            </button>
+                            <button id="resetDataBtn"
+                                class="flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-red-500 hover:text-red-500 transition group shadow-sm">
+                                <i data-lucide="trash-2"
+                                    class="w-6 h-6 mb-1 group-hover:scale-110 transition-transform"></i>
+                                <span class="text-lg font-bold">Xóa Data</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Data Table Preview -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest">Bảng
+                            Số Liệu</label>
+                        <div
+                            class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded overflow-hidden">
+                            <table class="w-full text-sm text-left">
+                                <thead
+                                    class="bg-slate-50 dark:bg-slate-900 text-slate-500 font-medium border-b border-slate-200 dark:border-slate-700">
+                                    <tr>
+                                        <th class="p-2">Lần</th>
+                                        <th class="p-2">f (Hz)</th>
+                                        <th class="p-2 text-right">s₁ (cm)</th>
+                                        <th class="p-2 text-right">s₂ (cm)</th>
+                                        <th class="p-2 text-right">n (bụng)</th>
+                                        <th class="p-2 text-right">v (m/s)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dataTableBody" class="font-mono">
+                                    <!-- Dynamic rows -->
+                                    <tr class="text-slate-400 italic">
+                                        <td colspan="6" class="p-2 text-center">Chưa có dữ liệu</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="statsPanelContainer"></div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- MAIN VISUALIZER -->
+            <main class="flex-1 flex flex-col relative bg-slate-100 dark:bg-[#0f172a]">
+
+                <!-- Experiment Scene (Canvas Layer) -->
+                <div class="flex-1 relative flex items-center justify-center p-8 overflow-hidden">
+                    <!-- Background Grid -->
+                    <div class="absolute inset-0 z-0 opacity-10 pointer-events-none"
+                        style="background-image: radial-gradient(#64748b 1px, transparent 1px); background-size: 20px 20px;">
+                    </div>
+
+                    <!-- Tube Container -->
+                    <div class="relative w-full max-w-5xl h-[400px] flex items-center">
+
+                        <!-- 1. Speaker (Fixed Left) -->
+                        <div
+                            class="absolute left-0 top-1/2 -translate-y-1/2 w-32 h-40 z-20 flex flex-col items-center justify-center">
+                            <!-- Speaker Icon/Graphic -->
+                            <div
+                                class="relative w-24 h-32 bg-slate-800 rounded-lg shadow-2xl border-4 border-slate-700 flex items-center justify-center">
+                                <div
+                                    class="w-20 h-20 rounded-full border-4 border-slate-600 bg-slate-900 shadow-inner relative overflow-hidden">
+                                    <!-- Cone Vibration Animation -->
+                                    <div id="speakerCone"
+                                        class="absolute inset-0 rounded-full bg-slate-800 scale-90 transition-transform duration-75 origin-center">
+                                    </div>
+                                </div>
+                                <!-- Mesh -->
+                                <div
+                                    class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9IiMwMDAiLz4KPC9zdmc+')] opacity-50">
+                                </div>
+                            </div>
+                            <div class="mt-2 text-sm font-bold text-slate-500 uppercase">Nguồn Âm</div>
+                        </div>
+
+                        <!-- 2. The Tube (Glass) -->
+                        <div
+                            class="absolute left-32 top-1/2 -translate-y-1/2 right-8 h-32 bg-blue-50/10 backdrop-blur-sm border-y-4 border-slate-300 dark:border-slate-600 rounded-r-lg z-10 overflow-hidden shadow-inner">
+
+                            <!-- Ruler Marking (Top) -->
+                            <div
+                                class="absolute top-0 left-0 right-0 h-8 border-b border-slate-300/30 flex text-[10px] font-mono text-slate-400 select-none">
+                                <!-- JS will generate ticks here or we use repeated background -->
+                                <div class="w-full h-full"
+                                    style="background: repeating-linear-gradient(90deg, transparent, transparent 39px, currentColor 40px); opacity: 0.5;">
+                                </div>
+                            </div>
+
+                            <!-- WAVE VISUALIZATION (Canvas Overlay) -->
+                            <canvas id="waveCanvas"
+                                class="absolute inset-0 w-full h-full opacity-60 mix-blend-overlay"></canvas>
+
+                            <!-- PISTON (Moveable) -->
+                            <div id="pistonHead"
+                                class="absolute top-0 bottom-0 w-4 bg-amber-500 shadow-xl z-20 transition-all duration-75 ease-out"
+                                style="left: 0px;">
+                                <!-- Handle rod extending to right -->
+                                <div
+                                    class="absolute top-1/2 left-4 h-3 w-[1000px] bg-slate-400 -translate-y-1/2 rounded-r shadow-md opacity-80">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- 3. Mic & Sensor (At Mouth - Left side of tube) -->
+                        <div class="absolute left-36 top-[65%] w-24 z-30 pointer-events-none">
+                            <div class="flex flex-col items-center">
+                                <div class="w-2 h-16 bg-red-500/50 rounded-full blur-[2px]"></div>
+                                <div
+                                    class="mt-1 px-2 py-1 bg-black/80 text-green-400 text-xs font-mono rounded border border-green-900 shadow-lg">
+                                    <span id="dBDisplay">-- dB</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- Bottom Scope (Detailed Analysis) -->
+                <div class="h-48 bg-white dark:bg-[#111] border-t border-slate-200 dark:border-slate-800 z-20 flex">
+                    <div class="w-full relative">
+                        <div
+                            class="absolute top-2 left-3 z-10 text-xs font-bold text-slate-500 uppercase tracking-wider bg-white/80 dark:bg-black/50 px-2 rounded">
+                            Tín hiệu Microphone (Tại Miệng Ống)
+                        </div>
+                        <canvas id="scopeCanvas" class="w-full h-full block"></canvas>
+                    </div>
+                </div>
+
+            </main>
+
+        </div>
+
+    </div>
+
+    <script src="js/theme.js?v=4.0.8"></script>
+    <script src="js/theory-system.js?v=4.0.8"></script>
+    <script src="js/quiz-database.js"></script>
+    <script src="js/quiz-system.js?v=4.0.8"></script>
+
+    <script>
+        // --- CONSTANTS ---
+        const V_SOUND = 34300; // cm/s
+
+        // --- STATE ---
+        let state = {
+            f: 650,          // Hz
+            vol: 0.5,        // 0-1
+            pistonPos: 0,    // cm (L)
+            isPlaying: false,
+            isRecording: false, // Not used per se, but good for tracking
+            tempS1: null,    // Store first position
+            particles: [],    // Array of equilibrium positions {xq: number, yq: number}
+            history: [], // { id, f, s1, s2, v }
+            visualPhase: 0   // Accumulator for animation to avoid aliasing
+        };
+
+        // --- DOM REFS ---
+        const toneBtn = document.getElementById('toneBtn');
+        const freqInput = document.getElementById('freqInput');
+        const freqDisplay = document.getElementById('freqDisplay');
+        const volInput = document.getElementById('volInput');
+        const volDisplay = document.getElementById('volDisplay');
+        const pistonSlider = document.getElementById('pistonSlider');
+        const pistonPosDisplay = document.getElementById('pistonPosDisplay');
+        const pistonHead = document.getElementById('pistonHead');
+        const waveCanvas = document.getElementById('waveCanvas');
+        const scopeCanvas = document.getElementById('scopeCanvas');
+        const dBDisplay = document.getElementById('dBDisplay');
+
+        const recordBtn = document.getElementById('recordBtn');
+        const resetDataBtn = document.getElementById('resetDataBtn');
+        const dataTableBody = document.getElementById('dataTableBody');
+        const statsPanelContainer = document.getElementById('statsPanelContainer');
+
+        const ctxWave = waveCanvas.getContext('2d');
+        const ctxScope = scopeCanvas.getContext('2d');
+
+        // --- AUDIO ENGINE ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let oscillator = null;
+        let masterGain = null;
+        let analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 2048;
+
+        // --- INIT PARTICLES ---
+        function initParticles() {
+            state.particles = [];
+            // Create particles grid 0..100cm (max)
+            for (let x = 0; x <= 120; x += 0.5) { // cm
+                for (let row = 0; row < 5; row++) {
+                    state.particles.push({
+                        xq: x,
+                        yRand: Math.random() * 0.8 - 0.4 // Jitter Y for natural gas look
+                    });
+                }
+            }
+        }
+        initParticles();
+
+        // --- PHYSICS CALC ---
+        function calculateResonanceAmplitude(L_cm, f_Hz) {
+            const v = V_SOUND;
+            const lambda = v / f_Hz;
+            const k = (2 * Math.PI) / lambda;
+
+            // Amplitude at Mouth (x=0) ~ |sin(kL)|
+            const val = Math.abs(Math.sin(k * L_cm));
+            return Math.pow(val, 0.8);
+        }
+
+        function getDisplacementAt(x_cm, t_sec) {
+            // Check if playing
+            if (!state.isPlaying) return 0;
+
+            // y(x,t) = A_env(x) * cos(wt)
+            // Envelope A_env(x) = sin(k(L-x)) -> Node at x=L
+            const v = V_SOUND;
+            const f = state.f;
+            const lambda = v / f;
+            const k = (2 * Math.PI) / lambda;
+            const w = 2 * Math.PI * f;
+            const L = state.pistonPos;
+
+            if (x_cm > L) return 0; // Behind piston
+
+            const envelope = Math.sin(k * (L - x_cm));
+            // Use visualPhase instead of w * t_sec to avoid aliasing
+            return envelope * Math.cos(state.visualPhase);
+        }
+
+        // --- SIMULATION LOOP ---
+        let animationId;
+
+        function updateAudio() {
+            if (!oscillator) return;
+            const now = audioCtx.currentTime;
+            oscillator.frequency.setTargetAtTime(state.f, now, 0.05);
+
+            const resAmp = calculateResonanceAmplitude(state.pistonPos, state.f);
+            const physicsGain = 0.2 + 0.8 * resAmp;
+            const finalVol = state.vol * physicsGain;
+
+            masterGain.gain.setTargetAtTime(finalVol, now, 0.1);
+
+            // Animate Speaker Cone
+            const coneScale = 0.9 + (finalVol * 0.15 * Math.sin(now * state.f * 0.1)); // Pseudo vibration visual
+            document.getElementById('speakerCone').style.transform = `scale(${coneScale})`;
+
+            const db = 20 * Math.log10(Math.max(0.001, finalVol));
+            const displayDB = 90 + db;
+            dBDisplay.innerText = displayDB.toFixed(1) + " dB";
+        }
+
+        function drawWave() {
+            if (waveCanvas.width !== waveCanvas.offsetWidth) {
+                waveCanvas.width = waveCanvas.offsetWidth;
+                waveCanvas.height = waveCanvas.offsetHeight;
+            }
+            if (scopeCanvas.width !== scopeCanvas.offsetWidth) {
+                scopeCanvas.width = scopeCanvas.offsetWidth;
+                scopeCanvas.height = scopeCanvas.offsetHeight;
+            }
+
+            const w = waveCanvas.width;
+            const h = waveCanvas.height;
+            const midY = h / 2;
+
+            ctxWave.clearRect(0, 0, w, h);
+
+            // Scaling
+            const pxPerCm = w / 110;
+            const pistonPx = state.pistonPos * pxPerCm;
+
+            pistonHead.style.transform = `translateX(${pistonPx}px)`;
+
+            const time = audioCtx.currentTime;
+            const k = (2 * Math.PI) / (V_SOUND / state.f);
+
+            // 1. DRAW STANDING WAVE ENVELOPE (Reference - Ghosted) - REMOVED per user request
+            // Previous code block removed to clear visual artifacts
+
+
+            // 2. DRAW LONGITUDINAL PARTICLES
+            // Particle Displacement Scale
+            const displacementScale = 25; // px magnitude
+
+            ctxWave.fillStyle = document.documentElement.classList.contains('dark') ? '#94a3b8' : '#475569';
+
+            for (let p of state.particles) {
+                if (p.xq > state.pistonPos) continue; // Behind piston
+
+                // Current displacement
+                const disp = getDisplacementAt(p.xq, time);
+                const dx = disp * displacementScale;
+
+                const px = (p.xq * pxPerCm) + dx;
+                const py = midY + (p.yRand * (h * 0.6)); // Spread across height
+
+                // Draw dot
+                ctxWave.beginPath();
+                ctxWave.arc(px, py, 1.5, 0, Math.PI * 2);
+                ctxWave.fill();
+            }
+
+            // Draw Realtime Scope
+            drawScope();
+        }
+
+        function drawScope() {
+            const w = scopeCanvas.width;
+            const h = scopeCanvas.height;
+
+            ctxScope.fillStyle = document.documentElement.classList.contains('dark') ? '#000' : '#fff';
+            ctxScope.fillRect(0, 0, w, h);
+
+            // Grid
+            ctxScope.strokeStyle = '#333';
+            ctxScope.lineWidth = 1;
+            ctxScope.beginPath(); ctxScope.moveTo(0, h / 2); ctxScope.lineTo(w, h / 2); ctxScope.stroke();
+
+            // Get Audio Data
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteTimeDomainData(dataArray);
+
+            ctxScope.lineWidth = 2;
+            ctxScope.strokeStyle = '#10b981';
+            ctxScope.beginPath();
+
+            const sliceWidth = w * 1.0 / dataArray.length;
+            let x = 0;
+
+            for (let i = 0; i < dataArray.length; i++) {
+                const v = dataArray[i] / 128.0;
+                const y = v * h / 2;
+                if (i === 0) ctxScope.moveTo(x, y);
+                else ctxScope.lineTo(x, y);
+                x += sliceWidth;
+            }
+            ctxScope.stroke();
+        }
+
+        function loop() {
+            if (state.isPlaying || document.getElementById('tab-simulation').classList.contains('active')) {
+                // Increment visual phase for animation
+                // Speed proportional to f but capped to avoid aliasing
+                // Let's say max visual freq is ~10Hz for clarity
+                const visualFreq = Math.min(state.f, 10);
+                // dt approx 1/60
+                state.visualPhase += (2 * Math.PI * visualFreq) / 60;
+
+                updateAudio();
+                drawWave();
+                animationId = requestAnimationFrame(loop);
+            } else {
+                animationId = null;
+            }
+        }
+
+        function startLoop() {
+            if (!animationId) loop();
+        }
+
+        // --- CONTROLS ---
+
+        function toggleAudio() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            if (state.isPlaying) {
+                // Stop
+                if (oscillator) { oscillator.stop(); oscillator.disconnect(); oscillator = null; }
+                state.isPlaying = false;
+                toneBtn.classList.remove('bg-green-500', 'text-white');
+                toneBtn.classList.add('bg-slate-200', 'dark:bg-slate-700');
+            } else {
+                // Start
+                oscillator = audioCtx.createOscillator();
+                masterGain = audioCtx.createGain();
+
+                oscillator.type = 'sine';
+                oscillator.frequency.value = state.f;
+                masterGain.gain.value = state.vol;
+
+                oscillator.connect(masterGain);
+                masterGain.connect(analyser); // Visuals
+                masterGain.connect(audioCtx.destination); // Speakers
+
+                oscillator.start();
+                state.isPlaying = true;
+
+                toneBtn.classList.add('bg-green-500', 'text-white');
+                toneBtn.classList.remove('bg-slate-200', 'dark:bg-slate-700');
+            }
+        }
+
+        // --- EVENT LISTENERS ---
+
+        // Freq
+        freqInput.addEventListener('input', (e) => {
+            // Auto Clear Data on Frequency Change
+            if (state.history.length > 0) {
+                state.history = [];
+                renderTable();
+            }
+            // Reset S1 if any
+            state.tempS1 = null;
+            updateRecordBtnUI();
+
+            state.f = parseInt(e.target.value);
+            freqDisplay.innerText = state.f;
+        });
+
+        // Vol
+        volInput.addEventListener('input', (e) => {
+            state.vol = parseFloat(e.target.value);
+            volDisplay.innerText = Math.round(state.vol * 100) + "%";
+        });
+
+        // Piston (Main Interaction)
+        pistonSlider.addEventListener('input', (e) => {
+            state.pistonPos = parseFloat(e.target.value);
+            pistonPosDisplay.innerText = state.pistonPos.toFixed(1) + " cm";
+        });
+
+        // Buttons
+        toneBtn.addEventListener('click', toggleAudio);
+
+        // Record Data
+        recordBtn.addEventListener('click', () => {
+            if (state.tempS1 === null) {
+                // First Click: Record S1
+                state.tempS1 = state.pistonPos;
+                updateRecordBtnUI();
+            } else {
+                // Second Click: Record S2 and Calculate
+                const s1 = state.tempS1;
+                const s2 = state.pistonPos;
+
+                // Calculate lambda = 2 * |s2 - s1| / n
+                // We infer 'n' (number of antinodes) based on theoretical values to simulate "counting"
+                // Theoretical half-lambda = (34300 / f) / 2
+                const theoreticalHalfLambda = (V_SOUND / state.f) / 2;
+                const dist = Math.abs(s2 - s1);
+
+                // Estimate n (round to nearest integer, minimum 1)
+                let n = Math.round(dist / theoreticalHalfLambda);
+                if (n < 1) n = 1;
+
+                const lambda_cm = (2 * dist) / n;
+                const lambda_m = lambda_cm / 100;
+
+                // v = lambda * f
+                const v_val = lambda_m * state.f;
+
+                // Add to history
+                const entry = {
+                    id: state.history.length + 1,
+                    f: state.f,
+                    s1: s1,
+                    s2: s2,
+                    n: n,
+                    v: v_val
+                };
+                state.history.push(entry);
+
+                // Reset
+                state.tempS1 = null;
+                updateRecordBtnUI();
+                renderTable();
+            }
+        });
+
+        function updateRecordBtnUI() {
+            const labelSpan = recordBtn.querySelector('span');
+            // Update classes for the span element
+            labelSpan.classList.remove('text-sm', 'font-medium');
+            labelSpan.classList.add('text-lg', 'font-bold');
+
+            if (state.tempS1 === null) {
+                labelSpan.innerText = "GHI S₁";
+                recordBtn.classList.remove('border-amber-500', 'text-amber-500');
+                recordBtn.classList.add('border-slate-200', 'dark:border-slate-700');
+            } else {
+                labelSpan.innerText = "GHI S₂";
+                recordBtn.classList.add('border-amber-500', 'text-amber-500');
+                recordBtn.classList.remove('border-slate-200', 'dark:border-slate-700');
+            }
+        }
+
+        resetDataBtn.addEventListener('click', () => {
+            state.history = [];
+            state.tempS1 = null;
+            updateRecordBtnUI();
+            renderTable();
+        });
+
+        function renderTable() {
+            dataTableBody.innerHTML = '';
+            statsPanelContainer.innerHTML = ''; // Clear stats
+
+            if (state.history.length === 0) {
+                dataTableBody.innerHTML = '<tr class="text-slate-400 italic"><td colspan="6" class="p-2 text-center">Chưa có dữ liệu</td></tr>';
+                return;
+            }
+
+            // Render Rows
+            state.history.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-700 hover:bg-slate-800 transition text-slate-300";
+                tr.innerHTML = `
+                    <td class="p-2">${item.id}</td>
+                    <td class="p-2 text-green-400 font-bold">${item.f}</td>
+                    <td class="p-2 text-right font-bold text-amber-500">${item.s1.toFixed(1)}</td>
+                    <td class="p-2 text-right font-bold text-amber-500">${item.s2.toFixed(1)}</td>
+                    <td class="p-2 text-right text-slate-400">${item.n}</td>
+                    <td class="p-2 text-right font-bold text-blue-400">${item.v.toFixed(1)}</td>
+                `;
+                dataTableBody.appendChild(tr);
+            });
+
+            // Calculate Stats
+            const n = state.history.length;
+            const sumV = state.history.reduce((a, b) => a + b.v, 0);
+            const meanV = sumV / n;
+
+            const sumDelta = state.history.reduce((a, b) => a + Math.abs(b.v - meanV), 0);
+            const meanDelta = sumDelta / n;
+
+            const relativeError = (meanV > 0) ? (meanDelta / meanV) * 100 : 0;
+
+            // Render Stats Panel
+            statsPanelContainer.innerHTML = `
+                <div class="mt-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded border border-slate-200 dark:border-slate-700 text-sm font-mono space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Vận tốc TB (v̄):</span>
+                        <span class="font-bold text-white">${meanV.toFixed(2)} m/s</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Sai số tuyệt đối (Δv̄):</span>
+                        <span class="font-bold text-amber-500">${meanDelta.toFixed(2)} m/s</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Sai số tỷ đối (δ):</span>
+                        <span class="font-bold text-red-500">${relativeError.toFixed(2)}%</span>
+                    </div>
+                   <div class="pt-2 mt-2 border-t border-slate-700 text-center">
+                        <span class="text-green-400 font-bold text-sm">v = ${meanV.toFixed(1)} ± ${meanDelta.toFixed(1)} m/s</span>
+                   </div>
+                </div>
+            `;
+        }
+
+        // --- TAB LOGIC ---
+        function switchTab(id) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + id).classList.add('active');
+
+            document.getElementById('view-instruction').classList.add('hidden');
+            document.getElementById('view-simulation').classList.add('hidden');
+
+            document.getElementById('view-' + id).classList.remove('hidden');
+
+            if (id === 'simulation') {
+                // resizeCanvas();
+                startLoop();
+            }
+        }
+
+        // --- INIT ---
+        window.addEventListener('resize', () => {
+            // Trigger resize in draw loop
+        });
+
+        // Start Loop on Load
+        startLoop();
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

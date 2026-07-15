@@ -1,0 +1,2550 @@
+[
+  {
+    "id": "phys_2026_de1",
+    "subject": "physics",
+    "subjectLabel": "Vật Lý",
+    "title": "Đề ôn tập thi thử THPT 2026 – môn Vật lý – Đề 1",
+    "type": "thpt_national",
+    "typeLabel": "Bộ GD&ĐT",
+    "timeLimit": 3000,
+    "category": "bo-gddt",
+    "questions": [
+      {
+        "id": "phys_2026_de1_q1",
+        "type": "mcq",
+        "text": "<p><strong>Cho:</strong> $\\pi = 3,14$; $T(K) = t(^\\circ C) + 273$; $R = 8,31 \\, \\text{J/mol} \\cdot K$; $N_A = 6,02 \\cdot 10^{23} \\, \\text{mol}^{-1}$</p>\n<hr>\n<p style=\"color: #ff6600;\"><strong>PHẦN I. Câu trắc nghiệm nhiều phương án lựa chọn. </strong></p><p><strong>Câu 1:</strong> Nhiệt hoá hơi riêng của một chất lỏng là:</p>",
+        "options": [
+          "nhiệt lượng cần thiết để 1 kg chất lỏng đó hoá hơi hoàn toàn.",
+          "nhiệt lượng cần thiết để 1 kg chất lỏng đó hóa hơi hoàn toàn ở nhiệt độ sôi.",
+          "nhiệt lượng cần thiết để 1 g chất lỏng đó hoá hơi hoàn toàn ở nhiệt độ phòng.",
+          "nhiệt lượng cần thiết để một mẫu chất lỏng đó hoá hơi hoàn toàn ở nhiệt độ sôi."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q2",
+        "type": "mcq",
+        "text": "Hãy tìm ý không đúng với mô hình động học phân tử trong các ý sau?",
+        "options": [
+          "Các chất được cấu tạo từ các hạt riêng biệt là phân tử.",
+          "Các phân tử chuyển động không ngừng.",
+          "Tốc độ chuyển động của các phân tử cấu tạo nên vật càng lớn thì thể tích của vật càng lớn.",
+          "Giữa các phân tử có lực tương tác gọi là lực tương tác phân tử."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q3",
+        "type": "mcq",
+        "text": "<p><strong>Sử dụng các thông tin sau cho Câu 3 và Câu 4.</strong> Cung cấp nhiệt lượng $1,5 \\, \\text{J}$ cho một khối khí trong một xilanh đặt nằm ngang. Chất khí nở ra đẩy pit-tông đi một đoạn $6,0 \\, \\text{cm}$. Biết lực ma sát giữa pit-tông và xilanh có độ lớn là $20,0 \\, \\text{N}$, diện tích tiết diện của pit-tông là $1,0 \\, \\text{cm}^2$. Coi pit-tông chuyển động thẳng đều.</p>\n<img src=\"/images/exams/A_nh-ma_n-hi_nh-2026-01-28-lu_c-1.50.18_CH.png\" alt=\"\" width=\"308\" height=\"150\" class=\"alignnone size-full wp-image-105874\">\n<p><strong>Câu 3.</strong> Thể tích khí trong xilanh tăng bao nhiêu?</p>",
+        "options": [
+          "$4,5 \\, \\text{ml}$.",
+          "$5,0 \\, \\text{ml}$.",
+          "$5,5 \\, \\text{ml}$.",
+          "$6,0 \\, \\text{ml}$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q4",
+        "type": "mcq",
+        "text": "Độ biến thiên nội năng của khối khí là:",
+        "options": [
+          "$0,3 \\, \\text{J}$.",
+          "$0,4 \\, \\text{J}$.",
+          "$0,5 \\, \\text{J}$.",
+          "$0,6 \\, \\text{J}$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q5",
+        "type": "mcq",
+        "text": "Biến thiên điện trở có thể được sử dụng để xác định nhiệt độ. Giả sử một nhiệt điện trở có điện trở lần lượt là $8,4 \\, \\Omega$ và $3,6 \\, \\Omega$ tại điểm đóng băng và điểm nước sôi. Giả sử sự thay đổi điện trở theo nhiệt độ là đồng đều như thể hiện trong hình. Nhiệt độ sẽ là bao nhiêu nếu điện trở của dây kim loại là $5,8 \\, \\Omega$.<br><img src=\"/images/exams/A_nh-ma_n-hi_nh-2026-01-28-lu_c-11.41.43_SA.png\" alt=\"\" width=\"252\" height=\"144\" class=\"alignnone size-full wp-image-105860\">",
+        "options": [
+          "$42^\\circ C$.",
+          "$46^\\circ C$.",
+          "$54^\\circ C$.",
+          "$58^\\circ C$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q6",
+        "type": "mcq",
+        "text": "Đường đẳng nhiệt trong hệ tọa độ $(p, V)$ có dạng là:",
+        "options": [
+          "đường thẳng song song với trục hoành.",
+          "đường thẳng song song với trục tung.",
+          "đường hyperbol.",
+          "đường thẳng kéo dài đi qua gốc tọa độ."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q7",
+        "type": "mcq",
+        "text": "Khí trong một bình có thể tích cố định bị rò rỉ dần dần. Khi thay đổi từ trạng thái $X$ có áp suất $p$ và nhiệt độ tuyệt đối $T_0$ thành trạng thái $Y$ có áp suất $1,5p$ và nhiệt độ tuyệt đối $2T_0$, như thể hiện trong đồ thị mối liên hệ áp suất - nhiệt độ $(p-T)$ ở hình vẽ bên. Bao nhiêu phần trăm khối lượng ban đầu của khí rò rỉ ra khỏi bình trong quá trình này?<br><img src=\"/images/exams/A_nh-ma_n-hi_nh-2026-01-28-lu_c-11.41.49_SA.png\" alt=\"\" width=\"228\" height=\"140\" class=\"alignnone size-medium wp-image-105861\">",
+        "options": [
+          "$10\\%$.",
+          "$20\\%$.",
+          "$25\\%$.",
+          "$50\\%$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q8",
+        "type": "mcq",
+        "text": "Một bình kín có thể tích $1 \\, \\text{m}^3$ chứa một loại khí lý tưởng. Nhiệt độ của khí là $25^\\circ C$ và áp suất của khí là $1,01 \\cdot 10^5 \\, \\text{Pa}$. Tính số phân tử khí trong bình?",
+        "options": [
+          "$2,46 \\cdot 10^{25}$.",
+          "$2,93 \\cdot 10^{25}$.",
+          "$2,46 \\cdot 10^{26}$.",
+          "$2,93 \\cdot 10^{26}$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q9",
+        "type": "mcq",
+        "text": "Khí trong xilanh của động cơ diesel có thể tích được nạp ban đầu là $360 \\, \\text{cm}^3$, nhiệt độ $47^\\circ C$ và áp suất $101 \\, \\text{kPa}$. Sau khi nén khí đến thể tích $20 \\, \\text{cm}^3$ thì nhiệt độ khí tăng đến $727^\\circ C$. Áp suất trong xilanh lúc này gần giá trị nào nhất?",
+        "options": [
+          "$315 \\, \\text{Pa}$.",
+          "$315 \\, \\text{kPa}$.",
+          "$5,7 \\, \\text{kPa}$.",
+          "$5,7 \\, \\text{MPa}$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q10",
+        "type": "mcq",
+        "text": "Khi bầu trời có sét, xuất hiện một số tạp âm (tiếng sột soạt) ở loa của một số thiết bị như máy thu thanh. Nguyên nhân là do đâu?",
+        "options": [
+          "Tiếng sấm làm cho màng loa rung động theo.",
+          "Điện từ trường do tia sét tạo ra gây nên dòng điện cảm ứng trong các mạch điện.",
+          "Ánh sáng của tia sét quá mạnh khiến loa bị nhiễm tạp âm.",
+          "Không khí bị giãn nén liên tục tạo nên tạp âm trong loa."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q11",
+        "type": "mcq",
+        "text": "Một cuộn dây hình chữ nhật có diện tích $S$ và có $N$ vòng dây. Cuộn dây nằm trong một từ trường đều. Khi cuộn dây quay đều với tần số $f$ quanh trục đối xứng vuông góc với đường sức từ, trong cuộn dây sẽ xuất hiện một suất điện động cực đại có giá trị là $E_0$. Giá trị cực đại của từ thông qua cuộn dây là",
+        "options": [
+          "$\\dfrac{E_0}{2\\pi f}$.",
+          "$\\dfrac{E_0}{\\pi f}$.",
+          "$\\pi f E_0$.",
+          "$2\\pi f E_0$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q12",
+        "type": "mcq",
+        "text": "Hai cuộn dây phẳng, tròn được đặt song song với nhau trong một từ trường đều. Cuộn dây thứ nhất có $20$ vòng, bán kính $20 \\, \\text{cm}$. Cuộn dây thứ hai có $40$ vòng, bán kính $5 \\, \\text{cm}$. Nếu từ thông qua cuộn dây thứ nhất là $6 \\cdot 10^{-6} \\, \\text{Wb}$ thì từ thông qua cuộn dây thứ hai có giá trị là",
+        "options": [
+          "$0,96 \\cdot 10^{-7} \\, \\text{Wb}$.",
+          "$1,22 \\cdot 10^{-7} \\, \\text{Wb}$.",
+          "$1,92 \\cdot 10^{-7} \\, \\text{Wb}$.",
+          "$7,50 \\cdot 10^{-7} \\, \\text{Wb}$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q13",
+        "type": "mcq",
+        "text": "Một đoạn dây dẫn có chiều dài $0,8 \\, \\text{m}$ đặt trong từ trường đều sao cho dây dẫn hợp với vector cảm ứng từ $B$ một góc $60^\\circ$. Biết dòng điện có cường độ $20 \\, \\text{A}$ và dây dẫn chịu một lực từ có độ lớn $2 \\cdot 10^{-2} \\, \\text{N}$. Độ lớn của vector cảm ứng từ $B$ là",
+        "options": [
+          "$0,81 \\cdot 10^{-3} \\, \\text{T}$.",
+          "$10^{-3} \\, \\text{T}$.",
+          "$1,44 \\cdot 10^{-3} \\, \\text{T}$.",
+          "$1,62 \\cdot 10^{-3} \\, \\text{T}$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q14",
+        "type": "mcq",
+        "text": "Một cân điện tử chỉ giá trị $X$ khi một cuộn dây đồng vòng kín được đặt trên nó như hình vẽ. Một thanh nam châm rơi từ độ cao nhất định theo phương thẳng đứng phía trên. Ngay trước khi nam châm chạm tới cuộn dây, số đọc của cân điện tử là<br><img src=\"/images/exams/A_nh-ma_n-hi_nh-2026-01-28-lu_c-11.41.56_SA.png\" alt=\"\" width=\"174\" height=\"196\" class=\"alignnone size-medium wp-image-105862\">",
+        "options": [
+          "giống như $X$.",
+          "đầu tiên nhỏ hơn $X$ và sau đó lớn hơn $X$.",
+          "nhỏ hơn $X$.",
+          "lớn hơn $X$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q15",
+        "type": "mcq",
+        "text": "Biểu đồ dưới đây cho thấy số khối và số hiệu nguyên tử của một hạt nhân phóng xạ $K$: Sau khi trải qua các phân rã sau, nó trở thành $Z$: $K \\xrightarrow{\\alpha} X \\xrightarrow{\\beta^-} Y \\xrightarrow{\\gamma} Z$. Trong các hạt nhân sau đây, hạt nhân nào biểu diễn $Z$?<br><img src=\"/images/exams/A_nh-ma_n-hi_nh-2026-01-28-lu_c-11.42.02_SA.png\" alt=\"\" width=\"260\" height=\"144\" class=\"alignnone size-medium wp-image-105863\">",
+        "options": [
+          "$P$.",
+          "$Q$.",
+          "$R$.",
+          "$S$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q16",
+        "type": "mcq",
+        "text": "Cho biết khối lượng của proton, neutron và hạt nhân $^{235}_{92}U$ lần lượt là $1,00728 \\, \\text{amu}$; $1,00867 \\, \\text{amu}$ và $234,99342 \\, \\text{amu}$. Cho $1 \\, \\text{amu} = 931,5 \\, \\text{MeV/c}^2$. Năng lượng liên kết và năng lượng liên kết riêng của hạt nhân $^{235}_{92}U$ là",
+        "options": [
+          "$1785 \\, \\text{MeV}$; $7,6 \\, \\text{MeV/nucleon}$.",
+          "$7,6 \\, \\text{MeV}$; $1785 \\, \\text{MeV/nucleon}$.",
+          "$8,6 \\, \\text{MeV}$; $2021 \\, \\text{MeV/nucleon}$.",
+          "$2021 \\, \\text{MeV}$; $8,6 \\, \\text{MeV/nucleon}$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q17",
+        "type": "mcq",
+        "text": "<p><strong>Sử dụng các thông tin sau cho Câu 17 và Câu 18.</strong> Cho phản ứng tổng hợp hạt nhân: $^6_3Li + ^2_1D \\rightarrow ^4_2He + ^A_Z X$. Biết khối lượng nguyên tử của các hạt là $m_D = 2,01410 \\, \\text{amu}$; $m_{Li} = 6,01512 \\, \\text{amu}$; $m_{He} = 4,00150 \\, \\text{amu}$. Cho $1 \\, \\text{amu} = 931,5 \\, \\text{MeV/c}^2$.</p>\n\n<p><strong>Câu 17.</strong> Nguyên tử $^A_Z X$ là</p>",
+        "options": [
+          "$^4_2He$.",
+          "$^1_1H$.",
+          "$^6_3Li$.",
+          "$^2_1D$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q18",
+        "type": "mcq",
+        "text": "Tính năng lượng toả ra của mỗi phản ứng ở Câu 17 (biết $m_{Li} = 6,01512$; $m_D = 2,01410$; $m_{He} = 4,00150$):",
+        "options": [
+          "$22,37 \\, \\text{MeV}$.",
+          "$24,42 \\, \\text{MeV}$.",
+          "$28,37 \\, \\text{MeV}$.",
+          "$31,37 \\, \\text{MeV}$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q19",
+        "type": "true_false",
+        "text": "Một quả bóng có khối lượng $200 \\, \\text{g}$ rơi từ độ cao $15 \\, \\text{m}$ xuống sân và nảy lên đến độ cao $10 \\, \\text{m}$. Sau khi va chạm với mặt sân, thể tích quả bóng không thay đổi. Bỏ qua ma sát và lực cản của không khí. Lấy $g = 10 \\, \\text{m/s}^2$.",
+        "statements": [
+          {
+            "id": "s1",
+            "text": "Ở độ cao $10 \\, \\text{m}$, quả bóng không có nội năng.",
+            "correctValue": false
+          },
+          {
+            "id": "s2",
+            "text": "Trong quá trình rơi xuống, nội năng quả bóng giảm vì thế năng quả bóng giảm.",
+            "correctValue": false
+          },
+          {
+            "id": "s3",
+            "text": "Sau khi va chạm với mặt sân, nội năng quả bóng tăng lên $20 \\, \\text{J}$.",
+            "correctValue": false
+          },
+          {
+            "id": "s4",
+            "text": "Sự thay đổi nội năng của quả bóng là sự thay đổi động năng trung bình của các phân tử mà không có thay đổi thế năng của các phân tử.",
+            "correctValue": false
+          }
+        ],
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q20",
+        "type": "true_false",
+        "text": "Một trong những bệnh nghề nghiệp của thợ lặn có tỉ lệ gây tử vong và mất sức lao động cao là bệnh giảm áp. Nếu một thợ lặn từ độ sâu $25 \\, \\text{m}$ nổi lên mặt nước quá nhanh, Nitrogen không vận chuyển kịp đến phổi giải phóng ra ngoài sẽ tích lại trong cơ thể hình thành các bọt khí gây nguy hiểm. Trong các khẳng định sau đây, câu nào đúng, sai.\nGiả sử sự chênh lệch nhiệt độ là không đáng kể. Cho biết khối lượng riêng của nước là 1000 kg/m3 . Lấy g 10 m/s2 =.\nGiả sử sự chênh lệch nhiệt độ là không đáng kể. Cho biết khối lượng riêng của nước là $1000 \\text{ kg/m}^3$. Lấy $g = 10 \\text{ m/s}^2$.",
+        "statements": [
+          {
+            "id": "s1",
+            "text": "Khi nổi lên mặt nước đột ngột và quá nhanh, áp suất giảm đột ngột làm các bọt khí Nitrogen nổi ra, to dần gây tắc mạch, chèn ép các tế bào thần kinh gây liệt, tổn thương các cơ quan.",
+            "correctValue": false
+          },
+          {
+            "id": "s2",
+            "text": "Áp suất mà người thợ lặn phải chịu khi ở độ sâu $25 \\text{ m}$ là $2,45 \\cdot 10^5 \\text{ Pa}$.",
+            "correctValue": false
+          },
+          {
+            "id": "s3",
+            "text": "Khi nổi lên mặt nước, áp suất tại mặt nước khi đó bằng áp suất khí quyển $1,013 \\cdot 10^5 \\text{ Pa}$.",
+            "correctValue": false
+          },
+          {
+            "id": "s4",
+            "text": "Khi ở độ sâu $25 \\text{ m}$, thể tích của bọt khí Nitrogen chiếm $1,00 \\text{ mm}^3$, khi lên đến mặt nước, thể tích của bọt khí này là $3,4 \\text{ mm}^3$.",
+            "correctValue": false
+          }
+        ],
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q21",
+        "type": "true_false",
+        "text": "Cho mạch điện như hình vẽ. Thanh kim loại $PQ$ đang đứng yên trên hai thanh ray kim loại song song nằm ngang, cách nhau một khoảng $4,9 \\, \\text{cm}$. Thanh có khối lượng $23,5 \\, \\text{g}$. Từ trường đều $B = 0,80 \\, \\text{T}$ vuông góc với mặt phẳng chứa hai thanh ray, chiều hướng vào. $R$ là một biến trở. Nguồn điện lý tưởng có suất điện động $12 \\, \\text{V}$. Di chuyển con chạy $C$ để biến trở có giá trị giảm từ từ. Khi $R = 20 \\, \\Omega$ thì thanh $PQ$ bắt đầu chuyển động. Lấy $g = 10 \\, \\text{m/s}^2$.",
+        "statements": [
+          {
+            "id": "s1",
+            "text": "Cường độ dòng điện trong mạch tại thời điểm $PQ$ bắt đầu chuyển động là $0,3 \\, \\text{A}$.",
+            "correctValue": false
+          },
+          {
+            "id": "s2",
+            "text": "Lực từ tác dụng lên thanh $PQ$ tại thời điểm nó bắt đầu chuyển động là $F = 0,01176 \\, \\text{N}$.",
+            "correctValue": false
+          },
+          {
+            "id": "s3",
+            "text": "Hệ số ma sát nghỉ cực đại giữa $PQ$ và hai thanh ray là $\\mu = 0,1$.",
+            "correctValue": false
+          },
+          {
+            "id": "s4",
+            "text": "Lực từ tác dụng lên thanh $PQ$ có chiều hướng sang phải.",
+            "correctValue": false
+          }
+        ],
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q22",
+        "type": "true_false",
+        "text": "Biết các hạt proton, neutron, hạt nhân vàng $^{197}_{79}Au$ và hạt nhân bạc $^{107}_{47}Ag$ có khối lượng lần lượt là $1,00728 \\, \\text{amu}$; $1,00866 \\, \\text{amu}$; $196,92323 \\, \\text{amu}$ và $106,87931 \\, \\text{amu}$.",
+        "statements": [
+          {
+            "id": "s1",
+            "text": "Hạt nhân vàng $^{197}_{79}Au$ nhiều hơn hạt nhân bạc $^{107}_{47}Ag$ $58$ neutron.",
+            "correctValue": false
+          },
+          {
+            "id": "s2",
+            "text": "Độ hụt khối của hạt nhân $^{197}_{79}Au$ là $1,67377 \\, \\text{amu}$.",
+            "correctValue": false
+          },
+          {
+            "id": "s3",
+            "text": "Năng lượng liên kết của hạt nhân $^{107}_{47}Ag$ xấp xỉ là $898,4 \\, \\text{MeV}$.",
+            "correctValue": false
+          },
+          {
+            "id": "s4",
+            "text": "Hạt nhân vàng $^{197}_{79}Au$ bền vững hơn hạt nhân bạc $^{107}_{47}Ag$.",
+            "correctValue": false
+          }
+        ],
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q23",
+        "type": "short_answer",
+        "text": "<p><br><br>Một khối khí cố định có thể tích là $3000 \\, \\text{cm}^3$ ở áp suất $1,0 \\cdot 10^5 \\, \\text{Pa}$. Tính thể tích của nó theo đơn vị <strong>lít</strong> khi áp suất tăng lên $2,5 \\cdot 10^6 \\, \\text{Pa}$ trong khi nhiệt độ không đổi (kết quả làm tròn đến chữ số hàng phần trăm).</p>",
+        "correctShortAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q24",
+        "type": "short_answer",
+        "text": "<p><br><br>Nung nóng một miếng kim loại làm nhiệt độ miếng kim loại tăng thêm $30^\\circ C$. Nếu tính trong thang nhiệt độ Fahrenheit thì độ tăng nhiệt độ miếng kim loại là bao nhiêu $^\\circ F$ (kết quả làm tròn đến chữ số hàng đơn vị)?</p>",
+        "correctShortAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q25",
+        "type": "short_answer",
+        "text": "<p><strong>Sử dụng các thông tin sau cho câu 3 đến câu 4:</strong></p>\n<p>Một nhà máy điện hạt nhân có công suất phát điện $182 \\cdot 10^7 \\, \\text{W}$, dùng năng lượng phân hạch của hạt nhân $^{235}_{92}U$ với hiệu suất $30\\%$. Trung bình mỗi hạt $^{235}_{92}U$ phân hạch tỏa ra năng lượng $200 \\, \\text{MeV}$.</p>\n\n<p><br><br>Năng lượng phân hạch cần để chuyển hóa thành điện năng trong $365$ ngày là $x \\cdot 10^{17} \\, \\text{J}$. Giá trị của $x$ là bao nhiêu (kết quả làm tròn đến chữ số hàng phần trăm)?</p>",
+        "correctShortAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q26",
+        "type": "short_answer",
+        "text": "<p><br><br>Khối lượng hạt $^{235}_{92}U$ được tiêu thụ trong $365$ ngày là bao nhiêu <strong>kg</strong>? Lấy khối lượng mol của $^{235}_{92}U$ là $235 \\, \\text{g/mol}$. Biết $N_A = 6,02 \\cdot 10^{23}$ (kết quả làm tròn đến chữ số hàng đơn vị).</p>",
+        "correctShortAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q27",
+        "type": "short_answer",
+        "text": "<p><strong>Sử dụng các thông tin sau cho Câu 5 và Câu 6.</strong> Một electron chuyển động trong từ trường $B = 3,0 \\cdot 10^{-5} \\, \\text{T}$ chỉ do tác dụng của lực từ, theo một đường tròn có bán kính $0,91 \\, \\text{m}$. Biết lực từ tác dụng lên electron có độ lớn là $F = |e| \\cdot v \\cdot B$ và $|e| = 1,6 \\cdot 10^{-19} \\, \\text{C}$; $m_e = 9,1 \\cdot 10^{-31} \\, \\text{kg}$.</p>\n\n<p><br><br>Một học sinh tính tốc độ của electron và được kết quả là $x \\cdot 10^6 \\, \\text{m/s}$. Tìm $x$ (kết quả làm tròn đến chữ số hàng phần mười).</p>",
+        "correctShortAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de1_q28",
+        "type": "short_answer",
+        "text": "<p><br><br>Thời gian để electron chuyển động được một vòng là $y \\cdot 10^{-6} \\, \\text{s}$. Tìm $y$ (kết quả làm tròn đến chữ số hàng phần mười).</p>",
+        "correctShortAnswer": 0,
+        "explanation": ""
+      }
+    ]
+  },
+  {
+    "id": "phys_2026_de2",
+    "subject": "physics",
+    "subjectLabel": "Vật Lý",
+    "title": "Đề ôn tập thi thử THPT 2026 – môn Vật lý – Đề 2",
+    "type": "thpt_national",
+    "typeLabel": "Bộ GD&ĐT",
+    "timeLimit": 3000,
+    "category": "bo-gddt",
+    "questions": [
+      {
+        "id": "phys_2026_de2_q1",
+        "type": "mcq",
+        "text": "<p style=\"color: #ff6600;\"><strong>PHẦN I. Câu trắc nghiệm nhiều phương án lựa chọn. </strong></p><p><strong>Câu 1:</strong> Có hai nhiệt kế, một dùng thang Celsius, một dùng thang Kelvin để đo nhiệt độ của môi trường tại cùng một thời điểm. Số chỉ trên nhiệt kế Kelvin</p>",
+        "options": [
+          "tỉ lệ thuận với số chỉ trên nhiệt kế Celsius.",
+          "lớn hơn số chỉ trên nhiệt kế Celsius.",
+          "nhỏ hơn số chỉ trên nhiệt kế Celsius.",
+          "có thể lớn hơn hoặc nhỏ hơn số chỉ trên nhiệt kế Celsius."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q2",
+        "type": "mcq",
+        "text": "Trong trường hợp nào dưới đây, sự biến đổi nội năng của vật không phải do thực hiện công?",
+        "options": [
+          "Mài dao.",
+          "Đóng đinh.",
+          "Khuấy nước.",
+          "Nung sắt trong lò."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q3",
+        "type": "mcq",
+        "text": "Một học sinh thêm $50 \\, \\text{g}$ sữa ở nhiệt độ $20^\\circ C$ vào $350 \\, \\text{g}$ trà ở nhiệt độ $80^\\circ C$, nhiệt độ cuối cùng của hỗn hợp là bao nhiêu? Cho nhiệt dung riêng của sữa $3800 \\, \\text{J/(kg.K)}$. Nhiệt dung riêng của trà $4200 \\, \\text{J/(kg.K)}$.",
+        "options": [
+          "$50,0^\\circ C$.",
+          "$72,5^\\circ C$.",
+          "$73,1^\\circ C$.",
+          "$77,4^\\circ C$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q4",
+        "type": "mcq",
+        "text": "<p><strong>Sử dụng các thông tin sau cho Câu 4 và Câu 5.</strong> Vận động viên điền kinh bị mất rất nhiều nước trong khi thi đấu. Các vận động viên thường chỉ có thể chuyển hoá khoảng $30\\%$ năng lượng dự trữ trong cơ thể thành năng lượng dùng cho các hoạt động của cơ thể. Phần năng lượng còn lại chuyển thành nhiệt thải ra ngoài nhờ sự bay hơi của nước qua hô hấp và da để giữ cho nhiệt độ cơ thể không đổi. Vận động viên dùng hết $9800 \\, \\text{kJ}$ trong cuộc thi. Coi nhiệt độ cơ thể của vận động viên hoàn toàn không đổi và nhiệt hoá hơi riêng của nước ở nhiệt độ của vận động viên là $2,4 \\cdot 10^6 \\, \\text{J/kg}$. Biết khối lượng riêng của nước là $1,0 \\cdot 10^3 \\, \\text{kg/m}^3$.</p>\n<p><strong>Câu 4.</strong> Phần năng lượng chuyển thành nhiệt thải ra ngoài nhờ sự bay hơi của nước ra ngoài là</p>",
+        "options": [
+          "$6560 \\, \\text{kJ}$.",
+          "$6660 \\, \\text{kJ}$.",
+          "$6760 \\, \\text{kJ}$.",
+          "$6860 \\, \\text{kJ}$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q5",
+        "type": "mcq",
+        "text": "Lượng nước thoát ra ngoài qua hô hấp và da xấp xỉ là",
+        "options": [
+          "$2,86 \\, \\text{lít}$.",
+          "$3,15 \\, \\text{lít}$.",
+          "$3,36 \\, \\text{lít}$.",
+          "$3,86 \\, \\text{lít}$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q6",
+        "type": "mcq",
+        "text": "Phương trình nào sau đây là phương trình trạng thái của một khối khí lí tưởng xác định?",
+        "options": [
+          "$pV = \\text{hằng số}$.",
+          "$\\dfrac{p}{T} = \\text{hằng số}$.",
+          "$\\dfrac{V}{T} = \\text{hằng số}$.",
+          "$\\dfrac{pV}{T} = \\text{hằng số}$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q7",
+        "type": "mcq",
+        "text": "Đồ thị nào dưới đây biểu diễn mối quan hệ giữa nội năng của khí lý tưởng (trục y) và nhiệt độ tuyệt đối của khí (trục x)?<br><img src=\"/images/exams/A_nh-ma_n-hi_nh-2026-01-28-lu_c-4.19.03_CH.png\" alt=\"\" width=\"754\" height=\"184\" class=\"alignnone size-full wp-image-105934\">",
+        "options": [
+          "Hình 1.",
+          "Hình 2.",
+          "Hình 3.",
+          "Hình 4."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q8",
+        "type": "mcq",
+        "text": "Một bình kín có thể tích không đổi chứa một lượng khí nhất định. Chất khí trong bình được làm lạnh. Điều gì xảy ra với áp suất chất khí và động năng trung bình của các phân tử khí trong bình?",
+        "options": [
+          "Áp suất chất khí giảm, động năng trung bình của các phân tử khí giảm.",
+          "Áp suất chất khí giảm, động năng trung bình của các phân tử khí tăng.",
+          "Áp suất chất khí tăng, động năng trung bình của các phân tử khí giảm.",
+          "Áp suất chất khí tăng, động năng trung bình của các phân tử khí tăng."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q9",
+        "type": "mcq",
+        "text": "Tại một bệnh viện, khí oxygen được đựng trong các bình chứa có áp suất $65 \\, \\text{atm}$ và nhiệt độ $15^\\circ C$. $1 \\, \\text{dm}^3$ khí oxygen trong bình sẽ chiếm thể tích bao nhiêu nếu được đưa ra ngoài môi trường phòng có nhiệt độ $24^\\circ C$ và áp suất $1 \\, \\text{atm}$?",
+        "options": [
+          "$15 \\, \\text{dm}^3$.",
+          "$24 \\, \\text{dm}^3$.",
+          "$67 \\, \\text{dm}^3$.",
+          "$85 \\, \\text{dm}^3$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q10",
+        "type": "mcq",
+        "text": "Từ trường không tương tác với",
+        "options": [
+          "điện tích đứng yên.",
+          "điện tích chuyển động.",
+          "nam châm vĩnh cửu.",
+          "dòng điện."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q11",
+        "type": "mcq",
+        "text": "Một vòng dây tròn dẫn điện được nối với nguồn điện. Yếu tố nào sau đây không ảnh hưởng đến độ lớn cảm ứng từ tại tâm của vòng dây?",
+        "options": [
+          "Hiệu điện thế của nguồn điện.",
+          "Khối lượng riêng của vòng dây.",
+          "Điện trở của vòng dây.",
+          "Đường kính của vòng dây."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q12",
+        "type": "mcq",
+        "text": "Một đoạn dây dẫn thẳng $MN = 5 \\, \\text{cm}$, khối lượng $10 \\, \\text{g}$ được treo vào hai sợi dây mảnh, nhẹ MC và ND sao cho MN nằm ngang và CMND nằm trong mặt phẳng thẳng đứng. Cả hệ đặt trong từ trường đều có độ lớn $B = 0,25 \\, \\text{T}$; hướng thẳng đứng từ dưới lên. Cho dòng điện có cường độ $I$ chạy qua $MN$ thì dây treo lệch một góc $\\theta = 30^\\circ$ so với phương thẳng đứng. Lấy $g = 10 \\, \\text{m/s}^2$. Giá trị $I$ xấp xỉ",
+        "options": [
+          "$4,62 \\, \\text{A}$.",
+          "$6,93 \\, \\text{A}$.",
+          "$4,12 \\, \\text{A}$.",
+          "$6,62 \\, \\text{A}$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q13",
+        "type": "mcq",
+        "text": "Một học sinh lắp đặt mạch điện được minh họa như hình vẽ. Nguồn điện có suất điện động không đổi. Trong các trường hợp sau đây trường hợp nào kim của ampe kế không bị lệch<br><img src=\"/images/exams/A_nh-ma_n-hi_nh-2026-01-28-lu_c-4.19.12_CH.png\" alt=\"\" width=\"294\" height=\"126\" class=\"alignnone size-medium wp-image-105935\">",
+        "options": [
+          "Khi đóng khóa K.",
+          "Khi ngắt khóa K.",
+          "Sau khi đóng khóa K và dòng điện qua X đã ổn định.",
+          "Sau khi đóng khóa K và di chuyển con chạy biến trở."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q14",
+        "type": "mcq",
+        "text": "Cường độ dòng điện của một dòng điện xoay chiều biến thiên theo phương trình $i = 2\\sqrt{2}\\cos(100\\pi t) \\, \\text{A}$. Cường độ dòng điện hiệu dụng có giá trị bằng bao nhiêu?",
+        "options": [
+          "$2 \\, \\text{A}$.",
+          "$2\\sqrt{2} \\, \\text{A}$.",
+          "$4 \\, \\text{A}$.",
+          "$\\sqrt{2} \\, \\text{A}$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q15",
+        "type": "mcq",
+        "text": "Đồng vị là những nguyên tử mà hạt nhân",
+        "options": [
+          "chứa cùng số proton Z nhưng có số neutron N khác nhau.",
+          "chứa cùng số proton Z và số khối A.",
+          "chứa cùng số neutron N nhưng có số proton Z khác nhau.",
+          "chứa cùng số khối A nhưng có số proton Z khác nhau."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q16",
+        "type": "mcq",
+        "text": "Trong phóng xạ $\\beta^-$ hạt nhân $^A_Z X$ biến đổi thành hạt nhân $^{A'}_{Z'} Y$ thì",
+        "options": [
+          "$Z' = Z - 1; A' = A$.",
+          "$Z' = Z + 1; A' = A - 1$.",
+          "$Z' = Z - 1; A' = A + 1$.",
+          "$Z' = Z + 1; A' = A$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q17",
+        "type": "mcq",
+        "text": "<p><strong>Sử dụng các thông tin sau cho Câu 17 và Câu 18.</strong> Ban đầu $(t = 0)$ có một mẫu chất phóng xạ $X$ nguyên chất. Ở thời điểm $t_1$, mẫu chất phóng xạ $X$ còn lại $20\\%$ hạt nhân chưa bị phân rã. Đến thời điểm $t_2 = t_1 + 100 \\, (s)$ số hạt nhân $X$ chưa bị phân rã chỉ còn $5\\%$ so với số hạt nhân ban đầu.</p>\n<p><strong>Câu 17.</strong> Công thức tính số hạt chưa phân rã của mẫu phóng xạ là</p>",
+        "options": [
+          "$N = N_0 \\cdot 2^{-\\dfrac{t}{T}}$.",
+          "$N = N_0 \\cdot 2^{\\dfrac{t}{T}}$.",
+          "$N = N_0 \\cdot 2^{\\dfrac{T}{t}}$.",
+          "$N = N_0 \\cdot 2^{-\\dfrac{T}{t}}$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q18",
+        "type": "mcq",
+        "text": "Chu kì bán rã của chất phóng xạ X là",
+        "options": [
+          "$25 \\, \\text{s}$.",
+          "$50 \\, \\text{s}$.",
+          "$100 \\, \\text{s}$.",
+          "$200 \\, \\text{s}$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q19",
+        "type": "true_false",
+        "text": "Một bình đun nước nóng bằng điện có công suất $9,0 \\, \\text{kW}$. Nước được làm nóng khi đi qua buồng đốt của bình. Nước chảy qua buồng đốt với lưu lượng $5,8 \\cdot 10^{-2} \\, \\text{kg/s}$. Nhiệt độ của nước khi đi vào buồng đốt là $15^\\circ C$. Cho nhiệt dung riêng của nước là $4200 \\, \\text{J/kg.K}$. Bỏ qua mọi hao phí.",
+        "statements": [
+          {
+            "id": "s1",
+            "text": "Nhiệt độ của nước khi ra khỏi buồng đốt là $50^\\circ C$.",
+            "correctValue": false
+          },
+          {
+            "id": "s2",
+            "text": "Nếu nhiệt độ của nước khi đi vào buồng đốt tăng gấp đôi thì nhiệt độ nước ra khỏi buồng đốt tăng gấp đôi.",
+            "correctValue": false
+          },
+          {
+            "id": "s3",
+            "text": "Nếu công suất điện giảm 2 lần thì nhiệt độ nước ra khỏi buồng đốt là $35^\\circ C$.",
+            "correctValue": false
+          },
+          {
+            "id": "s4",
+            "text": "Để điều chỉnh nhiệt độ của nước ra khỏi buồng đốt, ta có thể thay đổi công suất điện; lưu lượng dòng nước; nhiệt độ nước đi vào.",
+            "correctValue": false
+          }
+        ],
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q20",
+        "type": "true_false",
+        "text": "Một ống thuỷ tinh được cắm lộn ngược vào một chậu chứa thuỷ ngân, độ cao cột thuỷ ngân bên trong ống tính từ mặt nước là $10 \\, \\text{cm}$, chiều dài cột không khí bị giam trong ống là $80 \\, \\text{cm}$. Người ta ấn sâu ống thuỷ tinh xuống cho đến khi độ cao cột thuỷ ngân chỉ còn $5,2 \\, \\text{cm}$. Áp suất khí quyển là $75 \\, \\text{cmHg}$. Coi nhiệt độ của khối khí không đổi.",
+        "statements": [
+          {
+            "id": "s1",
+            "text": "Áp suất của khối khí bên trong ống thuỷ tinh ở hình 1 bằng áp suất khí quyển.",
+            "correctValue": false
+          },
+          {
+            "id": "s2",
+            "text": "Độ cao cột thuỷ ngân giảm do áp suất của khí trong ống thuỷ tinh tăng lên.",
+            "correctValue": false
+          },
+          {
+            "id": "s3",
+            "text": "Áp suất của khí trong ống thuỷ tinh ở hình 1 là $65 \\, \\text{cmHg}$.",
+            "correctValue": false
+          },
+          {
+            "id": "s4",
+            "text": "Độ cao cột không khí bên trong ống thuỷ tinh ở hình 2 là $74,2 \\, \\text{cm}$.",
+            "correctValue": false
+          }
+        ],
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q21",
+        "type": "true_false",
+        "text": "Dòng điện xoay chiều chạy qua một đoạn mạch có cường độ biến đổi điều hoà theo thời gian được mô tả bằng đồ thị:",
+        "statements": [
+          {
+            "id": "s1",
+            "text": "Cường độ dòng điện cực đại là $4 \\, \\text{A}$.",
+            "correctValue": false
+          },
+          {
+            "id": "s2",
+            "text": "Tần số góc $\\omega = 100\\pi \\, \\text{rad/s}$.",
+            "correctValue": false
+          },
+          {
+            "id": "s3",
+            "text": "Pha ban đầu của dòng điện là $\\varphi = \\dfrac{\\pi}{3} \\, \\text{rad}$.",
+            "correctValue": false
+          },
+          {
+            "id": "s4",
+            "text": "Biểu thức cường độ dòng điện là $i = 4\\cos\\left(100\\pi t - \\dfrac{\\pi}{4}\\right) \\, (A)$.",
+            "correctValue": false
+          }
+        ],
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q22",
+        "type": "true_false",
+        "text": "Cho hạt nhân $^{24}_{11}Na$ là đồng vị phóng xạ $\\beta^-$ với chu kì bán rã $T$ và biến đổi thành hạt nhân con magnesium $^A_Z Mg$. Ở thời điểm ban đầu $(t = 0)$ có một mẫu $^{24}_{11}Na$ có khối lượng $m_0 = 2,4 \\, \\text{g}$ thì sau thời gian $t = 30 \\, \\text{h}$ khối lượng hạt nhân $^{24}_{11}Na$ còn lại $m = 0,6 \\, \\text{g}$.",
+        "statements": [
+          {
+            "id": "s1",
+            "text": "Số neutron của hạt nhân $^A_Z Mg$ là $12$.",
+            "correctValue": false
+          },
+          {
+            "id": "s2",
+            "text": "Chu kỳ bán rã của hạt nhân $^{24}_{11}Na$ là $15 \\, \\text{h}$.",
+            "correctValue": false
+          },
+          {
+            "id": "s3",
+            "text": "Độ phóng xạ của $^{24}_{11}Na$ ở thời điểm $t = 0$ là $7,73 \\cdot 10^{17} \\, \\text{Bq}$.",
+            "correctValue": false
+          },
+          {
+            "id": "s4",
+            "text": "Ở thời điểm $t_1$, tỉ số giữa khối lượng $^A_Z Mg$ và $^{24}_{11}Na$ là $3$ thì tại thời điểm $t_2 = t_1 + 3T$ tỉ số khối lượng hạt nhân $^A_Z Mg$ và $^{24}_{11}Na$ bằng $8$.",
+            "correctValue": false
+          }
+        ],
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q23",
+        "type": "short_answer",
+        "text": "<p><br><br>Một đoạn dây dẫn mang dòng điện cường độ $1,5 \\, \\text{A}$ đặt trong một từ trường đều thì chịu một lực từ có độ lớn $0,3 \\, \\text{N}$. Nếu sau đó cường độ dòng điện tăng thêm $0,5 \\, \\text{A}$ thì lực từ tác dụng lên đoạn dây dẫn bằng bao nhiêu (tính theo đơn vị N)? (làm tròn kết quả đến chữ số hàng phần mười).</p>",
+        "correctShortAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q24",
+        "type": "short_answer",
+        "text": "<p><br><br>Hạt nhân $X$ phóng xạ $\\beta^-$ và biến đổi thành hạt nhân $Y$ bền vững. Ban đầu $(t = 0)$ có một mẫu chất phóng xạ $X$ nguyên chất. Tại các thời điểm $t_1 = t_0$ (năm) và $t_2 = t_0 + 24,6$ (năm), tỉ số giữa số hạt nhân $X$ còn lại trong mẫu và số hạt nhân $Y$ đã sinh ra có giá trị lần lượt là $\\dfrac{1}{3}$ và $\\dfrac{1}{15}$. Chu kì bán rã của chất phóng xạ $X$ là bao nhiêu năm (làm tròn kết quả đến chữ số hàng phần mười).</p>",
+        "correctShortAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q25",
+        "type": "short_answer",
+        "text": "<p><strong>Sử dụng các thông tin sau cho Câu 3 và Câu 4:</strong> $12 \\, \\text{gam}$ khí chiếm thể tích $6 \\, \\text{lít}$ ở $17^\\circ C$. Sau khi nung nóng đẳng áp lượng khí trên đến nhiệt độ $t$ thì khối lượng riêng của khí là $1,2 \\, \\text{g/lít}$.</p>\n\n<p><br><br>Nhiệt độ của khí sau khi nung nóng là bao nhiêu $^\\circ C$ (làm tròn kết quả đến chữ số hàng đơn vị)?</p>",
+        "correctShortAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q26",
+        "type": "short_answer",
+        "text": "<p><br><br>Biết khối lượng mol của khí đã dùng là $44 \\, \\text{g/mol}$. Áp suất của lượng khí đã dùng là bao nhiêu $kPa$ (làm tròn kết quả đến chữ số hàng đơn vị)?</p>",
+        "correctShortAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q27",
+        "type": "short_answer",
+        "text": "<p><strong>Sử dụng các thông tin sau cho Câu 5 và Câu 6.</strong> Người ta đặt một viên bi đặc bằng sắt bán kính $R = 6 \\, \\text{cm}$ đã được nung nóng tới nhiệt độ $t = 325^\\circ C$ lên một khối nước đá rất lớn ở $0^\\circ C$. Bỏ qua sự dẫn nhiệt của nước đá và sự nóng lên của đá đã tan. Cho khối lượng riêng của sắt là $D = 7800 \\, \\text{kg/m}^3$, của nước đá là $D_0 = 915 \\, \\text{kg/m}^3$. Nhiệt dung riêng của sắt là $c = 460 \\, \\text{J/(kg.K)}$, nhiệt nóng chảy riêng của nước đá là $3,4 \\cdot 10^5 \\, \\text{J/kg}$.</p>\n\n<p><br><br>Khối lượng của viên bi sắt là bao nhiêu kg (làm tròn kết quả đến chữ số hàng phần mười)?</p>",
+        "correctShortAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_de2_q28",
+        "type": "short_answer",
+        "text": "<p><br><br>Thể tích phần nước đá đã bị tan ra thành nước là $x \\cdot 10^{-3} \\, \\text{m}^3$. Tìm $x$ (làm tròn kết quả đến chữ số hàng phần trăm)?</p>",
+        "correctShortAnswer": 0,
+        "explanation": ""
+      }
+    ]
+  },
+  {
+    "id": "phys_2026_nghean",
+    "subject": "physics",
+    "subjectLabel": "Vật Lý",
+    "title": "Đề thi thử THPT 2026 môn Vật lý - Sở GD&ĐT Nghệ An - Lần 1",
+    "type": "thpt_national",
+    "typeLabel": "Sở GD&ĐT",
+    "timeLimit": 3000,
+    "category": "so-gddt",
+    "questions": [
+      {
+        "id": "phys_2026_nghean_q1",
+        "type": "mcq",
+        "text": "<p style=\"color: #ff6600;\"><strong>PHẦN I. Câu trắc nghiệm nhiều phương án lựa chọn. </strong></p><p><strong>Câu 1:</strong> Một khối khí lý tưởng có $n$ mol, áp suất $p$, thể tích $V$, nhiệt độ tuyệt đối $T$. Phương trình Clapeyron của khối khí này là</p>",
+        "options": [
+          "$\\frac{pT}{V} = nR$",
+          "$pV = \\frac{nR}{T}$",
+          "$\\frac{pV}{T} = nR$",
+          "$\\frac{pV}{T} = \\frac{R}{n}$"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q2",
+        "type": "mcq",
+        "text": "<p>Cầu chì là thiết bị dùng để bảo vệ mạch điện. Khi cường độ dòng điện vượt quá giá trị giới hạn thì dây cầu chì bị đứt và làm ngắt mạch điện. Hiện tượng này liên quan đến sự</p>",
+        "options": [
+          "đông đặc.",
+          "nóng chảy.",
+          "thăng hoa.",
+          "ngưng kết."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q3",
+        "type": "mcq",
+        "text": "<p>Trong một nhà máy xử lí rác thải rắn, rác được đưa lên băng chuyền đi qua một nam châm điện đặt phía trên để tách riêng các kim loại có từ tính. Các vật liệu bị nam châm giữ lại chủ yếu là hợp chất của kim loại nào sau đây?</p><p><img class=\"q-image\" src=\"/images/exams/extracted_img_1-71.png\"></p>",
+        "options": [
+          "Thiếc.",
+          "Kẽm.",
+          "Sắt.",
+          "Chì."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q4",
+        "type": "mcq",
+        "text": "<p>Trong quá trình nào sau đây khối khí không sinh công, nhận công?</p>",
+        "options": [
+          "Quá trình đẳng tích.",
+          "Quá trình dãn nở.",
+          "Quá trình đẳng áp.",
+          "Quá trình đẳng nhiệt."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q5",
+        "type": "mcq",
+        "text": "<p>Nối ống dây dẫn vào nguồn điện không đổi qua khóa $K$ như hình vẽ bên. Khi đóng khóa $K$ và đặt kim nam châm tại điểm $A$ thì cực Nam của nó sẽ hướng về vị trí</p><p><img class=\"q-image\" src=\"/images/exams/extracted_img_2-77.png\"></p>",
+        "options": [
+          "(2).",
+          "(3).",
+          "(1).",
+          "(4)."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q6",
+        "type": "mcq",
+        "text": "<p>Sóng điện thoại di động là</p>",
+        "options": [
+          "sóng siêu âm.",
+          "sóng cơ.",
+          "sóng hạ âm.",
+          "sóng điện từ."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q7",
+        "type": "mcq",
+        "text": "<p>Năm 1911, Rutherford thực hiện thí nghiệm tán xạ alpha ( $\\alpha$ ) trên lá vàng rất mỏng có sơ đồ như hình vẽ. Kết quả cho thấy, hầu hết các hạt $\\alpha$ xuyên qua tấm lá vàng, một số ít bật ngược trở lại. Kết quả thí nghiệm bác bỏ giả thuyết nào sau đây?</p><p><img class=\"q-image\" src=\"/images/exams/extracted_img_3-83.png\"></p>",
+        "options": [
+          "Hạt nhân mang điện tích dương và kích thước rất nhỏ so với kích thước nguyên tử.",
+          "Nguyên tử bao gồm hạt nhân ở trung tâm và các electron chuyển động xung quanh.",
+          "Nguyên tử có cấu trúc phần lớn là rỗng chứa các electron.",
+          "Nguyên tử gồm các electron phân bố đều trong một khối điện dương."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q8",
+        "type": "mcq",
+        "text": "<p>Một khung dây dẫn kín đặt trong từ trường. Trong khoảng thời gian $\\Delta t$ rất nhỏ, độ biến thiên từ thông qua khung dây là $\\Delta \\Phi$. Suất điện động xuất hiện trong khung khi đó là</p>",
+        "options": [
+          "$e = -\\frac{\\Delta \\Phi}{\\Delta t}$.",
+          "$e = \\Delta \\Phi \\cdot \\Delta t$.",
+          "$e = \\frac{\\Delta \\Phi}{\\Delta t}$.",
+          "$e = -\\Delta \\Phi \\cdot \\Delta t$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q9",
+        "type": "mcq",
+        "text": "<p>Biểu thức định luật $I$ của nhiệt động lực học có dạng: $\\Delta U = A + Q$. Một vật nhận công và truyền nhiệt có qui ước dấu của $A$ và $Q$ là</p>",
+        "options": [
+          "$A \\gt 0, Q \\lt 0$.",
+          "$A \\gt 0, Q \\gt 0$.",
+          "$A \\lt 0, Q \\gt 0$.",
+          "$A \\lt 0, Q \\lt 0$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q10",
+        "type": "mcq",
+        "text": "<p>Tia phóng xạ $\\beta^{-}$ có bản chất là chùm hạt</p>",
+        "options": [
+          "electron ($_{-1}^{0}\\text{e}$).",
+          "alpha ($_{2}^{4}\\text{He}$).",
+          "proton ($_{1}^{1}\\text{H}$).",
+          "positron ($_{1}^{0}\\text{e}$)."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q11",
+        "type": "mcq",
+        "text": "<p>Đoạn dây dẫn thẳng mang dòng điện I đặt trong từ trường đều B theo các trường hợp sau. Trường hợp nào đoạn dây không chịu tác dụng của lực từ?</p><p><img class=\"q-image\" src=\"/images/exams/extracted_img_4-81.png\"></p>",
+        "options": [
+          "Hình b.",
+          "Hình c.",
+          "Hình a.",
+          "Hình d."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q12",
+        "type": "mcq",
+        "text": "<p>Có ba viên bi làm bằng sắt, nhôm và đồng đang có cùng nhiệt độ bằng nhiệt độ không khí, khối lượng lần lượt là $m_{1}$, $m_{2}$ và $m_{3}$ với $m_{1} = 2m_{2} = m_{3}$. Bỏ đồng thời ba viên bi vào một cốc nước nóng cho đến khi hệ cân bằng nhiệt. Nhiệt dung riêng của các chất có giá trị như bảng bên. Nhận định nào sau đây đúng?</p><table style=\"border-collapse: collapse; width: 100%; text-align: center;\"><tbody><tr><th style=\"border: 1px solid black; padding: 8px;\">Chất</th><th style=\"border: 1px solid black; padding: 8px;\">Nhiệt dung riêng ($\\text{kJ}/\\text{kg}\\cdot^{\\circ}\\text{C}$)</th></tr><tr><td style=\"border: 1px solid black; padding: 8px;\">Sắt</td><td style=\"border: 1px solid black; padding: 8px;\">$0,46$</td></tr><tr><td style=\"border: 1px solid black; padding: 8px;\">Nước</td><td style=\"border: 1px solid black; padding: 8px;\">$4,19$</td></tr><tr><td style=\"border: 1px solid black; padding: 8px;\">Nhôm</td><td style=\"border: 1px solid black; padding: 8px;\">$0,88$</td></tr><tr><td style=\"border: 1px solid black; padding: 8px;\">Đồng</td><td style=\"border: 1px solid black; padding: 8px;\">$0,38$</td></tr></tbody></table>",
+        "options": [
+          "Viên bi sắt thu nhiệt lượng lớn nhất.",
+          "Viên bi nhôm thu nhiệt lượng lớn nhất.",
+          "Cả ba viên bi thu nhiệt lượng bằng nhau.",
+          "Viên bi đồng thu nhiệt lượng lớn nhất."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q13",
+        "type": "mcq",
+        "text": "<p>Khi trung bình của bình phương tốc độ các phân tử khí lý tưởng giảm 2 lần thì nhiệt độ tuyệt đối của khối khí</p>",
+        "options": [
+          "giảm 2 lần.",
+          "tăng 2 lần.",
+          "giảm 4 lần.",
+          "tăng 2 lần."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q14",
+        "type": "mcq",
+        "text": "<p>Cho nhiệt độ nóng chảy của đồng và sắt lần lượt là $1083^{\\circ}\\text{C}$ và $1538^{\\circ}\\text{C}$. Theo thang nhiệt độ Kelvin (độ $\\text{K}$), nhiệt độ nóng chảy của sắt lớn hơn nhiệt độ nóng chảy của đồng là</p>",
+        "options": [
+          "$182\\text{ K}$.",
+          "$455\\text{ K}$.",
+          "$673\\text{ K}$.",
+          "$728\\text{ K}$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q15",
+        "type": "mcq",
+        "text": "<p>Bóng thám không được sử dụng để thu thập thông tin về môi trường không khí và thời tiết ở các độ cao khác nhau. Bóng thường được bơm khí hiếm nhẹ hơn không khí (coi là khí lý tưởng). Khi bóng bay lên cao, các thông số trạng thái của khí trong bóng luôn tuân theo</p>",
+        "options": [
+          "phương trình trạng thái.",
+          "định luật Boyle.",
+          "định luật Charles.",
+          "quá trình đẳng tích."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q16",
+        "type": "mcq",
+        "text": "<p>Xét phản ứng tổng hợp hạt nhân $_{1}^{2}\\text{H} + _{1}^{3}\\text{H} \\rightarrow _{2}^{4}\\text{He} + _{0}^{1}\\text{n}$. Trong 3 hạt nhân $_{1}^{2}\\text{H}; _{1}^{3}\\text{H}; _{2}^{4}\\text{He}$ thì năng lượng liên kết riêng</p>",
+        "options": [
+          "của hạt nhân $_{2}^{4}\\text{He}$ là lớn nhất.",
+          "của 3 hạt là bằng nhau.",
+          "của hạt nhân $_{1}^{2}\\text{H}$ là lớn nhất.",
+          "của hạt nhân $_{2}^{4}\\text{He}$ là nhỏ nhất."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q17",
+        "type": "mcq",
+        "text": "<p>Số neutron có trong một hạt nhân phóng xạ $_{6}^{14}\\text{C}$ là</p>",
+        "options": [
+          "$20$.",
+          "$8$.",
+          "$6$.",
+          "$14$."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q18",
+        "type": "mcq",
+        "text": "<p>Hình nào sau đây diễn tả đúng dạng đường đẳng áp của một khối khí lý tưởng xác định?</p><p><img class=\"q-image\" src=\"/images/exams/extracted_img_5-80.png\"></p>",
+        "options": [
+          "Hình b.",
+          "Hình d.",
+          "Hình a.",
+          "Hình c."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q19",
+        "type": "true_false",
+        "text": "Khi cơ thể người ở môi trường áp suất tăng (như lặn xuống sâu), khí nitơ hít vào sẽ hòa tan nhiều hơn vào máu nhằm cân bằng với áp suất môi trường bên ngoài. Nếu áp suất giảm từ từ, nitơ sẽ thoát dần qua phổi và được đào thải an toàn. Tuy nhiên, khi giảm áp suất đột ngột, nitơ không kịp thoát ra, chuyển từ trạng thái hòa tan sang tạo bọt khí như hình vẽ. Sự hình thành của bọt khí làm cản trở tuần hoàn có thể gây tắc mạch máu (thuyên tắc khí), làm tổn thương các cơ quan.\n<img class=\"q-image\" src=\"/images/exams/extracted_img_6-71.png\">",
+        "statements": [
+          {
+            "id": "s1",
+            "text": "Để tránh hiện tượng thuyên tắc khí, thợ lặn cần nổi lên với tốc độ nhanh.",
+            "correctValue": false
+          },
+          {
+            "id": "s2",
+            "text": "Nếu coi nhiệt độ không đổi, khi một bọt khí hình thành trong mạch máu, thể tích các bọt khí sẽ tăng khi áp suất môi trường tiếp tục giảm.",
+            "correctValue": false
+          },
+          {
+            "id": "s3",
+            "text": "Nếu áp suất trong các bọt khí giảm n lần thì đường kính của nó tăng n lần.",
+            "correctValue": false
+          },
+          {
+            "id": "s4",
+            "text": "Để cấp cứu cho một thợ lặn bị thuyên tắc khí, các bác sĩ đã đưa bệnh nhân vào buồng tăng áp, cho thở oxygen nồng độ cao, giữ nằm yên và giữ ổn định thân nhiệt. Việc đưa bệnh nhân vào buồng tăng áp là để giảm kích thước bọt khí đã hình thành nhằm giảm nguy cơ chèn ép mạch máu.",
+            "correctValue": false
+          }
+        ],
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q20",
+        "type": "true_false",
+        "text": "Đàn guitar điện sử dụng Pickup để biến đổi dao động cơ của dây đàn thành tín hiệu điện. Pickup gồm một cuộn dây dẫn quấn quanh một nam châm, đặt ngay bên dưới dây đàn bằng thép. Cuộn dây nối với ampli (bộ khuếch đại). Tín hiệu điện sau khi khuếch đại được đưa đến loa và phát ra âm thanh.\n<img class=\"q-image\" src=\"/images/exams/extracted_img_7-71.png\">",
+        "statements": [
+          {
+            "id": "s1",
+            "text": "Guitar điện hoạt động dựa trên hiện tượng cảm ứng điện từ.",
+            "correctValue": false
+          },
+          {
+            "id": "s2",
+            "text": "Dây đàn dao động làm cho từ thông qua cuộn dây biến thiên cùng tần số với dao động của nó.",
+            "correctValue": false
+          },
+          {
+            "id": "s3",
+            "text": "Thân đàn của guitar điện có tác dụng cộng hưởng âm.",
+            "correctValue": false
+          },
+          {
+            "id": "s4",
+            "text": "Khi người chơi bấm phím làm ngắn dây đàn, âm phát ra từ loa có tần số lớn hơn so với khi không bấm.",
+            "correctValue": false
+          }
+        ],
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q21",
+        "type": "true_false",
+        "text": "Một nhóm học sinh thực hiện thí nghiệm khảo sát lực từ tác dụng lên một đoạn dây dẫn thẳng mang dòng điện. Sơ đồ thí nghiệm được bố trí như hình vẽ, đoạn dây dẫn $\\text{PQ}$ có trọng lượng $\\text{P}$, được treo nằm ngang bởi hai sợi dây dẫn mảnh, nhẹ tại hai điểm $\\text{M}$ và $\\text{N}$. Ban đầu khoá $\\text{k}$ ngắt, các dây treo có phương thẳng đứng. Đóng khóa $\\text{k}$, dòng điện đi qua $\\text{PQ}$, khi cân bằng một phần thanh $\\text{PQ}$ nằm trong từ trường đều giữa hai cực của nam châm, vuông góc với các đường sức từ. Khi đó các dây treo hợp với phương ngang một góc $\\theta$. Thay đổi cường độ dòng điện $\\text{I}$ qua thanh $\\text{PQ}$ và ghi lại giá trị của góc $\\theta$ tương ứng.\n<img class=\"q-image\" src=\"/images/exams/extracted_img_8-68.png\">",
+        "statements": [
+          {
+            "id": "s1",
+            "text": "Đường sức từ giữa hai cực nam châm có phương thẳng đứng, chiều hướng lên.",
+            "correctValue": false
+          },
+          {
+            "id": "s2",
+            "text": "Cực dương của nguồn điện nối với $\\text{M}$ và cực âm nối với $\\text{N}$.",
+            "correctValue": false
+          },
+          {
+            "id": "s3",
+            "text": "Lực từ tác dụng lên đoạn dây $\\text{PQ}$ có độ lớn $\\text{F} = \\text{P} \\cdot \\tan \\theta$.",
+            "correctValue": false
+          },
+          {
+            "id": "s4",
+            "text": "Giá trị $\\tan \\theta$ tỷ lệ thuận với cường độ dòng điện $\\text{I}$ qua đoạn dây.",
+            "correctValue": false
+          }
+        ],
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q22",
+        "type": "true_false",
+        "text": "Khi tìm hiểu về quá trình tản nhiệt, một nhóm học sinh thảo luận và cho rằng: Công suất tản nhiệt từ vật ra môi trường tỷ lệ thuận với độ chênh lệch nhiệt độ giữa chúng. Để kiểm chứng nhận định đó, nhóm thực hiện thí nghiệm về sự truyền nhiệt của một cốc nước ra môi trường. Các bước thí nghiệm như sau:\n<img class=\"q-image\" src=\"/images/exams/extracted_img_9-61.png\">\nBước 1: Bố trí thí nghiệm theo sơ đồ như hình vẽ, điện trở chìm hoàn toàn trong nước. Ban đầu $\\text{k}$ ngắt, nhiệt kế chỉ $\\text{t}_{0}$.\nBước 2: Đóng khóa $\\text{k}$, điều chỉnh công suất đủ nhỏ để nước không sôi, theo dõi nhiệt độ của nước thì nhóm nhận thấy, với một công suất điện $\\text{P}$ nhất định, nhiệt độ của nước tăng đến một giá trị rồi ổn định. Nhóm ghi lại công suất $\\text{P}$ và nhiệt độ ổn định $\\text{t}$.\nBước 3: Lặp lại thí nghiệm với các giá trị công suất khác nhau.\nCoi nhiệt độ môi trường không đổi, bỏ qua sự hóa hơi của nước.",
+        "statements": [
+          {
+            "id": "s1",
+            "text": "Nhiệt độ môi trường là $\\text{t}_{0}$.",
+            "correctValue": false
+          },
+          {
+            "id": "s2",
+            "text": "Nhiệt năng truyền từ điện trở sang nước và từ nước ra môi trường.",
+            "correctValue": false
+          },
+          {
+            "id": "s3",
+            "text": "Khi nhiệt độ ổn định, công suất tỏa nhiệt của điện trở cho nước và công suất tỏa nhiệt của nước cho môi trường bằng nhau.",
+            "correctValue": false
+          },
+          {
+            "id": "s4",
+            "text": "Nhóm vẽ đồ thị biểu diễn sự phụ thuộc của $\\Delta \\text{t} = \\text{t} - \\text{t}_{0}$ vào $\\text{P}$. Nếu đồ thị sau khi xử lí có dạng là đường thẳng đi qua gốc tọa độ thì nhận định ban đầu của nhóm là đúng.",
+            "correctValue": false
+          }
+        ],
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q23",
+        "type": "short_answer",
+        "text": "<p>Sử dụng các thông tin sau cho </p><br><p>Chất rắn Sodium azide ($\\text{NaN}_{3}$) được sử dụng trong túi khí ô tô như một nguồn cung cấp khí Nitơ để bơm căng túi khí nhanh chóng khi xảy ra va chạm. Khi ô tô va chạm mạnh vào vật cản, cảm biến va chạm sẽ kích hoạt làm chất rắn này phân hủy tạo ra khí $\\text{N}_{2}$ theo phương trình $2\\text{NaN}_{3} \\rightarrow 2\\text{Na} + 3\\text{N}_{2}$. Khí $\\text{N}_{2}$ làm túi khí phồng lên, giúp người</p><br><p><img class=\"q-image\" src=\"/images/exams/extracted_img_10-59.png\"></p><br><p>lái xe không va chạm trực tiếp với hệ thống lái. Trong một đợt thử nghiệm, thể tích túi khí khi có và không có người đè lên lần lượt là $64\\text{ lít}$ và $67\\text{ lít}$. Biết nhiệt độ túi khí là $30^{\\circ}\\text{C}$ không đổi. Hằng số Bolzmann $\\text{k} = 1,38 \\cdot 10^{-23}\\text{ J/K}$.</p><br><p><br><br>Khi có người lái đè lên túi khí thì áp suất khí trong túi là $1,4 \\cdot 10^{5}\\text{ Pa}$ ; trường hợp người lái không đè lên túi khí thì áp suất khí là $\\text{a} \\cdot 10^{5}\\text{ Pa}$ . Giá trị của $\\text{a}$ bằng bao nhiêu (làm tròn kết quả đến chữ số hàng phần mười)?</p>",
+        "correctShortAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q24",
+        "type": "short_answer",
+        "text": "<p><br><br>Khi túi khí bung ra, động năng chuyển động tịnh tiến trung bình của một phân tử $\\text{N}_{2}$ là $\\text{b} \\cdot 10^{-21}\\text{ J}$. Giá trị của $\\text{b}$ là bao nhiêu (làm tròn kết quả đến chữ số hàng phần mười)?</p>",
+        "correctShortAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q25",
+        "type": "short_answer",
+        "text": "<p>Sử dụng các thông tin sau cho </p><br><p>Xe đạp điện, xe máy điện là các ứng dụng của động cơ điện một chiều. Nguyên lí hoạt động của động cơ điện một chiều được mô tả như hình vẽ bên. Khung dây hình chữ nhật $\\text{ABCD}$ có kích thước $\\text{AB} = 30,0\\text{ cm}; \\text{BC} = 20,0\\text{ cm}$ ; đặt trong từ trường đều giữa hai cực của nam châm có độ lớn cảm ứng từ là $0,60\\text{ T}$. Biết cạnh $\\text{AB}$ và $\\text{CD}$ luôn vuông góc với các đường sức từ.</p><br><p><img class=\"q-image\" src=\"/images/exams/extracted_img_11-58.png\"></p><br><p><br><br>Khi dòng điện trong khung dây là $\\text{I} = 10,0\\text{ A}$ thì độ lớn lực từ tác dụng lên cạnh $\\text{AB}$ là bao nhiêu Niutơn (làm tròn kết quả đến chữ số hàng phần mười)?</p>",
+        "correctShortAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q26",
+        "type": "short_answer",
+        "text": "<p><br><br>Khi khung dây quay thì xuất hiện suất điện động cảm ứng gọi là suất phản điện. Biết khung gồm $20,0\\text{ vòng dây}$. Lấy $\\pi = 3,14$. Khi tốc độ quay của khung là $6,0\\frac{\\text{vòng}}{\\text{s}}$ thì suất phản điện có giá trị hiệu dụng là bao nhiêu Vôn (làm tròn kết quả đến chữ số hàng phần đơn vị)?</p>",
+        "correctShortAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q27",
+        "type": "short_answer",
+        "text": "<p>Sử dụng các thông tin sau cho </p><br><p>Các sự cố hạt nhân như Chernobyl (1986) hay Fukushima (2011) có thể làm phát tán đồng vị phóng xạ $_{38}^{90}\\text{Sr}$ vào môi trường. Đây là chất có tính chất hóa học tương tự calcium, nên dễ dàng hấp thụ vào cơ thể người thông qua chuỗi thức ăn, đặc biệt là sữa bò. Đồng vị $_{38}^{90}\\text{Sr}$ có chu kỳ bán rã là $\\text{T}_{1} = 28,8\\text{ năm}$. Trong $1,0\\text{ lít}$ sữa bò bị nhiễm xạ có độ phóng xạ $_{38}^{90}\\text{Sr}$ là $0,69\\text{ Bq}$. Lấy $1\\text{ năm} = 365\\text{ ngày}$.</p><br><p><br><br>Trong một mẫu thử có thể tích $200\\text{ ml}$ lấy từ lô sữa trên, số hạt $_{38}^{90}\\text{Sr}$ có trong mẫu là $\\text{x} \\cdot 10^{8}\\text{ hạt}$. Giá trị của $\\text{x}$ là bao nhiêu (làm tròn kết quả đến chữ số hàng phần mười)?</p>",
+        "correctShortAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2026_nghean_q28",
+        "type": "short_answer",
+        "text": "<p><br><br>Một người uống loại sữa trên, đồng vị $_{38}^{90}\\text{Sr}$ tích tụ trong xương và giảm đi theo hai cơ chế song song: phân rã phóng xạ tự nhiên và đào thải sinh học theo cùng qui luật của phóng xạ với chu kỳ $\\text{T}_{2} = 30,0\\text{ năm}$. Thời gian để số hạt nhân $_{38}^{90}\\text{Sr}$ trong xương người đó giảm đi $75,0\\%$ so với ban đầu là bao nhiêu năm (làm tròn kết quả đến chữ số đến hàng phần mười)?</p>",
+        "correctShortAnswer": 0,
+        "explanation": ""
+      }
+    ]
+  },
+  {
+    "id": "phys_2025_hanoi",
+    "subject": "physics",
+    "subjectLabel": "Vật Lý",
+    "title": "Đề thi thử tốt nghiệp THPT 2025 môn Vật lý - Sở GD&ĐT Hà Nội - Lần 1",
+    "type": "thpt_national",
+    "typeLabel": "Sở GD&ĐT",
+    "timeLimit": 3000,
+    "category": "so-gddt",
+    "questions": [
+      {
+        "id": "phys_2025_hanoi_q1",
+        "type": "mcq",
+        "text": "Một vật dao động điều hòa theo phương trình \\(x = A\\cos(\\omega t + \\varphi)\\). Đại lượng \\(\\omega\\) được gọi là:",
+        "options": [
+          "Tần số dao động.",
+          "Chu kỳ dao động.",
+          "Biên độ dao động.",
+          "Tần số góc của dao động."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q2",
+        "type": "mcq",
+        "text": "Một con lắc lò xo gồm vật nhỏ khối lượng \\(m\\) và lò xo có độ cứng \\(k\\). Chu kỳ dao động riêng của con lắc là:",
+        "options": [
+          "\\(T = 2\\pi \\sqrt{\\dfrac{k}{m}}\\)",
+          "\\(T = 2\\pi \\sqrt{\\dfrac{m}{k}}\\)",
+          "\\(T = \\dfrac{1}{2\\pi} \\sqrt{\\dfrac{k}{m}}\\)",
+          "\\(T = \\dfrac{1}{2\\pi} \\sqrt{\\dfrac{m}{k}}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q3",
+        "type": "mcq",
+        "text": "Tại một nơi có gia tốc trọng trường \\(g\\), một con lắc đơn có chiều dài \\(l\\) dao động điều hòa. Tần số dao động riêng của con lắc là:",
+        "options": [
+          "\\(f = \\sqrt{\\dfrac{g}{l}}\\)",
+          "\\(f = 2\\pi \\sqrt{\\dfrac{l}{g}}\\)",
+          "\\(f = \\dfrac{1}{2\\pi} \\sqrt{\\dfrac{l}{g}}\\)",
+          "\\(f = \\dfrac{1}{2\\pi} \\sqrt{\\dfrac{g}{l}}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q4",
+        "type": "mcq",
+        "text": "Chọn phát biểu đúng về sóng cơ học:",
+        "options": [
+          "Sóng cơ truyền được trong chất rắn, lỏng, khí và chân không.",
+          "Sóng cơ truyền được trong chất rắn, lỏng, khí nhưng không truyền được trong chân không.",
+          "Sóng cơ chỉ truyền được trong chất rắn và chất lỏng.",
+          "Sóng cơ chỉ truyền được trong chân không."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q5",
+        "type": "mcq",
+        "text": "Một sóng cơ truyền trên một sợi dây với bước sóng \\(\\lambda\\). Hai điểm trên dây dao động ngược pha với nhau khi khoảng cách giữa chúng là:",
+        "options": [
+          "\\(d = k\\lambda\\) với \\(k = 0, 1, 2, ...\\)",
+          "\\(d = (k + \\dfrac{1}{2})\\lambda\\) với \\(k = 0, 1, 2, ...\\)",
+          "\\(d = 2k\\lambda\\) với \\(k = 1, 2, 3, ...\\)",
+          "\\(d = (2k + 1)\\dfrac{\\lambda}{2}\\) với \\(k = 0, 1, 2, ...\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q6",
+        "type": "mcq",
+        "text": "Một mạch điện xoay chiều chỉ chứa cuộn cảm thuần có độ tự cảm \\(L\\). Nếu đặt vào hai đầu mạch điện áp \\(u = U_0 \\cos(\\omega t)\\), thì dòng điện trong mạch có biểu thức:",
+        "options": [
+          "\\(i = \\dfrac{U_0}{\\omega L} \\cos(\\omega t)\\)",
+          "\\(i = \\dfrac{U_0}{\\omega L} \\cos(\\omega t + \\dfrac{\\pi}{2})\\)",
+          "\\(i = \\dfrac{U_0}{\\omega L} \\cos(\\omega t - \\dfrac{\\pi}{2})\\)",
+          "\\(i = U_0 \\omega L \\cos(\\omega t + \\dfrac{\\pi}{2})\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q7",
+        "type": "mcq",
+        "text": "Trong mạch RLC nối tiếp đang xảy ra cộng hưởng điện, phát biểu nào sau đây là sai?",
+        "options": [
+          "Tổng trở của mạch đạt giá trị cực tiểu.",
+          "Cường độ dòng điện hiệu dụng trong mạch đạt giá trị cực đại.",
+          "Điện áp hiệu dụng hai đầu cuộn cảm bằng điện áp hiệu dụng hai đầu tụ điện.",
+          "Hệ số công suất của mạch bằng 0."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q8",
+        "type": "mcq",
+        "text": "Một máy biến áp lí tưởng có số vòng dây của cuộn sơ cấp là \\(N_1\\) và cuộn thứ cấp là \\(N_2\\). Đặt vào cuộn sơ cấp điện áp xoay chiều hiệu dụng \\(U_1\\), thì điện áp hiệu dụng ở cuộn thứ cấp là \\(U_2\\). Biểu thức liên hệ đúng là:",
+        "options": [
+          "\\(\\dfrac{U_1}{U_2} = \\dfrac{N_2}{N_1}\\)",
+          "\\(\\dfrac{U_1}{U_2} = \\dfrac{N_1}{N_2}\\)",
+          "\\(U_1 N_1 = U_2 N_2\\)",
+          "\\(U_1 N_2 = U_2 N_1\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q9",
+        "type": "mcq",
+        "text": "Dao động điện từ tự do trong mạch LC lí tưởng có tần số góc riêng là:",
+        "options": [
+          "\\(\\omega = LC\\)",
+          "\\(\\omega = \\dfrac{1}{LC}\\)",
+          "\\(\\omega = \\sqrt{LC}\\)",
+          "\\(\\omega = \\dfrac{1}{\\sqrt{LC}}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q10",
+        "type": "mcq",
+        "text": "Sóng điện từ là sóng:",
+        "options": [
+          "Truyền được trong chân không với tốc độ nhỏ hơn tốc độ ánh sáng.",
+          "Chỉ truyền được trong môi trường vật chất.",
+          "Có thành phần điện trường và từ trường luôn cùng pha.",
+          "Có thành phần điện trường và từ trường luôn vuông pha với nhau và vuông góc với phương truyền sóng."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q11",
+        "type": "mcq",
+        "text": "Trong thí nghiệm Y-âng về giao thoa ánh sáng, khoảng vân được xác định bởi công thức:",
+        "options": [
+          "\\(i = \\dfrac{\\lambda a}{D}\\)",
+          "\\(i = \\dfrac{\\lambda D}{a}\\)",
+          "\\(i = \\dfrac{a D}{\\lambda}\\)",
+          "\\(i = \\lambda a D\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q12",
+        "type": "mcq",
+        "text": "Khi nói về ánh sáng đơn sắc, phát biểu nào sau đây là đúng?",
+        "options": [
+          "Ánh sáng đơn sắc không bị tán sắc khi truyền qua lăng kính.",
+          "Ánh sáng đơn sắc có tần số phụ thuộc vào môi trường truyền.",
+          "Ánh sáng đơn sắc có bước sóng không phụ thuộc vào môi trường truyền.",
+          "Ánh sáng đơn sắc là ánh sáng chỉ bị lệch hướng mà không bị phân tích khi truyền qua lăng kính."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q13",
+        "type": "mcq",
+        "text": "Hiện tượng quang điện ngoài là hiện tượng êlectron bị bứt ra khỏi kim loại khi:",
+        "options": [
+          "Chiếu vào kim loại bức xạ có tần số lớn.",
+          "Chiếu vào kim loại bức xạ có bước sóng nhỏ.",
+          "Kim loại bị đốt nóng đến nhiệt độ cao.",
+          "Chiếu vào kim loại bức xạ có tần số lớn hơn hoặc bằng tần số giới hạn của kim loại đó."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q14",
+        "type": "mcq",
+        "text": "Theo thuyết photon của Anhxtanh, năng lượng của một photon tỉ lệ thuận với:",
+        "options": [
+          "Bước sóng của ánh sáng.",
+          "Tốc độ truyền ánh sáng.",
+          "Tần số của ánh sáng.",
+          "Cường độ chùm ánh sáng."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q15",
+        "type": "mcq",
+        "text": "Hạt nhân nguyên tử được cấu tạo từ:",
+        "options": [
+          "Proton và electron.",
+          "Electron và neutron.",
+          "Proton và hạt nhân.",
+          "Proton và neutron."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q16",
+        "type": "mcq",
+        "text": "Đồng vị là những nguyên tử mà hạt nhân của chúng có:",
+        "options": [
+          "Cùng số khối \\(A\\), khác số proton \\(Z\\).",
+          "Khác số khối \\(A\\), cùng số neutron \\(N\\).",
+          "Cùng số proton \\(Z\\), khác số neutron \\(N\\).",
+          "Cùng số neutron \\(N\\), khác số proton \\(Z\\)."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q17",
+        "type": "mcq",
+        "text": "Phản ứng hạt nhân toả năng lượng là phản ứng mà:",
+        "options": [
+          "Tổng khối lượng của các hạt nhân trước phản ứng lớn hơn tổng khối lượng của các hạt nhân sau phản ứng.",
+          "Tổng khối lượng của các hạt nhân trước phản ứng nhỏ hơn tổng khối lượng của các hạt nhân sau phản ứng.",
+          "Tổng năng lượng liên kết riêng của các hạt nhân trước phản ứng nhỏ hơn tổng năng lượng liên kết riêng của các hạt nhân sau phản ứng.",
+          "Tổng năng lượng toàn phần của các hạt nhân trước phản ứng nhỏ hơn tổng năng lượng toàn phần của các hạt nhân sau phản ứng."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q18",
+        "type": "mcq",
+        "text": "Một vật dao động điều hòa với chu kỳ \\(T\\). Tại thời điểm \\(t\\), li độ của vật là \\(x\\), vận tốc là \\(v\\), gia tốc là \\(a\\). Hệ thức đúng là:",
+        "options": [
+          "\\(v = \\omega x\\)",
+          "\\(a = -\\omega x\\)",
+          "\\(v = -\\omega^2 x\\)",
+          "\\(a = -\\omega^2 x\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q19",
+        "type": "mcq",
+        "text": "Một mạch RLC nối tiếp có \\(R=100\\Omega\\), \\(L = \\dfrac{1}{\\pi}\\text{H}\\), \\(C = \\dfrac{10^{-4}}{2\\pi}\\text{F}\\). Đặt vào hai đầu mạch điện áp \\(u = 200\\sqrt{2}\\cos(100\\pi t)\\) (V). Cường độ dòng điện hiệu dụng trong mạch là:",
+        "options": [
+          "\\(1\\text{ A}\\)",
+          "\\(2\\text{ A}\\)",
+          "\\(\\sqrt{2}\\text{ A}\\)",
+          "\\(2\\sqrt{2}\\text{ A}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q20",
+        "type": "mcq",
+        "text": "Một sóng cơ có bước sóng \\(\\lambda = 0.5\\text{ m}\\) truyền với tốc độ \\(v = 20\\text{ m/s}\\). Tần số của sóng là:",
+        "options": [
+          "\\(10\\text{ Hz}\\)",
+          "\\(20\\text{ Hz}\\)",
+          "\\(30\\text{ Hz}\\)",
+          "\\(40\\text{ Hz}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q21",
+        "type": "mcq",
+        "text": "Trong thí nghiệm Y-âng về giao thoa ánh sáng, hai khe cách nhau \\(a = 1\\text{ mm}\\), màn quan sát cách hai khe \\(D = 2\\text{ m}\\). Ánh sáng sử dụng có bước sóng \\(\\lambda = 0.5\\text{ μm}\\). Khoảng vân trên màn là:",
+        "options": [
+          "\\(0.5\\text{ mm}\\)",
+          "\\(1\\text{ mm}\\)",
+          "\\(2\\text{ mm}\\)",
+          "\\(4\\text{ mm}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q22",
+        "type": "mcq",
+        "text": "Một con lắc lò xo dao động điều hòa theo phương ngang. Khi vật đi qua vị trí cân bằng, động năng của vật là \\(W_đ = 0.1\\text{ J}\\). Lực đàn hồi cực đại tác dụng lên vật là \\(F_{dh,max} = 2\\text{ N}\\). Biên độ dao động của vật là:",
+        "options": [
+          "\\(5\\text{ cm}\\)",
+          "\\(10\\text{ cm}\\)",
+          "\\(20\\text{ cm}\\)",
+          "\\(40\\text{ cm}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q23",
+        "type": "mcq",
+        "text": "Cho phản ứng hạt nhân: \\(\\text{}^{235}_{92}\\text{U} + \\text{}^1_0\\text{n} \\rightarrow \\text{}^{137}_{53}\\text{I} + \\text{}^{96}_{39}\\text{Y} + k \\text{}^1_0\\text{n}\\). Số neutron \\(k\\) được giải phóng là:",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q24",
+        "type": "mcq",
+        "text": "Theo mẫu Bo về nguyên tử Hydro, bán kính quỹ đạo dừng thứ \\(n\\) của electron là \\(r_n = n^2 r_0\\), với \\(r_0\\) là bán kính Bo. Năng lượng của electron ở quỹ đạo dừng thứ \\(n\\) có biểu thức \\(E_n = -\\dfrac{13.6}{n^2}\\text{ (eV)}\\). Khi electron chuyển từ quỹ đạo dừng \\(M\\) về quỹ đạo dừng \\(K\\), nguyên tử phát ra một photon có năng lượng là:",
+        "options": [
+          "\\(|E_M - E_L|\\)",
+          "\\(|E_M - E_K|\\)",
+          "\\(|E_L - E_K|\\)",
+          "\\(|E_N - E_M|\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_hanoi_q25",
+        "type": "mcq",
+        "text": "Một vật dao động điều hòa có phương trình vận tốc \\(v = 10\\pi \\cos(2\\pi t + \\pi/3)\\) (cm/s). Gia tốc cực đại của vật là:",
+        "options": [
+          "\\(10\\pi\\text{ cm/s}^2\\)",
+          "\\(20\\pi\\text{ cm/s}^2\\)",
+          "\\(20\\pi^2\\text{ cm/s}^2\\)",
+          "\\(100\\pi^2\\text{ cm/s}^2\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      }
+    ]
+  },
+  {
+    "id": "phys_2025_tphcm",
+    "subject": "physics",
+    "subjectLabel": "Vật Lý",
+    "title": "Đề thi thử tốt nghiệp THPT 2025 môn Vật lý - Sở GD&ĐT TP.HCM - Lần 1",
+    "type": "thpt_national",
+    "typeLabel": "Sở GD&ĐT",
+    "timeLimit": 3000,
+    "category": "so-gddt",
+    "questions": [
+      {
+        "id": "phys_2025_tphcm_q1",
+        "type": "mcq",
+        "text": "Một vật dao động điều hòa theo phương trình \\(x = A\\cos(\\omega t + \\varphi)\\). Đại lượng \\(\\omega\\) được gọi là:",
+        "options": [
+          "Tần số dao động.",
+          "Chu kỳ dao động.",
+          "Biên độ dao động.",
+          "Tần số góc của dao động."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q2",
+        "type": "mcq",
+        "text": "Một con lắc lò xo gồm vật nhỏ khối lượng \\(m\\) và lò xo có độ cứng \\(k\\). Chu kỳ dao động riêng của con lắc là:",
+        "options": [
+          "\\(T = 2\\pi \\sqrt{\\dfrac{k}{m}}\\)",
+          "\\(T = 2\\pi \\sqrt{\\dfrac{m}{k}}\\)",
+          "\\(T = \\dfrac{1}{2\\pi} \\sqrt{\\dfrac{k}{m}}\\)",
+          "\\(T = \\dfrac{1}{2\\pi} \\sqrt{\\dfrac{m}{k}}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q3",
+        "type": "mcq",
+        "text": "Tại một nơi có gia tốc trọng trường \\(g\\), một con lắc đơn có chiều dài \\(l\\) dao động điều hòa. Tần số dao động riêng của con lắc là:",
+        "options": [
+          "\\(f = \\sqrt{\\dfrac{g}{l}}\\)",
+          "\\(f = 2\\pi \\sqrt{\\dfrac{l}{g}}\\)",
+          "\\(f = \\dfrac{1}{2\\pi} \\sqrt{\\dfrac{l}{g}}\\)",
+          "\\(f = \\dfrac{1}{2\\pi} \\sqrt{\\dfrac{g}{l}}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q4",
+        "type": "mcq",
+        "text": "Chọn phát biểu đúng về sóng cơ học:",
+        "options": [
+          "Sóng cơ truyền được trong chất rắn, lỏng, khí và chân không.",
+          "Sóng cơ truyền được trong chất rắn, lỏng, khí nhưng không truyền được trong chân không.",
+          "Sóng cơ chỉ truyền được trong chất rắn và chất lỏng.",
+          "Sóng cơ chỉ truyền được trong chân không."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q5",
+        "type": "mcq",
+        "text": "Một sóng cơ truyền trên một sợi dây với bước sóng \\(\\lambda\\). Hai điểm trên dây dao động ngược pha với nhau khi khoảng cách giữa chúng là:",
+        "options": [
+          "\\(d = k\\lambda\\) với \\(k = 0, 1, 2, ...\\)",
+          "\\(d = (k + \\dfrac{1}{2})\\lambda\\) với \\(k = 0, 1, 2, ...\\)",
+          "\\(d = 2k\\lambda\\) với \\(k = 1, 2, 3, ...\\)",
+          "\\(d = (2k + 1)\\dfrac{\\lambda}{2}\\) với \\(k = 0, 1, 2, ...\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q6",
+        "type": "mcq",
+        "text": "Một mạch điện xoay chiều chỉ chứa cuộn cảm thuần có độ tự cảm \\(L\\). Nếu đặt vào hai đầu mạch điện áp \\(u = U_0 \\cos(\\omega t)\\), thì dòng điện trong mạch có biểu thức:",
+        "options": [
+          "\\(i = \\dfrac{U_0}{\\omega L} \\cos(\\omega t)\\)",
+          "\\(i = \\dfrac{U_0}{\\omega L} \\cos(\\omega t + \\dfrac{\\pi}{2})\\)",
+          "\\(i = \\dfrac{U_0}{\\omega L} \\cos(\\omega t - \\dfrac{\\pi}{2})\\)",
+          "\\(i = U_0 \\omega L \\cos(\\omega t + \\dfrac{\\pi}{2})\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q7",
+        "type": "mcq",
+        "text": "Trong mạch RLC nối tiếp đang xảy ra cộng hưởng điện, phát biểu nào sau đây là sai?",
+        "options": [
+          "Tổng trở của mạch đạt giá trị cực tiểu.",
+          "Cường độ dòng điện hiệu dụng trong mạch đạt giá trị cực đại.",
+          "Điện áp hiệu dụng hai đầu cuộn cảm bằng điện áp hiệu dụng hai đầu tụ điện.",
+          "Hệ số công suất của mạch bằng 0."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q8",
+        "type": "mcq",
+        "text": "Một máy biến áp lí tưởng có số vòng dây của cuộn sơ cấp là \\(N_1\\) và cuộn thứ cấp là \\(N_2\\). Đặt vào cuộn sơ cấp điện áp xoay chiều hiệu dụng \\(U_1\\), thì điện áp hiệu dụng ở cuộn thứ cấp là \\(U_2\\). Biểu thức liên hệ đúng là:",
+        "options": [
+          "\\(\\dfrac{U_1}{U_2} = \\dfrac{N_2}{N_1}\\)",
+          "\\(\\dfrac{U_1}{U_2} = \\dfrac{N_1}{N_2}\\)",
+          "\\(U_1 N_1 = U_2 N_2\\)",
+          "\\(U_1 N_2 = U_2 N_1\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q9",
+        "type": "mcq",
+        "text": "Dao động điện từ tự do trong mạch LC lí tưởng có tần số góc riêng là:",
+        "options": [
+          "\\(\\omega = LC\\)",
+          "\\(\\omega = \\dfrac{1}{LC}\\)",
+          "\\(\\omega = \\sqrt{LC}\\)",
+          "\\(\\omega = \\dfrac{1}{\\sqrt{LC}}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q10",
+        "type": "mcq",
+        "text": "Sóng điện từ là sóng:",
+        "options": [
+          "Truyền được trong chân không với tốc độ nhỏ hơn tốc độ ánh sáng.",
+          "Chỉ truyền được trong môi trường vật chất.",
+          "Có thành phần điện trường và từ trường luôn cùng pha.",
+          "Có thành phần điện trường và từ trường luôn vuông pha với nhau và vuông góc với phương truyền sóng."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q11",
+        "type": "mcq",
+        "text": "Trong thí nghiệm Y-âng về giao thoa ánh sáng, khoảng vân được xác định bởi công thức:",
+        "options": [
+          "\\(i = \\dfrac{\\lambda a}{D}\\)",
+          "\\(i = \\dfrac{\\lambda D}{a}\\)",
+          "\\(i = \\dfrac{a D}{\\lambda}\\)",
+          "\\(i = \\lambda a D\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q12",
+        "type": "mcq",
+        "text": "Khi nói về ánh sáng đơn sắc, phát biểu nào sau đây là đúng?",
+        "options": [
+          "Ánh sáng đơn sắc không bị tán sắc khi truyền qua lăng kính.",
+          "Ánh sáng đơn sắc có tần số phụ thuộc vào môi trường truyền.",
+          "Ánh sáng đơn sắc có bước sóng không phụ thuộc vào môi trường truyền.",
+          "Ánh sáng đơn sắc là ánh sáng chỉ bị lệch hướng mà không bị phân tích khi truyền qua lăng kính."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q13",
+        "type": "mcq",
+        "text": "Hiện tượng quang điện ngoài là hiện tượng êlectron bị bứt ra khỏi kim loại khi:",
+        "options": [
+          "Chiếu vào kim loại bức xạ có tần số lớn.",
+          "Chiếu vào kim loại bức xạ có bước sóng nhỏ.",
+          "Kim loại bị đốt nóng đến nhiệt độ cao.",
+          "Chiếu vào kim loại bức xạ có tần số lớn hơn hoặc bằng tần số giới hạn của kim loại đó."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q14",
+        "type": "mcq",
+        "text": "Theo thuyết photon của Anhxtanh, năng lượng của một photon tỉ lệ thuận với:",
+        "options": [
+          "Bước sóng của ánh sáng.",
+          "Tốc độ truyền ánh sáng.",
+          "Tần số của ánh sáng.",
+          "Cường độ chùm ánh sáng."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q15",
+        "type": "mcq",
+        "text": "Hạt nhân nguyên tử được cấu tạo từ:",
+        "options": [
+          "Proton và electron.",
+          "Electron và neutron.",
+          "Proton và hạt nhân.",
+          "Proton và neutron."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q16",
+        "type": "mcq",
+        "text": "Đồng vị là những nguyên tử mà hạt nhân của chúng có:",
+        "options": [
+          "Cùng số khối \\(A\\), khác số proton \\(Z\\).",
+          "Khác số khối \\(A\\), cùng số neutron \\(N\\).",
+          "Cùng số proton \\(Z\\), khác số neutron \\(N\\).",
+          "Cùng số neutron \\(N\\), khác số proton \\(Z\\)."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q17",
+        "type": "mcq",
+        "text": "Phản ứng hạt nhân toả năng lượng là phản ứng mà:",
+        "options": [
+          "Tổng khối lượng của các hạt nhân trước phản ứng lớn hơn tổng khối lượng của các hạt nhân sau phản ứng.",
+          "Tổng khối lượng của các hạt nhân trước phản ứng nhỏ hơn tổng khối lượng của các hạt nhân sau phản ứng.",
+          "Tổng năng lượng liên kết riêng của các hạt nhân trước phản ứng nhỏ hơn tổng năng lượng liên kết riêng của các hạt nhân sau phản ứng.",
+          "Tổng năng lượng toàn phần của các hạt nhân trước phản ứng nhỏ hơn tổng năng lượng toàn phần của các hạt nhân sau phản ứng."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q18",
+        "type": "mcq",
+        "text": "Một vật dao động điều hòa với chu kỳ \\(T\\). Tại thời điểm \\(t\\), li độ của vật là \\(x\\), vận tốc là \\(v\\), gia tốc là \\(a\\). Hệ thức đúng là:",
+        "options": [
+          "\\(v = \\omega x\\)",
+          "\\(a = -\\omega x\\)",
+          "\\(v = -\\omega^2 x\\)",
+          "\\(a = -\\omega^2 x\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q19",
+        "type": "mcq",
+        "text": "Một mạch RLC nối tiếp có \\(R=100\\Omega\\), \\(L = \\dfrac{1}{\\pi}\\text{H}\\), \\(C = \\dfrac{10^{-4}}{2\\pi}\\text{F}\\). Đặt vào hai đầu mạch điện áp \\(u = 200\\sqrt{2}\\cos(100\\pi t)\\) (V). Cường độ dòng điện hiệu dụng trong mạch là:",
+        "options": [
+          "\\(1\\text{ A}\\)",
+          "\\(2\\text{ A}\\)",
+          "\\(\\sqrt{2}\\text{ A}\\)",
+          "\\(2\\sqrt{2}\\text{ A}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q20",
+        "type": "mcq",
+        "text": "Một sóng cơ có bước sóng \\(\\lambda = 0.5\\text{ m}\\) truyền với tốc độ \\(v = 20\\text{ m/s}\\). Tần số của sóng là:",
+        "options": [
+          "\\(10\\text{ Hz}\\)",
+          "\\(20\\text{ Hz}\\)",
+          "\\(30\\text{ Hz}\\)",
+          "\\(40\\text{ Hz}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q21",
+        "type": "mcq",
+        "text": "Trong thí nghiệm Y-âng về giao thoa ánh sáng, hai khe cách nhau \\(a = 1\\text{ mm}\\), màn quan sát cách hai khe \\(D = 2\\text{ m}\\). Ánh sáng sử dụng có bước sóng \\(\\lambda = 0.5\\text{ μm}\\). Khoảng vân trên màn là:",
+        "options": [
+          "\\(0.5\\text{ mm}\\)",
+          "\\(1\\text{ mm}\\)",
+          "\\(2\\text{ mm}\\)",
+          "\\(4\\text{ mm}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q22",
+        "type": "mcq",
+        "text": "Một con lắc lò xo dao động điều hòa theo phương ngang. Khi vật đi qua vị trí cân bằng, động năng của vật là \\(W_đ = 0.1\\text{ J}\\). Lực đàn hồi cực đại tác dụng lên vật là \\(F_{dh,max} = 2\\text{ N}\\). Biên độ dao động của vật là:",
+        "options": [
+          "\\(5\\text{ cm}\\)",
+          "\\(10\\text{ cm}\\)",
+          "\\(20\\text{ cm}\\)",
+          "\\(40\\text{ cm}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q23",
+        "type": "mcq",
+        "text": "Cho phản ứng hạt nhân: \\(\\text{}^{235}_{92}\\text{U} + \\text{}^1_0\\text{n} \\rightarrow \\text{}^{137}_{53}\\text{I} + \\text{}^{96}_{39}\\text{Y} + k \\text{}^1_0\\text{n}\\). Số neutron \\(k\\) được giải phóng là:",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q24",
+        "type": "mcq",
+        "text": "Theo mẫu Bo về nguyên tử Hydro, bán kính quỹ đạo dừng thứ \\(n\\) của electron là \\(r_n = n^2 r_0\\), với \\(r_0\\) là bán kính Bo. Năng lượng của electron ở quỹ đạo dừng thứ \\(n\\) có biểu thức \\(E_n = -\\dfrac{13.6}{n^2}\\text{ (eV)}\\). Khi electron chuyển từ quỹ đạo dừng \\(M\\) về quỹ đạo dừng \\(K\\), nguyên tử phát ra một photon có năng lượng là:",
+        "options": [
+          "\\(|E_M - E_L|\\)",
+          "\\(|E_M - E_K|\\)",
+          "\\(|E_L - E_K|\\)",
+          "\\(|E_N - E_M|\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_tphcm_q25",
+        "type": "mcq",
+        "text": "Một vật dao động điều hòa có phương trình vận tốc \\(v = 10\\pi \\cos(2\\pi t + \\pi/3)\\) (cm/s). Gia tốc cực đại của vật là:",
+        "options": [
+          "\\(10\\pi\\text{ cm/s}^2\\)",
+          "\\(20\\pi\\text{ cm/s}^2\\)",
+          "\\(20\\pi^2\\text{ cm/s}^2\\)",
+          "\\(100\\pi^2\\text{ cm/s}^2\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      }
+    ]
+  },
+  {
+    "id": "phys_2025_pbc",
+    "subject": "physics",
+    "subjectLabel": "Vật Lý",
+    "title": "Đề thi thử tốt nghiệp THPT 2025 môn Vật lý - THPT Chuyên Phan Bội Châu - Lần 1",
+    "type": "thpt_national",
+    "typeLabel": "Trường Chuyên",
+    "timeLimit": 3000,
+    "category": "truong-chuyen",
+    "questions": [
+      {
+        "id": "phys_2025_pbc_q1",
+        "type": "mcq",
+        "text": "Một vật dao động điều hòa theo phương trình \\(x = A\\cos(\\omega t + \\varphi)\\). Đại lượng \\(\\omega\\) được gọi là:",
+        "options": [
+          "Tần số dao động.",
+          "Chu kỳ dao động.",
+          "Biên độ dao động.",
+          "Tần số góc của dao động."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q2",
+        "type": "mcq",
+        "text": "Một con lắc lò xo gồm vật nhỏ khối lượng \\(m\\) và lò xo có độ cứng \\(k\\). Chu kỳ dao động riêng của con lắc là:",
+        "options": [
+          "\\(T = 2\\pi \\sqrt{\\dfrac{k}{m}}\\)",
+          "\\(T = 2\\pi \\sqrt{\\dfrac{m}{k}}\\)",
+          "\\(T = \\dfrac{1}{2\\pi} \\sqrt{\\dfrac{k}{m}}\\)",
+          "\\(T = \\dfrac{1}{2\\pi} \\sqrt{\\dfrac{m}{k}}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q3",
+        "type": "mcq",
+        "text": "Tại một nơi có gia tốc trọng trường \\(g\\), một con lắc đơn có chiều dài \\(l\\) dao động điều hòa. Tần số dao động riêng của con lắc là:",
+        "options": [
+          "\\(f = \\sqrt{\\dfrac{g}{l}}\\)",
+          "\\(f = 2\\pi \\sqrt{\\dfrac{l}{g}}\\)",
+          "\\(f = \\dfrac{1}{2\\pi} \\sqrt{\\dfrac{l}{g}}\\)",
+          "\\(f = \\dfrac{1}{2\\pi} \\sqrt{\\dfrac{g}{l}}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q4",
+        "type": "mcq",
+        "text": "Chọn phát biểu đúng về sóng cơ học:",
+        "options": [
+          "Sóng cơ truyền được trong chất rắn, lỏng, khí và chân không.",
+          "Sóng cơ truyền được trong chất rắn, lỏng, khí nhưng không truyền được trong chân không.",
+          "Sóng cơ chỉ truyền được trong chất rắn và chất lỏng.",
+          "Sóng cơ chỉ truyền được trong chân không."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q5",
+        "type": "mcq",
+        "text": "Một sóng cơ truyền trên một sợi dây với bước sóng \\(\\lambda\\). Hai điểm trên dây dao động ngược pha với nhau khi khoảng cách giữa chúng là:",
+        "options": [
+          "\\(d = k\\lambda\\) với \\(k = 0, 1, 2, ...\\)",
+          "\\(d = (k + \\dfrac{1}{2})\\lambda\\) với \\(k = 0, 1, 2, ...\\)",
+          "\\(d = 2k\\lambda\\) với \\(k = 1, 2, 3, ...\\)",
+          "\\(d = (2k + 1)\\dfrac{\\lambda}{2}\\) với \\(k = 0, 1, 2, ...\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q6",
+        "type": "mcq",
+        "text": "Một mạch điện xoay chiều chỉ chứa cuộn cảm thuần có độ tự cảm \\(L\\). Nếu đặt vào hai đầu mạch điện áp \\(u = U_0 \\cos(\\omega t)\\), thì dòng điện trong mạch có biểu thức:",
+        "options": [
+          "\\(i = \\dfrac{U_0}{\\omega L} \\cos(\\omega t)\\)",
+          "\\(i = \\dfrac{U_0}{\\omega L} \\cos(\\omega t + \\dfrac{\\pi}{2})\\)",
+          "\\(i = \\dfrac{U_0}{\\omega L} \\cos(\\omega t - \\dfrac{\\pi}{2})\\)",
+          "\\(i = U_0 \\omega L \\cos(\\omega t + \\dfrac{\\pi}{2})\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q7",
+        "type": "mcq",
+        "text": "Trong mạch RLC nối tiếp đang xảy ra cộng hưởng điện, phát biểu nào sau đây là sai?",
+        "options": [
+          "Tổng trở của mạch đạt giá trị cực tiểu.",
+          "Cường độ dòng điện hiệu dụng trong mạch đạt giá trị cực đại.",
+          "Điện áp hiệu dụng hai đầu cuộn cảm bằng điện áp hiệu dụng hai đầu tụ điện.",
+          "Hệ số công suất của mạch bằng 0."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q8",
+        "type": "mcq",
+        "text": "Một máy biến áp lí tưởng có số vòng dây của cuộn sơ cấp là \\(N_1\\) và cuộn thứ cấp là \\(N_2\\). Đặt vào cuộn sơ cấp điện áp xoay chiều hiệu dụng \\(U_1\\), thì điện áp hiệu dụng ở cuộn thứ cấp là \\(U_2\\). Biểu thức liên hệ đúng là:",
+        "options": [
+          "\\(\\dfrac{U_1}{U_2} = \\dfrac{N_2}{N_1}\\)",
+          "\\(\\dfrac{U_1}{U_2} = \\dfrac{N_1}{N_2}\\)",
+          "\\(U_1 N_1 = U_2 N_2\\)",
+          "\\(U_1 N_2 = U_2 N_1\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q9",
+        "type": "mcq",
+        "text": "Dao động điện từ tự do trong mạch LC lí tưởng có tần số góc riêng là:",
+        "options": [
+          "\\(\\omega = LC\\)",
+          "\\(\\omega = \\dfrac{1}{LC}\\)",
+          "\\(\\omega = \\sqrt{LC}\\)",
+          "\\(\\omega = \\dfrac{1}{\\sqrt{LC}}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q10",
+        "type": "mcq",
+        "text": "Sóng điện từ là sóng:",
+        "options": [
+          "Truyền được trong chân không với tốc độ nhỏ hơn tốc độ ánh sáng.",
+          "Chỉ truyền được trong môi trường vật chất.",
+          "Có thành phần điện trường và từ trường luôn cùng pha.",
+          "Có thành phần điện trường và từ trường luôn vuông pha với nhau và vuông góc với phương truyền sóng."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q11",
+        "type": "mcq",
+        "text": "Trong thí nghiệm Y-âng về giao thoa ánh sáng, khoảng vân được xác định bởi công thức:",
+        "options": [
+          "\\(i = \\dfrac{\\lambda a}{D}\\)",
+          "\\(i = \\dfrac{\\lambda D}{a}\\)",
+          "\\(i = \\dfrac{a D}{\\lambda}\\)",
+          "\\(i = \\lambda a D\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q12",
+        "type": "mcq",
+        "text": "Khi nói về ánh sáng đơn sắc, phát biểu nào sau đây là đúng?",
+        "options": [
+          "Ánh sáng đơn sắc không bị tán sắc khi truyền qua lăng kính.",
+          "Ánh sáng đơn sắc có tần số phụ thuộc vào môi trường truyền.",
+          "Ánh sáng đơn sắc có bước sóng không phụ thuộc vào môi trường truyền.",
+          "Ánh sáng đơn sắc là ánh sáng chỉ bị lệch hướng mà không bị phân tích khi truyền qua lăng kính."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q13",
+        "type": "mcq",
+        "text": "Hiện tượng quang điện ngoài là hiện tượng êlectron bị bứt ra khỏi kim loại khi:",
+        "options": [
+          "Chiếu vào kim loại bức xạ có tần số lớn.",
+          "Chiếu vào kim loại bức xạ có bước sóng nhỏ.",
+          "Kim loại bị đốt nóng đến nhiệt độ cao.",
+          "Chiếu vào kim loại bức xạ có tần số lớn hơn hoặc bằng tần số giới hạn của kim loại đó."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q14",
+        "type": "mcq",
+        "text": "Theo thuyết photon của Anhxtanh, năng lượng của một photon tỉ lệ thuận với:",
+        "options": [
+          "Bước sóng của ánh sáng.",
+          "Tốc độ truyền ánh sáng.",
+          "Tần số của ánh sáng.",
+          "Cường độ chùm ánh sáng."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q15",
+        "type": "mcq",
+        "text": "Hạt nhân nguyên tử được cấu tạo từ:",
+        "options": [
+          "Proton và electron.",
+          "Electron và neutron.",
+          "Proton và hạt nhân.",
+          "Proton và neutron."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q16",
+        "type": "mcq",
+        "text": "Đồng vị là những nguyên tử mà hạt nhân của chúng có:",
+        "options": [
+          "Cùng số khối \\(A\\), khác số proton \\(Z\\).",
+          "Khác số khối \\(A\\), cùng số neutron \\(N\\).",
+          "Cùng số proton \\(Z\\), khác số neutron \\(N\\).",
+          "Cùng số neutron \\(N\\), khác số proton \\(Z\\)."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q17",
+        "type": "mcq",
+        "text": "Phản ứng hạt nhân toả năng lượng là phản ứng mà:",
+        "options": [
+          "Tổng khối lượng của các hạt nhân trước phản ứng lớn hơn tổng khối lượng của các hạt nhân sau phản ứng.",
+          "Tổng khối lượng của các hạt nhân trước phản ứng nhỏ hơn tổng khối lượng của các hạt nhân sau phản ứng.",
+          "Tổng năng lượng liên kết riêng của các hạt nhân trước phản ứng nhỏ hơn tổng năng lượng liên kết riêng của các hạt nhân sau phản ứng.",
+          "Tổng năng lượng toàn phần của các hạt nhân trước phản ứng nhỏ hơn tổng năng lượng toàn phần của các hạt nhân sau phản ứng."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q18",
+        "type": "mcq",
+        "text": "Một vật dao động điều hòa với chu kỳ \\(T\\). Tại thời điểm \\(t\\), li độ của vật là \\(x\\), vận tốc là \\(v\\), gia tốc là \\(a\\). Hệ thức đúng là:",
+        "options": [
+          "\\(v = \\omega x\\)",
+          "\\(a = -\\omega x\\)",
+          "\\(v = -\\omega^2 x\\)",
+          "\\(a = -\\omega^2 x\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q19",
+        "type": "mcq",
+        "text": "Một mạch RLC nối tiếp có \\(R=100\\Omega\\), \\(L = \\dfrac{1}{\\pi}\\text{H}\\), \\(C = \\dfrac{10^{-4}}{2\\pi}\\text{F}\\). Đặt vào hai đầu mạch điện áp \\(u = 200\\sqrt{2}\\cos(100\\pi t)\\) (V). Cường độ dòng điện hiệu dụng trong mạch là:",
+        "options": [
+          "\\(1\\text{ A}\\)",
+          "\\(2\\text{ A}\\)",
+          "\\(\\sqrt{2}\\text{ A}\\)",
+          "\\(2\\sqrt{2}\\text{ A}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q20",
+        "type": "mcq",
+        "text": "Một sóng cơ có bước sóng \\(\\lambda = 0.5\\text{ m}\\) truyền với tốc độ \\(v = 20\\text{ m/s}\\). Tần số của sóng là:",
+        "options": [
+          "\\(10\\text{ Hz}\\)",
+          "\\(20\\text{ Hz}\\)",
+          "\\(30\\text{ Hz}\\)",
+          "\\(40\\text{ Hz}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q21",
+        "type": "mcq",
+        "text": "Trong thí nghiệm Y-âng về giao thoa ánh sáng, hai khe cách nhau \\(a = 1\\text{ mm}\\), màn quan sát cách hai khe \\(D = 2\\text{ m}\\). Ánh sáng sử dụng có bước sóng \\(\\lambda = 0.5\\text{ μm}\\). Khoảng vân trên màn là:",
+        "options": [
+          "\\(0.5\\text{ mm}\\)",
+          "\\(1\\text{ mm}\\)",
+          "\\(2\\text{ mm}\\)",
+          "\\(4\\text{ mm}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q22",
+        "type": "mcq",
+        "text": "Một con lắc lò xo dao động điều hòa theo phương ngang. Khi vật đi qua vị trí cân bằng, động năng của vật là \\(W_đ = 0.1\\text{ J}\\). Lực đàn hồi cực đại tác dụng lên vật là \\(F_{dh,max} = 2\\text{ N}\\). Biên độ dao động của vật là:",
+        "options": [
+          "\\(5\\text{ cm}\\)",
+          "\\(10\\text{ cm}\\)",
+          "\\(20\\text{ cm}\\)",
+          "\\(40\\text{ cm}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q23",
+        "type": "mcq",
+        "text": "Cho phản ứng hạt nhân: \\(\\text{}^{235}_{92}\\text{U} + \\text{}^1_0\\text{n} \\rightarrow \\text{}^{137}_{53}\\text{I} + \\text{}^{96}_{39}\\text{Y} + k \\text{}^1_0\\text{n}\\). Số neutron \\(k\\) được giải phóng là:",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q24",
+        "type": "mcq",
+        "text": "Theo mẫu Bo về nguyên tử Hydro, bán kính quỹ đạo dừng thứ \\(n\\) của electron là \\(r_n = n^2 r_0\\), với \\(r_0\\) là bán kính Bo. Năng lượng của electron ở quỹ đạo dừng thứ \\(n\\) có biểu thức \\(E_n = -\\dfrac{13.6}{n^2}\\text{ (eV)}\\). Khi electron chuyển từ quỹ đạo dừng \\(M\\) về quỹ đạo dừng \\(K\\), nguyên tử phát ra một photon có năng lượng là:",
+        "options": [
+          "\\(|E_M - E_L|\\)",
+          "\\(|E_M - E_K|\\)",
+          "\\(|E_L - E_K|\\)",
+          "\\(|E_N - E_M|\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_pbc_q25",
+        "type": "mcq",
+        "text": "Một vật dao động điều hòa có phương trình vận tốc \\(v = 10\\pi \\cos(2\\pi t + \\pi/3)\\) (cm/s). Gia tốc cực đại của vật là:",
+        "options": [
+          "\\(10\\pi\\text{ cm/s}^2\\)",
+          "\\(20\\pi\\text{ cm/s}^2\\)",
+          "\\(20\\pi^2\\text{ cm/s}^2\\)",
+          "\\(100\\pi^2\\text{ cm/s}^2\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      }
+    ]
+  },
+  {
+    "id": "phys_2025_cva",
+    "subject": "physics",
+    "subjectLabel": "Vật Lý",
+    "title": "Đề thi thử tốt nghiệp THPT 2025 môn Vật lý - THPT Chu Văn An - Lần 1",
+    "type": "thpt_national",
+    "typeLabel": "Trường Chuyên",
+    "timeLimit": 3000,
+    "category": "truong-chuyen",
+    "questions": [
+      {
+        "id": "phys_2025_cva_q1",
+        "type": "mcq",
+        "text": "Một vật dao động điều hòa theo phương trình \\(x = A\\cos(\\omega t + \\varphi)\\). Đại lượng \\(\\omega\\) được gọi là:",
+        "options": [
+          "Tần số dao động.",
+          "Chu kỳ dao động.",
+          "Biên độ dao động.",
+          "Tần số góc của dao động."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q2",
+        "type": "mcq",
+        "text": "Một con lắc lò xo gồm vật nhỏ khối lượng \\(m\\) và lò xo có độ cứng \\(k\\). Chu kỳ dao động riêng của con lắc là:",
+        "options": [
+          "\\(T = 2\\pi \\sqrt{\\dfrac{k}{m}}\\)",
+          "\\(T = 2\\pi \\sqrt{\\dfrac{m}{k}}\\)",
+          "\\(T = \\dfrac{1}{2\\pi} \\sqrt{\\dfrac{k}{m}}\\)",
+          "\\(T = \\dfrac{1}{2\\pi} \\sqrt{\\dfrac{m}{k}}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q3",
+        "type": "mcq",
+        "text": "Tại một nơi có gia tốc trọng trường \\(g\\), một con lắc đơn có chiều dài \\(l\\) dao động điều hòa. Tần số dao động riêng của con lắc là:",
+        "options": [
+          "\\(f = \\sqrt{\\dfrac{g}{l}}\\)",
+          "\\(f = 2\\pi \\sqrt{\\dfrac{l}{g}}\\)",
+          "\\(f = \\dfrac{1}{2\\pi} \\sqrt{\\dfrac{l}{g}}\\)",
+          "\\(f = \\dfrac{1}{2\\pi} \\sqrt{\\dfrac{g}{l}}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q4",
+        "type": "mcq",
+        "text": "Chọn phát biểu đúng về sóng cơ học:",
+        "options": [
+          "Sóng cơ truyền được trong chất rắn, lỏng, khí và chân không.",
+          "Sóng cơ truyền được trong chất rắn, lỏng, khí nhưng không truyền được trong chân không.",
+          "Sóng cơ chỉ truyền được trong chất rắn và chất lỏng.",
+          "Sóng cơ chỉ truyền được trong chân không."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q5",
+        "type": "mcq",
+        "text": "Một sóng cơ truyền trên một sợi dây với bước sóng \\(\\lambda\\). Hai điểm trên dây dao động ngược pha với nhau khi khoảng cách giữa chúng là:",
+        "options": [
+          "\\(d = k\\lambda\\) với \\(k = 0, 1, 2, ...\\)",
+          "\\(d = (k + \\dfrac{1}{2})\\lambda\\) với \\(k = 0, 1, 2, ...\\)",
+          "\\(d = 2k\\lambda\\) với \\(k = 1, 2, 3, ...\\)",
+          "\\(d = (2k + 1)\\dfrac{\\lambda}{2}\\) với \\(k = 0, 1, 2, ...\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q6",
+        "type": "mcq",
+        "text": "Một mạch điện xoay chiều chỉ chứa cuộn cảm thuần có độ tự cảm \\(L\\). Nếu đặt vào hai đầu mạch điện áp \\(u = U_0 \\cos(\\omega t)\\), thì dòng điện trong mạch có biểu thức:",
+        "options": [
+          "\\(i = \\dfrac{U_0}{\\omega L} \\cos(\\omega t)\\)",
+          "\\(i = \\dfrac{U_0}{\\omega L} \\cos(\\omega t + \\dfrac{\\pi}{2})\\)",
+          "\\(i = \\dfrac{U_0}{\\omega L} \\cos(\\omega t - \\dfrac{\\pi}{2})\\)",
+          "\\(i = U_0 \\omega L \\cos(\\omega t + \\dfrac{\\pi}{2})\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q7",
+        "type": "mcq",
+        "text": "Trong mạch RLC nối tiếp đang xảy ra cộng hưởng điện, phát biểu nào sau đây là sai?",
+        "options": [
+          "Tổng trở của mạch đạt giá trị cực tiểu.",
+          "Cường độ dòng điện hiệu dụng trong mạch đạt giá trị cực đại.",
+          "Điện áp hiệu dụng hai đầu cuộn cảm bằng điện áp hiệu dụng hai đầu tụ điện.",
+          "Hệ số công suất của mạch bằng 0."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q8",
+        "type": "mcq",
+        "text": "Một máy biến áp lí tưởng có số vòng dây của cuộn sơ cấp là \\(N_1\\) và cuộn thứ cấp là \\(N_2\\). Đặt vào cuộn sơ cấp điện áp xoay chiều hiệu dụng \\(U_1\\), thì điện áp hiệu dụng ở cuộn thứ cấp là \\(U_2\\). Biểu thức liên hệ đúng là:",
+        "options": [
+          "\\(\\dfrac{U_1}{U_2} = \\dfrac{N_2}{N_1}\\)",
+          "\\(\\dfrac{U_1}{U_2} = \\dfrac{N_1}{N_2}\\)",
+          "\\(U_1 N_1 = U_2 N_2\\)",
+          "\\(U_1 N_2 = U_2 N_1\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q9",
+        "type": "mcq",
+        "text": "Dao động điện từ tự do trong mạch LC lí tưởng có tần số góc riêng là:",
+        "options": [
+          "\\(\\omega = LC\\)",
+          "\\(\\omega = \\dfrac{1}{LC}\\)",
+          "\\(\\omega = \\sqrt{LC}\\)",
+          "\\(\\omega = \\dfrac{1}{\\sqrt{LC}}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q10",
+        "type": "mcq",
+        "text": "Sóng điện từ là sóng:",
+        "options": [
+          "Truyền được trong chân không với tốc độ nhỏ hơn tốc độ ánh sáng.",
+          "Chỉ truyền được trong môi trường vật chất.",
+          "Có thành phần điện trường và từ trường luôn cùng pha.",
+          "Có thành phần điện trường và từ trường luôn vuông pha với nhau và vuông góc với phương truyền sóng."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q11",
+        "type": "mcq",
+        "text": "Trong thí nghiệm Y-âng về giao thoa ánh sáng, khoảng vân được xác định bởi công thức:",
+        "options": [
+          "\\(i = \\dfrac{\\lambda a}{D}\\)",
+          "\\(i = \\dfrac{\\lambda D}{a}\\)",
+          "\\(i = \\dfrac{a D}{\\lambda}\\)",
+          "\\(i = \\lambda a D\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q12",
+        "type": "mcq",
+        "text": "Khi nói về ánh sáng đơn sắc, phát biểu nào sau đây là đúng?",
+        "options": [
+          "Ánh sáng đơn sắc không bị tán sắc khi truyền qua lăng kính.",
+          "Ánh sáng đơn sắc có tần số phụ thuộc vào môi trường truyền.",
+          "Ánh sáng đơn sắc có bước sóng không phụ thuộc vào môi trường truyền.",
+          "Ánh sáng đơn sắc là ánh sáng chỉ bị lệch hướng mà không bị phân tích khi truyền qua lăng kính."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q13",
+        "type": "mcq",
+        "text": "Hiện tượng quang điện ngoài là hiện tượng êlectron bị bứt ra khỏi kim loại khi:",
+        "options": [
+          "Chiếu vào kim loại bức xạ có tần số lớn.",
+          "Chiếu vào kim loại bức xạ có bước sóng nhỏ.",
+          "Kim loại bị đốt nóng đến nhiệt độ cao.",
+          "Chiếu vào kim loại bức xạ có tần số lớn hơn hoặc bằng tần số giới hạn của kim loại đó."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q14",
+        "type": "mcq",
+        "text": "Theo thuyết photon của Anhxtanh, năng lượng của một photon tỉ lệ thuận với:",
+        "options": [
+          "Bước sóng của ánh sáng.",
+          "Tốc độ truyền ánh sáng.",
+          "Tần số của ánh sáng.",
+          "Cường độ chùm ánh sáng."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q15",
+        "type": "mcq",
+        "text": "Hạt nhân nguyên tử được cấu tạo từ:",
+        "options": [
+          "Proton và electron.",
+          "Electron và neutron.",
+          "Proton và hạt nhân.",
+          "Proton và neutron."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q16",
+        "type": "mcq",
+        "text": "Đồng vị là những nguyên tử mà hạt nhân của chúng có:",
+        "options": [
+          "Cùng số khối \\(A\\), khác số proton \\(Z\\).",
+          "Khác số khối \\(A\\), cùng số neutron \\(N\\).",
+          "Cùng số proton \\(Z\\), khác số neutron \\(N\\).",
+          "Cùng số neutron \\(N\\), khác số proton \\(Z\\)."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q17",
+        "type": "mcq",
+        "text": "Phản ứng hạt nhân toả năng lượng là phản ứng mà:",
+        "options": [
+          "Tổng khối lượng của các hạt nhân trước phản ứng lớn hơn tổng khối lượng của các hạt nhân sau phản ứng.",
+          "Tổng khối lượng của các hạt nhân trước phản ứng nhỏ hơn tổng khối lượng của các hạt nhân sau phản ứng.",
+          "Tổng năng lượng liên kết riêng của các hạt nhân trước phản ứng nhỏ hơn tổng năng lượng liên kết riêng của các hạt nhân sau phản ứng.",
+          "Tổng năng lượng toàn phần của các hạt nhân trước phản ứng nhỏ hơn tổng năng lượng toàn phần của các hạt nhân sau phản ứng."
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q18",
+        "type": "mcq",
+        "text": "Một vật dao động điều hòa với chu kỳ \\(T\\). Tại thời điểm \\(t\\), li độ của vật là \\(x\\), vận tốc là \\(v\\), gia tốc là \\(a\\). Hệ thức đúng là:",
+        "options": [
+          "\\(v = \\omega x\\)",
+          "\\(a = -\\omega x\\)",
+          "\\(v = -\\omega^2 x\\)",
+          "\\(a = -\\omega^2 x\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q19",
+        "type": "mcq",
+        "text": "Một mạch RLC nối tiếp có \\(R=100\\Omega\\), \\(L = \\dfrac{1}{\\pi}\\text{H}\\), \\(C = \\dfrac{10^{-4}}{2\\pi}\\text{F}\\). Đặt vào hai đầu mạch điện áp \\(u = 200\\sqrt{2}\\cos(100\\pi t)\\) (V). Cường độ dòng điện hiệu dụng trong mạch là:",
+        "options": [
+          "\\(1\\text{ A}\\)",
+          "\\(2\\text{ A}\\)",
+          "\\(\\sqrt{2}\\text{ A}\\)",
+          "\\(2\\sqrt{2}\\text{ A}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q20",
+        "type": "mcq",
+        "text": "Một sóng cơ có bước sóng \\(\\lambda = 0.5\\text{ m}\\) truyền với tốc độ \\(v = 20\\text{ m/s}\\). Tần số của sóng là:",
+        "options": [
+          "\\(10\\text{ Hz}\\)",
+          "\\(20\\text{ Hz}\\)",
+          "\\(30\\text{ Hz}\\)",
+          "\\(40\\text{ Hz}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q21",
+        "type": "mcq",
+        "text": "Trong thí nghiệm Y-âng về giao thoa ánh sáng, hai khe cách nhau \\(a = 1\\text{ mm}\\), màn quan sát cách hai khe \\(D = 2\\text{ m}\\). Ánh sáng sử dụng có bước sóng \\(\\lambda = 0.5\\text{ μm}\\). Khoảng vân trên màn là:",
+        "options": [
+          "\\(0.5\\text{ mm}\\)",
+          "\\(1\\text{ mm}\\)",
+          "\\(2\\text{ mm}\\)",
+          "\\(4\\text{ mm}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q22",
+        "type": "mcq",
+        "text": "Một con lắc lò xo dao động điều hòa theo phương ngang. Khi vật đi qua vị trí cân bằng, động năng của vật là \\(W_đ = 0.1\\text{ J}\\). Lực đàn hồi cực đại tác dụng lên vật là \\(F_{dh,max} = 2\\text{ N}\\). Biên độ dao động của vật là:",
+        "options": [
+          "\\(5\\text{ cm}\\)",
+          "\\(10\\text{ cm}\\)",
+          "\\(20\\text{ cm}\\)",
+          "\\(40\\text{ cm}\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q23",
+        "type": "mcq",
+        "text": "Cho phản ứng hạt nhân: \\(\\text{}^{235}_{92}\\text{U} + \\text{}^1_0\\text{n} \\rightarrow \\text{}^{137}_{53}\\text{I} + \\text{}^{96}_{39}\\text{Y} + k \\text{}^1_0\\text{n}\\). Số neutron \\(k\\) được giải phóng là:",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q24",
+        "type": "mcq",
+        "text": "Theo mẫu Bo về nguyên tử Hydro, bán kính quỹ đạo dừng thứ \\(n\\) của electron là \\(r_n = n^2 r_0\\), với \\(r_0\\) là bán kính Bo. Năng lượng của electron ở quỹ đạo dừng thứ \\(n\\) có biểu thức \\(E_n = -\\dfrac{13.6}{n^2}\\text{ (eV)}\\). Khi electron chuyển từ quỹ đạo dừng \\(M\\) về quỹ đạo dừng \\(K\\), nguyên tử phát ra một photon có năng lượng là:",
+        "options": [
+          "\\(|E_M - E_L|\\)",
+          "\\(|E_M - E_K|\\)",
+          "\\(|E_L - E_K|\\)",
+          "\\(|E_N - E_M|\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      },
+      {
+        "id": "phys_2025_cva_q25",
+        "type": "mcq",
+        "text": "Một vật dao động điều hòa có phương trình vận tốc \\(v = 10\\pi \\cos(2\\pi t + \\pi/3)\\) (cm/s). Gia tốc cực đại của vật là:",
+        "options": [
+          "\\(10\\pi\\text{ cm/s}^2\\)",
+          "\\(20\\pi\\text{ cm/s}^2\\)",
+          "\\(20\\pi^2\\text{ cm/s}^2\\)",
+          "\\(100\\pi^2\\text{ cm/s}^2\\)"
+        ],
+        "correctAnswer": 0,
+        "explanation": ""
+      }
+    ]
+  }
+]

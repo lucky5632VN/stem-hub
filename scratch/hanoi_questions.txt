@@ -1,0 +1,150 @@
+Q1: Một vật dao động điều hòa theo phương trình \(x = A\cos(\omega t + \varphi)\). Đại lượng \(\omega\) được gọi là:
+  Option A: Tần số dao động.
+  Option B: Chu kỳ dao động.
+  Option C: Biên độ dao động.
+  Option D: Tần số góc của dao động.
+
+Q2: Một con lắc lò xo gồm vật nhỏ khối lượng \(m\) và lò xo có độ cứng \(k\). Chu kỳ dao động riêng của con lắc là:
+  Option A: \(T = 2\pi \sqrt{\dfrac{k}{m}}\)
+  Option B: \(T = 2\pi \sqrt{\dfrac{m}{k}}\)
+  Option C: \(T = \dfrac{1}{2\pi} \sqrt{\dfrac{k}{m}}\)
+  Option D: \(T = \dfrac{1}{2\pi} \sqrt{\dfrac{m}{k}}\)
+
+Q3: Tại một nơi có gia tốc trọng trường \(g\), một con lắc đơn có chiều dài \(l\) dao động điều hòa. Tần số dao động riêng của con lắc là:
+  Option A: \(f = \sqrt{\dfrac{g}{l}}\)
+  Option B: \(f = 2\pi \sqrt{\dfrac{l}{g}}\)
+  Option C: \(f = \dfrac{1}{2\pi} \sqrt{\dfrac{l}{g}}\)
+  Option D: \(f = \dfrac{1}{2\pi} \sqrt{\dfrac{g}{l}}\)
+
+Q4: Chọn phát biểu đúng về sóng cơ học:
+  Option A: Sóng cơ truyền được trong chất rắn, lỏng, khí và chân không.
+  Option B: Sóng cơ truyền được trong chất rắn, lỏng, khí nhưng không truyền được trong chân không.
+  Option C: Sóng cơ chỉ truyền được trong chất rắn và chất lỏng.
+  Option D: Sóng cơ chỉ truyền được trong chân không.
+
+Q5: Một sóng cơ truyền trên một sợi dây với bước sóng \(\lambda\). Hai điểm trên dây dao động ngược pha với nhau khi khoảng cách giữa chúng là:
+  Option A: \(d = k\lambda\) với \(k = 0, 1, 2, ...\)
+  Option B: \(d = (k + \dfrac{1}{2})\lambda\) với \(k = 0, 1, 2, ...\)
+  Option C: \(d = 2k\lambda\) với \(k = 1, 2, 3, ...\)
+  Option D: \(d = (2k + 1)\dfrac{\lambda}{2}\) với \(k = 0, 1, 2, ...\)
+
+Q6: Một mạch điện xoay chiều chỉ chứa cuộn cảm thuần có độ tự cảm \(L\). Nếu đặt vào hai đầu mạch điện áp \(u = U_0 \cos(\omega t)\), thì dòng điện trong mạch có biểu thức:
+  Option A: \(i = \dfrac{U_0}{\omega L} \cos(\omega t)\)
+  Option B: \(i = \dfrac{U_0}{\omega L} \cos(\omega t + \dfrac{\pi}{2})\)
+  Option C: \(i = \dfrac{U_0}{\omega L} \cos(\omega t - \dfrac{\pi}{2})\)
+  Option D: \(i = U_0 \omega L \cos(\omega t + \dfrac{\pi}{2})\)
+
+Q7: Trong mạch RLC nối tiếp đang xảy ra cộng hưởng điện, phát biểu nào sau đây là sai?
+  Option A: Tổng trở của mạch đạt giá trị cực tiểu.
+  Option B: Cường độ dòng điện hiệu dụng trong mạch đạt giá trị cực đại.
+  Option C: Điện áp hiệu dụng hai đầu cuộn cảm bằng điện áp hiệu dụng hai đầu tụ điện.
+  Option D: Hệ số công suất của mạch bằng 0.
+
+Q8: Một máy biến áp lí tưởng có số vòng dây của cuộn sơ cấp là \(N_1\) và cuộn thứ cấp là \(N_2\). Đặt vào cuộn sơ cấp điện áp xoay chiều hiệu dụng \(U_1\), thì điện áp hiệu dụng ở cuộn thứ cấp là \(U_2\). Biểu thức liên hệ đúng là:
+  Option A: \(\dfrac{U_1}{U_2} = \dfrac{N_2}{N_1}\)
+  Option B: \(\dfrac{U_1}{U_2} = \dfrac{N_1}{N_2}\)
+  Option C: \(U_1 N_1 = U_2 N_2\)
+  Option D: \(U_1 N_2 = U_2 N_1\)
+
+Q9: Dao động điện từ tự do trong mạch LC lí tưởng có tần số góc riêng là:
+  Option A: \(\omega = LC\)
+  Option B: \(\omega = \dfrac{1}{LC}\)
+  Option C: \(\omega = \sqrt{LC}\)
+  Option D: \(\omega = \dfrac{1}{\sqrt{LC}}\)
+
+Q10: Sóng điện từ là sóng:
+  Option A: Truyền được trong chân không với tốc độ nhỏ hơn tốc độ ánh sáng.
+  Option B: Chỉ truyền được trong môi trường vật chất.
+  Option C: Có thành phần điện trường và từ trường luôn cùng pha.
+  Option D: Có thành phần điện trường và từ trường luôn vuông pha với nhau và vuông góc với phương truyền sóng.
+
+Q11: Trong thí nghiệm Y-âng về giao thoa ánh sáng, khoảng vân được xác định bởi công thức:
+  Option A: \(i = \dfrac{\lambda a}{D}\)
+  Option B: \(i = \dfrac{\lambda D}{a}\)
+  Option C: \(i = \dfrac{a D}{\lambda}\)
+  Option D: \(i = \lambda a D\)
+
+Q12: Khi nói về ánh sáng đơn sắc, phát biểu nào sau đây là đúng?
+  Option A: Ánh sáng đơn sắc không bị tán sắc khi truyền qua lăng kính.
+  Option B: Ánh sáng đơn sắc có tần số phụ thuộc vào môi trường truyền.
+  Option C: Ánh sáng đơn sắc có bước sóng không phụ thuộc vào môi trường truyền.
+  Option D: Ánh sáng đơn sắc là ánh sáng chỉ bị lệch hướng mà không bị phân tích khi truyền qua lăng kính.
+
+Q13: Hiện tượng quang điện ngoài là hiện tượng êlectron bị bứt ra khỏi kim loại khi:
+  Option A: Chiếu vào kim loại bức xạ có tần số lớn.
+  Option B: Chiếu vào kim loại bức xạ có bước sóng nhỏ.
+  Option C: Kim loại bị đốt nóng đến nhiệt độ cao.
+  Option D: Chiếu vào kim loại bức xạ có tần số lớn hơn hoặc bằng tần số giới hạn của kim loại đó.
+
+Q14: Theo thuyết photon của Anhxtanh, năng lượng của một photon tỉ lệ thuận với:
+  Option A: Bước sóng của ánh sáng.
+  Option B: Tốc độ truyền ánh sáng.
+  Option C: Tần số của ánh sáng.
+  Option D: Cường độ chùm ánh sáng.
+
+Q15: Hạt nhân nguyên tử được cấu tạo từ:
+  Option A: Proton và electron.
+  Option B: Electron và neutron.
+  Option C: Proton và hạt nhân.
+  Option D: Proton và neutron.
+
+Q16: Đồng vị là những nguyên tử mà hạt nhân của chúng có:
+  Option A: Cùng số khối \(A\), khác số proton \(Z\).
+  Option B: Khác số khối \(A\), cùng số neutron \(N\).
+  Option C: Cùng số proton \(Z\), khác số neutron \(N\).
+  Option D: Cùng số neutron \(N\), khác số proton \(Z\).
+
+Q17: Phản ứng hạt nhân toả năng lượng là phản ứng mà:
+  Option A: Tổng khối lượng của các hạt nhân trước phản ứng lớn hơn tổng khối lượng của các hạt nhân sau phản ứng.
+  Option B: Tổng khối lượng của các hạt nhân trước phản ứng nhỏ hơn tổng khối lượng của các hạt nhân sau phản ứng.
+  Option C: Tổng năng lượng liên kết riêng của các hạt nhân trước phản ứng nhỏ hơn tổng năng lượng liên kết riêng của các hạt nhân sau phản ứng.
+  Option D: Tổng năng lượng toàn phần của các hạt nhân trước phản ứng nhỏ hơn tổng năng lượng toàn phần của các hạt nhân sau phản ứng.
+
+Q18: Một vật dao động điều hòa với chu kỳ \(T\). Tại thời điểm \(t\), li độ của vật là \(x\), vận tốc là \(v\), gia tốc là \(a\). Hệ thức đúng là:
+  Option A: \(v = \omega x\)
+  Option B: \(a = -\omega x\)
+  Option C: \(v = -\omega^2 x\)
+  Option D: \(a = -\omega^2 x\)
+
+Q19: Một mạch RLC nối tiếp có \(R=100\Omega\), \(L = \dfrac{1}{\pi}\text{H}\), \(C = \dfrac{10^{-4}}{2\pi}\text{F}\). Đặt vào hai đầu mạch điện áp \(u = 200\sqrt{2}\cos(100\pi t)\) (V). Cường độ dòng điện hiệu dụng trong mạch là:
+  Option A: \(1\text{ A}\)
+  Option B: \(2\text{ A}\)
+  Option C: \(\sqrt{2}\text{ A}\)
+  Option D: \(2\sqrt{2}\text{ A}\)
+
+Q20: Một sóng cơ có bước sóng \(\lambda = 0.5\text{ m}\) truyền với tốc độ \(v = 20\text{ m/s}\). Tần số của sóng là:
+  Option A: \(10\text{ Hz}\)
+  Option B: \(20\text{ Hz}\)
+  Option C: \(30\text{ Hz}\)
+  Option D: \(40\text{ Hz}\)
+
+Q21: Trong thí nghiệm Y-âng về giao thoa ánh sáng, hai khe cách nhau \(a = 1\text{ mm}\), màn quan sát cách hai khe \(D = 2\text{ m}\). Ánh sáng sử dụng có bước sóng \(\lambda = 0.5\text{ μm}\). Khoảng vân trên màn là:
+  Option A: \(0.5\text{ mm}\)
+  Option B: \(1\text{ mm}\)
+  Option C: \(2\text{ mm}\)
+  Option D: \(4\text{ mm}\)
+
+Q22: Một con lắc lò xo dao động điều hòa theo phương ngang. Khi vật đi qua vị trí cân bằng, động năng của vật là \(W_đ = 0.1\text{ J}\). Lực đàn hồi cực đại tác dụng lên vật là \(F_{dh,max} = 2\text{ N}\). Biên độ dao động của vật là:
+  Option A: \(5\text{ cm}\)
+  Option B: \(10\text{ cm}\)
+  Option C: \(20\text{ cm}\)
+  Option D: \(40\text{ cm}\)
+
+Q23: Cho phản ứng hạt nhân: \(\text{}^{235}_{92}\text{U} + \text{}^1_0\text{n} \rightarrow \text{}^{137}_{53}\text{I} + \text{}^{96}_{39}\text{Y} + k \text{}^1_0\text{n}\). Số neutron \(k\) được giải phóng là:
+  Option A: 1
+  Option B: 2
+  Option C: 3
+  Option D: 4
+
+Q24: Theo mẫu Bo về nguyên tử Hydro, bán kính quỹ đạo dừng thứ \(n\) của electron là \(r_n = n^2 r_0\), với \(r_0\) là bán kính Bo. Năng lượng của electron ở quỹ đạo dừng thứ \(n\) có biểu thức \(E_n = -\dfrac{13.6}{n^2}\text{ (eV)}\). Khi electron chuyển từ quỹ đạo dừng \(M\) về quỹ đạo dừng \(K\), nguyên tử phát ra một photon có năng lượng là:
+  Option A: \(|E_M - E_L|\)
+  Option B: \(|E_M - E_K|\)
+  Option C: \(|E_L - E_K|\)
+  Option D: \(|E_N - E_M|\)
+
+Q25: Một vật dao động điều hòa có phương trình vận tốc \(v = 10\pi \cos(2\pi t + \pi/3)\) (cm/s). Gia tốc cực đại của vật là:
+  Option A: \(10\pi\text{ cm/s}^2\)
+  Option B: \(20\pi\text{ cm/s}^2\)
+  Option C: \(20\pi^2\text{ cm/s}^2\)
+  Option D: \(100\pi^2\text{ cm/s}^2\)
+

@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giao Thoa Ánh Sáng (Khe Young)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tailwind-config.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .font-tech {
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            margin-top: -6px;
+            cursor: pointer;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5);
+            border: 2px solid white;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #64748b;
+            border-radius: 2px;
+        }
+
+        .dark input[type=range]::-webkit-slider-runnable-track {
+            background: #475569;
+        }
+
+        .hud-panel {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+    </style>
+</head>
+
+<body class="h-screen flex overflow-hidden bg-slate-900 text-slate-300 transition-colors duration-300">
+
+    <!-- SIDEBAR -->
+    <aside
+        class="w-72 flex-shrink-0 flex flex-col bg-[#1e293b] border-r border-slate-700 z-20 shadow-xl overflow-hidden">
+        <div class="h-16 flex items-center justify-between px-6 border-b border-slate-700">
+            <h1 class="font-tech font-bold text-xl text-white uppercase tracking-wider">Optics Lab</h1>
+            <a href="index.html"
+                class="p-2 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition-colors">
+                <i data-lucide="home" class="w-5 h-5"></i>
+            </a>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+
+            <!-- Mode Selection -->
+            <div>
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 block">Chế độ nguồn
+                    sáng</label>
+                <div class="grid grid-cols-1 gap-2">
+                    <label
+                        class="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700 cursor-pointer hover:bg-slate-700 transition">
+                        <input type="radio" name="mode" value="single" checked
+                            class="text-cyan-500 focus:ring-cyan-500">
+                        <span class="text-sm font-medium">Đơn sắc (λ₁)</span>
+                    </label>
+                    <label
+                        class="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700 cursor-pointer hover:bg-slate-700 transition">
+                        <input type="radio" name="mode" value="two_colors" class="text-cyan-500 focus:ring-cyan-500">
+                        <span class="text-sm font-medium">Hai màu (λ₁, λ₂)</span>
+                    </label>
+                    <label
+                        class="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700 cursor-pointer hover:bg-slate-700 transition">
+                        <input type="radio" name="mode" value="white_light" class="text-cyan-500 focus:ring-cyan-500">
+                        <span class="text-sm font-medium">Ánh sáng trắng</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Parameters -->
+            <div class="space-y-6">
+
+                <!-- Lambda 1 -->
+                <div id="group-lambda1">
+                    <div class="flex justify-between text-xs mb-1.5">
+                        <label class="font-medium text-slate-400">Bước sóng λ₁</label>
+                        <span class="font-mono font-bold" id="lambda1Display" style="color: #ef4444">600 nm</span>
+                    </div>
+                    <!-- Gradient slider track? -->
+                    <input type="range" id="lambda1" min="380" max="760" step="1" value="600" class="w-full">
+                </div>
+
+                <!-- Lambda 2 -->
+                <div id="group-lambda2" class="hidden">
+                    <div class="flex justify-between text-xs mb-1.5">
+                        <label class="font-medium text-slate-400">Bước sóng λ₂</label>
+                        <span class="font-mono font-bold" id="lambda2Display" style="color: #3b82f6">450 nm</span>
+                    </div>
+                    <input type="range" id="lambda2" min="380" max="760" step="1" value="450" class="w-full">
+                </div>
+
+                <!-- Geometry -->
+                <div>
+                    <div class="flex justify-between text-xs mb-1.5">
+                        <label class="font-medium text-slate-400">Khoảng cách khe (a)</label>
+                        <span class="font-mono text-white"><span id="aDisplay">0.5</span> mm</span>
+                    </div>
+                    <input type="range" id="aInput" min="0.1" max="2.0" step="0.05" value="0.5" class="w-full">
+                </div>
+
+                <div>
+                    <div class="flex justify-between text-xs mb-1.5">
+                        <label class="font-medium text-slate-400">Khoảng cách màn (D)</label>
+                        <span class="font-mono text-white"><span id="DDisplay">2.0</span> m</span>
+                    </div>
+                    <input type="range" id="DInput" min="0.5" max="5.0" step="0.1" value="2.0" class="w-full">
+                </div>
+            </div>
+
+            <!-- Calculations Results -->
+            <div class="p-4 bg-slate-800/80 border border-slate-700 rounded-lg text-xs font-mono space-y-3">
+                <h3 class="uppercase tracking-widest text-slate-500 font-bold border-b border-slate-700 pb-1 mb-2">Kết
+                    quả tính toán</h3>
+
+                <div id="result-i1" class="flex justify-between">
+                    <span class="text-slate-400">Khoảng vân i₁:</span>
+                    <span id="val-i1" class="font-bold text-white">-- mm</span>
+                </div>
+
+                <div id="result-i2" class="flex justify-between hidden">
+                    <span class="text-slate-400">Khoảng vân i₂:</span>
+                    <span id="val-i2" class="font-bold text-white">-- mm</span>
+                </div>
+
+                <div id="result-coincidence" class="flex justify-between hidden border-t border-slate-700 pt-2">
+                    <span class="text-slate-400">Vân trùng gần nhất:</span>
+                    <span id="val-coincidence" class="font-bold text-white">-- mm</span>
+                </div>
+
+                <div id="result-white" class="hidden text-slate-400 leading-relaxed italic">
+                    Ánh sáng trắng bị tán sắc. Vân trung tâm có màu trắng. Các vân sáng bậc cao có cầu vồng tím ở trong,
+                    đỏ ở ngoài.
+                </div>
+            </div>
+
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="flex-1 relative bg-black overflow-hidden flex flex-col justify-center items-center">
+        <!-- Canvas Container -->
+        <canvas id="interferenceCanvas" class="w-full h-full block"></canvas>
+
+        <!-- HUD Overlay for Screen Scale -->
+        <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+            <!-- Crosshair & Label -->
+            <div class="relative h-full flex flex-col items-center justify-end pb-4">
+                <div
+                    class="absolute inset-y-0 border-l-2 border-red-500 border-dashed shadow-[0_0_5px_rgba(239,68,68,0.8)]">
+                </div>
+                <span
+                    class="text-red-500 font-bold text-xs uppercase tracking-widest bg-black/60 px-2 py-1 rounded backdrop-blur-sm whitespace-nowrap z-10">Vân
+                    trung tâm</span>
+            </div>
+            <div class="h-px w-full bg-white/10 absolute"></div>
+
+            <!-- Scale Ruler Removed -->
+        </div>
+    </main>
+
+    <script src="js/theme.js?v=4.0.8"></script>
+    <script src="js/theory-system.js?v=4.0.8"></script>
+    <script src="js/quiz-database.js"></script>
+    <script src="js/quiz-system.js?v=4.0.8"></script>
+ <!-- Keep generic theme script just in case, though we force dark mode here -->
+    <script>
+        // --- CONSTANTS ---
+        const VISIBLE_MM = 10; // Viewport height covers 10mm physical
+
+        const canvas = document.getElementById('interferenceCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Mode Radios
+        const modeRadios = document.getElementsByName('mode');
+
+        // Inputs
+        const lambda1Input = document.getElementById('lambda1');
+        const lambda2Input = document.getElementById('lambda2');
+        const aInput = document.getElementById('aInput');
+        const DInput = document.getElementById('DInput');
+
+        // Groups & Displays
+        const groupLambda1 = document.getElementById('group-lambda1');
+        const groupLambda2 = document.getElementById('group-lambda2');
+
+        const lambda1Display = document.getElementById('lambda1Display');
+        const lambda2Display = document.getElementById('lambda2Display');
+        const aDisplay = document.getElementById('aDisplay');
+        const DDisplay = document.getElementById('DDisplay');
+
+        const resultI1 = document.getElementById('result-i1');
+        const resultI2 = document.getElementById('result-i2');
+        const resultCoin = document.getElementById('result-coincidence');
+        const resultWhite = document.getElementById('result-white');
+
+        const valI1 = document.getElementById('val-i1');
+        const valI2 = document.getElementById('val-i2');
+        const valCoin = document.getElementById('val-coincidence');
+
+        // --- MATH HELPERS ---
+        function wavelengthToRGB(Wavelength) {
+            let R, G, B;
+            const Gamma = 0.8;
+            const IntensityMax = 255;
+
+            if (Wavelength >= 380 && Wavelength < 440) {
+                R = -(Wavelength - 440) / (440 - 380); G = 0.0; B = 1.0;
+            } else if (Wavelength >= 440 && Wavelength < 490) {
+                R = 0.0; G = (Wavelength - 440) / (490 - 440); B = 1.0;
+            } else if (Wavelength >= 490 && Wavelength < 510) {
+                R = 0.0; G = 1.0; B = -(Wavelength - 510) / (510 - 490);
+            } else if (Wavelength >= 510 && Wavelength < 580) {
+                R = (Wavelength - 510) / (580 - 510); G = 1.0; B = 0.0;
+            } else if (Wavelength >= 580 && Wavelength < 645) {
+                R = 1.0; G = -(Wavelength - 645) / (645 - 580); B = 0.0;
+            } else if (Wavelength >= 645 && Wavelength <= 780) {
+                R = 1.0; G = 0.0; B = 0.0;
+            } else {
+                R = 0.0; G = 0.0; B = 0.0;
+            }
+
+            // Falloff
+            let factor = 0;
+            if (Wavelength >= 380 && Wavelength < 420) factor = 0.3 + 0.7 * (Wavelength - 380) / (420 - 380);
+            else if (Wavelength >= 420 && Wavelength < 700) factor = 1.0;
+            else if (Wavelength >= 700 && Wavelength <= 780) factor = 0.3 + 0.7 * (780 - Wavelength) / (780 - 700);
+            else factor = 0.0;
+
+            const r = Math.round(IntensityMax * Math.pow(R * factor, Gamma));
+            const g = Math.round(IntensityMax * Math.pow(G * factor, Gamma));
+            const b = Math.round(IntensityMax * Math.pow(B * factor, Gamma));
+            return { r, g, b, css: `rgb(${r},${g},${b})` };
+        }
+
+        function calculateI(lambdaNm, aMm, DM) {
+            // i (mm) = lambda(m) * D(m) / a(m) 
+            // = (lambdaNm * 1e-9) * DM / (aMm * 1e-3)
+            // = lambdaNm * DM / aMm * 1e-6 * 1e3 (gives result in meters) ??
+            // i(mm) = lambda(nm) * D(m) / a(mm) / 1000 ? No.
+            // i = lambdaD/a. 
+            // lambda=600nm = 0.6um = 0.0006mm.
+            // i(mm) = 0.0006 * D(m) / a(mm) * 1000 ?? No.
+            // i (mm) = lambda (mm) * D (mm) / a (mm).
+            // lambda (mm) = lambdaNm * 1e-6.
+            // D (mm) = DM * 1000.
+            // i = (lambdaNm * 1e-6) * (DM * 1000) / aMm = lambdaNm * DM / aMm / 1000.
+            return (lambdaNm * DM) / (aMm * 1000);
+        }
+
+        function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+        function lcm(a, b) { return (a * b) / gcd(a, b); }
+
+        // --- MAIN LOGIC ---
+        function update() {
+            // Read Mode
+            let mode = 'single';
+            for (const r of modeRadios) if (r.checked) mode = r.value;
+
+            // Read Inputs
+            const lambda1 = parseInt(lambda1Input.value);
+            const lambda2 = parseInt(lambda2Input.value);
+            const a = parseFloat(aInput.value);
+            const D = parseFloat(DInput.value);
+
+            // Update UI Labels
+            lambda1Display.textContent = lambda1 + " nm";
+            lambda1Display.style.color = wavelengthToRGB(lambda1).css;
+            lambda2Display.textContent = lambda2 + " nm";
+            lambda2Display.style.color = wavelengthToRGB(lambda2).css;
+            aDisplay.textContent = a.toFixed(2);
+            DDisplay.textContent = D.toFixed(1);
+
+            // Visibility
+            if (mode === 'single') {
+                groupLambda2.classList.add('hidden');
+                resultI2.classList.add('hidden');
+                resultCoin.classList.add('hidden');
+                resultWhite.classList.add('hidden');
+                resultI1.classList.remove('hidden');
+            } else if (mode === 'two_colors') {
+                groupLambda2.classList.remove('hidden');
+                resultI2.classList.remove('hidden');
+                resultCoin.classList.remove('hidden');
+                resultWhite.classList.add('hidden');
+                resultI1.classList.remove('hidden');
+            } else {
+                groupLambda1.classList.add('hidden');
+                groupLambda2.classList.add('hidden');
+                resultI1.classList.add('hidden');
+                resultI2.classList.add('hidden');
+                resultCoin.classList.add('hidden');
+                resultWhite.classList.remove('hidden');
+            }
+
+            // Calculate Results
+            const i1 = calculateI(lambda1, a, D);
+            valI1.textContent = i1.toFixed(3) + " mm";
+            valI1.style.color = wavelengthToRGB(lambda1).css;
+
+            if (mode === 'two_colors') {
+                const i2 = calculateI(lambda2, a, D);
+                valI2.textContent = i2.toFixed(3) + " mm";
+                valI2.style.color = wavelengthToRGB(lambda2).css;
+
+                // Coincidence
+                // i_co = LCM(i1, i2). 
+                // Approx by int ratio of lambda
+                const l1 = Math.round(lambda1 / 5); // simplify
+                const l2 = Math.round(lambda2 / 5);
+                const LCM = lcm(l1, l2);
+                const i_co = i1 * (LCM / l1);
+                valCoin.textContent = i_co.toFixed(2) + " mm";
+            }
+
+            // Draw
+            draw(mode, lambda1, lambda2, a, D, i1);
+        }
+
+        function draw(mode, l1, l2, a, D, i1) {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+
+            const w = canvas.width;
+            const h = canvas.height;
+            const cx = w / 2;
+
+            // Background
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, w, h);
+
+            // Scale: Total WIDTH is equivalent to VISIBLE_MM (10mm)
+            const ppm = w / VISIBLE_MM;
+
+            const imgData = ctx.createImageData(w, h);
+            const data = imgData.data;
+
+            // For white light, we sum multiple wavelengths
+            const whiteSteps = mode === 'white_light' ? [
+                380, 420, 460, 500, 540, 580, 620, 660, 700, 740
+            ] : [];
+
+            // Precalculate colors for white steps
+            const whiteColors = whiteSteps.map(l => wavelengthToRGB(l));
+            const whiteIs = whiteSteps.map(l => calculateI(l, a, D));
+
+            const c1 = wavelengthToRGB(l1);
+            const c2 = wavelengthToRGB(l2);
+            const i2 = calculateI(l2, a, D);
+
+            // Optimization: Compute 1 ROW of colors, then copy to all rows
+            // Since fringes are vertical, color depends only on X.
+
+            // 1. Calculate one row of colors
+            const rowColors = new Uint8ClampedArray(w * 4);
+
+            for (let x = 0; x < w; x++) {
+                // Physical X from center (mm)
+                const x_mm = (x - cx) / ppm;
+
+                let r = 0, g = 0, b = 0;
+
+                if (mode === 'single') {
+                    // Phase = 2pi * x / i
+                    const intensity = Math.cos(Math.PI * x_mm / i1) ** 2;
+                    r = c1.r * intensity;
+                    g = c1.g * intensity;
+                    b = c1.b * intensity;
+                }
+                else if (mode === 'two_colors') {
+                    const int1 = Math.cos(Math.PI * x_mm / i1) ** 2;
+                    const int2 = Math.cos(Math.PI * x_mm / i2) ** 2;
+
+                    r = c1.r * int1 + c2.r * int2;
+                    g = c1.g * int1 + c2.g * int2;
+                    b = c1.b * int1 + c2.b * int2;
+                }
+                else if (mode === 'white_light') {
+                    let tr = 0, tg = 0, tb = 0;
+                    for (let k = 0; k < whiteSteps.length; k++) {
+                        const i_wav = whiteIs[k];
+                        const int = Math.cos(Math.PI * x_mm / i_wav) ** 2;
+                        tr += whiteColors[k].r * int;
+                        tg += whiteColors[k].g * int;
+                        tb += whiteColors[k].b * int;
+                    }
+                    r = tr / 3; g = tg / 3; b = tb / 3;
+                }
+
+                r = Math.min(255, r); g = Math.min(255, g); b = Math.min(255, b);
+
+                rowColors[x * 4] = r;
+                rowColors[x * 4 + 1] = g;
+                rowColors[x * 4 + 2] = b;
+                rowColors[x * 4 + 3] = 255; // Alpha
+            }
+
+            // 2. Copy to all rows
+            for (let y = 0; y < h; y++) {
+                data.set(rowColors, y * w * 4);
+            }
+
+            ctx.putImageData(imgData, 0, 0);
+        }
+
+        // Init
+        lambda1Input.oninput = update;
+        lambda2Input.oninput = update;
+        aInput.oninput = update;
+        DInput.oninput = update;
+        for (const r of modeRadios) r.onchange = update;
+        window.addEventListener('resize', update);
+
+        update();
+    </script>
+</body>
+
+</html>

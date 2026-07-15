@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô Phỏng Sóng Dừng - Physics Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="./tailwind-config.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="./theme.js?v=4.0.6"></script>
+    <script src="./theory-system.js?v=4.0.6"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .control-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: auto;
+            min-width: 400px;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .dark .control-panel {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #cbd5e1;
+            outline: none;
+        }
+
+        .dark .slider {
+            background: #475569;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #06b6d4;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
+
+    <canvas id="waveCanvas"></canvas>
+
+    <div class="control-panel">
+        <div class="flex flex-col gap-4">
+
+            <!-- Header / Mode Selection -->
+            <div class="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    <i data-lucide="activity" class="w-4 h-4 text-lab-cyan"></i>
+                    Sóng Dừng
+                </h2>
+                <div class="flex bg-gray-100 dark:bg-slate-800 p-0.5 rounded-lg scale-90 origin-right">
+                    <button id="btn-2fixed" onclick="setMode('2fixed')"
+                        class="px-3 py-1.5 rounded-md text-xs font-medium transition-all bg-white dark:bg-slate-700 shadow text-lab-cyan">
+                        2 Đầu Cố Định
+                    </button>
+                    <button id="btn-1free" onclick="setMode('1free')"
+                        class="px-3 py-1.5 rounded-md text-xs font-medium transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+                        1 Đầu Tự Do
+                    </button>
+                </div>
+            </div>
+
+            <!-- Controls Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Inputs -->
+                <div class="space-y-3">
+                    <!-- Frequency -->
+                    <div>
+                        <div class="flex justify-between mb-1.5">
+                            <label class="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Tần Số
+                                (Hz)</label>
+                            <span id="val-freq" class="text-[10px] font-bold text-lab-cyan">5.00</span>
+                        </div>
+                        <input type="range" class="slider h-1" id="freq" min="0.5" max="30" step="0.1" value="5">
+                    </div>
+                    <!-- Tension -->
+                    <div>
+                        <div class="flex justify-between mb-1.5">
+                            <label class="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Sức
+                                Căng</label>
+                            <span id="val-tens" class="text-[10px] font-bold text-lab-cyan">50%</span>
+                        </div>
+                        <input type="range" class="slider h-1" id="tens" min="10" max="100" step="10" value="50">
+                    </div>
+                    <!-- Amplitude (Compact) -->
+                    <div>
+                        <div class="flex justify-between mb-1.5">
+                            <label class="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400">Biên
+                                Độ</label>
+                            <span id="val-amp" class="text-[10px] font-bold text-lab-cyan">50%</span>
+                        </div>
+                        <input type="range" class="slider h-1" id="amp" min="0" max="100" value="50">
+                    </div>
+                </div>
+
+                <!-- Info / Stats -->
+                <div
+                    class="bg-indigo-50 dark:bg-slate-800/50 rounded-lg p-3 flex flex-col justify-center gap-1.5 border border-indigo-100 dark:border-slate-700">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-600 dark:text-slate-400">Số Bụng Sóng:</span>
+                        <span id="stat-antinodes"
+                            class="font-mono font-bold text-indigo-600 dark:text-indigo-400">--</span>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-600 dark:text-slate-400">Số Nút Sóng:</span>
+                        <span id="stat-nodes" class="font-mono font-bold text-indigo-600 dark:text-indigo-400">--</span>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-600 dark:text-slate-400">Bước Sóng (λ):</span>
+                        <span id="stat-lambda"
+                            class="font-mono font-bold text-indigo-600 dark:text-indigo-400">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('waveCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // State
+        let width, height;
+        let mode = '2fixed';
+        let time = 0;
+
+        const BASE_SPEED = 800; // px/s
+        const PX_PER_CM = 20;
+
+        // Parameters
+        let frequency = 5;
+        let amplitude = 50;
+        let tension = 50;
+
+        // The VISIBLE length of the string, which updates dynamically
+        let currentStringLength = 800;
+
+        // Target length (ideal width)
+        let idealLength = 800;
+
+        // DOM Elements
+        const elFreq = document.getElementById('freq');
+        const elAmp = document.getElementById('amp');
+        const elTens = document.getElementById('tens');
+        const valFreq = document.getElementById('val-freq');
+        const valAmp = document.getElementById('val-amp');
+        const valTens = document.getElementById('val-tens');
+
+        const btn2Fixed = document.getElementById('btn-2fixed');
+        const btn1Free = document.getElementById('btn-1free');
+
+
+        // Stats
+        const statAntinodes = document.getElementById('stat-antinodes');
+        const statNodes = document.getElementById('stat-nodes');
+        const statLambda = document.getElementById('stat-lambda');
+        // const statLength REMOVED
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            idealLength = width * 0.8;
+            currentStringLength = idealLength;
+
+        }
+        window.addEventListener('resize', resize);
+
+        function getSpeed() {
+            return BASE_SPEED * Math.sqrt(tension / 50);
+        }
+
+        // Logic to calculate closest resonant length
+        function updatePhysicsLength() {
+            const v = getSpeed();
+            const lambda = v / frequency;
+
+            if (mode === '2fixed') {
+                // n * lambda / 2 = L
+                const halfLambda = lambda / 2;
+                let n = Math.round(idealLength / halfLambda);
+                if (n < 1) n = 1;
+                currentStringLength = n * halfLambda;
+            } else {
+                // 1 Free End: Fixed-Free
+                const quarterLambda = lambda / 4;
+                let m = Math.round(idealLength / quarterLambda);
+                if (m % 2 === 0) {
+                    m = (idealLength > m * quarterLambda) ? m + 1 : m - 1;
+                }
+                if (m < 1) m = 1;
+                currentStringLength = m * quarterLambda;
+            }
+        }
+
+
+
+        // Interaction
+        elFreq.addEventListener('input', (e) => {
+            frequency = parseFloat(e.target.value);
+            valFreq.textContent = frequency.toFixed(2);
+        });
+        elAmp.addEventListener('input', (e) => {
+            amplitude = parseInt(e.target.value);
+            valAmp.textContent = amplitude + '%';
+        });
+        elTens.addEventListener('input', (e) => {
+            tension = parseInt(e.target.value);
+            valTens.textContent = tension + '%';
+        });
+
+        function setMode(m) {
+            mode = m;
+            if (mode === '2fixed') {
+                btn2Fixed.className = "px-4 py-2 rounded-md text-sm font-medium transition-all bg-white dark:bg-slate-700 shadow text-lab-cyan cursor-default";
+                btn1Free.className = "px-4 py-2 rounded-md text-sm font-medium transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer";
+            } else {
+                btn2Fixed.className = "px-4 py-2 rounded-md text-sm font-medium transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer";
+                btn1Free.className = "px-4 py-2 rounded-md text-sm font-medium transition-all bg-white dark:bg-slate-700 shadow text-lab-cyan cursor-default";
+            }
+
+        }
+        window.setMode = setMode;
+
+        function calculateStats() {
+            const v = getSpeed();
+            const lambda = v / frequency;
+
+            // Stats (calculated from geometry now since we force resonance)
+            if (mode === '2fixed') {
+                // n = 2L / lambda
+                const n = Math.round((2 * currentStringLength) / lambda);
+                statNodes.textContent = n + 1; // n loops, n+1 nodes
+                statAntinodes.textContent = n;
+            } else {
+                // 1 Free
+                const m = Math.round((4 * currentStringLength) / lambda);
+                const k = (m - 1) / 2;
+                statNodes.textContent = k + 1;
+                statAntinodes.textContent = k + 1;
+            }
+
+            // CONVERT TO CM
+            const lambdaCm = lambda / PX_PER_CM;
+            // Removed statLength update
+            statLambda.textContent = lambdaCm.toFixed(1) + " cm";
+        }
+
+        // PAUSE CONTROL
+        let isPaused = false;
+        window.addEventListener('app-paused', () => isPaused = true);
+        window.addEventListener('app-resumed', () => {
+            isPaused = false;
+            draw();
+        });
+
+        function draw() {
+            if (isPaused) return;
+
+            updatePhysicsLength();
+
+            const centerStringX = width / 2;
+            const startX = centerStringX - (currentStringLength / 2);
+            const endX = centerStringX + (currentStringLength / 2);
+
+            const v = getSpeed();
+            const lambda = v / frequency;
+            const k = (2 * Math.PI) / lambda;
+            const w = 2 * Math.PI * frequency;
+
+            // Clear
+            ctx.clearRect(0, 0, width, height);
+            const centerY = height / 2 - 50;
+            const isDark = document.documentElement.classList.contains('dark');
+
+            // Draw Labels
+            ctx.fillStyle = isDark ? '#ffffff' : '#1e293b';
+            ctx.font = "bold 20px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("A", startX - 30, centerY + 8);
+            ctx.fillText("B", endX + 30, centerY + 8);
+
+            // Draw String
+            ctx.beginPath();
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#06b6d4';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#06b6d4';
+
+            for (let x = 0; x <= currentStringLength; x += 2) {
+                // STANDING WAVE FORMULA: y = 2A sin(kx) cos(wt)
+                const y = 2 * amplitude * Math.sin(k * x) * Math.cos(w * time);
+
+                if (x === 0) ctx.moveTo(startX + x, centerY - y);
+                else ctx.lineTo(startX + x, centerY - y);
+            }
+            ctx.stroke();
+
+            // Draw Endpoints
+            ctx.shadowBlur = 0;
+
+            // Point A (Start) - FIXED NODE
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(startX, centerY, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Point B (End)
+            ctx.beginPath();
+            if (mode === '2fixed') {
+                // Fixed Block B
+                ctx.fillStyle = isDark ? '#ffffff' : '#334155';
+                ctx.rect(endX, centerY - 10, 10, 20);
+                ctx.fill();
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath();
+                ctx.arc(endX, centerY, 4, 0, Math.PI * 2); // Fixed Node
+                ctx.fill();
+            } else {
+                // Free End B - Ring on Pole
+                ctx.strokeStyle = isDark ? '#ffffff' : '#334155';
+                ctx.lineWidth = 2;
+                ctx.moveTo(endX, centerY - 100);
+                ctx.lineTo(endX, centerY + 100);
+                ctx.stroke();
+
+                // Ring follows wave height at L
+                const yEnd = 2 * amplitude * Math.sin(k * currentStringLength) * Math.cos(w * time);
+
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath();
+                ctx.arc(endX, centerY - yEnd, 6, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            calculateStats();
+            time += 0.01;
+            requestAnimationFrame(draw);
+        }
+
+        resize();
+        draw();
+    </script>
+</body>
+
+</html>

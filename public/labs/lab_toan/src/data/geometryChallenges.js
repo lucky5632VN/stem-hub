@@ -1,0 +1,150 @@
+// src/data/geometryChallenges.js
+// Local fallback challenge bank cho Daily Geometry Challenge
+// Khi backend offline, dùng data này
+
+export const GEOMETRY_CHALLENGES = [
+  {
+    "id": 101,
+    "rank_required": 1,
+    "difficulty": "easy",
+    "xp": 60,
+    "type": "construction",
+    "title": "Dựng hình chóp đơn giản",
+    "problem": "Dựng hình chóp S.ABCD với đáy là hình vuông cạnh 2 và chiều cao 3. Yêu cầu: ít hơn 6 thao tác.",
+    "optimal_moves": 5,
+    "hint": "Bắt đầu bằng 4 đỉnh đáy trước, sau đó đặt đỉnh S lên trên",
+    "answer_hint": "V = (1/3)×4×3 = 4"
+  },
+  {
+    "id": 102,
+    "rank_required": 1,
+    "difficulty": "easy",
+    "xp": 60,
+    "type": "construction",
+    "title": "Hình lập phương",
+    "problem": "Dựng hình lập phương ABCD.A'B'C'D' cạnh 2. Sau đó tìm điểm giữa M của A'C. Ít hơn 8 thao tác.",
+    "optimal_moves": 7,
+    "hint": "Dựng đáy ABCD trước, kéo lên theo chiều cao",
+    "answer_hint": "M = trung điểm A'C"
+  },
+  {
+    "id": 103,
+    "rank_required": 1,
+    "difficulty": "easy",
+    "xp": 70,
+    "type": "angle",
+    "title": "Góc giữa đường chéo và đáy",
+    "problem": "Hình lập phương ABCD.A'B'C'D' cạnh a=2. Tính góc giữa đường chéo AC' và mặt đáy ABCD.",
+    "optimal_moves": 4,
+    "hint": "Chiếu AC' xuống mặt đáy — hình chiếu là đường chéo AC",
+    "answer_hint": "arctan(1/√2) ≈ 35.26°"
+  },
+  {
+    "id": 201,
+    "rank_required": 2,
+    "difficulty": "medium",
+    "xp": 100,
+    "type": "construction",
+    "title": "Hình chóp với điều kiện vuông góc",
+    "problem": "Dựng hình chóp S.ABC thỏa mãn: SA⊥(ABC), SA=AB=BC=CA=2. Tính góc giữa SB và mặt phẳng (ABC). Ít hơn 7 thao tác.",
+    "optimal_moves": 6,
+    "hint": "Vì SA⊥(ABC), đặt A tại gốc, SA là trục tung",
+    "answer_hint": "arctan(√3) = 60°"
+  },
+  {
+    "id": 202,
+    "rank_required": 2,
+    "difficulty": "medium",
+    "xp": 110,
+    "type": "distance",
+    "title": "Khoảng cách từ điểm đến mặt phẳng",
+    "problem": "Hình chóp đều S.ABCD: cạnh đáy 4, chiều cao 3. Dựng hình và tính khoảng cách từ B đến mặt phẳng (SAC). Ít hơn 8 thao tác.",
+    "optimal_moves": 7,
+    "hint": "Dùng công thức: d(B,SAC) = 3×V(SABC) / S(SAC)",
+    "answer_hint": "d = 4√2/3"
+  },
+  {
+    "id": 203,
+    "rank_required": 2,
+    "difficulty": "medium",
+    "xp": 120,
+    "type": "section",
+    "title": "Mặt cắt qua 3 điểm",
+    "problem": "Hình lập phương ABCD.A'B'C'D' cạnh 1. Dựng mặt cắt qua A, B', C'. Mặt cắt là hình gì? Tính diện tích.",
+    "optimal_moves": 6,
+    "hint": "Xác định từng điểm, nối lại và nhận dạng hình học",
+    "answer_hint": "Hình chữ nhật, S = √2 × 1 = √2"
+  },
+  {
+    "id": 301,
+    "rank_required": 3,
+    "difficulty": "medium",
+    "xp": 140,
+    "type": "construction",
+    "title": "Tứ diện với cạnh chéo nhau",
+    "problem": "Cho tứ diện ABCD với AB=CD=2, AC=BD=√5, AD=BC=√3. Dựng tứ diện và tìm khoảng cách giữa AB và CD. Ít hơn 9 thao tác.",
+    "optimal_moves": 8,
+    "hint": "Tứ diện đẳng diện — tất cả cạnh đối bằng nhau. Dùng hệ trục tọa độ",
+    "answer_hint": "d(AB,CD) = √(5/3)"
+  },
+  {
+    "id": 302,
+    "rank_required": 3,
+    "difficulty": "hard",
+    "xp": 160,
+    "type": "angle",
+    "title": "Góc nhị diện phức tạp",
+    "problem": "Hình lập phương ABCD.A'B'C'D' cạnh 1. Tính góc nhị diện theo cạnh A'B giữa mặt phẳng (A'BD) và (A'BC). Ít hơn 6 thao tác.",
+    "optimal_moves": 5,
+    "hint": "Tìm vector pháp tuyến của mỗi mặt phẳng rồi tính góc giữa chúng",
+    "answer_hint": "arccos(1/3) ≈ 70.53°"
+  },
+  {
+    "id": 401,
+    "rank_required": 4,
+    "difficulty": "hard",
+    "xp": 200,
+    "type": "construction",
+    "title": "Hình chóp cầu ngoại tiếp",
+    "problem": "Hình chóp đều S.ABCD cạnh đáy a=2, cạnh bên l=√3. Dựng hình và tìm bán kính mặt cầu ngoại tiếp. Ít hơn 10 thao tác.",
+    "optimal_moves": 9,
+    "hint": "Tâm cầu ngoại tiếp nằm trên trục đối xứng của hình chóp",
+    "answer_hint": "R = a²/(2h) + h/2, tính h trước"
+  },
+  {
+    "id": 402,
+    "rank_required": 4,
+    "difficulty": "hard",
+    "xp": 220,
+    "type": "optimization",
+    "title": "Tối ưu thể tích",
+    "problem": "Trong hình lập phương ABCD.A'B'C'D' cạnh 1, tìm điểm M trên A'B' sao cho thể tích tứ diện MACD là lớn nhất. Dựng và chứng minh. Tối thiểu số thao tác.",
+    "optimal_moves": 8,
+    "hint": "V(MACD) phụ thuộc vào chiều cao từ M xuống mặt phẳng (ACD)",
+    "answer_hint": "M là trung điểm A'B', V_max = 1/6"
+  },
+  {
+    "id": 501,
+    "rank_required": 5,
+    "difficulty": "hard",
+    "xp": 280,
+    "type": "construction",
+    "title": "Thách đấu: Hình chóp với góc nhị diện cho trước",
+    "problem": "Dựng hình chóp S.ABCD (đáy vuông cạnh 2) sao cho góc nhị diện theo cạnh AB giữa mặt bên SAB và đáy bằng 60°. Tính chiều cao. Ít hơn 8 thao tác.",
+    "optimal_moves": 7,
+    "hint": "Góc nhị diện 60° → tan(60°) = h/(a/2) → h = a√3/2",
+    "answer_hint": "h = √3"
+  },
+  {
+    "id": 601,
+    "rank_required": 6,
+    "difficulty": "hard",
+    "xp": 360,
+    "type": "proof",
+    "title": "Thách đấu Không gian: Tứ diện đặc biệt",
+    "problem": "Cho tứ diện ABCD có các cạnh đối vuông góc nhau từng đôi một (AB⊥CD, AC⊥BD, AD⊥BC). Chứng minh bốn đường cao đồng quy. Dựng mô hình 3D minh họa. Ít hơn 12 thao tác.",
+    "optimal_moves": 10,
+    "hint": "Tứ diện trực giao — đặt tọa độ thông minh để khai thác điều kiện vuông góc",
+    "answer_hint": "Trực tâm tứ diện tồn tại khi và chỉ khi các cạnh đối vuông góc"
+  }
+];

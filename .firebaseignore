@@ -1,0 +1,47 @@
+# Firebase Hosting ignore rules
+
+# Node modules
+**/node_modules/**
+
+# Python backend & virtual environments (contains .exe - forbidden on Spark)
+**/SpatialMind_Backend/**
+**/venv/**
+**/__pycache__/**
+**/*.pyc
+**/*.py
+**/*.bat
+**/*.exe
+**/*.dll
+**/*.pyd
+
+# Source code (not needed in production)
+**/src/**
+**/scripts/**
+
+# Config & lock files (source level)
+**/vite.config.*
+**/eslint.config.*
+**/package.json
+**/package-lock.json
+**/tsconfig.*
+**/postcss.config.*
+**/tailwind.config.*
+**/.env
+**/.env.*
+**/.git/**
+**/.gitignore
+**/.gitattributes
+
+# Docs & reports
+**/*.md
+**/*.docx
+**/*.zip
+**/*.txt
+
+# Python scratch files
+**/*.py
+
+# Firebase files themselves
+firebase.json
+.firebaserc
+.firebaseignore

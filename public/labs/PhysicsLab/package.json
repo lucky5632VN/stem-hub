@@ -1,0 +1,23 @@
+{
+  "name": "physics-lab-v21",
+  "version": "2.1.0",
+  "description": "Interactive Physics Simulation Dashboard for VATLY21",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve .",
+    "dev": "vercel dev"
+  },
+  "keywords": [
+    "physics",
+    "simulation",
+    "education",
+    "ntc",
+    "ptc",
+    "current"
+  ],
+  "author": "Antigravity",
+  "license": "MIT",
+  "devDependencies": {
+    "vercel": "latest"
+  }
+}

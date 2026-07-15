@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giao Thoa Sóng Cơ (WebGL Accelerated)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tailwind-config.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .font-tech {
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #06b6d4;
+            margin-top: -6px;
+            cursor: pointer;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+
+        .dark input[type=range]::-webkit-slider-runnable-track {
+            background: #475569;
+        }
+
+        .hud-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .hud-panel {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body
+    class="h-screen flex overflow-hidden bg-slate-50 dark:bg-[#0f172a] text-slate-700 dark:text-slate-300 transition-colors duration-300">
+
+    <!-- SIDEBAR -->
+    <aside
+        class="w-72 flex-shrink-0 flex flex-col bg-white dark:bg-[#1e293b] border-r border-slate-200 dark:border-slate-800 z-20 shadow-lg">
+        <div class="h-16 flex items-center justify-between px-6 border-b border-slate-100 dark:border-slate-700/50">
+            <h1 class="font-tech font-bold text-xl text-slate-800 dark:text-white uppercase tracking-wider">Control
+                Panel</h1>
+            <a href="index.html"
+                class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-cyan-500 transition-colors">
+                <i data-lucide="home" class="w-5 h-5"></i>
+            </a>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+
+            <!-- Playback -->
+            <div>
+                <label
+                    class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 block">Mô
+                    Phỏng</label>
+                <button id="togglePause"
+                    class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg font-medium transition shadow-sm hover:shadow-cyan-500/30">
+                    <i data-lucide="pause" class="w-4 h-4 fill-current"></i> <span class="text-sm">Tạm Dừng</span>
+                </button>
+            </div>
+
+            <!-- Playback Speed & Zoom -->
+            <div class="space-y-4">
+                <div>
+                    <div class="flex justify-between text-xs mb-1.5">
+                        <label class="font-medium text-slate-600 dark:text-slate-300">Tốc độ phát</label>
+                        <span class="font-mono text-cyan-600 dark:text-cyan-400"><span
+                                id="speedDisplay">0.5</span>x</span>
+                    </div>
+                    <input type="range" id="timeScale" min="0.1" max="2.0" step="0.1" value="0.5" class="w-full">
+                </div>
+                <div>
+                    <div class="flex justify-between text-xs mb-1.5">
+                        <label class="font-medium text-slate-600 dark:text-slate-300">Zoom</label>
+                        <span class="font-mono text-cyan-600 dark:text-cyan-400"><span
+                                id="zoomDisplay">100</span>%</span>
+                    </div>
+                    <input type="range" id="zoom" min="50" max="200" step="10" value="100" class="w-full">
+                </div>
+            </div>
+
+            <!-- Parameters -->
+            <div class="space-y-6">
+                <div>
+                    <div class="flex justify-between text-xs mb-1.5">
+                        <label class="font-medium text-slate-600 dark:text-slate-300">Vận tốc sóng (v)</label>
+                        <span class="font-mono text-cyan-600 dark:text-cyan-400"><span id="waveSpeedDisplay">40</span>
+                            cm/s</span>
+                    </div>
+                    <input type="range" id="waveSpeed" min="20" max="100" step="5" value="40" class="w-full">
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <label class="font-medium text-slate-600 dark:text-slate-300">Khoảng cách nguồn
+                                (S1-S2)</label>
+                            <span class="font-mono text-cyan-600 dark:text-cyan-400"><span id="distDisplay">12</span>
+                                cm</span>
+                        </div>
+                        <input type="range" id="sourceDistance" min="2" max="30" step="0.5" value="12" class="w-full">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <label class="font-medium text-slate-600 dark:text-slate-300">Tần số (f)</label>
+                            <span class="font-mono text-cyan-600 dark:text-cyan-400"><span id="freqDisplay">10.0</span>
+                                Hz</span>
+                        </div>
+                        <input type="range" id="frequency" min="1.0" max="25.0" step="0.5" value="10.0" class="w-full">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <label class="font-medium text-slate-600 dark:text-slate-300">Lệch pha (Δφ)</label>
+                            <span class="font-mono text-cyan-600 dark:text-cyan-400"><span id="phaseDisplay">0</span>
+                                π</span>
+                        </div>
+                        <input type="range" id="phaseDiff" min="0" max="2" step="0.1" value="0" class="w-full">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1.5">
+                                <label class="font-medium text-slate-600 dark:text-slate-300">Biên độ S1</label>
+                                <span class="font-mono text-cyan-600 dark:text-cyan-400"><span
+                                        id="amp1Display">0.5</span>
+                                    cm</span>
+                            </div>
+                            <input type="range" id="amp1" min="0.1" max="2.0" step="0.1" value="0.5" class="w-full">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1.5">
+                                <label class="font-medium text-slate-600 dark:text-slate-300">Biên độ S2</label>
+                                <span class="font-mono text-cyan-600 dark:text-cyan-400"><span
+                                        id="amp2Display">0.5</span>
+                                    cm</span>
+                            </div>
+                            <input type="range" id="amp2" min="0.1" max="2.0" step="0.1" value="0.5" class="w-full">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Display Options -->
+                <div class="bg-slate-100 dark:bg-slate-800/50 p-4 rounded-lg">
+                    <label
+                        class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 block">Hiển
+                        Thị</label>
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" id="toggleMaxima" checked
+                                class="w-4 h-4 text-cyan-600 rounded border-gray-300 focus:ring-cyan-500">
+                            <span
+                                class="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-cyan-600 transition">Vân
+                                Cực Đại (K)</span>
+                            <div class="w-3 h-3 rounded-full bg-yellow-400 ml-auto shadow-sm"></div>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" id="toggleMinima" checked
+                                class="w-4 h-4 text-cyan-600 rounded border-gray-300 focus:ring-cyan-500">
+                            <span
+                                class="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-cyan-600 transition">Vân
+                                Cực Tiểu (k+0.5)</span>
+                            <div class="w-3 h-3 rounded-full bg-pink-500 ml-auto shadow-sm"></div>
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+                <button onclick="toggleDarkMode()"
+                    class="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+                    <i id="theme-icon" data-lucide="moon" class="w-4 h-4"></i>
+                    <span class="text-xs font-medium uppercase">Toggle Theme</span>
+                </button>
+            </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="flex-1 relative bg-white dark:bg-[#0f172a] overflow-hidden flex flex-col">
+        <!-- Layer 1: WebGL Wave Render (Hardware Accelerated) -->
+        <canvas id="webglCanvas" class="absolute inset-0 w-full h-full block z-0"></canvas>
+        <!-- Layer 2: 2D Overlay (Vectors, Lines, Text) -->
+        <canvas id="overlayCanvas"
+            class="absolute inset-0 w-full h-full block z-10 cursor-crosshair pointer-events-none"></canvas>
+
+        <!-- HUD -->
+        <div class="absolute top-4 right-4 hud-panel rounded-xl p-4 shadow-xl z-20 backdrop-blur-md min-w-[160px]">
+            <h3
+                class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 border-b border-slate-200 dark:border-slate-700 pb-2">
+                Thông số sóng</h3>
+            <div class="space-y-2 font-mono text-sm">
+                <div class="flex justify-between">
+                    <span class="text-slate-600 dark:text-slate-400">Time (t)</span>
+                    <span id="statTime" class="font-bold text-slate-800 dark:text-white">0.00 s</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-600 dark:text-slate-400">Lambda (λ)</span>
+                    <span id="statLambda" class="font-bold text-sky-600">50.0 cm</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/theme.js?v=4.0.8"></script>
+    <script src="js/theory-system.js?v=4.0.8"></script>
+    <script src="js/quiz-database.js"></script>
+    <script src="js/quiz-system.js?v=4.0.8"></script>
+
+    <!-- WebGL Shader Source -->
+    <script id="vs" type="x-shader/x-vertex">
+        attribute vec2 position;
+        void main() {
+            gl_Position = vec4(position, 0.0, 1.0);
+        }
+    </script>
+
+    <script id="fs" type="x-shader/x-fragment">
+        precision highp float;
+        
+        uniform vec2 u_resolution;
+        uniform float u_time;
+        uniform float u_d;         // Distance between sources in pixels
+        uniform float u_lambda;    // Wavelength in pixels
+        uniform float u_deltaPhi;  // Phase difference
+        uniform float u_A1;        // Amplitude 1
+        uniform float u_A2;        // Amplitude 2
+        uniform float u_maxDisp;   // Max possible displacement for normalization
+        uniform vec2 u_S1;         // Source 1 position
+        uniform vec2 u_S2;         // Source 2 position
+        uniform vec3 u_colorBg;
+        uniform vec3 u_colorMax;
+        uniform vec3 u_colorMin;
+
+        // Constants
+        const float PI = 3.14159265359;
+
+        void main() {
+            vec2 st = gl_FragCoord.xy;
+            // Flip Y because WebGL 0,0 is bottom-left, but our UI logic is top-left
+            st.y = u_resolution.y - st.y; 
+
+            float d1 = distance(st, u_S1);
+            float d2 = distance(st, u_S2);
+
+            float k = 2.0 * PI / u_lambda;
+            // Phase accumulated passed via u_time (which is actually sourcePhase)
+            // u = A cos(omega*t - k*d + phi)
+            // Here u_time is (omega * accumulated_dt) called sourcePhase in JS
+            
+            float wave1 = u_A1 * cos(u_time - k * d1);
+            float wave2 = u_A2 * cos(u_time - k * d2 + u_deltaPhi * PI); // deltaPhi input is unit PI
+            
+            float u = wave1 + wave2;
+
+            // Normalize
+            float norm = u / u_maxDisp; // -1 to 1 basically
+            float intensity = abs(norm);
+            
+            // Contrast curve
+            float factor = pow(intensity, 1.2);
+
+            vec3 color;
+            if (norm > 0.0) {
+                color = mix(u_colorBg, u_colorMax, factor);
+            } else {
+                color = mix(u_colorBg, u_colorMin, factor);
+            }
+
+            gl_FragColor = vec4(color, 1.0);
+        }
+    </script>
+
+    <script>
+        // --- INITIALIZATION ---
+        const canvasGL = document.getElementById('webglCanvas');
+        const canvas2D = document.getElementById('overlayCanvas');
+        const ctx2D = canvas2D.getContext('2d');
+        const gl = canvasGL.getContext('webgl') || canvasGL.getContext('experimental-webgl');
+
+        if (!gl) {
+            alert("Trình duyệt của bạn không hỗ trợ WebGL. Vui lòng cập nhật.");
+        }
+
+        // --- UI REFS ---
+        const ui = {
+            togglePause: document.getElementById('togglePause'),
+            distInput: document.getElementById('sourceDistance'),
+            freqInput: document.getElementById('frequency'),
+            phaseInput: document.getElementById('phaseDiff'),
+            amp1Input: document.getElementById('amp1'),
+            amp2Input: document.getElementById('amp2'),
+            toggleMaxima: document.getElementById('toggleMaxima'),
+            toggleMinima: document.getElementById('toggleMinima'),
+            timeScaleInput: document.getElementById('timeScale'),
+            zoomInput: document.getElementById('zoom'),
+            waveSpeedInput: document.getElementById('waveSpeed'),
+            displays: {
+                dist: document.getElementById('distDisplay'),
+                freq: document.getElementById('freqDisplay'),
+                phase: document.getElementById('phaseDisplay'),
+                amp1: document.getElementById('amp1Display'),
+                amp2: document.getElementById('amp2Display'),
+                time: document.getElementById('statTime'),
+                lambda: document.getElementById('statLambda')
+            }
+        };
+
+        // --- PHYSICS CONSTANTS ---
+        const BASE_PX_PER_CM = 20;
+        let pixelsPerCm = BASE_PX_PER_CM;
+        let vWaveCmS = 40;
+        const PI2 = 2 * Math.PI;
+
+        // --- STATE ---
+        let params = {
+            d: 12 * BASE_PX_PER_CM,
+            f: 10.0,
+            deltaPhi: 0,
+            A1: 10,
+            A2: 10,
+            timeScale: 0.5
+        };
+        let state = {
+            startTime: 0,
+            elapsed: 0,
+            sourcePhase: 0,
+            isPaused: false,
+            S1: { x: 0, y: 0 },
+            S2: { x: 0, y: 0 },
+            width: 0,
+            height: 0
+        };
+
+        // --- WEBGL BOILERPLATE ---
+        function createShader(gl, type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error(gl.getShaderInfoLog(shader));
+                gl.deleteShader(shader);
+                return null;
+            }
+            return shader;
+        }
+
+        const vsSource = document.getElementById('vs').text;
+        const fsSource = document.getElementById('fs').text;
+        const vertexShader = createShader(gl, gl.VERTEX_SHADER, vsSource);
+        const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fsSource);
+        const program = gl.createProgram();
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+        gl.linkProgram(program);
+
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+            console.error(gl.getProgramInfoLog(program));
+        }
+
+        // Attribute Locations
+        const positionLocation = gl.getAttribLocation(program, "position");
+        // Uniform Locations
+        const uniforms = {
+            resolution: gl.getUniformLocation(program, "u_resolution"),
+            time: gl.getUniformLocation(program, "u_time"),
+            d: gl.getUniformLocation(program, "u_d"),
+            lambda: gl.getUniformLocation(program, "u_lambda"),
+            deltaPhi: gl.getUniformLocation(program, "u_deltaPhi"),
+            A1: gl.getUniformLocation(program, "u_A1"),
+            A2: gl.getUniformLocation(program, "u_A2"),
+            maxDisp: gl.getUniformLocation(program, "u_maxDisp"),
+            S1: gl.getUniformLocation(program, "u_S1"),
+            S2: gl.getUniformLocation(program, "u_S2"),
+            colorBg: gl.getUniformLocation(program, "u_colorBg"),
+            colorMax: gl.getUniformLocation(program, "u_colorMax"),
+            colorMin: gl.getUniformLocation(program, "u_colorMin"),
+        };
+
+        // Buffer Setup (Square covering -1 to 1)
+        const buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+            -1.0, -1.0,
+            1.0, -1.0,
+            -1.0, 1.0,
+            -1.0, 1.0,
+            1.0, -1.0,
+            1.0, 1.0]), gl.STATIC_DRAW);
+
+        // --- UPDATE FUNCTIONS ---
+        // Hex to RGB float array (0-1)
+        function hexToRgb(hex) {
+            const bigint = parseInt(hex.slice(1), 16);
+            return [((bigint >> 16) & 255) / 255, ((bigint >> 8) & 255) / 255, (bigint & 255) / 255];
+        }
+
+        let currentColors = { bg: [1, 1, 1], max: [0, 0, 0], min: [0, 0, 0] };
+
+        function updateColors(isDark) {
+            // Theme handling
+            if (isDark) {
+                // Dark Mode
+                currentColors.bg = hexToRgb('#0f172a'); // Slate 900
+                currentColors.max = hexToRgb('#22d3ee'); // Cyan 400
+                currentColors.min = hexToRgb('#f472b6'); // Pink 400
+            } else {
+                // Light Mode
+                currentColors.bg = hexToRgb('#f8fafc'); // Slate 50
+                currentColors.max = hexToRgb('#0891b2'); // Cyan 600
+                currentColors.min = hexToRgb('#db2777'); // Pink 600
+            }
+        }
+
+        function updateParams() {
+            const d_cm = parseFloat(ui.distInput.value);
+            const freq = parseFloat(ui.freqInput.value);
+            const deltaPhi = parseFloat(ui.phaseInput.value);
+            const A1_cm = parseFloat(ui.amp1Input.value);
+            const A2_cm = parseFloat(ui.amp2Input.value);
+
+            // Zoom & Speed Logic
+            const zoomPercent = parseFloat(ui.zoomInput.value);
+            pixelsPerCm = BASE_PX_PER_CM * (zoomPercent / 100);
+
+            vWaveCmS = parseFloat(ui.waveSpeedInput.value);
+            params.timeScale = parseFloat(ui.timeScaleInput.value);
+
+            params.d = d_cm * pixelsPerCm;
+            params.f = freq;
+            params.deltaPhi = deltaPhi; // In units of PI for uniform (handled in shader)
+            params.A1 = A1_cm * pixelsPerCm;
+            params.A2 = A2_cm * pixelsPerCm;
+            params.maxDisp = params.A1 + params.A2;
+
+            // Update UI Labels
+            ui.displays.dist.innerText = d_cm.toFixed(1);
+            ui.displays.freq.innerText = freq.toFixed(1);
+            ui.displays.phase.innerText = deltaPhi.toFixed(1);
+            ui.displays.amp1.innerText = A1_cm.toFixed(1);
+            ui.displays.amp2.innerText = A2_cm.toFixed(1);
+            document.getElementById('speedDisplay').innerText = params.timeScale.toFixed(1);
+            document.getElementById('zoomDisplay').innerText = zoomPercent;
+            document.getElementById('waveSpeedDisplay').innerText = vWaveCmS;
+
+            // Update Source Positions
+            const cx = state.width * 0.15; // Shifted left like before
+            const cy = state.height / 2;
+            const sx = Math.max(50, Math.min(cx, 200));
+
+            state.S1 = { x: sx, y: cy - params.d / 2 };
+            state.S2 = { x: sx, y: cy + params.d / 2 };
+        }
+
+        function resize() {
+            const w = canvasGL.parentElement.clientWidth;
+            const h = canvasGL.parentElement.clientHeight;
+
+            canvasGL.width = w;
+            canvasGL.height = h;
+            canvas2D.width = w;
+            canvas2D.height = h;
+
+            state.width = w;
+            state.height = h;
+
+            gl.viewport(0, 0, w, h);
+            updateParams();
+            if (state.isPaused) render();
+        }
+
+        // --- RENDER FUNCTIONS ---
+        function renderOverlay() {
+            ctx2D.clearRect(0, 0, state.width, state.height);
+
+            // Draw Sources
+            ctx2D.fillStyle = '#ef4444'; // Red
+            ctx2D.beginPath(); ctx2D.arc(state.S1.x, state.S1.y, 6, 0, PI2); ctx2D.fill();
+            ctx2D.beginPath(); ctx2D.arc(state.S2.x, state.S2.y, 6, 0, PI2); ctx2D.fill();
+
+            // Labels
+            ctx2D.fillStyle = document.documentElement.classList.contains('dark') ? '#fff' : '#334155';
+            ctx2D.font = 'bold 12px Inter';
+            ctx2D.fillText("S1", state.S1.x - 25, state.S1.y + 4);
+            ctx2D.fillText("S2", state.S2.x - 25, state.S2.y + 4);
+
+            // Hyperbolas (K lines)
+            const vWavePx = vWaveCmS * pixelsPerCm;
+            const lambda = vWavePx / params.f;
+            const maxK = Math.ceil(params.d / lambda) + 2;
+
+            // Distance shift = (PhaseDiffRad / 2PI) * lambda.
+            const distShift = (params.deltaPhi * Math.PI / PI2) * lambda;
+
+            // Center and constants for Hyperbola
+            const cx = state.S1.x;
+            const cy = (state.S1.y + state.S2.y) / 2;
+            const c = params.d / 2;
+            const c_sq = c * c;
+
+            const drawHyperbola = (N, color) => {
+                let diff = N * lambda - distShift;
+                if (Math.abs(diff) >= params.d) return;
+
+                let a = diff / 2;
+                let a_sq = a * a;
+                let b_sq = c_sq - a_sq;
+                if (b_sq <= 0) return;
+                let b = Math.sqrt(b_sq);
+
+                ctx2D.strokeStyle = color;
+                ctx2D.lineWidth = 2.5; // Thicker line
+                ctx2D.shadowBlur = 15; // Glow effect
+                ctx2D.shadowColor = color;
+
+                const abs_a = Math.abs(a);
+                const isTopBranch = (diff > 0);
+
+                let labelX = -1, labelY = -1;
+                // We want to find a point that is visible on screen to place the label.
+                // Best spot is usually at the edge of the screen (Right, Top, or Bottom).
+
+                // Track if we are currently inside bounds
+                let isInside = false;
+
+                // Loop
+                ctx2D.beginPath();
+                let hasStarted = false;
+
+                for (let x = 0; x < state.width; x += 4) {
+                    const term = Math.sqrt(1 + ((x - cx) ** 2) / b_sq);
+                    const y = isTopBranch ? (cy - abs_a * term) : (cy + abs_a * term);
+
+                    // Optimization: Don't draw if WAY off screen, but we need to track intersection
+                    // If y is within [0, height], this x,y is a candidate for label
+                    const inY = (y >= 10 && y <= state.height - 10);
+                    const inX = (x >= 0 && x <= state.width - 50); // -50 margin for text
+
+                    if (inY && inX) {
+                        labelX = x;
+                        labelY = y;
+                    }
+
+                    if (y < -100 || y > state.height + 100) {
+                        if (hasStarted) break; // Exited bounds
+                        continue;
+                    }
+
+                    if (!hasStarted) {
+                        ctx2D.moveTo(x, y);
+                        hasStarted = true;
+                    } else {
+                        ctx2D.lineTo(x, y);
+                    }
+                }
+                ctx2D.stroke();
+
+                // Reset shadow for text and next iterations to save perf and keep text sharp
+                ctx2D.shadowBlur = 0;
+                ctx2D.shadowColor = 'transparent';
+
+                // Draw Label
+                if (labelX !== -1) {
+                    ctx2D.fillStyle = color;
+                    ctx2D.font = 'bold 13px sans-serif'; // Removed monospace for cleaner look
+
+                    let text = "";
+                    if (Number.isInteger(N)) {
+                        // Maxima
+                        text = `CĐ ${Math.abs(N)}`;
+                    } else {
+                        // Minima: 0.5 -> 1, 1.5 -> 2
+                        const order = Math.floor(Math.abs(N)) + 1;
+                        text = `CT ${order}`;
+                    }
+
+                    ctx2D.fillText(text, labelX + 5, labelY + 4);
+                }
+            };
+
+            if (ui.toggleMaxima.checked) {
+                const col = document.documentElement.classList.contains('dark') ? 'rgba(250, 204, 21, 0.8)' : 'rgba(234, 179, 8, 0.8)'; // Yellow
+                for (let k = -maxK; k <= maxK; k++) {
+                    drawHyperbola(k, col);
+                }
+            }
+            if (ui.toggleMinima.checked) {
+                const col = document.documentElement.classList.contains('dark') ? 'rgba(244, 114, 182, 0.7)' : 'rgba(219, 39, 119, 0.7)'; // Pink
+                for (let k = -maxK; k <= maxK; k++) {
+                    drawHyperbola(k + 0.5, col);
+                }
+            }
+        }
+
+        function renderWebGL() {
+            gl.useProgram(program);
+
+            // Bind Attributes
+            gl.enableVertexAttribArray(positionLocation);
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+            gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+            // Bind Uniforms
+            gl.uniform2f(uniforms.resolution, state.width, state.height);
+            gl.uniform1f(uniforms.time, state.sourcePhase);
+            gl.uniform1f(uniforms.d, params.d);
+
+            const vWavePx = vWaveCmS * pixelsPerCm;
+            const lambda = vWavePx / params.f;
+            gl.uniform1f(uniforms.lambda, lambda);
+
+            gl.uniform1f(uniforms.deltaPhi, params.deltaPhi);
+            gl.uniform1f(uniforms.A1, params.A1);
+            gl.uniform1f(uniforms.A2, params.A2);
+            gl.uniform1f(uniforms.maxDisp, params.A1 + params.A2);
+
+            gl.uniform2f(uniforms.S1, state.S1.x, state.S1.y);
+            gl.uniform2f(uniforms.S2, state.S2.x, state.S2.y);
+
+            gl.uniform3fv(uniforms.colorBg, currentColors.bg);
+            gl.uniform3fv(uniforms.colorMax, currentColors.max);
+            gl.uniform3fv(uniforms.colorMin, currentColors.min);
+
+            // Draw
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+        }
+
+        function render() {
+            renderWebGL();
+            renderOverlay();
+
+            // HUD
+            ui.displays.time.innerText = state.elapsed.toFixed(2) + " s";
+            const vWavePx = vWaveCmS * pixelsPerCm;
+            const lambda = vWavePx / params.f;
+            ui.displays.lambda.innerText = (lambda / pixelsPerCm).toFixed(1) + " cm";
+        }
+
+        // --- GAME LOOP ---
+        let animationFrameId;
+        let lastTimestamp = 0;
+
+        function loop(timestamp) {
+            if (!lastTimestamp) lastTimestamp = timestamp;
+            const dt = (timestamp - lastTimestamp) / 1000;
+            lastTimestamp = timestamp;
+
+            if (!state.isPaused) {
+                const safeDt = Math.min(dt, 0.1) * params.timeScale;
+                state.elapsed += safeDt;
+
+                // Omega is constant physics, but we advance phase based on scaled time
+                const omega = 2 * Math.PI * params.f;
+                state.sourcePhase += omega * safeDt;
+
+                render();
+            }
+            animationFrameId = requestAnimationFrame(loop);
+        }
+
+        // --- EVENT HANDLERS ---
+        ui.togglePause.onclick = () => {
+            state.isPaused = !state.isPaused;
+            if (state.isPaused) {
+                ui.togglePause.innerHTML = '<i data-lucide="play" class="w-4 h-4 fill-current"></i> <span class="text-sm">Tiếp Tục</span>';
+            } else {
+                ui.togglePause.innerHTML = '<i data-lucide="pause" class="w-4 h-4 fill-current"></i> <span class="text-sm">Tạm Dừng</span>';
+            }
+            lucide.createIcons();
+        };
+
+        const inputs = [ui.distInput, ui.freqInput, ui.phaseInput, ui.amp1Input, ui.amp2Input, ui.timeScaleInput, ui.zoomInput, ui.waveSpeedInput];
+        inputs.forEach(input => input.oninput = () => {
+            updateParams();
+            if (state.isPaused) render();
+        });
+
+        // Wheel Zoom
+        canvas2D.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = Math.sign(e.deltaY) * -10;
+            let currentZoom = parseFloat(ui.zoomInput.value);
+            currentZoom = Math.max(50, Math.min(200, currentZoom + delta));
+            ui.zoomInput.value = currentZoom;
+            updateParams();
+            if (state.isPaused) render();
+        }, { passive: false });
+
+        ui.toggleMaxima.onchange = () => { if (state.isPaused) render(); };
+        ui.toggleMinima.onchange = () => { if (state.isPaused) render(); };
+
+        window.addEventListener('resize', resize);
+
+        // --- INIT ---
+        const isDark = document.documentElement.classList.contains('dark');
+        updateColors(isDark);
+        updateParams();
+        resize();
+
+        // --- THEMING & OBSERVERS ---
+        const obs = new MutationObserver(() => {
+            const isDark = document.documentElement.classList.contains('dark');
+            updateColors(isDark);
+            if (state.isPaused) render();
+        });
+        obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+        // Auto Pause
+        window.addEventListener('app-paused', () => {
+            cancelAnimationFrame(animationFrameId);
+        });
+        window.addEventListener('app-resumed', () => {
+            lastTimestamp = performance.now();
+            animationFrameId = requestAnimationFrame(loop);
+        });
+
+        requestAnimationFrame(loop);
+        lucide.createIcons();
+
+    </script>
+</body>
+
+</html>

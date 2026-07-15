@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mạch Điện DC | PHYSICS.LAB</title>
+    <meta name="description" content="Thí nghiệm ảo mạch điện một chiều DC. Kéo thả linh kiện, phân tích mạch theo phương pháp MNA, quan sát đáp ứng quá độ tụ điện.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+
+    <script src="js/tailwind-config.js"></script>
+    <link rel="stylesheet" href="css/global.css">
+
+    <style>
+        /* ====== LAYOUT ====== */
+        :root {
+            --accent: #00E5FF;
+            --accent2: #7B68EE;
+            --success: #00FF66;
+            --warn: #FF9900;
+            --danger: #FF4444;
+            --panel-bg: rgba(13,17,23,0.85);
+            --glass-border: rgba(255,255,255,0.07);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: #070b10;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* ====== MAIN LAYOUT ====== */
+        #app-shell {
+            display: grid;
+            grid-template-columns: 220px 1fr 300px;
+            grid-template-rows: 64px 1fr;
+            height: 100vh;
+            gap: 0;
+        }
+
+        /* ====== TOPBAR ====== */
+        #topbar {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px 0 72px;
+            background: rgba(7,11,16,0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 100;
+        }
+        #topbar .title-area h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.08em;
+            margin: 0;
+        }
+        #topbar .title-area .sub {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: rgba(255,255,255,0.35);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+        .topbar-actions { display: flex; gap: 8px; align-items: center; }
+        .tb-btn {
+            display: flex; align-items: center; gap: 6px;
+            padding: 7px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.7);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tb-btn:hover { background: rgba(0,229,255,0.1); border-color: var(--accent); color: var(--accent); }
+        .tb-btn.danger:hover { background: rgba(255,68,68,0.1); border-color: var(--danger); color: var(--danger); }
+        .tb-btn.active { background: rgba(255,68,68,0.15); border-color: var(--danger); color: var(--danger); }
+        .tb-sep { width: 1px; height: 24px; background: var(--glass-border); margin: 0 4px; }
+
+        /* ====== LEFT SIDEBAR — Components ====== */
+        #component-sidebar {
+            background: var(--panel-bg);
+            border-right: 1px solid var(--glass-border);
+            backdrop-filter: blur(16px);
+            overflow-y: auto;
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .sidebar-section-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: rgba(255,255,255,0.3);
+            padding: 8px 4px 4px;
+            margin-top: 8px;
+        }
+        .comp-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            background: rgba(255,255,255,0.03);
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            text-align: left;
+        }
+        .comp-btn:hover {
+            background: rgba(255,255,255,0.07);
+            border-color: rgba(255,255,255,0.12);
+            transform: translateX(2px);
+        }
+        .comp-btn .comp-icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; flex-shrink: 0;
+        }
+        .comp-btn .comp-info .comp-name {
+            font-size: 12px; font-weight: 600; color: #e2e8f0;
+        }
+        .comp-btn .comp-info .comp-desc {
+            font-size: 10px; color: rgba(255,255,255,0.35);
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.3;
+        }
+
+        /* ====== CANVAS AREA ====== */
+        #canvas-area {
+            position: relative;
+            overflow: hidden;
+            background: #0d1117;
+        }
+        #dc-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: crosshair;
+        }
+
+        /* Floating canvas overlays */
+        #canvas-hint {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: rgba(255,255,255,0.25);
+            letter-spacing: 0.1em;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        #canvas-mode-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(13,17,23,0.8);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.4);
+            pointer-events: none;
+        }
+        #canvas-mode-badge.running {
+            border-color: var(--success);
+            color: var(--success);
+            box-shadow: 0 0 8px rgba(0,255,102,0.2);
+        }
+
+        /* ====== RIGHT PANEL ====== */
+        #right-panel {
+            background: var(--panel-bg);
+            border-left: 1px solid var(--glass-border);
+            backdrop-filter: blur(16px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-section {
+            border-bottom: 1px solid var(--glass-border);
+            flex-shrink: 0;
+        }
+        .panel-section-hd {
+            padding: 12px 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: rgba(255,255,255,0.35);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .panel-section-hd::before {
+            content: '';
+            display: block;
+            width: 3px; height: 10px;
+            border-radius: 2px;
+            background: var(--accent);
+        }
+
+        /* Results table */
+        #dc-results { padding: 0 12px 12px; overflow-y: auto; max-height: 200px; }
+        .results-table { display: flex; flex-direction: column; gap: 4px; }
+        .result-row {
+            display: grid;
+            grid-template-columns: 60px 1fr 1fr;
+            gap: 4px;
+            align-items: center;
+            padding: 6px 10px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        .result-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .result-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: rgba(255,255,255,0.5);
+        }
+        .result-val b { color: #fff; }
+
+        /* Graph */
+        #dc-graph-section { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+        #dc-graph-wrap { flex: 1; padding: 0 12px 12px; min-height: 0; position: relative; }
+        #dc-graph {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            border: 1px solid rgba(123,104,238,0.2);
+            display: block;
+        }
+
+        /* Properties panel */
+        #dc-properties-section { flex-shrink: 0; border-top: 1px solid var(--glass-border); }
+        #dc-properties { padding: 10px 14px 14px; overflow-y: auto; max-height: 220px; }
+        .prop-hint {
+            font-size: 11px; color: rgba(255,255,255,0.25);
+            font-family: 'JetBrains Mono', monospace;
+            text-align: center; padding: 20px 0;
+        }
+        .prop-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px; font-weight: 700;
+            margin-bottom: 12px; letter-spacing: 0.1em;
+        }
+        .prop-row { margin-bottom: 8px; }
+        .prop-num-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .prop-num-label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            font-family: 'JetBrains Mono', monospace;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .prop-num-input {
+            width: 90px;
+            padding: 5px 8px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 6px;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            outline: none;
+            text-align: right;
+            -moz-appearance: textfield;
+        }
+        .prop-num-input::-webkit-inner-spin-button,
+        .prop-num-input::-webkit-outer-spin-button { opacity: 1; }
+        .prop-num-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(0,229,255,0.15); }
+        .prop-input {
+            width: 100%; padding: 5px 8px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 6px; color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px; outline: none;
+        }
+        .prop-input:focus { border-color: var(--accent); }
+        .prop-delete-btn {
+            width: 100%; padding: 7px;
+            background: rgba(255,68,68,0.1);
+            border: 1px solid rgba(255,68,68,0.3);
+            border-radius: 8px; color: var(--danger);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; cursor: pointer; margin-top: 8px;
+            transition: all 0.2s;
+        }
+        .prop-delete-btn:hover { background: rgba(255,68,68,0.2); }
+
+        /* Unknown Rx area */
+        #unknown-answer-area {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: rgba(255,68,68,0.07);
+            border-top: 1px solid rgba(255,68,68,0.2);
+            flex-shrink: 0;
+        }
+        #rx-input {
+            flex: 1; padding: 6px 10px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,68,68,0.4);
+            border-radius: 8px; color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px; outline: none;
+        }
+        .rx-btn {
+            padding: 6px 12px; border-radius: 8px;
+            border: 1px solid var(--accent); background: transparent;
+            color: var(--accent); font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            cursor: pointer; transition: all 0.2s; white-space: nowrap;
+        }
+        .rx-btn:hover { background: rgba(0,229,255,0.1); }
+        .rx-hint-btn {
+            padding: 6px 10px; border-radius: 8px;
+            border: 1px solid rgba(255,153,0,0.4); background: transparent;
+            color: var(--warn); font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .rx-hint-btn:hover { background: rgba(255,153,0,0.1); }
+
+        /* Neon glow text */
+        .neon-cyan { text-shadow: 0 0 8px rgba(0,229,255,0.6); color: var(--accent); }
+
+        /* Quiz Mode Button */
+        .quiz-mode-toggle:hover { background: rgba(123,104,238,0.15); border-color: var(--accent2); color: var(--accent2); }
+        .quiz-mode-toggle.active { background: rgba(123,104,238,0.2); border-color: var(--accent2); color: var(--accent2); box-shadow: 0 0 12px rgba(123,104,238,0.3); }
+
+        /* ====== QUIZ OVERLAY ====== */
+        #quiz-overlay {
+            display: none;
+            grid-row: 2;
+            grid-column: 3;
+            flex-direction: column;
+            background: var(--panel-bg);
+            border-left: 1px solid rgba(123,104,238,0.3);
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+            overflow: hidden;
+            position: relative;
+        }
+        #quiz-overlay::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, var(--accent2), var(--accent), var(--accent2));
+        }
+
+        /* Quiz Header */
+        .quiz-header {
+            padding: 14px 16px 10px;
+            border-bottom: 1px solid rgba(123,104,238,0.2);
+            flex-shrink: 0;
+        }
+        .quiz-header-row {
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .quiz-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px; font-weight: 700;
+            color: var(--accent2);
+            letter-spacing: 0.1em;
+        }
+        #quiz-score-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            display: flex; align-items: baseline; gap: 2px;
+        }
+        .score-correct { color: var(--success); font-weight: 700; font-size: 13px; }
+        .score-sep { color: rgba(255,255,255,0.3); }
+        .score-total { color: rgba(255,255,255,0.5); }
+        .score-pct {
+            margin-left: 6px; font-size: 9px;
+            background: rgba(123,104,238,0.2); color: var(--accent2);
+            padding: 1px 6px; border-radius: 10px;
+            border: 1px solid rgba(123,104,238,0.3);
+        }
+        #quiz-type-badge {
+            margin-top: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px; text-transform: uppercase;
+            color: rgba(255,255,255,0.4); letter-spacing: 0.15em;
+        }
+
+        /* Given values */
+        #quiz-given {
+            display: flex; flex-wrap: wrap; gap: 5px;
+            padding: 10px 16px 8px;
+            border-bottom: 1px solid var(--glass-border);
+            flex-shrink: 0;
+        }
+        .given-chip {
+            display: flex; align-items: center; gap: 4px;
+            padding: 3px 8px; border-radius: 6px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .given-key { font-family: 'Orbitron', sans-serif; font-size: 10px; color: #FF9900; font-weight: 700; }
+        .given-val { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #fff; }
+
+        /* Question */
+        .quiz-question-box {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--glass-border);
+            flex-shrink: 0;
+        }
+        .quiz-qlabel {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8px; text-transform: uppercase;
+            color: rgba(255,255,255,0.3); letter-spacing: 0.2em;
+            margin-bottom: 6px;
+        }
+        #quiz-question-text {
+            font-size: 13px; font-weight: 600;
+            color: #fff; line-height: 1.5;
+        }
+        #quiz-unit-hint {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; color: var(--accent2);
+            margin-top: 4px;
+        }
+
+        /* Answer row */
+        .quiz-answer-row {
+            display: flex; gap: 6px; align-items: center;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--glass-border);
+            flex-shrink: 0;
+        }
+        #quiz-answer-input {
+            flex: 1; padding: 8px 10px;
+            background: rgba(123,104,238,0.08);
+            border: 1px solid rgba(123,104,238,0.3);
+            border-radius: 8px; color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px; font-weight: 700;
+            outline: none; text-align: right;
+            -moz-appearance: textfield;
+        }
+        #quiz-answer-input::-webkit-inner-spin-button,
+        #quiz-answer-input::-webkit-outer-spin-button { opacity: 1; }
+        #quiz-answer-input:focus { border-color: var(--accent2); box-shadow: 0 0 0 2px rgba(123,104,238,0.2); }
+        .qz-check-btn {
+            padding: 8px 14px; border-radius: 8px;
+            background: rgba(123,104,238,0.2);
+            border: 1px solid var(--accent2);
+            color: var(--accent2); font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; font-weight: 700;
+            cursor: pointer; transition: all 0.2s; white-space: nowrap;
+        }
+        .qz-check-btn:hover { background: rgba(123,104,238,0.35); }
+
+        /* Feedback */
+        .quiz-feedback {
+            display: none;
+            margin: 0 12px 6px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px; line-height: 1.5;
+            font-family: 'JetBrains Mono', monospace;
+            flex-shrink: 0;
+        }
+        .quiz-feedback code {
+            background: rgba(255,255,255,0.1);
+            padding: 1px 5px; border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .quiz-feedback.correct { background: rgba(0,255,102,0.08); border: 1px solid rgba(0,255,102,0.3); color: var(--success); }
+        .quiz-feedback.close   { background: rgba(255,153,0,0.08);  border: 1px solid rgba(255,153,0,0.3);  color: var(--warn); }
+        .quiz-feedback.wrong   { background: rgba(255,68,68,0.08);   border: 1px solid rgba(255,68,68,0.3);  color: #FF8080; }
+
+        /* Hints */
+        .quiz-hints-section { flex-shrink: 0; }
+        #quiz-hints-list {
+            padding: 0 12px 8px;
+            display: flex; flex-direction: column; gap: 6px;
+            max-height: 130px; overflow-y: auto;
+        }
+        .quiz-hint-item {
+            padding: 7px 10px;
+            background: rgba(0,229,255,0.05);
+            border-left: 2px solid var(--accent);
+            border-radius: 0 6px 6px 0;
+            font-size: 11px; color: rgba(255,255,255,0.75);
+            line-height: 1.5;
+        }
+        .hint-num {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 8px; font-weight: 700;
+            color: var(--accent); margin-right: 6px;
+            text-transform: uppercase;
+        }
+
+        /* Action buttons */
+        .quiz-actions {
+            display: flex; gap: 6px;
+            padding: 8px 12px;
+            border-top: 1px solid var(--glass-border);
+            flex-shrink: 0; flex-wrap: wrap;
+        }
+        .qz-hint-btn {
+            flex: 1; padding: 7px 10px; border-radius: 8px;
+            background: rgba(0,229,255,0.07);
+            border: 1px solid rgba(0,229,255,0.25);
+            color: var(--accent); font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; cursor: pointer; transition: all 0.2s;
+        }
+        .qz-hint-btn:hover:not(:disabled) { background: rgba(0,229,255,0.15); }
+        .qz-hint-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .qz-sol-btn {
+            flex: 1; padding: 7px 10px; border-radius: 8px;
+            background: rgba(255,153,0,0.07);
+            border: 1px solid rgba(255,153,0,0.25);
+            color: var(--warn); font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; cursor: pointer; transition: all 0.2s;
+        }
+        .qz-sol-btn:hover { background: rgba(255,153,0,0.15); }
+        .qz-next-btn {
+            width: 100%; padding: 9px; border-radius: 8px;
+            background: linear-gradient(135deg, rgba(123,104,238,0.25), rgba(0,229,255,0.15));
+            border: 1px solid rgba(123,104,238,0.4);
+            color: #fff; font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; font-weight: 700;
+            cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .qz-next-btn:hover { background: linear-gradient(135deg, rgba(123,104,238,0.4), rgba(0,229,255,0.25)); border-color: var(--accent2); }
+
+        /* Solution steps */
+        #quiz-solution {
+            display: none;
+            flex-direction: column; gap: 4px;
+            padding: 0 12px 12px;
+            overflow-y: auto;
+        }
+        .solution-step {
+            border-radius: 8px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            overflow: hidden;
+        }
+        .sol-title {
+            padding: 6px 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; font-weight: 700;
+            color: var(--accent2);
+            background: rgba(123,104,238,0.1);
+            border-bottom: 1px solid rgba(123,104,238,0.15);
+        }
+        .sol-body {
+            padding: 8px 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; color: rgba(255,255,255,0.7);
+            line-height: 1.7;
+        }
+        .sol-body strong { color: #fff; }
+
+        /* ====== FREE PRACTICE PANEL ====== */
+        #fp-panel {
+            display: none;
+            grid-row: 2;
+            grid-column: 3;
+            flex-direction: column;
+            background: var(--panel-bg);
+            border-left: 1px solid rgba(0,229,255,0.2);
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+            overflow: hidden;
+            position: relative;
+        }
+        #fp-panel::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--success), var(--accent));
+        }
+        .fp-header {
+            padding: 12px 16px 10px;
+            border-bottom: 1px solid rgba(0,229,255,0.15);
+            flex-shrink: 0;
+        }
+        .fp-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px; font-weight: 700;
+            color: var(--accent); letter-spacing: 0.1em;
+        }
+        .fp-subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px; color: rgba(255,255,255,0.35);
+            text-transform: uppercase; letter-spacing: 0.15em;
+            margin-top: 3px;
+        }
+        /* Real-time metrics row */
+        .fp-metrics {
+            display: flex; gap: 0;
+            border-bottom: 1px solid var(--glass-border);
+            flex-shrink: 0;
+        }
+        .fp-metric {
+            flex: 1; padding: 10px 10px 8px;
+            border-right: 1px solid var(--glass-border);
+            text-align: center;
+            transition: background 0.2s;
+        }
+        .fp-metric:last-child { border-right: none; }
+        .fp-metric:hover { background: rgba(255,255,255,0.03); }
+        .fp-metric-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px; color: rgba(255,255,255,0.35);
+            text-transform: uppercase; letter-spacing: 0.12em;
+            margin-bottom: 3px;
+        }
+        .fp-metric-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 16px; font-weight: 700;
+            line-height: 1;
+        }
+        .fp-metric-val.accent2 { color: var(--accent2); }
+        .fp-metric-val.green   { color: var(--success); }
+        .fp-metric-val.cyan    { color: var(--accent); }
+        .fp-unit {
+            font-size: 9px; font-weight: 400;
+            color: rgba(255,255,255,0.4);
+            margin-left: 2px;
+        }
+        /* Component table */
+        #fp-dashboard {
+            flex: 1; overflow-y: auto;
+            display: flex; flex-direction: column;
+        }
+        .fp-table {
+            display: flex; flex-direction: column;
+        }
+        .fp-table-hd {
+            display: grid;
+            grid-template-columns: 1fr 52px 60px 60px;
+            gap: 2px;
+            padding: 6px 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8px; text-transform: uppercase;
+            letter-spacing: 0.15em; color: rgba(255,255,255,0.3);
+            border-bottom: 1px solid var(--glass-border);
+            flex-shrink: 0;
+        }
+        .fp-table-row {
+            display: grid;
+            grid-template-columns: 1fr 52px 60px 60px;
+            gap: 2px;
+            padding: 5px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            align-items: center;
+            transition: background 0.15s;
+        }
+        .fp-table-row:hover { background: rgba(255,255,255,0.03); }
+        .fp-comp-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px; font-weight: 700;
+            display: flex; flex-direction: column;
+        }
+        .fp-comp-param {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8px; color: rgba(255,255,255,0.3); font-weight: 400;
+        }
+        .fp-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; color: rgba(255,255,255,0.7);
+            text-align: right;
+        }
+        .fp-empty {
+            flex: 1; display: flex; align-items: center; justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; color: rgba(255,255,255,0.2);
+            text-align: center; line-height: 1.8;
+            padding: 20px;
+        }
+        /* Solution area */
+        .fp-actions {
+            padding: 8px 12px;
+            border-top: 1px solid var(--glass-border);
+            flex-shrink: 0;
+        }
+        #fp-show-sol-btn {
+            width: 100%; padding: 9px;
+            border-radius: 8px;
+            background: rgba(0,229,255,0.07);
+            border: 1px solid rgba(0,229,255,0.25);
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; font-weight: 700;
+            cursor: pointer; transition: all 0.2s;
+        }
+        #fp-show-sol-btn:hover { background: rgba(0,229,255,0.15); }
+        #fp-solution-area {
+            display: none;
+            flex-direction: column; gap: 4px;
+            padding: 8px 12px 12px;
+            overflow-y: auto;
+            max-height: 340px;
+            border-top: 1px solid var(--glass-border);
+        }
+        .fp-sol-step {
+            border-radius: 7px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            overflow: hidden;
+        }
+        .fp-sol-title {
+            padding: 5px 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px; font-weight: 700;
+            color: var(--accent);
+            background: rgba(0,229,255,0.07);
+            border-bottom: 1px solid rgba(0,229,255,0.1);
+            text-transform: uppercase; letter-spacing: 0.08em;
+        }
+        .fp-sol-body {
+            padding: 7px 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; color: rgba(255,255,255,0.75);
+            line-height: 1.7;
+        }
+        .fp-sol-body strong { color: #fff; }
+        .fp-sol-body em { color: rgba(255,255,255,0.5); font-style: normal; }
+
+        /* Free Practice button color */
+        .fp-mode-toggle:hover { background: rgba(0,255,102,0.1); border-color: var(--success); color: var(--success); }
+        .fp-mode-toggle.active { background: rgba(0,255,102,0.15); border-color: var(--success); color: var(--success); box-shadow: 0 0 12px rgba(0,255,102,0.25); }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+    </style>
+</head>
+
+<body class="dark">
+
+<div id="app-shell">
+
+    <!-- ====== TOPBAR ====== -->
+    <header id="topbar">
+        <div class="title-area">
+            <h2>EXPERIMENT / <span class="neon-cyan">Mạch Điện Một Chiều (DC)</span></h2>
+            <div class="sub">Modified Nodal Analysis · Backward Euler Integration · Real-time Simulation</div>
+        </div>
+        <div class="topbar-actions">
+            <button class="tb-btn" onclick="loadDemoCircuit(); runSimulation();" title="Tải mạch demo">
+                <i data-lucide="play-circle" style="width:13px;height:13px"></i> Demo
+            </button>
+            <div class="tb-sep"></div>
+            <button class="tb-btn fp-mode-toggle" id="free-practice-btn" onclick="toggleFreePractice()" title="Phân tích mạch tự do — Real-time dashboard">
+                <i data-lucide="layout-dashboard" style="width:13px;height:13px"></i> Phân Tích
+            </button>
+            <div class="tb-sep"></div>
+            <button class="tb-btn quiz-mode-toggle" id="quiz-mode-btn" onclick="toggleQuizMode()" title="Chế độ luyện tập giải bài">
+                <i data-lucide="graduation-cap" style="width:13px;height:13px"></i> Luyện Tập
+            </button>
+            <div class="tb-sep"></div>
+            <button class="tb-btn" id="unknown-mode-btn" onclick="activateUnknownMode()" title="Chế độ tìm điện trở ẩn">
+                <i data-lucide="help-circle" style="width:13px;height:13px"></i> R<sub style="font-size:9px">x</sub> Ẩn
+            </button>
+            <div class="tb-sep"></div>
+            <button class="tb-btn danger" onclick="clearCircuit()" title="Xóa toàn bộ mạch">
+                <i data-lucide="trash-2" style="width:13px;height:13px"></i> Xóa mạch
+            </button>
+        </div>
+    </header>
+
+    <!-- ====== LEFT SIDEBAR — Components ====== -->
+    <aside id="component-sidebar">
+        <div class="sidebar-section-title">⚡ Nguồn điện</div>
+
+        <button class="comp-btn" onclick="addComponent('voltage_source')" id="btn-voltage-source">
+            <div class="comp-icon" style="background:rgba(0,255,102,0.1); border:1px solid rgba(0,255,102,0.3); font-size:18px;">⊕</div>
+            <div class="comp-info">
+                <div class="comp-name" style="color:#00FF66">Nguồn áp</div>
+                <div class="comp-desc">Voltage source<br>Điều chỉnh SĐĐ</div>
+            </div>
+        </button>
+
+        <div class="sidebar-section-title">🔌 Linh kiện thụ động</div>
+
+        <button class="comp-btn" onclick="addComponent('resistor')" id="btn-resistor">
+            <div class="comp-icon" style="background:rgba(255,153,0,0.1); border:1px solid rgba(255,153,0,0.3);">
+                <svg width="24" height="14" viewBox="0 0 24 14"><polyline points="0,7 3,7 3.5,1 5.5,13 7.5,1 9.5,13 11.5,1 13.5,13 15.5,1 17.5,13 19.5,7 24,7" fill="none" stroke="#FF9900" stroke-width="2"/></svg>
+            </div>
+            <div class="comp-info">
+                <div class="comp-name" style="color:#FF9900">Điện trở</div>
+                <div class="comp-desc">Resistor<br>1Ω – 10kΩ</div>
+            </div>
+        </button>
+
+        <button class="comp-btn" onclick="addComponent('capacitor')" id="btn-capacitor">
+            <div class="comp-icon" style="background:rgba(123,104,238,0.1); border:1px solid rgba(123,104,238,0.3);">
+                <svg width="24" height="20" viewBox="0 0 24 20">
+                    <line x1="0" y1="10" x2="10" y2="10" stroke="#7B68EE" stroke-width="2"/>
+                    <line x1="10" y1="2" x2="10" y2="18" stroke="#7B68EE" stroke-width="2.5"/>
+                    <line x1="14" y1="2" x2="14" y2="18" stroke="#7B68EE" stroke-width="2.5"/>
+                    <line x1="14" y1="10" x2="24" y2="10" stroke="#7B68EE" stroke-width="2"/>
+                </svg>
+            </div>
+            <div class="comp-info">
+                <div class="comp-name" style="color:#7B68EE">Tụ điện</div>
+                <div class="comp-desc">Capacitor<br>Quá độ RC</div>
+            </div>
+        </button>
+
+        <div class="sidebar-section-title">📏 Thiết bị đo</div>
+
+        <button class="comp-btn" onclick="addComponent('ammeter')" id="btn-ammeter">
+            <div class="comp-icon" style="background:rgba(255,68,68,0.1); border:1px solid rgba(255,68,68,0.3);">
+                <svg width="28" height="28" viewBox="0 0 28 28">
+                    <circle cx="14" cy="14" r="12" fill="none" stroke="#FF4444" stroke-width="2"/>
+                    <text x="14" y="18" text-anchor="middle" fill="#FF4444" font-family="Orbitron" font-size="10" font-weight="bold">A</text>
+                </svg>
+            </div>
+            <div class="comp-info">
+                <div class="comp-name" style="color:#FF4444">Ampe kế</div>
+                <div class="comp-desc">Ammeter<br>Đo cường độ I</div>
+            </div>
+        </button>
+
+        <button class="comp-btn" onclick="addComponent('voltmeter')" id="btn-voltmeter">
+            <div class="comp-icon" style="background:rgba(0,229,255,0.1); border:1px solid rgba(0,229,255,0.3);">
+                <svg width="28" height="28" viewBox="0 0 28 28">
+                    <circle cx="14" cy="14" r="12" fill="none" stroke="#00E5FF" stroke-width="2"/>
+                    <text x="14" y="18" text-anchor="middle" fill="#00E5FF" font-family="Orbitron" font-size="10" font-weight="bold">V</text>
+                </svg>
+            </div>
+            <div class="comp-info">
+                <div class="comp-name" style="color:#00E5FF">Vôn kế</div>
+                <div class="comp-desc">Voltmeter<br>Đo hiệu điện thế</div>
+            </div>
+        </button>
+
+        <div class="sidebar-section-title">📖 Hướng dẫn</div>
+        <div style="padding:10px 8px; font-family:'JetBrains Mono',monospace; font-size:9px; color:rgba(255,255,255,0.3); line-height:1.8;">
+            • Click <b style="color:rgba(255,255,255,0.5)">linh kiện</b> ở đây để thêm<br>
+            • <b style="color:rgba(255,255,255,0.5)">Kéo</b> terminal ● để nối dây<br>
+            • <b style="color:rgba(255,255,255,0.5)">Click</b> thân để chọn &amp; chỉnh<br>
+            • <b style="color:rgba(255,255,255,0.5)">Chuột phải</b> để xóa linh kiện<br>
+            • <b style="color:rgba(255,255,255,0.5)">Lăn chuột</b> để thu phóng<br>
+            • <b style="color:rgba(255,255,255,0.5)">Kéo giữa</b> để di chuyển canvas
+        </div>
+    </aside>
+
+    <!-- ====== CANVAS AREA ====== -->
+    <main id="canvas-area">
+        <canvas id="dc-canvas"></canvas>
+        <div id="canvas-hint">Kéo thả linh kiện từ sidebar bên trái · Click terminal ● để nối dây</div>
+        <div id="canvas-mode-badge">STEADY-STATE</div>
+    </main>
+
+    <!-- ====== RIGHT PANEL ====== -->
+    <section id="right-panel">
+
+        <!-- Results -->
+        <div class="panel-section">
+            <div class="panel-section-hd">Kết quả đo lường</div>
+            <div id="dc-results">
+                <p style="font-family:'JetBrains Mono',monospace; font-size:10px; color:rgba(255,255,255,0.2); text-align:center; padding:16px 0;">
+                    Lắp ráp mạch để xem kết quả
+                </p>
+            </div>
+        </div>
+
+        <!-- Voltage Graph -->
+        <div id="dc-graph-section" class="panel-section" style="flex:1; border-bottom:none;">
+            <div class="panel-section-hd">
+                Đồ thị V<sub style="font-size:8px">C</sub>(t) — Tụ điện
+            </div>
+            <div id="dc-graph-wrap">
+                <canvas id="dc-graph"></canvas>
+            </div>
+        </div>
+
+        <!-- Properties Inspector -->
+        <div id="dc-properties-section" class="panel-section">
+            <div class="panel-section-hd">Thuộc tính linh kiện</div>
+            <div id="dc-properties">
+                <p class="prop-hint">Chọn linh kiện để chỉnh sửa thông số</p>
+            </div>
+        </div>
+
+        <!-- Unknown Rx answer area -->
+        <div id="unknown-answer-area">
+            <input type="number" id="rx-input" placeholder="Nhập R_x (Ω)…" step="0.1" min="0">
+            <button class="rx-hint-btn" onclick="showRxHint()">💡</button>
+            <button class="rx-btn" onclick="checkRxAnswer()">Kiểm tra</button>
+        </div>
+
+    </section>
+
+    <!-- ====== QUIZ OVERLAY (replaces right panel in quiz mode) ====== -->
+    <section id="quiz-overlay">
+
+        <!-- Header: title + score -->
+        <div class="quiz-header">
+            <div class="quiz-header-row">
+                <div class="quiz-title">🎓 CHẾ ĐỘ LUYỆN TẬP</div>
+                <div id="quiz-score-display">
+                    <span class="score-correct">0</span>
+                    <span class="score-sep">/</span>
+                    <span class="score-total">0</span>
+                    <span class="score-pct">—</span>
+                </div>
+            </div>
+            <div id="quiz-type-badge">Đang khởi tạo...</div>
+        </div>
+
+        <!-- Given values -->
+        <div id="quiz-given"></div>
+
+        <!-- Question -->
+        <div class="quiz-question-box">
+            <div class="quiz-qlabel">📐 Yêu cầu</div>
+            <div id="quiz-question-text">Đang tải bài toán...</div>
+            <div id="quiz-unit-hint"></div>
+        </div>
+
+        <!-- Answer input + check -->
+        <div class="quiz-answer-row">
+            <input type="number" id="quiz-answer-input"
+                placeholder="Nhập đáp án…"
+                step="any"
+                onkeydown="quizAnswerKeydown(event)">
+            <button class="qz-check-btn" onclick="checkQuizAnswer()">✓ Kiểm tra</button>
+        </div>
+
+        <!-- Feedback -->
+        <div class="quiz-feedback" id="quiz-feedback"></div>
+
+        <!-- Hints list -->
+        <div class="quiz-hints-section">
+            <div id="quiz-hints-list"></div>
+        </div>
+
+        <!-- Solution steps (scrollable, hidden by default) -->
+        <div id="quiz-solution"></div>
+
+        <!-- Action buttons -->
+        <div class="quiz-actions">
+            <button class="qz-hint-btn" id="quiz-hint-btn" onclick="getQuizHint()">💡 Gợi ý</button>
+            <button class="qz-sol-btn" id="quiz-show-sol-btn" onclick="showQuizSolution()">📋 Lời giải</button>
+            <button class="qz-next-btn" onclick="nextQuizProblem()">
+                <i data-lucide="arrow-right" style="width:14px;height:14px"></i> Bài tiếp theo
+            </button>
+        </div>
+
+    </section>
+
+    <!-- ====== FREE PRACTICE PANEL ====== -->
+    <section id="fp-panel">
+
+        <!-- Header -->
+        <div class="fp-header">
+            <div class="fp-title">📊 PHÂN TÍCH TỰ DO</div>
+            <div class="fp-subtitle">Real-time Circuit Analysis Dashboard</div>
+        </div>
+
+        <!-- Real-time dashboard (metrics + table, rendered by JS) -->
+        <div id="fp-dashboard">
+            <div class="fp-empty">Tải mạch Demo hoặc lắp ráp mạch<br>để xem phân tích tực thì</div>
+        </div>
+
+        <!-- Solution area (toggled) -->
+        <div id="fp-solution-area"></div>
+
+        <!-- Actions -->
+        <div class="fp-actions">
+            <button id="fp-show-sol-btn" onclick="showFreeSolution()">📋 Xem lời giải</button>
+        </div>
+
+    </section>
+
+</div>
+
+<!-- Scripts -->
+<script src="js/theme.js?v=4.0.8"></script>
+    <script src="js/theory-system.js?v=4.0.8"></script>
+    <script src="js/quiz-database.js"></script>
+    <script src="js/quiz-system.js?v=4.0.8"></script>
+
+<script src="js/sim-mach-dien-dc.js"></script>
+
+<script>
+    // Resize graph canvas to fill its container
+    function resizeGraphCanvas() {
+        const wrap = document.getElementById('dc-graph-wrap');
+        const gc   = document.getElementById('dc-graph');
+        if (wrap && gc) {
+            gc.width  = wrap.clientWidth - 24;
+            gc.height = wrap.clientHeight - 12;
+        }
+    }
+    window.addEventListener('resize', resizeGraphCanvas);
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(resizeGraphCanvas, 100);
+        initFreePractice();
+    });
+
+    // Mode badge update
+    const origRunSim = window.runSimulation;
+    window.runSimulation = function() {
+        const badge = document.getElementById('canvas-mode-badge');
+        const hasCap = circuitModel?.components?.some(c => c.type === 'capacitor');
+        if (badge) {
+            badge.textContent = hasCap ? '⏱ TRANSIENT' : '∞ STEADY-STATE';
+            badge.className = hasCap ? 'running' : '';
+        }
+        if (origRunSim) origRunSim();
+    };
+
+    // Override addComponent to also run simulation
+    const origAdd = window.addComponent;
+    window.addComponent = function(type) {
+        if (origAdd) origAdd(type);
+        const badge = document.getElementById('canvas-mode-badge');
+        const hasCap = circuitModel?.components?.some(c => c.type === 'capacitor');
+        if (badge) {
+            badge.textContent = hasCap ? '⏱ TRANSIENT' : '∞ STEADY-STATE';
+            badge.className = hasCap ? 'running' : '';
+        }
+    };
+</script>
+
+</body>
+</html>

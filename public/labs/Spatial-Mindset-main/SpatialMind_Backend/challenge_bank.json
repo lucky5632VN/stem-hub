@@ -1,0 +1,282 @@
+[
+  {
+    "id": 1,
+    "difficulty": "easy",
+    "xp": 50,
+    "title": "Hình lập phương cơ bản",
+    "problem": "Cho hình lập phương ABCD.A'B'C'D' cạnh a = 2. Tính góc giữa đường chéo AC' và mặt đáy ABCD.",
+    "answer_hint": "arctan(√2/2) ≈ 35.26°"
+  },
+  {
+    "id": 2,
+    "difficulty": "easy",
+    "xp": 50,
+    "title": "Hình chóp đều S.ABCD",
+    "problem": "Hình chóp đều S.ABCD có cạnh đáy a = 4, chiều cao h = 3. Tính thể tích.",
+    "answer_hint": "V = (1/3) × 16 × 3 = 16"
+  },
+  {
+    "id": 3,
+    "difficulty": "easy",
+    "xp": 50,
+    "title": "Lăng trụ tam giác",
+    "problem": "Lăng trụ tam giác đều ABC.A'B'C' có cạnh đáy a = 2, chiều cao h = 4. Tính thể tích.",
+    "answer_hint": "V = (√3/4)×4×4 = 4√3"
+  },
+  {
+    "id": 4,
+    "difficulty": "easy",
+    "xp": 60,
+    "title": "Đường chéo hình lập phương",
+    "problem": "Hình lập phương cạnh a. Tính độ dài đường chéo không gian AC'.",
+    "answer_hint": "AC' = a√3"
+  },
+  {
+    "id": 5,
+    "difficulty": "easy",
+    "xp": 60,
+    "title": "Góc mặt bên hình chóp",
+    "problem": "Hình chóp đều S.ABCD cạnh đáy 4, cạnh bên 5. Tính góc giữa mặt bên SAB và đáy.",
+    "answer_hint": "Tính đường cao từ S xuống AB, rồi tính góc"
+  },
+  {
+    "id": 6,
+    "difficulty": "medium",
+    "xp": 100,
+    "title": "Góc nhị diện phức tạp",
+    "problem": "Hình lập phương ABCD.A'B'C'D' cạnh 1. Tính góc nhị diện giữa mặt phẳng A'BD và mặt đáy ABCD.",
+    "answer_hint": "arccos(1/√3) ≈ 54.74°"
+  },
+  {
+    "id": 7,
+    "difficulty": "medium",
+    "xp": 100,
+    "title": "Khoảng cách từ điểm đến mặt phẳng",
+    "problem": "Hình chóp đều S.ABCD cạnh đáy 4, chiều cao 3. Tính khoảng cách từ B đến mặt phẳng (SAC).",
+    "answer_hint": "Dùng thể tích: d(B, SAC) = 3V(SABC) / S(SAC)"
+  },
+  {
+    "id": 8,
+    "difficulty": "medium",
+    "xp": 100,
+    "title": "Thiết diện hình chóp",
+    "problem": "Hình chóp S.ABCD đáy vuông cạnh 2, đỉnh S trên đường vuông góc qua tâm, h=3. Mặt phẳng qua A song song SB cắt hình chóp theo thiết diện gì?",
+    "answer_hint": "Thiết diện là tam giác"
+  },
+  {
+    "id": 9,
+    "difficulty": "medium",
+    "xp": 120,
+    "title": "Lăng trụ xiên",
+    "problem": "Hình lăng trụ ABCA'B'C', đáy là tam giác vuông AB=AC=2, AA'=3, AA' vuông góc với BC. Tính thể tích.",
+    "answer_hint": "V = S_đáy × h"
+  },
+  {
+    "id": 10,
+    "difficulty": "medium",
+    "xp": 120,
+    "title": "Góc của cạnh bên với đáy",
+    "problem": "Hình chóp S.ABCD đáy vuông cạnh 4, cạnh bên SA=SB=SC=SD=5. Tính góc giữa cạnh SA và mặt đáy.",
+    "answer_hint": "SO = 2√2, sin(angle) = SO/SA"
+  },
+  {
+    "id": 11,
+    "difficulty": "medium",
+    "xp": 130,
+    "title": "Đường thẳng song song mặt phẳng",
+    "problem": "Lăng trụ đứng ABC.A'B'C' đáy tam giác đều cạnh 2, chiều cao 4. M là trung điểm AA', N là trung điểm BB'. MN có song song với (A'B'C') không?",
+    "answer_hint": "Kiểm tra MN // A'B' và MN ∈ mặt phẳng song song"
+  },
+  {
+    "id": 12,
+    "difficulty": "hard",
+    "xp": 180,
+    "title": "Tứ diện đều",
+    "problem": "Tứ diện đều ABCD cạnh a. Tính khoảng cách giữa hai cạnh chéo nhau AB và CD.",
+    "answer_hint": "d = a/√2"
+  },
+  {
+    "id": 13,
+    "difficulty": "hard",
+    "xp": 180,
+    "title": "Hình chóp cụt",
+    "problem": "Hình chóp cụt đáy lớn là hình vuông cạnh 6, đáy nhỏ là hình vuông cạnh 2, chiều cao 4. Tính thể tích.",
+    "answer_hint": "V = (h/3)(S1 + S2 + √(S1×S2))"
+  },
+  {
+    "id": 14,
+    "difficulty": "hard",
+    "xp": 200,
+    "title": "Cầu nội tiếp hình chóp",
+    "problem": "Hình chóp đều S.ABCD cạnh đáy a=2, cạnh bên l=3. Tìm bán kính cầu nội tiếp hình chóp.",
+    "answer_hint": "r = 3V / S_tổng"
+  },
+  {
+    "id": 15,
+    "difficulty": "hard",
+    "xp": 200,
+    "title": "Góc nhị diện trong tứ diện",
+    "problem": "Tứ diện ABCD, AB=CD=AC=BD=2, AD=BC=√6. Tính góc nhị diện dọc cạnh AB.",
+    "answer_hint": "Tìm pháp vector hai mặt phẳng, dùng cos(angle) = |n1·n2|/(|n1||n2|)"
+  },
+  {
+    "id": 16,
+    "difficulty": "easy",
+    "xp": 55,
+    "title": "Hình hộp chữ nhật",
+    "problem": "Hình hộp chữ nhật ABCD.A'B'C'D' có AB=3, BC=4, AA'=5. Tính đường chéo không gian.",
+    "answer_hint": "d = √(9+16+25) = √50 = 5√2"
+  },
+  {
+    "id": 17,
+    "difficulty": "easy",
+    "xp": 55,
+    "title": "Hình trụ cơ bản",
+    "problem": "Hình trụ bán kính r=2, chiều cao h=5. Tính thể tích và diện tích xung quanh.",
+    "answer_hint": "V = πr²h, Sxq = 2πrh"
+  },
+  {
+    "id": 18,
+    "difficulty": "medium",
+    "xp": 110,
+    "title": "Mặt phẳng qua 3 điểm",
+    "problem": "Cho A(1,0,0), B(0,2,0), C(0,0,3). Viết phương trình mặt phẳng (ABC) và tính khoảng cách từ O đến (ABC).",
+    "answer_hint": "6x + 3y + 2z = 6, d = 6/7"
+  },
+  {
+    "id": 19,
+    "difficulty": "medium",
+    "xp": 110,
+    "title": "Hình chóp có đáy thoi",
+    "problem": "Hình chóp S.ABCD đáy là hình thoi cạnh 2, góc A=60°, chiều cao SO=3. Tính góc giữa mặt bên SBC và mặt đáy.",
+    "answer_hint": "Tìm hình chiếu của SO lên BC, tính góc"
+  },
+  {
+    "id": 20,
+    "difficulty": "hard",
+    "xp": 190,
+    "title": "Khối đa diện từ hình lập phương",
+    "problem": "Cắt hình lập phương cạnh 2 bởi mặt phẳng qua 3 đỉnh không kề nhau trên cùng một mặt. Tính thể tích phần nhỏ hơn.",
+    "answer_hint": "Phần cắt ra là tứ diện V = a³/6"
+  },
+  {
+    "id": 21,
+    "difficulty": "easy",
+    "xp": 65,
+    "title": "Hình nón cơ bản",
+    "problem": "Hình nón có bán kính đáy r=3, đường sinh l=5. Tính chiều cao và thể tích.",
+    "answer_hint": "h = 4, V = πr²h/3 = 12π"
+  },
+  {
+    "id": 22,
+    "difficulty": "easy",
+    "xp": 65,
+    "title": "Lăng trụ đứng đáy tam giác vuông",
+    "problem": "Lăng trụ đứng ABCA'B'C', tam giác ABC vuông tại A, AB=3, AC=4, chiều cao AA'=6. Tính thể tích.",
+    "answer_hint": "V = (1/2×3×4)×6 = 36"
+  },
+  {
+    "id": 23,
+    "difficulty": "medium",
+    "xp": 115,
+    "title": "Đường thẳng vuông góc mặt phẳng",
+    "problem": "Cho hình lập phương ABCD.A'B'C'D' cạnh 1. Chứng minh AC' vuông góc với A'C.",
+    "answer_hint": "Dùng vectơ: AC'·A'C = 0"
+  },
+  {
+    "id": 24,
+    "difficulty": "medium",
+    "xp": 115,
+    "title": "Thiết diện song song đáy",
+    "problem": "Hình chóp S.ABCD đáy vuông cạnh 4, chiều cao h=6. Mặt phẳng song song đáy cắt chiều cao tại điểm cách đáy 2. Tính diện tích thiết diện.",
+    "answer_hint": "Tỉ lệ đồng dạng: (4/6)² × 16 = ... "
+  },
+  {
+    "id": 25,
+    "difficulty": "hard",
+    "xp": 185,
+    "title": "Khoảng cách hai đường thẳng chéo nhau",
+    "problem": "Hình lập phương ABCD.A'B'C'D' cạnh 1. Tính khoảng cách giữa AB' và D'C.",
+    "answer_hint": "d = 1/√2 = √2/2"
+  },
+  {
+    "id": 26,
+    "difficulty": "hard",
+    "xp": 190,
+    "title": "Góc giữa hai mặt phẳng",
+    "problem": "Hình chóp S.ABC đáy là tam giác cạnh 2, SA=SB=SC=2. Tính góc giữa (SAB) và (ABC).",
+    "answer_hint": "Tìm đường cao từ S, chiếu lên đáy, arctan"
+  },
+  {
+    "id": 27,
+    "difficulty": "easy",
+    "xp": 70,
+    "title": "Hình cầu",
+    "problem": "Hình cầu bán kính R=3. Tính thể tích và diện tích mặt cầu.",
+    "answer_hint": "V = (4/3)πR³ = 36π, S = 4πR² = 36π"
+  },
+  {
+    "id": 28,
+    "difficulty": "medium",
+    "xp": 125,
+    "title": "Hình chóp tam giác đều",
+    "problem": "Hình chóp đều S.ABC cạnh đáy a=4, cạnh bên l=5. Tính chiều cao và góc giữa cạnh bên và đáy.",
+    "answer_hint": "h = √(l² - R²), R = a/√3"
+  },
+  {
+    "id": 29,
+    "difficulty": "hard",
+    "xp": 200,
+    "title": "Hình chóp có cạnh bên vuông góc đáy",
+    "problem": "Hình chóp SABC, SA vuông góc (ABC), AB=AC=BC=2, SA=3. Tính khoảng cách từ A đến (SBC).",
+    "answer_hint": "Dùng phương trình mặt phẳng hoặc thể tích"
+  },
+  {
+    "id": 30,
+    "difficulty": "hard",
+    "xp": 200,
+    "title": "Bài tổng hợp – Tứ diện ngoại tiếp cầu",
+    "problem": "Tứ diện đều ABCD cạnh a. Tính bán kính cầu ngoại tiếp.",
+    "answer_hint": "R = a√6/4"
+  },
+  {
+    "id": 31,
+    "difficulty": "medium",
+    "xp": 140,
+    "title": "Khoảng cách SB và CD",
+    "problem": "Cho hình chóp S.ABCD có đáy ABCD là hình vuông cạnh a, SA vuông góc (ABCD) và SA = a. Tính khoảng cách giữa hai đường thẳng SB và CD.",
+    "answer_hint": "d(SB, CD) = d(CD, (SAB)) = BC = a"
+  },
+  {
+    "id": 32,
+    "difficulty": "hard",
+    "xp": 180,
+    "title": "Góc SC và (SAB)",
+    "problem": "Cho hình chóp S.ABCD có đáy là hình chữ nhật, AB=a, AD=2a, SA vuông góc (ABCD) và SA=a. Tính góc giữa đường thẳng SC và mặt phẳng (SAB).",
+    "answer_hint": "Hình chiếu của C lên (SAB) là B. Góc là góc CSB. tan(CSB) = BC/SB = 2a/(a√2) = √2"
+  },
+  {
+    "id": 33,
+    "difficulty": "easy",
+    "xp": 75,
+    "title": "Tọa độ Oxyz cơ bản",
+    "problem": "Trong không gian Oxyz, cho mặt phẳng (P): x + 2y - 2z + 5 = 0 và điểm A(1, 2, -1). Tính khoảng cách từ A đến mặt phẳng (P).",
+    "answer_hint": "d = |1 + 2(2) - 2(-1) + 5| / √(1² + 2² + (-2)²) = 12/3 = 4"
+  },
+  {
+    "id": 34,
+    "difficulty": "medium",
+    "xp": 130,
+    "title": "Thể tích chóp S.ABC",
+    "problem": "Cho hình chóp S.ABC có đáy là tam giác vuông tại A, AB=a, AC=a√3, SA vuông góc (ABC) và SA=2a. Tính thể tích khối chóp S.ABC.",
+    "answer_hint": "V = (1/3) * (1/2 * a * a√3) * 2a = a³√3 / 3"
+  },
+  {
+    "id": 35,
+    "difficulty": "hard",
+    "xp": 195,
+    "title": "Tứ diện vuông OABC",
+    "problem": "Cho tứ diện OABC có OA, OB, OC đôi một vuông góc và OA=a, OB=2a, OC=3a. Tính khoảng cách từ O đến mặt phẳng (ABC).",
+    "answer_hint": "1/d² = 1/OA² + 1/OB² + 1/OC² = 1/a² + 1/4a² + 1/9a² = 49/36a². d = 6a/7"
+  }
+]

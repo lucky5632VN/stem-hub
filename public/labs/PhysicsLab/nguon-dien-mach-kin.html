@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khảo sát Nguồn điện & Mạch kín | PHYSICS.LAB</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Libraries -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/p5@1.4.0/lib/p5.min.js"></script>
+    <script src="https://unpkg.com/echarts@5.4.3/dist/echarts.min.js"></script>
+    
+    <!-- React & Babel for zero-build JSX -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script src="js/tailwind-config.js"></script>
+    <link rel="stylesheet" href="css/global.css">
+
+    <style>
+        :root {
+            --lab-accent: #00f2ff;
+            --lab-bg: #0f172a;
+            --lab-panel: rgba(30, 41, 59, 0.7);
+        }
+
+        body {
+            background-color: var(--lab-bg);
+            color: #f8fafc;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .glass-panel {
+            background: var(--lab-panel);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .font-tech { font-family: 'Orbitron', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Custom Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: var(--lab-accent);
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -6px;
+            box-shadow: 0 0 15px var(--lab-accent);
+            border: 2px solid white;
+        }
+
+        .neon-text {
+            text-shadow: 0 0 10px var(--lab-accent), 0 0 20px rgba(0, 242, 255, 0.3);
+        }
+
+        /* p5.js canvas container */
+        #circuit-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* ECharts container */
+        #chart-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+        ::-webkit-scrollbar-thumb { 
+            background: rgba(255,255,255,0.1); 
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+        /* Animations */
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); border-color: rgba(239, 68, 68, 0.8); }
+            50% { box-shadow: 0 0 40px rgba(239, 68, 68, 0.8); border-color: rgba(239, 68, 68, 1); }
+        }
+        .short-circuit-alert {
+            animation: pulse-red 0.5s infinite;
+        }
+    </style>
+</head>
+
+<body class="dark overflow-hidden h-screen w-screen relative">
+    
+    <!-- Main Application Mounting Point -->
+    <div id="root" class="w-full h-full min-h-screen"></div>
+
+    <!-- Scripts -->
+    <script src="js/theme.js?v=4.0.8"></script>
+    <script src="js/theory-system.js?v=4.0.8"></script>
+    <script src="js/quiz-database.js"></script>
+    <script src="js/quiz-system.js?v=4.0.8"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo } = React;
+
+        const PhysicsSim = () => {
+            // 1. STATE (ξ, r, R)
+            const [emf, setEmf] = useState(12.0);
+            const [internalR, setInternalR] = useState(1.0);
+            const [externalR, setExternalR] = useState(10.0);
+            const [showXRay, setShowXRay] = useState(false);
+            
+            const current = useMemo(() => emf / (externalR + internalR), [emf, externalR, internalR]);
+            const terminalV = useMemo(() => current * externalR, [current, externalR]);
+            const power = useMemo(() => current * current * externalR, [current, externalR]);
+            const efficiency = useMemo(() => (externalR / (externalR + internalR)) * 100, [externalR, internalR]);
+            const isShortCircuit = externalR === 0;
+
+            const canvasRef = useRef(null);
+            const chartRef = useRef(null);
+            const chartInstance = useRef(null);
+            const p5Instance = useRef(null);
+            const simStateRef = useRef({ current, externalR, showXRay });
+
+            // Sync refs for p5 access without re-rendering sketch
+            useEffect(() => {
+                simStateRef.current = { current, externalR, showXRay };
+            }, [current, externalR, showXRay]);
+
+            // Lucide Icons Refresh
+            useEffect(() => {
+                if (window.lucide) window.lucide.createIcons();
+            });
+
+            // ECharts Implementation
+            useEffect(() => {
+                if (!chartRef.current) return;
+                if (!chartInstance.current) chartInstance.current = echarts.init(chartRef.current, 'dark');
+
+                const rValues = [], pValues = [], hValues = [];
+                const maxR = 50.0, step = 0.5;
+
+                for (let r = 0; r <= maxR; r += step) {
+                    const I = emf / (r + internalR);
+                    rValues.push(r.toFixed(1));
+                    pValues.push((I * I * r).toFixed(2));
+                    hValues.push(((r / (r + internalR)) * 100).toFixed(1));
+                }
+
+                chartInstance.current.setOption({
+                    backgroundColor: 'transparent',
+                    tooltip: { trigger: 'axis', backgroundColor: 'rgba(15, 23, 42, 0.9)', borderColor: 'rgba(0, 242, 255, 0.3)', textStyle: { color: '#fff' } },
+                    grid: { left: '8%', right: '8%', bottom: '15%', top: '15%', containLabel: true },
+                    xAxis: { type: 'category', name: 'R (Ω)', nameLocation: 'middle', nameGap: 30, data: rValues, axisLine: { lineStyle: { color: 'rgba(255,255,255,0.2)' } } },
+                    yAxis: [
+                        { type: 'value', name: 'P (W)', position: 'left', splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } }, axisLine: { lineStyle: { color: 'rgba(255,215,0,0.5)' } } },
+                        { type: 'value', name: 'H (%)', position: 'right', max: 100, axisLine: { lineStyle: { color: 'rgba(0,242,255,0.5)' } }, splitLine: { show: false } }
+                    ],
+                    series: [
+                        { name: 'Công suất P', type: 'line', data: pValues, smooth: true, lineStyle: { color: '#ffd700', width: 3 }, symbol: 'none', areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(255, 215, 0, 0.2)' }, { offset: 1, color: 'rgba(255, 215, 0, 0)' }]) } },
+                        { name: 'Hiệu suất H', type: 'line', yAxisIndex: 1, data: hValues, smooth: true, lineStyle: { color: '#00f2ff', width: 3, type: 'dashed' }, symbol: 'none' },
+                        { name: 'Điểm hoạt động', type: 'scatter', data: [[externalR.toFixed(1), power.toFixed(2)]], symbolSize: 15, itemStyle: { color: isShortCircuit ? '#ef4444' : '#fff', shadowBlur: 10, shadowColor: '#fff' }, z: 10 }
+                    ]
+                });
+
+                const handleResize = () => chartInstance.current.resize();
+                window.addEventListener('resize', handleResize);
+                return () => window.removeEventListener('resize', handleResize);
+            }, [emf, internalR, externalR, power, isShortCircuit]);
+
+            // p5.js Sketch
+            useEffect(() => {
+                if (!canvasRef.current) return;
+                const sketch = (p) => {
+                    let convPart = [], smoke = [];
+                    p.setup = () => {
+                        const c = p.createCanvas(canvasRef.current.offsetWidth, canvasRef.current.offsetHeight);
+                        c.parent(canvasRef.current);
+                        for(let i=0; i<40; i++) convPart.push({ pos: p.random(0, 1000) });
+                    };
+                    p.draw = () => {
+                        p.clear();
+                        const { current: iVal, externalR: extR, showXRay: xray } = simStateRef.current;
+                        const speed = iVal * 2.5; 
+                        const isShort = extR === 0;
+                        const cx = p.width/2, cy = p.height/2, rw = p.width*0.7, rh = p.height*0.5;
+                        const srcX = cx - rw/2, resX = cx + rw/2, totalDist = 2*(rw+rh);
+
+                        p.strokeWeight(2); p.stroke(255, 40); p.noFill(); p.rect(cx-rw/2, cy-rh/2, rw, rh, 10);
+                        
+                        p.push(); p.translate(srcX, cy);
+                        if(isShort) p.translate(p.random(-2,2), p.random(-2,2));
+                        p.fill(30, 41, 59); p.stroke(isShort ? '#ef4444' : '#00f2ff'); p.rect(-20, -40, 40, 80, 5);
+                        p.fill(isShort ? '#ef4444' : '#00f2ff'); p.rect(-10, -50, 20, 10, 2);
+                        p.pop();
+
+                        p.push(); p.translate(resX, cy); p.noFill(); p.stroke(255, 215, 0); p.beginShape();
+                        p.vertex(0, -40); for(let j=0; j<5; j++) { p.vertex(-10, -30 + j*15); p.vertex(10, -22.5 + j*15); } p.vertex(0,40); p.endShape();
+                        p.pop();
+
+                        const getCoords = (d) => {
+                            if (d < rw) return {x: srcX + d, y: cy - rh/2};
+                            if (d < rw + rh) return {x: cx + rw/2, y: cy - rh/2 + (d - rw)};
+                            if (d < 2*rw + rh) return {x: cx + rw/2 - (d - (rw+rh)), y: cy + rh/2};
+                            return {x: srcX, y: cy + rh/2 - (d - (2*rw + rh))};
+                        };
+
+                        p.fill(255, 255, 0);
+                        convPart.forEach((pt, idx) => {
+                            pt.pos = (pt.pos + speed) % totalDist;
+                            const co = getCoords(pt.pos); p.ellipse(co.x, co.y, 4, 4);
+                            if(idx % 10 === 0) {
+                                p.push(); p.translate(co.x, co.y);
+                                if(pt.pos < rw) p.rotate(0); else if(pt.pos < rw+rh) p.rotate(p.HALF_PI); else if(pt.pos < 2*rw+rh) p.rotate(p.PI); else p.rotate(-p.HALF_PI);
+                                p.triangle(0,-3, 0,3, 6,0); p.pop();
+                            }
+                        });
+
+                        if (isShort && p.frameCount % 5 === 0) smoke.push({x: srcX, y: cy, vx: p.random(-1,1), vy: p.random(-2,-4), a: 255});
+                        smoke.forEach((s, i) => { p.fill(200, s.a); p.ellipse(s.x, s.y, 6, 6); s.x+=s.vx; s.y+=s.vy; s.a-=5; if(s.a<=0) smoke.splice(i,1); });
+                    };
+                    p.windowResized = () => p.resizeCanvas(canvasRef.current.offsetWidth, canvasRef.current.offsetHeight);
+                };
+                p5Instance.current = new p5(sketch);
+                return () => p5Instance.current.remove();
+            }, []); // Empty dependency array: run once
+
+            return (
+                <div className="flex flex-col h-screen overflow-hidden p-6 gap-6 lg:flex-row bg-[#050810]">
+                    <div className={`glass-panel flex-[1.2] rounded-3xl p-6 relative flex flex-col overflow-hidden transition-all duration-500 ${isShortCircuit ? 'border-red-500/50 shadow-[0_0_50px_rgba(239,68,68,0.2)]' : ''}`}>
+                        <div className="z-10 flex justify-between items-start mb-6">
+                            <div>
+                                <h2 className="text-2xl font-tech font-bold uppercase tracking-widest text-[#00f2ff]">Mô Phỏng Ảo</h2>
+                                <div className="text-xs font-mono text-slate-400 mt-1 flex items-center gap-2">
+                                    <div className={`w-2 h-2 rounded-full ${isShortCircuit ? 'bg-red-500' : 'bg-[#00f2ff]'} animate-pulse`}></div>
+                                    SYSTEM {isShortCircuit ? 'OVERLOAD' : 'NOMINAL'}
+                                </div>
+                            </div>
+                            {isShortCircuit && <div className="bg-red-500/20 text-red-500 border border-red-500/50 px-4 py-2 rounded-xl text-xs font-tech animate-bounce font-bold">⚠️ ĐOẢN MẠCH!</div>}
+                        </div>
+                        <div ref={canvasRef} className="flex-1 rounded-2xl bg-black/30 border border-white/5"></div>
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+                            <Meter label="Ampe kế" value={`${current.toFixed(3)} A`} color="text-yellow-400" />
+                            <Meter label="Vôn kế" value={`${terminalV.toFixed(2)} V`} color="text-[#00f2ff]" />
+                            <Meter label="Công suất" value={`${power.toFixed(2)} W`} color="text-purple-400" />
+                            <Meter label="Hiệu suất" value={`${efficiency.toFixed(1)}%`} color="text-emerald-400" />
+                        </div>
+                    </div>
+                    <div className="flex-1 flex flex-col gap-6">
+                        <div className="glass-panel rounded-3xl p-6 flex flex-col gap-6">
+                            <h3 className="text-lg font-tech font-bold flex items-center gap-2"><i data-lucide="settings-2" className="w-5 h-5 text-[#00f2ff]"></i> THIẾT LẬP</h3>
+                            <Slider label="Suất điện động (ξ)" value={emf} min={0} max={24} step={0.5} unit="V" onChange={setEmf} />
+                            <Slider label="Điện trở trong (r)" value={internalR} min={0.1} max={5} step={0.1} unit="Ω" onChange={setInternalR} />
+                            <Slider label="Biến trở ngoài (R)" value={externalR} min={0} max={50} step={0.5} unit="Ω" onChange={setExternalR} color={isShortCircuit ? "accent-red-500" : ""} />
+                        </div>
+                        <div className="glass-panel flex-1 rounded-3xl p-6 relative overflow-hidden flex flex-col min-h-[300px]">
+                            <h3 className="text-sm font-tech font-bold uppercase text-slate-300 mb-4">Đặc tuyến Cực trị</h3>
+                            <div ref={chartRef} className="flex-1"></div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const Meter = ({ label, value, color }) => (
+            <div className="bg-black/50 border border-white/10 p-3 rounded-2xl flex flex-col items-center">
+                <span className="text-[10px] font-mono text-slate-500 uppercase">{label}</span>
+                <span className={`text-xl font-tech ${color}`}>{value}</span>
+            </div>
+        );
+
+        const Slider = ({ label, value, min, max, step, unit, onChange, color="" }) => (
+            <div>
+                <div className="flex justify-between items-center mb-2">
+                    <label className="text-xs font-mono text-slate-400 uppercase">{label}</label>
+                    <span className="text-sm font-tech text-[#00f2ff]">{value.toFixed(1)} {unit}</span>
+                </div>
+                <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(parseFloat(e.target.value))} className={`w-full ${color}`} />
+            </div>
+        );
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<PhysicsSim />);
+    </script>
+
+    <script>
+        // Lucide icon initialization helper
+        window.addEventListener('DOMContentLoaded', () => {
+             if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+    </script>
+</body>
+
+</html>

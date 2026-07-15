@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sóng Dừng - 1 Đầu Tự Do</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tailwind-config.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .font-tech {
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #06b6d4;
+            margin-top: -6px;
+            cursor: pointer;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+
+        .dark input[type=range]::-webkit-slider-runnable-track {
+            background: #475569;
+        }
+
+        .hud-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .hud-panel {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body
+    class="h-screen flex overflow-hidden bg-slate-50 dark:bg-[#0f172a] text-slate-700 dark:text-slate-300 transition-colors duration-300">
+
+    <!-- SIDEBAR -->
+    <aside
+        class="w-72 flex-shrink-0 flex flex-col bg-white dark:bg-[#1e293b] border-r border-slate-200 dark:border-slate-800 z-20 shadow-lg">
+        <div class="h-16 flex items-center justify-between px-6 border-b border-slate-100 dark:border-slate-700/50">
+            <h1 class="font-tech font-bold text-xl text-slate-800 dark:text-white uppercase tracking-wider">Control
+                Panel</h1>
+            <a href="index.html"
+                class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-cyan-500 transition-colors">
+                <i data-lucide="home" class="w-5 h-5"></i>
+            </a>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 space-y-5 custom-scrollbar">
+
+            <!-- Controls -->
+            <div>
+                <label
+                    class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 block">Điểu
+                    Khiển</label>
+                <button id="resetButton"
+                    class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg transition font-medium">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i> <span class="text-xs">Đặt Lại</span>
+                </button>
+            </div>
+
+            <!-- Parameters -->
+            <div class="space-y-4">
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <label class="font-medium text-slate-600 dark:text-slate-300">Bậc Hài (k)</label>
+                        <!-- Only Odd Harmonics for Fixed-Free: 1, 3, 5, 7... -->
+                        <span class="font-mono text-cyan-600 dark:text-cyan-400 font-bold" id="modeDisplay">1</span>
+                    </div>
+                    <!-- Using range 0-7 mapped to 2n+1 -->
+                    <input type="range" id="harmonicInput" min="0" max="7" step="1" value="0" class="w-full">
+                    <div class="flex justify-between text-[10px] text-slate-400 px-1 mt-1 font-mono">
+                        <span>1</span><span>15</span>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <label class="font-medium text-slate-600 dark:text-slate-300">Lực căng dây (T)</label>
+                        <span class="font-mono text-cyan-600 dark:text-cyan-400"><span id="tensionDisplay">10.0</span>
+                            N</span>
+                    </div>
+                    <input type="range" id="tensionInput" min="1" max="50" step="1" value="10" class="w-full">
+                </div>
+
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <label class="font-medium text-slate-600 dark:text-slate-300">Biên độ nguồn (A)</label>
+                        <span class="font-mono text-cyan-600 dark:text-cyan-400"><span id="ampDisplay">1.0</span>
+                            cm</span>
+                    </div>
+                    <input type="range" id="ampInput" min="0.1" max="2.0" step="0.1" value="1.0" class="w-full">
+                </div>
+            </div>
+
+            <!-- Info Box -->
+            <div
+                class="p-3 bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-900/30 rounded-lg text-xs font-mono space-y-1.5">
+                <div class="flex justify-between text-indigo-800 dark:text-indigo-300">
+                    <span>Vận tốc (v):</span>
+                    <span id="velDisplay" class="font-bold">-- m/s</span>
+                </div>
+                <div class="flex justify-between text-indigo-800 dark:text-indigo-300">
+                    <span>Bước sóng (λ):</span>
+                    <span id="lambdaDisplay" class="font-bold">-- m</span>
+                </div>
+                <div class="flex justify-between text-indigo-800 dark:text-indigo-300">
+                    <span>Tần số (f):</span>
+                    <span id="freqDisplay" class="font-bold">-- Hz</span>
+                </div>
+            </div>
+
+            <div class="p-2.5 bg-slate-100 dark:bg-slate-800/50 rounded text-xs text-slate-500 italic">
+                * Đầu trái cố định (Nút). <br>
+                * Đầu phải tự do (Bụng).
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+            <button onclick="toggleDarkMode()"
+                class="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+                <i id="theme-icon" data-lucide="moon" class="w-4 h-4"></i>
+                <span class="text-xs font-medium uppercase">Toggle Theme</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="flex-1 relative bg-white dark:bg-[#0f172a] overflow-hidden flex flex-col">
+        <!-- Canvas Container -->
+        <div class="flex-1 relative bg-grid-pattern dark:bg-grid-pattern-dark bg-[length:40px_40px]">
+            <canvas id="simCanvas" class="absolute inset-0 w-full h-full block"></canvas>
+
+            <!-- HUD -->
+            <div class="absolute top-4 right-4 w-48 hud-panel rounded-xl p-3 shadow-xl z-10 backdrop-blur-md">
+                <div
+                    class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 border-b border-slate-200 dark:border-slate-700 pb-1">
+                    Trạng thái dây</div>
+                <div class="space-y-1 font-mono text-xs">
+                    <div class="flex justify-between items-center text-green-600 dark:text-green-400">
+                        <span>Hài âm:</span>
+                        <span class="font-bold">Bậc <span id="hudMode">1</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/theme.js?v=4.0.8"></script>
+    <script src="js/theory-system.js?v=4.0.8"></script>
+    <script src="js/quiz-database.js"></script>
+    <script src="js/quiz-system.js?v=4.0.8"></script>
+
+    <script>
+        // --- CONSTANTS ---
+        const L = 4.0; // Length 4m
+        const MU = 0.01; // mass density
+
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Inputs
+        const harmonicInput = document.getElementById('harmonicInput');
+        const tensionInput = document.getElementById('tensionInput');
+        const ampInput = document.getElementById('ampInput');
+        const resetButton = document.getElementById('resetButton');
+
+        // Displays
+        const modeDisplay = document.getElementById('modeDisplay');
+        const tensionDisplay = document.getElementById('tensionDisplay');
+        const ampDisplay = document.getElementById('ampDisplay');
+        const velDisplay = document.getElementById('velDisplay');
+        const lambdaDisplay = document.getElementById('lambdaDisplay');
+        const freqDisplay = document.getElementById('freqDisplay');
+        const hudMode = document.getElementById('hudMode');
+
+        // State
+        let harmonicIndex = 0; // 0, 1, 2, ...
+        let k = 1; // 2n+1: 1, 3, 5, ...
+        let T = 10.0;
+        let A = 1.0;
+        let time = 0;
+
+        let width, height;
+
+        // --- PHYSICS ---
+        function getPhysics() {
+            const v = Math.sqrt(T / MU);
+            // Condition for fixed-free: L = k * lambda / 4 (where k is odd integer 1, 3, 5...)
+            // So lambda = 4L / k
+            const lambda = (4 * L) / k;
+            const f = v / lambda;
+            const omega = 2 * Math.PI * f;
+            return { v, lambda, f, omega };
+        }
+
+        function updateUI() {
+            harmonicIndex = parseInt(harmonicInput.value);
+            k = 2 * harmonicIndex + 1; // 1, 3, 5, 7...
+
+            T = parseFloat(tensionInput.value);
+            A = parseFloat(ampInput.value);
+
+            modeDisplay.innerText = k;
+            hudMode.innerText = k;
+            tensionDisplay.innerText = T.toFixed(1);
+            ampDisplay.innerText = A.toFixed(1);
+
+            const { v, lambda, f } = getPhysics();
+
+            velDisplay.innerText = v.toFixed(1) + ' m/s';
+            lambdaDisplay.innerText = lambda.toFixed(2) + ' m';
+            freqDisplay.innerText = f.toFixed(1) + ' Hz';
+        }
+
+        // --- DRAWING ---
+        function resize() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            width = canvas.width;
+            height = canvas.height;
+        }
+        window.addEventListener('resize', resize);
+
+        function draw(timestamp) {
+            const dt = (timestamp - lastTime) / 1000;
+            lastTime = timestamp;
+            time += dt;
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw String
+            const centerY = height / 2;
+            const stringLenPx = width - 100; // Padding 50px each side
+            const startX = 50;
+            const endX = width - 50;
+
+            const { omega, lambda } = getPhysics();
+            const k_wave = (2 * Math.PI) / lambda;
+
+            // Draw Axis
+            ctx.beginPath();
+            ctx.strokeStyle = localStorage.getItem('theme') === 'dark' ? '#334155' : '#cbd5e1';
+            ctx.lineWidth = 1; ctx.setLineDash([5, 5]);
+            ctx.moveTo(startX, centerY); ctx.lineTo(endX, centerY);
+            ctx.stroke(); ctx.setLineDash([]);
+
+            // Draw Vibrating String
+            const metersPerPx = L / stringLenPx;
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#06b6d4'; // Cyan-500
+            ctx.lineWidth = 3;
+
+            const points = stringLenPx;
+            for (let i = 0; i <= points; i++) {
+                const px = startX + i;
+                const x_real = i * metersPerPx;
+
+                // Standing Wave: Fixed-Free
+                // y = 2A sin(2pi x / lambda) ... check boundary x=L
+                // x=L -> sin(2pi L / (4L/k)) = sin(pi k / 2). Since k is odd, this is +/- 1. Max amp. Correct.
+
+                const displacement = 2 * A * Math.sin(k_wave * x_real) * Math.cos(omega * time);
+
+                // Visual Scale
+                const pxPerCm = 20;
+                const py = centerY - displacement * pxPerCm;
+
+                if (i === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+
+            // Draw Ends
+            // Fixed Left
+            ctx.fillStyle = '#ef4444'; // Red
+            ctx.beginPath(); ctx.arc(startX, centerY, 6, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = localStorage.getItem('theme') === 'dark' ? '#94a3b8' : '#475569';
+            ctx.font = 'bold 12px Inter'; ctx.fillText('Fixed', startX - 10, centerY - 15);
+
+            // Free Right
+            ctx.fillStyle = '#10b981'; // Green
+            const endDisplacement = 2 * A * Math.sin(k_wave * L) * Math.cos(omega * time);
+            const endY = centerY - endDisplacement * 20;
+            ctx.beginPath(); ctx.arc(endX, endY, 6, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = localStorage.getItem('theme') === 'dark' ? '#94a3b8' : '#475569';
+            ctx.font = 'bold 12px Inter'; ctx.fillText('Free', endX - 10, centerY - 15);
+
+            requestAnimationFrame(draw);
+        }
+
+        // --- CONTROL LISTENERS ---
+        let lastTime = performance.now();
+
+        harmonicInput.oninput = updateUI;
+        tensionInput.oninput = updateUI;
+        ampInput.oninput = updateUI;
+
+        resetButton.onclick = () => {
+            harmonicInput.value = 0; // k=1
+            tensionInput.value = 10;
+            ampInput.value = 1.0;
+            time = 0;
+            updateUI();
+        };
+
+        // Init
+        resize();
+        updateUI();
+        requestAnimationFrame(draw);
+        lucide.createIcons();
+
+    </script>
+</body>
+
+</html>

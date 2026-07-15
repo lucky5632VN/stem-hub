@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Lab Interface</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons: Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+
+    <script src="/labs/PhysicsLab/js/tailwind-config.js"></script>
+
+    <link rel="stylesheet" href="/labs/PhysicsLab/css/global.css">
+</head>
+<!-- FORCE DARK MODE FOR GLASS UI -->
+<body class="dark h-screen w-screen flex items-center justify-center overflow-hidden font-sans text-lab-dark_text transition-colors duration-300">
+
+    <!-- Outer Wrapper -->
+    <div class="w-full h-full lg:p-8 p-4 flex items-center justify-center max-w-[1800px] mx-auto relative z-10">
+
+        <!-- Main Glass Dashboard Container -->
+        <div class="glass-panel-container w-full h-full flex relative shadow-2xl">
+            <!-- SIDEBAR -->
+            <aside class="w-[280px] bg-lab-dark_panel/20 border-r border-white/10 flex-shrink-0 flex flex-col z-20 hidden lg:flex relative">
+        <!-- Logo Area -->
+        <div class="h-[80px] flex items-center px-6 border-b border-white/5 relative overflow-hidden group">
+            <div class="flex items-center gap-3 relative z-10">
+                <div class="w-10 h-10 rounded-xl bg-lab-dark_cyan/20 border border-lab-dark_cyan/50 text-lab-dark_cyan flex items-center justify-center shadow-[0_0_15px_rgba(0,242,254,0.3)] backdrop-blur-md">
+                    <i data-lucide="atom" class="w-6 h-6 animate-pulse-slow"></i>
+                </div>
+                <div>
+                    <h1 class="font-tech font-bold text-2xl text-white tracking-wider">
+                        PHYSICS<span class="text-lab-dark_cyan">.LAB</span></h1>
+                    <div class="text-[10px] text-lab-dark_cyan font-mono tracking-widest opacity-80">V.3.0.GLASS</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-8 px-4 space-y-2">
+            
+            <a href="/"
+                class="flex items-center px-4 py-3 text-lab-dark_muted hover:text-white transition-all nav-link group">
+                <i data-lucide="arrow-left" class="w-5 h-5 mr-3 group-hover:text-lab-dark_cyan transition-colors"></i>
+                <span class="font-medium font-tech tracking-wider text-lg">Về Hub</span>
+            </a>
+
+            <!-- Divider -->
+            <div class="my-4 mx-2 border-t border-white/5"></div>
+
+            <a href="/labs/PhysicsLab/index.html"
+                class="flex items-center px-4 py-3 text-white transition-all overflow-hidden nav-link active relative group">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3"></i>
+                <span class="font-medium font-tech tracking-wider text-lg">Dashboard</span>
+            </a>
+        </nav>
+
+        <!-- Sidebar Footer Status -->
+        <div class="p-6">
+            <div class="glass-panel flex items-center justify-between text-xs font-mono text-white px-4 py-3 rounded-2xl">
+                <div class="flex items-center gap-2">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-lab-success opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-lab-success"></span>
+                    </span>
+                    <span class="font-semibold tracking-wider">ONLINE</span>
+                </div>
+                <i data-lucide="wifi" class="w-4 h-4 text-lab-success"></i>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 min-h-0 flex flex-col overflow-hidden relative z-10 bg-transparent">
+
+        <!-- Content Area -->
+        <div class="flex-1 min-h-0 overflow-y-auto px-8 pb-8 pt-8 relative">
+
+            <!-- Grid Content -->
+            <div id="module-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+
+                <!-- Card 1: Dao Động Điều Hòa -->
+                <a href="/labs/PhysicsLab/dao-dong-dieu-hoa.html"
+                    class="module-card glass-panel rounded-xl p-6 relative group block overflow-hidden will-change-transform">
+                    <div class="corner-marker top-left"></div>
+                    <div class="corner-marker top-right"></div>
+                    <div class="corner-marker bottom-left"></div>
+                    <div class="corner-marker bottom-right"></div>
+
+                    <div class="flex items-start justify-between mb-5 relative z-10">
+                        <div
+                            class="h-12 w-12 rounded-full bg-blue-100/70 dark:bg-blue-900/40 border border-blue-200 dark:border-blue-700/50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-blue-300/50">
+                            <i data-lucide="repeat" class="w-6 h-6"></i>
+                        </div>
+                        <span
+                            class="px-2.5 py-1 rounded-full bg-white/10 text-white border border-white/20 text-[10px] font-mono text-lab-dark_muted uppercase tracking-wider font-semibold">Cơ
+                            học</span>
+                    </div>
+
+                    <h3
+                        class="module-title text-xl font-bold text-white font-tech mb-2 group-hover:text-lab-cyan transition">
+                        Dao Động Điều Hòa</h3>
+                    <p
+                        class="module-description text-lab-dark_muted text-sm leading-relaxed mb-6 font-light">
+                        Mối liên hệ giữa dao động điều hòa (SHM) và chuyển động tròn đều (UCM).</p>
+
+                    <div
+                        class="pt-4 border-t border-white/10 flex items-center justify-between group-hover:border-lab-cyan/30 dark:group-hover:border-lab-dark_cyan/30 transition-colors">
+                        <div
+                            class="flex items-center gap-1.5 text-xs font-mono text-lab-cyan dark:text-lab-dark_cyan font-semibold">
+                            <span
+                                class="w-1.5 h-1.5 rounded-full bg-lab-cyan dark:bg-lab-dark_cyan animate-pulse"></span>
+                            v1.0 Ready
+                        </div>
+                        <span
+                            class="text-slate-400 group-hover:text-lab-cyan group-hover:translate-x-1 transition-transform duration-300">
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </span>
+                    </div>
+                </a>
+
+                <!-- Card 2: Con Lắc Đơn / Lò Xo -->
+                <a href="/labs/PhysicsLab/con-lac-don-lo-xo.html"
+                    class="module-card glass-panel rounded-xl p-6 relative group block overflow-hidden will-change-transform">
+                    <div class="corner-marker top-left"></div>
+                    <div class="corner-marker top-right"></div>
+                    <div class="corner-marker bottom-left"></div>
+                    <div class="corner-marker bottom-right"></div>
+
+                    <div class="flex items-start justify-between mb-5 relative z-10">
+                        <div
+                            class="h-12 w-12 rounded-full bg-orange-100/70 dark:bg-orange-900/40 border border-orange-200 dark:border-orange-700/50 flex items-center justify-center text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-orange-300/50">
+                            <i data-lucide="scale" class="w-6 h-6"></i>
+                        </div>
+                        <span
+                            class="px-2.5 py-1 rounded-full bg-white/10 text-white border border-white/20 text-[10px] font-mono text-lab-dark_muted uppercase tracking-wider font-semibold">Động
+                            lực học</span>
+                    </div>
+
+                    <h3
+                        class="module-title text-xl font-bold text-white font-tech mb-2 group-hover:text-orange-500 transition">
+                        Con Lắc Đơn / Lò Xo</h3>
+                    <p
+                        class="module-description text-lab-dark_muted text-sm leading-relaxed mb-6 font-light">
+                        Phân tích các tham số ảnh hưởng đến chu kỳ và biên độ dao động.</p>
+
+                    <div
+                        class="pt-4 border-t border-white/10 flex items-center justify-between group-hover:border-orange-500/30 transition-colors">
+                        <div class="flex items-center gap-1.5 text-xs font-mono text-orange-600 font-semibold">
+                            <i data-lucide="flask-conical" class="w-3 h-3"></i> 2 Experiments
+                        </div>
+                        <span
+                            class="text-slate-400 group-hover:text-orange-500 group-hover:translate-x-1 transition-transform duration-300">
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </span>
+                    </div>
+                </a>
+
+                <!-- Card 3: Sóng Dọc & Ngang -->
+                <a href="/labs/PhysicsLab/song-doc-song-ngang.html"
+                    class="module-card glass-panel rounded-xl p-6 relative group block overflow-hidden will-change-transform">
+                    <div class="corner-marker top-left"></div>
+                    <div class="corner-marker top-right"></div>
+                    <div class="corner-marker bottom-left"></div>
+                    <div class="corner-marker bottom-right"></div>
+
+                    <div class="flex items-start justify-between mb-5 relative z-10">
+                        <div
+                            class="h-12 w-12 rounded-full bg-emerald-100/70 dark:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-700/50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-emerald-300/50">
+                            <i data-lucide="waves" class="w-6 h-6"></i>
+                        </div>
+                        <span
+                            class="px-2.5 py-1 rounded-full bg-white/10 text-white border border-white/20 text-[10px] font-mono text-lab-dark_muted uppercase tracking-wider font-semibold">Sóng
+                            cơ</span>
+                    </div>
+
+                    <h3
+                        class="module-title text-xl font-bold text-white font-tech mb-2 group-hover:text-emerald-500 transition">
+                        Sóng Dọc & Ngang</h3>
+                    <p
+                        class="module-description text-lab-dark_muted text-sm leading-relaxed mb-6 font-light">
+                        Trực quan hóa sự khác biệt giữa hai loại sóng cơ học cơ bản.</p>
+
+                    <div
+                        class="pt-4 border-t border-white/10 flex items-center justify-between group-hover:border-emerald-500/30 transition-colors">
+                        <div class="flex items-center gap-1.5 text-xs font-mono text-emerald-600 font-semibold">
+                            <i data-lucide="monitor" class="w-3 h-3"></i> 2D Sim
+                        </div>
+                        <span
+                            class="text-slate-400 group-hover:text-emerald-500 group-hover:translate-x-1 transition-transform duration-300">
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </span>
+                    </div>
+                </a>
+
+                <!-- Card 4: Giao Thoa Sóng Cơ -->
+                <a href="/labs/PhysicsLab/giao-thoa-song-co.html"
+                    class="module-card glass-panel rounded-xl p-6 relative group block overflow-hidden will-change-transform">
+                    <div class="corner-marker top-left"></div>
+                    <div class="corner-marker top-right"></div>
+                    <div class="corner-marker bottom-left"></div>
+                    <div class="corner-marker bottom-right"></div>
+
+                    <div class="flex items-start justify-between mb-5 relative z-10">
+                        <div
+                            class="h-12 w-12 rounded-full bg-indigo-100/70 dark:bg-indigo-900/40 border border-indigo-200 dark:border-indigo-700/50 flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-indigo-300/50">
+                            <i data-lucide="activity" class="w-6 h-6"></i>
+                        </div>
+                        <span
+                            class="px-2.5 py-1 rounded-full bg-white/10 text-white border border-white/20 text-[10px] font-mono text-lab-dark_muted uppercase tracking-wider font-semibold">Sóng
+                            cơ</span>
+                    </div>
+
+                    <h3
+                        class="module-title text-xl font-bold text-white font-tech mb-2 group-hover:text-indigo-500 transition">
+                        Giao Thoa Sóng Cơ</h3>
+                    <p
+                        class="module-description text-lab-dark_muted text-sm leading-relaxed mb-6 font-light">
+                        Quan sát hiện tượng giao thoa của hai nguồn sóng kết hợp.</p>
+
+                    <div
+                        class="pt-4 border-t border-white/10 flex items-center justify-between group-hover:border-indigo-500/30 transition-colors">
+                        <div class="flex items-center gap-1.5 text-xs font-mono text-indigo-600 font-semibold">
+                            <i data-lucide="mouse-pointer-2" class="w-3 h-3"></i> Interactive
+                        </div>
+                        <span
+                            class="text-slate-400 group-hover:text-indigo-500 group-hover:translate-x-1 transition-transform duration-300">
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </span>
+                    </div>
+                </a>
+
+                <!-- Card 5: Dao Động Tắt Dần -->
+                <a href="/labs/PhysicsLab/dao-dong-tat-dan.html"
+                    class="module-card glass-panel rounded-xl p-6 relative group block overflow-hidden will-change-transform">
+                    <div class="corner-marker top-left"></div>
+                    <div class="corner-marker top-right"></div>
+                    <div class="corner-marker bottom-left"></div>
+                    <div class="corner-marker bottom-right"></div>
+
+                    <div class="flex items-start justify-between mb-5 relative z-10">
+                        <div
+                            class="h-12 w-12 rounded-full bg-red-100/70 dark:bg-red-900/40 border border-red-200 dark:border-red-700/50 flex items-center justify-center text-red-600 group-hover:bg-red-600 group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-red-300/50">
+                            <i data-lucide="trending-down" class="w-6 h-6"></i>
+                        </div>
+                        <span
+                            class="px-2.5 py-1 rounded-full bg-white/10 text-white border border-white/20 text-[10px] font-mono text-lab-dark_muted uppercase tracking-wider font-semibold">Dao
+                            động</span>
+                    </div>
+
+                    <h3
+                        class="module-title text-xl font-bold text-white font-tech mb-2 group-hover:text-red-500 transition">
+                        Dao Động Tắt Dần</h3>
+                    <p
+                        class="module-description text-lab-dark_muted text-sm leading-relaxed mb-6 font-light">
+                        Khảo sát sự suy giảm biên độ dao động theo thời gian thực.</p>
+
+                    <div
+                        class="pt-4 border-t border-white/10 flex items-center justify-between group-hover:border-red-500/30 transition-colors">
+                        <div class="flex items-center gap-1.5 text-xs font-mono text-red-600 font-semibold">
+                            <i data-lucide="line-chart" class="w-3 h-3"></i> Graph View
+                        </div>
+                        <span
+                            class="text-slate-400 group-hover:text-red-500 group-hover:translate-x-1 transition-transform duration-300">
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </span>
+                    </div>
+                </a>
+
+                <!-- Card 6: Giao Thoa Ánh Sáng -->
+                <a href="/labs/PhysicsLab/giao-thoa-anh-sang.html"
+                    class="module-card glass-panel rounded-xl p-6 relative group block overflow-hidden will-change-transform">
+                    <div class="corner-marker top-left"></div>
+                    <div class="corner-marker top-right"></div>
+                    <div class="corner-marker bottom-left"></div>
+                    <div class="corner-marker bottom-right"></div>
+
+                    <div class="flex items-start justify-between mb-5 relative z-10">
+                        <div
+                            class="h-12 w-12 rounded-full bg-yellow-100/70 dark:bg-yellow-900/40 border border-yellow-200 dark:border-yellow-700/50 flex items-center justify-center text-yellow-600 group-hover:bg-yellow-600 group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-yellow-300/50">
+                            <i data-lucide="sun" class="w-6 h-6"></i>
+                        </div>
+                        <span
+                            class="px-2.5 py-1 rounded-full bg-white/10 text-white border border-white/20 text-[10px] font-mono text-lab-dark_muted uppercase tracking-wider font-semibold">Quang
+                            học</span>
+                    </div>
+
+                    <h3
+                        class="module-title text-xl font-bold text-white font-tech mb-2 group-hover:text-yellow-500 transition">
+                        Giao Thoa Ánh Sáng</h3>
+                    <p
+                        class="module-description text-lab-dark_muted text-sm leading-relaxed mb-6 font-light">
+                        Mô phỏng thí nghiệm khe Young với ánh sáng đơn sắc, đa sắc.</p>
+
+                    <div
+                        class="pt-4 border-t border-white/10 flex items-center justify-between group-hover:border-yellow-500/30 transition-colors">
+                        <div class="flex items-center gap-1.5 text-xs font-mono text-yellow-600 font-semibold">
+                            <i data-lucide="aperture" class="w-3 h-3"></i> Spectrum
+                        </div>
+                        <span
+                            class="text-slate-400 group-hover:text-yellow-500 group-hover:translate-x-1 transition-transform duration-300">
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </span>
+                    </div>
+                </a>
+
+                <!-- Card 7: Đo Tần Số Sóng Âm -->
+                <a href="/labs/PhysicsLab/do-tan-so-song-am.html"
+                    class="module-card glass-panel rounded-xl p-6 relative group block overflow-hidden will-change-transform">
+                    <div class="corner-marker top-left"></div>
+                    <div class="corner-marker top-right"></div>
+                    <div class="corner-marker bottom-left"></div>
+                    <div class="corner-marker bottom-right"></div>
+
+                    <div class="flex items-start justify-between mb-5 relative z-10">
+                        <div
+                            class="h-12 w-12 rounded-full bg-purple-100/70 dark:bg-purple-900/40 border border-purple-200 dark:border-purple-700/50 flex items-center justify-center text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-purple-300/50">
+                            <i data-lucide="mic" class="w-6 h-6"></i>
+                        </div>
+                        <span
+                            class="px-2.5 py-1 rounded-full bg-white/10 text-white border border-white/20 text-[10px] font-mono text-lab-dark_muted uppercase tracking-wider font-semibold">Âm
+                            học</span>
+                    </div>
+
+                    <h3
+                        class="module-title text-xl font-bold text-white font-tech mb-2 group-hover:text-purple-500 transition">
+                        Đo Tần Số Sóng Âm</h3>
+                    <p
+                        class="module-description text-lab-dark_muted text-sm leading-relaxed mb-6 font-light">
+                        Thực hành đo tần số và chu kỳ sóng âm bằng máy hiện sóng ảo.</p>
+
+                    <div
+                        class="pt-4 border-t border-white/10 flex items-center justify-between group-hover:border-purple-500/30 transition-colors">
+                        <div class="flex items-center gap-1.5 text-xs font-mono text-purple-600 font-semibold">
+                            <i data-lucide="radio" class="w-3 h-3"></i> Oscilloscope
+                        </div>
+                        <span
+                            class="text-slate-400 group-hover:text-purple-500 group-hover:translate-x-1 transition-transform duration-300">
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </span>
+                    </div>
+                </a>
+
+                <!-- Card 7.5: Đo Tốc Độ Sóng Âm -->
+                <a href="/labs/PhysicsLab/thi-nghiem-song-dung.html"
+                    class="module-card glass-panel rounded-xl p-6 relative group block overflow-hidden will-change-transform">
+                    <div class="corner-marker top-left"></div>
+                    <div class="corner-marker top-right"></div>
+                    <div class="corner-marker bottom-left"></div>
+                    <div class="corner-marker bottom-right"></div>
+
+                    <div class="flex items-start justify-between mb-5 relative z-10">
+                        <div
+                            class="h-12 w-12 rounded-full bg-violet-100/70 dark:bg-violet-900/40 border border-violet-200 dark:border-violet-700/50 flex items-center justify-center text-violet-600 group-hover:bg-violet-600 group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-violet-300/50">
+                            <i data-lucide="music" class="w-6 h-6"></i>
+                        </div>
+                        <span
+                            class="px-2.5 py-1 rounded-full bg-white/10 text-white border border-white/20 text-[10px] font-mono text-lab-dark_muted uppercase tracking-wider font-semibold">Âm
+                            học</span>
+                    </div>
+
+                    <h3
+                        class="module-title text-xl font-bold text-white font-tech mb-2 group-hover:text-violet-500 transition">
+                        Đo Tốc Độ Sóng Âm</h3>
+                    <p
+                        class="module-description text-lab-dark_muted text-sm leading-relaxed mb-6 font-light">
+                        Thí nghiệm tạo sóng dừng để đo tốc độ truyền âm trong không khí.</p>
+
+                    <div
+                        class="pt-4 border-t border-white/10 flex items-center justify-between group-hover:border-violet-500/30 transition-colors">
+                        <div class="flex items-center gap-1.5 text-xs font-mono text-violet-600 font-semibold">
+                            <i data-lucide="activity" class="w-3 h-3"></i> Resonance
+                        </div>
+                        <span
+                            class="text-slate-400 group-hover:text-violet-500 group-hover:translate-x-1 transition-transform duration-300">
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </span>
+                    </div>
+                </a>
+
+                <!-- Card 8: Sóng Dừng -->
+                <a href="/labs/PhysicsLab/js/song-dung.html"
+                    class="module-card glass-panel rounded-xl p-6 relative group block overflow-hidden will-change-transform">
+                    <div class="corner-marker top-left"></div>
+                    <div class="corner-marker top-right"></div>
+                    <div class="corner-marker bottom-left"></div>
+                    <div class="corner-marker bottom-right"></div>
+
+                    <div class="flex items-start justify-between mb-5 relative z-10">
+                        <div
+                            class="h-12 w-12 rounded-full bg-pink-100/70 dark:bg-pink-900/40 border border-pink-200 dark:border-pink-700/50 flex items-center justify-center text-pink-600 group-hover:bg-pink-600 group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-pink-300/50">
+                            <i data-lucide="music" class="w-6 h-6"></i>
+                        </div>
+                        <span
+                            class="px-2.5 py-1 rounded-full bg-white/10 text-white border border-white/20 text-[10px] font-mono text-lab-dark_muted uppercase tracking-wider font-semibold">Sóng
+                            dừng</span>
+                    </div>
+
+                    <h3
+                        class="module-title text-xl font-bold text-white font-tech mb-2 group-hover:text-pink-500 transition">
+                        Sóng Dừng</h3>
+                    <p
+                        class="module-description text-lab-dark_muted text-sm leading-relaxed mb-6 font-light">
+                        Quan sát và phân tích sự hình thành sóng dừng trên dây với đầu cố định và tự do.</p>
+
+                    <div
+                        class="pt-4 border-t border-white/10 flex items-center justify-between group-hover:border-pink-500/30 transition-colors">
+                        <div class="flex items-center gap-1.5 text-xs font-mono text-pink-600 font-semibold">
+                            <i data-lucide="sliders" class="w-3 h-3"></i> Cố định & Tự do
+                        </div>
+                        <span
+                            class="text-slate-400 group-hover:text-pink-500 group-hover:translate-x-1 transition-transform duration-300">
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </span>
+                    </div>
+                </a>
+
+                <!-- Card 10: Đo Suất Điện Động & Điện Trở Trong -->
+                <a href="/labs/PhysicsLab/do-suat-dien-dong.html"
+                    class="module-card glass-panel rounded-xl p-6 relative group block overflow-hidden will-change-transform">
+                    <div class="corner-marker top-left"></div>
+                    <div class="corner-marker top-right"></div>
+                    <div class="corner-marker bottom-left"></div>
+                    <div class="corner-marker bottom-right"></div>
+
+                    <div class="flex items-start justify-between mb-5 relative z-10">
+                        <div
+                            class="h-12 w-12 rounded-full bg-lime-100/70 dark:bg-lime-900/40 border border-lime-200 dark:border-lime-700/50 flex items-center justify-center text-lime-600 group-hover:bg-lime-600 group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-lime-300/50">
+                            <i data-lucide="battery-charging" class="w-6 h-6"></i>
+                        </div>
+                        <span
+                            class="px-2.5 py-1 rounded-full bg-white/10 text-white border border-white/20 text-[10px] font-mono text-lab-dark_muted uppercase tracking-wider font-semibold">Điện
+                            học</span>
+                    </div>
+
+                    <h3
+                        class="module-title text-xl font-bold text-white font-tech mb-2 group-hover:text-lime-500 transition">
+                        Đo E & r của Pin</h3>
+                    <p
+                        class="module-description text-lab-dark_muted text-sm leading-relaxed mb-6 font-light">
+                        Thí nghiệm ảo xác định suất điện động và điện trở trong bằng đồ thị.</p>
+
+                    <div
+                        class="pt-4 border-t border-white/10 flex items-center justify-between group-hover:border-lime-500/30 transition-colors">
+                        <div class="flex items-center gap-1.5 text-xs font-mono text-lime-600 font-semibold">
+                            <i data-lucide="pen-tool" class="w-3 h-3"></i> Graphing
+                        </div>
+                        <span
+                            class="text-slate-400 group-hover:text-lime-500 group-hover:translate-x-1 transition-transform duration-300">
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </span>
+                    </div>
+                </a>
+
+                <!-- Card 11: Dòng Điện Trong Kim Loại -->
+                <a href="/labs/PhysicsLab/dong-dien-kim-loai.html"
+                    class="module-card glass-panel rounded-xl p-6 relative group block overflow-hidden will-change-transform">
+                    <div class="corner-marker top-left"></div>
+                    <div class="corner-marker top-right"></div>
+                    <div class="corner-marker bottom-left"></div>
+                    <div class="corner-marker bottom-right"></div>
+
+                    <div class="flex items-start justify-between mb-5 relative z-10">
+                        <div
+                            class="h-12 w-12 rounded-full bg-[#00E5FF]/20 border border-[#00E5FF]/50 flex items-center justify-center text-[#00E5FF] group-hover:bg-[#00E5FF] group-hover:text-white transition-all duration-300 shadow-[0_0_15px_rgba(0,229,255,0.3)]">
+                            <i data-lucide="zap" class="w-6 h-6"></i>
+                        </div>
+                        <span
+                            class="px-2.5 py-1 rounded-full bg-white/10 text-white border border-white/20 text-[10px] font-mono text-lab-dark_muted uppercase tracking-wider font-semibold">Điện
+                            học</span>
+                    </div>
+
+                    <h3
+                        class="module-title text-xl font-bold text-white font-tech mb-2 group-hover:text-[#00E5FF] transition drop-shadow-[0_0_5px_rgba(0,229,255,0.5)]">
+                        Cơ chế sinh dòng điện</h3>
+                    <p
+                        class="module-description text-lab-dark_muted text-sm leading-relaxed mb-6 font-light">
+                        Mô phỏng vi mô sự dịch chuyển có hướng của hạt mang điện: \\(I = Snve\\).</p>
+
+                    <div
+                        class="pt-4 border-t border-white/10 flex items-center justify-between group-hover:border-[#00E5FF]/30 transition-colors">
+                        <div class="flex items-center gap-1.5 text-xs font-mono text-[#00E5FF] font-semibold">
+                            <i data-lucide="cpu" class="w-3 h-3"></i> Interactive
+                        </div>
+                        <span
+                            class="text-slate-400 group-hover:text-[#00E5FF] group-hover:translate-x-1 transition-transform duration-300">
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </span>
+                    </div>
+                </a>
+
+                <!-- Card 12: Đặc tuyến Điện Trở Nhiệt -->
+                <a href="/labs/PhysicsLab/dien-tro-nhiet.html"
+                    class="module-card glass-panel rounded-xl p-6 relative group block overflow-hidden will-change-transform">
+                    <div class="corner-marker top-left"></div>
+                    <div class="corner-marker top-right"></div>
+                    <div class="corner-marker bottom-left"></div>
+                    <div class="corner-marker bottom-right"></div>
+
+                    <div class="flex items-start justify-between mb-5 relative z-10">
+                        <div
+                            class="h-12 w-12 rounded-full bg-emerald-100/70 dark:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-700/50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-emerald-300/50">
+                            <i data-lucide="thermometer" class="w-6 h-6"></i>
+                        </div>
+                        <span
+                            class="px-2.5 py-1 rounded-full bg-white/10 text-white border border-white/20 text-[10px] font-mono text-lab-dark_muted uppercase tracking-wider font-semibold">Điện
+                            học</span>
+                    </div>
+
+                    <h3
+                        class="module-title text-xl font-bold text-white font-tech mb-2 group-hover:text-emerald-500 transition">
+                        Đặc tuyến Điện Trở Nhiệt</h3>
+                    <p
+                        class="module-description text-lab-dark_muted text-sm leading-relaxed mb-6 font-light">
+                        Phân tích chuyển pha logarit và hệ số Beta trên trục tọa độ Chart.js 2D.</p>
+
+                    <div
+                        class="pt-4 border-t border-white/10 flex items-center justify-between group-hover:border-emerald-500/30 transition-colors">
+                        <div class="flex items-center gap-1.5 text-xs font-mono text-emerald-600 font-semibold">
+                            <i data-lucide="line-chart" class="w-3 h-3"></i> Interactive 2D
+                        </div>
+                        <span
+                            class="text-slate-400 group-hover:text-emerald-500 group-hover:translate-x-1 transition-transform duration-300">
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </span>
+                    </div>
+                </a>
+
+
+                <!-- Card 13: Mạch Điện DC -->
+                <a href="/labs/PhysicsLab/mach-dien-dc.html"
+                    class="module-card glass-panel rounded-xl p-6 relative group block overflow-hidden will-change-transform">
+                    <div class="corner-marker top-left"></div>
+                    <div class="corner-marker top-right"></div>
+                    <div class="corner-marker bottom-left"></div>
+                    <div class="corner-marker bottom-right"></div>
+
+                    <div class="flex items-start justify-between mb-5 relative z-10">
+                        <div
+                            class="h-12 w-12 rounded-full bg-yellow-100/70 dark:bg-yellow-900/40 border border-yellow-200 dark:border-yellow-700/50 flex items-center justify-center text-yellow-500 group-hover:bg-yellow-500 group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-yellow-300/50">
+                            <i data-lucide="circuit-board" class="w-6 h-6"></i>
+                        </div>
+                        <span
+                            class="px-2.5 py-1 rounded-full bg-white/10 text-white border border-white/20 text-[10px] font-mono text-lab-dark_muted uppercase tracking-wider font-semibold">Điện
+                            học</span>
+                    </div>
+
+                    <h3
+                        class="module-title text-xl font-bold text-white font-tech mb-2 group-hover:text-yellow-400 transition">
+                        Mạch Điện DC</h3>
+                    <p
+                        class="module-description text-lab-dark_muted text-sm leading-relaxed mb-6 font-light">
+                        Lắp ráp và phân tích mạch điện một chiều với MNA. Mô phỏng quá độ RC của tụ điện.</p>
+
+                    <div
+                        class="pt-4 border-t border-white/10 flex items-center justify-between group-hover:border-yellow-400/30 transition-colors">
+                        <div class="flex items-center gap-1.5 text-xs font-mono text-yellow-500 font-semibold">
+                            <i data-lucide="zap" class="w-3 h-3"></i> MNA Engine
+                        </div>
+                        <span
+                            class="text-slate-400 group-hover:text-yellow-400 group-hover:translate-x-1 transition-transform duration-300">
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </span>
+                    </div>
+                </a>
+
+                <!-- Card 14: Nguồn điện & Mạch kín -->
+                <a href="/labs/PhysicsLab/nguon-dien-mach-kin.html"
+                    class="module-card glass-panel rounded-xl p-6 relative group block overflow-hidden will-change-transform">
+                    <div class="corner-marker top-left"></div>
+                    <div class="corner-marker top-right"></div>
+                    <div class="corner-marker bottom-left"></div>
+                    <div class="corner-marker bottom-right"></div>
+
+                    <div class="flex items-start justify-between mb-5 relative z-10">
+                        <div
+                            class="h-12 w-12 rounded-full bg-cyan-100/70 dark:bg-cyan-900/40 border border-cyan-200 dark:border-cyan-700/50 flex items-center justify-center text-cyan-600 group-hover:bg-cyan-600 group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-cyan-300/50">
+                            <i data-lucide="battery" class="w-6 h-6"></i>
+                        </div>
+                        <span
+                            class="px-2.5 py-1 rounded-full bg-white/10 text-white border border-white/20 text-[10px] font-mono text-lab-dark_muted uppercase tracking-wider font-semibold">Điện học</span>
+                    </div>
+
+                    <h3
+                        class="module-title text-xl font-bold text-white font-tech mb-2 group-hover:text-cyan-500 transition">
+                        Nguồn điện & Mạch kín</h3>
+                    <p
+                        class="module-description text-lab-dark_muted text-sm leading-relaxed mb-6 font-light">
+                        Khảo sát sự phụ thuộc của hiệu điện thế vào cường độ dòng điện. Xác định E và r.</p>
+
+                    <div
+                        class="pt-4 border-t border-white/10 flex items-center justify-between group-hover:border-cyan-500/30 transition-colors">
+                        <div class="flex items-center gap-1.5 text-xs font-mono text-cyan-600 font-semibold">
+                            <i data-lucide="activity" class="w-3 h-3"></i> Ohm's Law
+                        </div>
+                        <span
+                            class="text-slate-400 group-hover:text-cyan-500 group-hover:translate-x-1 transition-transform duration-300">
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </span>
+                    </div>
+                </a>
+
+            </div>
+
+            <!-- Footer Output -->
+            <footer class="mt-8 flex items-center justify-between text-xs font-mono text-lab-dark_muted">
+                <div>&copy; 2025 PHYSICS.LAB / LIQUID UI</div>
+                <div>SYSTEM PERFORMANCE: <span class="text-lab-dark_cyan ml-1">OPTIMAL</span></div>
+            </footer>
+        </div>
+    </main>
+
+    <!-- Close the container and wrapper -->
+    </div>
+    </div>
+
+    <!-- Script Block -->
+    <script>
+        lucide.createIcons();
+        function filterModules() {
+            const input = document.getElementById('module-search');
+            const filter = input.value.toLowerCase();
+            const modules = document.querySelectorAll('.module-card');
+
+            modules.forEach(card => {
+                const titleElement = card.querySelector('.module-title');
+                const descriptionElement = card.querySelector('.module-description');
+
+                let title = titleElement ? titleElement.innerText : '';
+                let description = descriptionElement ? descriptionElement.innerText : '';
+
+                const content = (title + ' ' + description).toLowerCase();
+
+                if (content.indexOf(filter) > -1) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+    <script src="/labs/PhysicsLab/js/theme.js?v=4.0.8"></script>
+</body>
+</html>

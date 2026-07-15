@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module Viewer - Vật Lý Ảo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tailwind-config.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        iframe {
+            width: 100%;
+            height: calc(100vh - 60px);
+            /* Adjust for header */
+            border: none;
+            background: white;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 dark:bg-lab-dark_bg overflow-hidden flex flex-col h-screen">
+
+    <!-- Header / Toolbar -->
+    <div
+        class="h-[60px] bg-white dark:bg-lab-dark_panel border-b border-gray-200 dark:border-slate-700 flex items-center justify-between px-4 shadow-sm z-10">
+        <div class="flex items-center gap-4">
+            <a href="index.html" class="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition"
+                title="Back to Home">
+                <i data-lucide="arrow-left" class="w-5 h-5 text-slate-600 dark:text-slate-300"></i>
+            </a>
+            <h1 id="module-title" class="font-bold text-lg text-slate-800 dark:text-white truncate">Module Viewer</h1>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <button onclick="toggleDarkMode()"
+                class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition">
+                <i id="theme-icon" data-lucide="moon" class="w-5 h-5"></i>
+            </button>
+            <div class="h-6 w-px bg-gray-300 dark:bg-slate-600 mx-2"></div>
+            <span class="text-xs font-mono text-slate-400" id="module-id">ID: ---</span>
+        </div>
+    </div>
+
+    <!-- Iframe Container -->
+    <div class="flex-1 relative w-full h-full">
+        <iframe id="sandbox-frame" sandbox="allow-scripts allow-modals allow-forms allow-same-origin"></iframe>
+
+        <!-- Error State -->
+        <div id="error-screen"
+            class="hidden absolute inset-0 flex items-center justify-center bg-white dark:bg-slate-900 z-50">
+            <div class="text-center">
+                <i data-lucide="alert-triangle" class="w-16 h-16 text-yellow-500 mx-auto mb-4"></i>
+                <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Module Not Found</h2>
+                <p class="text-slate-500">Mô-đun không tồn tại hoặc đã bị xóa.</p>
+                <a href="index.html" class="mt-4 inline-block px-4 py-2 bg-lab-cyan text-white rounded-lg">Quay về trang
+                    chủ</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/theme.js?v=4.0.8"></script>
+    <script src="js/module-manager.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const moduleId = params.get('id');
+
+            const module = ModuleManager.getModuleById(moduleId);
+
+            if (module) {
+                document.title = module.name + " - Viewer";
+                document.getElementById('module-title').innerText = module.name;
+                document.getElementById('module-id').innerText = "ID: " + module.id;
+
+                const frame = document.getElementById('sandbox-frame');
+
+                // Inject content
+                // We use srcdoc if supported, or write to doc
+                // srcdoc is safer and cleaner
+                frame.srcdoc = module.code;
+            } else {
+                document.getElementById('error-screen').classList.remove('hidden');
+                document.getElementById('sandbox-frame').classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+
+</html>

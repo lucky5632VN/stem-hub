@@ -1,0 +1,23 @@
+{
+  "name": "SpatialMind — Học Toán 3D với AI",
+  "short_name": "SpatialMind",
+  "description": "Visualize hình học 3D, giải đại số với AI Socratic. Gamification XP & thử thách hàng ngày.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#06b6d4",
+  "orientation": "any",
+  "lang": "vi",
+  "categories": ["education", "utilities"],
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

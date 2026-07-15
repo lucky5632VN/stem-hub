@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặc Tuyến Điện Trở Nhiệt NTC & PTC | PHYSICS.LAB</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+    
+    <!-- Chart.js for 2D Graph rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- MathJax for rendering equation -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <script src="js/tailwind-config.js"></script>
+    <link rel="stylesheet" href="css/global.css">
+
+    <style>
+        /* Custom HUD glow elements */
+        .neon-text-red {
+            text-shadow: 0 0 5px rgba(231, 76, 60, 0.4), 0 0 10px rgba(231, 76, 60, 0.2);
+        }
+        .neon-text-blue {
+            text-shadow: 0 0 5px rgba(52, 152, 219, 0.4), 0 0 10px rgba(52, 152, 219, 0.2);
+        }
+        .hud-border {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.02);
+        }
+        
+        .slider-thumb-red::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #e74c3c;
+            cursor: pointer;
+            box-shadow: 0 0 10px #e74c3c, 0 0 20px #e74c3c;
+            transition: transform 0.2s;
+        }
+        .slider-thumb-red::-webkit-slider-thumb:hover { transform: scale(1.2); }
+        
+        .slider-thumb-blue::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+            box-shadow: 0 0 10px #3498db, 0 0 20px #3498db;
+            transition: transform 0.2s;
+        }
+        .slider-thumb-blue::-webkit-slider-thumb:hover { transform: scale(1.2); }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body class="dark h-screen w-screen flex items-center justify-center overflow-hidden font-sans text-lab-dark_text transition-all duration-700" id="app-body">
+
+    <!-- Outer Wrapper -->
+    <div class="w-full h-full lg:p-8 p-4 flex items-center justify-center max-w-[1800px] mx-auto relative z-10 transition-all duration-700" id="ambient-container">
+
+        <!-- Main Glass Dashboard Container -->
+        <div class="glass-panel-container w-full h-full flex relative shadow-2xl transition-all duration-500">
+            <!-- NAVIGATION (Managed by theme.js?v=4.0.8) -->
+
+            <!-- MAIN CONTENT -->
+            <main class="flex-1 min-h-0 flex flex-col overflow-hidden relative z-10 bg-transparent">
+                <!-- Header -->
+                <header class="h-[80px] border-b border-white/5 flex items-center justify-between px-8 z-30 flex-shrink-0">
+                    <div class="flex flex-col justify-center">
+                        <h2 class="text-2xl font-bold text-white font-tech tracking-wide flex items-center gap-3">
+                            <span class="text-lab-dark_muted text-lg font-mono">CHUYÊN SÂU /</span> Đặc tuyến Điện Trở Nhiệt <span class="px-2 py-0.5 text-[10px] bg-[#e74c3c]/20 text-[#e74c3c] rounded border border-[#e74c3c]/30 font-mono tracking-widest ml-2">CHART.JS</span>
+                        </h2>
+                    </div>
+                </header>
+
+                <!-- WORKSPACE -->
+                <div class="flex-1 min-h-0 p-6 flex flex-col gap-6 relative overflow-y-auto custom-scrollbar">
+                    
+                    <!-- TOP: Chart Area -->
+                    <div class="glass-panel flex-1 min-h-[400px] max-h-[60vh] rounded-3xl relative overflow-hidden group hud-border p-4 flex flex-col">
+                        <div class="flex justify-between items-center mb-2 px-4">
+                            <div class="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em] flex gap-4">
+                                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#e74c3c]"></span> NTC R-T Curve</span>
+                                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#3498db]"></span> PTC R-T Curve</span>
+                            </div>
+                            <div class="text-[10px] font-mono text-white/40 border border-white/10 px-2 py-1 rounded bg-black/20">LOGARITHMIC SCALE</div>
+                        </div>
+                        <div class="flex-1 relative w-full h-full">
+                            <canvas id="thermistorChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- BOTTOM: Dual Control Panels -->
+                    <div class="flex flex-col lg:flex-row gap-6 shrink-0 pb-4">
+                        
+                        <!-- NTC Controller -->
+                        <div class="glass-panel flex-1 rounded-3xl p-6 relative overflow-hidden border-t-2 border-[#e74c3c]/50">
+                            <!-- Background accent -->
+                            <div class="absolute -top-20 -right-20 w-40 h-40 bg-[#e74c3c]/10 rounded-full blur-[50px] pointer-events-none"></div>
+                            
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-white font-tech text-lg font-bold tracking-wider">NTC Thermistor</h3>
+                                    <p class="text-xs font-mono text-lab-dark_muted mt-1">Hệ số nhiệt Âm (Beta Parameter)</p>
+                                </div>
+                                <div class="bg-black/40 border border-[#e74c3c]/30 rounded-xl px-4 py-3 flex flex-col items-end min-w-[120px]">
+                                    <div class="text-[10px] font-mono text-[#e74c3c] uppercase mb-1">Resistance</div>
+                                    <div class="text-2xl font-['Orbitron'] font-bold text-white leading-none neon-text-red" id="ntc-r-out">10000</div>
+                                    <div class="text-[10px] text-lab-dark_muted font-mono mt-1">&Omega; (Ohms)</div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-xs font-mono mb-2">
+                                        <span class="text-lab-dark_muted">Nhiệt độ (T)</span>
+                                        <span class="text-[#e74c3c] font-bold"><span id="ntc-t-out">25</span> °C</span>
+                                    </div>
+                                    <input type="range" id="ntc-t-slider" min="0" max="150" step="1" value="25" title="Điều chỉnh nhiệt độ NTC"
+                                        class="w-full h-2 bg-black/50 rounded-lg appearance-none cursor-pointer slider-thumb-red border border-white/10 focus:outline-none">
+                                    <div class="flex justify-between text-[10px] text-white/30 font-mono mt-1 px-1">
+                                        <span>0°C</span><span>150°C</span>
+                                    </div>
+                                </div>
+                                <div class="bg-black/30 p-3 rounded-lg border border-[#e74c3c]/20 text-center font-['Orbitron'] text-xs text-white/80 mt-2">
+                                    $$ R_T = R_0 e^{\beta(\frac{1}{T} - \frac{1}{T_0})} $$
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PTC Controller -->
+                        <div class="glass-panel flex-1 rounded-3xl p-6 relative overflow-hidden border-t-2 border-[#3498db]/50">
+                            <!-- Background accent -->
+                            <div class="absolute -top-20 -right-20 w-40 h-40 bg-[#3498db]/10 rounded-full blur-[50px] pointer-events-none"></div>
+                            
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-white font-tech text-lg font-bold tracking-wider">Switching PTC</h3>
+                                    <p class="text-xs font-mono text-lab-dark_muted mt-1">Hệ số nhiệt Dương (Heywang Model)</p>
+                                </div>
+                                <div class="bg-black/40 border border-[#3498db]/30 rounded-xl px-4 py-3 flex flex-col items-end min-w-[120px]" id="ptc-output-box">
+                                    <div class="text-[10px] font-mono text-[#3498db] uppercase mb-1">Resistance</div>
+                                    <div class="text-2xl font-['Orbitron'] font-bold text-white leading-none neon-text-blue" id="ptc-r-out">100</div>
+                                    <div class="text-[10px] text-lab-dark_muted font-mono mt-1">&Omega; (Ohms)</div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-xs font-mono mb-2">
+                                        <span class="text-lab-dark_muted">Nhiệt độ (T)</span>
+                                        <span class="text-[#3498db] font-bold"><span id="ptc-t-out">25</span> °C</span>
+                                    </div>
+                                    <input type="range" id="ptc-t-slider" min="0" max="150" step="1" value="25" title="Điều chỉnh nhiệt độ PTC"
+                                        class="w-full h-2 bg-black/50 rounded-lg appearance-none cursor-pointer slider-thumb-blue border border-white/10 focus:outline-none">
+                                    <div class="flex justify-between text-[10px] text-white/30 font-mono mt-1 px-1">
+                                        <span>0°C</span><span class="text-[#3498db] border-b border-[#3498db]">T_c = 100°C</span><span>150°C</span>
+                                    </div>
+                                </div>
+                                <div class="bg-black/30 p-3 rounded-lg border border-[#3498db]/20 text-center font-['Orbitron'] text-xs text-white/80 mt-2">
+                                    $$ R(T_{>T_c}) = R_1 e^{\alpha(T-T_1)} $$
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="js/theme.js?v=4.0.8"></script>
+    <script src="js/theory-system.js?v=4.0.8"></script>
+    <script src="js/quiz-database.js"></script>
+    <script src="js/quiz-system.js?v=4.0.8"></script>
+
+    <script src="js/sim-dien-tro-nhiet.js"></script>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

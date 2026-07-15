@@ -1,0 +1,224 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ========================================================
+   DESIGN TOKEN SYSTEM — STEM ARENA
+   Light: Apple.com inspired (clean, airy, #F5F5F7 bg)
+   Dark:  Original neon-cyber dark (unchanged)
+   ======================================================== */
+
+:root {
+  /* Surface */
+  --background:        #F5F5F7;
+  --background-alt:    #FAFAFA;
+  --surface:           #FFFFFF;
+  --surface-secondary: #F2F2F5;
+  --surface-hover:     #EBEBEF;
+  --foreground:        #1D1D1F;
+  --foreground-muted:  #6E6E73;
+  --foreground-subtle: #9a9aa0;
+
+  /* Borders */
+  --border:            rgba(0,0,0,0.09);
+  --border-strong:     rgba(0,0,0,0.15);
+
+  /* Brand Accent — kept from original */
+  --accent-primary:    #f43f5e;   /* rose-500 */
+  --accent-secondary:  #a855f7;   /* purple-500 */
+
+  /* Card */
+  --card-bg:           #FFFFFF;
+  --card-shadow:       0 1px 3px rgba(0,0,0,0.06), 0 6px 20px rgba(0,0,0,0.05);
+  --card-shadow-hover: 0 4px 12px rgba(0,0,0,0.10), 0 16px 40px rgba(0,0,0,0.08);
+}
+
+.dark {
+  /* Surface */
+  --background:        #1c1e29;
+  --background-alt:    #14151f;
+  --surface:           rgba(255,255,255,0.03);
+  --surface-secondary: rgba(255,255,255,0.02);
+  --surface-hover:     rgba(255,255,255,0.06);
+  --foreground:        #f4f4f5;
+  --foreground-muted:  #a1a1aa;
+  --foreground-subtle: #71717a;
+
+  /* Borders */
+  --border:            rgba(255,255,255,0.07);
+  --border-strong:     rgba(255,255,255,0.12);
+
+  /* Brand Accent */
+  --accent-primary:    #f43f5e;
+  --accent-secondary:  #a855f7;
+
+  /* Card */
+  --card-bg:           rgba(255,255,255,0.03);
+  --card-shadow:       none;
+  --card-shadow-hover: 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: 'Outfit', sans-serif;
+  --font-mono: var(--font-geist-mono);
+}
+
+/* ========================================================
+   BASE STYLES
+   ======================================================== */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ========================================================
+   LIGHT MODE — COMPREHENSIVE OVERRIDES
+   We use the `html:not(.dark)` to avoid !important wars.
+   These fix hardcoded dark-only Tailwind classes.
+   ======================================================== */
+
+/* --- Page backgrounds --- */
+html:not(.dark) .bg-\[\#1c1e29\],
+html:not(.dark) .bg-\[\#14151f\],
+html:not(.dark) .bg-\[\#131524\],
+html:not(.dark) .bg-\[\#0c0d14\],
+html:not(.dark) .bg-\[\#0c0d16\],
+html:not(.dark) .bg-\[\#08090d\],
+html:not(.dark) .bg-\[\#0f1017\],
+html:not(.dark) .bg-\[\#0f111a\],
+html:not(.dark) .bg-\[\#141622\],
+html:not(.dark) .bg-\[\#1a1b26\],
+html:not(.dark) .bg-\[\#1a1c29\],
+html:not(.dark) .bg-\[\#1b1e30\],
+html:not(.dark) .bg-\[\#20222f\] { background-color: var(--background) !important; }
+
+/* --- Card / panel backgrounds --- */
+html:not(.dark) .bg-\[\#242633\],
+html:not(.dark) .bg-\[\#2a2c3a\],
+html:not(.dark) .bg-\[\#1f212e\],
+html:not(.dark) .bg-\[\#161726\],
+html:not(.dark) .bg-\[\#141526\],
+html:not(.dark) .bg-\[\#1c1e2d\],
+html:not(.dark) .bg-\[\#1e202b\],
+html:not(.dark) .bg-\[\#181924\],
+html:not(.dark) .bg-\[\#14151f\],
+html:not(.dark) .bg-\[\#1a1b26\],
+html:not(.dark) .bg-\[\#1a1c29\],
+html:not(.dark) .bg-\[\#1b1e30\],
+html:not(.dark) .bg-\[\#1c1e29\]\/80,
+html:not(.dark) .bg-\[\#141526\]\/80,
+html:not(.dark) .bg-\[\#1e202b\]\/95,
+html:not(.dark) .bg-\[\#14151f\]\/80,
+html:not(.dark) .bg-\[\#14151f\]\/50,
+html:not(.dark) .bg-\[\#14151f\]\/75,
+html:not(.dark) .bg-white\/\[0\.02\],
+html:not(.dark) .bg-white\/\[0\.03\],
+html:not(.dark) .bg-white\/\[0\.01\] {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--card-shadow) !important;
+}
+
+/* --- Subtle panels & hover states --- */
+html:not(.dark) .bg-white\/5,
+html:not(.dark) .bg-white\/\[0\.05\],
+html:not(.dark) .bg-white\/2,
+html:not(.dark) .hover\:bg-white\/5:hover,
+html:not(.dark) .hover\:bg-white\/10:hover {
+  background-color: var(--surface-secondary) !important;
+}
+
+html:not(.dark) .hover\:bg-white\/\[0\.02\]:hover { background-color: var(--surface-hover) !important; }
+
+/* --- Subtle dark bg sections (e.g. table rows) --- */
+html:not(.dark) .bg-\[\#08090d\]\/60,
+html:not(.dark) .bg-black\/20,
+html:not(.dark) .bg-black\/30 {
+  background-color: var(--surface-secondary) !important;
+  border-color: var(--border) !important;
+}
+
+/* --- Input / select backgrounds --- */
+html:not(.dark) .bg-\[\#161726\],
+html:not(.dark) .bg-black\/30 {
+  background-color: var(--surface) !important;
+}
+
+html:not(.dark) select option {
+  background-color: #ffffff !important;
+  color: #1D1D1F !important;
+}
+
+/* --- Text colors --- */
+html:not(.dark) .text-white,
+html:not(.dark) .text-zinc-100,
+html:not(.dark) .text-zinc-200 { color: var(--foreground) !important; }
+
+html:not(.dark) .text-zinc-300,
+html:not(.dark) .text-zinc-400 { color: var(--foreground-muted) !important; }
+
+html:not(.dark) .text-zinc-500,
+html:not(.dark) .text-zinc-600 { color: var(--foreground-subtle) !important; }
+
+/* --- Borders --- */
+html:not(.dark) .border-white\/5,
+html:not(.dark) .border-white\/10,
+html:not(.dark) .border-\[\#1f2235\],
+html:not(.dark) .border-\[\#1f2235\]\/40 { border-color: var(--border) !important; }
+
+html:not(.dark) .border-white\/\[0\.07\] { border-color: var(--border-strong) !important; }
+
+/* --- Dividers & separators --- */
+html:not(.dark) .divide-white\/5 > * + * { border-color: var(--border) !important; }
+
+/* --- Specific dark bg classes used in leaderboard, admin etc --- */
+html:not(.dark) .bg-\[\#0c0d14\]\/85 {
+  background-color: rgba(245,245,247,0.92) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+/* --- Sticky bottom bar on leaderboard/profile --- */
+html:not(.dark) .bg-\[\#161726\]\/90 {
+  background-color: rgba(255,255,255,0.92) !important;
+  border-color: var(--border) !important;
+}
+
+/* --- Admin sidebar background fix --- */
+html:not(.dark) .bg-\[\#0c0d14\] { background-color: #F0F0F5 !important; }
+
+/* --- Recharts axis/grid light mode fix --- */
+html:not(.dark) .recharts-cartesian-axis-tick-value { fill: #6E6E73 !important; }
+html:not(.dark) .recharts-cartesian-grid line { stroke: rgba(0,0,0,0.07) !important; }
+html:not(.dark) .recharts-legend-item-text { color: #6E6E73 !important; }
+html:not(.dark) .recharts-tooltip-wrapper .recharts-default-tooltip {
+  background-color: #FFFFFF !important;
+  border-color: rgba(0,0,0,0.1) !important;
+  color: #1D1D1F !important;
+}
+
+/* ========================================================
+   ANIMATIONS
+   ======================================================== */
+@keyframes cybergrid-scroll {
+  from { background-position: 0 0; }
+  to   { background-position: 0 900px; }
+}
+
+/* ========================================================
+   ADMIN LAYOUT HELPERS
+   ======================================================== */
+.admin-main-content {
+  width: calc(100% - 76px);
+  margin-left: 76px;
+}
+
+@media (min-width: 1024px) {
+  .admin-main-content {
+    width: calc(100% - 260px);
+    margin-left: 260px;
+  }
+}

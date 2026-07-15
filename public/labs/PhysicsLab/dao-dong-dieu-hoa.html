@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mối liên hệ giữa CĐTĐ và DĐĐH</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tailwind-config.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .font-tech {
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #06b6d4;
+            margin-top: -6px;
+            cursor: pointer;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+
+        .dark input[type=range]::-webkit-slider-runnable-track {
+            background: #475569;
+        }
+
+        .hud-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .hud-panel {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body
+    class="h-screen flex overflow-hidden bg-slate-50 dark:bg-[#0f172a] text-slate-700 dark:text-slate-300 transition-colors duration-300">
+
+    <!-- SIDEBAR -->
+    <aside id="mainSidebar"
+        class="w-72 flex-shrink-0 flex flex-col bg-white dark:bg-[#1e293b] border-r border-slate-200 dark:border-slate-800 z-20 shadow-lg transition-all duration-300 ease-in-out transform">
+        <div class="h-16 flex items-center justify-between px-6 border-b border-slate-100 dark:border-slate-700/50">
+            <h1 class="font-tech font-bold text-xl text-slate-800 dark:text-white uppercase tracking-wider">BẢNG ĐIỀU
+                KHIỂN</h1>
+            <a href="index.html"
+                class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-cyan-500 transition-colors">
+                <i data-lucide="home" class="w-5 h-5"></i>
+            </a>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+            <!-- Playback -->
+            <div>
+                <label
+                    class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 block">Điều
+                    Khiển</label>
+                <div class="flex gap-2 mb-2">
+                    <button id="toggleButton"
+                        class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg font-medium transition shadow-sm hover:shadow-cyan-500/30">
+                        <i data-lucide="play" class="w-4 h-4 fill-current"></i> <span class="text-sm">Chạy</span>
+                    </button>
+                    <button id="resetButton"
+                        class="px-4 py-2.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg transition">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div class="flex gap-2">
+                    <button id="stepBackButton"
+                        class="flex-1 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded shadow-sm hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-50 transition">
+                        &larr; Lùi
+                    </button>
+                    <button id="stepButton"
+                        class="flex-1 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded shadow-sm hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-50 transition">
+                        Tiến &rarr;
+                    </button>
+                </div>
+            </div>
+
+            <!-- Parameters -->
+            <div class="space-y-6">
+                <!-- Period -->
+                <div>
+                    <div class="flex justify-between text-xs mb-1.5">
+                        <label class="font-medium text-slate-600 dark:text-slate-300">Chu kỳ (T)</label>
+                        <span class="font-mono text-cyan-600 dark:text-cyan-400"><span
+                                id="periodValueDisplay">4.0</span> s</span>
+                    </div>
+                    <input type="range" id="periodRange" min="0.5" max="10" step="0.1" value="4.0" class="w-full">
+                    <!-- Hidden number input for logic compatibility -->
+                    <input type="hidden" id="period" value="4.0">
+                </div>
+
+                <!-- Amplitude -->
+                <div>
+                    <div class="flex justify-between text-xs mb-1.5">
+                        <label class="font-medium text-slate-600 dark:text-slate-300">Biên độ (A)</label>
+                        <span class="font-mono text-cyan-600 dark:text-cyan-400" id="amplitudeDisplay">10.00 cm</span>
+                    </div>
+                    <!-- Pixel value range 90-150 -->
+                    <input type="range" id="amplitudeRange" min="90" max="150" value="120" step="1" class="w-full">
+                </div>
+
+                <!-- Phase -->
+                <div>
+                    <div class="flex justify-between text-xs mb-1.5">
+                        <label class="font-medium text-slate-600 dark:text-slate-300">Pha ban đầu (φ)</label>
+                        <span class="font-mono text-cyan-600 dark:text-cyan-400"><span
+                                id="initialPhaseDisplay">0</span>°</span>
+                    </div>
+                    <input type="range" id="initialPhaseRange" min="-360" max="360" step="15" value="0" class="w-full">
+                    <input type="hidden" id="initialPhase" value="0">
+                </div>
+            </div>
+
+            <!-- Info Box -->
+            <div
+                class="p-3 bg-slate-100 dark:bg-slate-800/50 rounded-lg text-xs text-slate-500 dark:text-slate-400 font-mono">
+                <div class="flex justify-between mb-1">
+                    <span>Tần số góc (ω):</span>
+                    <span id="omegaDisplay" class="text-slate-700 dark:text-slate-200 font-bold">1.57 rad/s</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Pha (rad):</span>
+                    <span id="initialPhaseRadDisplay" class="text-slate-700 dark:text-slate-200 font-bold">0.00
+                        rad</span>
+                </div>
+            </div>
+
+            <!-- GUIDE -->
+            <div class="mt-4 p-4 border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <h4 class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase mb-2">Chú giải</h4>
+                <ul class="space-y-2 text-xs text-slate-600 dark:text-slate-400">
+                    <li class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-orange-500 border border-orange-700"></span> Chuyển động
+                        tròn đều
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-blue-500 border border-blue-700"></span> Dao động điều hòa
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+        <!-- Sidebar Footer -->
+        <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+            <button onclick="toggleDarkMode()"
+                class="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+                <i id="theme-icon" data-lucide="moon" class="w-4 h-4"></i>
+                <span class="text-xs font-medium uppercase">Giao diện Tối/Sáng</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="flex-1 relative bg-white dark:bg-[#0f172a] overflow-hidden flex flex-col">
+        <!-- Sidebar Toggle Button -->
+        <button id="sidebarToggle"
+            class="absolute top-4 left-4 z-50 px-4 py-2 flex items-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors text-sm font-medium">
+            <i data-lucide="menu" class="w-4 h-4"></i>
+            <span>Ẩn/Hiện bảng điều khiển</span>
+        </button>
+        <!-- Canvas Container -->
+        <div class="flex-1 relative flex items-center justify-center">
+            <!-- Canvas phải chiếm toàn bộ và nằm đúng vị trí -->
+            <canvas id="physicsCanvas" class="absolute inset-0 w-full h-full block"></canvas>
+
+            <!-- HUD -->
+            <div id="infoPanel"
+                class="absolute top-4 right-4 w-64 hud-panel rounded-xl p-4 shadow-xl z-10 backdrop-blur-md">
+                <h3 id="infoPanelHeader"
+                    class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 border-b border-slate-200 dark:border-slate-700 pb-2 cursor-move select-none">
+                    Thông số Thời thực</h3>
+                <div class="space-y-2 font-mono text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-slate-600 dark:text-slate-400">Thời gian (t)</span>
+                        <span id="timeDisplay" class="font-bold text-slate-800 dark:text-white">0.00 s</span>
+                    </div>
+                    <div class="w-full h-px bg-slate-200 dark:bg-slate-700 my-2"></div>
+                    <div class="flex justify-between text-red-500">
+                        <span>Li độ (x)</span>
+                        <span id="xDisplay" class="font-bold">0.00 cm</span>
+                    </div>
+                    <div class="flex justify-between text-green-500">
+                        <span>Vận tốc (v)</span>
+                        <span id="vDisplay" class="font-bold">0.00 cm/s</span>
+                    </div>
+                    <div class="flex justify-between text-blue-500">
+                        <span>Gia tốc (a)</span>
+                        <span id="aDisplay" class="font-bold">0.00 cm/s²</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/theme.js?v=4.0.8"></script>
+    <script src="js/theory-system.js?v=4.0.8"></script>
+    <script src="js/quiz-database.js"></script>
+    <script src="js/quiz-system.js?v=4.0.8"></script>
+
+    <script>
+        // --- CONSTANTS & VARS ---
+        const canvas = document.getElementById('physicsCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- PERFORMANCE CACHE ---
+        const bgCanvas = document.createElement('canvas'); // Off-screen canvas for static elements
+        const bgCtx = bgCanvas.getContext('2d');
+        let needsStaticRedraw = true;
+
+        // --- THEME OBSERVER ---
+        // Automatically redraw when class="dark" changes
+        const themeObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    needsStaticRedraw = true;
+                    // Force redraw with current elapsed time
+                    updatePhysicsAndDraw(current_elapsed_time);
+                }
+            });
+        });
+        themeObserver.observe(document.documentElement, { attributes: true });
+
+        // Displays
+        const omegaDisplay = document.getElementById('omegaDisplay');
+        const amplitudeDisplay = document.getElementById('amplitudeDisplay');
+        const initialPhaseRadDisplay = document.getElementById('initialPhaseRadDisplay');
+        const periodValueDisplay = document.getElementById('periodValueDisplay');
+        const initialPhaseDisplay = document.getElementById('initialPhaseDisplay');
+
+        // Inputs
+        const periodInput = document.getElementById('period'); // hidden
+        const periodRange = document.getElementById('periodRange');
+        const initialPhaseInput = document.getElementById('initialPhase'); // hidden
+        const initialPhaseRange = document.getElementById('initialPhaseRange');
+        const amplitudeRange = document.getElementById('amplitudeRange');
+
+        // HUD
+        const timeDisplay = document.getElementById('timeDisplay');
+        const xDisplay = document.getElementById('xDisplay');
+        const vDisplay = document.getElementById('vDisplay');
+        const aDisplay = document.getElementById('aDisplay');
+
+        // Buttons
+        const toggleButton = document.getElementById('toggleButton');
+        const stepButton = document.getElementById('stepButton');
+        const stepBackButton = document.getElementById('stepBackButton');
+        const resetButton = document.getElementById('resetButton');
+
+        let animationFrameId = null;
+        let lastTimestamp = 0;
+        let isRunning = false;
+        let current_elapsed_time = 0;
+        const ANGLE_TOLERANCE = 0.001;
+        let initial_phase_rad = 0;
+
+        let width = canvas.width;
+        let height = canvas.height;
+
+        // Dynamic Layout Calculation
+        let center_x_ucm, center_y_ucm, radius, shm_y_pos;
+        let GRAPH_Y_START, GRAPH_X_END, GRAPH_SINGLE_HEIGHT;
+        const Y_PADDING_GRAPH = 15;
+        const X_OFFSET = 60; // Left padding for graphs
+        let SCALE_FACTOR = 1.0;
+
+        const history = { y: [], v: [], a: [] };
+
+        // --- RESIZE LOGIC ---
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+
+            width = canvas.width;
+            height = canvas.height;
+
+            // Resize Cache Canvas
+            bgCanvas.width = width;
+            bgCanvas.height = height;
+            needsStaticRedraw = true;
+
+            recalcLayout();
+            if (!isRunning) updatePhysicsAndDraw(current_elapsed_time);
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        function recalcLayout() {
+            // UCM Top Section (~52% chiều cao)
+            const UCM_HEIGHT = height * 0.52;
+            center_x_ucm = width / 2;
+
+            // Layout cố định dựa trên Max Radius
+            const maxRadius = parseFloat(amplitudeRange.max);
+            center_y_ucm = Math.max(maxRadius + 40, UCM_HEIGHT * 0.45);
+
+            // Cập nhật radius hiển thị
+            radius = parseFloat(amplitudeRange.value);
+
+            // Các vị trí neo (Axis, Graphs) dựa trên maxRadius để không bị nhảy
+            shm_y_pos = center_y_ucm + maxRadius + 70;
+
+            // Graph Section
+            // Tăng khoảng cách để không che chữ "Dao động điều hòa"
+            GRAPH_Y_START = shm_y_pos + 90;
+            if (GRAPH_Y_START > height - 120) {
+                GRAPH_Y_START = height - 150;
+            }
+
+            GRAPH_X_END = width - 40;
+            const GRAPH_TOTAL_SPACE = height - GRAPH_Y_START - 20;
+            GRAPH_SINGLE_HEIGHT = Math.max(10, (GRAPH_TOTAL_SPACE - 2 * Y_PADDING_GRAPH) / 3);
+        }
+
+        // --- HELPERS ---
+        function getFixedStepIncrement() {
+            const T = parseFloat(periodInput.value);
+            if (isNaN(T) || T < 0.5) return 0.5 / 80;
+            return T / 80;
+        }
+
+        function getAmplitudeInCm(pixel_value) {
+            const PIXEL_MIN = 90;
+            const PIXEL_RANGE = 150 - 90;
+            const CM_MIN = 2;
+            const CM_RANGE = 12 - 2;
+            return CM_MIN + (pixel_value - PIXEL_MIN) * (CM_RANGE / PIXEL_RANGE);
+        }
+
+        function updateAllParams() {
+            needsStaticRedraw = true; // Force redraw of static labels (values)
+            let T = parseFloat(periodRange.value);
+            periodInput.value = T;
+            periodValueDisplay.textContent = T.toFixed(1);
+            const omega = (2 * Math.PI) / T;
+            omegaDisplay.textContent = `${omega.toFixed(3)} rad/s`;
+
+            let phi_deg = parseFloat(initialPhaseRange.value);
+            initialPhaseInput.value = phi_deg;
+            initialPhaseDisplay.textContent = phi_deg;
+            initial_phase_rad = phi_deg * (Math.PI / 180);
+            initialPhaseRadDisplay.textContent = `${initial_phase_rad.toFixed(2)} rad`;
+
+            radius = parseFloat(amplitudeRange.value);
+            const A_cm = getAmplitudeInCm(radius);
+            amplitudeDisplay.textContent = `${A_cm.toFixed(2)} cm`;
+
+            recalcLayout();
+
+            // Yêu cầu: TỰ ĐỘNG DỪNG và RESET khi điều chỉnh logic
+            if (isRunning) {
+                toggleSimulation(); // Sẽ set isRunning = false và cập nhật nút Play
+            }
+
+            resetSimulationLogic(); // Đưa t về 0, xóa history
+            updatePhysicsAndDraw(0); // Vẽ trạng thái nghỉ tại t=0
+        }
+
+        // --- SPECIAL ANGLES CONFIG ---
+        const SQRT2_2 = Math.sqrt(2) / 2;
+        const SQRT3_2 = Math.sqrt(3) / 2;
+
+        const SPECIAL_ANGLES = [
+            { rad: 0, label_phase: "0", label_x: "+A", val_factor: 1 },
+            { rad: Math.PI / 6, label_phase: "π/6", label_x: "+A√3/2", val_factor: SQRT3_2 },
+            { rad: Math.PI / 4, label_phase: "π/4", label_x: "+A√2/2", val_factor: SQRT2_2 },
+            { rad: Math.PI / 3, label_phase: "π/3", label_x: "+A/2", val_factor: 0.5 },
+            { rad: Math.PI / 2, label_phase: "π/2", label_x: "0", val_factor: 0 },
+            { rad: 2 * Math.PI / 3, label_phase: "2π/3", label_x: "-A/2", val_factor: -0.5 },
+            { rad: 3 * Math.PI / 4, label_phase: "3π/4", label_x: "-A√2/2", val_factor: -SQRT2_2 },
+            { rad: 5 * Math.PI / 6, label_phase: "5π/6", label_x: "-A√3/2", val_factor: -SQRT3_2 },
+            { rad: Math.PI, label_phase: "π", label_x: "-A", val_factor: -1 },
+            { rad: 7 * Math.PI / 6, label_phase: "7π/6", label_x: "-A√3/2", val_factor: -SQRT3_2 },
+            { rad: 5 * Math.PI / 4, label_phase: "5π/4", label_x: "-A√2/2", val_factor: -SQRT2_2 },
+            { rad: 4 * Math.PI / 3, label_phase: "4π/3", label_x: "-A/2", val_factor: -0.5 },
+            { rad: 3 * Math.PI / 2, label_phase: "3π/2", label_x: "0", val_factor: 0 },
+            { rad: 5 * Math.PI / 3, label_phase: "5π/3", label_x: "+A/2", val_factor: 0.5 },
+            { rad: 7 * Math.PI / 4, label_phase: "7π/4", label_x: "+A√2/2", val_factor: SQRT2_2 },
+            { rad: 11 * Math.PI / 6, label_phase: "11π/6", label_x: "+A√3/2", val_factor: SQRT3_2 },
+            { rad: 2 * Math.PI, label_phase: "2π", label_x: "+A", val_factor: 1 }, // Wrap around
+        ];
+
+        // --- DRAWING FUNCTIONS ---
+        function drawArrow(ctx, fromX, fromY, toX, toY, headLength = 10, color = '#000') {
+            const dx = toX - fromX;
+            const dy = toY - fromY;
+            const angle = Math.atan2(dy, dx);
+            ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 2;
+
+            // Glow effect for arrows if requested
+            ctx.shadowBlur = 4; ctx.shadowColor = color;
+
+            ctx.moveTo(fromX, fromY); ctx.lineTo(toX, toY); ctx.stroke();
+            ctx.beginPath(); ctx.fillStyle = color;
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headLength * Math.cos(angle - Math.PI / 6), toY - headLength * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI / 6), toY - headLength * Math.sin(angle + Math.PI / 6));
+            ctx.fill();
+
+            ctx.shadowBlur = 0; // Reset
+        }
+
+        function drawAxes() {
+            const isDark = document.documentElement.classList.contains('dark');
+            // Adaptive Colors
+            const axisColor = isDark ? '#94a3b8' : '#94a3b8';
+            const labelColor = isDark ? '#e2e8f0' : '#475569';
+            const shmAxisColor = '#06b6d4';
+
+            ctx.font = '14px Inter';
+            ctx.strokeStyle = axisColor;
+            ctx.fillStyle = labelColor;
+            ctx.lineWidth = 1;
+
+            // UCM Axes - Cố định kích thước trục theo MAX radius
+            const maxR = parseFloat(amplitudeRange.max);
+
+            ctx.beginPath(); ctx.setLineDash([5, 5]);
+            ctx.moveTo(center_x_ucm, center_y_ucm - maxR - 30); ctx.lineTo(center_x_ucm, center_y_ucm + maxR + 30);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(center_x_ucm - maxR - 30, center_y_ucm); ctx.lineTo(center_x_ucm + maxR + 30, center_y_ucm);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = labelColor;
+            ctx.textAlign = 'center';
+            ctx.fillText('Chuyển động tròn đều (UCM)', center_x_ucm, center_y_ucm - maxR - 45);
+
+            // SHM Axis (Neon Glow only in Dark Mode)
+            if (isDark) {
+                ctx.shadowBlur = 5; ctx.shadowColor = shmAxisColor;
+            } else {
+                ctx.shadowBlur = 0;
+            }
+
+            ctx.beginPath(); ctx.strokeStyle = shmAxisColor; ctx.lineWidth = 2;
+            drawArrow(ctx, center_x_ucm - maxR - 40, shm_y_pos, center_x_ucm + maxR + 60, shm_y_pos, 8, shmAxisColor);
+            ctx.shadowBlur = 0;
+
+            ctx.beginPath(); ctx.moveTo(center_x_ucm, shm_y_pos - 8); ctx.lineTo(center_x_ucm, shm_y_pos + 8); ctx.stroke();
+            ctx.fillStyle = shmAxisColor;
+            ctx.fillText('O', center_x_ucm, shm_y_pos + 25);
+            ctx.fillText('x', center_x_ucm + maxR + 70, shm_y_pos + 5);
+
+            ctx.fillStyle = labelColor;
+            ctx.fillText('Dao động điều hòa (SHM)', center_x_ucm, shm_y_pos + 45);
+        }
+
+        // --- OPTIMIZED DRAWING ---
+        function drawStaticGraphBackground() {
+            if (history.y.length < 1 && !needsStaticRedraw) return; // Wait for initial data or force redraw
+            if (GRAPH_SINGLE_HEIGHT < 20) return;
+
+            // Clear cache
+            bgCtx.clearRect(0, 0, width, height);
+
+            // --- THEME COLORS ---
+            const isDark = document.documentElement.classList.contains('dark');
+            const colors = {
+                bg: isDark ? '#0f172a' : '#ffffff',
+                separator: isDark ? '#38bdf8' : '#cbd5e1',
+                axis: isDark ? '#e2e8f0' : '#334155',
+                axis_vert: isDark ? '#475569' : '#cbd5e1',
+                grid_special: isDark ? 'rgba(148, 163, 184, 0.15)' : 'rgba(71, 85, 105, 0.1)',
+                grid_time: isDark ? 'rgba(148, 163, 184, 0.2)' : 'rgba(71, 85, 105, 0.15)',
+                text: isDark ? '#cbd5e1' : '#475569',
+            };
+
+            const graphAreaTop = GRAPH_Y_START - 20;
+
+            // BACKGROUND
+            bgCtx.fillStyle = colors.bg;
+            bgCtx.fillRect(0, graphAreaTop, width, height - graphAreaTop);
+
+            // Separator Line
+            if (isDark) {
+                bgCtx.shadowBlur = 5; bgCtx.shadowColor = colors.separator;
+            }
+            bgCtx.beginPath(); bgCtx.strokeStyle = colors.separator; bgCtx.lineWidth = 1;
+            bgCtx.moveTo(0, graphAreaTop); bgCtx.lineTo(width, graphAreaTop); bgCtx.stroke();
+            bgCtx.shadowBlur = 0;
+
+            // --- CALC MAX VALUES ---
+            const T = parseFloat(periodInput.value);
+            const omega = (2 * Math.PI) / T;
+            const A_cm = getAmplitudeInCm(radius);
+            const V_max = A_cm * omega;
+            const A_max = A_cm * omega * omega;
+
+            const graphsInfo = [
+                { title: "x (cm)", color: "#ef4444", val: A_cm, unit: "" },
+                { title: "v (cm/s)", color: "#10b981", val: V_max, unit: "" },
+                { title: "a (cm/s²)", color: "#3b82f6", val: A_max, unit: "" }
+            ];
+
+            graphsInfo.forEach((g, i) => {
+                const y_center = GRAPH_Y_START + (i + 0.5) * GRAPH_SINGLE_HEIGHT + i * Y_PADDING_GRAPH;
+                if (y_center > height + GRAPH_SINGLE_HEIGHT) return;
+                const half_h = GRAPH_SINGLE_HEIGHT / 2;
+                const boxTop = y_center - half_h;
+                const boxBottom = y_center + half_h;
+
+                // Axis Line (Zero line)
+                bgCtx.beginPath(); bgCtx.strokeStyle = colors.axis; bgCtx.lineWidth = 1; bgCtx.setLineDash([]);
+                bgCtx.moveTo(X_OFFSET, y_center); bgCtx.lineTo(GRAPH_X_END, y_center); bgCtx.stroke();
+
+                // Special Grid Lines
+                const SPECIAL_FRACTIONS = [0.5, Math.sqrt(2) / 2, Math.sqrt(3) / 2];
+                bgCtx.lineWidth = 1; bgCtx.strokeStyle = colors.grid_special; bgCtx.setLineDash([1, 4]);
+
+                SPECIAL_FRACTIONS.forEach(frac => {
+                    const y_offset = frac * (half_h * 0.9);
+                    bgCtx.beginPath();
+                    bgCtx.moveTo(X_OFFSET, y_center - y_offset); bgCtx.lineTo(GRAPH_X_END, y_center - y_offset);
+                    bgCtx.stroke();
+                    bgCtx.beginPath();
+                    bgCtx.moveTo(X_OFFSET, y_center + y_offset); bgCtx.lineTo(GRAPH_X_END, y_center + y_offset);
+                    bgCtx.stroke();
+                });
+
+                // Vertical Axis Line
+                bgCtx.beginPath(); bgCtx.strokeStyle = colors.axis_vert; bgCtx.setLineDash([]);
+                bgCtx.moveTo(X_OFFSET, boxTop); bgCtx.lineTo(X_OFFSET, boxBottom); bgCtx.stroke();
+
+                // Labels text
+                bgCtx.font = '10px Inter'; bgCtx.textAlign = 'right'; bgCtx.fillStyle = colors.text;
+                const y_visual_limit = half_h * 0.9;
+
+                // Format Value
+                const valStr = g.val < 10 ? g.val.toFixed(2) : g.val.toFixed(1);
+                bgCtx.fillText(`+${valStr}`, X_OFFSET - 5, y_center - y_visual_limit + 3);
+                bgCtx.fillText(`-${valStr}`, X_OFFSET - 5, y_center + y_visual_limit + 3);
+
+                // Title
+                if (isDark) {
+                    bgCtx.shadowBlur = 5; bgCtx.shadowColor = g.color;
+                }
+                bgCtx.fillStyle = g.color; bgCtx.font = 'bold 12px Inter'; bgCtx.textAlign = 'right';
+                bgCtx.fillText(g.title, X_OFFSET - 8, y_center + 4);
+                bgCtx.shadowBlur = 0;
+            });
+
+            needsStaticRedraw = false;
+        }
+
+        function drawGraphs(elapsed) {
+            if (GRAPH_SINGLE_HEIGHT < 20) return;
+
+            // 1. Draw Static Background (Cached)
+            if (needsStaticRedraw) drawStaticGraphBackground();
+            ctx.drawImage(bgCanvas, 0, 0);
+
+            // 2. Draw Dynamic Elements
+            const T = parseFloat(periodInput.value);
+            const omega = (2 * Math.PI) / T;
+            const A_cm = getAmplitudeInCm(radius);
+
+            const Y_MAX_CURRENT = A_cm;
+            const V_MAX_CURRENT = A_cm * omega;
+            const A_MAX_CURRENT = A_cm * omega * omega;
+
+            const graphs = [
+                { data: history.y, currentMax: Y_MAX_CURRENT, color: "#ef4444" },
+                { data: history.v, currentMax: V_MAX_CURRENT, color: "#10b981" },
+                { data: history.a, currentMax: A_MAX_CURRENT, color: "#3b82f6" }
+            ];
+
+            const X_RANGE = GRAPH_X_END - X_OFFSET;
+            const t_max = elapsed > 10 ? elapsed : 10;
+            const t_min = t_max - 10;
+            const isDark = document.documentElement.classList.contains('dark');
+            const colors = {
+                text: isDark ? '#cbd5e1' : '#475569',
+                playhead: isDark ? '#ffffff' : '#0f172a',
+                grid_time: isDark ? 'rgba(148, 163, 184, 0.2)' : 'rgba(71, 85, 105, 0.15)'
+            };
+
+            // Calculate shared layout info
+            const timeStep = T / 4;
+            const k_start = Math.ceil(t_min / timeStep);
+            const k_end = Math.floor(t_max / timeStep);
+
+            graphs.forEach((g, i) => {
+                const y_center = GRAPH_Y_START + (i + 0.5) * GRAPH_SINGLE_HEIGHT + i * Y_PADDING_GRAPH;
+                if (y_center > height + GRAPH_SINGLE_HEIGHT) return;
+                const half_h = GRAPH_SINGLE_HEIGHT / 2;
+                const boxTop = y_center - half_h;
+                const boxBottom = y_center + half_h;
+
+                // --- DYNAMIC TIME GRID LINES (Moving) ---
+                ctx.strokeStyle = colors.grid_time;
+                ctx.fillStyle = colors.text;
+                ctx.font = '10px Consolas, monospace';
+                ctx.textAlign = 'center';
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(X_OFFSET, boxTop, X_RANGE, 2 * half_h); // Clip to graph content area
+                ctx.clip();
+
+                for (let k = k_start; k <= k_end; k++) {
+                    if (k === 0) continue;
+                    const t_val = k * timeStep;
+                    const t_ratio = (t_val - t_min) / 10;
+                    if (t_ratio < 0 || t_ratio > 1) continue;
+
+                    const x = X_OFFSET + t_ratio * X_RANGE;
+
+                    // Draw Line
+                    ctx.beginPath(); ctx.setLineDash([4, 4]);
+                    ctx.moveTo(x, boxTop); ctx.lineTo(x, boxBottom);
+                    ctx.stroke();
+
+                    // Label logic same as before...
+                    let label = "";
+                    if (k % 4 === 0) {
+                        const n = k / 4; label = (n === 1) ? "T" : `${n}T`;
+                    } else if (k % 2 === 0) {
+                        const n = k / 2; label = `${n}T/2`;
+                    } else {
+                        label = (k === 1) ? "T/4" : `${k}T/4`;
+                    }
+                    if (k < 0) label = "-" + label.replace("-", "");
+
+                    ctx.fillText(label, x, y_center + (half_h * 0.8));
+                }
+                ctx.setLineDash([]);
+
+                // --- DRAW PATH ---
+                // Logic Scaling: Normalize to 90%
+                const yScale = (half_h * 0.9) / (g.currentMax || 1);
+
+                // Draw Path - NEON GLOW (Optimized: Less blur or only if needed)
+                if (isDark) {
+                    ctx.shadowBlur = 8; ctx.shadowColor = g.color; // Reduced blur from 10
+                }
+                ctx.beginPath(); ctx.strokeStyle = g.color; ctx.lineWidth = 2.5;
+
+                let first = true;
+                let startIndex = 0;
+                // Optimization: Find startIndex via Binary Search or rough estimate? 
+                // Simple linear scan is likely fast enough for < 1000 points.
+                for (let k = 0; k < g.data.length; k++) {
+                    if (g.data[k].t >= t_min) {
+                        startIndex = k; break;
+                    }
+                }
+                if (startIndex > 0) startIndex--;
+
+                for (let k = startIndex; k < g.data.length; k++) {
+                    const p = g.data[k];
+                    const t_ratio = (p.t - t_min) / 10;
+                    const x = X_OFFSET + t_ratio * X_RANGE;
+                    const y = y_center - p.val * yScale;
+
+                    if (first) { ctx.moveTo(x, y); first = false; }
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+
+                ctx.restore(); // Restore clip
+                ctx.shadowBlur = 0;
+            });
+
+            // --- CURRENT TIME INDICATOR (PLAYHEAD) ---
+            const t_ratio_cur = (elapsed - t_min) / 10;
+            if (t_ratio_cur >= 0 && t_ratio_cur <= 1.001) {
+                const x_cur = X_OFFSET + t_ratio_cur * X_RANGE;
+                const y_start_line = GRAPH_Y_START;
+                const y_end_line = GRAPH_Y_START + 3 * GRAPH_SINGLE_HEIGHT + 2 * Y_PADDING_GRAPH;
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.strokeStyle = colors.playhead;
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 3]);
+                if (isDark) {
+                    ctx.shadowBlur = 5; ctx.shadowColor = 'rgba(255,255,255,0.8)';
+                }
+
+                ctx.moveTo(x_cur, y_start_line);
+                ctx.lineTo(x_cur, y_end_line);
+                ctx.stroke();
+
+                // Label "t"
+                ctx.fillStyle = colors.playhead; ctx.font = 'bold 12px Consolas';
+                ctx.textAlign = 'center'; ctx.setLineDash([]);
+                ctx.fillText("t", x_cur, y_start_line - 5);
+                ctx.restore();
+            }
+        }
+
+        function updatePhysicsAndDraw(elapsed) {
+            const T = parseFloat(periodInput.value);
+            const omega = (2 * Math.PI) / T;
+            const A_pixel = radius;
+            const A_cm = getAmplitudeInCm(A_pixel);
+
+            // --- TIME & THEME CHECK (DOM) ---
+            const isDark = document.documentElement.classList.contains('dark');
+
+            // BG Simulation Area
+            const graphAreaTop = GRAPH_Y_START - 20;
+            // Update Canvas BG based on theme
+            ctx.fillStyle = isDark ? '#0f172a' : '#f8fafc';
+            ctx.fillRect(0, 0, width, graphAreaTop);
+
+            drawAxes();
+
+            // Calcs
+            let phase = (omega * elapsed + initial_phase_rad) % (2 * Math.PI);
+            if (phase < 0) phase += 2 * Math.PI;
+
+            // --- CHECK SPECIAL ANGLE ---
+            let isSpecialIdx = -1;
+
+            // Only show special values when PAUSED or STEPPING (not during animation)
+            if (!isRunning) {
+                // Dynamic tolerance based on speed to ensure we catch it at 60fps
+                // Base tolerance 0.05, plus frame-step buffer
+                const PHASE_TOLERANCE = Math.max(0.05, omega * 0.04);
+
+                for (let i = 0; i < SPECIAL_ANGLES.length; i++) {
+                    const sp = SPECIAL_ANGLES[i];
+                    let diff = Math.abs(phase - sp.rad);
+                    if (diff > Math.PI) diff = 2 * Math.PI - diff;
+
+                    if (diff < PHASE_TOLERANCE) {
+                        isSpecialIdx = i;
+                        break;
+                    }
+                }
+            }
+
+            const angle = omega * elapsed + initial_phase_rad;
+            const x_ucm = center_x_ucm + A_pixel * Math.cos(angle);
+            const y_ucm = center_y_ucm - A_pixel * Math.sin(angle);
+            const x_shm = x_ucm;
+
+            // Physics Values
+            const x_val = A_cm * Math.cos(angle);
+            const v_val = -A_cm * omega * Math.sin(angle);
+            const a_val = -A_cm * omega * omega * Math.cos(angle);
+
+            // --- VISUALIZATION ENTITIES --
+
+            // 1. Connection Lines
+            drawArrow(ctx, center_x_ucm, center_y_ucm, x_ucm, y_ucm, 8, '#f97316');
+
+            // Phase Arc
+            ctx.beginPath(); ctx.strokeStyle = '#f97316'; ctx.lineWidth = 1; ctx.setLineDash([2, 2]);
+            ctx.arc(center_x_ucm, center_y_ucm, 25, -initial_phase_rad, -angle, true);
+            ctx.stroke(); ctx.setLineDash([]);
+
+            // Projection Line
+            ctx.beginPath();
+            ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)';
+            ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5;
+            ctx.moveTo(x_ucm, y_ucm); ctx.lineTo(x_shm, shm_y_pos); ctx.stroke(); ctx.setLineDash([]);
+
+            // 2. Main Entities
+
+            // UCM Path
+            ctx.beginPath();
+            ctx.strokeStyle = isDark ? '#f59e0b' : '#d97706'; ctx.lineWidth = 2; // Amber-500/600
+            ctx.arc(center_x_ucm, center_y_ucm, A_pixel, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            // Highlight Color (Green if Special, Orange/Blue if Normal)
+            const ucmColor = (isSpecialIdx !== -1) ? '#22c55e' : '#f97316';
+            const shmColor = (isSpecialIdx !== -1) ? '#22c55e' : '#3b82f6';
+
+            // Glow if special (Only in Dark Mode)
+            if (isSpecialIdx !== -1 && isDark) {
+                ctx.shadowBlur = 15; ctx.shadowColor = '#22c55e';
+            }
+
+            // UCM Point
+            ctx.beginPath();
+            ctx.fillStyle = ucmColor;
+            ctx.arc(x_ucm, y_ucm, (isSpecialIdx !== -1) ? 10 : 8, 0, 2 * Math.PI);
+            ctx.fill();
+            // Stroke for contrast
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = (isSpecialIdx !== -1) ? '#15803d' : (isDark ? '#9a3412' : '#fff');
+            ctx.stroke();
+
+            // SHM Point
+            ctx.beginPath();
+            ctx.fillStyle = shmColor;
+            ctx.arc(x_shm, shm_y_pos, (isSpecialIdx !== -1) ? 11 : 9, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.strokeStyle = (isSpecialIdx !== -1) ? '#15803d' : (isDark ? '#1e40af' : '#fff');
+            ctx.stroke();
+
+            ctx.shadowBlur = 0; // Reset visual glow
+
+            // Draw Special Labels
+            if (isSpecialIdx !== -1) {
+                const sp = SPECIAL_ANGLES[isSpecialIdx];
+                ctx.font = 'bold 16px Inter'; ctx.fillStyle = '#22c55e'; // Keep green for special
+
+                // UCM Label (Phase) - Offset outward from center
+                const labelDist = A_pixel + 30;
+                const lx = center_x_ucm + labelDist * Math.cos(sp.rad);
+                const ly = center_y_ucm - labelDist * Math.sin(sp.rad);
+                ctx.textAlign = 'center';
+                ctx.fillText(sp.label_phase, lx, ly);
+
+                // SHM Label (Value) - Above the point
+                ctx.fillText(sp.label_x, x_shm, shm_y_pos - 25);
+            }
+
+            // HUD
+            timeDisplay.textContent = elapsed.toFixed(2) + " s";
+            xDisplay.textContent = x_val.toFixed(2) + " cm";
+            vDisplay.textContent = v_val.toFixed(2) + " cm/s";
+            aDisplay.textContent = a_val.toFixed(2) + " cm/s²";
+
+            // Push History
+            // Push History (Higher resolution)
+            history.y.push({ t: elapsed, val: x_val });
+            history.v.push({ t: elapsed, val: v_val });
+            history.a.push({ t: elapsed, val: a_val });
+
+            // Limit history memory but keep enough for scrolling
+            if (history.y.length > 2000) {
+                history.y.shift(); history.v.shift(); history.a.shift();
+            }
+
+            drawGraphs(elapsed);
+
+            // Button state
+            if (!isRunning) stepBackButton.disabled = elapsed <= 0;
+        }
+
+        function animate(timestamp) {
+            if (!startTime) startTime = timestamp; // First run
+            if (!lastTimestamp) lastTimestamp = timestamp;
+
+            const dt = (timestamp - lastTimestamp) / 1000; // in seconds
+            lastTimestamp = timestamp;
+
+            // Cap dt to prevent huge jumps (e.g. if tab was inactive)
+            const safeDt = Math.min(dt, 0.1);
+
+            current_elapsed_time += safeDt;
+            updatePhysicsAndDraw(current_elapsed_time);
+
+            if (isRunning) {
+                animationFrameId = requestAnimationFrame(animate);
+            }
+        }
+
+        // --- CONTROLS ---
+        function resetSimulationLogic() {
+            current_elapsed_time = 0;
+            startTime = performance.now();
+            history.y = []; history.v = []; history.a = [];
+        }
+
+        function toggleSimulation() {
+            if (isRunning) { // Pause
+                isRunning = false;
+                cancelAnimationFrame(animationFrameId);
+                toggleButton.innerHTML = '<i data-lucide="play" class="w-4 h-4 fill-current"></i> <span class="text-sm">Chạy</span>';
+                stepButton.disabled = false; stepBackButton.disabled = false;
+                lucide.createIcons();
+            } else { // Play
+                isRunning = true;
+                startTime = null; // Reset for delta calculation safety
+                lastTimestamp = performance.now();
+                animationFrameId = requestAnimationFrame(animate);
+                toggleButton.innerHTML = '<i data-lucide="pause" class="w-4 h-4 fill-current"></i> <span class="text-sm">Dừng</span>';
+                stepButton.disabled = true; stepBackButton.disabled = true;
+                lucide.createIcons();
+            }
+        }
+
+        // --- AUTO-PAUSE LOGIC ---
+        window.addEventListener('app-paused', () => {
+            if (isRunning) {
+                cancelAnimationFrame(animationFrameId);
+            }
+        });
+
+        window.addEventListener('app-resumed', () => {
+            if (isRunning) {
+                lastTimestamp = performance.now();
+                animationFrameId = requestAnimationFrame(animate);
+            }
+        });
+
+        function resetSimulation() {
+            if (isRunning) toggleSimulation();
+            resetSimulationLogic();
+            updatePhysicsAndDraw(0);
+        }
+
+        function carefulStep(dir) {
+            if (isRunning) return;
+            const T = parseFloat(periodInput.value);
+            const nominalDt = T / 80;
+            const omega = (2 * Math.PI) / T;
+
+            let nextTime = current_elapsed_time + dir * nominalDt;
+            if (nextTime < 0) nextTime = 0;
+
+            // --- SMART SNAP LOGIC ---
+            // Check if we crossed a special angle or landed close to one
+            const currentPhase = (omega * current_elapsed_time + initial_phase_rad);
+            const nextPhase = (omega * nextTime + initial_phase_rad);
+
+            // We search for a special angle between currentPhase and nextPhase
+            let bestTargetTime = null;
+
+            // Efficient way: scan all special angles
+            for (let sp of SPECIAL_ANGLES) {
+                const basePhase = sp.rad; // 0..2PI
+
+                // Find k such that target phase is close to currentPhase
+                const k = Math.round((currentPhase - basePhase) / (2 * Math.PI));
+                const targetPhase = basePhase + k * 2 * Math.PI;
+
+                const t_candidate = (targetPhase - initial_phase_rad) / omega;
+
+                // Check if t_candidate is "between" t_current and t_next (with small margin)
+                const t1 = Math.min(current_elapsed_time, nextTime);
+                const t2 = Math.max(current_elapsed_time, nextTime);
+
+                if (t_candidate > t1 + 0.0001 && t_candidate <= t2 + 0.0001) {
+                    if (dir > 0 && t_candidate > current_elapsed_time) {
+                        if (t_candidate < nextTime + 0.001) {
+                            bestTargetTime = t_candidate;
+                            break; // Found one
+                        }
+                    } else if (dir < 0 && t_candidate < current_elapsed_time) {
+                        if (t_candidate > nextTime - 0.001) {
+                            bestTargetTime = t_candidate;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (bestTargetTime !== null) {
+                nextTime = bestTargetTime;
+            }
+
+            current_elapsed_time = nextTime;
+            updatePhysicsAndDraw(current_elapsed_time);
+        }
+
+        // Listeners
+        toggleButton.addEventListener('click', toggleSimulation);
+        resetButton.addEventListener('click', resetSimulation);
+        stepButton.addEventListener('click', () => carefulStep(1));
+        stepBackButton.addEventListener('click', () => carefulStep(-1));
+
+        periodRange.addEventListener('input', updateAllParams);
+        initialPhaseRange.addEventListener('input', updateAllParams);
+        amplitudeRange.addEventListener('input', updateAllParams);
+
+        // Init
+        setTimeout(() => {
+            lucide.createIcons();
+            resizeCanvas();
+            updateAllParams();
+        }, 100);
+
+        // --- DRAG LOGIC ---
+        const draggablePanel = document.getElementById('infoPanel');
+        const dragHeader = document.getElementById('infoPanelHeader');
+
+        let isDragging = false;
+        let startX, startY, initialLeft, initialTop;
+
+        dragHeader.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+
+            // Get current position relative to offsetParent
+            initialLeft = draggablePanel.offsetLeft;
+            initialTop = draggablePanel.offsetTop;
+
+            // Switch to left/top positioning 
+            draggablePanel.style.right = 'auto'; // Disable right anchoring
+            draggablePanel.style.left = initialLeft + 'px';
+            draggablePanel.style.top = initialTop + 'px';
+
+            document.body.style.cursor = 'move';
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault(); // Prevent selection
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            draggablePanel.style.left = `${initialLeft + dx}px`;
+            draggablePanel.style.top = `${initialTop + dy}px`;
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                document.body.style.cursor = 'default';
+            }
+        });
+
+        // --- SIDEBAR TOGGLE LOGIC ---
+        const sidebar = document.getElementById('mainSidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        let isSidebarOpen = true;
+
+        sidebarToggle.addEventListener('click', () => {
+            isSidebarOpen = !isSidebarOpen;
+            if (isSidebarOpen) {
+                sidebar.classList.remove('-ml-72');
+            } else {
+                sidebar.classList.add('-ml-72');
+            }
+
+            // Wait for transition to finish then resize
+            setTimeout(() => {
+                resizeCanvas();
+            }, 300); // Match transition duration
+        });
+    </script>
+</body>
+
+</html>

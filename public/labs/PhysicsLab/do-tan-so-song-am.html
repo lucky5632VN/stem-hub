@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đo Sóng Âm (Oscilloscope)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tailwind-config.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .font-tech {
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #10b981;
+            margin-top: -6px;
+            cursor: pointer;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+            border: 2px solid white;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #475569;
+            border-radius: 2px;
+        }
+
+        .dark input[type=range]::-webkit-slider-runnable-track {
+            background: #334155;
+        }
+
+        /* Custom Scrollbar for History Table */
+        .history-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .history-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .history-scroll::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body
+    class="h-screen flex overflow-hidden bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-300 transition-colors duration-300">
+
+    <!-- SIDEBAR -->
+    <aside
+        class="w-72 flex-shrink-0 flex flex-col bg-white dark:bg-[#1e293b] border-r border-slate-200 dark:border-slate-700 z-20 shadow-xl">
+        <div class="h-16 flex items-center justify-between px-6 border-b border-slate-200 dark:border-slate-700">
+            <h1 class="font-tech font-bold text-xl text-green-500 uppercase tracking-wider">Sound Lab</h1>
+            <a href="index.html"
+                class="p-2 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition-colors">
+                <i data-lucide="home" class="w-5 h-5"></i>
+            </a>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+
+            <!-- Source Control -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-widest">Nguồn Âm</label>
+                    <div class="flex gap-2">
+                        <button id="toneBtn" class="p-2 rounded bg-slate-700 hover:bg-slate-600 text-white transition"
+                            title="Máy Phát Sóng">
+                            <i data-lucide="activity" class="w-4 h-4"></i>
+                        </button>
+                        <button id="micBtn" class="p-2 rounded bg-slate-700 hover:bg-slate-600 text-white transition"
+                            title="Microphone">
+                            <i data-lucide="mic" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Frequency Generator Controls -->
+                <div id="genControls"
+                    class="p-4 bg-white dark:bg-slate-800 rounded-lg space-y-4 border border-slate-200 dark:border-slate-700">
+                    <div>
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <label class="font-medium text-slate-400">Tần số (Hz)</label>
+                            <span id="freqDisplay" class="font-mono font-bold text-green-400">1000</span>
+                        </div>
+                        <input type="range" id="freqInput" min="200" max="2000" step="10" value="1000" class="w-full">
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <label class="font-medium text-slate-400">Âm lượng</label>
+                            <span id="volDisplay" class="font-mono font-bold text-green-400">50%</span>
+                        </div>
+                        <input type="range" id="volInput" min="0" max="1" step="0.05" value="0.5" class="w-full">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scope Control -->
+            <div class="space-y-4">
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-widest block">Oscilloscope</label>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button id="pauseBtn"
+                        class="flex items-center justify-center gap-2 px-3 py-2 bg-yellow-600 hover:bg-yellow-500 text-white rounded transition text-sm font-medium">
+                        <i data-lucide="pause" class="w-4 h-4"></i> Pause
+                    </button>
+                    <button id="saveBtn"
+                        class="flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded transition text-sm font-medium">
+                        <i data-lucide="save" class="w-4 h-4"></i> Lưu
+                    </button>
+                </div>
+
+                <div
+                    class="space-y-3 p-4 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <label class="font-medium text-slate-400">Time/Div</label>
+                            <span class="font-mono text-white"><span id="timeDivVal">5</span> ms</span>
+                        </div>
+                        <input type="range" id="timeDivInput" min="1" max="20" step="1" value="5" class="w-full">
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <label class="font-medium text-slate-400">Volt/Div</label>
+                            <span class="font-mono text-slate-900 dark:text-white"><span id="voltDivVal">50</span>
+                                u</span>
+                        </div>
+                        <input type="range" id="voltDivInput" min="10" max="100" step="10" value="50" class="w-full">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Realtime Stats -->
+            <div
+                class="p-4 bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-mono space-y-3">
+                <h3 class="uppercase tracking-widest text-slate-500 font-bold border-b border-slate-700 pb-1 mb-2">Đo
+                    Tức Thời</h3>
+
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Tần số (f):</span>
+                    <span id="rtFreq" class="text-xl font-bold text-green-400">0.00 Hz</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Chu kỳ (T):</span>
+                    <span id="rtPeriod" class="text-lg font-bold text-green-400">0.00 ms</span>
+                </div>
+            </div>
+
+            <!-- Error Calculation -->
+            <div
+                class="p-4 bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-mono space-y-3">
+                <h3 class="uppercase tracking-widest text-slate-500 font-bold border-b border-slate-700 pb-1 mb-2">Sai
+                    Số Phép Đo</h3>
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-slate-400">Giá trị trung bình (<span
+                                style="text-decoration: overline">f</span>)</label>
+                        <input id="refFreqInput" type="number" readonly
+                            class="bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded px-2 py-1 w-20 text-right text-slate-900 dark:text-white focus:border-green-500 outline-none"
+                            value="0">
+                    </div>
+                </div>
+                <div class="flex justify-between items-center border-t border-slate-700/50 pt-2">
+                    <span class="text-slate-400">Sai số tuyệt đối (<span
+                            style="text-decoration: overline">Δf</span>):</span>
+                    <span id="absErrorDisplay" class="text-lg font-bold text-amber-500">0.00 Hz</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Sai số tỷ đối (δ):</span>
+                    <span id="relErrorDisplay" class="text-lg font-bold text-red-500">0.00 %</span>
+                </div>
+            </div>
+
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="flex-1 overflow-hidden flex flex-col bg-white dark:bg-black">
+        <!-- Oscilloscope Canvas -->
+        <div class="flex-1 relative border-b border-slate-200 dark:border-slate-800 group">
+            <canvas id="scopeCanvas" class="absolute inset-0 w-full h-full block cursor-crosshair z-10"></canvas>
+
+            <!-- Cursor Lines (Custom HTML overlays or drawn on canvas? Canvas is better) -->
+
+            <!-- Overlay Info -->
+            <div
+                class="absolute top-4 right-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur p-3 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-mono z-20 shadow-lg">
+                <div class="grid grid-cols-2 gap-x-6 gap-y-1">
+                    <span class="text-slate-500">Time:</span> <span id="cursorTime"
+                        class="text-slate-900 dark:text-white font-bold text-right">-- ms</span>
+                    <span class="text-slate-500">Amp:</span> <span id="cursorAmp"
+                        class="text-slate-900 dark:text-white font-bold text-right">-- V</span>
+                    <span
+                        class="text-slate-500 col-span-2 border-t border-slate-200 dark:border-slate-700/50 mt-1 pt-1 italic text-slate-400 text-[10px]"
+                        id="cursorHint">Click/Hover graph</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- History / Data Panel -->
+        <div class="h-48 bg-slate-50 dark:bg-[#0f172a] flex flex-col">
+            <div
+                class="px-4 py-2 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                <h3 class="font-tech font-bold text-slate-300 uppercase tracking-widest text-sm">Lịch Sử Đo</h3>
+                <div id="statsResult" class="text-xs font-mono text-emerald-400 hidden">
+                    Avg F: <span id="avgF">--</span> Hz
+                </div>
+                <button id="clearHistory" class="text-xs text-red-400 hover:text-red-300 hover:underline">Xóa
+                    Hết</button>
+            </div>
+            <div class="flex-1 overflow-auto history-scroll p-4">
+                <table class="w-full text-left border-collapse text-xs font-mono text-slate-400">
+                    <thead>
+                        <tr class="border-b border-slate-700 text-slate-500">
+                            <th class="py-1">#</th>
+                            <th class="py-1 text-right">Tần số (Hz)</th>
+                            <th class="py-1 text-right">Chu kỳ (ms)</th>
+                            <th class="py-1 text-right">Thời gian</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <!-- Rows -->
+                    </tbody>
+                </table>
+                <div id="emptyMsg" class="text-center text-slate-600 text-sm mt-4 italic">Chưa có dữ liệu nào được lưu.
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/theme.js?v=4.0.8"></script>
+    <script src="js/theory-system.js?v=4.0.8"></script>
+    <script src="js/quiz-database.js"></script>
+    <script src="js/quiz-system.js?v=4.0.8"></script>
+
+    <script>
+        // --- AUDIO ENGINE ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 32768; // Increased for better Time/Div resolution (Max size)
+        // Buffer size will be 32768. Sample rate ~48k. -> ~0.68s of data.
+
+        let oscillator = null;
+        let gainNode = null;
+
+        let micStream = null;
+        let micSource = null;
+
+        let isGenOn = false;
+        let isMicOn = false;
+
+        // --- UI REFS ---
+        const toneBtn = document.getElementById('toneBtn');
+        const micBtn = document.getElementById('micBtn');
+        const freqInput = document.getElementById('freqInput');
+        const volInput = document.getElementById('volInput');
+        const freqDisplay = document.getElementById('freqDisplay');
+        const volDisplay = document.getElementById('volDisplay');
+
+        const canvas = document.getElementById('scopeCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const timeDivInput = document.getElementById('timeDivInput');
+        const voltDivInput = document.getElementById('voltDivInput');
+        const timeDivVal = document.getElementById('timeDivVal');
+        const voltDivVal = document.getElementById('voltDivVal');
+
+        const pauseBtn = document.getElementById('pauseBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const rtFreq = document.getElementById('rtFreq');
+        const rtPeriod = document.getElementById('rtPeriod');
+
+        // Error Calc Refs
+        // Error Calc Refs
+        const refFreqInput = document.getElementById('refFreqInput');
+        const absErrorDisplay = document.getElementById('absErrorDisplay');
+        const relErrorDisplay = document.getElementById('relErrorDisplay');
+
+        // Cursor Refs
+        const cursorTimeDisplay = document.getElementById('cursorTime');
+        const cursorAmpDisplay = document.getElementById('cursorAmp');
+
+        const historyBody = document.getElementById('historyBody');
+        const clearHistory = document.getElementById('clearHistory');
+        const statsResult = document.getElementById('statsResult');
+        const avgF = document.getElementById('avgF');
+        const emptyMsg = document.getElementById('emptyMsg');
+
+        // --- STATE ---
+        let isPaused = false;
+        let animationId;
+        let timeDiv = 5; // ms
+        let voltDiv = 50;
+        let lastData = new Uint8Array(analyser.frequencyBinCount);
+        let history = [];
+        let cursor = { x: -1, y: -1, active: false };
+
+        // --- GENERATOR LOGIC ---
+        function startGen() {
+            if (isMicOn) stopMic();
+            if (isGenOn) { stopGen(); return; }
+
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            oscillator = audioCtx.createOscillator();
+            gainNode = audioCtx.createGain();
+
+            oscillator.type = 'sine';
+            const f = parseFloat(freqInput.value);
+            oscillator.frequency.setValueAtTime(f, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(parseFloat(volInput.value), audioCtx.currentTime);
+
+            // Auto Update Ref Freq if history is empty
+            if (history.length === 0) {
+                refFreqInput.value = f;
+            }
+
+            oscillator.connect(gainNode);
+            gainNode.connect(analyser); // For Visuals
+            gainNode.connect(audioCtx.destination); // For Ear
+
+            oscillator.start();
+
+            isGenOn = true;
+            toneBtn.classList.add('bg-green-600', 'hover:bg-green-500');
+            toneBtn.classList.remove('bg-slate-700', 'hover:bg-slate-600');
+        }
+
+        function stopGen() {
+            if (oscillator) { oscillator.stop(); oscillator.disconnect(); }
+            if (gainNode) { gainNode.disconnect(); }
+            isGenOn = false;
+            toneBtn.classList.remove('bg-green-600', 'hover:bg-green-500');
+            toneBtn.classList.add('bg-slate-700', 'hover:bg-slate-600');
+        }
+
+        // --- MIC LOGIC ---
+        async function startMic() {
+            if (isGenOn) stopGen();
+            if (isMicOn) { stopMic(); return; }
+
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            try {
+                micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                micSource = audioCtx.createMediaStreamSource(micStream);
+                micSource.connect(analyser); // Only visual, no feedback loop to destination
+
+                isMicOn = true;
+                micBtn.classList.add('bg-red-600', 'hover:bg-red-500');
+                micBtn.classList.remove('bg-slate-700', 'hover:bg-slate-600');
+            } catch (e) {
+                console.error("Mic Error", e);
+                alert("Không thể truy cập Microphone");
+            }
+        }
+
+        function stopMic() {
+            if (micStream) micStream.getTracks().forEach(t => t.stop());
+            if (micSource) micSource.disconnect();
+            isMicOn = false;
+            micBtn.classList.remove('bg-red-600', 'hover:bg-red-500');
+            micBtn.classList.add('bg-slate-700', 'hover:bg-slate-600');
+        }
+
+        // --- SCOPE DRAWING ---
+        let isTabPaused = false;
+
+        function resize() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resize);
+
+        function draw() {
+            if (isTabPaused) return;
+            if (!isPaused) {
+                analyser.getByteTimeDomainData(lastData);
+            }
+
+            // Fill BG
+            const isDark = document.documentElement.classList.contains('dark');
+            ctx.fillStyle = isDark ? '#000000' : '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Grid
+            ctx.strokeStyle = isDark ? '#334155' : '#e2e8f0';
+            ctx.lineWidth = 1;
+
+
+            ctx.beginPath();
+            const hDivs = 8;
+            const vDivs = 10;
+            const dw = canvas.width / vDivs;
+            const dh = canvas.height / hDivs;
+
+            for (let i = 1; i < vDivs; i++) { ctx.moveTo(i * dw, 0); ctx.lineTo(i * dw, canvas.height); }
+            for (let i = 1; i < hDivs; i++) { ctx.moveTo(0, i * dh); ctx.lineTo(canvas.width, i * dh); }
+            ctx.stroke();
+
+            // Axis
+            ctx.strokeStyle = isDark ? '#64748b' : '#94a3b8';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height / 2); ctx.lineTo(canvas.width, canvas.height / 2);
+            ctx.moveTo(canvas.width / 2, 0); ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.stroke();
+
+            // --- WAVEFORM DRAWING LOGIC (Fixed) ---
+            ctx.strokeStyle = '#10b981'; // Green signal
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+
+            // Calculations
+            const totalTimeVisible = timeDiv * vDivs; // Total MS on screen (e.g. 5ms/div * 10 = 50ms)
+            const sampleRate = audioCtx.sampleRate || 48000;
+
+            // Samples needed to cover the Total Time Visible
+            const samplesNeeded = Math.floor((totalTimeVisible / 1000) * sampleRate);
+
+            // We use the available buffer (lastData)
+            // If samplesNeeded > available, we are zoomed out too much (or limited by FFT). 
+            // With FFT 32768, we have ~680ms, so 50ms (or even 200ms) fits easily.
+
+            const availableSamples = lastData.length;
+            const samplesToDraw = Math.min(availableSamples, samplesNeeded);
+
+            // MAPPING: We map [0 ... samplesToDraw] to [0 ... canvas.width]
+
+            const step = canvas.width / samplesToDraw;
+
+            // Pre-calculate Scale Y
+            // Value 0..255 -> -1..1 -> Offset from Center
+            // voltDiv = X units/div. 
+            // Standard: Full Scale ~ 1.0 (Unit). 
+            // Let's rely on voltDiv scaling visually.
+            const scaleY = (50 / voltDiv);
+            const centerY = canvas.height / 2;
+
+            let x = 0;
+            // Keep drawing path
+            for (let i = 0; i < samplesToDraw; i++) {
+                // Optimization: if step is < 1 pixel, skip? No, aliasing issues. Draw all.
+                // Or max one point per pixel?
+                const v = (lastData[i] / 128.0) - 1.0; // -1 to 1
+                const y = centerY - (v * centerY * scaleY); // Invert Y for canvas
+
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+
+                x += step;
+            }
+            ctx.stroke();
+
+            // --- DRAW CURSOR ---
+            if (cursor.active) {
+                // Draw Crosshair
+                ctx.strokeStyle = '#e11d48'; // Red-600
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 4]);
+
+                // Vertical Line
+                ctx.beginPath();
+                ctx.moveTo(cursor.x, 0); ctx.lineTo(cursor.x, canvas.height);
+                ctx.stroke();
+
+                // Compute Intersect
+                // Find nearest sample index based on cursor.x
+                const ratio = cursor.x / canvas.width;
+                const sampleIdx = Math.floor(ratio * samplesToDraw);
+
+                if (sampleIdx >= 0 && sampleIdx < samplesToDraw) {
+                    const rawVal = lastData[sampleIdx];
+                    const v = (rawVal / 128.0) - 1.0; // -1 to 1
+                    const y = centerY - (v * centerY * scaleY);
+
+                    // Horizontal Line at signal value (optional, or at cursor Y?)
+                    // Usually cursor tracks the mouse Y, but for "Trace" feature, maybe snap to signal?
+                    // User said "click vào... xem biên độ". Best to snap to signal Y at that X.
+
+                    // Draw Intersection Dot
+                    ctx.fillStyle = '#ef4444';
+                    ctx.beginPath(); ctx.arc(cursor.x, y, 4, 0, 2 * Math.PI); ctx.fill();
+
+                    // Update UI Stats
+                    const timeAtX = (sampleIdx / sampleRate) * 1000; // ms relative to window start
+                    const displayAmp = v.toFixed(3); // Normalized V
+
+                    cursorTimeDisplay.innerText = timeAtX.toFixed(2) + " ms";
+                    cursorAmpDisplay.innerText = displayAmp + " V";
+                }
+                ctx.setLineDash([]);
+            } else {
+                // cursorTimeDisplay.innerText = "-- ms";
+                // cursorAmpDisplay.innerText = "-- V";
+            }
+
+            if (!isPaused) computeStats(lastData, sampleRate);
+
+            animationId = requestAnimationFrame(draw);
+        }
+
+        function computeStats(data, sampleRate) {
+            // ... Zero Crossing Logic ...
+            let crossings = [];
+            // Use subset for stability if needed, but whole buffer is mostly consistent signal
+            // Limit to first N samples to speed up?
+            for (let i = 1; i < data.length; i++) {
+                if ((data[i - 1] < 128 && data[i] >= 128) || (data[i - 1] > 128 && data[i] <= 128)) {
+                    crossings.push(i);
+                }
+            }
+
+            let avgPeriodSamples = 0;
+            if (crossings.length > 1) {
+                let distSum = 0;
+                // Average over many crossings
+                for (let i = 0; i < crossings.length - 1; i++) {
+                    distSum += (crossings[i + 1] - crossings[i]);
+                }
+                const avgHalfPeriod = distSum / (crossings.length - 1);
+                avgPeriodSamples = avgHalfPeriod * 2;
+            }
+
+            let freq = 0;
+            let p_ms = 0;
+
+            if (avgPeriodSamples > 0) {
+                const periodSec = avgPeriodSamples / sampleRate;
+                freq = 1 / periodSec;
+                p_ms = periodSec * 1000;
+
+                rtFreq.innerText = freq.toFixed(2) + " Hz";
+                rtPeriod.innerText = p_ms.toFixed(2) + " ms";
+            } else {
+                rtFreq.innerText = "0.00 Hz";
+                rtPeriod.innerText = "0.00 ms";
+            }
+
+            // Update Error Calculation real-time?
+            // With new logic (Mean of History), we only calculate when History updates.
+            // So we clear real-time updates here or leave placeholders.
+            // Let's just reset placeholders if no history.
+            if (history.length === 0) {
+                absErrorDisplay.innerText = "0.00 Hz";
+                relErrorDisplay.innerText = "0.00 %";
+            }
+        }
+
+        // --- INTERACTION ---
+        function handleCursor(e) {
+            const rect = canvas.getBoundingClientRect();
+            cursor.x = e.clientX - rect.left;
+            cursor.y = e.clientY - rect.top;
+            cursor.active = true;
+        }
+
+        canvas.addEventListener('mousemove', handleCursor);
+        canvas.addEventListener('mousedown', handleCursor); // Determine active on click too
+        canvas.addEventListener('mouseleave', () => { cursor.active = false; });
+
+        // Touch support
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            cursor.x = e.touches[0].clientX - rect.left;
+            cursor.y = e.touches[0].clientY - rect.top;
+            cursor.active = true;
+        });
+
+        // --- CONTROLS ---
+        toneBtn.onclick = startGen;
+        micBtn.onclick = startMic;
+
+        freqInput.oninput = () => {
+            freqDisplay.innerText = freqInput.value;
+            // Also update Ref Freq if user is driving the measured signal and history is empty
+            if (history.length === 0) {
+                refFreqInput.value = freqInput.value;
+            }
+
+            if (oscillator) oscillator.frequency.setValueAtTime(parseFloat(freqInput.value), audioCtx.currentTime);
+        };
+
+        volInput.oninput = () => {
+            volDisplay.innerText = Math.round(volInput.value * 100) + "%";
+            if (gainNode) gainNode.gain.setValueAtTime(parseFloat(volInput.value), audioCtx.currentTime);
+        };
+
+        timeDivInput.oninput = () => { timeDiv = parseInt(timeDivInput.value); timeDivVal.innerText = timeDiv; };
+        voltDivInput.oninput = () => { voltDiv = parseInt(voltDivInput.value); voltDivVal.innerText = voltDiv; };
+
+        pauseBtn.onclick = () => {
+            isPaused = !isPaused;
+            pauseBtn.innerHTML = isPaused ? `<i data-lucide="play" class="w-4 h-4"></i> Resume` : `<i data-lucide="pause" class="w-4 h-4"></i> Pause`;
+            lucide.createIcons();
+        };
+
+        // Save logic to include Error info? 
+        saveBtn.onclick = () => {
+            const f = parseFloat(rtFreq.innerText);
+            const p = parseFloat(rtPeriod.innerText);
+            if (f <= 0) return;
+
+            history.push({ f, p, t: new Date().toLocaleTimeString() });
+            updateHistory();
+        };
+
+        clearHistory.onclick = () => {
+            history = [];
+            updateHistory();
+        };
+
+        function updateHistory() {
+            historyBody.innerHTML = '';
+            let fSum = 0;
+            history.forEach((h, i) => {
+                fSum += h.f;
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-700 hover:bg-slate-800 transition";
+                tr.innerHTML = `<td class="py-2 text-slate-500">${i + 1}</td>
+                                 <td class="py-2 text-right font-bold text-green-400">${h.f.toFixed(2)}</td>
+                                 <td class="py-2 text-right text-slate-400">${h.p.toFixed(2)}</td>
+                                 <td class="py-2 text-right text-slate-500 text-[10px]">${h.t}</td>`;
+                historyBody.appendChild(tr);
+            });
+
+            if (history.length > 0) {
+                emptyMsg.classList.add('hidden');
+                statsResult.classList.remove('hidden');
+                const avg = fSum / history.length;
+                avgF.innerText = avg.toFixed(2);
+                refFreqInput.value = avg.toFixed(2);
+
+                // 2. Absolute Error (Mean Deviation)
+                // Delta_f_i = |f_i - avg|
+                // Mean_Delta_f = Sum(Delta_f_i) / N
+                let sumDelta = 0;
+                history.forEach(h => {
+                    sumDelta += Math.abs(h.f - avg);
+                });
+                const meanAbsError = sumDelta / history.length;
+
+                // 3. Relative Error
+                // delta = (Mean_Delta_f / avg) * 100
+                const relError = (meanAbsError / avg) * 100;
+
+                absErrorDisplay.innerText = meanAbsError.toFixed(2) + " Hz";
+                relErrorDisplay.innerText = relError.toFixed(2) + " %";
+            } else {
+                emptyMsg.classList.remove('hidden');
+                statsResult.classList.add('hidden');
+            }
+        }
+
+        // --- AUTO-PAUSE LOGIC ---
+        window.addEventListener('app-paused', () => {
+            isTabPaused = true;
+            if (audioCtx.state === 'running') audioCtx.suspend();
+            cancelAnimationFrame(animationId);
+        });
+
+        window.addEventListener('app-resumed', () => {
+            isTabPaused = false;
+            // Only resume if not manually paused and context was suspended
+            if (audioCtx.state === 'suspended' && (isGenOn || isMicOn)) audioCtx.resume();
+            if (!isPaused) animationId = requestAnimationFrame(draw);
+        });
+
+        // Init
+        resize();
+        requestAnimationFrame(draw);
+        lucide.createIcons();
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đo Suất Điện Động & Điện Trở Trong</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tailwind-config.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .font-tech {
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        /* Custom Checkbox/Switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #06b6d4;
+        }
+
+        .toggle-checkbox:checked+.toggle-label {
+            background-color: #06b6d4;
+        }
+
+        /* Digital Display Font */
+        @font-face {
+            font-family: 'Digital-7';
+            src: url('https://cdnjs.cloudflare.com/ajax/libs/localfont/0.0.0/fonts/Digital-7.woff2') format('woff2');
+            /* Fallback if not available, verify text is readable */
+        }
+
+        .font-digital {
+            font-family: 'Courier New', Courier, monospace;
+            letter-spacing: 2px;
+        }
+
+        .lcd-display {
+            background: #222;
+            color: #ef4444;
+            /* Red LED */
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 5px #ef4444;
+            border: 4px solid #444;
+            border-radius: 4px;
+            padding: 4px 8px;
+            display: inline-block;
+            min-width: 100px;
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .lcd-display.blue {
+            color: #3b82f6;
+            text-shadow: 0 0 5px #3b82f6;
+        }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .dark .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+
+<body
+    class="h-screen flex overflow-hidden bg-slate-50 dark:bg-[#0f172a] text-slate-700 dark:text-slate-300 transition-colors duration-300">
+
+    <!-- SIDEBAR CONTROLS -->
+    <aside id="mainSidebar"
+        class="w-80 flex-shrink-0 flex flex-col bg-white dark:bg-[#1e293b] border-r border-slate-200 dark:border-slate-800 z-20 shadow-lg transition-all duration-300 ease-in-out transform">
+        <!-- Sidebar Header -->
+        <div class="h-16 flex items-center justify-between px-6 border-b border-slate-100 dark:border-slate-700/50">
+            <h1 class="font-tech font-bold text-xl text-slate-800 dark:text-white uppercase tracking-wider">
+                THIẾT LẬP THÍ NGHIỆM
+            </h1>
+            <a href="index.html"
+                class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-cyan-500 transition-colors"
+                title="Trở về Trang chủ">
+                <i data-lucide="home" class="w-5 h-5"></i>
+            </a>
+        </div>
+
+        <!-- Scrollable Content -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+
+            <!-- Control Panel -->
+            <div class="space-y-6">
+
+                <!-- Circuit Control -->
+                <div
+                    class="p-4 bg-slate-100 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4">Mạch
+                        Điện</h3>
+
+                    <!-- Switch K -->
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="font-medium text-slate-700 dark:text-slate-200">Khóa K</span>
+                        <div
+                            class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" name="toggle" id="switchK"
+                                class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-slate-300" />
+                            <label for="switchK"
+                                class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer"></label>
+                        </div>
+                    </div>
+
+                    <!-- Variable Resistor R -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs">
+                            <label class="font-medium text-slate-600 dark:text-slate-300">Biến trở (R)</label>
+                            <span class="font-mono text-cyan-600 dark:text-cyan-400"><span
+                                    id="resistorValue">100.0</span> Ω</span>
+                        </div>
+                        <input type="range" id="resistorSlider" min="0" max="100.0" step="0.5" value="100.0"
+                            class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700">
+                    </div>
+                </div>
+
+                <!-- Hidden Battery Params (Simulation Config) -->
+                <div
+                    class="p-4 bg-yellow-50 dark:bg-yellow-900/10 rounded-xl border border-yellow-200 dark:border-yellow-700/30">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-xs font-bold text-yellow-600 dark:text-yellow-500 uppercase tracking-widest">
+                            Thông Số Pin (Ẩn)</h3>
+                        <div class="flex gap-2">
+                            <button id="toggleParamsBtn"
+                                class="text-xs bg-yellow-100 dark:bg-yellow-800 text-yellow-700 dark:text-yellow-300 px-2 py-1 rounded hover:opacity-80 transition"
+                                title="Ẩn/Hiện thông số">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                            </button>
+                            <button id="randomizeBtn"
+                                class="text-xs bg-yellow-100 dark:bg-yellow-800 text-yellow-700 dark:text-yellow-300 px-2 py-1 rounded hover:opacity-80 transition">Random</button>
+                        </div>
+                    </div>
+
+                    <div id="batteryParamsContainer"
+                        class="space-y-3 opacity-50 hover:opacity-100 transition-opacity hidden">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <label class="text-slate-500">Suất điện động (E)</label>
+                                <span class="font-mono text-slate-700 dark:text-slate-300"><span
+                                        id="emfValue">9.0</span> V</span>
+                            </div>
+                            <input type="range" id="emfSlider" min="1.5" max="24.0" step="0.5" value="9.0"
+                                class="w-full h-1 bg-slate-200 rounded appearance-none cursor-pointer">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <label class="text-slate-500">Điện trở trong (r)</label>
+                                <span class="font-mono text-slate-700 dark:text-slate-300"><span
+                                        id="internalRValue">2.0</span> Ω</span>
+                            </div>
+                            <input type="range" id="internalRSlider" min="0.1" max="10.0" step="0.1" value="2.0"
+                                class="w-full h-1 bg-slate-200 rounded appearance-none cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="grid grid-cols-2 gap-3">
+                    <button id="recordBtn"
+                        class="bg-cyan-600 hover:bg-cyan-500 text-white py-3 rounded-lg font-bold shadow-lg shadow-cyan-500/20 active:scale-95 transition flex flex-col items-center justify-center gap-1">
+                        <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                        <span>GHI SỐ LIỆU</span>
+                    </button>
+                    <button id="resetDataBtn"
+                        class="bg-slate-200 dark:bg-slate-700 hover:bg-red-100 dark:hover:bg-red-900/30 text-slate-600 dark:text-slate-300 hover:text-red-500 dark:hover:text-red-400 border border-transparent hover:border-red-200 dark:hover:border-red-800 py-3 rounded-lg font-medium transition flex flex-col items-center justify-center gap-1">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                        <span>XÓA DỮ LIỆU</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+            <button onclick="toggleDarkMode()"
+                class="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+                <i id="theme-icon" data-lucide="moon" class="w-4 h-4"></i>
+                <span class="text-xs font-medium uppercase">Giao diện Tối/Sáng</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col relative min-w-0 h-screen">
+
+        <!-- Top Section: Circuit & Meters -->
+        <div class="flex-1 flex flex-col lg:flex-row border-b border-slate-200 dark:border-slate-800 min-h-0">
+
+            <!-- Circuit Diagram Canvas -->
+            <div class="flex-1 relative bg-slate-50 dark:bg-[#0f172a] overflow-hidden min-h-[300px]">
+                <canvas id="circuitCanvas" class="absolute inset-0 w-full h-full"></canvas>
+
+                <!-- Floating Meters (Overlay) -->
+                <div class="absolute top-4 right-4 flex gap-4">
+                    <div
+                        class="bg-white/90 dark:bg-slate-800/90 backdrop-blur p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl">
+                        <div class="text-[10px] text-slate-500 font-bold uppercase mb-1">Vôn kế (V)</div>
+                        <div id="voltmeterDisplay" class="lcd-display">0.00 V</div>
+                    </div>
+                    <div
+                        class="bg-white/90 dark:bg-slate-800/90 backdrop-blur p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl">
+                        <div class="text-[10px] text-slate-500 font-bold uppercase mb-1">Ampe kế (A)</div>
+                        <div id="ammeterDisplay" class="lcd-display blue">0.00 A</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div
+                class="w-full lg:w-80 bg-white dark:bg-[#1e293b] border-l border-slate-200 dark:border-slate-800 flex flex-col min-h-0 h-[40vh] lg:h-full">
+                <div class="p-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+                    <h3 class="font-bold text-sm text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                        <i data-lucide="table" class="w-4 h-4"></i> Bảng Số Liệu
+                    </h3>
+                </div>
+                <div class="flex-1 overflow-y-auto custom-scrollbar">
+                    <table class="w-full text-sm">
+                        <thead
+                            class="bg-slate-100 dark:bg-slate-800 text-xs text-slate-500 dark:text-slate-400 font-bold uppercase sticky top-0">
+                            <tr>
+                                <th class="py-2 px-3 text-center border-b dark:border-slate-700">#</th>
+                                <th class="py-2 px-3 text-right border-b dark:border-slate-700">R (Ω)</th>
+                                <th class="py-2 px-3 text-right border-b dark:border-slate-700">U (V)</th>
+                                <th class="py-2 px-3 text-right border-b dark:border-slate-700">I (A)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody"
+                            class="font-mono text-slate-700 dark:text-slate-300 divide-y divide-slate-100 dark:divide-slate-800">
+                            <!-- Rows will be added here -->
+                            <tr id="emptyRow">
+                                <td colspan="4" class="py-8 text-center text-slate-400 text-xs italic">Chưa có dữ liệu.
+                                    Bấm "Ghi Số Liệu".</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Section: Graph -->
+        <div class="h-[40%] bg-white dark:bg-[#1e293b] p-4 relative flex flex-col">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="font-bold text-sm text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                    <i data-lucide="line-chart" class="w-4 h-4 text-cyan-500"></i> Đồ thị U = f(I)
+                </h3>
+                <div class="text-sm font-bold px-3 py-1 rounded-lg transition-colors duration-300" id="equationLabel">
+                    Phương trình: Chờ dữ liệu...</div>
+            </div>
+            <div class="flex-1 relative w-full min-h-0">
+                <canvas id="graphCanvas"></canvas>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="js/theme.js?v=4.0.8"></script>
+    <script src="js/theory-system.js?v=4.0.8"></script>
+    <script src="js/quiz-database.js"></script>
+    <script src="js/quiz-system.js?v=4.0.8"></script>
+
+    <script>
+        // --- LOGIC MÔ PHỎNG & UI ---
+
+        // State Variables
+        const state = {
+            E: 9.0,         // Suất điện động (V)
+            r: 2.0,         // Điện trở trong (Ohm)
+            R: 100.0,       // Biến trở bên ngoài (Ohm)
+            isClosed: false,// Trạng thái khóa K
+            r: 2.0,         // Điện trở trong (Ohm)
+            R: 100.0,       // Biến trở bên ngoài (Ohm)
+            isClosed: false,// Trạng thái khóa K
+            recordedPoints: [], // Mảng lưu {u, i, r}
+            lastReading: { U_disp: 0, I_disp: 0, R_disp: 100.0 } // Cache giá trị đo hiện tại
+        };
+
+        // DOM Elements
+        const resistorSlider = document.getElementById('resistorSlider');
+        const resistorValue = document.getElementById('resistorValue');
+        const switchK = document.getElementById('switchK');
+
+        const emfSlider = document.getElementById('emfSlider');
+        const emfValue = document.getElementById('emfValue');
+        const internalRSlider = document.getElementById('internalRSlider');
+        const internalRValue = document.getElementById('internalRValue');
+        const randomizeBtn = document.getElementById('randomizeBtn');
+        const toggleParamsBtn = document.getElementById('toggleParamsBtn');
+        const batteryParamsContainer = document.getElementById('batteryParamsContainer');
+
+        const voltmeterDisplay = document.getElementById('voltmeterDisplay');
+        const ammeterDisplay = document.getElementById('ammeterDisplay');
+
+        const circuitCanvas = document.getElementById('circuitCanvas');
+        const ctxCircuit = circuitCanvas.getContext('2d');
+
+        const recordBtn = document.getElementById('recordBtn');
+        const resetDataBtn = document.getElementById('resetDataBtn');
+        const dataTableBody = document.getElementById('dataTableBody');
+        const emptyRow = document.getElementById('emptyRow');
+        const equationLabel = document.getElementById('equationLabel'); // Added label reference
+
+        // Chart.js Instance
+        let chart;
+
+        // --- INIT ---
+        function init() {
+            initChart();
+            addEventListeners();
+            resizeCircuitCanvas();
+            window.addEventListener('resize', resizeCircuitCanvas);
+            updateSimulation(); // First draw
+        }
+
+        function initChart() {
+            const ctxGraph = document.getElementById('graphCanvas').getContext('2d');
+            chart = new Chart(ctxGraph, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Dữ liệu đo (U, I)',
+                            data: [],
+                            backgroundColor: '#06b6d4', // Cyan
+                            borderColor: '#06b6d4',
+                            pointRadius: 5,
+                            pointHoverRadius: 7
+                        },
+                        {
+                            label: 'Đường hồi quy',
+                            data: [],
+                            type: 'line',
+                            borderColor: '#ef4444', // Red
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            fill: false,
+                            tension: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 0 // Disable animation for instant updates
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: { display: true, text: 'Cường độ dòng điện I (A)', color: '#64748b' },
+                            grid: { color: 'rgba(100, 116, 139, 0.1)' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Hiệu điện thế U (V)', color: '#64748b' },
+                            grid: { color: 'rgba(100, 116, 139, 0.1)' },
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#64748b' } }
+                    }
+                }
+            });
+        }
+
+        function addEventListeners() {
+            // Sliders
+            resistorSlider.addEventListener('input', (e) => {
+                state.R = parseFloat(e.target.value);
+                resistorValue.textContent = state.R.toFixed(1);
+                updateSimulation();
+            });
+
+            emfSlider.addEventListener('input', (e) => {
+                state.E = parseFloat(e.target.value);
+                emfValue.textContent = state.E.toFixed(1);
+                updateSimulation();
+                clearData(); // Clear data if parameters change
+            });
+
+            internalRSlider.addEventListener('input', (e) => {
+                state.r = parseFloat(e.target.value);
+                internalRValue.textContent = state.r.toFixed(1);
+                updateSimulation();
+                clearData();
+            });
+
+            // Switch
+            switchK.addEventListener('change', (e) => {
+                state.isClosed = e.target.checked;
+                updateSimulation();
+            });
+
+            // Randomize
+            randomizeBtn.addEventListener('click', () => {
+                state.E = parseFloat((Math.random() * 10 + 3).toFixed(1)); // 3 - 13V
+                state.r = parseFloat((Math.random() * 3 + 0.5).toFixed(1)); // 0.5 - 3.5 Ohm
+
+                // Update UI
+                emfSlider.value = state.E;
+                emfValue.textContent = state.E.toFixed(1);
+                internalRSlider.value = state.r;
+                internalRValue.textContent = state.r.toFixed(1);
+
+                clearData();
+                updateSimulation();
+            });
+
+            // Toggle Params
+            toggleParamsBtn.addEventListener('click', () => {
+                batteryParamsContainer.classList.toggle('hidden');
+
+                // Update Icon
+                const icon = toggleParamsBtn.querySelector('i');
+                if (batteryParamsContainer.classList.contains('hidden')) {
+                    icon.setAttribute('data-lucide', 'eye');
+                } else {
+                    icon.setAttribute('data-lucide', 'eye-off');
+                }
+                lucide.createIcons();
+            });
+
+            // Buttons
+            recordBtn.addEventListener('click', recordData);
+            resetDataBtn.addEventListener('click', clearData);
+        }
+
+        // --- CORE SIMULATION ---
+        function calculateCircuit() {
+            let U, I;
+
+            if (!state.isClosed) {
+                // Mạch hở
+                I = 0;
+                U = state.E;
+            } else {
+                // Mạch kín: I = E / (R + r)
+                const totalR = state.R + state.r;
+                I = state.E / totalR;
+                U = I * state.R;
+            }
+
+            // Thêm nhiễu ngẫu nhiên (Noise)
+            // U: +/- 0.05V, I: +/- 0.01A
+            // Chỉ thêm nhiễu khi mạch kín hoặc đo U nguồn (luôn có dao động nhỏ)
+            let noiseU = (Math.random() - 0.5) * 0.06;
+            let noiseI = (state.isClosed) ? (Math.random() - 0.5) * 0.02 : 0;
+
+            let U_disp = U + noiseU;
+            let I_disp = I + noiseI;
+
+            // Đảm bảo không âm vô lý
+            if (U_disp < 0) U_disp = 0;
+            if (I_disp < 0) I_disp = 0;
+
+            return {
+                U_disp: U_disp,
+                I_disp: I_disp
+            };
+        }
+
+        function updateSimulation() {
+            const { U_disp, I_disp } = calculateCircuit();
+            state.lastReading = { U_disp, I_disp, R_disp: state.R }; // Cache for recording
+
+            // Update Meters
+            voltmeterDisplay.textContent = U_disp.toFixed(2) + " V";
+            ammeterDisplay.textContent = I_disp.toFixed(2) + " A";
+
+            // Redraw Circuit
+            drawCircuit(state.isClosed, I_disp > 0.01);
+        }
+
+        // --- DRAWING ---
+        function resizeCircuitCanvas() {
+            const container = circuitCanvas.parentElement;
+            circuitCanvas.width = container.clientWidth;
+            circuitCanvas.height = container.clientHeight;
+            drawCircuit(state.isClosed, calculateCircuit().I_disp > 0.01);
+        }
+
+        function drawCircuit(isClosed, hasCurrent) {
+            const w = circuitCanvas.width;
+            const h = circuitCanvas.height;
+            const ctx = ctxCircuit;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Settings
+            const cx = w / 2;
+            const cy = h / 2;
+            const loopW = Math.min(w * 0.7, 500);
+            const loopH = Math.min(h * 0.6, 300);
+
+            const startX = cx - loopW / 2;
+            const endX = cx + loopW / 2;
+            const topY = cy - loopH / 2;
+            const bottomY = cy + loopH / 2;
+
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Wire Color
+            ctx.strokeStyle = hasCurrent ? '#ef4444' : '#64748b'; // Red if current, Slate if none (or simple wire color)
+            if (hasCurrent) {
+                // Glow effect if current
+                ctx.shadowColor = '#ef4444';
+                ctx.shadowBlur = 10;
+            } else {
+                ctx.shadowBlur = 0;
+            }
+            ctx.strokeStyle = '#94a3b8'; // Wire is always metal-colored usually
+
+            // Draw Main Loop Rectangle
+            ctx.beginPath();
+            ctx.moveTo(startX, topY);
+            ctx.lineTo(endX, topY); // Top wire
+            ctx.lineTo(endX, bottomY); // Right wire
+            ctx.lineTo(startX, bottomY); // Bottom wire
+            ctx.lineTo(startX, topY); // Left wire
+            ctx.stroke();
+
+            // --- COMPONENTS ---
+            ctx.shadowBlur = 0; // Reset shadow for components
+
+            // 1. BATTERY (Left Side)
+            // Draw Battery Symbol at center of Left Wire
+            const batY = cy;
+            ctx.clearRect(startX - 15, batY - 20, 30, 40); // Clear wire behind
+
+            // Positive plate (Long)
+            ctx.beginPath();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = document.documentElement.classList.contains('dark') ? '#fff' : '#334155';
+            ctx.moveTo(startX - 15, batY - 10);
+            ctx.lineTo(startX + 15, batY - 10);
+            ctx.stroke();
+
+            // Negative plate (Short)
+            ctx.lineWidth = 6; // Thicker
+            ctx.beginPath();
+            ctx.moveTo(startX - 8, batY + 10);
+            ctx.lineTo(startX + 8, batY + 10);
+            ctx.stroke();
+
+            // Label E, r
+            ctx.fillStyle = '#f59e0b'; // Amber
+            ctx.font = 'bold 16px Rajdhani';
+            ctx.fillText('E, r', startX - 35, batY);
+
+            // 2. SWITCH K (Top Side)
+            const switchX = cx - 50; // Offset slightly
+            ctx.clearRect(switchX - 20, topY - 20, 40, 40);
+
+            ctx.beginPath();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#334155';
+            // Terminals
+            ctx.arc(switchX - 15, topY, 4, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(switchX + 15, topY, 4, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Lever
+            ctx.beginPath();
+            ctx.moveTo(switchX - 15, topY);
+            if (isClosed) {
+                ctx.lineTo(switchX + 15, topY); // Closed
+            } else {
+                ctx.lineTo(switchX + 10, topY - 15); // Open
+            }
+            ctx.stroke();
+            ctx.fillStyle = '#64748b';
+            ctx.font = '14px Inter';
+            ctx.fillText('K', switchX - 5, topY - 20);
+
+            // 3. AMMETER (Top Side, Right of switch)
+            const ammeterX = cx + 80;
+            ctx.clearRect(ammeterX - 20, topY - 20, 40, 40);
+
+            ctx.beginPath();
+            ctx.fillStyle = '#fff';
+            ctx.strokeStyle = '#3b82f6'; // Blue
+            ctx.lineWidth = 2;
+            ctx.arc(ammeterX, topY, 18, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = '#3b82f6';
+            ctx.font = 'bold 16px Inter';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('A', ammeterX, topY);
+
+            // 4. VARIABLE RESISTOR R (Bottom Side)
+            const resX = cx;
+            ctx.clearRect(resX - 40, bottomY - 30, 80, 60); // Clear logic
+
+            // Draw Zigzag
+            ctx.beginPath();
+            ctx.strokeStyle = '#fff'; // White interior for contrast on dark bg or vice versa?
+            // Let's use standard resistor symbol
+            ctx.strokeStyle = document.documentElement.classList.contains('dark') ? '#e2e8f0' : '#1e293b';
+            ctx.lineWidth = 3;
+
+            ctx.moveTo(resX - 30, bottomY);
+            ctx.lineTo(resX - 25, bottomY - 10);
+            ctx.lineTo(resX - 15, bottomY + 10);
+            ctx.lineTo(resX - 5, bottomY - 10);
+            ctx.lineTo(resX + 5, bottomY + 10);
+            ctx.lineTo(resX + 15, bottomY - 10);
+            ctx.lineTo(resX + 25, bottomY + 10);
+            ctx.lineTo(resX + 30, bottomY);
+            ctx.stroke();
+
+            // Arrow for Variable (Rheostat)
+            ctx.beginPath();
+            ctx.strokeStyle = '#ef4444';
+            ctx.moveTo(resX - 15, bottomY + 20);
+            ctx.lineTo(resX + 15, bottomY - 20);
+            ctx.moveTo(resX + 10, bottomY - 22);
+            ctx.lineTo(resX + 15, bottomY - 20); // Arrowhead
+            ctx.lineTo(resX + 18, bottomY - 15);
+            ctx.stroke();
+
+            // Label R
+            ctx.fillStyle = document.documentElement.classList.contains('dark') ? '#e2e8f0' : '#1e293b';
+            ctx.font = 'bold 16px Rajdhani';
+            ctx.fillText(`R = ${state.R.toFixed(1)}Ω`, resX, bottomY + 35);
+
+
+            // 5. VOLTMETER (Parallel to Battery or Loading)
+            // Usually across the load R (if measuring output voltage of circuit parts)
+            // Or across battery terminals to measure U
+            // Let's put it across the Battery (Left side) parallel connection
+
+            const vX = startX + 50; // Inner parallel
+            // Draw wires from Top-Left and Bottom-Left to a Voltmeter
+
+            // But standard circuit puts Voltmeter across Battery
+            // Let's draw it as a separate loop attached to terminals
+
+            // Wire connect points: (startX, topY + 40) and (startX, bottomY - 40)
+            const vUnode = topY + ((bottomY - topY) / 2) - 80;
+            const vLnode = topY + ((bottomY - topY) / 2) + 80;
+
+            // Draw thin wires
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#64748b';
+            ctx.beginPath();
+            ctx.moveTo(startX, cy - 40); // Above battery
+            ctx.lineTo(startX + 40, cy - 40);
+            ctx.lineTo(startX + 40, cy - 18);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(startX, cy + 40); // Below battery
+            ctx.lineTo(startX + 40, cy + 40);
+            ctx.lineTo(startX + 40, cy + 18);
+            ctx.stroke();
+
+            // V Meter Circle
+            const meterX = startX + 40;
+            const meterY = cy;
+
+            ctx.beginPath();
+            ctx.fillStyle = '#fff';
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 2;
+            ctx.arc(meterX, meterY, 18, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#334155';
+            ctx.font = 'bold 16px Inter';
+            ctx.fillText('V', meterX, meterY);
+
+            // Current Arrows (Animation)
+            if (hasCurrent) {
+                const time = Date.now() / 1000;
+                const offset = (time * 50) % 20; // Move 50px/sec
+
+                ctx.fillStyle = '#ef4444';
+                // Top wire (Right direction)
+                for (let x = startX + offset; x < endX; x += 40) {
+                    drawArrowLike(ctx, x, topY, 'right');
+                }
+                // Right wire (Down)
+                for (let y = topY + offset; y < bottomY; y += 40) {
+                    drawArrowLike(ctx, endX, y, 'down');
+                }
+                // Bottom wire (Left)
+                for (let x = endX - offset; x > startX; x -= 40) {
+                    drawArrowLike(ctx, x, bottomY, 'left');
+                }
+                // Left wire (Up) - Through Battery
+                for (let y = bottomY - offset; y > topY; y -= 40) {
+                    if (Math.abs(y - cy) > 30) // Skip crossing over battery symbol directly
+                        drawArrowLike(ctx, startX, y, 'up');
+                }
+            }
+        }
+
+        function drawArrowLike(ctx, x, y, dir) {
+            ctx.beginPath();
+            const sz = 3;
+            if (dir === 'right') {
+                ctx.moveTo(x, y - sz); ctx.lineTo(x + sz * 2, y); ctx.lineTo(x, y + sz);
+            } else if (dir === 'down') {
+                ctx.moveTo(x - sz, y); ctx.lineTo(x, y + sz * 2); ctx.lineTo(x + sz, y);
+            } else if (dir === 'left') {
+                ctx.moveTo(x, y - sz); ctx.lineTo(x - sz * 2, y); ctx.lineTo(x, y + sz);
+            } else if (dir === 'up') {
+                ctx.moveTo(x - sz, y); ctx.lineTo(x, y - sz * 2); ctx.lineTo(x + sz, y);
+            }
+            ctx.fill();
+        }
+
+        // --- DATA RECORDING & GRAPHING ---
+        function recordData() {
+            if (!state.isClosed) {
+                alert("Vui lòng đóng khóa K để đo số liệu!");
+                return;
+            }
+
+            // Use cached reading to match display
+            const { U_disp, I_disp, R_disp } = state.lastReading;
+
+            // Add to array
+            state.recordedPoints.push({ x: I_disp, y: U_disp, r: R_disp });
+
+            updateTable();
+            updateRegression();
+        }
+
+        function clearData() {
+            state.recordedPoints = [];
+            updateTable();
+            updateRegression(); // Clears graph
+        }
+
+        function updateTable() {
+            dataTableBody.innerHTML = '';
+
+            if (state.recordedPoints.length === 0) {
+                dataTableBody.appendChild(emptyRow);
+                return;
+            }
+
+            state.recordedPoints.forEach((pt, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-2 px-3 text-center border-b dark:border-slate-700 text-slate-500">${index + 1}</td>
+                    <td class="py-2 px-3 text-right border-b dark:border-slate-700 font-mono text-slate-600 dark:text-slate-400">${pt.r.toFixed(1)}</td>
+                    <td class="py-2 px-3 text-right border-b dark:border-slate-700 font-bold text-slate-700 dark:text-slate-300">${pt.y.toFixed(2)}</td>
+                    <td class="py-2 px-3 text-right border-b dark:border-slate-700 font-mono text-blue-600 dark:text-blue-400">${pt.x.toFixed(2)}</td>
+                `;
+                dataTableBody.appendChild(tr);
+            });
+
+            // Auto scroll to bottom
+            dataTableBody.parentElement.parentElement.scrollTop = dataTableBody.parentElement.parentElement.scrollHeight;
+        }
+
+        function updateRegression() {
+            // Update Data Points
+            chart.data.datasets[0].data = state.recordedPoints;
+
+            // Calculate Linear Regression if n >= 2
+            if (state.recordedPoints.length >= 2) {
+                const n = state.recordedPoints.length;
+                let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+
+                state.recordedPoints.forEach(p => {
+                    sumX += p.x;
+                    sumY += p.y;
+                    sumXY += p.x * p.y;
+                    sumXX += p.x * p.x;
+                });
+
+                // Slope (m) = (n*sumXY - sumX*sumY) / (n*sumXX - sumX^2)
+                // Intercept (b) = (sumY - m*sumX) / n
+                // Equation: y = mx + b
+                // In Physics: U = -r*I + E  => slope = -r, intercept = E
+
+                const denominator = (n * sumXX - sumX * sumX);
+                if (denominator !== 0) {
+                    const m = (n * sumXY - sumX * sumY) / denominator;
+                    const b = (sumY - m * sumX) / n;
+
+                    // Generate Line Points (from min I to max I extended)
+                    // Extend to I=0 to show E
+                    const maxI = Math.max(...state.recordedPoints.map(p => p.x)) * 1.1;
+
+                    chart.data.datasets[1].data = [
+                        { x: 0, y: b },
+                        { x: maxI, y: m * maxI + b }
+                    ];
+
+                    const calcE = b;
+                    const calcR = -m;
+                    equationLabel.innerHTML = `Kết quả: <span class="text-cyan-700 dark:text-cyan-300">E ≈ ${calcE.toFixed(2)}V</span>, <span class="text-red-600 dark:text-red-400">r ≈ ${calcR.toFixed(2)}Ω</span>`;
+                    equationLabel.className = 'text-sm font-bold px-3 py-1 rounded-lg bg-cyan-100 dark:bg-cyan-900/30 border border-cyan-200 dark:border-cyan-800 transition-colors duration-300';
+                }
+            } else {
+                chart.data.datasets[1].data = [];
+                equationLabel.textContent = 'Phương trình: Chờ thêm dữ liệu (n≥2)...';
+                equationLabel.className = 'text-sm font-bold px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 transition-colors duration-300';
+            }
+
+            chart.update();
+        }
+
+        // init
+        init();
+
+        // Lucide
+        lucide.createIcons();
+
+    </script>
+</body>
+
+</html>

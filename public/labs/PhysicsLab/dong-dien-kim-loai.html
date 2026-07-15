@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dòng Điện Trong Kim Loại | PHYSICS.LAB</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+    
+    <!-- MathJax for rendering equation -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <script src="js/tailwind-config.js"></script>
+    <link rel="stylesheet" href="css/global.css">
+
+    <style>
+        /* Custom HUD glow elements */
+        .neon-text-cyan {
+            text-shadow: 0 0 5px rgba(0, 229, 255, 0.4), 0 0 10px rgba(0, 229, 255, 0.2);
+        }
+        .hud-border {
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.05);
+        }
+        
+        .slider-thumb-cyan::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #00E5FF;
+            cursor: pointer;
+            box-shadow: 0 0 10px #00E5FF, 0 0 20px #00E5FF;
+        }
+        
+        .math-interactive {
+            cursor: crosshair;
+            transition: all 0.3s ease;
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: inherit;
+        }
+    </style>
+</head>
+
+<body class="dark h-screen w-screen flex items-center justify-center overflow-hidden font-sans text-lab-dark_text transition-all duration-700" id="app-body">
+
+    <!-- Outer Wrapper -->
+    <div class="w-full h-full lg:p-8 p-4 flex items-center justify-center max-w-[1800px] mx-auto relative z-10 transition-all duration-700" id="ambient-container">
+
+        <!-- Main Glass Dashboard Container -->
+        <div class="glass-panel-container w-full h-full flex relative shadow-2xl transition-all duration-500">
+            <!-- MAIN CONTENT (Menu will be injected by theme.js?v=4.0.8) -->
+            <main class="flex-1 min-h-0 flex flex-col overflow-hidden relative z-10 bg-transparent">
+                <!-- Header -->
+                <header class="h-[80px] border-b border-white/5 flex items-center justify-between px-8 z-30 flex-shrink-0">
+                    <div class="flex flex-col justify-center">
+                        <h2 class="text-2xl font-bold text-white font-tech tracking-wide flex items-center gap-3">
+                            <span class="text-lab-dark_muted text-lg font-mono">EXPERIMENT /</span> Cơ chế sinh dòng điện <span class="px-2 py-0.5 text-[10px] bg-[#00E5FF]/20 text-[#00E5FF] rounded border border-[#00E5FF]/30 font-mono tracking-widest ml-2">VI MÔ</span>
+                        </h2>
+                    </div>
+                    <!-- Stats Menu -->
+                    <div class="flex gap-4 items-center">
+                         <div class="glass-panel px-3 py-1.5 rounded-lg flex items-center gap-2">
+                             <div class="text-[10px] text-lab-dark_muted font-mono uppercase">FPS</div>
+                             <div class="text-xs text-[#00FF66] font-mono font-bold" id="fps-counter">60</div>
+                         </div>
+                    </div>
+                </header>
+
+                <!-- WORKSPACE -->
+                <div class="flex-1 min-h-0 p-6 flex flex-col lg:flex-row gap-6 relative">
+                    
+                    <!-- LEFT COLUMN: Canvas & Control -->
+                    <div class="flex-1 flex flex-col gap-6 min-w-0">
+                        <!-- Canvas Container -->
+                        <div class="glass-panel flex-1 rounded-3xl relative overflow-hidden group hud-border transition-all duration-300" id="canvas-wrapper">
+                            <!-- Background gradient for depth -->
+                            <div class="absolute inset-0 bg-gradient-to-b from-[#00E5FF]/5 to-transparent pointer-events-none"></div>
+                            
+                            <!-- Canvas Element -->
+                            <canvas id="sim-canvas"></canvas>
+                            
+                            <!-- Overlays -->
+                            <div class="absolute top-4 left-4 z-10 flex flex-col gap-1">
+                                <div class="text-[10px] font-mono text-[#00E5FF]/70 uppercase tracking-[0.2em]">Particle Engine</div>
+                                <div class="text-xs font-mono text-white font-bold tracking-widest" id="particle-count-display">P: 0</div>
+                            </div>
+                        </div>
+
+                        <!-- Control Panel -->
+                        <div class="glass-panel h-[140px] rounded-3xl p-6 flex flex-col gap-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-sm font-tech text-white uppercase tracking-widest border-l-2 border-[#00E5FF] pl-2">Thông số Vi Mô</h3>
+                                
+                                <!-- Environment Tabs -->
+                                <div class="flex items-center bg-white/5 rounded-full p-1" id="env-tabs">
+                                    <button class="px-4 py-1 rounded-full text-[10px] font-mono tracking-widest uppercase transition-all duration-300 env-tab active bg-[#00E5FF] text-black font-bold shadow-[0_0_10px_rgba(0,229,255,0.5)]" data-env="metal">Kim Loại</button>
+                                    <button class="px-4 py-1 rounded-full text-[10px] font-mono tracking-widest uppercase transition-all duration-300 text-lab-dark_muted hover:text-white env-tab" data-env="semi">Bán Dẫn</button>
+                                    <button class="px-4 py-1 rounded-full text-[10px] font-mono tracking-widest uppercase transition-all duration-300 text-lab-dark_muted hover:text-white env-tab" data-env="electro">Điện Phân</button>
+                                    <button class="px-4 py-1 rounded-full text-[10px] font-mono tracking-widest uppercase transition-all duration-300 text-lab-dark_muted hover:text-white env-tab" data-env="gas">Chất Khí</button>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <!-- Area S -->
+                                <div class="flex flex-col gap-2" id="control-S" onmouseover="highlightVar('S')" onmouseout="resetHighlight()">
+                                    <div class="flex justify-between items-end">
+                                        <label class="text-xs font-mono text-lab-dark_muted uppercase">Tiết diện dây (<span class="text-[#00FF66] font-bold">S</span>)</label>
+                                        <span class="text-xs font-mono text-white" id="val-S">1.0</span>
+                                    </div>
+                                    <input type="range" id="slider-S" min="0.5" max="2.0" step="0.1" value="1.0" title="Điều chỉnh tiết diện dây S" class="w-full h-1 bg-white/10 rounded-lg appearance-none slider-thumb-cyan outline-none">
+                                </div>
+
+                                <!-- Density n -->
+                                <div class="flex flex-col gap-2" id="control-n" onmouseover="highlightVar('n')" onmouseout="resetHighlight()">
+                                    <div class="flex justify-between items-end">
+                                        <label class="text-xs font-mono text-lab-dark_muted uppercase">Mật độ Hạt (<span class="text-white font-bold">n</span>)</label>
+                                        <span class="text-xs font-mono text-white" id="val-n">500</span>
+                                    </div>
+                                    <input type="range" id="slider-n" min="100" max="1500" step="50" value="500" title="Điều chỉnh mật độ hạt n" class="w-full h-1 bg-white/10 rounded-lg appearance-none slider-thumb-cyan outline-none">
+                                </div>
+
+                                <!-- Velocity v -->
+                                <div class="flex flex-col gap-2" id="control-v" onmouseover="highlightVar('v')" onmouseout="resetHighlight()">
+                                    <div class="flex justify-between items-end">
+                                        <label class="text-xs font-mono text-lab-dark_muted uppercase">Vận tốc trôi (<span class="text-[#FF0055] font-bold">v</span>)</label>
+                                        <span class="text-xs font-mono text-white" id="val-v">0.5</span>
+                                    </div>
+                                    <input type="range" id="slider-v" min="0.0" max="3.0" step="0.1" value="0.5" title="Điều chỉnh vận tốc trôi v" class="w-full h-1 bg-white/10 rounded-lg appearance-none slider-thumb-cyan outline-none">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT COLUMN: Analytics & Math -->
+                    <div class="w-full lg:w-[320px] xl:w-[380px] flex flex-col gap-6">
+                        
+                        <!-- Ammeter HUD -->
+                        <div class="glass-panel p-6 rounded-3xl h-[300px] flex flex-col items-center justify-center relative overflow-hidden group transition-all duration-300 hud-border" id="hud-container">
+                            <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,229,255,0.05)_0%,transparent_70%)] pointer-events-none"></div>
+                            
+                            <h3 class="absolute top-6 left-6 text-xs text-lab-dark_muted font-mono uppercase tracking-widest">Cường độ (I)</h3>
+                            
+                            <!-- SVG Radial Gauge -->
+                            <div class="relative w-48 h-48 mt-4">
+                                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                                    <!-- Background Track -->
+                                    <circle cx="50" cy="50" r="40" fill="transparent" stroke="rgba(255,255,255,0.05)" stroke-width="6" stroke-dasharray="251.2" stroke-dashoffset="0"></circle>
+                                    <!-- Progress Fill (Will be animated via JS) -->
+                                    <circle id="gauge-fill" cx="50" cy="50" r="40" fill="transparent" stroke="url(#gradient-I)" stroke-width="6" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2" style="transition: stroke-dashoffset 0.1s linear, stroke 0.3s;"></circle>
+                                    <!-- Gradient Defs -->
+                                    <defs>
+                                        <linearGradient id="gradient-I" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#00E5FF" />
+                                            <stop offset="100%" stop-color="#FF00A0" />
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                                
+                                <!-- Center Text -->
+                                <div class="absolute inset-0 flex flex-col items-center justify-center gap-1">
+                                    <input
+                                        type="number"
+                                        id="readout-I"
+                                        value="0.00"
+                                        step="0.01"
+                                        min="0"
+                                        title="Nhập I để tự tính lại v"
+                                        oninput="onIInput(this.value)"
+                                        class="w-28 text-center text-[28px] font-['Orbitron'] font-bold text-white leading-none neon-text-cyan bg-transparent border-b border-[#00E5FF]/40 outline-none focus:border-[#00E5FF] transition-all duration-200"
+                                        style="-moz-appearance:textfield; appearance:textfield;"
+                                    >
+                                    <div class="text-[10px] text-lab-dark_muted font-mono tracking-widest">AMPERE</div>
+                                    <div class="text-[8px] text-[#00E5FF]/40 font-mono tracking-wider">↕ nhập hoặc chỉnh slider</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Equation Binding -->
+                        <div class="glass-panel flex-1 rounded-3xl p-6 flex flex-col justify-center relative">
+                            <div class="absolute top-4 left-4 text-[10px] text-lab-dark_muted font-mono uppercase tracking-widest">Toán học Liên kết</div>
+                            
+                            <div class="flex justify-center items-center w-full h-full text-2xl mt-4">
+                                <!-- Interactive Math Equation -->
+                                <div class="bg-black/40 px-3 py-4 rounded-xl border border-white/5 shadow-inner flex flex-wrap justify-center items-center gap-x-2 gap-y-1 font-['Orbitron'] tracking-wider text-sm sm:text-base xl:text-lg transition-all duration-300 w-full" id="math-equation-container">
+                                    <!-- Dynamic Math Content gets injected here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/theme.js?v=4.0.8"></script>
+    <script src="js/theory-system.js?v=4.0.8"></script>
+    <script src="js/quiz-database.js"></script>
+    <script src="js/quiz-system.js?v=4.0.8"></script>
+
+    <script src="js/sim-dong-dien.js"></script>
+</body>
+</html>

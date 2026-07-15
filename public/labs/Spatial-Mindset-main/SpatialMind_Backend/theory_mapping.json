@@ -1,0 +1,12 @@
+{
+  "derivatives": {
+    "title": "Đạo hàm",
+    "path": "knowledge_base/derivatives.md",
+    "keywords": ["đạo hàm", "tính đạo hàm", "vi phân", "tiếp tuyến"]
+  },
+  "probability": {
+    "title": "Xác suất",
+    "path": "knowledge_base/probability.md",
+    "keywords": ["xác suất", "phân phối chuẩn", "biến ngẫu nhiên", "thống kê"]
+  }
+}

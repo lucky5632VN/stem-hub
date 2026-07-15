@@ -1,0 +1,1108 @@
+[
+  {
+    "id": "phys_thi_thu_vstep_q1",
+    "type": "mcq",
+    "text": "Một vật dao động điều hòa theo phương trình \\(x = A\\cos(\\omega t + \\varphi)\\). Đại lượng \\(\\omega\\) được gọi là:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Tần số dao động.",
+      "Chu kỳ dao động.",
+      "Biên độ dao động.",
+      "Tần số góc của dao động."
+    ],
+    "correctAnswer": 3,
+    "explanation": "Tần số góc \\(\\omega\\) là một đại lượng trong dao động điều hòa đo bằng radian trên giây (rad/s)."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q2",
+    "type": "mcq",
+    "text": "Một con lắc lò xo gồm vật nhỏ khối lượng \\(m\\) và lò xo có độ cứng \\(k\\). Chu kỳ dao động riêng của con lắc là:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "\\(T = 2\\pi \\sqrt{\\dfrac{k}{m}}\\)",
+      "\\(T = 2\\pi \\sqrt{\\dfrac{m}{k}}\\)",
+      "\\(T = \\dfrac{1}{2\\pi} \\sqrt{\\dfrac{k}{m}}\\)",
+      "\\(T = \\dfrac{1}{2\\pi} \\sqrt{\\dfrac{m}{k}}\\)"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Chu kỳ dao động riêng của con lắc lò xo được tính theo công thức \\(T = 2\\pi \\sqrt{\\dfrac{m}{k}}\\)."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q3",
+    "type": "mcq",
+    "text": "Tại một nơi có gia tốc trọng trường \\(g\\), một con lắc đơn có chiều dài \\(l\\) dao động điều hòa. Tần số dao động riêng của con lắc là:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "\\(f = \\sqrt{\\dfrac{g}{l}}\\)",
+      "\\(f = 2\\pi \\sqrt{\\dfrac{l}{g}}\\)",
+      "\\(f = \\dfrac{1}{2\\pi} \\sqrt{\\dfrac{l}{g}}\\)",
+      "\\(f = \\dfrac{1}{2\\pi} \\sqrt{\\dfrac{g}{l}}\\)"
+    ],
+    "correctAnswer": 3,
+    "explanation": "Tần số dao động riêng của con lắc đơn là \\(f = \\dfrac{1}{2\\pi} \\sqrt{\\dfrac{g}{l}}\\)."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q4",
+    "type": "mcq",
+    "text": "Chọn phát biểu đúng về sóng cơ học:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Sóng cơ truyền được trong chất rắn, lỏng, khí và chân không.",
+      "Sóng cơ truyền được trong chất rắn, lỏng, khí nhưng không truyền được trong chân không.",
+      "Sóng cơ chỉ truyền được trong chất rắn và chất lỏng.",
+      "Sóng cơ chỉ truyền được trong chân không."
+    ],
+    "correctAnswer": 1,
+    "explanation": "Sóng cơ truyền được trong các môi trường vật chất đàn hồi rắn, lỏng, khí và không truyền được trong chân không."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q5",
+    "type": "mcq",
+    "text": "Một sóng cơ truyền trên một sợi dây với bước sóng \\(\\lambda\\). Hai điểm trên dây dao động ngược pha với nhau khi khoảng cách giữa chúng là:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "\\(d = k\\lambda\\) với \\(k = 0, 1, 2, ...\\)",
+      "\\(d = (k + \\dfrac{1}{2})\\lambda\\) với \\(k = 0, 1, 2, ...\\)",
+      "\\(d = 2k\\lambda\\) với \\(k = 1, 2, 3, ...\\)",
+      "\\(d = (2k + 1)\\dfrac{\\lambda}{2}\\) với \\(k = 0, 1, 2, ...\\)"
+    ],
+    "correctAnswer": 3,
+    "explanation": "Hai điểm trên cùng phương truyền sóng dao động ngược pha khi khoảng cách giữa chúng bằng một số lẻ nửa bước sóng: \\(d = (2k + 1)\\dfrac{\\lambda}{2}\\)."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q6",
+    "type": "mcq",
+    "text": "Một mạch điện xoay chiều chỉ chứa cuộn cảm thuần có độ tự cảm \\(L\\). Nếu đặt vào hai đầu mạch điện áp \\(u = U_0 \\cos(\\omega t)\\), thì dòng điện trong mạch có biểu thức:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "\\(i = \\dfrac{U_0}{\\omega L} \\cos(\\omega t)\\)",
+      "\\(i = \\dfrac{U_0}{\\omega L} \\cos(\\omega t + \\dfrac{\\pi}{2})\\)",
+      "\\(i = \\dfrac{U_0}{\\omega L} \\cos(\\omega t - \\dfrac{\\pi}{2})\\)",
+      "\\(i = U_0 \\omega L \\cos(\\omega t + \\dfrac{\\pi}{2})\\)"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Mạch chỉ chứa cuộn cảm thuần thì dòng điện trễ pha \\(\\pi/2\\) so với điện áp hai đầu mạch: \\(i = \\dfrac{U_0}{\\omega L} \\cos(\\omega t - \\dfrac{\\pi}{2})\\)."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q7",
+    "type": "mcq",
+    "text": "Trong mạch RLC nối tiếp đang xảy ra cộng hưởng điện, phát biểu nào sau đây là sai?",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Tổng trở của mạch đạt giá trị cực tiểu.",
+      "Cường độ dòng điện hiệu dụng trong mạch đạt giá trị cực đại.",
+      "Điện áp hiệu dụng hai đầu cuộn cảm bằng điện áp hiệu dụng hai đầu tụ điện.",
+      "Hệ số công suất của mạch bằng 0."
+    ],
+    "correctAnswer": 3,
+    "explanation": "Khi cộng hưởng điện xảy ra, hệ số công suất của mạch đạt cực đại \\(\\cos \\varphi = 1\\), không phải bằng 0."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q8",
+    "type": "mcq",
+    "text": "Một máy biến áp lí tưởng có số vòng dây của cuộn sơ cấp là \\(N_1\\) và cuộn thứ cấp là \\(N_2\\). Đặt vào cuộn sơ cấp điện áp xoay chiều hiệu dụng \\(U_1\\), thì điện áp hiệu dụng ở cuộn thứ cấp là \\(U_2\\). Biểu thức liên hệ đúng là:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "\\(\\dfrac{U_1}{U_2} = \\dfrac{N_2}{N_1}\\)",
+      "\\(\\dfrac{U_1}{U_2} = \\dfrac{N_1}{N_2}\\)",
+      "\\(U_1 N_1 = U_2 N_2\\)",
+      "\\(U_1 N_2 = U_2 N_1\\)"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Đối với máy biến áp lí tưởng, tỉ số điện áp hiệu dụng hai đầu các cuộn dây bằng tỉ số số vòng dây tương ứng: \\(\\dfrac{U_1}{U_2} = \\dfrac{N_1}{N_2}\\)."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q9",
+    "type": "mcq",
+    "text": "Dao động điện từ tự do trong mạch LC lí tưởng có tần số góc riêng là:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "\\(\\omega = LC\\)",
+      "\\(\\omega = \\dfrac{1}{LC}\\)",
+      "\\(\\omega = \\sqrt{LC}\\)",
+      "\\(\\omega = \\dfrac{1}{\\sqrt{LC}}\\)"
+    ],
+    "correctAnswer": 3,
+    "explanation": "Tần số góc dao động riêng của mạch LC lí tưởng: \\(\\omega = \\dfrac{1}{\\sqrt{LC}}\\)."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q10",
+    "type": "mcq",
+    "text": "Sóng điện từ là sóng:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Truyền được trong chân không với tốc độ nhỏ hơn tốc độ ánh sáng.",
+      "Chỉ truyền được trong môi trường vật chất.",
+      "Có thành phần điện trường và từ trường luôn cùng pha.",
+      "Có thành phần điện trường và từ trường luôn vuông pha với nhau và vuông góc với phương truyền sóng."
+    ],
+    "correctAnswer": 2,
+    "explanation": "Sóng điện từ có thành phần điện trường và từ trường dao động cùng tần số và luôn cùng pha với nhau."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q11",
+    "type": "mcq",
+    "text": "Trong thí nghiệm Y-âng về giao thoa ánh sáng, khoảng vân được xác định bởi công thức:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "\\(i = \\dfrac{\\lambda a}{D}\\)",
+      "\\(i = \\dfrac{\\lambda D}{a}\\)",
+      "\\(i = \\dfrac{a D}{\\lambda}\\)",
+      "\\(i = \\lambda a D\\)"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Công thức tính khoảng vân giao thoa trong thí nghiệm Y-âng: \\(i = \\dfrac{\\lambda D}{a}\\)."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q12",
+    "type": "mcq",
+    "text": "Khi nói về ánh sáng đơn sắc, phát biểu nào sau đây là đúng?",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Ánh sáng đơn sắc không bị tán sắc khi truyền qua lăng kính.",
+      "Ánh sáng đơn sắc có tần số phụ thuộc vào môi trường truyền.",
+      "Ánh sáng đơn sắc có bước sóng không phụ thuộc vào môi trường truyền.",
+      "Ánh sáng đơn sắc là ánh sáng chỉ bị lệch hướng mà không bị phân tích khi truyền qua lăng kính."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Ánh sáng đơn sắc là ánh sáng không bị tán sắc khi đi qua lăng kính, chỉ bị lệch về phía đáy lăng kính."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q13",
+    "type": "mcq",
+    "text": "Hiện tượng quang điện ngoài là hiện tượng êlectron bị bứt ra khỏi kim loại khi:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Chiếu vào kim loại bức xạ có tần số lớn.",
+      "Chiếu vào kim loại bức xạ có bước sóng nhỏ.",
+      "Kim loại bị đốt nóng đến nhiệt độ cao.",
+      "Chiếu vào kim loại bức xạ có tần số lớn hơn hoặc bằng tần số giới hạn của kim loại đó."
+    ],
+    "correctAnswer": 3,
+    "explanation": "Hiện tượng quang điện ngoài xảy ra khi ánh sáng kích thích có bước sóng đủ ngắn hoặc tần số đủ lớn hơn hoặc bằng giới hạn quang điện của kim loại đó."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q14",
+    "type": "mcq",
+    "text": "Theo thuyết photon của Anhxtanh, năng lượng của một photon tỉ lệ thuận với:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Bước sóng của ánh sáng.",
+      "Tốc độ truyền ánh sáng.",
+      "Tần số của ánh sáng.",
+      "Cường độ chùm ánh sáng."
+    ],
+    "correctAnswer": 2,
+    "explanation": "Năng lượng của một photon: \\(E = hf\\), tỉ lệ thuận với tần số của ánh sáng."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q15",
+    "type": "mcq",
+    "text": "Hạt nhân nguyên tử được cấu tạo từ:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Proton và electron.",
+      "Electron và neutron.",
+      "Proton và hạt nhân.",
+      "Proton và neutron."
+    ],
+    "correctAnswer": 3,
+    "explanation": "Hạt nhân nguyên tử được cấu tạo từ các nucleon, gồm hai loại hạt là proton và neutron."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q16",
+    "type": "mcq",
+    "text": "Đồng vị là những nguyên tử mà hạt nhân của chúng có:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Cùng số khối \\(A\\), khác số proton \\(Z\\).",
+      "Khác số khối \\(A\\), cùng số neutron \\(N\\).",
+      "Cùng số proton \\(Z\\), khác số neutron \\(N\\).",
+      "Cùng số neutron \\(N\\), khác số proton \\(Z\\)."
+    ],
+    "correctAnswer": 2,
+    "explanation": "Đồng vị là các nguyên tử có cùng số proton Z nhưng khác số khối A (do khác số neutron N)."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q17",
+    "type": "mcq",
+    "text": "Phản ứng hạt nhân toả năng lượng là phản ứng mà:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Tổng khối lượng của các hạt nhân trước phản ứng lớn hơn tổng khối lượng của các hạt nhân sau phản ứng.",
+      "Tổng khối lượng của các hạt nhân trước phản ứng nhỏ hơn tổng khối lượng của các hạt nhân sau phản ứng.",
+      "Tổng năng lượng liên kết riêng của các hạt nhân trước phản ứng nhỏ hơn tổng năng lượng liên kết riêng của các hạt nhân sau phản ứng.",
+      "Tổng năng lượng toàn phần của các hạt nhân trước phản ứng nhỏ hơn tổng năng lượng toàn phần của các hạt nhân sau phản ứng."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Phản ứng hạt nhân tỏa năng lượng khi tổng khối lượng nghỉ của các hạt trước phản ứng lớn hơn sau phản ứng, lượng hụt khối đó chuyển thành năng lượng tỏa ra."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q18",
+    "type": "mcq",
+    "text": "Một vật dao động điều hòa với chu kỳ \\(T\\). Tại thời điểm \\(t\\), li độ của vật là \\(x\\), vận tốc là \\(v\\), gia tốc là \\(a\\). Hệ thức đúng là:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "\\(v = \\omega x\\)",
+      "\\(a = -\\omega x\\)",
+      "\\(v = -\\omega^2 x\\)",
+      "\\(a = -\\omega^2 x\\)"
+    ],
+    "correctAnswer": 3,
+    "explanation": "Mối liên hệ giữa gia tốc và li độ trong dao động điều hòa: \\(a = -\\omega^2 x\\)."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q19",
+    "type": "mcq",
+    "text": "Một mạch RLC nối tiếp có \\(R=100\\Omega\\), \\(L = \\dfrac{1}{\\pi}\\text{H}\\), \\(C = \\dfrac{10^{-4}}{2\\pi}\\text{F}\\). Đặt vào hai đầu mạch điện áp \\(u = 200\\sqrt{2}\\cos(100\\pi t)\\) (V). Cường độ dòng điện hiệu dụng trong mạch là:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "\\(1\\text{ A}\\)",
+      "\\(2\\text{ A}\\)",
+      "\\(\\sqrt{2}\\text{ A}\\)",
+      "\\(2\\sqrt{2}\\text{ A}\\)"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Ta có \\(Z_L = \\omega L = 100\\pi \\cdot \\dfrac{1}{\\pi} = 100\\ \\Omega\\) và \\(Z_C = \\dfrac{1}{\\omega C} = 200\\ \\Omega\\). Tổng trở \\(Z = \\sqrt{R^2 + (Z_L-Z_C)^2} = 100\\sqrt{2}\\ \\Omega\\). Cường độ hiệu dụng \\(I = \\dfrac{U}{Z} = \\dfrac{200}{100\\sqrt{2}} = \\sqrt{2}\\text{ A}\\)."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q20",
+    "type": "mcq",
+    "text": "Một sóng cơ có bước sóng \\(\\lambda = 0.5\\text{ m}\\) truyền với tốc độ \\(v = 20\\text{ m/s}\\). Tần số của sóng là:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "\\(10\\text{ Hz}\\)",
+      "\\(20\\text{ Hz}\\)",
+      "\\(30\\text{ Hz}\\)",
+      "\\(40\\text{ Hz}\\)"
+    ],
+    "correctAnswer": 3,
+    "explanation": "Tần số sóng \\(f = \\dfrac{v}{\\lambda} = \\dfrac{20}{0.5} = 40\\text{ Hz}\\)."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q21",
+    "type": "mcq",
+    "text": "Trong thí nghiệm Y-âng về giao thoa ánh sáng, hai khe cách nhau \\(a = 1\\text{ mm}\\), màn quan sát cách hai khe \\(D = 2\\text{ m}\\). Ánh sáng sử dụng có bước sóng \\(\\lambda = 0.5\\text{ μm}\\). Khoảng vân trên màn là:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "\\(0.5\\text{ mm}\\)",
+      "\\(1\\text{ mm}\\)",
+      "\\(2\\text{ mm}\\)",
+      "\\(4\\text{ mm}\\)"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Khoảng vân \\(i = \\dfrac{\\lambda D}{a} = \\dfrac{0.5 \\cdot 10^{-6} \\cdot 2}{1 \\cdot 10^{-3}} = 1\\text{ mm}\\)."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q22",
+    "type": "mcq",
+    "text": "Một con lắc lò xo dao động điều hòa theo phương ngang. Khi vật đi qua vị trí cân bằng, động năng của vật là \\(W_đ = 0.1\\text{ J}\\). Lực đàn hồi cực đại tác dụng lên vật là \\(F_{dh,max} = 2\\text{ N}\\). Biên độ dao động của vật là:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "\\(5\\text{ cm}\\)",
+      "\\(10\\text{ cm}\\)",
+      "\\(20\\text{ cm}\\)",
+      "\\(40\\text{ cm}\\)"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Động năng cực đại \\(W_đ = \\dfrac{1}{2} k A^2 = 0.1\\text{ J}\\), lực đàn hồi cực đại \\(F = k A = 2\\text{ N}\\). Chia hai phương trình ta được \\(\\dfrac{1}{2}A = 0.05\\text{ m} = 5\\text{ cm} \\Rightarrow A = 10\\text{ cm}\\)."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q23",
+    "type": "mcq",
+    "text": "Cho phản ứng hạt nhân: \\(\\text{}^{235}_{92}\\text{U} + \\text{}^1_0\\text{n} \\rightarrow \\text{}^{137}_{53}\\text{I} + \\text{}^{96}_{39}\\text{Y} + k \\text{}^1_0\\text{n}\\). Số neutron \\(k\\) được giải phóng là:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Bảo toàn số khối: \\(235 + 1 = 137 + 96 + k \\Rightarrow 236 = 233 + k \\Rightarrow k = 3\\)."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q24",
+    "type": "mcq",
+    "text": "Theo mẫu Bo về nguyên tử Hydro, bán kính quỹ đạo dừng thứ \\(n\\) của electron là \\(r_n = n^2 r_0\\), với \\(r_0\\) là bán kính Bo. Năng lượng của electron ở quỹ đạo dừng thứ \\(n\\) có biểu thức \\(E_n = -\\dfrac{13.6}{n^2}\\text{ (eV)}\\). Khi electron chuyển từ quỹ đạo dừng \\(M\\) về quỹ đạo dừng \\(K\\), nguyên tử phát ra một photon có năng lượng là:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "\\(|E_M - E_L|\\)",
+      "\\(|E_M - E_K|\\)",
+      "\\(|E_L - E_K|\\)",
+      "\\(|E_N - E_M|\\)"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Năng lượng photon phát ra khi chuyển từ quỹ đạo M về K là \\(\\Delta E = |E_M - E_K|\\)."
+  },
+  {
+    "id": "phys_thi_thu_vstep_q25",
+    "type": "mcq",
+    "text": "Một vật dao động điều hòa có phương trình vận tốc \\(v = 10\\pi \\cos(2\\pi t + \\pi/3)\\) (cm/s). Gia tốc cực đại của vật là:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "\\(10\\pi\\text{ cm/s}^2\\)",
+      "\\(20\\pi\\text{ cm/s}^2\\)",
+      "\\(20\\pi^2\\text{ cm/s}^2\\)",
+      "\\(100\\pi^2\\text{ cm/s}^2\\)"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Gia tốc cực đại của vật là \\(a_{max} = \\omega^2 A = \\omega v_{max} = 2\\pi \\cdot 10\\pi = 20\\pi^2\\text{ cm/s}^2\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_1_q1",
+    "type": "mcq",
+    "text": "<p style=\"color: #ff6600;\"><strong>PHẦN I. Câu trắc nghiệm nhiều phương án lựa chọn. </strong></p><p><strong>Câu 1:</strong> Có hai nhiệt kế, một dùng thang Celsius, một dùng thang Kelvin để đo nhiệt độ của môi trường tại cùng một thời điểm. Số chỉ trên nhiệt kế Kelvin</p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "tỉ lệ thuận với số chỉ trên nhiệt kế Celsius.",
+      "lớn hơn số chỉ trên nhiệt kế Celsius.",
+      "nhỏ hơn số chỉ trên nhiệt kế Celsius.",
+      "có thể lớn hơn hoặc nhỏ hơn số chỉ trên nhiệt kế Celsius."
+    ],
+    "correctAnswer": 1,
+    "explanation": "Thang Kelvin luôn lớn hơn Celsius một lượng là 273.15 độ."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_1_q2",
+    "type": "mcq",
+    "text": "Trong trường hợp nào dưới đây, sự biến đổi nội năng của vật không phải do thực hiện công?",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Mài dao.",
+      "Đóng đinh.",
+      "Khuấy nước.",
+      "Nung sắt trong lò."
+    ],
+    "correctAnswer": 3,
+    "explanation": "Nung sắt trong lò là hình thức truyền nhiệt trực tiếp, không phải do thực hiện công cơ học."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_1_q3",
+    "type": "mcq",
+    "text": "Một học sinh thêm $50 \\, \\text{g}$ sữa ở nhiệt độ $20^\\circ C$ vào $350 \\, \\text{g}$ trà ở nhiệt độ $80^\\circ C$, nhiệt độ cuối cùng của hỗn hợp là bao nhiêu? Cho nhiệt dung riêng của sữa $3800 \\, \\text{J/(kg.K)}$. Nhiệt dung riêng của trà $4200 \\, \\text{J/(kg.K)}$.",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$50,0^\\circ C$.",
+      "$72,5^\\circ C$.",
+      "$73,1^\\circ C$.",
+      "$77,4^\\circ C$."
+    ],
+    "correctAnswer": 2,
+    "explanation": "Cân bằng nhiệt: \\(m_1 c_1 (T_f - T_1) + m_2 c_2 (T_f - T_2) = 0 \\Rightarrow 0.05 \\cdot 3800 \\cdot (T_f - 20) + 0.35 \\cdot 4200 \\cdot (T_f - 80) = 0 \\Rightarrow T_f \\approx 73.1^\\circ C\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_1_q4",
+    "type": "mcq",
+    "text": "<p><strong>Sử dụng các thông tin sau cho Câu 4 và Câu 5.</strong> Vận động viên điền kinh bị mất rất nhiều nước trong khi thi đấu. Các vận động viên thường chỉ có thể chuyển hoá khoảng $30\\%$ năng lượng dự trữ trong cơ thể thành năng lượng dùng cho các hoạt động của cơ thể. Phần năng lượng còn lại chuyển thành nhiệt thải ra ngoài nhờ sự bay hơi của nước qua hô hấp và da để giữ cho nhiệt độ cơ thể không đổi. Vận động viên dùng hết $9800 \\, \\text{kJ}$ trong cuộc thi. Coi nhiệt độ cơ thể của vận động viên hoàn toàn không đổi và nhiệt hoá hơi riêng của nước ở nhiệt độ của vận động viên là $2,4 \\cdot 10^6 \\, \\text{J/kg}$. Biết khối lượng riêng của nước là $1,0 \\cdot 10^3 \\, \\text{kg/m}^3$.</p>\n<p><strong>Câu 4.</strong> Phần năng lượng chuyển thành nhiệt thải ra ngoài nhờ sự bay hơi của nước ra ngoài là</p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$6560 \\, \\text{kJ}$.",
+      "$6660 \\, \\text{kJ}$.",
+      "$6760 \\, \\text{kJ}$.",
+      "$6860 \\, \\text{kJ}$."
+    ],
+    "correctAnswer": 3,
+    "explanation": "Tỉ lệ tản nhiệt là 70% năng lượng tiêu hao: \\(Q_{toa} = 9800 \\cdot 0.70 = 6860\\text{ kJ}\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_1_q5",
+    "type": "mcq",
+    "text": "Lượng nước thoát ra ngoài qua hô hấp và da xấp xỉ là",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$2,86 \\, \\text{lít}$.",
+      "$3,15 \\, \\text{lít}$.",
+      "$3,36 \\, \\text{lít}$.",
+      "$3,86 \\, \\text{lít}$."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Khối lượng nước bay hơi thoát nhiệt: \\(m = Q_{toa} / L = 6.86 \\cdot 10^6 / (2.4 \\cdot 10^6) = 2.86\\text{ kg} \\approx 2.86\\text{ lít}\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_1_q6",
+    "type": "mcq",
+    "text": "Phương trình nào sau đây là phương trình trạng thái của một khối khí lí tưởng xác định?",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$pV = \\text{hằng số}$.",
+      "$\\dfrac{p}{T} = \\text{hằng số}$.",
+      "$\\dfrac{V}{T} = \\text{hằng số}$.",
+      "$\\dfrac{pV}{T} = \\text{hằng số}$."
+    ],
+    "correctAnswer": 3,
+    "explanation": "Phương trình Clapeyron-Mendeleev chỉ ra hệ thức trạng thái là \\(pV/T = \\text{const}\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_1_q7",
+    "type": "mcq",
+    "text": "Đồ thị nào dưới đây biểu diễn mối quan hệ giữa nội năng của khí lý tưởng (trục y) và nhiệt độ tuyệt đối của khí (trục x)?<br><img src=\"/images/exams/A_nh-ma_n-hi_nh-2026-01-28-lu_c-4.19.03_CH.png\" alt=\"\" width=\"754\" height=\"184\" class=\"alignnone size-full wp-image-105934\">",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Hình 1.",
+      "Hình 2.",
+      "Hình 3.",
+      "Hình 4."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Nội năng khí lý tưởng phụ thuộc tuyến tính vào nhiệt độ tuyệt đối T nên đồ thị đi qua gốc tọa độ (Hình 1)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_1_q8",
+    "type": "mcq",
+    "text": "Một bình kín có thể tích không đổi chứa một lượng khí nhất định. Chất khí trong bình được làm lạnh. Điều gì xảy ra với áp suất chất khí và động năng trung bình của các phân tử khí trong bình?",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Áp suất chất khí giảm, động năng trung bình của các phân tử khí giảm.",
+      "Áp suất chất khí giảm, động năng trung bình của các phân tử khí tăng.",
+      "Áp suất chất khí tăng, động năng trung bình của các phân tử khí giảm.",
+      "Áp suất chất khí tăng, động năng trung bình của các phân tử khí tăng."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Thể tích không đổi, làm lạnh làm giảm nhiệt độ T dẫn tới giảm áp suất p và giảm động năng trung bình phân tử."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_1_q9",
+    "type": "mcq",
+    "text": "Tại một bệnh viện, khí oxygen được đựng trong các bình chứa có áp suất $65 \\, \\text{atm}$ và nhiệt độ $15^\\circ C$. $1 \\, \\text{dm}^3$ khí oxygen trong bình sẽ chiếm thể tích bao nhiêu nếu được đưa ra ngoài môi trường phòng có nhiệt độ $24^\\circ C$ và áp suất $1 \\, \\text{atm}$?",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$15 \\, \\text{dm}^3$.",
+      "$24 \\, \\text{dm}^3$.",
+      "$67 \\, \\text{dm}^3$.",
+      "$85 \\, \\text{dm}^3$."
+    ],
+    "correctAnswer": 2,
+    "explanation": "Phương trình trạng thái: \\(V_2 = V_1 \\cdot \\dfrac{p_1}{p_2} \\cdot \\dfrac{T_2}{T_1} = 1 \\cdot \\dfrac{65}{1} \\cdot \\dfrac{297}{288} \\approx 67\\text{ dm}^3\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_1_q10",
+    "type": "mcq",
+    "text": "Từ trường không tương tác với",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "điện tích đứng yên.",
+      "điện tích chuyển động.",
+      "nam châm vĩnh cửu.",
+      "dòng điện."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Từ trường chỉ tương tác lực từ lên điện tích chuyển động hoặc dòng điện/nam châm khác, không tác dụng lên điện tích đứng yên."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_1_q11",
+    "type": "mcq",
+    "text": "Một vòng dây tròn dẫn điện được nối với nguồn điện. Yếu tố nào sau đây không ảnh hưởng đến độ lớn cảm ứng từ tại tâm của vòng dây?",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Hiệu điện thế của nguồn điện.",
+      "Khối lượng riêng của vòng dây.",
+      "Điện trở của vòng dây.",
+      "Đường kính của vòng dây."
+    ],
+    "correctAnswer": 1,
+    "explanation": "Cảm ứng từ tâm vòng tròn dây: \\(B = 2\\pi \\cdot 10^{-7} \\cdot I / R\\). Khối lượng riêng vật liệu dây không ảnh hưởng trực tiếp."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_1_q12",
+    "type": "mcq",
+    "text": "Một đoạn dây dẫn thẳng $MN = 5 \\, \\text{cm}$, khối lượng $10 \\, \\text{g}$ được treo vào hai sợi dây mảnh, nhẹ MC và ND sao cho MN nằm ngang và CMND nằm trong mặt phẳng thẳng đứng. Cả hệ đặt trong từ trường đều có độ lớn $B = 0,25 \\, \\text{T}$; hướng thẳng đứng từ dưới lên. Cho dòng điện có cường độ $I$ chạy qua $MN$ thì dây treo lệch một góc $\\theta = 30^\\circ$ so với phương thẳng đứng. Lấy $g = 10 \\, \\text{m/s}^2$. Giá trị $I$ xấp xỉ",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$4,62 \\, \\text{A}$.",
+      "$6,93 \\, \\text{A}$.",
+      "$4,12 \\, \\text{A}$.",
+      "$6,62 \\, \\text{A}$."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Cân bằng lực dây treo: \\(I = \\dfrac{mg \\tan\\theta}{B L} = \\dfrac{0.01 \\cdot 10 \\cdot \\tan 30^\\circ}{0.25 \\cdot 0.05} \\approx 4.62\\text{ A}\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_1_q13",
+    "type": "mcq",
+    "text": "Một học sinh lắp đặt mạch điện được minh họa như hình vẽ. Nguồn điện có suất điện động không đổi. Trong các trường hợp sau đây trường hợp nào kim của ampe kế không bị lệch<br><img src=\"/images/exams/A_nh-ma_n-hi_nh-2026-01-28-lu_c-4.19.12_CH.png\" alt=\"\" width=\"294\" height=\"126\" class=\"alignnone size-medium wp-image-105935\">",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Khi đóng khóa K.",
+      "Khi ngắt khóa K.",
+      "Sau khi đóng khóa K và dòng điện qua X đã ổn định.",
+      "Sau khi đóng khóa K và di chuyển con chạy biến trở."
+    ],
+    "correctAnswer": 2,
+    "explanation": "Dòng điện ổn định không tạo ra sự biến thiên từ thông, do đó ampe kế ở cuộn dây thứ hai không lệch."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_1_q14",
+    "type": "mcq",
+    "text": "Cường độ dòng điện của một dòng điện xoay chiều biến thiên theo phương trình $i = 2\\sqrt{2}\\cos(100\\pi t) \\, \\text{A}$. Cường độ dòng điện hiệu dụng có giá trị bằng bao nhiêu?",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$2 \\, \\text{A}$.",
+      "$2\\sqrt{2} \\, \\text{A}$.",
+      "$4 \\, \\text{A}$.",
+      "$\\sqrt{2} \\, \\text{A}$."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Cường độ dòng điện hiệu dụng: \\(I = I_0 / \\sqrt{2} = 2\\sqrt{2} / \\sqrt{2} = 2\\text{ A}\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_1_q15",
+    "type": "mcq",
+    "text": "Đồng vị là những nguyên tử mà hạt nhân",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "chứa cùng số proton Z nhưng có số neutron N khác nhau.",
+      "chứa cùng số proton Z và số khối A.",
+      "chứa cùng số neutron N nhưng có số proton Z khác nhau.",
+      "chứa cùng số khối A nhưng có số proton Z khác nhau."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Đồng vị là các nguyên tố có cùng số proton Z nhưng khác số khối A và số neutron N."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_1_q16",
+    "type": "mcq",
+    "text": "Trong phóng xạ $\\beta^-$ hạt nhân $^A_Z X$ biến đổi thành hạt nhân $^{A'}_{Z'} Y$ thì",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$Z' = Z - 1; A' = A$.",
+      "$Z' = Z + 1; A' = A - 1$.",
+      "$Z' = Z - 1; A' = A + 1$.",
+      "$Z' = Z + 1; A' = A$."
+    ],
+    "correctAnswer": 3,
+    "explanation": "Phóng xạ beta- tạo ra hạt nhân con dịch chuyển sang phải 1 ô trong bảng tuần hoàn: Z' = Z + 1, A' = A."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_1_q17",
+    "type": "mcq",
+    "text": "<p><strong>Sử dụng các thông tin sau cho Câu 17 và Câu 18.</strong> Ban đầu $(t = 0)$ có một mẫu chất phóng xạ $X$ nguyên chất. Ở thời điểm $t_1$, mẫu chất phóng xạ $X$ còn lại $20\\%$ hạt nhân chưa bị phân rã. Đến thời điểm $t_2 = t_1 + 100 \\, (s)$ số hạt nhân $X$ chưa bị phân rã chỉ còn $5\\%$ so với số hạt nhân ban đầu.</p>\n<p><strong>Câu 17.</strong> Công thức tính số hạt chưa phân rã của mẫu phóng xạ là</p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$N = N_0 \\cdot 2^{-\\dfrac{t}{T}}$.",
+      "$N = N_0 \\cdot 2^{\\dfrac{t}{T}}$.",
+      "$N = N_0 \\cdot 2^{\\dfrac{T}{t}}$.",
+      "$N = N_0 \\cdot 2^{-\\dfrac{T}{t}}$."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Số hạt nhân phóng xạ còn lại tuân theo định luật phóng xạ: \\(N = N_0 \\cdot 2^{-t/T}\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_1_q18",
+    "type": "mcq",
+    "text": "Chu kì bán rã của chất phóng xạ X là",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$25 \\, \\text{s}$.",
+      "$50 \\, \\text{s}$.",
+      "$100 \\, \\text{s}$.",
+      "$200 \\, \\text{s}$."
+    ],
+    "correctAnswer": 1,
+    "explanation": "Số hạt giảm từ 20% còn 5% tức giảm 4 lần (2 chu kỳ bán rã). Vậy \\(2T = 100\\text{ s} \\Rightarrow T = 50\\text{ s}\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_2_q1",
+    "type": "mcq",
+    "text": "<p style=\"color: #ff6600;\"><strong>PHẦN I. Câu trắc nghiệm nhiều phương án lựa chọn. </strong></p><p><strong>Câu 1:</strong> Một khối khí lý tưởng có $n$ mol, áp suất $p$, thể tích $V$, nhiệt độ tuyệt đối $T$. Phương trình Clapeyron của khối khí này là</p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$\\frac{pT}{V} = nR$",
+      "$pV = \\frac{nR}{T}$",
+      "$\\frac{pV}{T} = nR$",
+      "$\\frac{pV}{T} = \\frac{R}{n}$"
+    ],
+    "correctAnswer": 2,
+    "explanation": "Phương trình trạng thái của khí lý tưởng: \\(\\dfrac{pV}{T} = nR\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_2_q2",
+    "type": "mcq",
+    "text": "<p>Cầu chì là thiết bị dùng để bảo vệ mạch điện. Khi cường độ dòng điện vượt quá giá trị giới hạn thì dây cầu chì bị đứt và làm ngắt mạch điện. Hiện tượng này liên quan đến sự</p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "đông đặc.",
+      "nóng chảy.",
+      "thăng hoa.",
+      "ngưng kết."
+    ],
+    "correctAnswer": 1,
+    "explanation": "Khi dòng điện quá tải, dòng nhiệt tỏa ra lớn làm dây chì nóng chảy và đứt để bảo vệ thiết bị."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_2_q3",
+    "type": "mcq",
+    "text": "<p>Trong một nhà máy xử lí rác thải rắn, rác được đưa lên băng chuyền đi qua một nam châm điện đặt phía trên để tách riêng các kim loại có từ tính. Các vật liệu bị nam châm giữ lại chủ yếu là hợp chất của kim loại nào sau đây?</p><p><img class=\"q-image\" src=\"/images/exams/extracted_img_1-71.png\"></p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Thiếc.",
+      "Kẽm.",
+      "Sắt.",
+      "Chì."
+    ],
+    "correctAnswer": 2,
+    "explanation": "Nam châm điện hút các kim loại có tính chất sắt từ mạnh như sắt (Fe) để phân loại."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_2_q4",
+    "type": "mcq",
+    "text": "<p>Trong quá trình nào sau đây khối khí không sinh công, nhận công?</p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Quá trình đẳng tích.",
+      "Quá trình dãn nở.",
+      "Quá trình đẳng áp.",
+      "Quá trình đẳng nhiệt."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Quá trình đẳng tích có thể tích không đổi, công bằng 0, hệ không thực hiện cũng không nhận công cơ học."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_2_q5",
+    "type": "mcq",
+    "text": "<p>Nối ống dây dẫn vào nguồn điện không đổi qua khóa $K$ như hình vẽ bên. Khi đóng khóa $K$ và đặt kim nam châm tại điểm $A$ thì cực Nam của nó sẽ hướng về vị trí</p><p><img class=\"q-image\" src=\"/images/exams/extracted_img_2-77.png\"></p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "(2).",
+      "(3).",
+      "(1).",
+      "(4)."
+    ],
+    "correctAnswer": 2,
+    "explanation": "Xác định chiều dòng điện và cực từ solenoid qua quy tắc nắm tay phải, kim nam châm sẽ hướng cực Nam về vị trí (1)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_2_q6",
+    "type": "mcq",
+    "text": "<p>Sóng điện thoại di động là</p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "sóng siêu âm.",
+      "sóng cơ.",
+      "sóng hạ âm.",
+      "sóng điện từ."
+    ],
+    "correctAnswer": 3,
+    "explanation": "Sóng điện thoại di động là sóng vô tuyến, thuộc nhóm sóng điện từ."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_2_q7",
+    "type": "mcq",
+    "text": "<p>Năm 1911, Rutherford thực hiện thí nghiệm tán xạ alpha ( $\\alpha$ ) trên lá vàng rất mỏng có sơ đồ như hình vẽ. Kết quả cho thấy, hầu hết các hạt $\\alpha$ xuyên qua tấm lá vàng, một số ít bật ngược trở lại. Kết quả thí nghiệm bác bỏ giả thuyết nào sau đây?</p><p><img class=\"q-image\" src=\"/images/exams/extracted_img_3-83.png\"></p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Hạt nhân mang điện tích dương và kích thước rất nhỏ so với kích thước nguyên tử.",
+      "Nguyên tử bao gồm hạt nhân ở trung tâm và các electron chuyển động xung quanh.",
+      "Nguyên tử có cấu trúc phần lớn là rỗng chứa các electron.",
+      "Nguyên tử gồm các electron phân bố đều trong một khối điện dương."
+    ],
+    "correctAnswer": 3,
+    "explanation": "Kết quả tán xạ alpha chứng minh nguyên tử hầu như rỗng và có hạt nhân cực nhỏ tích điện dương ở tâm, bác bỏ giả thuyết phân bố đều."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_2_q8",
+    "type": "mcq",
+    "text": "<p>Một khung dây dẫn kín đặt trong từ trường. Trong khoảng thời gian $\\Delta t$ rất nhỏ, độ biến thiên từ thông qua khung dây là $\\Delta \\Phi$. Suất điện động xuất hiện trong khung khi đó là</p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$e = -\\frac{\\Delta \\Phi}{\\Delta t}$.",
+      "$e = \\Delta \\Phi \\cdot \\Delta t$.",
+      "$e = \\frac{\\Delta \\Phi}{\\Delta t}$.",
+      "$e = -\\Delta \\Phi \\cdot \\Delta t$."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Định luật Faraday về cảm ứng điện từ: suất điện động cảm ứng tỷ lệ nghịch với thời gian biến thiên từ thông: \\(e = -\\dfrac{\\Delta\\Phi}{\\Delta t}\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_2_q9",
+    "type": "mcq",
+    "text": "<p>Biểu thức định luật $I$ của nhiệt động lực học có dạng: $\\Delta U = A + Q$. Một vật nhận công và truyền nhiệt có qui ước dấu của $A$ và $Q$ là</p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$A \\gt 0, Q \\lt 0$.",
+      "$A \\gt 0, Q \\gt 0$.",
+      "$A \\lt 0, Q \\gt 0$.",
+      "$A \\lt 0, Q \\lt 0$."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Theo quy ước dấu: Nhận công thì \\(A > 0\\), truyền nhiệt thì \\(Q < 0\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_2_q10",
+    "type": "mcq",
+    "text": "<p>Tia phóng xạ $\\beta^{-}$ có bản chất là chùm hạt</p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "electron ($_{-1}^{0}\\text{e}$).",
+      "alpha ($_{2}^{4}\\text{He}$).",
+      "proton ($_{1}^{1}\\text{H}$).",
+      "positron ($_{1}^{0}\\text{e}$)."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Tia phóng xạ beta- có bản chất là dòng hạt electron chuyển động với tốc độ gần bằng tốc độ ánh sáng."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_2_q11",
+    "type": "mcq",
+    "text": "<p>Đoạn dây dẫn thẳng mang dòng điện I đặt trong từ trường đều B theo các trường hợp sau. Trường hợp nào đoạn dây không chịu tác dụng của lực từ?</p><p><img class=\"q-image\" src=\"/images/exams/extracted_img_4-81.png\"></p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Hình b.",
+      "Hình c.",
+      "Hình a.",
+      "Hình d."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Đoạn dây song song với các đường sức từ (Hình b) không chịu tác dụng của lực từ."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_2_q12",
+    "type": "mcq",
+    "text": "<p>Có ba viên bi làm bằng sắt, nhôm và đồng đang có cùng nhiệt độ bằng nhiệt độ không khí, khối lượng lần lượt là $m_{1}$, $m_{2}$ và $m_{3}$ với $m_{1} = 2m_{2} = m_{3}$. Bỏ đồng thời ba viên bi vào một cốc nước nóng cho đến khi hệ cân bằng nhiệt. Nhiệt dung riêng của các chất có giá trị như bảng bên. Nhận định nào sau đây đúng?</p><table style=\"border-collapse: collapse; width: 100%; text-align: center;\"><tbody><tr><th style=\"border: 1px solid black; padding: 8px;\">Chất</th><th style=\"border: 1px solid black; padding: 8px;\">Nhiệt dung riêng ($\\text{kJ}/\\text{kg}\\cdot^{\\circ}\\text{C}$)</th></tr><tr><td style=\"border: 1px solid black; padding: 8px;\">Sắt</td><td style=\"border: 1px solid black; padding: 8px;\">$0,46$</td></tr><tr><td style=\"border: 1px solid black; padding: 8px;\">Nước</td><td style=\"border: 1px solid black; padding: 8px;\">$4,19$</td></tr><tr><td style=\"border: 1px solid black; padding: 8px;\">Nhôm</td><td style=\"border: 1px solid black; padding: 8px;\">$0,88$</td></tr><tr><td style=\"border: 1px solid black; padding: 8px;\">Đồng</td><td style=\"border: 1px solid black; padding: 8px;\">$0,38$</td></tr></tbody></table>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Viên bi sắt thu nhiệt lượng lớn nhất.",
+      "Viên bi nhôm thu nhiệt lượng lớn nhất.",
+      "Cả ba viên bi thu nhiệt lượng bằng nhau.",
+      "Viên bi đồng thu nhiệt lượng lớn nhất."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Nhiệt lượng hấp thụ \\(Q = m c \\Delta T\\). Tính toán so sánh tỉ lệ tích khối lượng và nhiệt dung riêng cho thấy bi sắt thu nhiệt nhiều nhất."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_2_q13",
+    "type": "mcq",
+    "text": "<p>Khi trung bình của bình phương tốc độ các phân tử khí lý tưởng giảm 2 lần thì nhiệt độ tuyệt đối của khối khí</p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "giảm 2 lần.",
+      "tăng 2 lần.",
+      "giảm 4 lần.",
+      "tăng 2 lần."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Động năng tịnh tiến trung bình tỉ lệ thuận với nhiệt độ tuyệt đối T, do đó T giảm 2 lần."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_2_q14",
+    "type": "mcq",
+    "text": "<p>Cho nhiệt độ nóng chảy của đồng và sắt lần lượt là $1083^{\\circ}\\text{C}$ và $1538^{\\circ}\\text{C}$. Theo thang nhiệt độ Kelvin (độ $\\text{K}$), nhiệt độ nóng chảy của sắt lớn hơn nhiệt độ nóng chảy của đồng là</p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$182\\text{ K}$.",
+      "$455\\text{ K}$.",
+      "$673\\text{ K}$.",
+      "$728\\text{ K}$."
+    ],
+    "correctAnswer": 1,
+    "explanation": "Độ biến thiên nhiệt độ thang Kelvin bằng thang Celsius: \\(\\Delta T = 1538 - 1083 = 455\\text{ K}\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_2_q15",
+    "type": "mcq",
+    "text": "<p>Bóng thám không được sử dụng để thu thập thông tin về môi trường không khí và thời tiết ở các độ cao khác nhau. Bóng thường được bơm khí hiếm nhẹ hơn không khí (coi là khí lý tưởng). Khi bóng bay lên cao, các thông số trạng thái của khí trong bóng luôn tuân theo</p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "phương trình trạng thái.",
+      "định luật Boyle.",
+      "định luật Charles.",
+      "quá trình đẳng tích."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Khí trong bóng thám không biến đổi liên tục và các thông số luôn tuân theo phương trình trạng thái khí lý tưởng."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_2_q16",
+    "type": "mcq",
+    "text": "<p>Xét phản ứng tổng hợp hạt nhân $_{1}^{2}\\text{H} + _{1}^{3}\\text{H} \\rightarrow _{2}^{4}\\text{He} + _{0}^{1}\\text{n}$. Trong 3 hạt nhân $_{1}^{2}\\text{H}; _{1}^{3}\\text{H}; _{2}^{4}\\text{He}$ thì năng lượng liên kết riêng</p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "của hạt nhân $_{2}^{4}\\text{He}$ là lớn nhất.",
+      "của 3 hạt là bằng nhau.",
+      "của hạt nhân $_{1}^{2}\\text{H}$ là lớn nhất.",
+      "của hạt nhân $_{2}^{4}\\text{He}$ là nhỏ nhất."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Hạt nhân He4 có năng lượng liên kết riêng cực kì lớn (khoảng 7.07 MeV/nucleon) nên bền vững nhất."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_2_q17",
+    "type": "mcq",
+    "text": "<p>Số neutron có trong một hạt nhân phóng xạ $_{6}^{14}\\text{C}$ là</p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$20$.",
+      "$8$.",
+      "$6$.",
+      "$14$."
+    ],
+    "correctAnswer": 1,
+    "explanation": "Hạt nhân Carbon-14 có số proton là 6, do đó số neutron là 14 - 6 = 8."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_2_q18",
+    "type": "mcq",
+    "text": "<p>Hình nào sau đây diễn tả đúng dạng đường đẳng áp của một khối khí lý tưởng xác định?</p><p><img class=\"q-image\" src=\"/images/exams/extracted_img_5-80.png\"></p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Hình b.",
+      "Hình d.",
+      "Hình a.",
+      "Hình c."
+    ],
+    "correctAnswer": 2,
+    "explanation": "Đồ thị biểu diễn đẳng áp trong hệ (V, T) là đường thẳng đi qua gốc tọa độ (Hình a)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_3_q1",
+    "type": "mcq",
+    "text": "<p><strong>Cho:</strong> $\\pi = 3,14$; $T(K) = t(^\\circ C) + 273$; $R = 8,31 \\, \\text{J/mol} \\cdot K$; $N_A = 6,02 \\cdot 10^{23} \\, \\text{mol}^{-1}$</p>\n<hr>\n<p style=\"color: #ff6600;\"><strong>PHẦN I. Câu trắc nghiệm nhiều phương án lựa chọn. </strong></p><p><strong>Câu 1:</strong> Nhiệt hoá hơi riêng của một chất lỏng là:</p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "nhiệt lượng cần thiết để 1 kg chất lỏng đó hoá hơi hoàn toàn.",
+      "nhiệt lượng cần thiết để 1 kg chất lỏng đó hóa hơi hoàn toàn ở nhiệt độ sôi.",
+      "nhiệt lượng cần thiết để 1 g chất lỏng đó hoá hơi hoàn toàn ở nhiệt độ phòng.",
+      "nhiệt lượng cần thiết để một mẫu chất lỏng đó hoá hơi hoàn toàn ở nhiệt độ sôi."
+    ],
+    "correctAnswer": 1,
+    "explanation": "Nhiệt hóa hơi riêng của một chất lỏng là nhiệt lượng cần truyền cho 1 kg chất lỏng đó hóa hơi hoàn toàn ở nhiệt độ sôi."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_3_q2",
+    "type": "mcq",
+    "text": "Hãy tìm ý không đúng với mô hình động học phân tử trong các ý sau?",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Các chất được cấu tạo từ các hạt riêng biệt là phân tử.",
+      "Các phân tử chuyển động không ngừng.",
+      "Tốc độ chuyển động của các phân tử cấu tạo nên vật càng lớn thì thể tích của vật càng lớn.",
+      "Giữa các phân tử có lực tương tác gọi là lực tương tác phân tử."
+    ],
+    "correctAnswer": 2,
+    "explanation": "Tốc độ chuyển động nhiệt của phân tử liên quan trực tiếp đến nhiệt độ của vật chứ không tỉ lệ thuận với thể tích."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_3_q3",
+    "type": "mcq",
+    "text": "<p><strong>Sử dụng các thông tin sau cho Câu 3 và Câu 4.</strong> Cung cấp nhiệt lượng $1,5 \\, \\text{J}$ cho một khối khí trong một xilanh đặt nằm ngang. Chất khí nở ra đẩy pit-tông đi một đoạn $6,0 \\, \\text{cm}$. Biết lực ma sát giữa pit-tông và xilanh có độ lớn là $20,0 \\, \\text{N}$, diện tích tiết diện của pit-tông là $1,0 \\, \\text{cm}^2$. Coi pit-tông chuyển động thẳng đều.</p>\n<img src=\"/images/exams/A_nh-ma_n-hi_nh-2026-01-28-lu_c-1.50.18_CH.png\" alt=\"\" width=\"308\" height=\"150\" class=\"alignnone size-full wp-image-105874\">\n<p><strong>Câu 3.</strong> Thể tích khí trong xilanh tăng bao nhiêu?</p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$4,5 \\, \\text{ml}$.",
+      "$5,0 \\, \\text{ml}$.",
+      "$5,5 \\, \\text{ml}$.",
+      "$6,0 \\, \\text{ml}$."
+    ],
+    "correctAnswer": 3,
+    "explanation": "Thể tích biến thiên: \\(\\Delta V = S \\cdot \\Delta s = 1.0\\text{ cm}^2 \\cdot 6.0\\text{ cm} = 6.0\\text{ cm}^3 = 6.0\\text{ ml}\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_3_q4",
+    "type": "mcq",
+    "text": "Độ biến thiên nội năng của khối khí là:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$0,3 \\, \\text{J}$.",
+      "$0,4 \\, \\text{J}$.",
+      "$0,5 \\, \\text{J}$.",
+      "$0,6 \\, \\text{J}$."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Công khí thực hiện chống ma sát: \\(A' = F \\cdot s = 20 \\cdot 0.06 = 1.2\\text{ J} \\Rightarrow A = -1.2\\text{ J}\\). Độ biến thiên nội năng: \\(\\Delta U = Q + A = 1.5 - 1.2 = 0.3\\text{ J}\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_3_q5",
+    "type": "mcq",
+    "text": "Biến thiên điện trở có thể được sử dụng để xác định nhiệt độ. Giả sử một nhiệt điện trở có điện trở lần lượt là $8,4 \\, \\Omega$ và $3,6 \\, \\Omega$ tại điểm đóng băng và điểm nước sôi. Giả sử sự thay đổi điện trở theo nhiệt độ là đồng đều như thể hiện trong hình. Nhiệt độ sẽ là bao nhiêu nếu điện trở của dây kim loại là $5,8 \\, \\Omega$.<br><img src=\"/images/exams/A_nh-ma_n-hi_nh-2026-01-28-lu_c-11.41.43_SA.png\" alt=\"\" width=\"252\" height=\"144\" class=\"alignnone size-full wp-image-105860\">",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$42^\\circ C$.",
+      "$46^\\circ C$.",
+      "$54^\\circ C$.",
+      "$58^\\circ C$."
+    ],
+    "correctAnswer": 2,
+    "explanation": "Nội suy tuyến tính nhiệt độ: \\(t = 100 \\cdot \\dfrac{R - R_1}{R_2 - R_1} = 100 \\cdot \\dfrac{5.8 - 8.4}{3.6 - 8.4} = 54^\\circ C\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_3_q6",
+    "type": "mcq",
+    "text": "Đường đẳng nhiệt trong hệ tọa độ $(p, V)$ có dạng là:",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "đường thẳng song song với trục hoành.",
+      "đường thẳng song song với trục tung.",
+      "đường hyperbol.",
+      "đường thẳng kéo dài đi qua gốc tọa độ."
+    ],
+    "correctAnswer": 2,
+    "explanation": "Theo định luật Boyle, đường đẳng nhiệt trong hệ tọa độ (p, V) có dạng là một đường hyperbol."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_3_q7",
+    "type": "mcq",
+    "text": "Khí trong một bình có thể tích cố định bị rò rỉ dần dần. Khi thay đổi từ trạng thái $X$ có áp suất $p$ và nhiệt độ tuyệt đối $T_0$ thành trạng thái $Y$ có áp suất $1,5p$ và nhiệt độ tuyệt đối $2T_0$, như thể hiện trong đồ thị mối liên hệ áp suất - nhiệt độ $(p-T)$ ở hình vẽ bên. Bao nhiêu phần trăm khối lượng ban đầu của khí rò rỉ ra khỏi bình trong quá trình này?<br><img src=\"/images/exams/A_nh-ma_n-hi_nh-2026-01-28-lu_c-11.41.49_SA.png\" alt=\"\" width=\"228\" height=\"140\" class=\"alignnone size-medium wp-image-105861\">",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$10\\%$.",
+      "$20\\%$.",
+      "$25\\%$.",
+      "$50\\%$."
+    ],
+    "correctAnswer": 2,
+    "explanation": "Từ phương trình Mendeleev-Clapeyron: \\(m = \\dfrac{p V M}{R T}\\). Tỉ số khối lượng: \\(\\dfrac{m_2}{m_1} = \\dfrac{p_2}{p_1} \\cdot \\dfrac{T_1}{T_2} = 1.5 \\cdot \\dfrac{1}{2} = 0.75\\). Khí rò rỉ đi 25%."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_3_q8",
+    "type": "mcq",
+    "text": "Một bình kín có thể tích $1 \\, \\text{m}^3$ chứa một loại khí lý tưởng. Nhiệt độ của khí là $25^\\circ C$ và áp suất của khí là $1,01 \\cdot 10^5 \\, \\text{Pa}$. Tính số phân tử khí trong bình?",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$2,46 \\cdot 10^{25}$.",
+      "$2,93 \\cdot 10^{25}$.",
+      "$2,46 \\cdot 10^{26}$.",
+      "$2,93 \\cdot 10^{26}$."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Số phân tử khí: \\(N = \\dfrac{p V}{k_B T} = \\dfrac{1.01 \\cdot 10^5 \\cdot 1}{1.38 \\cdot 10^{-23} \\cdot 298} \\approx 2.46 \\cdot 10^{25}\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_3_q9",
+    "type": "mcq",
+    "text": "Khí trong xilanh của động cơ diesel có thể tích được nạp ban đầu là $360 \\, \\text{cm}^3$, nhiệt độ $47^\\circ C$ và áp suất $101 \\, \\text{kPa}$. Sau khi nén khí đến thể tích $20 \\, \\text{cm}^3$ thì nhiệt độ khí tăng đến $727^\\circ C$. Áp suất trong xilanh lúc này gần giá trị nào nhất?",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$315 \\, \\text{Pa}$.",
+      "$315 \\, \\text{kPa}$.",
+      "$5,7 \\, \\text{kPa}$.",
+      "$5,7 \\, \\text{MPa}$."
+    ],
+    "correctAnswer": 3,
+    "explanation": "Áp dụng phương trình trạng thái khí lý tưởng: \\(p_2 = p_1 \\cdot \\dfrac{V_1}{V_2} \\cdot \\dfrac{T_2}{T_1} = 101 \\cdot \\dfrac{360}{20} \\cdot \\dfrac{1000}{320} \\approx 5.7\\text{ MPa}\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_3_q10",
+    "type": "mcq",
+    "text": "Khi bầu trời có sét, xuất hiện một số tạp âm (tiếng sột soạt) ở loa của một số thiết bị như máy thu thanh. Nguyên nhân là do đâu?",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "Tiếng sấm làm cho màng loa rung động theo.",
+      "Điện từ trường do tia sét tạo ra gây nên dòng điện cảm ứng trong các mạch điện.",
+      "Ánh sáng của tia sét quá mạnh khiến loa bị nhiễm tạp âm.",
+      "Không khí bị giãn nén liên tục tạo nên tạp âm trong loa."
+    ],
+    "correctAnswer": 1,
+    "explanation": "Sét tạo ra điện từ trường biến thiên mạnh lan truyền cảm ứng thành dòng điện nhiễu trong loa gây ra tiếng sột soạt."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_3_q11",
+    "type": "mcq",
+    "text": "Một cuộn dây hình chữ nhật có diện tích $S$ và có $N$ vòng dây. Cuộn dây nằm trong một từ trường đều. Khi cuộn dây quay đều với tần số $f$ quanh trục đối xứng vuông góc với đường sức từ, trong cuộn dây sẽ xuất hiện một suất điện động cực đại có giá trị là $E_0$. Giá trị cực đại của từ thông qua cuộn dây là",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$\\dfrac{E_0}{2\\pi f}$.",
+      "$\\dfrac{E_0}{\\pi f}$.",
+      "$\\pi f E_0$.",
+      "$2\\pi f E_0$."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Suất điện động cực đại \\(E_0 = \\omega \\Phi_0 = 2\\pi f \\Phi_0 \\Rightarrow \\Phi_0 = \\dfrac{E_0}{2\\pi f}\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_3_q12",
+    "type": "mcq",
+    "text": "Hai cuộn dây phẳng, tròn được đặt song song với nhau trong một từ trường đều. Cuộn dây thứ nhất có $20$ vòng, bán kính $20 \\, \\text{cm}$. Cuộn dây thứ hai có $40$ vòng, bán kính $5 \\, \\text{cm}$. Nếu từ thông qua cuộn dây thứ nhất là $6 \\cdot 10^{-6} \\, \\text{Wb}$ thì từ thông qua cuộn dây thứ hai có giá trị là",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$0,96 \\cdot 10^{-7} \\, \\text{Wb}$.",
+      "$1,22 \\cdot 10^{-7} \\, \\text{Wb}$.",
+      "$1,92 \\cdot 10^{-7} \\, \\text{Wb}$.",
+      "$7,50 \\cdot 10^{-7} \\, \\text{Wb}$."
+    ],
+    "correctAnswer": 3,
+    "explanation": "Từ thông tỉ lệ với vòng dây và diện tích: \\(\\Phi \\propto N \\cdot R^2 \\Rightarrow \\dfrac{\\Phi_2}{\\Phi_1} = \\dfrac{40 \\cdot 5^2}{20 \\cdot 20^2} = 0.125 \\Rightarrow \\Phi_2 = 7.5 \\cdot 10^{-7}\\text{ Wb}\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_3_q13",
+    "type": "mcq",
+    "text": "Một đoạn dây dẫn có chiều dài $0,8 \\, \\text{m}$ đặt trong từ trường đều sao cho dây dẫn hợp với vector cảm ứng từ $B$ một góc $60^\\circ$. Biết dòng điện có cường độ $20 \\, \\text{A}$ và dây dẫn chịu một lực từ có độ lớn $2 \\cdot 10^{-2} \\, \\text{N}$. Độ lớn của vector cảm ứng từ $B$ là",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$0,81 \\cdot 10^{-3} \\, \\text{T}$.",
+      "$10^{-3} \\, \\text{T}$.",
+      "$1,44 \\cdot 10^{-3} \\, \\text{T}$.",
+      "$1,62 \\cdot 10^{-3} \\, \\text{T}$."
+    ],
+    "correctAnswer": 2,
+    "explanation": "Lực từ: \\(F = I B L \\sin\\alpha \\Rightarrow B = \\dfrac{F}{I L \\sin 60^\\circ} \\approx 1.44 \\cdot 10^{-3}\\text{ T}\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_3_q14",
+    "type": "mcq",
+    "text": "Một cân điện tử chỉ giá trị $X$ khi một cuộn dây đồng vòng kín được đặt trên nó như hình vẽ. Một thanh nam châm rơi từ độ cao nhất định theo phương thẳng đứng phía trên. Ngay trước khi nam châm chạm tới cuộn dây, số đọc của cân điện tử là<br><img src=\"/images/exams/A_nh-ma_n-hi_nh-2026-01-28-lu_c-11.41.56_SA.png\" alt=\"\" width=\"174\" height=\"196\" class=\"alignnone size-medium wp-image-105862\">",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "giống như $X$.",
+      "đầu tiên nhỏ hơn $X$ và sau đó lớn hơn $X$.",
+      "nhỏ hơn $X$.",
+      "lớn hơn $X$."
+    ],
+    "correctAnswer": 3,
+    "explanation": "Lenz's Law: Nam châm tiến gần vòng dây tạo lực đẩy hướng lên chống chuyển động rơi. Phản lực hướng xuống làm cân chỉ số lớn hơn."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_3_q15",
+    "type": "mcq",
+    "text": "Biểu đồ dưới đây cho thấy số khối và số hiệu nguyên tử của một hạt nhân phóng xạ $K$: Sau khi trải qua các phân rã sau, nó trở thành $Z$: $K \\xrightarrow{\\alpha} X \\xrightarrow{\\beta^-} Y \\xrightarrow{\\gamma} Z$. Trong các hạt nhân sau đây, hạt nhân nào biểu diễn $Z$?<br><img src=\"/images/exams/A_nh-ma_n-hi_nh-2026-01-28-lu_c-11.42.02_SA.png\" alt=\"\" width=\"260\" height=\"144\" class=\"alignnone size-medium wp-image-105863\">",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$P$.",
+      "$Q$.",
+      "$R$.",
+      "$S$."
+    ],
+    "correctAnswer": 1,
+    "explanation": "Hạt nhân Z nhận bức xạ và chuyển đổi tương ứng với hạt Q trên đồ thị."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_3_q16",
+    "type": "mcq",
+    "text": "Cho biết khối lượng của proton, neutron và hạt nhân $^{235}_{92}U$ lần lượt là $1,00728 \\, \\text{amu}$; $1,00867 \\, \\text{amu}$ và $234,99342 \\, \\text{amu}$. Cho $1 \\, \\text{amu} = 931,5 \\, \\text{MeV/c}^2$. Năng lượng liên kết và năng lượng liên kết riêng của hạt nhân $^{235}_{92}U$ là",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$1785 \\, \\text{MeV}$; $7,6 \\, \\text{MeV/nucleon}$.",
+      "$7,6 \\, \\text{MeV}$; $1785 \\, \\text{MeV/nucleon}$.",
+      "$8,6 \\, \\text{MeV}$; $2021 \\, \\text{MeV/nucleon}$.",
+      "$2021 \\, \\text{MeV}$; $8,6 \\, \\text{MeV/nucleon}$."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Năng lượng liên kết: \\(E_{lk} = \\Delta m \\cdot 931.5 = [92 \\cdot 1.00728 + 143 \\cdot 1.00867 - 234.99342] \\cdot 931.5 \\approx 1785\\text{ MeV}\\). Liên kết riêng: \\(1785 / 235 \\approx 7.6\\text{ MeV/nucleon}\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_3_q17",
+    "type": "mcq",
+    "text": "<p><strong>Sử dụng các thông tin sau cho Câu 17 và Câu 18.</strong> Cho phản ứng tổng hợp hạt nhân: $^6_3Li + ^2_1D \\rightarrow ^4_2He + ^A_Z X$. Biết khối lượng nguyên tử của các hạt là $m_D = 2,01410 \\, \\text{amu}$; $m_{Li} = 6,01512 \\, \\text{amu}$; $m_{He} = 4,00150 \\, \\text{amu}$. Cho $1 \\, \\text{amu} = 931,5 \\, \\text{MeV/c}^2$.</p>\n\n<p><strong>Câu 17.</strong> Nguyên tử $^A_Z X$ là</p>",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$^4_2He$.",
+      "$^1_1H$.",
+      "$^6_3Li$.",
+      "$^2_1D$."
+    ],
+    "correctAnswer": 0,
+    "explanation": "Bảo toàn số khối và điện tích: \\(3 + 1 = 2 + Z \\Rightarrow Z = 2\\); \\(6 + 2 = 4 + A \\Rightarrow A = 4\\). Hạt nhân X là hạt alpha \\(^{4}_{2}\\text{He}\\)."
+  },
+  {
+    "id": "phys_de_on_tap_thi_thu_thpt_2026_mon_vat_ly_de_3_q18",
+    "type": "mcq",
+    "text": "Tính năng lượng toả ra của mỗi phản ứng ở Câu 17 (biết $m_{Li} = 6,01512$; $m_D = 2,01410$; $m_{He} = 4,00150$):",
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "options": [
+      "$22,37 \\, \\text{MeV}$.",
+      "$24,42 \\, \\text{MeV}$.",
+      "$28,37 \\, \\text{MeV}$.",
+      "$31,37 \\, \\text{MeV}$."
+    ],
+    "correctAnswer": 1,
+    "explanation": "Năng lượng phản ứng hạt nhân tỏa ra: \\(\\Delta E = (m_{Li} + m_D - 2m_{He}) \\cdot 931.5 \\approx 24.42\\text{ MeV}\\)."
+  }
+]

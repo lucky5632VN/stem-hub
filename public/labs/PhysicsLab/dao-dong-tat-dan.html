@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dao Động Tắt Dần</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tailwind-config.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .font-tech {
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #06b6d4;
+            margin-top: -6px;
+            cursor: pointer;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+
+        .dark input[type=range]::-webkit-slider-runnable-track {
+            background: #475569;
+        }
+
+        .hud-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .hud-panel {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body
+    class="h-screen flex overflow-hidden bg-slate-50 dark:bg-[#0f172a] text-slate-700 dark:text-slate-300 transition-colors duration-300">
+
+    <!-- SIDEBAR -->
+    <aside id="mainSidebar"
+        class="w-72 flex-shrink-0 flex flex-col bg-white dark:bg-[#1e293b] border-r border-slate-200 dark:border-slate-800 z-20 shadow-lg transition-all duration-300 ease-in-out transform">
+        <div class="h-16 flex items-center justify-between px-6 border-b border-slate-100 dark:border-slate-700/50">
+            <h1 class="font-tech font-bold text-xl text-slate-800 dark:text-white uppercase tracking-wider">BẢNG ĐIỀU
+                KHIỂN</h1>
+            <a href="index.html"
+                class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-cyan-500 transition-colors">
+                <i data-lucide="home" class="w-5 h-5"></i>
+            </a>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+            <!-- Playback -->
+            <div>
+                <label
+                    class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 block">Điều
+                    Khiển</label>
+                <div class="flex gap-2">
+                    <button id="toggleButton"
+                        class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg font-medium transition shadow-sm hover:shadow-cyan-500/30">
+                        <i data-lucide="play" class="w-4 h-4 fill-current"></i> <span class="text-sm">Chạy</span>
+                    </button>
+                    <button id="resetButton"
+                        class="px-4 py-2.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg transition">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Parameters -->
+            <div class="space-y-6">
+                <!-- Environment (Damping) -->
+                <div>
+                    <label
+                        class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 block">Môi
+                        trường (Cản)</label>
+                    <select id="environment"
+                        class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-cyan-500 transition mb-3">
+                        <option value="vacuum">Chân không (0.1%)</option>
+                        <option value="air" selected>Không khí (10%)</option>
+                        <option value="water">Nước (50%)</option>
+                        <option value="custom">Tùy chỉnh</option>
+                    </select>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <label class="font-medium text-slate-600 dark:text-slate-300">Giảm sau 1T (%)</label>
+                            <span class="font-mono text-cyan-600 dark:text-cyan-400" id="reductionDisplay">10%</span>
+                        </div>
+                        <input type="range" id="reductionRange" min="0" max="99" step="1" value="10" disabled
+                            class="w-full opacity-50 cursor-not-allowed">
+                    </div>
+                </div>
+
+                <!-- Parameters -->
+                <div>
+                    <div class="flex justify-between text-xs mb-1.5">
+                        <label class="font-medium text-slate-600 dark:text-slate-300">Tần số (f)</label>
+                        <span class="font-mono text-cyan-600 dark:text-cyan-400"><span id="freqDisplay">2.0</span>
+                            Hz</span>
+                    </div>
+                    <input type="range" id="freqRange" min="0.5" max="5.0" step="0.1" value="2.0" class="w-full">
+                </div>
+
+                <div>
+                    <div class="flex justify-between text-xs mb-1.5">
+                        <label class="font-medium text-slate-600 dark:text-slate-300">Biên độ ban đầu (A₀)</label>
+                        <span class="font-mono text-cyan-600 dark:text-cyan-400"><span id="ampDisplay">10.0</span>
+                            cm</span>
+                    </div>
+                    <input type="range" id="ampRange" min="2.0" max="20.0" step="0.5" value="10.0" class="w-full">
+                </div>
+
+                <div>
+                    <div class="flex justify-between text-xs mb-1.5">
+                        <label class="font-medium text-slate-600 dark:text-slate-300">Pha ban đầu (φ)</label>
+                        <span class="font-mono text-cyan-600 dark:text-cyan-400"><span id="phiDisplay">0</span>
+                            rad</span>
+                    </div>
+                    <input type="range" id="phiRange" min="-180" max="180" step="5" value="0" class="w-full">
+                </div>
+            </div>
+
+            <!-- Info Box -->
+            <div
+                class="p-3 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-lg text-xs font-mono">
+                <div class="flex justify-between mb-1 text-red-800 dark:text-red-300">
+                    <span>Hệ số giảm (δ):</span>
+                    <span id="deltaDisplay" class="font-bold">--</span>
+                </div>
+                <div class="text-[10px] text-red-600 dark:text-red-400 mt-1">
+                    Biên độ giảm dần theo hàm: <br> A(t) = A₀ · e<sup>-δt</sup>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+            <button onclick="toggleDarkMode()"
+                class="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+                <i id="theme-icon" data-lucide="moon" class="w-4 h-4"></i>
+                <span class="text-xs font-medium uppercase">Giao diện Tối/Sáng</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="flex-1 relative bg-white dark:bg-[#0f172a] overflow-hidden flex flex-col">
+        <!-- Sidebar Toggle Button -->
+        <button id="sidebarToggle"
+            class="absolute top-4 left-4 z-50 px-4 py-2 flex items-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors text-sm font-medium">
+            <i data-lucide="menu" class="w-4 h-4"></i>
+            <span>Ẩn/Hiện bảng điều khiển</span>
+        </button>
+        <!-- Visualization Area -->
+        <div class="flex-1 relative overflow-hidden">
+            <canvas id="simCanvas" class="absolute inset-0 w-full h-full block"></canvas>
+
+            <!-- HUD -->
+            <div id="infoPanel"
+                class="absolute top-4 right-4 w-60 hud-panel rounded-xl p-4 shadow-xl z-10 backdrop-blur-md">
+                <h3 id="infoPanelHeader"
+                    class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 border-b border-slate-200 dark:border-slate-700 pb-2 cursor-move select-none">
+                    Thông số thời thực</h3>
+                <div class="space-y-2 font-mono text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-slate-600 dark:text-slate-400">Thời gian</span>
+                        <span id="timeVal" class="font-bold text-slate-800 dark:text-white">0.00 s</span>
+                    </div>
+                    <div class="w-full h-px bg-slate-200 dark:bg-slate-700 my-2"></div>
+                    <div class="flex justify-between text-cyan-600">
+                        <span>Li độ (x)</span>
+                        <span id="xVal" class="font-bold">0.00 cm</span>
+                    </div>
+                    <div class="flex justify-between text-orange-500">
+                        <span>Biên độ (A)</span>
+                        <span id="aVal" class="font-bold">-- cm</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graph Area -->
+        <div
+            class="h-48 flex-shrink-0 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] relative">
+            <h3 class="absolute top-2 left-4 text-xs font-bold text-slate-400 z-10 uppercase">Đồ thị Dao động (x-t)</h3>
+            <canvas id="graphCanvas" class="w-full h-full block"></canvas>
+        </div>
+    </main>
+
+    <script src="js/theme.js?v=4.0.8"></script>
+    <script src="js/theory-system.js?v=4.0.8"></script>
+    <script src="js/quiz-database.js"></script>
+    <script src="js/quiz-system.js?v=4.0.8"></script>
+
+    <script>
+        // --- SETUP ---
+        const simCanvas = document.getElementById('simCanvas');
+        const graphCanvas = document.getElementById('graphCanvas');
+        const ctxSim = simCanvas.getContext('2d');
+        const ctxGraph = graphCanvas.getContext('2d');
+
+        // Inputs
+        const environmentSelect = document.getElementById('environment');
+        const reductionRange = document.getElementById('reductionRange');
+        const reductionDisplay = document.getElementById('reductionDisplay');
+        const freqRange = document.getElementById('freqRange');
+        const ampRange = document.getElementById('ampRange');
+        const phiRange = document.getElementById('phiRange');
+
+        // Displays
+        const freqDisplay = document.getElementById('freqDisplay');
+        const ampDisplay = document.getElementById('ampDisplay');
+        const phiDisplay = document.getElementById('phiDisplay');
+        const deltaDisplay = document.getElementById('deltaDisplay');
+
+        // HUD
+        const timeVal = document.getElementById('timeVal');
+        const xVal = document.getElementById('xVal');
+        const aVal = document.getElementById('aVal');
+
+        // State
+        let isRunning = false;
+        let animationFrameId = null;
+        let startTime = 0;
+        let elapsed = 0;
+        let lastTime = 0;
+
+        let width, height;
+        let history = []; // {t, x, env}
+
+        // Params
+        let params = {
+            f: 2.0,
+            A0: 10.0,
+            phi: 0,
+            reduction: 10, // %
+            delta: 0
+        };
+
+        const REDUCTION_PRESETS = {
+            vacuum: 0.1,
+            air: 10,
+            water: 50
+        };
+
+        // --- LOGIC ---
+        function calculateDelta() {
+            // formula: delta = -ln(1 - P/100) * f
+            const f = params.f;
+            const P = params.reduction;
+            if (P >= 100) return 100 * f; // Instant stop
+            const ratio = 1 - (P / 100);
+            const delta = -Math.log(ratio) * f;
+            return delta;
+        }
+
+        function updateParams() {
+            params.f = parseFloat(freqRange.value);
+            params.A0 = parseFloat(ampRange.value);
+            const phiDeg = parseFloat(phiRange.value);
+            params.phi = phiDeg * (Math.PI / 180);
+
+            // Environment Logic
+            if (environmentSelect.value !== 'custom') {
+                params.reduction = REDUCTION_PRESETS[environmentSelect.value];
+                reductionRange.value = params.reduction;
+                reductionRange.classList.add('opacity-50', 'cursor-not-allowed');
+                reductionRange.disabled = true;
+            } else {
+                reductionRange.disabled = false;
+                reductionRange.classList.remove('opacity-50', 'cursor-not-allowed');
+                params.reduction = parseFloat(reductionRange.value);
+            }
+
+            params.delta = calculateDelta();
+
+            // UI Updates
+            freqDisplay.innerText = params.f.toFixed(1);
+            ampDisplay.innerText = params.A0.toFixed(1);
+            phiDisplay.innerText = (phiDeg * Math.PI / 180).toFixed(2);
+            reductionDisplay.innerText = params.reduction + '%';
+            deltaDisplay.innerText = params.delta.toFixed(3);
+
+            if (!isRunning) {
+                elapsed = 0; // Fix: Reset time tracking
+                history = []; // Clear graph on param change if stopped
+                drawFrame(0);
+            }
+        }
+
+        // --- DRAWING ---
+        function resize() {
+            simCanvas.width = simCanvas.clientWidth;
+            simCanvas.height = simCanvas.clientHeight;
+            graphCanvas.width = graphCanvas.clientWidth;
+            graphCanvas.height = graphCanvas.clientHeight;
+            width = simCanvas.width;
+            height = simCanvas.height;
+            drawFrame(elapsed);
+        }
+        window.addEventListener('resize', resize);
+
+        function drawSpringSystem(t) {
+            ctxSim.clearRect(0, 0, width, height);
+
+            const omega = 2 * Math.PI * params.f;
+            const envelope = params.A0 * Math.exp(-params.delta * t);
+            const x = envelope * Math.cos(omega * t + params.phi);
+
+            // HUD
+            timeVal.innerText = t.toFixed(2) + ' s';
+            xVal.innerText = x.toFixed(2) + ' cm';
+            aVal.innerText = envelope.toFixed(2) + ' cm';
+
+            // Visual Scaling
+            const scale = Math.min(width, height) / 40; // Pixels per cm (Autoscale roughly)
+            const centerX = width / 2;
+            const centerY = height / 3;
+            const springTop = 20;
+
+            const springL0 = 150;
+            const pixelX = x * scale;
+            const blockY = centerY + pixelX; // Vertical Spring
+
+            // Note: Vertical spring usually x is vertical displacement. 
+            // Let's implement vertical spring hanging from top.
+
+            // Ceiling
+            ctxSim.fillStyle = localStorage.getItem('theme') === 'dark' ? '#475569' : '#cbd5e1';
+            ctxSim.fillRect(centerX - 60, 0, 120, springTop);
+
+            // Equilibrium Line
+            ctxSim.beginPath(); ctxSim.strokeStyle = '#94a3b8'; ctxSim.setLineDash([5, 5]);
+            ctxSim.moveTo(centerX - 100, centerY); ctxSim.lineTo(centerX + 100, centerY); ctxSim.stroke(); ctxSim.setLineDash([]);
+            ctxSim.font = '10px Inter'; ctxSim.fillStyle = '#64748b'; ctxSim.fillText('VTCB', centerX + 110, centerY);
+
+            // Envelope Lines (Ghost)
+            const envPx = envelope * scale;
+            ctxSim.beginPath(); ctxSim.strokeStyle = 'rgba(239, 68, 68, 0.3)';
+            ctxSim.moveTo(centerX - 40, centerY - envPx); ctxSim.lineTo(centerX + 40, centerY - envPx);
+            ctxSim.moveTo(centerX - 40, centerY + envPx); ctxSim.lineTo(centerX + 40, centerY + envPx);
+            ctxSim.stroke();
+
+            // Spring
+            const coilCount = 12;
+            ctxSim.beginPath(); ctxSim.strokeStyle = '#06b6d4'; ctxSim.lineWidth = 3;
+            ctxSim.moveTo(centerX, springTop);
+            const springEnd = blockY - 20; // Top of block
+            const springLen = springEnd - springTop;
+            for (let i = 0; i <= coilCount; i++) {
+                const y = springTop + (springLen / coilCount) * i;
+                const offset = (i % 2 === 0) ? -10 : 10;
+                if (i === 0 || i === coilCount) ctxSim.lineTo(centerX, y);
+                else ctxSim.lineTo(centerX + offset, y);
+            }
+            ctxSim.stroke();
+
+            // Block
+            ctxSim.fillStyle = '#3b82f6';
+            ctxSim.fillRect(centerX - 20, springEnd, 40, 40);
+
+            // Red Dot (Center of Gravity)
+            ctxSim.fillStyle = '#ef4444';
+            ctxSim.beginPath();
+            ctxSim.arc(centerX, springEnd + 20, 3, 0, 2 * Math.PI);
+            ctxSim.fill();
+
+            return { x, envelope };
+        }
+
+        function drawGraph(t, currentX, currentEnv) {
+            const W = graphCanvas.width;
+            const H = graphCanvas.height;
+            ctxGraph.clearRect(0, 0, W, H);
+
+            // Add current point
+            history.push({ t: t, x: currentX, env: currentEnv });
+
+            // Check scroll and trim history for performance
+            const timeWindow = 10; // seconds window
+            let tStart = 0;
+            if (t > timeWindow) tStart = t - timeWindow;
+
+            // Performance: Remove old points
+            if (history.length > 0 && history[0].t < tStart - 5) {
+                // Remove chunk to avoid frequent splicing
+                const removeCount = history.findIndex(p => p.t >= tStart - 5);
+                if (removeCount > 0) history.splice(0, removeCount);
+            }
+
+            // Filter draw data
+            // To speed up, we can just start loop from index where t >= tStart
+            // Scale
+            const scaleX = (W - 60) / timeWindow;
+            const scaleY = (H - 40) / (2 * params.A0); // Fit max amplitude
+            const midY = H / 2;
+            const paddingX = 40;
+
+            // Axes
+            ctxGraph.strokeStyle = '#94a3b8'; ctxGraph.lineWidth = 1;
+            ctxGraph.beginPath();
+            ctxGraph.moveTo(paddingX, 10); ctxGraph.lineTo(paddingX, H - 10); // Y
+            ctxGraph.moveTo(paddingX, midY); ctxGraph.lineTo(W, midY); // X
+            ctxGraph.stroke();
+
+            // Labels
+            ctxGraph.fillStyle = '#64748b'; ctxGraph.font = '10px Inter';
+            ctxGraph.fillText('0', paddingX - 10, midY);
+            ctxGraph.fillText('t', W - 10, midY + 12);
+            ctxGraph.fillText('x', paddingX, 10);
+
+            // Draw History
+            // 1. Envelope
+            ctxGraph.strokeStyle = 'rgba(239, 68, 68, 0.4)'; ctxGraph.lineWidth = 1; ctxGraph.setLineDash([2, 2]);
+            ctxGraph.beginPath();
+            let first = true;
+            for (let i = 0; i < history.length; i++) {
+                const p = history[i];
+                if (p.t < tStart) continue;
+                const px = paddingX + (p.t - tStart) * scaleX;
+                const py = midY - p.env * scaleY; // Top env
+                if (first) { ctxGraph.moveTo(px, py); first = false; } else ctxGraph.lineTo(px, py);
+            }
+            ctxGraph.stroke();
+            // Bottom Env
+            ctxGraph.beginPath(); first = true;
+            for (let i = 0; i < history.length; i++) {
+                const p = history[i];
+                if (p.t < tStart) continue;
+                const px = paddingX + (p.t - tStart) * scaleX;
+                const py = midY + p.env * scaleY;
+                if (first) { ctxGraph.moveTo(px, py); first = false; } else ctxGraph.lineTo(px, py);
+            }
+            ctxGraph.stroke(); ctxGraph.setLineDash([]);
+
+            // 2. Wave
+            ctxGraph.strokeStyle = '#3b82f6'; ctxGraph.lineWidth = 2;
+            ctxGraph.beginPath();
+            first = true;
+
+            // Optimization: only draw points in window
+            let startIndex = 0;
+            // Binary search or linear search for start index? Linear is fine for small Arrays
+            // But array grows. Let's simple filter.
+            for (let i = 0; i < history.length; i++) {
+                if (history[i].t >= tStart) {
+                    const p = history[i];
+                    const px = paddingX + (p.t - tStart) * scaleX;
+                    const py = midY - p.x * scaleY;
+                    if (first) { ctxGraph.moveTo(px, py); first = false; }
+                    else ctxGraph.lineTo(px, py);
+                }
+            }
+            ctxGraph.stroke();
+
+            // Current vertical line
+            ctxGraph.strokeStyle = '#ef4444'; ctxGraph.lineWidth = 1;
+            const currX = paddingX + (t - tStart) * scaleX;
+            ctxGraph.beginPath(); ctxGraph.moveTo(currX, 10); ctxGraph.lineTo(currX, H - 10); ctxGraph.stroke();
+        }
+
+        function drawFrame(t) {
+            const { x, envelope } = drawSpringSystem(t);
+            drawGraph(t, x, envelope);
+        }
+
+        // --- LOOP ---
+        function loop(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const dt = (timestamp - lastTime) / 1000;
+            // Limit dt to prevent huge jumps if tab inactive
+            const safeDt = Math.min(dt, 0.1);
+
+            if (isRunning) {
+                elapsed += safeDt;
+                drawFrame(elapsed);
+                animationFrameId = requestAnimationFrame(loop);
+            }
+            lastTime = timestamp;
+        }
+
+        // --- AUTO-PAUSE LOGIC ---
+        window.addEventListener('app-paused', () => {
+            cancelAnimationFrame(animationFrameId);
+        });
+
+        window.addEventListener('app-resumed', () => {
+            if (isRunning) {
+                lastTime = performance.now();
+                animationFrameId = requestAnimationFrame(loop);
+            }
+        });
+
+        // Events
+        environmentSelect.addEventListener('change', updateParams);
+        reductionRange.addEventListener('input', updateParams);
+        freqRange.addEventListener('input', updateParams);
+        ampRange.addEventListener('input', updateParams);
+        phiRange.addEventListener('input', () => {
+            updateParams();
+            // Force reset when changing Initial Phase
+            elapsed = 0;
+            history = [];
+            if (!isRunning) drawFrame(0);
+        });
+
+        const toggleBtn = document.getElementById('toggleButton');
+        const resetBtn = document.getElementById('resetButton');
+
+        toggleBtn.addEventListener('click', () => {
+            isRunning = !isRunning;
+            if (isRunning) {
+                toggleBtn.innerHTML = '<i data-lucide="pause" class="w-4 h-4 fill-current"></i> <span class="text-sm">Dừng</span>';
+                lucide.createIcons();
+                lastTime = performance.now();
+                animationFrameId = requestAnimationFrame(loop);
+            } else {
+                toggleBtn.innerHTML = '<i data-lucide="play" class="w-4 h-4 fill-current"></i> <span class="text-sm">Chạy</span>';
+                lucide.createIcons();
+                cancelAnimationFrame(animationFrameId);
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            isRunning = false;
+            toggleBtn.innerHTML = '<i data-lucide="play" class="w-4 h-4 fill-current"></i> <span class="text-sm">Chạy</span>';
+            lucide.createIcons();
+            cancelAnimationFrame(animationFrameId);
+            elapsed = 0;
+            history = [];
+            drawFrame(0);
+        });
+
+        // Init
+        resize();
+        updateParams();
+        drawFrame(0);
+        lucide.createIcons();
+
+        // --- DRAG LOGIC ---
+        const draggablePanel = document.getElementById('infoPanel');
+        const dragHeader = document.getElementById('infoPanelHeader');
+
+        let isDragging = false;
+        let startX, startY, initialLeft, initialTop;
+
+        dragHeader.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+
+            // Get current position relative to offsetParent
+            initialLeft = draggablePanel.offsetLeft;
+            initialTop = draggablePanel.offsetTop;
+
+            // Switch to left/top positioning 
+            draggablePanel.style.right = 'auto'; // Disable right anchoring
+            draggablePanel.style.left = initialLeft + 'px';
+            draggablePanel.style.top = initialTop + 'px';
+
+            document.body.style.cursor = 'move';
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault(); // Prevent selection
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            draggablePanel.style.left = `${initialLeft + dx}px`;
+            draggablePanel.style.top = `${initialTop + dy}px`;
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                document.body.style.cursor = 'default';
+            }
+        });
+
+        // --- SIDEBAR TOGGLE LOGIC ---
+        const sidebar = document.getElementById('mainSidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        let isSidebarOpen = true;
+
+        sidebarToggle.addEventListener('click', () => {
+            isSidebarOpen = !isSidebarOpen;
+            if (isSidebarOpen) {
+                sidebar.classList.remove('-ml-72');
+            } else {
+                sidebar.classList.add('-ml-72');
+            }
+
+            // Wait for transition to finish then resize
+            setTimeout(() => {
+                resize();
+            }, 300); // Match transition duration
+        });
+
+    </script>
+</body>
+
+</html>

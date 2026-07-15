@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô Phỏng Dao Động Điều Hòa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/tailwind-config.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .font-tech {
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        /* Custom Range Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #06b6d4;
+            /* lab-cyan */
+            margin-top: -6px;
+            cursor: pointer;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+
+        .dark input[type=range]::-webkit-slider-runnable-track {
+            background: #475569;
+        }
+
+        /* Stats HUD Glass */
+        .hud-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .hud-panel {
+            background: rgba(15, 23, 42, 0.85);
+            /* slate-900 */
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body
+    class="h-screen flex overflow-hidden bg-slate-50 dark:bg-[#0f172a] text-slate-700 dark:text-slate-300 transition-colors duration-300">
+
+    <!-- SIDEBAR CONTROLS -->
+    <aside id="mainSidebar"
+        class="w-72 flex-shrink-0 flex flex-col bg-white dark:bg-[#1e293b] border-r border-slate-200 dark:border-slate-800 z-20 shadow-lg transition-all duration-300 ease-in-out transform">
+        <!-- Sidebar Header -->
+        <div class="h-16 flex items-center justify-between px-6 border-b border-slate-100 dark:border-slate-700/50">
+            <h1 class="font-tech font-bold text-xl text-slate-800 dark:text-white uppercase tracking-wider">
+                BẢNG ĐIỀU KHIỂN
+            </h1>
+            <a href="index.html"
+                class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-cyan-500 transition-colors"
+                title="Trở về Trang chủ">
+                <i data-lucide="home" class="w-5 h-5"></i>
+            </a>
+        </div>
+
+        <!-- Scrollable Content -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+
+            <!-- Type Selector -->
+            <div>
+                <label
+                    class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 block">Loại
+                    Con Lắc</label>
+                <div class="grid grid-cols-2 gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+                    <button id="springSelect"
+                        class="px-4 py-2 rounded-md text-sm font-semibold transition-all shadow-sm bg-white dark:bg-slate-700 text-cyan-600 dark:text-cyan-400 ring-1 ring-black/5 dark:ring-white/10">
+                        Lò Xo
+                    </button>
+                    <button id="pendulumSelect"
+                        class="px-4 py-2 rounded-md text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 transition-all">
+                        Đơn
+                    </button>
+                </div>
+            </div>
+
+            <!-- Playback Controls -->
+            <div>
+                <label
+                    class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 block">Điều
+                    Khiển</label>
+                <div class="flex gap-2 mb-2">
+                    <button id="playPauseBtn"
+                        class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg font-medium transition shadow-sm hover:shadow-cyan-500/30">
+                        <i data-lucide="play" class="w-4 h-4 fill-current"></i> <span class="text-sm">Chạy</span>
+                    </button>
+                    <button id="restartBtn"
+                        class="px-4 py-2.5 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg transition">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div class="flex gap-2">
+                    <button id="stepBackBtn" disabled
+                        class="flex-1 py-2 px-3 text-sm font-bold text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded shadow-sm hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-50 transition">
+                        &larr; Lùi
+                    </button>
+                    <button id="stepForwardBtn" disabled
+                        class="flex-1 py-2 px-3 text-sm font-bold text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded shadow-sm hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-50 transition">
+                        Tiến &rarr;
+                    </button>
+                </div>
+            </div>
+
+            <!-- Parameters (Spring) -->
+            <div id="springParams" class="space-y-5 animate-fade-in">
+                <div class="flex items-center gap-4 mb-4">
+                    <label class="flex items-center cursor-pointer group">
+                        <input type="radio" name="springType" value="vertical" checked class="hidden peer">
+                        <span
+                            class="w-4 h-4 rounded-full border border-slate-400 peer-checked:border-cyan-500 peer-checked:bg-cyan-500 flex items-center justify-center mr-2">
+                            <span class="w-1.5 h-1.5 bg-white rounded-full opacity-0 peer-checked:opacity-100"></span>
+                        </span>
+                        <span
+                            class="text-sm font-medium text-slate-600 dark:text-slate-400 group-hover:text-cyan-600">Thẳng
+                            đứng</span>
+                    </label>
+                    <label class="flex items-center cursor-pointer group">
+                        <input type="radio" name="springType" value="horizontal" class="hidden peer">
+                        <span
+                            class="w-4 h-4 rounded-full border border-slate-400 peer-checked:border-cyan-500 peer-checked:bg-cyan-500 flex items-center justify-center mr-2">
+                            <span class="w-1.5 h-1.5 bg-white rounded-full opacity-0 peer-checked:opacity-100"></span>
+                        </span>
+                        <span
+                            class="text-sm font-medium text-slate-600 dark:text-slate-400 group-hover:text-cyan-600">Nằm
+                            ngang</span>
+                    </label>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Mass -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <label class="font-medium text-slate-600 dark:text-slate-300">Khối lượng (m)</label>
+                            <span class="font-mono text-cyan-600 dark:text-cyan-400"><span id="massValue">1.0</span>
+                                kg</span>
+                        </div>
+                        <input type="range" id="mass" min="0.1" max="5.0" step="0.1" value="1.0" class="w-full">
+                    </div>
+                    <!-- Stiffness -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <label class="font-medium text-slate-600 dark:text-slate-300">Độ cứng (k)</label>
+                            <span class="font-mono text-cyan-600 dark:text-cyan-400"><span
+                                    id="stiffnessValue">10.0</span> N/m</span>
+                        </div>
+                        <input type="range" id="stiffness" min="1.0" max="50.0" step="0.5" value="10.0" class="w-full">
+                    </div>
+                    <!-- Amplitude -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <label class="font-medium text-slate-600 dark:text-slate-300">Biên độ (A)</label>
+                            <span class="font-mono text-cyan-600 dark:text-cyan-400"><span
+                                    id="amplitudeValue">10.0</span> cm</span>
+                        </div>
+                        <input type="range" id="amplitude" min="1.0" max="30.0" step="1.0" value="10.0" class="w-full">
+                    </div>
+                    <!-- Length -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <label class="font-medium text-slate-600 dark:text-slate-300">Chiều dài tự nhiên
+                                (L₀)</label>
+                            <span class="font-mono text-cyan-600 dark:text-cyan-400"><span
+                                    id="lengthSpringValue">0.5</span> m</span>
+                        </div>
+                        <input type="range" id="lengthSpring" min="0.1" max="1.0" step="0.05" value="0.5"
+                            class="w-full">
+                    </div>
+                    <!-- Gravity -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <label class="font-medium text-slate-600 dark:text-slate-300">Gia tốc (g)</label>
+                            <span class="font-mono text-cyan-600 dark:text-cyan-400"><span
+                                    id="gravitySpringValue">9.8</span> m/s²</span>
+                        </div>
+                        <input type="range" id="gravitySpring" min="9.0" max="10.0" step="0.01" value="9.8"
+                            class="w-full">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parameters (Pendulum) -->
+            <div id="pendulumParams" class="space-y-5 hidden animate-fade-in">
+                <div class="space-y-4">
+                    <!-- Mass -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <label class="font-medium text-slate-600 dark:text-slate-300">Khối lượng (m)</label>
+                            <span class="font-mono text-cyan-600 dark:text-cyan-400"><span
+                                    id="massPendulumValue">0.5</span> kg</span>
+                        </div>
+                        <input type="range" id="massPendulum" min="0.1" max="5.0" step="0.1" value="0.5" class="w-full">
+                    </div>
+                    <!-- Length -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <label class="font-medium text-slate-600 dark:text-slate-300">Chiều dài dây (l)</label>
+                            <span class="font-mono text-cyan-600 dark:text-cyan-400"><span
+                                    id="lengthPendulumValue">1.0</span> m</span>
+                        </div>
+                        <input type="range" id="lengthPendulum" min="0.1" max="5.0" step="0.1" value="1.0"
+                            class="w-full">
+                    </div>
+                    <!-- Angle -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <label class="font-medium text-slate-600 dark:text-slate-300">Biên độ Góc (A₀)</label>
+                            <span class="font-mono text-cyan-600 dark:text-cyan-400"><span
+                                    id="angleAmplitudeValue">10.0</span> độ</span>
+                        </div>
+                        <input type="range" id="angleAmplitude" min="1.0" max="30.0" step="1.0" value="10.0"
+                            class="w-full">
+                    </div>
+                    <!-- Gravity -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-1.5">
+                            <label class="font-medium text-slate-600 dark:text-slate-300">Gia tốc (g)</label>
+                            <span class="font-mono text-cyan-600 dark:text-cyan-400"><span
+                                    id="gravityPendulumValue">9.8</span> m/s²</span>
+                        </div>
+                        <input type="range" id="gravityPendulum" min="9.0" max="10.0" step="0.01" value="9.8"
+                            class="w-full">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+            <button onclick="toggleDarkMode()"
+                class="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+                <i id="theme-icon" data-lucide="moon" class="w-4 h-4"></i>
+                <span class="text-xs font-medium uppercase">Giao diện Tối/Sáng</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col relative min-w-0">
+        <!-- Sidebar Toggle Button -->
+        <button id="sidebarToggle"
+            class="absolute top-4 left-4 z-50 px-4 py-2 flex items-center gap-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors text-sm font-medium">
+            <i data-lucide="menu" class="w-4 h-4"></i>
+            <span>Ẩn/Hiện bảng điều khiển</span>
+        </button>
+
+        <!-- Simulation Canvas Area -->
+        <div class="flex-1 relative bg-slate-50 dark:bg-[#0f172a] overflow-hidden">
+            <!-- Canvas -->
+            <canvas id="simCanvas" class="absolute inset-0 w-full h-full block"></canvas>
+
+            <!-- Floating HUD (Stats) -->
+            <div id="infoPanel"
+                class="absolute top-4 right-4 w-64 hud-panel rounded-xl p-4 shadow-xl z-10 backdrop-blur-md">
+                <h3 id="infoPanelHeader"
+                    class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 border-b border-slate-200 dark:border-slate-700 pb-2 cursor-move select-none">
+                    Thông số thời thực</h3>
+
+                <div class="space-y-3 font-mono text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-slate-600 dark:text-slate-400">Thời gian (t)</span>
+                        <span id="displayTime" class="font-bold text-slate-800 dark:text-white">0.00 s</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-600 dark:text-slate-400" id="posLabel">Vị trí (x)</span>
+                        <span id="displayPosition" class="font-bold text-slate-800 dark:text-white">0.00 cm</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-600 dark:text-slate-400" id="ampLabel">Biên độ (A)</span>
+                        <span id="displayAmplitude" class="font-bold text-slate-800 dark:text-white">0.00 cm</span>
+                    </div>
+
+                    <div class="w-full h-px bg-slate-200 dark:bg-slate-700 my-2"></div>
+
+                    <div class="flex justify-between">
+                        <span class="text-purple-600 dark:text-purple-400">Chu kỳ (T)</span>
+                        <span id="displayPeriod" class="font-bold">0.00 s</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-purple-600 dark:text-purple-400">Tần số (f)</span>
+                        <span id="displayFrequency" class="font-bold">0.00 Hz</span>
+                    </div>
+
+                    <div class="w-full h-px bg-slate-200 dark:bg-slate-700 my-2"></div>
+
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-green-600 dark:text-green-500">Động năng (Eđ)</span>
+                            <span id="displayKinetic">0.00 J</span>
+                        </div>
+                        <!-- Progress bar for Kinetic -->
+                        <div class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                            <div id="barKinetic" class="h-full bg-green-500 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-red-600 dark:text-red-500">Thế năng (Et)</span>
+                            <span id="displayPotential">0.00 J</span>
+                        </div>
+                        <!-- Progress bar for Potential -->
+                        <div class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                            <div id="barPotential" class="h-full bg-red-500 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="pt-2 text-xs flex justify-between items-center text-blue-600 dark:text-blue-400 font-bold border-t border-slate-200 dark:border-slate-700 mt-2">
+                        <span>Cơ năng (E)</span>
+                        <span id="totalEnergyValue">0.0000</span> J
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Energy Graph (Bottom Panel) -->
+        <div
+            class="h-48 flex-shrink-0 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] relative">
+            <h3 class="absolute top-2 left-4 text-xs font-bold text-slate-400 z-10">ĐỒ THỊ NĂNG LƯỢNG (E = Eđ + Et)</h3>
+            <canvas id="energyGraphCanvas" class="w-full h-full block"></canvas>
+        </div>
+
+    </main>
+
+    <script src="js/theme.js?v=4.0.8"></script>
+    <script src="js/theory-system.js?v=4.0.8"></script>
+    <script src="js/quiz-database.js"></script>
+    <script src="js/quiz-system.js?v=4.0.8"></script>
+
+    <script type="module">
+        // --- CÁC HẰNG SỐ CƠ BẢN ---
+        const PI = Math.PI;
+        // Các giá trị cos(omega*t) cho vị trí đặc biệt
+        const SPECIAL_COS_VALUES = [1.0, Math.sqrt(3) / 2, Math.sqrt(2) / 2, 0.5, 0.0, -0.5, -Math.sqrt(2) / 2, -Math.sqrt(3) / 2, -1.0];
+        const STEP_TIME_FRACTION = 1 / 80;
+        const GRAPH_WINDOW_TIME = 5.0;
+        const MAX_PENDULUM_L_INPUT = 5.0;
+
+        // --- CÁC BIẾN TRẠNG thái ---
+        let animationFrameId;
+        let isPlaying = false;
+        let currentTime = 0;
+        let currentPendulum = 'spring';
+        let maxEnergy = 0;
+
+        // DOM & Canvas
+        const simCanvas = document.getElementById('simCanvas');
+        const energyGraphCanvas = document.getElementById('energyGraphCanvas');
+        const ctxSim = simCanvas.getContext('2d');
+        const ctxGraph = energyGraphCanvas.getContext('2d');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const stepForwardBtn = document.getElementById('stepForwardBtn');
+        const stepBackBtn = document.getElementById('stepBackBtn');
+        // Visual Bars
+        const barKinetic = document.getElementById('barKinetic');
+        const barPotential = document.getElementById('barPotential');
+
+        // Params
+        const params = {
+            m: 1.0, k: 10.0, A: 0.1, L0_spring: 0.5, g_spring: 9.8, springType: 'vertical',
+            m_pendulum: 0.5, l: 1.0, A0: 10 * PI / 180, g_pendulum: 9.8
+        };
+
+        const energyData = { t: [], Ed: [], Et: [], E: [] };
+
+        const round = (num, dp) => Math.round(num * Math.pow(10, dp)) / Math.pow(10, dp);
+        const degToRad = (deg) => deg * PI / 180;
+        const radToDeg = (rad) => rad * 180 / PI;
+
+        // --- TÍNH TOÁN VẬT LÝ ---
+        function getPhysicsConstants(type, time) {
+            let T, omega, x, v, Ed, Et, E_constant, E_current;
+
+            if (type === 'spring') {
+                const m = params.m;
+                const k = params.k;
+                const A = params.A;
+                omega = Math.sqrt(k / m);
+                T = 2 * PI / omega;
+                x = A * Math.cos(omega * time);
+                v = -A * omega * Math.sin(omega * time);
+                Ed = 0.5 * m * v * v;
+                Et = 0.5 * k * x * x;
+                E_constant = 0.5 * k * A * A;
+            } else {
+                const m = params.m_pendulum;
+                const l = params.l;
+                const A0 = params.A0;
+                const g = params.g_pendulum;
+                omega = Math.sqrt(g / l);
+                T = 2 * PI / omega;
+                x = A0 * Math.cos(omega * time);
+                const omega_angle = -A0 * omega * Math.sin(omega * time);
+
+                const h = l * (1 - Math.cos(x));
+                Et = m * g * h;
+
+                const v_sq = (l * omega_angle) ** 2;
+                Ed = 0.5 * m * v_sq;
+
+                const h_max = l * (1 - Math.cos(A0));
+                E_constant = m * g * h_max;
+            }
+
+            E_current = Ed + Et;
+            const f = 1 / T;
+
+            return { T, f, omega, x, Ed, Et, E_constant: Math.max(1e-6, E_constant), E_current: Math.max(1e-6, E_current) };
+        }
+
+        // --- VẼ TRỰC QUAN (SIMULATION) ---
+        function resizeCanvas() {
+            // Updated to use clientWidth/Height for responsiveness
+            simCanvas.width = simCanvas.clientWidth;
+            simCanvas.height = simCanvas.clientHeight;
+            energyGraphCanvas.width = energyGraphCanvas.clientWidth;
+            energyGraphCanvas.height = energyGraphCanvas.clientHeight;
+            drawGraph();
+            updateStateAndDraw(currentTime);
+        }
+
+        // Use ResizeObserver for more robust resizing of flex elements
+        const resizeObserver = new ResizeObserver(() => {
+            resizeCanvas();
+        });
+        resizeObserver.observe(simCanvas.parentElement); // Observe the container
+
+        function drawSpringPendulum(time, x, A, L0, w, h) {
+            ctxSim.clearRect(0, 0, w, h);
+            const PADDING = 40;
+            const BLOCK_SIZE = 40;
+
+            if (params.springType === 'vertical') {
+                const C_x = w / 2;
+                const Fixed_Y = PADDING;
+
+                const deltaL = params.m * params.g_spring / params.k;
+                const L_eq = params.L0_spring + deltaL;
+
+                // Allow spring to take up 80% of height max
+                const totalSimHeight = h * 0.8;
+                // Need to estimate max extension to scale properly
+                const maxSimLength = L_eq + params.A;
+
+                // Dynamic scaling
+                const SCALE_FACTOR = totalSimHeight / (maxSimLength * 1.2);
+                const L_eq_px = L_eq * SCALE_FACTOR;
+
+                const Y_eq_center = Fixed_Y + L_eq_px + BLOCK_SIZE / 2;
+                const Y_current_center = Y_eq_center + x * SCALE_FACTOR;
+                const Y_current_top = Y_current_center - BLOCK_SIZE / 2;
+
+                // Wall
+                ctxSim.fillStyle = '#475569';
+                ctxSim.fillRect(C_x - 50, 0, 100, Fixed_Y);
+
+                // Spring
+                const spring_y_end = Y_current_top;
+                const numCoils = 15;
+                const coilHeight = spring_y_end - Fixed_Y;
+                ctxSim.strokeStyle = '#06b6d4'; // Cyan-500
+                ctxSim.lineWidth = 3;
+                ctxSim.beginPath();
+                ctxSim.moveTo(C_x, Fixed_Y);
+                for (let i = 0; i < numCoils; i++) {
+                    const y = Fixed_Y + (coilHeight / numCoils) * (i + 0.5);
+                    const offset = (i % 2 === 0) ? 10 : -10;
+                    ctxSim.lineTo(C_x + offset, y);
+                }
+                ctxSim.lineTo(C_x, spring_y_end);
+                ctxSim.stroke();
+
+                // Object
+                ctxSim.fillStyle = '#3b82f6'; // Blue-500
+                ctxSim.lineWidth = 2;
+                ctxSim.strokeStyle = '#1d4ed8'; // Blue-700
+                ctxSim.fillRect(C_x - BLOCK_SIZE / 2, Y_current_top, BLOCK_SIZE, BLOCK_SIZE);
+                ctxSim.strokeRect(C_x - BLOCK_SIZE / 2, Y_current_top, BLOCK_SIZE, BLOCK_SIZE);
+
+                // Center of Gravity Dot (Green if special)
+                const isSpecial = currentSpecialLabel !== null;
+                ctxSim.fillStyle = isSpecial ? '#22c55e' : '#ef4444';
+                ctxSim.beginPath();
+                ctxSim.arc(C_x, Y_current_top + BLOCK_SIZE / 2, isSpecial ? 5 : 3, 0, 2 * Math.PI);
+                ctxSim.fill();
+                if (isSpecial) {
+                    ctxSim.font = 'bold 12px Inter';
+                    ctxSim.fillStyle = '#22c55e';
+                    ctxSim.fillText(currentSpecialLabel, C_x + 10, Y_current_top + BLOCK_SIZE / 2 - 5);
+                }
+
+                // Axis Lines (Ghostly)
+                ctxSim.strokeStyle = 'rgba(100, 116, 139, 0.3)'; // Slate-500 with opacity
+                ctxSim.lineWidth = 1;
+                ctxSim.setLineDash([5, 5]);
+                // EQ Line
+                ctxSim.beginPath(); ctxSim.moveTo(C_x - 80, Y_eq_center); ctxSim.lineTo(C_x + 80, Y_eq_center); ctxSim.stroke();
+
+                // Amplitude Markers
+                const A_px = params.A * SCALE_FACTOR;
+                ctxSim.strokeStyle = 'rgba(239, 68, 68, 0.5)'; // Red-500
+                // +A
+                ctxSim.beginPath(); ctxSim.moveTo(C_x - 30, Y_eq_center + A_px); ctxSim.lineTo(C_x + 30, Y_eq_center + A_px); ctxSim.stroke();
+                // -A
+                ctxSim.beginPath(); ctxSim.moveTo(C_x - 30, Y_eq_center - A_px); ctxSim.lineTo(C_x + 30, Y_eq_center - A_px); ctxSim.stroke();
+
+                ctxSim.fillStyle = '#94a3b8'; ctxSim.font = '12px Inter'; ctxSim.textAlign = 'left';
+                ctxSim.fillText('VTCB', C_x + 45, Y_eq_center + 4);
+
+                ctxSim.setLineDash([]);
+            } else {
+                // --- HORIZONTAL ---
+                const Fixed_X = PADDING;
+                const Center_Y = h / 2;
+
+                const L_eq = params.L0_spring;
+                const totalSimWidth = w * 0.8;
+                const maxSimLength = L_eq + params.A;
+                const SCALE_FACTOR = totalSimWidth / (maxSimLength * 1.2);
+
+                const L_eq_px = L_eq * SCALE_FACTOR;
+                const X_eq_center = Fixed_X + L_eq_px + BLOCK_SIZE / 2;
+                const X_current_center = X_eq_center + x * SCALE_FACTOR;
+                const X_current_left = X_current_center - BLOCK_SIZE / 2;
+
+                // Wall
+                ctxSim.fillStyle = '#475569';
+                ctxSim.fillRect(0, Center_Y - 50, Fixed_X, 100);
+
+                // Floor
+                ctxSim.strokeStyle = '#94a3b8'; ctxSim.lineWidth = 2;
+                ctxSim.beginPath(); ctxSim.moveTo(0, Center_Y + BLOCK_SIZE / 2); ctxSim.lineTo(w, Center_Y + BLOCK_SIZE / 2); ctxSim.stroke();
+
+                // Spring
+                const spring_x_end = X_current_left;
+                const numCoils = 15;
+                const coilLength = spring_x_end - Fixed_X;
+                ctxSim.strokeStyle = '#06b6d4';
+                ctxSim.lineWidth = 3;
+                ctxSim.beginPath(); ctxSim.moveTo(Fixed_X, Center_Y);
+                for (let i = 0; i < numCoils; i++) {
+                    const x_pos = Fixed_X + (coilLength / numCoils) * (i + 0.5);
+                    const offset = (i % 2 === 0) ? 10 : -10;
+                    ctxSim.lineTo(x_pos, Center_Y + offset);
+                }
+                ctxSim.lineTo(spring_x_end, Center_Y);
+                ctxSim.stroke();
+
+                // Object
+                ctxSim.fillStyle = '#3b82f6';
+                ctxSim.fillRect(X_current_left, Center_Y - BLOCK_SIZE / 2, BLOCK_SIZE, BLOCK_SIZE);
+                ctxSim.strokeStyle = '#1d4ed8'; ctxSim.lineWidth = 2;
+                ctxSim.strokeRect(X_current_left, Center_Y - BLOCK_SIZE / 2, BLOCK_SIZE, BLOCK_SIZE);
+
+                // Center of Gravity Dot (Green if special)
+                const isSpecial = currentSpecialLabel !== null;
+                ctxSim.fillStyle = isSpecial ? '#22c55e' : '#ef4444';
+                ctxSim.beginPath();
+                ctxSim.arc(X_current_center, Center_Y, isSpecial ? 5 : 3, 0, 2 * Math.PI);
+                ctxSim.fill();
+                if (isSpecial) {
+                    ctxSim.font = 'bold 12px Inter';
+                    ctxSim.fillStyle = '#22c55e';
+                    ctxSim.fillText(currentSpecialLabel, X_current_center + 10, Center_Y - 10);
+                }
+
+                // EQ Line
+                ctxSim.strokeStyle = 'rgba(100, 116, 139, 0.3)'; ctxSim.setLineDash([5, 5]);
+                ctxSim.beginPath(); ctxSim.moveTo(X_eq_center, Center_Y - 60); ctxSim.lineTo(X_eq_center, Center_Y + 60); ctxSim.stroke();
+
+                // Amplitude Markers
+                const A_px = params.A * SCALE_FACTOR;
+                ctxSim.strokeStyle = 'rgba(239, 68, 68, 0.5)'; // Red-500
+                ctxSim.setLineDash([]);
+                // +A (Right)
+                ctxSim.beginPath(); ctxSim.moveTo(X_eq_center + A_px, Center_Y - 30); ctxSim.lineTo(X_eq_center + A_px, Center_Y + 30); ctxSim.stroke();
+                // -A (Left)
+                ctxSim.beginPath(); ctxSim.moveTo(X_eq_center - A_px, Center_Y - 30); ctxSim.lineTo(X_eq_center - A_px, Center_Y + 30); ctxSim.stroke();
+
+                ctxSim.setLineDash([]);
+            }
+        }
+
+        function drawSimplePendulum(time, alpha, A0, l, w, h) {
+            ctxSim.clearRect(0, 0, w, h);
+            const C_x = w / 2;
+            const C_y = 40;
+            const BLOCK_RADIUS = 20;
+
+            // Scale L to fit 80% height Max
+            const MAX_VISUAL_L = h * 0.8;
+            const L_PX = (l / MAX_PENDULUM_L_INPUT) * MAX_VISUAL_L;
+
+            const x_mass = C_x + L_PX * Math.sin(alpha);
+            const y_mass = C_y + L_PX * Math.cos(alpha);
+
+            // Ceiling
+            ctxSim.fillStyle = '#475569';
+            ctxSim.fillRect(C_x - 50, 0, 100, C_y);
+
+            // Pivot
+            ctxSim.beginPath(); ctxSim.arc(C_x, C_y, 4, 0, 2 * PI); ctxSim.fillStyle = '#94a3b8'; ctxSim.fill();
+
+            // String
+            ctxSim.strokeStyle = '#64748b'; // Slate-500
+            ctxSim.lineWidth = 2;
+            ctxSim.beginPath(); ctxSim.moveTo(C_x, C_y); ctxSim.lineTo(x_mass, y_mass); ctxSim.stroke();
+
+            // Mass
+            ctxSim.fillStyle = '#f97316'; // Orange
+            ctxSim.beginPath(); ctxSim.arc(x_mass, y_mass, BLOCK_RADIUS, 0, 2 * PI); ctxSim.fill();
+            ctxSim.strokeStyle = '#c2410c'; ctxSim.lineWidth = 2; ctxSim.stroke();
+
+            // Center of Gravity Dot (Green if special)
+            const isSpecial = currentSpecialLabel !== null;
+            ctxSim.fillStyle = isSpecial ? '#22c55e' : '#ef4444';
+            ctxSim.beginPath();
+            ctxSim.arc(x_mass, y_mass, isSpecial ? 5 : 3, 0, 2 * PI);
+            ctxSim.fill();
+            if (isSpecial) {
+                ctxSim.font = 'bold 12px Inter';
+                ctxSim.fillStyle = '#22c55e';
+                ctxSim.fillText(currentSpecialLabel, x_mass + 10, y_mass - 10);
+            }
+
+            // Angle Arc
+            ctxSim.strokeStyle = 'rgba(239, 68, 68, 0.3)';
+            ctxSim.beginPath(); ctxSim.arc(C_x, C_y, L_PX, PI / 2 - A0, PI / 2 + A0); ctxSim.stroke();
+        }
+
+        function drawGraph() {
+            const W = energyGraphCanvas.width;
+            const H = energyGraphCanvas.height;
+            ctxGraph.clearRect(0, 0, W, H);
+
+            const PADDING_TOP = 20;
+            const PADDING_BOTTOM = 30;
+            const PADDING_LEFT = 40;
+            const PADDING_RIGHT = 10;
+
+            const GRAPH_W = W - PADDING_LEFT - PADDING_RIGHT;
+            const GRAPH_H = H - PADDING_TOP - PADDING_BOTTOM;
+
+            let t_end = Math.max(currentTime, GRAPH_WINDOW_TIME);
+            let t_start = t_end - GRAPH_WINDOW_TIME;
+
+            const { E_constant } = getPhysicsConstants(currentPendulum, 0);
+            const maxE = E_constant * 1.2;
+
+            // Axes
+            ctxGraph.strokeStyle = '#94a3b8'; // Slate-400
+            ctxGraph.lineWidth = 1;
+            ctxGraph.beginPath();
+            ctxGraph.moveTo(PADDING_LEFT, PADDING_TOP);
+            ctxGraph.lineTo(PADDING_LEFT, H - PADDING_BOTTOM);
+            ctxGraph.lineTo(W - PADDING_RIGHT, H - PADDING_BOTTOM);
+            ctxGraph.stroke();
+
+            // Text
+            ctxGraph.fillStyle = '#64748b';
+            ctxGraph.font = '10px Inter';
+            ctxGraph.textAlign = 'right';
+            ctxGraph.fillText('Thời gian (s)', W - 10, H - 10);
+
+            if (energyData.t.length === 0) return;
+
+            const getX = (t) => PADDING_LEFT + ((t - t_start) / GRAPH_WINDOW_TIME) * GRAPH_W;
+            const getY = (e) => H - PADDING_BOTTOM - (e / maxE) * GRAPH_H;
+
+            // --- GRID & LABELS ---
+            ctxGraph.textAlign = 'center';
+            ctxGraph.textBaseline = 'top';
+            ctxGraph.font = '10px Inter';
+            ctxGraph.fillStyle = '#94a3b8';
+            ctxGraph.strokeStyle = document.documentElement.classList.contains('dark') ? 'rgba(148, 163, 184, 0.1)' : 'rgba(0, 0, 0, 0.05)';
+            ctxGraph.lineWidth = 1;
+
+            const tStartGrid = Math.ceil(t_start);
+            const tEndGrid = Math.floor(t_end);
+
+            for (let t = tStartGrid; t <= tEndGrid; t++) {
+                const x = getX(t);
+                // Grid Line
+                ctxGraph.beginPath();
+                ctxGraph.moveTo(x, PADDING_TOP);
+                ctxGraph.lineTo(x, H - PADDING_BOTTOM);
+                ctxGraph.stroke();
+
+                // Label
+                ctxGraph.fillText(t, x, H - PADDING_BOTTOM + 4);
+            }
+
+            // Clip
+            ctxGraph.save();
+            ctxGraph.beginPath(); ctxGraph.rect(PADDING_LEFT, PADDING_TOP, GRAPH_W, GRAPH_H); ctxGraph.clip();
+
+            const drawLine = (dataArr, color) => {
+                ctxGraph.strokeStyle = color;
+                ctxGraph.lineWidth = 2;
+                ctxGraph.beginPath();
+                let started = false;
+                for (let i = 0; i < energyData.t.length; i++) {
+                    const t = energyData.t[i];
+                    if (t < t_start) continue;
+                    if (t > t_end) break;
+                    const x = getX(t);
+                    const y = getY(dataArr[i]);
+                    if (!started) { ctxGraph.moveTo(x, y); started = true; }
+                    else { ctxGraph.lineTo(x, y); }
+                }
+                ctxGraph.stroke();
+            };
+
+            drawLine(energyData.Et, '#ef4444'); // Red
+            drawLine(energyData.Ed, '#22c55e'); // Green
+            drawLine(energyData.E, '#3b82f6'); // Blue
+
+            ctxGraph.restore();
+        }
+
+        function updateStateAndDraw(time) {
+            const { T, f, x, Ed, Et, E_constant, E_current } = getPhysicsConstants(currentPendulum, time);
+
+            const posDisplay = currentPendulum === 'spring' ? x * 100 : radToDeg(x);
+            const unit = currentPendulum === 'spring' ? 'cm' : '°';
+
+            // Update HUD
+            document.getElementById('displayTime').textContent = `${round(time, 2)} s`;
+            document.getElementById('posLabel').textContent = currentPendulum === 'spring' ? 'Vị trí (x)' : 'Góc (α)';
+            document.getElementById('displayPosition').textContent = `${round(posDisplay, 2)} ${unit}`;
+
+            // Update Amplitude Display
+            const ampDisplay = currentPendulum === 'spring' ? params.A * 100 : radToDeg(params.A0);
+            document.getElementById('ampLabel').textContent = currentPendulum === 'spring' ? 'Biên độ (A)' : 'Biên độ (α₀)';
+            document.getElementById('displayAmplitude').textContent = `${round(ampDisplay, 2)} ${unit}`;
+
+            document.getElementById('displayPeriod').textContent = `${round(T, 3)} s`;
+            document.getElementById('displayFrequency').textContent = `${round(f, 3)} Hz`;
+
+            document.getElementById('displayKinetic').textContent = `${round(Ed, 4)} J`;
+            document.getElementById('displayPotential').textContent = `${round(Et, 4)} J`;
+            document.getElementById('totalEnergyValue').textContent = round(E_constant, 4);
+
+            // Update Progress Bars
+            const pKinetic = Math.min(100, (Ed / E_constant) * 100);
+            const pPotential = Math.min(100, (Et / E_constant) * 100);
+            barKinetic.style.width = `${pKinetic}%`;
+            barPotential.style.width = `${pPotential}%`;
+
+            if (currentPendulum === 'spring') {
+                drawSpringPendulum(time, x, params.A, params.L0_spring, simCanvas.width, simCanvas.height);
+            } else {
+                drawSimplePendulum(time, x, params.A0, params.l, simCanvas.width, simCanvas.height);
+            }
+
+            if (energyData.t.length === 0 || time > energyData.t[energyData.t.length - 1]) {
+                energyData.t.push(time);
+                energyData.Ed.push(Ed);
+                energyData.Et.push(Et);
+                energyData.E.push(E_constant);
+
+                while (energyData.t.length > 0 && energyData.t[0] < time - GRAPH_WINDOW_TIME - 2) {
+                    energyData.t.shift();
+                    energyData.Ed.shift(); energyData.Et.shift(); energyData.E.shift();
+                }
+            }
+            drawGraph();
+        }
+
+        // --- GAME LOOP ---
+        let lastTime = 0;
+        function updateSimulation(timestamp) {
+            if (!isPlaying) { lastTime = timestamp; return; }
+            const dt = (timestamp - lastTime) / 1000;
+            lastTime = timestamp;
+            currentTime += dt;
+            currentSpecialLabel = null; // Clear special label when playing
+            updateStateAndDraw(currentTime);
+            animationFrameId = requestAnimationFrame(updateSimulation);
+        }
+
+        function togglePlayPause() {
+            isPlaying = !isPlaying;
+            if (isPlaying) {
+                playPauseBtn.innerHTML = '<i data-lucide="pause" class="w-4 h-4 fill-current"></i> <span class="text-sm">Tạm dừng</span>';
+                lucide.createIcons();
+                stepForwardBtn.disabled = true;
+                stepBackBtn.disabled = true;
+                lastTime = performance.now();
+                animationFrameId = requestAnimationFrame(updateSimulation);
+            } else {
+                playPauseBtn.innerHTML = '<i data-lucide="play" class="w-4 h-4 fill-current"></i> <span class="text-sm">Chạy</span>';
+                lucide.createIcons();
+                stepForwardBtn.disabled = false;
+                stepBackBtn.disabled = false;
+                cancelAnimationFrame(animationFrameId);
+            }
+        }
+
+        function restartSimulation() {
+            if (isPlaying) togglePlayPause();
+            currentTime = 0;
+            energyData.t = []; energyData.Ed = []; energyData.Et = []; energyData.E = [];
+            updateStateAndDraw(0);
+        }
+
+        // --- STEP LOGIC ---
+        // Special values relative to Amplitude: 0, 0.5, 0.707, 0.866, 1
+        const SPECIAL_RATIOS = [
+            { val: 0, label: "0" },
+            { val: 0.5, label: "A/2" },
+            { val: Math.sqrt(2) / 2, label: "A√2/2" },
+            { val: Math.sqrt(3) / 2, label: "A√3/2" },
+            { val: 1, label: "A" }
+        ];
+
+        let currentSpecialLabel = null; // To track if we are at a special spot
+
+        function calculateStepTime(direction) {
+            if (isPlaying) return;
+            const { T, omega } = getPhysicsConstants(currentPendulum, currentTime);
+            if (!T || !omega) return;
+
+            // Standard step: T/80
+            const nominalDt = T / 80;
+            const targetT = currentTime + direction * nominalDt;
+
+            // Find closest special time
+            // x = A * cos(omega * t) -> cos(omega * t) = x/A
+            // We correspond ratios to phases.
+            // But we can also checking current phase.
+            // Phase = omega * t
+            // Target Phase = omega * targetT
+
+            let bestTime = targetT;
+            let minDiff = Infinity;
+            let foundLabel = null;
+
+            // Search range: current to target + some buffer to "snap"
+            // Actually, we want to "land" on a special value if we pass it or get close.
+
+            // Normalize phase to 0..2PI
+            // We just check cos(phase) against ratios.
+
+            // Better approach: Calculate all "Special Times" near the current time window.
+            // t_special = (acos(ratio) + k2PI)/omega  OR  (2PI - acos(ratio) + k2PI)/omega
+
+            const ratios = SPECIAL_RATIOS;
+
+            // Check potential special times near targetT
+            const searchWindow = nominalDt * 1.5; // Snap within this range matches "priority"
+
+            ratios.forEach(r => {
+                // cos(phi) = +/- ratio
+                const angle = Math.acos(r.val); // 0 to PI/2 usually for these positive ratios
+                // We need to check both +ratio and -ratio if we want symmetric snaps
+                // Let's assume we want +/- values.
+
+                const anglesToCheck = [
+                    angle,              // +ratio (1st quad)
+                    Math.PI - angle,    // -ratio (2nd quad)
+                    Math.PI + angle,    // -ratio (3rd quad)
+                    2 * Math.PI - angle   // +ratio (4th quad)
+                ];
+
+                // Remove duplicates (e.g. angle=0 gives 0 and 2PI)
+
+                anglesToCheck.forEach(ang => {
+                    // t = (ang + k*2PI) / omega
+                    // Find k such that t is close to targetT
+                    const baseT = ang / omega;
+                    const period = (2 * Math.PI) / omega;
+
+                    const k = Math.round((targetT - baseT) / period);
+                    const t_candidate = baseT + k * period;
+
+                    const diff = direction * (t_candidate - currentTime); // distance in direction
+
+                    // We only snap if the special point is "ahead" (in direction) and "close enough"
+                    // OR if we are doing a "smart step" that jumps exactly to it
+                    // Rule: If a special point is within [currentTime, currentTime + direction*nominalDt*1.2], snap to it.
+                    // Also check strict proximity
+
+                    if (diff > 1e-5 && diff < nominalDt * 1.5) {
+                        // Found a candidate
+                        if (Math.abs(t_candidate - targetT) < minDiff) {
+                            minDiff = Math.abs(t_candidate - targetT);
+                            bestTime = t_candidate;
+                            // Check Sign for label
+                            const realCos = Math.cos(omega * bestTime);
+                            const sign = realCos >= 0 ? "+" : "-";
+                            // Avoid "+0"
+                            const finalSign = (Math.abs(realCos) < 1e-5) ? "" : sign;
+                            const finalLabel = (r.val === 0) ? "VTCB" : (finalSign + r.label);
+                            foundLabel = finalLabel;
+                        }
+                    }
+                });
+            });
+
+            // Update
+            // If we snapped, `foundLabel` is set.
+            // If we didn't snap, `bestTime` is just `targetT`, and label is null.
+
+            // Logic shift: if we found a label, it matches priority.
+
+            let finalTime = bestTime;
+
+            // Handle history splicing (Backwards erase)
+            if (finalTime < currentTime) {
+                let idx = energyData.t.findIndex(t => t >= finalTime - 1e-5);
+                if (idx !== -1) {
+                    energyData.t.splice(idx);
+                    energyData.Ed.splice(idx);
+                    energyData.Et.splice(idx);
+                    energyData.E.splice(idx);
+                }
+            }
+
+            currentTime = finalTime;
+            currentSpecialLabel = foundLabel; // Global var to read in draw
+            updateStateAndDraw(currentTime);
+        }
+
+        // --- AUTO-PAUSE LOGIC ---
+        window.addEventListener('app-paused', () => {
+            cancelAnimationFrame(animationFrameId);
+        });
+
+        window.addEventListener('app-resumed', () => {
+            if (isPlaying) {
+                lastTime = performance.now();
+                animationFrameId = requestAnimationFrame(updateSimulation);
+            }
+        });
+
+        // Listeners for Steps
+        stepForwardBtn.addEventListener('click', () => { calculateStepTime(1); });
+        stepBackBtn.addEventListener('click', () => { calculateStepTime(-1); });
+
+        // --- DRAG LOGIC ---
+        const draggablePanel = document.getElementById('infoPanel');
+        const dragHeader = document.getElementById('infoPanelHeader');
+
+        let isDragging = false;
+        let startX, startY, initialLeft, initialTop;
+
+        dragHeader.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+
+            // Get current position relative to offsetParent
+            initialLeft = draggablePanel.offsetLeft;
+            initialTop = draggablePanel.offsetTop;
+
+            // Switch to left/top positioning 
+            draggablePanel.style.right = 'auto'; // Disable right anchoring
+            draggablePanel.style.left = initialLeft + 'px';
+            draggablePanel.style.top = initialTop + 'px';
+
+            document.body.style.cursor = 'move';
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault(); // Prevent selection
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            draggablePanel.style.left = `${initialLeft + dx}px`;
+            draggablePanel.style.top = `${initialTop + dy}px`;
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                document.body.style.cursor = 'default';
+            }
+        });
+
+        // --- SIDEBAR TOGGLE LOGIC ---
+        const sidebar = document.getElementById('mainSidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        let isSidebarOpen = true;
+
+        sidebarToggle.addEventListener('click', () => {
+            isSidebarOpen = !isSidebarOpen;
+            if (isSidebarOpen) {
+                sidebar.classList.remove('-ml-72');
+            } else {
+                sidebar.classList.add('-ml-72');
+            }
+
+            // Wait for transition to finish then resize
+            setTimeout(() => {
+                resizeCanvas();
+            }, 300); // Match transition duration
+        });
+
+        // --- EVENTS ---
+        playPauseBtn.addEventListener('click', togglePlayPause);
+        restartBtn.addEventListener('click', restartSimulation);
+
+        // Input Listeners
+        function updateParams() {
+            params.m = parseFloat(document.getElementById('mass').value);
+            params.k = parseFloat(document.getElementById('stiffness').value);
+            params.A = parseFloat(document.getElementById('amplitude').value) / 100;
+            params.L0_spring = parseFloat(document.getElementById('lengthSpring').value);
+            params.g_spring = parseFloat(document.getElementById('gravitySpring').value);
+
+            params.m_pendulum = parseFloat(document.getElementById('massPendulum').value);
+            params.l = parseFloat(document.getElementById('lengthPendulum').value);
+            params.A0 = degToRad(parseFloat(document.getElementById('angleAmplitude').value));
+            params.g_pendulum = parseFloat(document.getElementById('gravityPendulum').value);
+
+            const radios = document.getElementsByName('springType');
+            for (let r of radios) if (r.checked) params.springType = r.value;
+
+            // --- AUTO-CORRECT PARAMS (Safety Checks) ---
+            if (currentPendulum === 'spring') {
+                // Calculate Equilibrium Position
+                const deltaL = (params.springType === 'vertical') ? (params.m * params.g_spring / params.k) : 0;
+                const L_eq = params.L0_spring + deltaL;
+
+                // Max safe amplitude (leave 5cm buffer)
+                const maxSafeA = Math.max(0.01, L_eq - 0.05);
+
+                if (params.A > maxSafeA) {
+                    params.A = maxSafeA;
+                    // Auto-update UI Range
+                    const aInput = document.getElementById('amplitude');
+                    if (aInput) aInput.value = (params.A * 100).toFixed(1);
+                }
+            }
+
+            // Update labels
+            document.getElementById('massValue').innerText = params.m.toFixed(1);
+            document.getElementById('stiffnessValue').innerText = params.k.toFixed(1);
+            document.getElementById('amplitudeValue').innerText = (params.A * 100).toFixed(1);
+            document.getElementById('lengthSpringValue').innerText = params.L0_spring.toFixed(2);
+            document.getElementById('gravitySpringValue').innerText = params.g_spring.toFixed(2);
+
+            document.getElementById('massPendulumValue').innerText = params.m_pendulum.toFixed(1);
+            document.getElementById('lengthPendulumValue').innerText = params.l.toFixed(1);
+            document.getElementById('angleAmplitudeValue').innerText = radToDeg(params.A0).toFixed(1);
+            document.getElementById('gravityPendulumValue').innerText = params.g_pendulum.toFixed(2);
+
+            // Reset graph history immediately
+            energyData.t = []; energyData.Ed = []; energyData.Et = []; energyData.E = [];
+            currentTime = 0; // Reset time to origin
+
+            if (!isPlaying) {
+                updateStateAndDraw(currentTime);
+            }
+        }
+
+        document.querySelectorAll('input[type=range], input[type=radio]').forEach(el => {
+            el.addEventListener('input', updateParams);
+        });
+
+        // Toggle Type
+        const springSelect = document.getElementById('springSelect');
+        const pendulumSelect = document.getElementById('pendulumSelect');
+        const springParams = document.getElementById('springParams');
+        const pendulumParams = document.getElementById('pendulumParams');
+
+        springSelect.addEventListener('click', () => {
+            currentPendulum = 'spring';
+            springSelect.className = "px-4 py-2 rounded-md text-sm font-semibold transition-all shadow-sm bg-white dark:bg-slate-700 text-cyan-600 dark:text-cyan-400 ring-1 ring-black/5 dark:ring-white/10";
+            pendulumSelect.className = "px-4 py-2 rounded-md text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 transition-all";
+            springParams.classList.remove('hidden');
+            pendulumParams.classList.add('hidden');
+            restartSimulation();
+        });
+
+        pendulumSelect.addEventListener('click', () => {
+            currentPendulum = 'pendulum';
+            pendulumSelect.className = "px-4 py-2 rounded-md text-sm font-semibold transition-all shadow-sm bg-white dark:bg-slate-700 text-cyan-600 dark:text-cyan-400 ring-1 ring-black/5 dark:ring-white/10";
+            springSelect.className = "px-4 py-2 rounded-md text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 transition-all";
+            pendulumParams.classList.remove('hidden');
+            springParams.classList.add('hidden');
+            restartSimulation();
+        });
+
+        // Init
+        lucide.createIcons();
+        resizeCanvas();
+        updateParams();
+
+    </script>
+</body>
+
+</html>

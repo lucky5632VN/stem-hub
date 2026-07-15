@@ -1,0 +1,150 @@
+Q1 (mcq): PHẦN I. Câu trắc nghiệm nhiều phương án lựa chọn. Câu 1: Có hai nhiệt kế, một dùng thang Celsius, một dùng thang Kelvin để đo nhiệt độ của môi trường tại cùng một thời điểm. Số chỉ trên nhiệt kế Kelvin
+  Option A: tỉ lệ thuận với số chỉ trên nhiệt kế Celsius.
+  Option B: lớn hơn số chỉ trên nhiệt kế Celsius.
+  Option C: nhỏ hơn số chỉ trên nhiệt kế Celsius.
+  Option D: có thể lớn hơn hoặc nhỏ hơn số chỉ trên nhiệt kế Celsius.
+
+Q2 (mcq): Trong trường hợp nào dưới đây, sự biến đổi nội năng của vật không phải do thực hiện công?
+  Option A: Mài dao.
+  Option B: Đóng đinh.
+  Option C: Khuấy nước.
+  Option D: Nung sắt trong lò.
+
+Q3 (mcq): Một học sinh thêm $50 \, \text{g}$ sữa ở nhiệt độ $20^\circ C$ vào $350 \, \text{g}$ trà ở nhiệt độ $80^\circ C$, nhiệt độ cuối cùng của hỗn hợp là bao nhiêu? Cho nhiệt dung riêng của sữa $3800 \, \text{J/(kg.K)}$. Nhiệt dung riêng của trà $4200 \, \text{J/(kg.K)}$.
+  Option A: $50,0^\circ C$.
+  Option B: $72,5^\circ C$.
+  Option C: $73,1^\circ C$.
+  Option D: $77,4^\circ C$.
+
+Q4 (mcq): Sử dụng các thông tin sau cho Câu 4 và Câu 5. Vận động viên điền kinh bị mất rất nhiều nước trong khi thi đấu. Các vận động viên thường chỉ có thể chuyển hoá khoảng $30\%$ năng lượng dự trữ trong cơ thể thành năng lượng dùng cho các hoạt động của cơ thể. Phần năng lượng còn lại chuyển thành nhiệt thải ra ngoài nhờ sự bay hơi của nước qua hô hấp và da để giữ cho nhiệt độ cơ thể không đổi. Vận động viên dùng hết $9800 \, \text{kJ}$ trong cuộc thi. Coi nhiệt độ cơ thể của vận động viên hoàn toàn không đổi và nhiệt hoá hơi riêng của nước ở nhiệt độ của vận động viên là $2,4 \cdot 10^6 \, \text{J/kg}$. Biết khối lượng riêng của nước là $1,0 \cdot 10^3 \, \text{kg/m}^3$.
+Câu 4. Phần năng lượng chuyển thành nhiệt thải ra ngoài nhờ sự bay hơi của nước ra ngoài là
+  Option A: $6560 \, \text{kJ}$.
+  Option B: $6660 \, \text{kJ}$.
+  Option C: $6760 \, \text{kJ}$.
+  Option D: $6860 \, \text{kJ}$.
+
+Q5 (mcq): Lượng nước thoát ra ngoài qua hô hấp và da xấp xỉ là
+  Option A: $2,86 \, \text{lít}$.
+  Option B: $3,15 \, \text{lít}$.
+  Option C: $3,36 \, \text{lít}$.
+  Option D: $3,86 \, \text{lít}$.
+
+Q6 (mcq): Phương trình nào sau đây là phương trình trạng thái của một khối khí lí tưởng xác định?
+  Option A: $pV = \text{hằng số}$.
+  Option B: $\dfrac{p}{T} = \text{hằng số}$.
+  Option C: $\dfrac{V}{T} = \text{hằng số}$.
+  Option D: $\dfrac{pV}{T} = \text{hằng số}$.
+
+Q7 (mcq): Đồ thị nào dưới đây biểu diễn mối quan hệ giữa nội năng của khí lý tưởng (trục y) và nhiệt độ tuyệt đối của khí (trục x)?
+  Option A: Hình 1.
+  Option B: Hình 2.
+  Option C: Hình 3.
+  Option D: Hình 4.
+
+Q8 (mcq): Một bình kín có thể tích không đổi chứa một lượng khí nhất định. Chất khí trong bình được làm lạnh. Điều gì xảy ra với áp suất chất khí và động năng trung bình của các phân tử khí trong bình?
+  Option A: Áp suất chất khí giảm, động năng trung bình của các phân tử khí giảm.
+  Option B: Áp suất chất khí giảm, động năng trung bình của các phân tử khí tăng.
+  Option C: Áp suất chất khí tăng, động năng trung bình của các phân tử khí giảm.
+  Option D: Áp suất chất khí tăng, động năng trung bình của các phân tử khí tăng.
+
+Q9 (mcq): Tại một bệnh viện, khí oxygen được đựng trong các bình chứa có áp suất $65 \, \text{atm}$ và nhiệt độ $15^\circ C$. $1 \, \text{dm}^3$ khí oxygen trong bình sẽ chiếm thể tích bao nhiêu nếu được đưa ra ngoài môi trường phòng có nhiệt độ $24^\circ C$ và áp suất $1 \, \text{atm}$?
+  Option A: $15 \, \text{dm}^3$.
+  Option B: $24 \, \text{dm}^3$.
+  Option C: $67 \, \text{dm}^3$.
+  Option D: $85 \, \text{dm}^3$.
+
+Q10 (mcq): Từ trường không tương tác với
+  Option A: điện tích đứng yên.
+  Option B: điện tích chuyển động.
+  Option C: nam châm vĩnh cửu.
+  Option D: dòng điện.
+
+Q11 (mcq): Một vòng dây tròn dẫn điện được nối với nguồn điện. Yếu tố nào sau đây không ảnh hưởng đến độ lớn cảm ứng từ tại tâm của vòng dây?
+  Option A: Hiệu điện thế của nguồn điện.
+  Option B: Khối lượng riêng của vòng dây.
+  Option C: Điện trở của vòng dây.
+  Option D: Đường kính của vòng dây.
+
+Q12 (mcq): Một đoạn dây dẫn thẳng $MN = 5 \, \text{cm}$, khối lượng $10 \, \text{g}$ được treo vào hai sợi dây mảnh, nhẹ MC và ND sao cho MN nằm ngang và CMND nằm trong mặt phẳng thẳng đứng. Cả hệ đặt trong từ trường đều có độ lớn $B = 0,25 \, \text{T}$; hướng thẳng đứng từ dưới lên. Cho dòng điện có cường độ $I$ chạy qua $MN$ thì dây treo lệch một góc $\theta = 30^\circ$ so với phương thẳng đứng. Lấy $g = 10 \, \text{m/s}^2$. Giá trị $I$ xấp xỉ
+  Option A: $4,62 \, \text{A}$.
+  Option B: $6,93 \, \text{A}$.
+  Option C: $4,12 \, \text{A}$.
+  Option D: $6,62 \, \text{A}$.
+
+Q13 (mcq): Một học sinh lắp đặt mạch điện được minh họa như hình vẽ. Nguồn điện có suất điện động không đổi. Trong các trường hợp sau đây trường hợp nào kim của ampe kế không bị lệch
+  Option A: Khi đóng khóa K.
+  Option B: Khi ngắt khóa K.
+  Option C: Sau khi đóng khóa K và dòng điện qua X đã ổn định.
+  Option D: Sau khi đóng khóa K và di chuyển con chạy biến trở.
+
+Q14 (mcq): Cường độ dòng điện của một dòng điện xoay chiều biến thiên theo phương trình $i = 2\sqrt{2}\cos(100\pi t) \, \text{A}$. Cường độ dòng điện hiệu dụng có giá trị bằng bao nhiêu?
+  Option A: $2 \, \text{A}$.
+  Option B: $2\sqrt{2} \, \text{A}$.
+  Option C: $4 \, \text{A}$.
+  Option D: $\sqrt{2} \, \text{A}$.
+
+Q15 (mcq): Đồng vị là những nguyên tử mà hạt nhân
+  Option A: chứa cùng số proton Z nhưng có số neutron N khác nhau.
+  Option B: chứa cùng số proton Z và số khối A.
+  Option C: chứa cùng số neutron N nhưng có số proton Z khác nhau.
+  Option D: chứa cùng số khối A nhưng có số proton Z khác nhau.
+
+Q16 (mcq): Trong phóng xạ $\beta^-$ hạt nhân $^A_Z X$ biến đổi thành hạt nhân $^{A'}_{Z'} Y$ thì
+  Option A: $Z' = Z - 1; A' = A$.
+  Option B: $Z' = Z + 1; A' = A - 1$.
+  Option C: $Z' = Z - 1; A' = A + 1$.
+  Option D: $Z' = Z + 1; A' = A$.
+
+Q17 (mcq): Sử dụng các thông tin sau cho Câu 17 và Câu 18. Ban đầu $(t = 0)$ có một mẫu chất phóng xạ $X$ nguyên chất. Ở thời điểm $t_1$, mẫu chất phóng xạ $X$ còn lại $20\%$ hạt nhân chưa bị phân rã. Đến thời điểm $t_2 = t_1 + 100 \, (s)$ số hạt nhân $X$ chưa bị phân rã chỉ còn $5\%$ so với số hạt nhân ban đầu.
+Câu 17. Công thức tính số hạt chưa phân rã của mẫu phóng xạ là
+  Option A: $N = N_0 \cdot 2^{-\dfrac{t}{T}}$.
+  Option B: $N = N_0 \cdot 2^{\dfrac{t}{T}}$.
+  Option C: $N = N_0 \cdot 2^{\dfrac{T}{t}}$.
+  Option D: $N = N_0 \cdot 2^{-\dfrac{T}{t}}$.
+
+Q18 (mcq): Chu kì bán rã của chất phóng xạ X là
+  Option A: $25 \, \text{s}$.
+  Option B: $50 \, \text{s}$.
+  Option C: $100 \, \text{s}$.
+  Option D: $200 \, \text{s}$.
+
+Q19 (true_false): Một bình đun nước nóng bằng điện có công suất $9,0 \, \text{kW}$. Nước được làm nóng khi đi qua buồng đốt của bình. Nước chảy qua buồng đốt với lưu lượng $5,8 \cdot 10^{-2} \, \text{kg/s}$. Nhiệt độ của nước khi đi vào buồng đốt là $15^\circ C$. Cho nhiệt dung riêng của nước là $4200 \, \text{J/kg.K}$. Bỏ qua mọi hao phí.
+  Statement s1: Nhiệt độ của nước khi ra khỏi buồng đốt là $50^\circ C$.
+  Statement s2: Nếu nhiệt độ của nước khi đi vào buồng đốt tăng gấp đôi thì nhiệt độ nước ra khỏi buồng đốt tăng gấp đôi.
+  Statement s3: Nếu công suất điện giảm 2 lần thì nhiệt độ nước ra khỏi buồng đốt là $35^\circ C$.
+  Statement s4: Để điều chỉnh nhiệt độ của nước ra khỏi buồng đốt, ta có thể thay đổi công suất điện; lưu lượng dòng nước; nhiệt độ nước đi vào.
+
+Q20 (true_false): Một ống thuỷ tinh được cắm lộn ngược vào một chậu chứa thuỷ ngân, độ cao cột thuỷ ngân bên trong ống tính từ mặt nước là $10 \, \text{cm}$, chiều dài cột không khí bị giam trong ống là $80 \, \text{cm}$. Người ta ấn sâu ống thuỷ tinh xuống cho đến khi độ cao cột thuỷ ngân chỉ còn $5,2 \, \text{cm}$. Áp suất khí quyển là $75 \, \text{cmHg}$. Coi nhiệt độ của khối khí không đổi.
+  Statement s1: Áp suất của khối khí bên trong ống thuỷ tinh ở hình 1 bằng áp suất khí quyển.
+  Statement s2: Độ cao cột thuỷ ngân giảm do áp suất của khí trong ống thuỷ tinh tăng lên.
+  Statement s3: Áp suất của khí trong ống thuỷ tinh ở hình 1 là $65 \, \text{cmHg}$.
+  Statement s4: Độ cao cột không khí bên trong ống thuỷ tinh ở hình 2 là $74,2 \, \text{cm}$.
+
+Q21 (true_false): Dòng điện xoay chiều chạy qua một đoạn mạch có cường độ biến đổi điều hoà theo thời gian được mô tả bằng đồ thị:
+  Statement s1: Cường độ dòng điện cực đại là $4 \, \text{A}$.
+  Statement s2: Tần số góc $\omega = 100\pi \, \text{rad/s}$.
+  Statement s3: Pha ban đầu của dòng điện là $\varphi = \dfrac{\pi}{3} \, \text{rad}$.
+  Statement s4: Biểu thức cường độ dòng điện là $i = 4\cos\left(100\pi t - \dfrac{\pi}{4}\right) \, (A)$.
+
+Q22 (true_false): Cho hạt nhân $^{24}_{11}Na$ là đồng vị phóng xạ $\beta^-$ với chu kì bán rã $T$ và biến đổi thành hạt nhân con magnesium $^A_Z Mg$. Ở thời điểm ban đầu $(t = 0)$ có một mẫu $^{24}_{11}Na$ có khối lượng $m_0 = 2,4 \, \text{g}$ thì sau thời gian $t = 30 \, \text{h}$ khối lượng hạt nhân $^{24}_{11}Na$ còn lại $m = 0,6 \, \text{g}$.
+  Statement s1: Số neutron của hạt nhân $^A_Z Mg$ là $12$.
+  Statement s2: Chu kỳ bán rã của hạt nhân $^{24}_{11}Na$ là $15 \, \text{h}$.
+  Statement s3: Độ phóng xạ của $^{24}_{11}Na$ ở thời điểm $t = 0$ là $7,73 \cdot 10^{17} \, \text{Bq}$.
+  Statement s4: Ở thời điểm $t_1$, tỉ số giữa khối lượng $^A_Z Mg$ và $^{24}_{11}Na$ là $3$ thì tại thời điểm $t_2 = t_1 + 3T$ tỉ số khối lượng hạt nhân $^A_Z Mg$ và $^{24}_{11}Na$ bằng $8$.
+
+Q23 (short_answer): Một đoạn dây dẫn mang dòng điện cường độ $1,5 \, \text{A}$ đặt trong một từ trường đều thì chịu một lực từ có độ lớn $0,3 \, \text{N}$. Nếu sau đó cường độ dòng điện tăng thêm $0,5 \, \text{A}$ thì lực từ tác dụng lên đoạn dây dẫn bằng bao nhiêu (tính theo đơn vị N)? (làm tròn kết quả đến chữ số hàng phần mười).
+
+Q24 (short_answer): Hạt nhân $X$ phóng xạ $\beta^-$ và biến đổi thành hạt nhân $Y$ bền vững. Ban đầu $(t = 0)$ có một mẫu chất phóng xạ $X$ nguyên chất. Tại các thời điểm $t_1 = t_0$ (năm) và $t_2 = t_0 + 24,6$ (năm), tỉ số giữa số hạt nhân $X$ còn lại trong mẫu và số hạt nhân $Y$ đã sinh ra có giá trị lần lượt là $\dfrac{1}{3}$ và $\dfrac{1}{15}$. Chu kì bán rã của chất phóng xạ $X$ là bao nhiêu năm (làm tròn kết quả đến chữ số hàng phần mười).
+
+Q25 (short_answer): Sử dụng các thông tin sau cho Câu 3 và Câu 4: $12 \, \text{gam}$ khí chiếm thể tích $6 \, \text{lít}$ ở $17^\circ C$. Sau khi nung nóng đẳng áp lượng khí trên đến nhiệt độ $t$ thì khối lượng riêng của khí là $1,2 \, \text{g/lít}$.
+
+Nhiệt độ của khí sau khi nung nóng là bao nhiêu $^\circ C$ (làm tròn kết quả đến chữ số hàng đơn vị)?
+
+Q26 (short_answer): Biết khối lượng mol của khí đã dùng là $44 \, \text{g/mol}$. Áp suất của lượng khí đã dùng là bao nhiêu $kPa$ (làm tròn kết quả đến chữ số hàng đơn vị)?
+
+Q27 (short_answer): Sử dụng các thông tin sau cho Câu 5 và Câu 6. Người ta đặt một viên bi đặc bằng sắt bán kính $R = 6 \, \text{cm}$ đã được nung nóng tới nhiệt độ $t = 325^\circ C$ lên một khối nước đá rất lớn ở $0^\circ C$. Bỏ qua sự dẫn nhiệt của nước đá và sự nóng lên của đá đã tan. Cho khối lượng riêng của sắt là $D = 7800 \, \text{kg/m}^3$, của nước đá là $D_0 = 915 \, \text{kg/m}^3$. Nhiệt dung riêng của sắt là $c = 460 \, \text{J/(kg.K)}$, nhiệt nóng chảy riêng của nước đá là $3,4 \cdot 10^5 \, \text{J/kg}$.
+
+Khối lượng của viên bi sắt là bao nhiêu kg (làm tròn kết quả đến chữ số hàng phần mười)?
+
+Q28 (short_answer): Thể tích phần nước đá đã bị tan ra thành nước là $x \cdot 10^{-3} \, \text{m}^3$. Tìm $x$ (làm tròn kết quả đến chữ số hàng phần trăm)?
+
