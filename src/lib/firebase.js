@@ -41,70 +41,29 @@ if (typeof window === "undefined") {
   functions = globalThis.__firebaseFunctions;
 }
 
-// Chỉ kết nối tới emulator khi có biến môi trường NEXT_PUBLIC_USE_EMULATOR chỉ định rõ ràng là 'true'
 const useEmulator = process.env.NEXT_PUBLIC_USE_EMULATOR === 'true';
 
-if (useEmulator) {
-  // Flag check để tránh connect emulator nhiều lần khi React reload
-  if (!globalThis.__firebaseEmulatorsConnected) {
-    try {
+if (typeof window !== "undefined" && !globalThis.__firebaseEmulatorsConnected) {
+  try {
+    if (useEmulator) {
+      // Kết nối tất cả emulators (Auth, Firestore, Functions)
       connectFirestoreEmulator(db, '127.0.0.1', 8080);
       connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
-      globalThis.__firebaseEmulatorsConnected = true;
-      console.log("Connected to Firebase Emulators (Auth, Firestore)");
-    } catch (err) {
-      console.warn("Failed to connect to Firebase Emulators:", err);
+      connectFunctionsEmulator(functions, '127.0.0.1', 5001);
+      console.log("Connected to all Firebase Emulators (Auth, Firestore, Functions)");
+    } else {
+      // Cơ chế Hybrid Production: Chỉ kết nối Functions tới local emulator, Auth & Firestore kết nối thẳng Production Cloud
+      connectFunctionsEmulator(functions, '127.0.0.1', 5001);
+      console.log("🔥 [Hybrid Production] Connected Functions to Local Emulator (127.0.0.1:5001), Auth & Firestore to Production");
     }
+    globalThis.__firebaseEmulatorsConnected = true;
+  } catch (err) {
+    console.warn("Failed to connect to Firebase Emulators:", err);
   }
 }
 
 function httpsCallable(functionsInstance, name) {
-  const apiRouteMapping = {
-    'submitAnswer': '/api/submit-answer',
-    'finalizeMatch': '/api/finalize-match',
-    'processCrystalTransaction': '/api/crystal-transaction',
-    'processFriendAction': '/api/friend-action',
-    'updateLastActive': '/api/update-last-active'
-  };
-
-  const apiPath = apiRouteMapping[name];
-
-  if (apiPath) {
-    return async (data) => {
-      console.log(`[Next.js API Route Redirect] Calling API Route for '${name}' at ${apiPath}`, data);
-      try {
-        const authInstance = getAuth(app);
-        const currentUser = authInstance.currentUser;
-        const headers = {
-          'Content-Type': 'application/json'
-        };
-
-        if (currentUser) {
-          const idToken = await currentUser.getIdToken(true);
-          headers['Authorization'] = `Bearer ${idToken}`;
-        }
-
-        const response = await fetch(apiPath, {
-          method: 'POST',
-          headers: headers,
-          body: JSON.stringify(data || {})
-        });
-
-        const resData = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(resData.error || `HTTP error ${response.status}`);
-        }
-
-        // httpsCallable returns the response wrapped in a { data } object
-        return { data: resData };
-      } catch (err) {
-        console.error(`[API Route Request Failed] '${name}' failed:`, err);
-        throw err;
-      }
-    };
-  }
-
+  // Ưu tiên các hàm được xử lý trực tiếp ở client-side (nếu có cấu hình)
   if (clientFunctions[name]) {
     const clientFn = clientFunctions[name](db, auth);
     return async (data) => {
@@ -118,9 +77,9 @@ function httpsCallable(functionsInstance, name) {
       }
     };
   }
+  
+  // Trả về lệnh gọi Cloud Function gốc (kết nối trực tiếp qua Emulator hoặc Cloud thực tế tùy cấu hình)
   return originalHttpsCallable(functionsInstance, name);
 }
 
 export { app, auth, db, functions, httpsCallable };
-
-
