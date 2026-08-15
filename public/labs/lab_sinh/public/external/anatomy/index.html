@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Cơ thể người</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    html, body {margin: 0; padding: 0; overflow: hidden; background-color: #020617; height: 100%;} 
+    canvas {
+        display: block; 
+        margin: auto; 
+        background-color: #020617;
+        /* Khung viền tinh tế ẩn trong nền tối */
+        border: none;
+    }
+</style>
+<script>
+    var canvas, stage, exportRoot, images, ss, lib = lib || {};
+
+    function init() {
+        canvas = document.getElementById("canvas");
+        createjs.LoadItem.LOAD_TIMEOUT_DEFAULT = 120 * 1000;
+
+        // Chỉ chạy khi lib đã sẵn sàng
+        if (typeof lib === 'undefined' || !lib.properties) {
+            setTimeout(init, 100);
+            return;
+        }
+
+        if (lib.properties.manifest && lib.properties.manifest.length) {
+            images = images || {};
+            ss = ss || {};
+            var loader = new createjs.LoadQueue(false);
+            loader.addEventListener("fileload", handleFileLoad);
+            loader.addEventListener("complete", handleComplete);
+            loader.loadManifest(lib.properties.manifest);
+        } else {
+            handleComplete();
+        }
+    }
+
+    function handleFileLoad(evt) {
+        if (evt.item.type == "image") {
+            images[evt.item.id] = evt.result;
+        }
+    }
+
+    function handleComplete(evt) {
+        if (evt) {
+            var queue = evt.target;
+            var ssMetadata = lib.ssMetadata;
+            if (ssMetadata) {
+                for (var i = 0; i < ssMetadata.length; i++) {
+                    ss[ssMetadata[i].name] = new createjs.SpriteSheet({
+                        "images": [queue.getResult(ssMetadata[i].name)],
+                        "frames": ssMetadata[i].frames
+                    });
+                }
+            }
+        }
+
+        exportRoot = new lib._696();
+        stage = new createjs.Stage(canvas);
+        
+        // Chuyển nền sang tối đồng bộ hệ thống
+        var bg = new createjs.Shape();
+        bg.graphics.beginFill('#020617').drawRect(-500, -500, lib.properties.width + 1000, lib.properties.height + 1000);
+        bg.mouseEnabled = false;
+        exportRoot.addChildAt(bg, 0);
+        bg.on('tick', function() {
+            if (exportRoot.getChildIndex(bg) != 0) exportRoot.setChildIndex(bg, 0);
+        });
+
+        // DEEP PATCH: HIDE COPYRIGHT & MAXIMIZE CONTENT
+        var patchAttempts = 0;
+        var patchInterval = setInterval(function() {
+            if (exportRoot) {
+                // Force initial resize and cleanup
+                resize();
+
+                // Override nav behavior to prevent it from ever showing up
+                if (exportRoot.nav) {
+                    exportRoot.nav.visible = false;
+                    exportRoot.nav.alpha = 0;
+                    exportRoot.nav.on('tick', function() { this.visible = false; this.alpha = 0; });
+                }
+
+                // Hide any specific white borders or copyright instances
+                const cleanup = (obj) => {
+                    if (!obj || !obj.children) return;
+                    obj.children.forEach(child => {
+                        // Hide white/light shapes that look like borders
+                        if (child.graphics && child.graphics._fill && (child.graphics._fill.style === '#FFFFFF' || child.graphics._fill.style === 'white')) {
+                            child.visible = false;
+                        }
+                        // Hide anything that looks like a copyright text
+                        if (child.text && (child.text.includes('Copyright') || child.text.includes('National Taiwan') || child.text.includes('eduMedia'))) {
+                            child.visible = false;
+                        }
+                        cleanup(child);
+                    });
+                };
+                cleanup(exportRoot);
+
+                patchAttempts++;
+                if (patchAttempts > 20) clearInterval(patchInterval); 
+            }
+        }, 200);
+
+        stage.addChild(exportRoot);
+        canvas.style.display = '';
+        stage.update();
+        stage.enableMouseOver();
+
+        createjs.Ticker.setFPS(lib.properties.fps);
+        createjs.Ticker.addEventListener("tick", stage);
+        createjs.Touch.enable(stage);
+
+        resize();
+    }
+
+    function resize() {
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+        
+        // Trừ đi chiều cao Header (~80px) để không bị che đầu
+        var headerHeight = 80;
+        var availableHeight = h - headerHeight;
+        
+        var hRatio = w / lib.properties.width;
+        var vRatio = availableHeight / lib.properties.height;
+        
+        // Sử dụng tỷ lệ phóng lớn "điểm vàng" (Golden Ratio for portrait)
+        var minRatio = Math.min(hRatio, vRatio);
+        var theaterRatio = minRatio * 1.28; // Tăng lên 1.28x để lấp đầy nhưng không mất đầu
+
+        canvas.width = w;
+        canvas.height = h;
+        
+        if (exportRoot) {
+            // 1. Ẩn thanh công cụ và bản quyền một cách triệt để
+            if (exportRoot.nav) {
+                exportRoot.nav.visible = false;
+                exportRoot.nav.alpha = 0;
+            }
+
+            // 2. Gỡ bỏ mặt nạ cắt (Mask)
+            if (exportRoot.instance) {
+                exportRoot.instance.mask = null;
+            }
+
+            // 3. Áp dụng tỷ lệ mới
+            exportRoot.scaleX = exportRoot.scaleY = theaterRatio;
+            
+            // 4. Căn giữa theo chiều ngang và đẩy xuống dưới Header
+            exportRoot.x = (w - (lib.properties.width * theaterRatio)) / 2; 
+            exportRoot.y = headerHeight + (availableHeight - (lib.properties.height * theaterRatio)) / 2;
+        }
+        
+        stage.update();
+    }
+
+    if (window.addEventListener) window.addEventListener('orientationchange', function() {
+        setTimeout(resize, 1000);
+    });
+    window.addEventListener('resize', resize);
+</script>
+</head>
+<body onload="init();">
+<canvas id="canvas" width="1000" height="800" style="background-color:#FFFFFF; display: none"></canvas>
+<!-- Scripts relocated to match local structure -->
+<script src="vendor/gettext.min.js"></script>
+<script src="human-body-1/gettext-vi.js"></script>
+<script src="vendor/three.min.js"></script>
+<script src="vendor/createjs-2015.11.26.min.js"></script>
+<script src="compo.min.js"></script>
+<script src="human-body-1/human-body-1.js"></script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Hệ sinh sản nam</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000000; color: white; }
+    canvas { display: block; touch-action: none; background-color: #000000; }
+</style>
+<script src="../vendor/gettext.min.js"></script>
+<script src="./gettext-vi.js"></script>
+<script src="../vendor/createjs-2015.11.26.min.js"></script>
+<script src="../compo.min.js"></script>
+<script src="./male-reproductive-system.js"></script>
+<script>
+    var canvas, stage, exportRoot, images, ss;
+
+    function nukeBackgrounds(container) {
+        if (!container || !container.children) return;
+        for (var i = 0; i < container.children.length; i++) {
+            var child = container.children[i];
+            if (!child) continue;
+            var className = child.constructor ? child.constructor.name : "";
+            var name = child.name || "";
+            
+            var isBackground = false;
+            
+            // 1. Kiểm tra tên đối tượng (name hoặc className)
+            if (name.indexOf("masque") !== -1 || className.indexOf("masque") !== -1 || 
+                name.indexOf("fond") !== -1 || name.indexOf("bg") !== -1 || 
+                className.indexOf("fond") !== -1 || className.indexOf("bg") !== -1) {
+                isBackground = true;
+            }
+            
+            // 2. Kiểm tra Shape có kích thước lớn hoặc dùng BitmapFill/Gradient
+            else if (className === "Shape") {
+                try {
+                    var instructions = child.graphics && child.graphics._instructions;
+                    if (instructions) {
+                        for (var j = 0; j < instructions.length; j++) {
+                            var inst = instructions[j];
+                            if (inst) {
+                                var instStr = inst.toString ? inst.toString() : "";
+                                if (inst.rect && (inst.rect[2] > 300 || inst.rect[3] > 300)) {
+                                    isBackground = true;
+                                    break;
+                                }
+                                if (instStr.indexOf("Gradient") !== -1 || instStr.indexOf("gradient") !== -1 || 
+                                    instStr.indexOf("Bitmap") !== -1 || instStr.indexOf("bitmap") !== -1) {
+                                    isBackground = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                } catch(e) {}
+            } 
+            
+            // 3. TẤT CẢ các Bitmap đều là hình nền
+            else if (className === "Bitmap") {
+                isBackground = true;
+            }
+            
+            // 4. Kiểm tra màu sắc của Shape (màu đỏ hoặc trắng làm nền)
+            else if (className === "Shape") {
+                try {
+                    var style = child.graphics && child.graphics._fill && child.graphics._fill.style;
+                    if (style && (style === "#ff0000" || style === "red" || style === "#FF0000" || style === "#f00" || 
+                        style.indexOf("255,0,0") !== -1 || style.indexOf("255, 0, 0") !== -1 || style === "#ffffff" || style === "white")) {
+                        isBackground = true;
+                    }
+                } catch(e) {}
+            }
+
+            if (className === "Text" || child.text !== undefined) {
+                child.color = "#000000";
+            }
+
+            if (isBackground) {
+                if (child.parent) {
+                    child.parent.removeChild(child);
+                    i--;
+                }
+            } else if (child.children && child.visible) {
+                nukeBackgrounds(child);
+            }
+        }
+    }
+
+    function init() {
+        canvas = document.getElementById("canvas");
+        createjs.LoadItem.LOAD_TIMEOUT_DEFAULT = 120 * 1000;
+
+        if (lib.properties.manifest && lib.properties.manifest.length) {
+            images = images || {};
+            ss = ss || {};
+            
+            // Viết lại đường dẫn manifest để dùng ảnh cục bộ
+            for (var j = 0; j < lib.properties.manifest.length; j++) {
+                var item = lib.properties.manifest[j];
+                if (item.src) {
+                    var filename = item.src.substring(item.src.lastIndexOf('/') + 1);
+                    item.src = "images/" + filename;
+                }
+            }
+
+            var loader = new createjs.LoadQueue(false);
+
+            loader.addEventListener("fileload", handleFileLoad);
+            loader.addEventListener("complete", handleComplete);
+            loader.loadManifest(lib.properties.manifest);
+        } else {
+            handleComplete();
+        }
+    }
+
+    function handleFileLoad(evt) {
+        if (evt.item.type == "image") {
+            images[evt.item.id] = evt.result;
+        }
+    }
+
+    function handleComplete(evt) {
+        if (evt) {
+            var queue = evt.target;
+            var ssMetadata = lib.ssMetadata || [];
+            for (var i = 0; i < ssMetadata.length; i++) {
+                ss[ssMetadata[i].name] = new createjs.SpriteSheet({
+                    "images": [queue.getResult(ssMetadata[i].name)],
+                    "frames": ssMetadata[i].frames
+                });
+            }
+        }
+
+        // Sử dụng lib._658 cho hệ sinh sản nam
+        exportRoot = new lib._658();
+        stage = new createjs.Stage(canvas);
+        
+        // Tạo nền đen
+        var bg = new createjs.Shape();
+        bg.graphics.beginFill('#000000').drawRect(-1000, -1000, 3000, 3000);
+        stage.addChild(bg);
+        
+        stage.addChild(exportRoot);
+        
+        stage.update();
+        stage.enableMouseOver();
+
+        createjs.Ticker.setFPS(lib.properties.fps || 24);
+        createjs.Ticker.addEventListener("tick", stage);
+        createjs.Touch.enable(stage);
+
+        createjs.Ticker.addEventListener("tick", function() {
+            if (exportRoot) {
+                nukeBackgrounds(exportRoot);
+
+                // Xóa triệt để các lớp nền (Shape/Bitmap) nằm ngoài mô hình
+                var c0 = exportRoot.getChildAt(0);
+                if (c0 && c0.children) {
+                    for (var j = c0.children.length - 1; j >= 0; j--) {
+                        var cc = c0.children[j];
+                        if (cc) {
+                            var ccName = cc.constructor ? cc.constructor.name : "";
+                            if (ccName === "Shape" || ccName === "Bitmap") {
+                                try { c0.removeChild(cc); } catch(e) {}
+                            }
+                        }
+                    }
+                }
+                for (var j = exportRoot.children.length - 1; j >= 0; j--) {
+                    var cc = exportRoot.children[j];
+                    if (cc) {
+                        var ccName = cc.constructor ? cc.constructor.name : "";
+                        if (ccName === "Shape" || ccName === "Bitmap") {
+                            try { exportRoot.removeChild(cc); } catch(e) {}
+                        }
+                    }
+                }
+                
+
+                
+                // Ẩn thanh điều khiển màu trắng
+                if (exportRoot.controller) exportRoot.controller.visible = false;
+                if (exportRoot.nav) exportRoot.nav.visible = false;
+
+                for (var k = 0; k < exportRoot.children.length; k++) {
+                    var child = exportRoot.children[k];
+                    if (child) {
+                        var cName = child.constructor ? child.constructor.name : "";
+                        var instanceName = child.name || "";
+                        if (cName.indexOf("Controller") !== -1 || cName.indexOf("Nav") !== -1 || 
+                            instanceName.indexOf("controller") !== -1 || instanceName.indexOf("nav") !== -1) {
+                            child.visible = false;
+                        }
+                    }
+                }
+            }
+            if (bg && exportRoot.getChildAt(0) !== bg) {
+                exportRoot.addChildAt(bg, 0);
+            }
+        });
+
+        resize();
+    }
+
+    function resize() {
+        if (!exportRoot) return;
+        var w = window.innerWidth, h = window.innerHeight;
+        var simW = (lib && lib.properties && lib.properties.width) || 550;
+        var simH = (lib && lib.properties && lib.properties.height) || 440;
+
+        var ratio = Math.min(w / simW, h / simH);
+        canvas.width = w;
+        canvas.height = h;
+
+        exportRoot.scaleX = exportRoot.scaleY = ratio;
+        exportRoot.x = (w - simW * ratio) / 2;
+        exportRoot.y = (h - simH * ratio) / 2;
+
+        if (stage) {
+            stage.update();
+        }
+    }
+
+    window.addEventListener('resize', resize);
+    window.addEventListener('orientationchange', function() {
+        setTimeout(resize, 1000);
+    });
+</script>
+</head>
+<body onload="init();" style="margin:0;padding:0;">
+    <canvas id="canvas" width="550" height="440" style="background-color:#000000;"></canvas>
+</body>
+</html>

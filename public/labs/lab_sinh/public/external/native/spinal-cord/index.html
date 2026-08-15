@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Tá»§y sá»‘ng</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../dark-sim-theme.css">
+<style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        background-color: #020617; /* Slate 950 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        height: 100%;
+        width: 100%;
+    }
+    #canvas {
+        display: block;
+        margin: auto;
+        background-color: #020617;
+    }
+</style>
+<script>
+    var canvas, stage, exportRoot, images, ss;
+
+    function init() {
+        canvas = document.getElementById("canvas");
+        createjs.LoadItem.LOAD_TIMEOUT_DEFAULT = 120 * 1000;
+
+        if (lib.properties.manifest && lib.properties.manifest.length) {
+            images = images || {};
+            ss = ss || {};
+            var loader = new createjs.LoadQueue(false);
+
+            loader.addEventListener("fileload", handleFileLoad);
+            loader.addEventListener("complete", handleComplete);
+            loader.loadManifest(lib.properties.manifest);
+        } else {
+            handleComplete();
+        }
+    }
+
+    function handleFileLoad(evt) {
+        if (evt.item.type == "image") {
+            images[evt.item.id] = evt.result;
+        }
+    }
+
+    function handleComplete(evt) {
+        if (evt) {
+            var queue = evt.target;
+            var ssMetadata = lib.ssMetadata;
+            for (var i = 0; i < ssMetadata.length; i++) {
+                ss[ssMetadata[i].name] = new createjs.SpriteSheet({
+                    "images": [queue.getResult(ssMetadata[i].name)],
+                    "frames": ssMetadata[i].frames
+                })
+            }
+        }
+
+        // V16: CLEANUP PREVIOUS PATCHES (Removing heavy locks)
+        window.reparentedLabels = [];
+
+        exportRoot = new lib._359();
+        stage = new createjs.Stage(canvas);
+        
+        // Background - Darkened to match platform
+        var bg = new createjs.Shape();
+        bg.graphics.beginFill('#020617').drawRect(0, 0, lib.properties.width, lib.properties.height);
+        exportRoot.addChildAt(bg, 0);
+        bg.on('tick', function() {
+            if (exportRoot.getChildIndex(bg) != 0) exportRoot.setChildIndex(bg, 0);
+        });
+
+        // DEEP PATCH: HIDE COPYRIGHT & EXTERNAL CONTROLS API
+        var patchAttempts = 0;
+        var patchInterval = setInterval(function() {
+            if (exportRoot) {
+                // Force initial resize
+                resize();
+
+                // 1. Hide ALL native navigation and branding (But keep functionally active)
+                if (exportRoot.nav) {
+                    exportRoot.nav.visible = true;
+                    exportRoot.nav.alpha = 1; // System must think it's visible for legends to work
+                    exportRoot.nav.x = -5000; // Move far off-screen
+                    exportRoot.nav.mouseEnabled = false;
+                }
+
+                // 2. Recursive Deep Clean for branding
+                const cleanup = (obj) => {
+                    if (!obj || !obj.children) return;
+                    obj.children.forEach(child => {
+                        const cInstanceName = (child.name || "").toLowerCase();
+                        
+                        // 1. WHITELIST: PROTECT CONTENT LABELS
+                        const isProtected = cInstanceName.includes('field') || 
+                            cInstanceName.includes('label') || 
+                            cInstanceName.includes('lgd') || 
+                            cInstanceName.includes('legend') ||
+                            cInstanceName === 'legendes' ||
+                            cInstanceName === 'legendes2' ||
+                            cInstanceName === 'legendes3';
+                        
+                        // DEEP CHECK for ancestors to protect internal graphics of legends
+                        let pStatus = isProtected;
+                        let walkP = child.parent;
+                        while(walkP && walkP !== exportRoot) {
+                            if (walkP.name && (walkP.name.toLowerCase().includes('legend') || walkP.name.toLowerCase().includes('label'))) {
+                                pStatus = true; break;
+                            }
+                            walkP = walkP.parent;
+                        }
+
+                        if (pStatus) {
+                            child.visible = true;
+                            child.alpha = 1;
+                            let tempP = child.parent;
+                            while(tempP && tempP !== exportRoot) { tempP.visible = true; tempP = tempP.parent; }
+                            return; 
+                        }
+
+                        // 2. HIDE BRANDING & NAVIGATION BUTTONS
+                        const isBranding = cInstanceName.includes('logo') || cInstanceName.includes('title') || cInstanceName.includes('copyright') || cInstanceName.includes('taiwan') || cInstanceName.includes('edumedia');
+                        const isNavUI = cInstanceName.includes('nav') || cInstanceName.includes('controller') || cInstanceName.includes('btn') || cInstanceName.includes('gomme') || cInstanceName.includes('pencil');
+                        
+                        if (isBranding || isNavUI) {
+                            child.visible = false;
+                            child.alpha = 0;
+                        }
+                        
+                        // 3. Identify by Names
+                        if ((cInstanceName.includes('whitegray') || cInstanceName.includes('bg') || cInstanceName.includes('block')) && !pStatus) {
+                            child.visible = false;
+                        }
+
+                        // 4. Identify by Color (Light grey borders/backgrounds)
+                        if (child.graphics && child.graphics._fill) {
+                            const color = child.graphics._fill.style;
+                            const isWhiteGrey = color === '#FFFFFF' || color === '#CCCCCC' || color === '#D8D8D8' || color === '#E5E5E5' || color === 'white';
+                            
+                            if (isWhiteGrey && !pStatus) {
+                                // Double check if it's inside anim/photo
+                                let isContent = false;
+                                let pNode = child;
+                                while(pNode) { 
+                                    if(pNode.name === 'anim' || pNode.name === 'photo' || pNode.name === 'instance') { 
+                                        isContent = true; break; 
+                                    } 
+                                    pNode = pNode.parent; 
+                                }
+                                if (!isContent) child.visible = false;
+                            }
+                        }
+                        
+                        cleanup(child);
+                    });
+                };
+                cleanup(exportRoot);
+
+                // V17: Direct force legendes/legendes2/legendes3 AFTER cleanup
+                try {
+                    var photo = exportRoot.anim ? exportRoot.anim.photo : null;
+                    // V21: Không dùng reparentedLabels nữa để tránh lệch vị trí
+                    if (photo) {
+                        ['legendes', 'legendes2', 'legendes3'].forEach(function(name) {
+                            var lgd = photo[name];
+                            if (!lgd) return;
+                            lgd.visible = true; lgd.alpha = 1;
+                            if (lgd.mask) lgd.mask = null;
+                        });
+                    }
+                } catch(e) {}
+
+                // V21: Loại bỏ surgicalForceLabels (đã cũ và gây lệch vị trí)
+                window.reparentedLabels = []; 
+
+                // V21: PERSISTENT TICK WATCHER - Exclusive Visibility Logic
+                stage.on("tick", function() {
+                    if (!exportRoot) return;
+                    
+                    // 1. Giữ nav ẩn nhưng vẫn hoạt động cho controller
+                    if (exportRoot.nav) {
+                        exportRoot.nav.x = -5000;
+                        exportRoot.nav.visible = true;
+                        if (exportRoot.nav.controller) exportRoot.nav.controller.legendIsOn = true;
+                    }
+                    
+                    // 2. Điều khiển hiển thị nhãn ĐỘC QUYỀN (Chỉ hiện cái cần hiện)
+                    try {
+                        var photo = exportRoot.anim ? exportRoot.anim.photo : null;
+                        if (photo && window.currentZoomLevel) {
+                            var activeName = { 'x20': 'legendes', 'x100': 'legendes2', 'x800': 'legendes3' }[window.currentZoomLevel];
+                            
+                            ['legendes', 'legendes2', 'legendes3'].forEach(function(name) {
+                                var lgd = photo[name];
+                                if (!lgd) return;
+                                
+                                if (name === activeName) {
+                                    // HIỆN nhãn của mức zoom này
+                                    if (photo.children.indexOf(lgd) === -1) photo.addChild(lgd);
+                                    lgd.visible = true;
+                                    lgd.alpha = 1;
+                                    if (lgd.mask) lgd.mask = null;
+                                    
+                                    // Ép hiển thị các thành phần bên trong (text, pointer)
+                                    if (lgd.children) {
+                                        lgd.children.forEach(function(c) {
+                                            c.visible = true; c.alpha = 1;
+                                            if (c.mask) c.mask = null;
+                                        });
+                                    }
+                                } else {
+                                    // ẨN các nhãn của các mức zoom khác
+                                    lgd.visible = false;
+                                    lgd.alpha = 0;
+                                }
+                            });
+                        }
+                    } catch(e) {}
+                });
+
+                window.surgicalForceLabels = surgicalForceLabels;
+                surgicalForceLabels();
+
+                window.currentZoomLevel = 'x20'; // Khởi tạo mức zoom mặc định
+
+                // V17/V20: Direct Legend Force - Ép nhãn vào display list ngay lập tức
+                const directForceLegends = () => {
+                    try {
+                        var ctrl = exportRoot.nav ? exportRoot.nav.controller : null;
+                        if (ctrl) { ctrl.legendIsOn = true; ctrl.hasLegends = true; }
+
+                        var photo = exportRoot.anim ? exportRoot.anim.photo : null;
+                        if (photo && window.currentZoomLevel) {
+                            var lgdName = { 'x20': 'legendes', 'x100': 'legendes2', 'x800': 'legendes3' }[window.currentZoomLevel];
+                            var lgd = photo[lgdName];
+                            if (lgd) {
+                                if (photo.children.indexOf(lgd) === -1) photo.addChild(lgd);
+                                lgd.visible = true; lgd.alpha = 1;
+                                if (lgd.mask) lgd.mask = null;
+                                if (lgd.children) lgd.children.forEach(function(c) {
+                                    c.visible = true; c.alpha = 1;
+                                    if (c.mask) c.mask = null;
+                                    if (c.gotoAndStop) c.gotoAndStop(1);
+                                });
+                            }
+                        }
+                        stage.update();
+                    } catch(e) {}
+                };
+                window.directForceLegends = directForceLegends;
+                directForceLegends();
+
+                patchAttempts++;
+                if (patchAttempts > 20) clearInterval(patchInterval); 
+            }
+        }, 200);
+
+        // EXTERNAL API FOR REACT PARENT
+        window.setMagnification = function(level) {
+            if (!exportRoot || !exportRoot.anim || !exportRoot.anim.photo) return;
+            
+            // Track current zoom for tick watcher
+            window.currentZoomLevel = level;
+
+            var photo = exportRoot.anim.photo;
+            var targetFrame = 0;
+            switch(level) {
+                case 'x20':  targetFrame = 0;  break;
+                case 'x100': targetFrame = 24; break;
+                case 'x800': targetFrame = 43; break;
+            }
+
+            // CORE V20 FIX: Add legend object to display list since Edumedia
+            // timeline removes it via state-based addChild/removeChild mechanism
+            var lgdName = { 'x20': 'legendes', 'x100': 'legendes2', 'x800': 'legendes3' }[level];
+            var addLegendToDisplay = function() {
+                try {
+                    var ctrl = exportRoot.nav ? exportRoot.nav.controller : null;
+                    if (ctrl) { ctrl.legendIsOn = true; ctrl.hasLegends = true; }
+                    
+                    var lgd = photo[lgdName];
+                    if (!lgd) return;
+                    
+                    // Re-add to display list if timeline removed it
+                    if (photo.children.indexOf(lgd) === -1) {
+                        photo.addChild(lgd);
+                    }
+                    lgd.visible = true;
+                    lgd.alpha = 1;
+                    if (lgd.mask) lgd.mask = null;
+                    
+                    // Force children visible
+                    if (lgd.children) {
+                        for (var i = 0; i < lgd.children.length; i++) {
+                            var c = lgd.children[i];
+                            c.visible = true;
+                            c.alpha = 1;
+                            if (c.mask) c.mask = null;
+                            if (c.gotoAndStop) c.gotoAndStop(1);
+                        }
+                    }
+                    stage.update();
+                } catch(e) { console.warn('addLegendToDisplay:', e); }
+            };
+
+            // Tween to target frame
+            createjs.Tween.get(photo, {override: true})
+                .to({currentFrame: targetFrame}, 600, createjs.Ease.quadInOut)
+                .on("change", function() {
+                    photo.gotoAndStop(Math.round(photo.currentFrame));
+                })
+                .call(function() {
+                    setTimeout(function() {
+                        addLegendToDisplay();
+                        cleanup(exportRoot);
+                        addLegendToDisplay(); // Re-add after cleanup
+                        stage.update();
+                    }, 50);
+                });
+
+            if (!createjs.Ticker.hasEventListener("tick")) {
+                createjs.Ticker.addEventListener("tick", stage);
+            }
+        };
+
+        // Listen for messages from React parent
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'SET_MAGNIFICATION') {
+                window.setMagnification(event.data.level);
+            }
+        });
+
+        stage.addChild(exportRoot);
+        canvas.style.display = '';
+        stage.update();
+        
+        createjs.Ticker.setFPS(lib.properties.fps);
+        createjs.Ticker.addEventListener("tick", stage);
+        createjs.Touch.enable(stage);
+
+        resize();
+    }
+
+    function resize() {
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+        var hRatio = w / lib.properties.width;
+        var vRatio = h / lib.properties.height;
+        
+        // CÄƒn lá» vÃ  phÃ³ng lá»›n 1.45x (High Magnification)
+        var minRatio = Math.min(hRatio, vRatio);
+        var theaterRatio = minRatio * 1.45; 
+
+        canvas.width = w;
+        canvas.height = h;
+        
+        if (exportRoot) {
+            
+            // Gá»¡ bá» máº·t náº¡ cáº¯t (Mask)
+            if (exportRoot.instance) {
+                exportRoot.instance.mask = null;
+            }
+
+            // Ãp dá»¥ng tá»· lá»‡ phÃ³ng lá»›n vÃ  cÄƒn giá»¯a
+            exportRoot.scaleX = exportRoot.scaleY = theaterRatio;
+            exportRoot.x = (w - (lib.properties.width * theaterRatio)) / 2; 
+            exportRoot.y = (h - (lib.properties.height * theaterRatio)) / 2;
+        }
+        
+        stage.update();
+    }
+
+    window.addEventListener('resize', resize);
+</script>
+</head>
+<body onload="init();">
+    <canvas id="canvas" width="550" height="440" style="display: none"></canvas>
+
+    <script src="vendor/gettext.min.js"></script>
+    <script src="spinal-cord/gettext-vi.js"></script>
+    <script src="vendor/createjs-2015.11.26.min.js"></script>
+    <script src="compo.min.js"></script>
+    <script src="spinal-cord/spinal-cord.js"></script>
+</body>
+</html>

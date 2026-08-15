@@ -1,0 +1,28 @@
+var i18n = window.i18n();
+i18n.setLocale('vi');
+i18n.setMessages('messages', 'vi', {
+  "50 µm": "50 µm",
+  "Interphase": "Gian kỳ",
+  "Two daughters\ncells": "Hai tế bào con",
+  "Plasma\n membrane": "Màng sinh chất",
+  "Condensed\nchromosome\nwith one chromatid": "Nhiễm sắc thể\nco xoắn với\nmột cromatit",
+  "Two opposite\nends\nof the cell": "Hai đầu đối diện\ncủa tế bào",
+  "Metaphase plate:\nChromosomes line up in\nthe middle of\nthe spindle.": "Đĩa kỳ giữa:\nNhiễm sắc thể xếp\ngiữa thoi nguyên phân",
+  "Mitotic spindle": "Thoi nguyên phân",
+  "Centromere": "Tâm động",
+  "Condensed chromosome\nwith two chromatids": "Nhiễm sắc thể co xoắn\nvới hai cromatit",
+  "Chromosome\nduring\ncondensation": "Nhiễm sắc thể\nđang co xoắn",
+  "Plant cell": "Tế bào thực vật",
+  "Cell wall": "Thành tế bào",
+  "Cytoplasm": "Tế bào chất",
+  "Nuclear\n membrane": "Màng nhân",
+  "Uncondensed\nchromosomes\n(chromatin)": "Nhiễm sắc thể\ntháo xoắn\n(chất nhiễm sắc)",
+  "Nucleus": "Nhân",
+  "New growing\ncell wall": "Thành tế bào\nmới đang lớn",
+  "Click on the [checkbox] button to see the labels. Click on the tool bar below the animation to choose a stage of the cycle.": "Nhấn vào nút ≡ để xem các nhãn. Nhấn vào thanh công cụ bên dưới hoạt ảnh để chọn một giai đoạn của chu kỳ.",
+  "Prophase": "Kỳ đầu",
+  "Metaphase": "Kỳ giữa",
+  "Anaphase": "Kỳ sau",
+  "Telophase": "Kỳ cuối",
+  "Cytokinesis": "Phân bào",
+}, 'nplurals=1; plural=0;');

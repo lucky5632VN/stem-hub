@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Vị giác</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../dark-sim-theme.css">
+<style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #020617; }
+    canvas { display: block; margin: auto; touch-action: none; background-color: #020617; box-shadow: 0 0 50px rgba(0, 240, 255, 0.15); border: 1px solid rgba(0, 240, 255, 0.3); }
+</style>
+<script>
+    var canvas, stage, exportRoot, images, ss;
+
+    function init() {
+        canvas = document.getElementById("canvas");
+        
+        if (typeof lib === 'undefined') {
+            return;
+        }
+
+        if (lib.properties && lib.properties.manifest && lib.properties.manifest.length > 0) {
+            images = images || {};
+            ss = ss || {};
+            var loader = new createjs.LoadQueue(false);
+            loader.addEventListener("fileload", handleFileLoad);
+            loader.addEventListener("complete", handleComplete);
+            loader.loadManifest(lib.properties.manifest);
+        } else {
+            handleComplete();
+        }
+    }
+
+    function handleFileLoad(evt) {
+        if (evt.item.type == "image") { images[evt.item.id] = evt.result; }
+    }
+
+    function handleComplete(evt) {
+        if (evt) {
+            var queue = evt.target;
+            var ssMetadata = lib.ssMetadata;
+            if (ssMetadata) {
+                for (var i = 0; i < ssMetadata.length; i++) {
+                    ss[ssMetadata[i].name] = new createjs.SpriteSheet({
+                        "images": [queue.getResult(ssMetadata[i].name)],
+                        "frames": ssMetadata[i].frames
+                    })
+                }
+            }
+        }
+
+        var constructorName = "_478";
+        if (!lib[constructorName]) {
+            var funcKeys = Object.keys(lib).filter(k => typeof lib[k] === 'function');
+            constructorName = funcKeys.find(k => k.indexOf('_') === 0) || funcKeys[funcKeys.length - 1];
+        }
+
+        var initialVisibleChildren = [];
+        
+        function performCleanup() {
+            if (!stage) return;
+            
+            const cleanup = (obj) => {
+                if (!obj || !obj.children) return;
+                obj.children.forEach(child => {
+                    const name = (child.name || "").toLowerCase();
+                    // Aggressively hide branding, controller, and legacy background bars
+                    const isUnwanted = name.includes('logo') || 
+                                      name.includes('copyright') ||
+                                      name.includes('controller') ||
+                                      name.includes('barre') ||
+                                      name.includes('fond') ||
+                                      name.includes('area');
+                    
+                    if (isUnwanted) {
+                        child.visible = false;
+                    }
+                    
+                    if (child.text && typeof child.text === 'string' && child.text.includes('Nhú vị giác')) {
+                        child.color = "#FFFFFF";
+                    }
+
+                    cleanup(child);
+                });
+            };
+
+            // Cleanup everything on stage
+            stage.children.forEach(child => {
+                const name = (child.name || "").toLowerCase();
+                if (name.includes('logo') || name.includes('copyright') || name.includes('controller') || name.includes('barre') || name.includes('fond')) {
+                    child.visible = false;
+                }
+                cleanup(child);
+            });
+        }
+
+        try {
+            exportRoot = new lib[constructorName]();
+            stage = new createjs.Stage(canvas);
+            
+            // Add background layer like the original
+            if (lib.properties) {
+                var bg = new createjs.Shape();
+                bg.graphics.beginFill('#020617').drawRect(0, 0, lib.properties.width, lib.properties.height);
+                exportRoot.addChildAt(bg, 0);
+                bg.on('tick', function() {
+                    if (exportRoot.getChildIndex(bg) != 0) exportRoot.setChildIndex(bg, 0);
+                });
+            }
+            
+            stage.addChild(exportRoot);
+            
+            // Initial burst of cleanups to prevent flicker
+            performCleanup();
+            setTimeout(performCleanup, 5);
+            setTimeout(performCleanup, 20);
+            setTimeout(performCleanup, 50);
+            setTimeout(performCleanup, 100);
+            setTimeout(performCleanup, 200);
+            setTimeout(performCleanup, 500);
+
+            stage.update();
+            stage.enableMouseOver();
+
+            var fps = lib.properties ? lib.properties.fps : 12;
+            console.log("Setting FPS to:", fps);
+            createjs.Ticker.setFPS(fps); 
+            createjs.Ticker.addEventListener("tick", stage);
+            createjs.Touch.enable(stage);
+            resize();
+            setInterval(performCleanup, 100); 
+        } catch(e) {
+            console.error("Exception in handleComplete:", e);
+        }
+    }
+
+    function resize() {
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+        var pw = lib.properties ? lib.properties.width : 550;
+        var ph = lib.properties ? lib.properties.height : 400;
+        var ratio = Math.min(w/pw, h/ph);
+        canvas.width = w;
+        canvas.height = h;
+        if (exportRoot) {
+            exportRoot.scaleX = exportRoot.scaleY = ratio;
+            exportRoot.x = (w - pw * ratio) / 2;
+            exportRoot.y = (h - ph * ratio) / 2;
+        }
+        stage && stage.update();
+    }
+
+    window.addEventListener('resize', resize);
+</script>
+</head>
+<body onload="init();">
+    <canvas id="canvas" width="550" height="440"></canvas>
+    
+    <script src="../vendor/gettext.min.js"></script>
+    <script src="the-sense-of-taste/gettext-vi.js"></script>
+    <script src="../vendor/createjs-2015.11.26.min.js"></script>
+    <script src="../compo.min.js"></script>
+    <script src="the-sense-of-taste/the-sense-of-taste.js"></script>
+</body>
+</html>

@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Hệ Thống Đấu Trường & Phòng Thí Nghiệm Học Tập STEM (STEM Arena)
 
-## Getting Started
+Hệ thống Đấu Trường STEM là nền tảng học tập tương tác thế hệ mới dành cho học sinh. Dự án kết hợp mô hình đấu trường PvP 1v1 thời gian thực kịch tính với các phòng thí nghiệm mô phỏng trực quan (Vật lý, Hóa học, Toán học, Sinh học), giúp kích thích tư duy khoa học và tối ưu hóa hiệu quả giáo dục số.
 
-First, run the development server:
+---
 
+## 📋 Yêu Cầu Hệ Thống
+
+- **Môi trường**: Node.js v18.x hoặc v20.x trở lên.
+- **Trình quản lý gói**: `npm` (đi kèm sẵn khi cài đặt Node.js).
+- **Trình duyệt khuyến nghị**: Google Chrome, Microsoft Edge, Safari (chạy tốt trên cả thiết bị di động và máy tính).
+
+---
+
+## 🛠️ Hướng Dẫn Cài Đặt & Chạy Dự Án
+
+### Bước 1: Giải nén mã nguồn
+Giải nén tệp zip mã nguồn vào một thư mục làm việc trên máy tính của bạn.
+
+### Bước 2: Cài đặt thư viện phụ thuộc
+Mở Terminal / Command Prompt tại thư mục dự án và chạy lệnh sau để tải các package cần thiết:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Bước 3: Cấu hình biến môi trường (Tùy chọn)
+Dự án được cấu hình sẵn thông tin kết nối tới hệ thống Cơ sở dữ liệu đám mây **Firebase (Auth & Firestore)** chính thức (nằm trong gói miễn phí). Giám khảo **không cần cấu hình thêm bất kỳ khóa bảo mật nào** để chạy thử.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+Nếu muốn chuyển đổi chế độ giả lập (Emulator), có thể tạo file `.env.local` tại thư mục gốc với nội dung:
+```env
+NEXT_PUBLIC_USE_EMULATOR=false
+```
+*Lưu ý: Đặt thành `true` nếu muốn chạy dự án kèm theo Firebase Local Emulator.*
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Bước 4: Khởi động chế độ phát triển (Development)
+Chạy lệnh sau để khởi động dự án ở Localhost:
+```bash
+npm run dev
+```
+Sau đó, truy cập ứng dụng thông qua trình duyệt tại địa chỉ: [http://localhost:3000](http://localhost:3000).
 
-## Learn More
+### Bước 5: Biên dịch phiên bản Production (Tùy chọn)
+Để tối ưu hóa hiệu năng và kiểm tra độ ổn định của ứng dụng, chạy lệnh build chính thức:
+```bash
+npm run build
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📌 Ghi Chú Quan Trọng Dành Cho Ban Giám Khảo
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Bảo mật và Tự Động Đồng Bộ**:
+   - Toàn bộ thông tin Firebase Client đã được cấu hình dạng bảo mật Client-side.
+   - Cơ sở dữ liệu và Cơ chế xác thực chạy trực tiếp trên Cloud Firestore / Firebase Auth.
+2. **Không Cần Triển Khai Cloud Functions**:
+   - Dự án được tích hợp cơ chế tự động chuyển đổi thông minh (**Client-Side Callable Engine** tại `src/lib/clientFunctions.js`).
+   - Khi chạy ở môi trường ngoài, hệ thống sẽ tự động điều phối toàn bộ nghiệp vụ (tính toán ELO, kết hợp trận đấu PvP, vòng quay Gacha, điểm danh 30 ngày) chạy trực tiếp trên trình duyệt Client mà không phụ thuộc vào Firebase Cloud Functions.
+3. **Danh Sách Tài Khoản Khảo Sát**:
+   - Vui lòng tham khảo file đính kèm `Danh_sach_20_tai_khoan_test.docx` để có danh sách các tài khoản học sinh và giáo viên đã được tạo sẵn để trải nghiệm các tính năng kết bạn, đấu trường PvP và quản lý lớp học.
+"# vn-stem-hub" 

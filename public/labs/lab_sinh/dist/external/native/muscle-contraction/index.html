@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Co cơ (đốt cơ)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000000; }
+    canvas { display: block; margin: auto; touch-action: none; background-color: #000000; }
+</style>
+<script>
+    var canvas, stage, exportRoot, images, ss;
+
+    function log(msg) {
+        console.log("Sim Log: " + msg);
+        window.parent.postMessage({ type: 'log', message: msg }, '*');
+    }
+
+    function init() {
+        canvas = document.getElementById("canvas");
+        createjs.LoadItem.LOAD_TIMEOUT_DEFAULT = 30 * 1000;
+
+        images = images || {};
+        ss = ss || {};
+        
+        var loader = new createjs.LoadQueue(true);
+        loader.addEventListener("fileload", handleFileLoad);
+        loader.addEventListener("complete", handleComplete);
+
+        var manifest = [
+            {src: "images/312_atlas_.png", id: "312_atlas_png"}
+        ];
+
+        if (typeof lib !== 'undefined' && lib.properties && lib.properties.manifest && lib.properties.manifest.length) {
+            manifest = manifest.concat(lib.properties.manifest);
+        }
+        loader.loadManifest(manifest);
+    }
+
+    function handleFileLoad(evt) {
+        if (evt.item.type == "image") {
+            images[evt.item.id] = evt.result;
+        }
+    }
+
+    function handleComplete(evt) {
+        var queue = evt.target;
+        
+        try {
+            ss["312_atlas_"] = new createjs.SpriteSheet({
+                "images": [queue.getResult("312_atlas_png")],
+                "frames": [[0,1289,500,380],[0,862,630,425],[0,0,339,860],[341,0,330,860]]
+            });
+        } catch (e) {
+            console.error("SpriteSheet Error:", e);
+        }
+
+        if (typeof lib === 'undefined') return;
+
+        // Khôi phục lại lớp chính chuẩn xác
+        var mainClass = lib._312 || lib.main;
+        if (!mainClass) return;
+
+        try {
+            exportRoot = new mainClass();
+            stage = new createjs.Stage(canvas);
+            stage.addChild(exportRoot);
+            
+            stage.update();
+            stage.enableMouseOver();
+
+            createjs.Ticker.setFPS(lib.properties.fps || 24);
+            createjs.Ticker.addEventListener("tick", stage);
+            createjs.Touch.enable(stage);
+
+            resize();
+            canvas.style.display = 'block';
+        } catch (e) {
+            console.error("Init Error:", e);
+        }
+    }
+
+    function resize() {
+        if (!exportRoot) return;
+        var w = window.innerWidth, h = window.innerHeight;
+        
+        var simW = (typeof lib !== 'undefined' && lib.properties && lib.properties.width) || 550;
+        var simH = (typeof lib !== 'undefined' && lib.properties && lib.properties.height) || 400;
+        
+        var ratio = Math.min(w / simW, h / simH) * 1.45;
+        
+        canvas.width = w;
+        canvas.height = h;
+        
+        exportRoot.scaleX = exportRoot.scaleY = ratio;
+        exportRoot.x = (w - (simW * ratio)) / 2;
+        exportRoot.y = (h - (simH * ratio)) / 2; 
+
+        // Truy quét và ẩn các lớp nền đặc thù
+        function nukeBackgrounds(container) {
+            if (!container || !container.children) return;
+            for (var i = 0; i < container.children.length; i++) {
+                var child = container.children[i];
+                var shouldHide = false;
+                
+                // Kiểm tra tên lớp
+                var className = child.constructor ? child.constructor.name : "";
+                var lowerClass = className.toLowerCase();
+                
+                if (lowerClass.indexOf("fond") !== -1 || 
+                    lowerClass.indexOf("bg") !== -1 ||
+                    lowerClass.indexOf("background") !== -1) {
+                    shouldHide = true;
+                }
+                
+                // Nếu là các lớp đặc thù đã xác định từ log
+                if (className === "fondanimationbleu" || className === "fondneurone") {
+                    shouldHide = true;
+                }
+
+                if (shouldHide) {
+                    child.visible = false;
+                } else if (child.children) {
+                    nukeBackgrounds(child);
+                }
+            }
+        }
+        
+        nukeBackgrounds(exportRoot);
+        
+        if (stage) {
+            stage.backgroundColor = "#000000";
+            stage.update();
+        }
+    }
+
+    window.addEventListener('resize', resize);
+    
+    window.addEventListener('message', function(event) {
+        if (!exportRoot) return;
+        var data = event.data;
+        if (data.type === 'control') {
+            switch (data.command) {
+                case 'play': createjs.Ticker.paused = false; break;
+                case 'pause': createjs.Ticker.paused = true; break;
+                case 'reset': window.location.reload(); break;
+            }
+        }
+    });
+</script>
+</head>
+<body onload="init();">
+    <div id="debug-info"></div>
+    <canvas id="canvas" width="550" height="440" style="display:none"></canvas>
+
+    <script src="vendor/gettext.min.js"></script>
+    <script src="gettext-vi.js"></script>
+    <script src="vendor/createjs-2015.11.26.min.js"></script>
+    <script src="compo.min.js"></script>
+    <script src="muscle-contraction-sarcomere.js"></script>
+</body>
+</html>

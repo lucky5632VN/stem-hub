@@ -1,0 +1,28 @@
+var i18n = window.i18n();
+i18n.setLocale('vi');
+i18n.setMessages('messages', 'vi', {
+  "Producers": "Sản xuất",
+  "Primary consumers": "Tiêu thụ sơ cấp",
+  "Secondary consumers": "Tiêu thụ thứ cấp",
+  "Tertiary consumers": "Tiêu thụ thứ ba",
+  'In the "Ecosystem" tab, click and slide each living being towards its name.\nIn the "Food Chain" tab, drag an arrow between 2 images meaning "... is eaten by ...".\nThere are 20 arrows to be placed.': 'Trong thẻ "Hệ sinh thái", nhấn và trượt mỗi sinh vật hướng về tên của nó. Trong thẻ "Chuỗi thức ăn", kéo một mũi tên giữa 2 ảnh có nghĩa là "... bị ăn bởi ...". Có 20 mũi tên cần đặt.',
+  "%1 / %2": "%1 / %2",
+  "... is eaten by ...": "... bị ăn bởi ...",
+  "Completed!": "Hoàn thành!",
+  "Drag each image in its appropriate zone.": "Kéo mỗi ảnh vào\nkhu vực thích hợp.",
+  "Great! Next step...": "Tuyệt! Bước tiếp theo...",
+  "Eagle": "Đại bàng",
+  "Wolf": "Chó sói",
+  "Izard": "Sơn dương",
+  "Groundhog": "Macmot châu Mỹ",
+  "Stoat": "Chồn ecmin",
+  "Snake": "Rắn",
+  "Water vole": "Chuột nước",
+  "Grasshopper": "Châu chấu",
+  "Caterpillar": "Sâu bướm",
+  "Lizard": "Thằn lằn",
+  "Herbs": "Cỏ",
+  "Leaves": "Lá",
+  "Ecosystem": "Hệ sinh thái",
+  "Food chain": "Chuỗi thức ăn",
+}, 'nplurals=1; plural=0;');

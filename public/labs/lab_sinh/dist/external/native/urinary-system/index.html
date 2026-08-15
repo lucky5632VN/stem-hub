@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Hệ tiết niệu</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #FFFFFF; }
+    canvas { display: block; margin: auto; touch-action: none; }
+    #bottom-mask {
+        position: fixed;
+        width: 320px;
+        height: 55px;
+        background: white;
+        z-index: 9999;
+        pointer-events: none;
+        display: block;
+        bottom: 0;
+    }
+</style>
+<script>
+    var canvas, stage, exportRoot, images, ss;
+
+    function init() {
+        if (typeof createjs === 'undefined' || typeof lib === 'undefined') return;
+
+        canvas = document.getElementById("canvas");
+        createjs.LoadItem.LOAD_TIMEOUT_DEFAULT = 120 * 1000;
+
+        if (typeof createjs.MotionGuidePlugin !== 'undefined') {
+            createjs.MotionGuidePlugin.install();
+        }
+
+        images = images || {};
+        ss = ss || {};
+
+        var manifest = lib.properties && lib.properties.manifest;
+        if (manifest && manifest.length) {
+            // Fix đường dẫn tuyệt đối Django → đường dẫn tương đối
+            manifest = manifest.map(function(item) {
+                var src = item.src || '';
+                if (src.indexOf('/static/') === 0 || src.indexOf('http') === 0) {
+                    var parts = src.split('/');
+                    src = 'images/' + parts[parts.length - 1];
+                }
+                return { src: src, id: item.id, type: item.type };
+            });
+
+            var loader = new createjs.LoadQueue(false);
+            loader.addEventListener("fileload", handleFileLoad);
+            loader.addEventListener("complete", handleComplete);
+            loader.loadManifest(manifest);
+        } else {
+            handleComplete();
+        }
+    }
+
+    function handleFileLoad(evt) {
+        if (evt.item.type == "image") {
+            images[evt.item.id] = evt.result;
+        }
+    }
+
+    function handleComplete(evt) {
+        if (evt) {
+            var queue = evt.target;
+            var ssMetadata = lib.ssMetadata;
+            if (ssMetadata && ssMetadata.length) {
+                for (var i = 0; i < ssMetadata.length; i++) {
+                    ss[ssMetadata[i].name] = new createjs.SpriteSheet({
+                        "images": [queue.getResult(ssMetadata[i].name)],
+                        "frames": ssMetadata[i].frames
+                    });
+                }
+            }
+        }
+
+        try { exportRoot = new lib._450(); } catch(e) { return; }
+
+        stage = new createjs.Stage(canvas);
+        var bg = new createjs.Shape();
+        bg.graphics.beginFill('white').drawRect(0, 0, lib.properties.width, lib.properties.height);
+        exportRoot.addChildAt(bg, 0);
+        bg.on('tick', function() {
+            if (exportRoot.getChildIndex(bg) != 0) exportRoot.setChildIndex(bg, 0);
+        });
+        stage.addChild(exportRoot);
+        
+        // Hiện canvas dưới dạng trong suốt để tính toán kích thước
+        canvas.style.display = 'block';
+        canvas.style.opacity = '0';
+        canvas.style.transition = 'opacity 0.2s ease-in'; // Thêm hiệu ứng fade-in mượt mà
+
+        // Chạy ẩn và căn chỉnh ngay lập tức
+        translateAndClean(); 
+
+        stage.update();
+        stage.enableMouseOver();
+        createjs.Ticker.setFPS(lib.properties.fps || 24);
+        createjs.Ticker.addEventListener("tick", stage);
+        createjs.Touch.enable(stage);
+        resize();
+
+        // Đợi 150ms để mọi thứ (bao gồm miếng che) yên vị rồi mới hiện mô hình
+        setTimeout(function() {
+            canvas.style.opacity = '1';
+        }, 150);
+    }
+
+    function translateAndClean() {
+        var count = 0;
+        var dictionary = {
+            "Towards\nthe bladder": "Hướng về\nbàng quang",
+            "Towards the bladder": "Hướng về bàng quang",
+            "Loop of\nHenle": "Quai\nHenle",
+            "Loop of Henle": "Quai Henle",
+            "Proximal\ntubule": "Ống lượn\ngần",
+            "Distal\ntubule": "Ống lượn\nxa",
+            "Collecting\ntubule": "Ống\ngóp",
+            "Bowman's\nCapsule": "Nang\nBowman",
+            "Bowman\u0027s\nCapsule": "Nang\nBowman",
+            "Blood\ncapillary\nnetwork": "Mạng\nmao mạch\nmáu"
+        };
+
+        function processContainer(container) {
+            if (!container || !container.numChildren) return;
+            for (var i = 0; i < container.numChildren; i++) {
+                var child = container.getChildAt(i);
+                
+                // 1. Dịch văn bản
+                if (child instanceof createjs.Text && child.text) {
+                    var originalText = child.text;
+                    if (dictionary[originalText]) {
+                        child.text = dictionary[originalText];
+                    }
+                }
+
+                // 2. Ẩn thanh điều khiển dựa trên tên (Tất cả bắt đầu bằng EM hoặc chứa từ khóa điều khiển)
+                var name = child.name || '';
+                var isEM = name && (
+                    name.indexOf('EM') === 0 || 
+                    name.toLowerCase().indexOf('controller') !== -1 || 
+                    name.toLowerCase().indexOf('logo') !== -1 || 
+                    name.toLowerCase().indexOf('virtual') !== -1 || 
+                    name === 'nav' ||
+                    name.indexOf('legende') !== -1
+                );
+                
+                if (isEM) {
+                    child.visible = false;
+                    child.alpha = 0;
+                    child.scaleX = child.scaleY = 0;
+                }
+                
+                if (child.numChildren) processContainer(child);
+            }
+        }
+
+        // CHẠY NGAY LẬP TỨC 1 LẦN (ĐỒNG BỘ)
+        if (exportRoot) processContainer(exportRoot);
+        if (stage) {
+            processContainer(stage);
+            var rect = canvas.getBoundingClientRect();
+            var mask = document.getElementById('bottom-mask');
+            if (mask && rect.width > 0) {
+                mask.style.left = (rect.left + rect.width - 320) + 'px';
+                mask.style.top = (rect.top + rect.height - 55) + 'px';
+            }
+        }
+
+        var interval = setInterval(function() {
+            count++;
+            if (count > 200) clearInterval(interval); // Chạy trong 10 giây để đảm bảo ổn định
+
+            if (exportRoot) {
+                processContainer(exportRoot);
+            }
+            if (stage) {
+                processContainer(stage);
+                
+                // Căn chỉnh miếng che HTML dính chặt vào góc Canvas
+                var mask = document.getElementById('bottom-mask');
+                if (mask && canvas) {
+                    var rect = canvas.getBoundingClientRect();
+                    mask.style.display = 'block';
+                    mask.style.transform = 'none'; // Reset transform từ CSS
+                    mask.style.left = (rect.left + rect.width - 320) + 'px';
+                    mask.style.top = (rect.top + rect.height - 55) + 'px';
+                    mask.style.width = '320px';
+                    mask.style.height = '55px';
+                    mask.style.background = 'white';
+                }
+                
+                stage.update();
+            }
+        }, 50);
+    }
+
+    function resize() {
+        var w = window.innerWidth, h = window.innerHeight;
+        var simW = (lib && lib.properties && lib.properties.width) || 550;
+        var simH = (lib && lib.properties && lib.properties.height) || 440;
+        var ratio = Math.min(w / simW, h / simH);
+        canvas.width = Math.round(simW * ratio);
+        canvas.height = Math.round(simH * ratio);
+        if (exportRoot) exportRoot.scaleX = exportRoot.scaleY = ratio;
+        stage && stage.update();
+    }
+
+    window.addEventListener('resize', resize);
+</script>
+</head>
+<body onload="init();">
+    <div id="bottom-mask"></div>
+    <canvas id="canvas" width="550" height="440" style="display:none"></canvas>
+
+    <script src="vendor/gettext.min.js"></script>
+    <script src="urinary-system/gettext-vi.js"></script>
+    <script src="vendor/createjs-2015.11.26.min.js"></script>
+    <script src="compo.min.js"></script>
+    <script src="urinary-system/urinary-system.js"></script>
+</body>
+</html>

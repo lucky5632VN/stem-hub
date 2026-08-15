@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Hệ hô hấp</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000000; color: white; }
+    canvas { display: block; touch-action: none; background-color: #000000; }
+    #debug-overlay {
+        display: none; /* Ẩn debug khi đã tinh chỉnh xong */
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #00ff00;
+        font-family: monospace;
+        font-size: 12px;
+        padding: 10px;
+        border-radius: 5px;
+        z-index: 9999;
+        width: 350px;
+        pointer-events: none;
+    }
+</style>
+<script>
+    var canvas, stage, exportRoot, images, ss;
+
+    function log(msg) {
+        console.log('[RespiratoryLab] ' + msg);
+        var overlay = document.getElementById('debug-overlay');
+        if (overlay) {
+            var div = document.createElement('div');
+            div.textContent = msg;
+            overlay.appendChild(div);
+            overlay.scrollTop = overlay.scrollHeight;
+        }
+    }
+
+    function nukeBackgrounds(container) {
+        if (!container || !container.children) return;
+        for (var i = 0; i < container.children.length; i++) {
+            var child = container.children[i];
+            if (!child) continue;
+            var className = child.constructor ? child.constructor.name : "";
+            var name = child.name || "";
+            
+            var isBackground = false;
+            
+            // 1. Kiểm tra tên đối tượng (name hoặc className)
+            if (name.indexOf("masque") !== -1 || name.indexOf("legend") !== -1 || name.indexOf("rouge") !== -1 || 
+                className.indexOf("masque") !== -1 || className.indexOf("legend") !== -1 || className.indexOf("rouge") !== -1 ||
+                name.indexOf("fond") !== -1 || name.indexOf("bg") !== -1 || className.indexOf("fond") !== -1 || className.indexOf("bg") !== -1) {
+                isBackground = true;
+            }
+            
+            // 2. Kiểm tra Shape con trực tiếp của root
+            else if (className === "Shape" && container === exportRoot) {
+                isBackground = true;
+            } 
+            
+            // 3. Kiểm tra màu sắc của Shape (màu đỏ)
+            else if (className === "Shape") {
+                if (child.nominalBounds && (child.nominalBounds.width > 300 || child.nominalBounds.height > 300)) {
+                    // Nếu là Shape lớn nằm ở bên trái (x < 200)
+                    if (child.x < 200) {
+                        isBackground = true;
+                    }
+                }
+                try {
+                    var style = child.graphics && child.graphics._fill && child.graphics._fill.style;
+                    if (style && (style === "#ff0000" || style === "red" || style === "#FF0000" || style === "#f00" || 
+                        style.indexOf("255,0,0") !== -1 || style.indexOf("255, 0, 0") !== -1)) {
+                        isBackground = true;
+                    }
+                } catch(e) {}
+            }
+
+            if (className === "Text" || child.text !== undefined) {
+                child.color = "#ffffff";
+            }
+
+            if (isBackground) {
+                if (!child._overrideVisible) {
+                    child._overrideVisible = true;
+                    try {
+                        Object.defineProperty(child, 'visible', {
+                            get: function() { return false; },
+                            set: function(val) { /* Do nothing */ },
+                            configurable: true
+                        });
+                    } catch(e) {
+                        child.visible = false;
+                    }
+                }
+                child.visible = false; // Đảm bảo ẩn ngay lập tức
+            } else if (child.children && child.visible) {
+                nukeBackgrounds(child);
+            }
+        }
+    }
+
+    function init() {
+        canvas = document.getElementById("canvas");
+        if (!canvas) return;
+
+        try {
+            createjs.LoadItem.LOAD_TIMEOUT_DEFAULT = 30 * 1000;
+            createjs.MotionGuidePlugin.install();
+        } catch(e) {
+            console.error(e);
+        }
+
+        if (typeof lib === 'undefined') return;
+
+        images = images || {};
+        ss = ss || {};
+
+        var manifest = (lib.properties && lib.properties.manifest) ? lib.properties.manifest : [];
+
+        if (manifest.length > 0) {
+            var loader = new createjs.LoadQueue(false);
+            loader.addEventListener("fileload", handleFileLoad);
+            loader.addEventListener("complete", handleComplete);
+            loader.loadManifest(manifest);
+        } else {
+            handleComplete(null);
+        }
+    }
+
+    function handleFileLoad(evt) {
+        if (evt.item.type == "image") {
+            images[evt.item.id] = evt.result;
+        }
+    }
+
+    function handleComplete(evt) {
+        if (evt) {
+            try {
+                var queue = evt.target;
+                var ssMetadata = lib.ssMetadata || [];
+                for (var i = 0; i < ssMetadata.length; i++) {
+                    ss[ssMetadata[i].name] = new createjs.SpriteSheet({
+                        "images": [queue.getResult(ssMetadata[i].name)],
+                        "frames": ssMetadata[i].frames
+                    });
+                }
+            } catch(e) {}
+        }
+
+        var mainClass = lib._543 || lib.main;
+        if (!mainClass) return;
+
+        try {
+            exportRoot = new mainClass();
+            stage = new createjs.Stage(canvas);
+            stage.addChild(exportRoot);
+            
+            // Theo dõi trạng thái để đồng bộ UI
+            var lastLabel = "";
+            createjs.Ticker.addEventListener("tick", function() {
+                var currentLabel = exportRoot.currentLabel;
+                if (currentLabel !== lastLabel) {
+                    lastLabel = currentLabel;
+                    window.parent.postMessage({ type: 'stateChange', label: currentLabel }, '*');
+                }
+            });
+
+            canvas.style.display = 'block';
+            stage.update();
+            stage.enableMouseOver();
+
+            createjs.Ticker.setFPS(lib.properties.fps || 24);
+            createjs.Ticker.addEventListener("tick", stage);
+            createjs.Touch.enable(stage);
+
+            // Tạo một lớp nền đen che phủ toàn bộ
+            var bgCover = new createjs.Shape();
+            bgCover.graphics.beginFill("#000000").drawRect(-2000, -2000, 4000, 4000);
+            exportRoot.addChildAt(bgCover, 0);
+
+            // Cập nhật nukeBackgrounds liên tục
+            createjs.Ticker.addEventListener("tick", function() {
+                if (exportRoot) nukeBackgrounds(exportRoot);
+                if (bgCover) {
+                    // Đảm bảo nền đen luôn ở dưới cùng và hiển thị
+                    if (exportRoot.getChildAt(0) !== bgCover) {
+                        exportRoot.addChildAt(bgCover, 0);
+                    }
+                    bgCover.visible = true;
+                }
+            });
+
+            resize();
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    // Hàm kích hoạt nút phóng to nội bộ của mô phỏng
+    function triggerInternalZoom() {
+        if (!exportRoot) return;
+        log("Đang tìm kiếm nút zoom...");
+        function findBtn(container) {
+            if (!container || !container.children) return null;
+            for (var i = 0; i < container.children.length; i++) {
+                var child = container.children[i];
+                if (!child) continue;
+                
+                var className = child.constructor ? child.constructor.name : "";
+                var name = child.name || "";
+                var type = child.type || "";
+                
+                if (className.indexOf("Zoom") !== -1 || 
+                    className.indexOf("loupe") !== -1 || 
+                    name.indexOf("Zoom") !== -1 || 
+                    name.indexOf("loupe") !== -1 ||
+                    type === "zoom" ||
+                    type === "zoomIn" ||
+                    type === "zoomPlus") {
+                    return child;
+                }
+                
+                var found = findBtn(child);
+                if (found) return found;
+            }
+            return null;
+        }
+        
+        var btn = findBtn(exportRoot);
+        if (btn) {
+            log("Tìm thấy nút zoom: " + (btn.name || btn.constructor.name));
+            btn.dispatchEvent("click");
+            log("Đã dispatch click event");
+        } else {
+            log("KHÔNG tìm thấy nút zoom. Thử dùng frame labels...");
+            // Fallback dựa trên nhãn khung hình (state labels)
+            var current = exportRoot.currentLabel;
+            if (current === "legend1" || current === "legend2" || current === "legend6") {
+                log("Đang ở tổng quan, nhảy tới legend7 (zoom in)");
+                exportRoot.gotoAndPlay("legend7");
+            } else if (current === "legend7" || current === "legend8") {
+                log("Đang ở phế nang, nhảy tới legend1 (zoom out)");
+                exportRoot.gotoAndPlay("legend1");
+            } else {
+                log("Trạng thái hiện tại: " + current + ". Thử legend7 đại.");
+                exportRoot.gotoAndPlay("legend7");
+            }
+        }
+    }
+
+    window.addEventListener('message', function(event) {
+        if (!exportRoot) return;
+        var data = event.data;
+        if (data.type === 'control') {
+            log("Nhận lệnh: " + data.command);
+            if (data.command === 'zoom') {
+                triggerInternalZoom();
+            } else if (data.command === 'reset') {
+                if (typeof exportRoot.raz === 'function') {
+                    exportRoot.raz();
+                } else if (typeof exportRoot.reset === 'function') {
+                    exportRoot.reset();
+                } else {
+                    location.reload();
+                }
+            }
+        }
+    });
+
+    function resize() {
+        if (!exportRoot) return;
+        var w = window.innerWidth, h = window.innerHeight;
+        var simW = (lib && lib.properties && lib.properties.width) || 550;
+        var simH = (lib && lib.properties && lib.properties.height) || 440;
+
+        // Giảm tỷ lệ xuống 1.2 để không bị quá to
+        var ratio = Math.min(w / simW, h / simH) * 1.2;
+        canvas.width = w;
+        canvas.height = h;
+
+        exportRoot.scaleX = exportRoot.scaleY = ratio;
+        
+        // Căn giữa tự động và đẩy xuống dưới một chút (offset 50px scaled)
+        exportRoot.x = (w - simW * ratio) / 2;
+        exportRoot.y = (h - simH * ratio) / 2 + (50 * ratio);
+
+        nukeBackgrounds(exportRoot);
+
+        if (stage) {
+            stage.backgroundColor = "#000000";
+            stage.update();
+        }
+    }
+
+    window.addEventListener('resize', resize);
+</script>
+</head>
+<body onload="init();">
+    <div id="debug-overlay"></div>
+    <canvas id="canvas" width="550" height="440" style="display:none"></canvas>
+
+    <script src="../vendor/gettext.min.js"></script>
+    <script>
+        // Khởi tạo i18n để tránh lỗi "i18n.gettext is not a function"
+        try {
+            if (typeof window.i18n === 'function') {
+                window.i18n = window.i18n();
+            } else {
+                window.i18n = { gettext: function(s) { return s; } };
+            }
+        } catch(e) {
+            window.i18n = { gettext: function(s) { return s; } };
+        }
+    </script>
+    <script src="../vendor/createjs-2015.11.26.min.js"></script>
+    <script src="../compo.min.js"></script>
+    <script src="respiratory-system.js"></script>
+</body>
+</html>

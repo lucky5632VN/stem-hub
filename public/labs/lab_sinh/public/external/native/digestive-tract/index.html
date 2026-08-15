@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bộ máy tiêu hóa - Virtual Lab</title>
+<style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000000; }
+    canvas { display: block; margin: auto; touch-action: none; background-color: #000000; }
+    #bottom-mask {
+        position: fixed;
+        width: 320px;
+        height: 65px;
+        background: #000000;
+        z-index: 9999;
+        pointer-events: none;
+        display: block;
+        bottom: 0;
+    }
+</style>
+<script>
+    var canvas, stage, exportRoot, images, ss;
+
+    // THÔNG BÁO KHỞI ĐỘNG NGAY LẬP TỨC
+    (function() {
+        window.onerror = function(msg, url, line) {
+            var errorMsg = "GLOBAL ERROR: " + msg + " at " + line;
+            try { window.parent.postMessage({ type: 'error', message: errorMsg }, '*'); } catch(e) {}
+            return false;
+        };
+
+        try {
+            window.parent.postMessage({ type: 'log', message: "--- IFRAME ĐÃ NẠP XONG ---" }, '*');
+        } catch(e) {}
+        
+        var oldLog = console.log;
+        var oldError = console.error;
+        console.log = function() {
+            var msg = Array.from(arguments).join(' ');
+            try { window.parent.postMessage({ type: 'log', message: msg }, '*'); } catch(e) {}
+            oldLog.apply(console, arguments);
+        };
+        console.error = function() {
+            var msg = Array.from(arguments).join(' ');
+            try { window.parent.postMessage({ type: 'error', message: msg }, '*'); } catch(e) {}
+            oldError.apply(console, arguments);
+        };
+    })();
+
+    function init() {
+        try {
+            window.parent.postMessage({ type: 'log', message: ">>> Đang khởi động hệ thống kiểm tra..." }, '*');
+            
+            var checkCount = 0;
+            var checkReady = setInterval(function() {
+                checkCount++;
+                var hasCreateJS = (typeof createjs !== 'undefined' && createjs.LoadQueue);
+                var hasLib = (typeof lib !== 'undefined' && lib._122);
+                
+                if (hasCreateJS && hasLib) {
+                    clearInterval(checkReady);
+                    startSimulation();
+                } else if (checkCount > 100) {
+                    clearInterval(checkReady);
+                }
+            }, 200);
+        } catch(e) {}
+    }
+
+    function startSimulation() {
+        try {
+            window.parent.postMessage({ type: 'log', message: ">>> BƯỚC 1: Bắt đầu startSimulation" }, '*');
+            canvas = document.getElementById("canvas");
+            images = images || {};
+            ss = ss || {};
+
+            if (lib && lib.properties && lib.properties.manifest && lib.properties.manifest.length > 0) {
+                var loader = new createjs.LoadQueue(false);
+                loader.addEventListener("fileload", function(evt) {
+                    if (evt.item.type == "image") images[evt.item.id] = evt.result;
+                });
+                loader.addEventListener("complete", function(evt) {
+                    handleComplete(evt);
+                });
+                loader.addEventListener("error", function(e) {
+                    handleComplete();
+                });
+                loader.loadManifest(lib.properties.manifest);
+            } else {
+                handleComplete();
+            }
+        } catch (err) {}
+    }
+
+    function handleComplete(evt) {
+        try {
+            if (lib.ssMetadata && lib.ssMetadata.length) {
+                for (var i = 0; i < lib.ssMetadata.length; i++) {
+                    var sData = lib.ssMetadata[i];
+                    var img = (evt && evt.target) ? evt.target.getResult(sData.name) : images[sData.name];
+                    ss[sData.name] = new createjs.SpriteSheet({ "images": [img], "frames": sData.frames });
+                }
+            }
+
+            exportRoot = new lib._122();
+            stage = new createjs.Stage(canvas);
+            
+            // LỚP NỀN ĐEN TUYỆT ĐỐI
+            var stageBg = new createjs.Shape();
+            stageBg.graphics.beginFill("#000000").drawRect(-2000, -2000, 4000, 4000);
+            stage.addChildAt(stageBg, 0);
+
+            stage.addChild(exportRoot);
+            
+            createjs.Ticker.setFPS((lib.properties && lib.properties.fps) || 24);
+            createjs.Ticker.addEventListener("tick", stage);
+            stage.enableMouseOver();
+            createjs.Touch.enable(stage);
+            
+            resize();
+            translateAndClean();
+            
+            canvas.style.display = 'block';
+            canvas.style.opacity = '1';
+        } catch (err) {}
+    }
+
+    function translateAndClean() {
+        var count = 0;
+        function processContainer(container) {
+            if (!container || !container.numChildren) return;
+            for (var i = 0; i < container.numChildren; i++) {
+                var child = container.getChildAt(i);
+                var name = child.name || '';
+                var isLegacyUI = name && (
+                    name.indexOf('EM') === 0 || 
+                    name.toLowerCase().indexOf('controller') !== -1 || 
+                    name.toLowerCase().indexOf('logo') !== -1 || 
+                    name.toLowerCase().indexOf('virtual') !== -1 || 
+                    name === 'nav' ||
+                    name.indexOf('legende') !== -1
+                );
+                if (isLegacyUI) {
+                    child.visible = false;
+                    child.alpha = 0;
+                }
+                if (child.numChildren) processContainer(child);
+            }
+        }
+
+        window.labPlay = function() { 
+            if (!exportRoot) return;
+            var playedAny = false;
+            if (exportRoot.totalFrames > 1) { exportRoot.play(); playedAny = true; }
+            function deepPlay(container) {
+                if (!container || !container.children) return;
+                for (var i = 0; i < container.children.length; i++) {
+                    var child = container.children[i];
+                    var name = (child.name || "").toLowerCase();
+                    var isBlacklisted = name.indexOf('icon') !== -1 || name.indexOf('btn') !== -1 || name.indexOf('contact') !== -1 || name.indexOf('legende') !== -1 || name.indexOf('pp') !== -1 || name.indexOf('em') === 0 || (child.name && child.name.indexOf('_') === 0);
+                    if (child.play && child.totalFrames > 50 && !isBlacklisted) { child.play(); playedAny = true; }
+                    deepPlay(child);
+                }
+            }
+            deepPlay(exportRoot);
+        };
+
+        window.labPause = function() { 
+            if (!exportRoot) return;
+            exportRoot.stop();
+            function deepStop(container) {
+                if (!container || !container.children) return;
+                for (var i = 0; i < container.children.length; i++) {
+                    var child = container.children[i];
+                    if (child.stop) child.stop();
+                    deepStop(child);
+                }
+            }
+            deepStop(exportRoot);
+        };
+
+        window.labReset = function() { 
+            if (!exportRoot) return;
+            exportRoot.gotoAndPlay(0); 
+            function deepReset(container) {
+                if (!container || !container.children) return;
+                for (var i = 0; i < container.children.length; i++) {
+                    var child = container.children[i];
+                    if (child.gotoAndPlay) child.gotoAndPlay(0);
+                    deepReset(child);
+                }
+            }
+            deepReset(exportRoot);
+        };
+
+        window.labStepForward = function() { if (exportRoot) exportRoot.gotoAndStop(exportRoot.currentFrame + 1); };
+        window.labStepBackward = function() { if (exportRoot) exportRoot.gotoAndStop(exportRoot.currentFrame - 1); };
+
+        var interval = setInterval(function() {
+            count++;
+            if (count > 100) { clearInterval(interval); return; }
+            if (exportRoot) processContainer(exportRoot);
+            if (stage) {
+                processContainer(stage);
+                var rect = canvas.getBoundingClientRect();
+                var mask = document.getElementById('bottom-mask');
+                if (mask && rect.width > 0) {
+                    mask.style.left = (rect.left + rect.width - 320) + 'px';
+                    mask.style.top = (rect.top + rect.height - 65) + 'px';
+                    mask.style.background = '#000000';
+                }
+            }
+        }, 50);
+    }
+
+    function resize() {
+        if (window.resizeTimeout) clearTimeout(window.resizeTimeout);
+        window.resizeTimeout = setTimeout(function() {
+            var hRatio = window.innerWidth / lib.properties.width;
+            var vRatio = window.innerHeight / lib.properties.height;
+            var minRatio = Math.min(hRatio, vRatio);
+            var zoomRatio = minRatio * 1.05;
+            canvas.width = zoomRatio * lib.properties.width;
+            canvas.height = zoomRatio * lib.properties.height;
+            if (exportRoot) {
+                exportRoot.scaleX = exportRoot.scaleY = zoomRatio;
+                exportRoot.x = (window.innerWidth - canvas.width) / 2 / zoomRatio - 180;
+                exportRoot.y = 10; 
+            }
+        }, 10);
+    }
+    window.addEventListener('resize', resize);
+</script>
+</head>
+<body style="background: #000000;">
+    <div id="bottom-mask"></div>
+    <canvas id="canvas" width="550" height="440" style="display:none"></canvas>
+    <script src="vendor/gettext.min.js"></script>
+    <script src="digestive-tract/gettext-vi.js"></script>
+    <script src="vendor/three.min.js"></script>
+    <script src="vendor/createjs-2015.11.26.min.js"></script>
+    <script src="compo.min.js"></script>
+    <script src="digestive-tract/digestive-tract.js"></script>
+    <script>setTimeout(init, 500);</script>
+</body>
+</html>

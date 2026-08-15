@@ -1,0 +1,285 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Lưới thức ăn</title>
+    <style>
+        html {overflow: auto;} html, body {margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000000; color: white;} 
+        canvas {display: block; touch-action: none; background-color: #000000; margin: auto;}
+        #onscreen-logger { position: fixed; top: 10px; left: 10px; right: 10px; max-height: 50%; overflow-y: auto; background: rgba(0,0,0,0.8); color: #ff5555; padding: 10px; font-family: monospace; z-index: 9999; border: 1px solid red; display: none; pointer-events: none; }
+    </style>
+    <script>
+        // Khởi tạo biến lưu lỗi tạm thời
+        var preLoadErrors = [];
+        window.onerror = function(msg, url, line, col, error) {
+            var err = 'ERROR: ' + msg + ' at ' + url + ':' + line;
+            if (document.body) {
+                logToScreen(err);
+            } else {
+                preLoadErrors.push(err);
+            }
+        };
+        var oldConsoleError = console.error;
+        console.error = function() {
+            var err = 'CONSOLE.ERROR: ' + Array.from(arguments).join(' ');
+            if (document.body) {
+                logToScreen(err);
+            } else {
+                preLoadErrors.push(err);
+            }
+            oldConsoleError.apply(console, arguments);
+        };
+
+        function logToScreen(msg) {
+            var logger = document.getElementById('onscreen-logger');
+            if (!logger) {
+                logger = document.createElement('div');
+                logger.id = 'onscreen-logger';
+                document.body.appendChild(logger);
+            }
+            logger.style.display = 'block';
+            logger.innerHTML += '<div>' + msg + '</div>';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            preLoadErrors.forEach(function(msg) {
+                logToScreen(msg);
+            });
+        });
+    </script>
+    <script src="../vendor/gettext.min.js"></script>
+    <script>
+        try {
+            window.i18n_obj = new window.i18n();
+            window.i18n_obj.setLocale('vi');
+            window.i18n_obj.setMessages('messages', 'vi', {}, 'nplurals=1; plural=0;');
+            window.i18n = window.i18n_obj; // Alias for obfuscated code
+        } catch(e) {
+            window.i18n = { gettext: function(s){ return s; }, setLocale: function(){}, setMessages: function(){} };
+        }
+    </script>
+    <script src="../vendor/three.min.js"></script>
+    <script src="../vendor/createjs-2015.11.26.min.js"></script>
+    <script src="../vendor/compo.min.js"></script>
+    <script src="./food-network.js"></script>
+    <script>
+
+
+    var canvas, stage, exportRoot, images, ss;
+
+    function init() {
+        canvas = document.getElementById("canvas");
+        createjs.LoadItem.LOAD_TIMEOUT_DEFAULT = 120 * 1000;
+        
+        if (typeof lib === 'undefined') {
+            logToScreen('ERROR: lib is undefined. food-network.js might have failed to load.');
+            return;
+        }
+
+        if (lib.properties.manifest && lib.properties.manifest.length) {
+            logToScreen('Loading ' + lib.properties.manifest.length + ' assets...');
+            images = images || {};
+            ss = ss || {};
+            var loader = new createjs.LoadQueue(false);
+            loader.addEventListener("fileload", handleFileLoad);
+            loader.addEventListener("complete", function(evt) {
+                try {
+                    handleComplete(evt);
+                } catch(e) {
+                    logToScreen('HANDLECOMPLETE ERROR: ' + e.message + ' ' + e.stack);
+                }
+            });
+            loader.addEventListener("error", function(evt) {
+                logToScreen('LOAD ERROR: ' + evt.data.src);
+            });
+            loader.loadManifest(lib.properties.manifest);
+        } else {
+            handleComplete();
+        }
+    }
+
+    function handleFileLoad(evt) {
+        if (evt.item.type == "image") {
+            images[evt.item.id] = evt.result;
+        }
+    }
+
+    function translateAndClean() {
+        var count = 0;
+        var dictionary = {
+            "Top carnivores": "Ăn thịt trên cùng",
+            "Carnivores": "Ăn thịt",
+            "Herbivores": "Ăn cỏ",
+            "Producers": "Sản xuất",
+            "Next step": "Bước tiếp theo",
+            "A few years later...": "Vài năm sau...",
+            "Click on a living being in the ecosystem to make it disappear. Click \"Next step\" more than once to simulate the long term consequences on the ecosystem.": "Nhấn vào một sinh vật trong hệ sinh thái để làm cho nó biến mất. Nhấn \"Bước tiếp theo\" nhiều hơn một lần để mô phỏng hậu quả dài hạn đến hệ sinh thái."
+        };
+
+        function processContainer(container) {
+            if (!container || !container.numChildren) return;
+            for (var i = 0; i < container.numChildren; i++) {
+                var child = container.getChildAt(i);
+                
+                // 1. Dịch văn bản (dùng indexOf để bắt cả văn bản thay đổi động)
+                if (child instanceof createjs.Text && child.text) {
+                    var txt = child.text.trim();
+                    for (var key in dictionary) {
+                        if (txt.indexOf(key) !== -1) {
+                            child.text = dictionary[key];
+                            
+                            // Xử lý riêng cho nút "Bước tiếp theo"
+                            if (dictionary[key] === "Bước tiếp theo") {
+                                child.textAlign = "center";
+                                child.lineWidth = 180; // Đủ rộng để không xuống dòng quá sớm
+                                // Thường các nút này có Shape đi kèm, nới rộng nó
+                                var parent = child.parent;
+                                if (parent) {
+                                    for (var k = 0; k < parent.numChildren; k++) {
+                                        var sibling = parent.getChildAt(k);
+                                        if (sibling instanceof createjs.Shape) {
+                                            sibling.scaleX = 1.3; 
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // Chỉnh font nhẹ cho đẹp
+                            var fontMatch = child.font.match(/(\d+)px/);
+                            if (fontMatch) {
+                                var oldSize = parseInt(fontMatch[1]);
+                                var newSize = Math.round(oldSize * 1.05); 
+                                child.font = child.font.replace(oldSize + 'px', newSize + 'px');
+                                child.lineHeight = newSize * 1.2;
+                            }
+                            break;
+                        }
+                    }
+                }
+                
+                // 2. Ẩn thanh điều khiển thừa (logo, footer, v.v.)
+                var name = child.name || '';
+                var isExtra = name && (
+                    name.toLowerCase().indexOf('logo') !== -1 || 
+                    name.toLowerCase().indexOf('footer') !== -1 ||
+                    name.toLowerCase().indexOf('nav') !== -1 ||
+                    name.toLowerCase().indexOf('controller') !== -1 ||
+                    name === 'EMLogo'
+                );
+                
+                // Ẩn các thành phần ở sát mép dưới (dải băng trắng)
+                if (isExtra || child.y > 460) {
+                    child.visible = false;
+                }
+                
+                if (child.numChildren) processContainer(child);
+            }
+        }
+
+        var interval = setInterval(function() {
+            count++;
+            if (count > 1000) clearInterval(interval); 
+
+            if (exportRoot) {
+                processContainer(exportRoot);
+                stage.update();
+            }
+        }, 100);
+    }
+
+    function handleComplete(evt) {
+        if (evt) {
+            var queue = evt.target;
+            var ssMetadata = lib.ssMetadata;
+            if (ssMetadata && ssMetadata.length) {
+                for (var i = 0; i < ssMetadata.length; i++) {
+                    ss[ssMetadata[i].name] = new createjs.SpriteSheet({
+                        "images": [queue.getResult(ssMetadata[i].name)],
+                        "frames": ssMetadata[i].frames
+                    });
+                }
+            }
+        }
+        
+        if (!lib._172) return;
+
+        exportRoot = new lib._172();
+        stage = new createjs.Stage(canvas);
+        stage.addChild(exportRoot);
+        
+        // Kích hoạt dịch tiếng Việt
+        translateAndClean();
+
+        stage.update();
+        stage.enableMouseOver();
+        createjs.Ticker.setFPS(lib.properties.fps || 24);
+        createjs.Ticker.addEventListener("tick", stage);
+        createjs.Touch.enable(stage);
+        
+        resize();
+    }
+
+    var resizingClassSuffix = ' u-resizing';
+    var prevWidth, resizeTimeout;
+
+    function addResizingClass() {
+        if (document.body.className.indexOf(resizingClassSuffix) == -1) document.body.className += resizingClassSuffix;
+    }
+
+    function removeResizingClass() {
+        document.body.className = document.body.className.replace(resizingClassSuffix, '');
+    }
+
+    function doResize() {
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+        prevWidth = w;
+
+        var hRatio = w / lib.properties.width;
+        var vRatio = h / lib.properties.height;
+
+        removeResizingClass();
+
+        var minRatio = Math.min(hRatio, vRatio);
+
+        canvas.width = minRatio * lib.properties.width;
+        canvas.height = minRatio * lib.properties.height;
+        exportRoot.scaleX = exportRoot.scaleY = minRatio;
+
+        document.body.dispatchEvent(new Event("AfterResize"));
+    }
+
+    function resize() {
+        removeResizingClass();
+
+        if (window.resizeTimeout) clearTimeout(window.resizeTimeout);
+
+        window.resizeTimeout = setTimeout(function() {
+            if (!lib || !lib.properties) return;
+            
+            var hRatio = window.innerWidth / lib.properties.width;
+            var vRatio = window.innerHeight / lib.properties.height;
+            var minRatio = Math.min(hRatio, vRatio);
+
+            canvas.width = minRatio * lib.properties.width;
+            canvas.height = minRatio * lib.properties.height;
+            if (exportRoot) {
+                exportRoot.scaleX = exportRoot.scaleY = minRatio;
+                stage.update();
+            }
+
+            document.body.dispatchEvent(new Event("AfterResize"));
+        }, 10);
+    }
+
+    if (window.addEventListener) window.addEventListener('orientationchange', function() {
+        addResizingClass();
+        setTimeout(resize, 1000);
+    });
+</script>
+</head>
+<body onload="try { init(); } catch(e) { logToScreen('INIT ERROR: ' + e.message + ' ' + e.stack); }" onresize="resize()">
+    <canvas id="canvas" width="550" height="440" style="display: block; margin: auto; background-color: #fff;"></canvas>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Hoạt động bộ nhiễm sắc thể</title>
+    <style>
+        html {overflow: auto;} 
+        html, body {
+            margin: 0; 
+            padding: 0; 
+            width: 100%; 
+            height: 100%; 
+            overflow: hidden; 
+            background: #000000;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        } 
+        canvas {
+            display: block; 
+            touch-action: none; 
+            background-color: #000000; 
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8); 
+            border-radius: 0;
+            max-width: 100vw;
+            max-height: 100vh;
+        }
+    </style>
+    <script>
+        function logToScreen(msg) { console.log('[KaryotypeLab]', msg); }
+    </script>
+    <script src="../vendor/gettext.min.js"></script>
+    <script src="./gettext-vi.js"></script>
+    <script src="../vendor/three.min.js"></script>
+    <script src="../vendor/createjs-2015.11.26.min.js"></script>
+    <script src="../vendor/compo.min.js"></script>
+    <script src="./karyotype-activities.js"></script>
+    <script>
+
+    var canvas, stage, exportRoot, images, ss;
+
+    function init() {
+        canvas = document.getElementById("canvas");
+        if (createjs.MotionGuidePlugin) createjs.MotionGuidePlugin.install();
+        
+        if (typeof lib === 'undefined') return;
+
+        if (lib.properties.manifest && lib.properties.manifest.length) {
+            lib.properties.manifest = lib.properties.manifest.map(function(item) {
+                if (item && item.src && typeof item.src === 'string' && item.src.indexOf('fondanimationbleu.jpg') !== -1) {
+                    item.src = './fondanimationbleu.jpg';
+                }
+                return item;
+            });
+            images = images || {};
+            ss = ss || {};
+            var loader = new createjs.LoadQueue(false);
+            loader.addEventListener("fileload", handleFileLoad);
+            loader.addEventListener("complete", handleComplete);
+            loader.loadManifest(lib.properties.manifest);
+        } else {
+            handleComplete();
+        }
+    }
+
+    function handleFileLoad(evt) {
+        if (evt.item.type == "image") images[evt.item.id] = evt.result;
+    }
+
+    var viMap = {
+        'Pair #1':'Cặp 1','Pair #2':'Cặp 2','Pair #3':'Cặp 3','Pair #4':'Cặp 4','Pair #5':'Cặp 5',
+        'Pair #6':'Cặp 6','Pair #7':'Cặp 7','Pair #8':'Cặp 8','Pair #9':'Cặp 9','Pair #10':'Cặp 10',
+        'Pair #11':'Cặp 11','Pair #12':'Cặp 12','Pair #13':'Cặp 13','Pair #14':'Cặp 14','Pair #15':'Cặp 15',
+        'Pair #16':'Cặp 16','Pair #17':'Cặp 17','Pair #18':'Cặp 18','Pair #19':'Cặp 19','Pair #20':'Cặp 20',
+        'Pair #21':'Cặp 21','Pair #22':'Cặp 22','Pair #23':'Cặp 23',
+        'Centromere':'Tâm động','Telomere':'Đầu mút NST',
+        'Short arm':'Cánh ngắn (p)','Long arm':'Cánh dài (q)',
+        'Chromatid':'Crômatit','Sister chromatids':'Crômatit chị em',
+        'Normal gamete':'Giao tử bình thường','Abnormal gamete':'Giao tử bất thường',
+        'Pair #1 of homologous chromosomes':'Cặp số 1 của các nhiễm sắc thể tương đồng',
+        'Pair #2 of homologous chromosomes':'Cặp số 2 của các nhiễm sắc thể tương đồng',
+        'Pair #1 nondisjunction':'Sự không phân ly ở cặp số 1',
+        'Pair #2 nondisjunction':'Sự không phân ly ở cặp số 2',
+        'Fertilization':'Thụ tinh',
+        'Diploid parent cell [ 2n = 4 ]':'Tế bào mẹ lưỡng bội [ 2n = 4 ]',
+        'Shortened chromosome':'Nhiễm sắc thể rút ngắn',
+        'Homologous chromosomes':'Nhiễm sắc thể tương đồng',
+        'Hom ologous chrom osom es':'Nhiễm sắc thể tương đồng',
+        'Meiosis I':'Giảm phân I','Meiosis II':'Giảm phân II',
+        'Numerical abnormalities':'Bất thường về số lượng','Structural abnormalities':'Bất thường về cấu trúc',
+        'Numerical abnormalitites':'Bất thường về số lượng',
+        'Deletions':'Mất đoạn','Inversions':'Đảo đoạn','Translocations':'Chuyển đoạn',
+        'Deletion':'Mất đoạn','Inversion':'Đảo đoạn','Translocation':'Chuyển đoạn',
+        'Xóa bỏ':'Mất đoạn','Đảo ngược':'Đảo đoạn','Chuyển vị':'Chuyển đoạn',
+        'Intersticial deletion':'Mất đoạn có khe',
+        'Interstitial deletion':'Mất đoạn có khe',
+        'Terminal deletion':'Mất đoạn đầu cuối',
+        'Pericentric inversion':'Đảo đoạn quanh tâm',
+        'Paracentric inversion':'Đảo đoạn bên tâm',
+        'Reciprocal translocation':'Chuyển đoạn tương hỗ',
+        'Simple translocation':'Chuyển đoạn đơn giản',
+        'Select a syndrome':'Chọn một hội chứng',
+        'Theory':'Lý thuyết','Exercise':'Bài tập','Example':'Ví dụ','Step':'Bước','of':'trên',
+        'Score:':'Điểm số:','Correct!':'Chính xác!','Incorrect!':'Chưa đúng!','Try again':'Hãy thử lại'
+    };
+
+    function translateAndClean() {
+        var count = 0;
+        function normalizeText(s) { return s ? s.toString().replace(/\s+/g, ' ').trim() : ''; }
+        
+        var viMapNormalized = {};
+        for (var k in viMap) { viMapNormalized[normalizeText(k)] = viMap[k]; }
+
+        function translateText(txt) {
+            if (!txt || typeof txt !== 'string') return txt;
+            var norm = normalizeText(txt);
+            if (norm.indexOf('Score') !== -1) return norm.replace('Score', 'Điểm số');
+            
+            if (norm.indexOf('Normal gamete') !== -1) return 'Giao tử bình thường\n[ n nhiễm sắc thể ]';
+            if (norm.indexOf('Abnormal gamete') !== -1 && norm.indexOf('+1') !== -1) return 'Giao tử bất thường\n[ n+1 nhiễm sắc thể ]';
+            if (norm.indexOf('Abnormal gamete') !== -1 && norm.indexOf('-1') !== -1) return 'Giao tử bất thường\n[ n-1 nhiễm sắc thể ]';
+            
+            var res = viMapNormalized[norm] || txt;
+            if (typeof res === 'string') {
+                res = res.replace(/m\s+ất/g, 'mất').replace(/Xóa bỏ/g, 'Mất đoạn');
+            }
+            return res;
+        }
+
+        function processContainer(container) {
+            if (!container) return;
+            
+            // Force Dark Mode for any remaining grey background/corner elements
+            if (container.graphics && container.graphics._instructions) {
+                var insts = container.graphics._instructions;
+                for (var j = 0; j < insts.length; j++) {
+                    var inst = insts[j];
+                    if (inst.style) {
+                        var s = inst.style.toString().toLowerCase();
+                        if (s === "#ffffff" || s === "white" || s === "#f8fafc" || s === "#eeeeee" || s === "#cccccc" || s === "#d3d3d3" || s === "#e1e1e1") {
+                            // If it's not a main content panel, turn it black
+                            if (container.y < 50 || container.x < 50) inst.style = "#000000";
+                        }
+                    }
+                }
+            }
+            
+            // Hide unwanted background images (blue ocean, etc.)
+            if (container.image && container.image.src) {
+                var src = container.image.src.toLowerCase();
+                if (src.indexOf('fond') !== -1 || src.indexOf('bleu') !== -1) {
+                    container.visible = false;
+                }
+            }
+            
+            if (typeof container.text === 'string' && container.text.length > 0) {
+                var tr = translateText(container.text);
+                if (tr !== container.text) container.text = tr;
+                container.font = "bold 12px Segoe UI, Tahoma, sans-serif";
+                container.color = "#000000"; // Black text for light mode
+                if (tr.indexOf('Giao tử') !== -1) {
+                    container.lineWidth = 400;
+                    container.textAlign = "center";
+                    container.lineHeight = 16;
+                }
+            }
+            if (container.numChildren) {
+                for (var i = 0; i < container.numChildren; i++) {
+                    processContainer(container.getChildAt(i));
+                }
+            }
+        }
+
+        function hideBlueBg(container) {
+            if (!container) return;
+            if (container.image && container.image.src && container.image.src.indexOf('fondanimationbleu') !== -1) {
+                container.visible = false;
+            }
+            if (container.numChildren) {
+                for (var i = 0; i < container.numChildren; i++) {
+                    hideBlueBg(container.getChildAt(i));
+                }
+            }
+        }
+
+        var interval = setInterval(function() {
+            count++;
+            if (count > 600) clearInterval(interval);
+            if (stage) {
+                processContainer(stage);
+                hideBlueBg(stage);
+            }
+        }, 100);
+    }
+
+    function handleComplete(evt) {
+        if (evt) {
+            var queue = evt.target;
+            var ssMetadata = lib.ssMetadata;
+            if (ssMetadata && ssMetadata.length) {
+                for (var i = 0; i < ssMetadata.length; i++) {
+                    ss[ssMetadata[i].name] = new createjs.SpriteSheet({
+                        "images": [queue.getResult(ssMetadata[i].name)],
+                        "frames": ssMetadata[i].frames
+                    });
+                }
+            }
+        }
+        
+        var rootObject = lib._730 || lib['contour'] || lib[Object.keys(lib).find(function(k) {
+            return k !== 'properties' && k !== 'ssMetadata' && typeof lib[k] === 'function';
+        })];
+        if (!rootObject) return;
+
+        exportRoot = new rootObject();
+        stage = new createjs.Stage(canvas);
+        
+        // Add a black background shape
+        var bg = new createjs.Shape();
+        bg.graphics.beginFill("#000000").drawRect(-1000, -1000, 3000, 3000);
+        stage.addChild(bg);
+
+        // Add black overlays with precise positioning to preserve the white panel's rounded corners
+        var leftCover = new createjs.Shape();
+        leftCover.graphics.beginFill("#000000").drawRect(-100, 0, 110, 440);
+        
+        var rightCover = new createjs.Shape();
+        rightCover.graphics.beginFill("#000000").drawRect(540, 0, 110, 440);
+        
+        // Group everything into a main container for synchronized scaling/positioning
+        mainContainer = new createjs.Container();
+        mainContainer.addChild(exportRoot);
+        mainContainer.addChild(leftCover);
+        mainContainer.addChild(rightCover);
+        stage.addChild(mainContainer);
+
+        translateAndClean();
+        stage.update();
+        stage.enableMouseOver();
+        createjs.Ticker.setFPS(lib.properties.fps || 24);
+        createjs.Ticker.addEventListener("tick", stage);
+        createjs.Touch.enable(stage);
+        resize();
+    }
+
+    function resize() {
+        if (window.resizeTimeout) clearTimeout(window.resizeTimeout);
+        window.resizeTimeout = setTimeout(function() {
+            if (!lib || !lib.properties) return;
+            // Adjusted zoom to 1.2x to avoid cutting off headers
+            var zoom = 1.2;
+            var minRatio = Math.min(window.innerWidth / lib.properties.width, window.innerHeight / lib.properties.height) * zoom; 
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            if (typeof mainContainer !== 'undefined' && mainContainer) {
+                mainContainer.scaleX = mainContainer.scaleY = minRatio;
+                // Center precisely and shift down + left offset to hide grey strip
+                mainContainer.x = ((window.innerWidth - lib.properties.width * minRatio) / 2) - 15;
+                mainContainer.y = ((window.innerHeight - lib.properties.height * minRatio) / 2) + 30; 
+                stage.update();
+            } else if (exportRoot) {
+                exportRoot.scaleX = exportRoot.scaleY = minRatio;
+                exportRoot.x = ((window.innerWidth - lib.properties.width * minRatio) / 2) - 15;
+                exportRoot.y = ((window.innerHeight - lib.properties.height * minRatio) / 2) + 30; 
+                stage.update();
+            }
+        }, 10);
+    }
+    window.onresize = resize;
+</script>
+</head>
+<body onload="init()">
+    <canvas id="canvas" width="550" height="440"></canvas>
+</body>
+</html>

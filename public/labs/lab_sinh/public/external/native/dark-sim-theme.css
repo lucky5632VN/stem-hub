@@ -1,0 +1,96 @@
+/* Bioluminescent Dark Theme for Embedded Simulations */
+body {
+    background-color: transparent !important;
+    background-image: none !important;
+    color: #e2e8f0 !important;
+    overflow-y: auto !important;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#simulation-container {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+canvas {
+    background-color: transparent !important;
+    box-shadow: 0 0 50px rgba(0, 240, 255, 0.15);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* Styles for Embedded BioSTEM Lab Mode */
+body.embedded {
+    overflow: hidden !important;
+}
+
+body.embedded .main-content {
+    display: none !important;
+}
+
+body.embedded #simulation-container {
+    height: 100vh !important;
+    border-bottom: none !important;
+}
+
+.main-content {
+    background: rgba(15, 23, 42, 0.8) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 16px !important;
+    padding: 24px !important;
+    color: #94a3b8 !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+    margin-top: 20px;
+}
+
+h2 {
+    color: #00f0ff !important;
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.3) !important;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.2) !important;
+    font-size: 1.4rem !important;
+    margin-top: 0 !important;
+}
+
+p, div, li, span {
+    color: #cbd5e1 !important;
+}
+
+strong {
+    color: #00ffa3 !important;
+}
+
+.instruction-box {
+    background: rgba(0, 240, 255, 0.05) !important;
+    border-left: 4px solid #00f0ff !important;
+}
+
+a {
+    color: #00f0ff !important;
+    text-decoration: underline !important;
+}
+
+/* Scrollbar dark */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 240, 255, 0.3);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #00f0ff;
+}

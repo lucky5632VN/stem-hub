@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Cây phát sinh chủng loại</title>
+    <style>
+        html {overflow: auto;} 
+        html, body {
+            margin: 0; 
+            padding: 0; 
+            width: 100%; 
+            height: 100%; 
+            overflow: hidden; 
+            background: radial-gradient(circle, #2c3e50 0%, #000000 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        } 
+        canvas {
+            display: block; 
+            touch-action: none; 
+            background-color: #f8fafc; 
+            box-shadow: 0 30px 60px rgba(0,0,0,0.7); 
+            border-radius: 12px;
+            max-width: 100vw;
+            max-height: 100vh;
+        }
+    </style>
+    <script src="../vendor/gettext.min.js"></script>
+    <script src="./gettext-vi.js"></script>
+    <script src="../vendor/three.min.js"></script>
+    <script src="../vendor/createjs-2015.11.26.min.js"></script>
+    <script src="../vendor/compo.min.js"></script>
+    <script src="./the-tree.js"></script>
+    <script>
+    var canvas, stage, exportRoot, images, ss;
+
+    function init() {
+        canvas = document.getElementById("canvas");
+        createjs.LoadItem.LOAD_TIMEOUT_DEFAULT = 120 * 1000;
+        createjs.MotionGuidePlugin.install();
+
+        if (lib.properties.manifest && lib.properties.manifest.length) {
+            images = images || {};
+            ss = ss || {};
+            var loader = new createjs.LoadQueue(false);
+            loader.addEventListener("fileload", handleFileLoad);
+            loader.addEventListener("complete", handleComplete);
+            loader.loadManifest(lib.properties.manifest);
+        } else {
+            handleComplete();
+        }
+    }
+
+    function handleFileLoad(evt) {
+        if (evt.item.type == "image") {
+            images[evt.item.id] = evt.result;
+        }
+    }
+
+    function handleComplete(evt) {
+        if (evt) {
+            var queue = evt.target;
+            var ssMetadata = lib.ssMetadata;
+            for (var i = 0; i < ssMetadata.length; i++) {
+                ss[ssMetadata[i].name] = new createjs.SpriteSheet({
+                    "images": [queue.getResult(ssMetadata[i].name)],
+                    "frames": ssMetadata[i].frames
+                })
+            }
+        }
+
+        exportRoot = new lib._551();
+        stage = new createjs.Stage(canvas);
+        
+        // Remove default white background if needed, or keep clean
+        var bg = new createjs.Shape();
+        bg.graphics.beginFill('#f8fafc').drawRect(0, 0, lib.properties.width, lib.properties.height);
+        exportRoot.addChildAt(bg, 0);
+        bg.on('tick', function() {
+            if (exportRoot.getChildIndex(bg) != 0) exportRoot.setChildIndex(bg, 0);
+        });
+        
+        function cleanFooter() {
+            var count = 0;
+            function processContainer(container) {
+                if (!container) return;
+                
+                var name = container.name || '';
+                var isFooter = false;
+                
+                if (name === 'EMLogo' || name.toLowerCase().indexOf('virtuallab') !== -1 || 
+                    name.toLowerCase().indexOf('footer') !== -1 || name.toLowerCase().indexOf('copyright') !== -1) {
+                    isFooter = true;
+                }
+                
+                if (container.y >= 390) {
+                    isFooter = true;
+                }
+                
+                if (isFooter) {
+                    container.visible = false;
+                    return;
+                }
+                
+                if (container.numChildren) {
+                    for (var i = 0; i < container.numChildren; i++) {
+                        processContainer(container.getChildAt(i));
+                    }
+                }
+            }
+
+            var interval = setInterval(function() {
+                count++;
+                if (count > 500) clearInterval(interval);
+                if (stage) {
+                    processContainer(stage);
+                }
+            }, 100);
+        }
+
+        stage.addChild(exportRoot);
+        canvas.style.display = '';
+        cleanFooter();
+        stage.update();
+        stage.enableMouseOver();
+
+        createjs.Ticker.setFPS(lib.properties.fps);
+        createjs.Ticker.addEventListener("tick", stage);
+        createjs.Touch.enable(stage);
+
+        resize();
+    }
+
+    var resizingClassSuffix = ' u-resizing';
+    var prevWidth, resizeTimeout;
+
+    function addResizingClass() {
+        if (document.body.className.indexOf(resizingClassSuffix) == -1) document.body.className += resizingClassSuffix;
+    }
+
+    function removeResizingClass() {
+        document.body.className = document.body.className.replace(resizingClassSuffix, '');
+    }
+
+    function resize() {
+        removeResizingClass();
+        if (window.resizeTimeout) clearTimeout(window.resizeTimeout);
+
+        window.resizeTimeout = setTimeout(function() {
+            var hRatio = window.innerWidth / lib.properties.width;
+            var vRatio = window.innerHeight / lib.properties.height;
+            var minRatio = Math.min(hRatio, vRatio) * 1.25; // Scale up slightly
+
+            canvas.width = minRatio * lib.properties.width;
+            canvas.height = minRatio * (lib.properties.height - 45); // Crop bottom 45px
+            exportRoot.scaleX = exportRoot.scaleY = minRatio;
+            stage.update();
+
+            document.body.dispatchEvent(new Event("AfterResize"));
+        }, 10);
+    }
+
+    if (window.addEventListener) window.addEventListener('orientationchange', function() {
+        addResizingClass();
+        setTimeout(resize, 1000);
+    });
+</script>
+</head>
+<body onload="init();" onresize="resize()">
+    <canvas id="canvas" width="550" height="440" style="display: none;"></canvas>
+</body>
+</html>

@@ -1,0 +1,143 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Bộ não người</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../dark-sim-theme.css">
+<style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #020617; }
+    canvas { display: block; margin: auto; touch-action: none; background-color: #020617; box-shadow: 0 0 50px rgba(0, 240, 255, 0.15); border: 1px solid rgba(0, 240, 255, 0.3); }
+    #debug-log { 
+        position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: #00ff00; 
+        font-family: monospace; font-size: 10px; padding: 10px; z-index: 1000; pointer-events: none;
+        max-width: 300px; max-height: 400px; overflow: auto;
+    }
+</style>
+<script>
+    var canvas, stage, exportRoot, images, ss;
+
+    function init() {
+        canvas = document.getElementById("canvas");
+        
+        if (typeof lib === 'undefined') {
+            return;
+        }
+
+        if (lib.properties && lib.properties.manifest && lib.properties.manifest.length > 0) {
+            images = images || {};
+            ss = ss || {};
+            var loader = new createjs.LoadQueue(false);
+            loader.addEventListener("fileload", handleFileLoad);
+            loader.addEventListener("complete", handleComplete);
+            loader.loadManifest(lib.properties.manifest);
+        } else {
+            handleComplete();
+        }
+    }
+
+    function handleFileLoad(evt) {
+        if (evt.item.type == "image") { images[evt.item.id] = evt.result; }
+    }
+
+    function handleComplete(evt) {
+        if (evt) {
+            var queue = evt.target;
+            var ssMetadata = lib.ssMetadata;
+            if (ssMetadata) {
+                for (var i = 0; i < ssMetadata.length; i++) {
+                    ss[ssMetadata[i].name] = new createjs.SpriteSheet({
+                        "images": [queue.getResult(ssMetadata[i].name)],
+                        "frames": ssMetadata[i].frames
+                    })
+                }
+            }
+        }
+
+        var constructorName = "_691";
+        if (!lib[constructorName]) {
+            var funcKeys = Object.keys(lib).filter(k => typeof lib[k] === 'function');
+            constructorName = funcKeys.find(k => k.indexOf('_') === 0) || funcKeys[funcKeys.length - 1];
+        }
+
+        function performCleanup() {
+            if (!exportRoot) return;
+            // 1. Hide navigation container
+            if (exportRoot.nav) exportRoot.nav.visible = false;
+            
+            // 2. Recursive cleanup
+            const cleanup = (obj) => {
+                if (!obj || !obj.children) return;
+                obj.children.forEach(child => {
+                    const name = (child.name || "").toLowerCase();
+                    const isWhiteUI = name.includes('logo') || name.includes('title') || name.includes('copyright') || name.includes('fond') || name.includes('barre');
+                    if (isWhiteUI) child.visible = false;
+                    cleanup(child);
+                });
+            };
+            cleanup(exportRoot);
+            stage && stage.update();
+        }
+
+        try {
+            exportRoot = new lib[constructorName]();
+            stage = new createjs.Stage(canvas);
+            stage.addChild(exportRoot);
+            
+            // Run immediate cleanup before first render
+            performCleanup();
+            
+            stage.update();
+
+            createjs.Ticker.setFPS(lib.properties ? lib.properties.fps : 24);
+            createjs.Ticker.addEventListener("tick", stage);
+            createjs.Touch.enable(stage);
+
+            resize();
+
+            // Continuous cleanup for dynamic elements
+            setInterval(performCleanup, 50);
+        } catch(e) {
+            console.error("Exception in handleComplete:", e);
+        }
+    }
+
+    function resize() {
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+        var pw = lib.properties ? lib.properties.width : 550;
+        var ph = lib.properties ? lib.properties.height : 400;
+        var ratio = Math.min(w/pw, h/ph);
+        canvas.width = w;
+        canvas.height = h;
+        if (exportRoot) {
+            exportRoot.scaleX = exportRoot.scaleY = ratio;
+            exportRoot.x = (w - pw * ratio) / 2;
+            exportRoot.y = (h - ph * ratio) / 2;
+        }
+        stage && stage.update();
+    }
+
+    window.addEventListener('resize', resize);
+    window.addEventListener('message', function(e) {
+        if (e.data.type === 'SET_VIEW' && exportRoot) {
+            log("Message received: " + e.data.view);
+            var labelMap = { 'lobes': 'Lobes', 'regions': 'aires', 'sagittal': 'coupe' };
+            exportRoot.gotoAndStop(labelMap[e.data.view] || 'Lobes');
+            stage.update();
+        }
+    });
+</script>
+</head>
+<body onload="init();">
+    <canvas id="canvas" width="550" height="440"></canvas>
+    
+    <script src="vendor/gettext.min.js"></script>
+    <script src="human-brain/gettext-vi.js"></script>
+    <script src="vendor/three.min.js"></script>
+    <script src="vendor/createjs-2015.11.26.min.js"></script>
+    <script src="compo.min.js"></script>
+    <script src="human-brain/human-brain.js"></script>
+</body>
+</html>
