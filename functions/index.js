@@ -1,16 +1,17 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 
-// Nếu đang chạy trong Functions Emulator cục bộ, tự động trỏ kết nối lên Production Cloud Firestore/Auth
+// If running in the Functions Emulator, do NOT override emulator host env vars.
+// Previously this code removed emulator env vars which caused local functions
+// to connect to production Firestore/Auth and produced permission errors.
 if (process.env.FUNCTIONS_EMULATOR) {
-  console.log("🔥 [Functions Emulator] Bypassing local Firestore/Auth emulators to connect to Production Cloud");
-  delete process.env.FIRESTORE_EMULATOR_HOST;
-  delete process.env.FIREBASE_AUTH_EMULATOR_HOST;
+  console.log("🔥 [Functions Emulator] Detected FUNCTIONS_EMULATOR; using local emulators if configured.");
 }
 
 admin.initializeApp();
 const db = admin.firestore();
-const { calculateLaserPath } = require('./physicsEngine');
+// NOTE: physicsEngine laser module deprecated for new mixed gameplay
+// const { calculateLaserPath } = require('./physicsEngine');
 
 // === BẢN ĐỒ PHẢN ỨNG HÓA HỌC TRÊN SERVER ===
 const CHEMISTRY_MISSIONS = [
@@ -76,7 +77,7 @@ exports.submitAnswer = functions.https.onCall(async (data, context) => {
     throw new functions.https.HttpsError('unauthenticated', 'User must be logged in.');
   }
   const uid = context.auth.uid;
-  const { matchId, questionId, selectedAnswer } = data;
+  const { matchId, questionId, selectedAnswer, actingForBotId, stepIndex } = data;
 
   if (!matchId) {
     throw new functions.https.HttpsError('invalid-argument', 'Missing matchId.');
@@ -94,9 +95,54 @@ exports.submitAnswer = functions.https.onCall(async (data, context) => {
   }
 
   const isPlayer1 = roomData.player1.uid === uid;
-  const isPlayer2 = roomData.player2.uid === uid;
+  const isPlayer2 = roomData.player2 ? roomData.player2.uid === uid : false;
   if (!isPlayer1 && !isPlayer2) {
     throw new functions.https.HttpsError('permission-denied', 'You are not a participant in this match.');
+  }
+
+  // === NHÁNH XỬ LÝ HÀNH ĐỘNG HỘ BOT (PLAYBACK CLOCK) ===
+  if (actingForBotId) {
+    if (!roomData.isBotMatch || roomData.botUid !== actingForBotId) {
+      throw new functions.https.HttpsError('invalid-argument', 'Tài khoản bot không khớp với phòng đấu.');
+    }
+
+    const scriptDoc = await matchRef.collection('bot_schedules').doc('script').get();
+    if (!scriptDoc.exists) {
+      throw new functions.https.HttpsError('not-found', 'Kịch bản hành động của bot không tồn tại.');
+    }
+
+    const { schedule = [] } = scriptDoc.data();
+    const idx = Number(stepIndex);
+    const step = (idx >= 0 && idx < schedule.length) ? schedule[idx] : null;
+
+    if (!step) {
+      return { success: false, reason: 'Out of range stepIndex' };
+    }
+
+    const isBotP1 = roomData.player1.uid === actingForBotId;
+    const scoreKey = isBotP1 ? 'player1Score' : 'player2Score';
+    const progKey = isBotP1 ? 'player1Progress' : 'player2Progress';
+    const logsKey = isBotP1 ? 'player1Logs' : 'player2Logs';
+
+    const currentScore = roomData[scoreKey] || 0;
+    const newScore = step.isCorrect ? currentScore + (step.scoreDelta || 1) : currentScore;
+    const newProgress = Math.min(100, Math.max(roomData[progKey] || 0, step.progress || 0));
+
+    const botName = isBotP1 ? roomData.player1.name : (roomData.player2?.name || 'Đối thủ');
+    const logMsg = step.isCorrect
+      ? `✅ [Server] ${botName} trả lời đúng (Tiến độ: ${newProgress}%)`
+      : `❌ [Server] ${botName} trả lời sai (Tiến độ: ${newProgress}%)`;
+
+    const currentLogs = roomData[logsKey] || [];
+    const updatedLogs = [logMsg, ...currentLogs].slice(0, 10);
+
+    await matchRef.update({
+      [scoreKey]: newScore,
+      [progKey]: newProgress,
+      [logsKey]: updatedLogs
+    });
+
+    return { success: true, correct: step.isCorrect, currentProgress: newProgress };
   }
 
   const subject = roomData.subject;
@@ -107,41 +153,32 @@ exports.submitAnswer = functions.https.onCall(async (data, context) => {
   let currentProgress = 0;
   let explanation = '';
 
-  if (subject === 'biology') {
-    const qIndex = Number(questionId);
-    if (isNaN(qIndex) || qIndex < 0 || qIndex >= questionPool.length) {
-      throw new functions.https.HttpsError('invalid-argument', 'Invalid questionId.');
-    }
-    const q = questionPool[qIndex];
-    correct = q.correct === selectedAnswer;
-    explanation = q.note || '';
+  const challengeMode = matchData.challengeMode || (subject === 'biology' ? 'mcq' : 'practical');
 
-    const scoreKey = isPlayer1 ? 'player1Score' : 'player2Score';
-    const currentScore = roomData[scoreKey] || 0;
-    const newScore = correct ? currentScore + 1 : currentScore;
-
-    const nextQ = qIndex + 1;
-    if (nextQ >= questionPool.length) {
-      const pct = Math.round((newScore / questionPool.length) * 100);
-      currentProgress = pct >= 60 ? Math.min(100, pct + 10) : pct;
-    } else {
-      currentProgress = Math.round((nextQ / questionPool.length) * 100);
-    }
-
-    const updateData = {
-      [scoreKey]: newScore,
-      [isPlayer1 ? 'player1Progress' : 'player2Progress']: currentProgress
-    };
-    await matchRef.update(updateData);
-  } else if (subject === 'math') {
+  if (subject === 'math') {
     const astIndex = Number(questionId);
     if (isNaN(astIndex) || astIndex < 0 || astIndex >= questionPool.length) {
-      throw new functions.https.HttpsError('invalid-argument', 'Invalid asteroidIndex.');
+      throw new functions.https.HttpsError('invalid-argument', 'Invalid questionId.');
     }
     const target = questionPool[astIndex];
-    const userX = selectedAnswer.x;
-    const userY = selectedAnswer.y;
-    correct = target.coord.x === userX && target.coord.y === userY;
+    
+    // Nhận diện loại câu hỏi dựa trên type của câu hỏi đó
+    if (target.type === 'mcq') {
+      correct = String(target.correct) === String(selectedAnswer);
+      explanation = target.note || target.explanation || '';
+    } else if (target.type === 'practical_volume') {
+      const userVal = (typeof selectedAnswer === 'object' && selectedAnswer !== null)
+        ? Number(selectedAnswer.x)
+        : Number(selectedAnswer);
+      correct = Math.abs(userVal - Number(target.correct)) <= 0.1;
+      explanation = target.note || target.explanation || '';
+    } else {
+      const userX = selectedAnswer && selectedAnswer.x !== undefined ? Number(selectedAnswer.x) : NaN;
+      const userY = selectedAnswer && selectedAnswer.y !== undefined ? Number(selectedAnswer.y) : NaN;
+      const targetCoord = target.coord || target.ans || { x: 0, y: 0 };
+      correct = targetCoord.x === userX && targetCoord.y === userY;
+      explanation = target.note || target.explanation || '';
+    }
 
     const scoreKey = isPlayer1 ? 'player1Score' : 'player2Score';
     const currentScore = roomData[scoreKey] || 0;
@@ -159,53 +196,108 @@ exports.submitAnswer = functions.https.onCall(async (data, context) => {
       [isPlayer1 ? 'player1Progress' : 'player2Progress']: currentProgress
     };
     await matchRef.update(updateData);
-  } else if (subject === 'physics') {
-    try {
-      const { physMirrors } = selectedAnswer || {};
-      if (!physMirrors || !Array.isArray(physMirrors) || physMirrors.length < 3) {
-        throw new Error('physMirrors is missing, not an array, or has fewer than 3 elements.');
-      }
-
-      // 1. Đọc target đề bài từ matchData đã lưu trong Firestore (do host tạo phòng lưu vào)
-      //    Đây là nguồn sự thật duy nhất, không tính lại từ matchId để tránh bất đồng bộ.
-      const physTarget = (matchData.physTarget && Array.isArray(matchData.physTarget) && matchData.physTarget.length === 3)
-        ? matchData.physTarget
-        : [45, 90, 135]; // fallback về đáp án vật lý hợp lệ mặc định
-
-      // 2. Kiểm tra xem người chơi có xoay khớp mục tiêu đề bài hay không
-      const isMatchTarget = Number(physMirrors[0]) === physTarget[0] &&
-                            Number(physMirrors[1]) === physTarget[1] &&
-                            Number(physMirrors[2]) === physTarget[2];
-
-      // 3. Double-check bằng mô phỏng vật lý tia laser (lớp bảo vệ thứ hai)
-      const mirrors = physMirrors.map((angle, idx) => ({
-        x: idx === 0 ? 45 : 175,
-        y: idx === 2 ? 140 : 50,
-        angle: Number(angle) || 0
-      }));
-      const result = calculateLaserPath(mirrors, { x: 45, y: 140 }, { x: 295, y: 140 });
-
-      // 4. Kết quả đúng khi: góc khớp đề bài VÀ tia laser thực sự trúng đích
-      //    Dùng AND thay vì OR để đảm bảo không có gian lận nào có thể qua được
-      correct = !!(isMatchTarget && result.isHit);
-      currentProgress = correct ? 100 : 0;
-
-      functions.logger.info(`Physics submission: uid=${uid}, physMirrors=[${physMirrors}], physTarget=[${physTarget}], isMatchTarget=${isMatchTarget}, isHit=${result.isHit}, correct=${correct}`);
-
-      const updateData = {
-        [isPlayer1 ? 'player1Progress' : 'player2Progress']: currentProgress
-      };
-      await matchRef.update(updateData);
-    } catch (err) {
-      functions.logger.error("Error in physics submitAnswer:", err);
-      throw new functions.https.HttpsError(
-        'internal',
-        `Physics calculation failed: ${err.message || err}`,
-        err.stack
-      );
+  } else if (subject === 'biology') {
+    const qIndex = Number(questionId);
+    if (isNaN(qIndex) || qIndex < 0 || qIndex >= questionPool.length) {
+      throw new functions.https.HttpsError('invalid-argument', 'Invalid questionId.');
     }
+    const q = questionPool[qIndex];
+    if (!q) {
+      throw new functions.https.HttpsError('not-found', 'Question not found.');
+    }
+
+    if (q.type === 'mcq') {
+      correct = q.correct === selectedAnswer;
+      explanation = q.note || q.explanation || '';
+    } else if (q.type === 'tf') {
+      const answers = Array.isArray(selectedAnswer)
+        ? selectedAnswer
+        : selectedAnswer && Array.isArray(selectedAnswer.answers)
+          ? selectedAnswer.answers
+          : [];
+      if (Array.isArray(q.correct) && answers.length === q.correct.length) {
+        correct = q.correct.every((value, idx) => value === answers[idx]);
+      }
+      explanation = q.note || q.explanation || '';
+    } else if (q.type === 'practical_dna') {
+      const submitted = typeof selectedAnswer === 'object' && selectedAnswer.answer
+        ? String(selectedAnswer.answer).trim().toUpperCase()
+        : String(selectedAnswer).trim().toUpperCase();
+      const expected = String(q.templateStrand || '')
+        .split('')
+        .map((ch) => {
+          if (ch === 'A') return 'U';
+          if (ch === 'T') return 'A';
+          if (ch === 'G') return 'X';
+          if (ch === 'X') return 'G';
+          return ch;
+        })
+        .join('');
+      correct = submitted === expected;
+      explanation = q.note || q.explanation || `Chuỗi đúng là: ${expected}.`;
+    } else if (q.type === 'practical_cycle') {
+      const answerOrder = Array.isArray(selectedAnswer)
+        ? selectedAnswer
+        : selectedAnswer && Array.isArray(selectedAnswer.answer)
+          ? selectedAnswer.answer
+          : [];
+      const expectedOrder = Array.isArray(q.correctOrder) ? q.correctOrder : [];
+      correct = answerOrder.length === expectedOrder.length && answerOrder.every((step, idx) => step === expectedOrder[idx]);
+      explanation = q.note || q.explanation || `Thứ tự đúng: ${expectedOrder.join(' → ')}.`;
+    } else {
+      correct = String(selectedAnswer) === String(q.correct);
+      explanation = q.note || q.explanation || '';
+    }
+
+    const scoreKey = isPlayer1 ? 'player1Score' : 'player2Score';
+    const currentScore = roomData[scoreKey] || 0;
+    const newScore = correct ? currentScore + 1 : currentScore;
+
+    currentProgress = Math.round((newScore / questionPool.length) * 100);
+    // Nếu đã trả lời câu cuối cùng và điểm đúng >= 60%, thưởng thêm tiến độ 10%
+    if (qIndex === questionPool.length - 1 && newScore / questionPool.length >= 0.6) {
+      currentProgress = Math.min(100, currentProgress + 10);
+    }
+
+    const updateData = {
+      [scoreKey]: newScore,
+      [isPlayer1 ? 'player1Progress' : 'player2Progress']: currentProgress
+    };
+    await matchRef.update(updateData);
+  } else if (subject === 'physics') {
+    const qIndex = Number(questionId);
+    if (isNaN(qIndex) || qIndex < 0 || qIndex >= questionPool.length) {
+      throw new functions.https.HttpsError('invalid-argument', 'Invalid questionId.');
+    }
+    const q = questionPool[qIndex];
+    if (!q) {
+      throw new functions.https.HttpsError('not-found', 'Question not found.');
+    }
+
+    const selectedStr = String(selectedAnswer);
+    const correctStr = String(q.correct);
+    const indexMap = { '0': 'A', '1': 'B', '2': 'C', '3': 'D' };
+    const correctChar = indexMap[correctStr] || correctStr;
+    const selectedChar = indexMap[selectedStr] || selectedStr;
+    
+    correct = (correctStr === selectedStr) || (correctChar.toUpperCase() === selectedChar.toUpperCase());
+    explanation = q.note || q.explanation || '';
+
+    const scoreKey = isPlayer1 ? 'player1Score' : 'player2Score';
+    const currentScore = roomData[scoreKey] || 0;
+    const newScore = correct ? currentScore + 1 : currentScore;
+
+    currentProgress = Math.round((newScore / questionPool.length) * 100);
+    if (qIndex === questionPool.length - 1 && newScore / questionPool.length >= 0.6) {
+      currentProgress = Math.min(100, currentProgress + 10);
+    }
+    const updateData = {
+      [scoreKey]: newScore,
+      [isPlayer1 ? 'player1Progress' : 'player2Progress']: currentProgress
+    };
+    await matchRef.update(updateData);
   } else if (subject === 'chemistry') {
-    const { type, equation, reactants, chemicalId, chemTemp, chemHCl, chemNaOH, chemEvap } = selectedAnswer;
+      const { type, equation, reactants, chemicalId, chemTemp, chemHCl, chemNaOH, chemEvap } = selectedAnswer;
     const currentProg = isPlayer1 ? (roomData.player1Progress || 0) : (roomData.player2Progress || 0);
 
     if (type === 'chemistry_reaction_complete') {
@@ -259,6 +351,24 @@ exports.submitAnswer = functions.https.onCall(async (data, context) => {
         functions.logger.warn(`Chemistry IFRAME_CHEAT_DETECTED: uid=${uid}, idclEnergy=${idclEnergy}`);
       }
 
+      // --- LAYER 4: Kiểm tra chữ ký bảo mật SHA-256 ---
+      const signature = selectedAnswer.signature;
+      if (!signature) {
+        isPhysicallyValid = false;
+        validationNote = `Thiếu chữ ký bảo mật hóa học.`;
+      } else {
+        const crypto = require('crypto');
+        const wasteVal = selectedAnswer.waste !== undefined ? Number(selectedAnswer.waste) : 0;
+        const energyVal = selectedAnswer.idclEnergy !== undefined ? Number(selectedAnswer.idclEnergy) : 0;
+        const msgStr = `reaction_complete:${matchId}:${uid}:${equation || ''}:${reactants || ''}:${energyVal}:${wasteVal}`;
+        const expectedSig = crypto.createHmac('sha256', uid).update(msgStr).digest('hex');
+        if (signature !== expectedSig) {
+          isPhysicallyValid = false;
+          validationNote = `Chữ ký bảo mật hóa học không hợp lệ.`;
+          functions.logger.warn(`Chemistry SIGNATURE_MISMATCH: uid=${uid}, got=${signature}, expected=${expectedSig}`);
+        }
+      }
+
       if (isMatch && isPhysicallyValid) {
         correct = true;
         currentProgress = 100;
@@ -273,8 +383,19 @@ exports.submitAnswer = functions.https.onCall(async (data, context) => {
         currentProgress = Math.min(90, currentProg + 15);
       }
     } else if (type === 'chemistry_safety_violation') {
-      // Phạt an toàn: server tin sự kiện này vì client không có động lực giả mạo vi phạm an toàn của chính mình
-      currentProgress = Math.max(0, currentProg - 10);
+      const signature = selectedAnswer.signature;
+      let isSigValid = false;
+      if (signature) {
+        const crypto = require('crypto');
+        const msgStr = `safety_violation:${matchId}:${uid}`;
+        const expectedSig = crypto.createHmac('sha256', uid).update(msgStr).digest('hex');
+        isSigValid = (signature === expectedSig);
+      }
+      if (isSigValid) {
+        currentProgress = Math.max(0, currentProg - 10);
+      } else {
+        functions.logger.warn(`Chemistry SAFETY_VIOLATION SIGNATURE_MISMATCH: uid=${uid}`);
+      }
     }
 
     const updateData = {
@@ -297,6 +418,181 @@ exports.submitAnswer = functions.https.onCall(async (data, context) => {
   });
 
   return { correct, currentProgress, explanation };
+});
+
+// === 1.5. ASSIGN BOT OPPONENT FUNCTION (SERVER-SIDE SCRIPT GENERATION & BOT LOCKING) ===
+exports.assignBotOpponent = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be logged in.');
+  }
+  const uid = context.auth.uid;
+  const { subject = 'math', activeRoomId } = data;
+
+  const playerRef = db.collection('users').doc(uid);
+  const playerSnap = await playerRef.get();
+  if (!playerSnap.exists) {
+    throw new functions.https.HttpsError('not-found', 'Player profile not found.');
+  }
+  const playerData = playerSnap.data();
+  const playerElo = playerData.stats?.elo !== undefined ? playerData.stats.elo : (playerData.personalization?.elo || 1000);
+
+  // 1. Tìm và chọn 1 bot khả dụng trong Firestore
+  const botQuerySnap = await db.collection('users')
+    .where('isBotAccount', '==', true)
+    .where('botStatus', '==', 'available')
+    .limit(10)
+    .get();
+
+  let botDocs = botQuerySnap.docs;
+  if (botDocs.length === 0) {
+    const fallbackSnap = await db.collection('users').where('isBotAccount', '==', true).limit(10).get();
+    botDocs = fallbackSnap.docs;
+  }
+
+  if (botDocs.length === 0) {
+    throw new functions.https.HttpsError('unavailable', 'Không tìm thấy tài khoản bot khả dụng.');
+  }
+
+  const chosenDoc = botDocs[Math.floor(Math.random() * botDocs.length)];
+  const chosenBot = { uid: chosenDoc.id, ...chosenDoc.data() };
+
+  // Khóa trạng thái bot
+  await chosenDoc.ref.update({ botStatus: 'in_match' });
+
+  // 2. Xác định ID phòng đấu
+  let roomId = activeRoomId;
+  if (!roomId) {
+    roomId = `room_${uid}_${Date.now()}`;
+  }
+
+  const roomRef = db.collection('match_rooms').doc(roomId);
+  const existingRoomSnap = await roomRef.get();
+
+  // 3. Sinh kịch bản hành động cho bot server-side (Non-linear distribution & ELO target ~50%)
+  const botElo = chosenBot.stats?.elo || playerElo;
+  const eloDiff = botElo - playerElo;
+  let baseAccuracy = 0.55 + (eloDiff / 800);
+  baseAccuracy = Math.max(0.35, Math.min(0.80, baseAccuracy));
+
+  let totalSteps = 30;
+  if (subject === 'chemistry') totalSteps = 5;
+
+  const schedule = [];
+  let cumulativeTimeMs = 0;
+
+  for (let i = 0; i < totalSteps; i++) {
+    const isCorrect = Math.random() < baseAccuracy;
+
+    // Mô phỏng trễ nhận thức phi tuyến tính của học sinh
+    let baseDelay = 3200 + Math.floor(Math.pow(Math.random(), 2) * 5500);
+
+    if (subject === 'math' || subject === 'physics') {
+      baseDelay += 1500;
+    } else if (subject === 'chemistry') {
+      baseDelay = 8000 + Math.floor(Math.random() * 6000);
+    }
+
+    if (i > 0 && i % 6 === 0) {
+      baseDelay += 3000 + Math.floor(Math.random() * 4000);
+    }
+
+    cumulativeTimeMs += baseDelay;
+
+    let progress = 0;
+    if (subject === 'chemistry') {
+      progress = Math.min(100, (i + 1) * 20);
+    } else {
+      progress = Math.min(100, Math.floor(((i + 1) / totalSteps) * 100));
+    }
+
+    schedule.push({
+      stepIndex: i,
+      questionId: String(i),
+      isCorrect,
+      scoreDelta: isCorrect ? 1 : 0,
+      progress,
+      delayMs: baseDelay,
+      cumulativeTimeMs
+    });
+  }
+
+  // 4. Lưu kịch bản vào subcollection bảo mật (Chặn client trực tiếp đọc qua Firestore Rules)
+  await roomRef.collection('bot_schedules').doc('script').set({
+    botUid: chosenBot.uid,
+    createdAt: new Date().toISOString(),
+    schedule
+  });
+
+  // 5. Cập nhật phòng đấu thành trạng thái playing với đối thủ Bot
+  const player1Profile = {
+    uid: uid,
+    name: playerData.displayName || playerData.name || 'Người chơi',
+    elo: playerElo,
+    level: playerData.stats?.level || 1,
+    activeTitle: playerData.personalization?.activeTitle || 'apprentice',
+    avatarFrame: playerData.personalization?.avatarFrame || 'default',
+    avatarParts: playerData.personalization?.avatarParts || null
+  };
+
+  const botProfile = {
+    uid: chosenBot.uid,
+    name: chosenBot.displayName || chosenBot.name || 'Trợ Lý Tập Sự',
+    elo: chosenBot.stats?.elo || playerElo,
+    level: chosenBot.stats?.level || 1,
+    activeTitle: chosenBot.personalization?.activeTitle || 'apprentice',
+    avatarFrame: chosenBot.personalization?.avatarFrame || 'default',
+    avatarParts: chosenBot.personalization?.avatarParts || null
+  };
+
+  const roomUpdateData = {
+    id: roomId,
+    subject: subject,
+    status: 'equipment_selecting',
+    equipmentPhase: {
+      status: 'selecting',
+      expiresAt: Date.now() + 30000,
+      p1Ready: false,
+      p2Ready: false
+    },
+    player1Equipment: [],
+    player2Equipment: [],
+    activeEffects: {
+      p1: { frozenUntil: 0, fogUntil: 0, eloShielded: false, crystalMultiplier: 1, stolenCount: 0, reflectActive: false, lastStolenCard: null },
+      p2: { frozenUntil: 0, fogUntil: 0, eloShielded: false, crystalMultiplier: 1, stolenCount: 0, reflectActive: false, lastStolenCard: null }
+    },
+    isBotMatch: true,
+    botUid: chosenBot.uid,
+    player1: player1Profile,
+    player2: botProfile,
+    player1Progress: 0,
+    player2Progress: 0,
+    player1Score: 0,
+    player2Score: 0,
+    player1Logs: ['Đấu thủ 1 đã sẵn sàng!'],
+    player2Logs: ['Đối thủ đã sẵn sàng thi đấu!'],
+    timeRemaining: existingRoomSnap.exists() && existingRoomSnap.data().timeRemaining ? existingRoomSnap.data().timeRemaining : 180,
+    winnerId: null,
+    createdAt: new Date().toISOString()
+  };
+
+  if (existingRoomSnap.exists()) {
+    await roomRef.update(roomUpdateData);
+  } else {
+    await roomRef.set(roomUpdateData);
+  }
+
+  // Trả về mốc thời gian playback (CHỈ GỒM stepIndex và delayMs, KHÔNG CHỨA ĐÁP ÁN ĐÚNG/SAI)
+  const playbackSchedule = schedule.map(s => ({
+    stepIndex: s.stepIndex,
+    delayMs: s.cumulativeTimeMs
+  }));
+
+  return {
+    success: true,
+    roomId,
+    botUid: chosenBot.uid,
+    playbackSchedule
+  };
 });
 
 // === 2. FINALIZE MATCH FUNCTION (SERVER SIDE ELO & IDEMPOTENCY) ===
@@ -387,12 +683,15 @@ exports.finalizeMatch = functions.https.onCall(async (data, context) => {
     let eloChangeP1 = Math.round(pvpEloFactor * (scoreP1 - expectedP1));
     let eloChangeP2 = Math.round(pvpEloFactor * (scoreP2 - expectedP2));
 
+    const maxEloWin = pvpEloFactor;
+    const minEloWin = Math.max(10, Math.round(pvpEloFactor * 0.5));
+
     if (winnerId === roomData.player1.uid) {
-      eloChangeP1 = Math.max(15, Math.min(32, eloChangeP1));
-      eloChangeP2 = -eloChangeP1;
+      eloChangeP1 = Math.max(minEloWin, Math.min(maxEloWin, eloChangeP1));
+      eloChangeP2 = -Math.floor(eloChangeP1 * 0.6);
     } else if (winnerId === roomData.player2.uid) {
-      eloChangeP2 = Math.max(15, Math.min(32, eloChangeP2));
-      eloChangeP1 = -eloChangeP2;
+      eloChangeP2 = Math.max(minEloWin, Math.min(maxEloWin, eloChangeP2));
+      eloChangeP1 = -Math.floor(eloChangeP2 * 0.6);
     } else {
       eloChangeP1 = Math.round(eloChangeP1);
       eloChangeP2 = Math.round(eloChangeP2);
@@ -404,53 +703,61 @@ exports.finalizeMatch = functions.https.onCall(async (data, context) => {
     let p1CrystalChange = winnerId === roomData.player1.uid ? pvpCrystalStake : 0;
     let p2CrystalChange = winnerId === roomData.player2.uid ? pvpCrystalStake : 0;
 
-    // Cập nhật stats user 1
-    const p1Stats = p1Data.stats || {};
-    const p1Pers = p1Data.personalization || {};
-    const newEloP1 = Math.max(0, p1Elo + eloChangeP1);
-    const newExpP1 = (p1Stats.exp || 0) + p1ExpChange;
-    let newLevelP1 = p1Stats.level || 1;
-    let nextLevelExpP1 = p1Stats.nextLevelExp || 1000;
-    while (newExpP1 >= nextLevelExpP1) {
-      newLevelP1 += 1;
-      nextLevelExpP1 = newLevelP1 * 1000;
+    // Cập nhật stats user 1 (bỏ qua nếu là tài khoản Bot)
+    if (p1Data.isBotAccount) {
+      transaction.update(p1Ref, { botStatus: 'available' });
+    } else {
+      const p1Stats = p1Data.stats || {};
+      const p1Pers = p1Data.personalization || {};
+      const newEloP1 = Math.max(0, p1Elo + eloChangeP1);
+      const newExpP1 = (p1Stats.exp || 0) + p1ExpChange;
+      let newLevelP1 = p1Stats.level || 1;
+      let nextLevelExpP1 = p1Stats.nextLevelExp || 1000;
+      while (newExpP1 >= nextLevelExpP1) {
+        newLevelP1 += 1;
+        nextLevelExpP1 = newLevelP1 * 1000;
+      }
+
+      transaction.update(p1Ref, {
+        'stats.elo': newEloP1,
+        'stats.exp': newExpP1,
+        'stats.level': newLevelP1,
+        'stats.nextLevelExp': nextLevelExpP1,
+        'stats.wins': (p1Stats.wins || 0) + (winnerId === roomData.player1.uid ? 1 : 0),
+        'stats.losses': (p1Stats.losses || 0) + (winnerId === roomData.player2.uid ? 1 : 0),
+        'personalization.crystals': (p1Pers.crystals || 0) + p1CrystalChange,
+        'personalization.elo': newEloP1,
+        'personalization.level': newLevelP1
+      });
     }
 
-    transaction.update(p1Ref, {
-      'stats.elo': newEloP1,
-      'stats.exp': newExpP1,
-      'stats.level': newLevelP1,
-      'stats.nextLevelExp': nextLevelExpP1,
-      'stats.wins': (p1Stats.wins || 0) + (winnerId === roomData.player1.uid ? 1 : 0),
-      'stats.losses': (p1Stats.losses || 0) + (winnerId === roomData.player2.uid ? 1 : 0),
-      'personalization.crystals': (p1Pers.crystals || 0) + p1CrystalChange,
-      'personalization.elo': newEloP1,
-      'personalization.level': newLevelP1
-    });
+    // Cập nhật stats user 2 (bỏ qua nếu là tài khoản Bot)
+    if (p2Data.isBotAccount) {
+      transaction.update(p2Ref, { botStatus: 'available' });
+    } else {
+      const p2Stats = p2Data.stats || {};
+      const p2Pers = p2Data.personalization || {};
+      const newEloP2 = Math.max(0, p2Elo + eloChangeP2);
+      const newExpP2 = (p2Stats.exp || 0) + p2ExpChange;
+      let newLevelP2 = p2Stats.level || 1;
+      let nextLevelExpP2 = p2Stats.nextLevelExp || 1000;
+      while (newExpP2 >= nextLevelExpP2) {
+        newLevelP2 += 1;
+        nextLevelExpP2 = newLevelP2 * 1000;
+      }
 
-    // Cập nhật stats user 2
-    const p2Stats = p2Data.stats || {};
-    const p2Pers = p2Data.personalization || {};
-    const newEloP2 = Math.max(0, p2Elo + eloChangeP2);
-    const newExpP2 = (p2Stats.exp || 0) + p2ExpChange;
-    let newLevelP2 = p2Stats.level || 1;
-    let nextLevelExpP2 = p2Stats.nextLevelExp || 1000;
-    while (newExpP2 >= nextLevelExpP2) {
-      newLevelP2 += 1;
-      nextLevelExpP2 = newLevelP2 * 1000;
+      transaction.update(p2Ref, {
+        'stats.elo': newEloP2,
+        'stats.exp': newExpP2,
+        'stats.level': newLevelP2,
+        'stats.nextLevelExp': nextLevelExpP2,
+        'stats.wins': (p2Stats.wins || 0) + (winnerId === roomData.player2.uid ? 1 : 0),
+        'stats.losses': (p2Stats.losses || 0) + (winnerId === roomData.player1.uid ? 1 : 0),
+        'personalization.crystals': (p2Pers.crystals || 0) + p2CrystalChange,
+        'personalization.elo': newEloP2,
+        'personalization.level': newLevelP2
+      });
     }
-
-    transaction.update(p2Ref, {
-      'stats.elo': newEloP2,
-      'stats.exp': newExpP2,
-      'stats.level': newLevelP2,
-      'stats.nextLevelExp': nextLevelExpP2,
-      'stats.wins': (p2Stats.wins || 0) + (winnerId === roomData.player2.uid ? 1 : 0),
-      'stats.losses': (p2Stats.losses || 0) + (winnerId === roomData.player1.uid ? 1 : 0),
-      'personalization.crystals': (p2Pers.crystals || 0) + p2CrystalChange,
-      'personalization.elo': newEloP2,
-      'personalization.level': newLevelP2
-    });
 
     // Cập nhật room
     transaction.update(matchRef, {
@@ -475,17 +782,47 @@ exports.finalizeMatch = functions.https.onCall(async (data, context) => {
 
 // === 3. PROCESS CRYSTAL TRANSACTION FUNCTION (SHOP, GACHA, CHECKIN, CLAIM QUEST) ===
 const FALLBACK_SHOP_ITEMS = {
-  'hair_punk': { price: 200, name: 'Tóc Punk Bộc Phá 🎸' },
-  'hair_quantum': { price: 250, name: 'Tóc Rực Sáng Lượng Tử 🌀' },
-  'hair_cyberspace': { price: 300, name: 'Kiểu Tóc Thế Giới Mới 🌐' },
-  'top_cyber': { price: 300, name: 'Giáp Khoa Học Cyber 🦾' },
-  'top_scifi_suit': { price: 350, name: 'Trang Phục Phi Hành Gia 🛰️' },
-  'top_dimension': { price: 400, name: 'Áo Khoác Đấng Kiến Tạo 🌌' },
-  'bottom_neon': { price: 200, name: 'Quần Da Sọc Neon ⚡' },
-  'bottom_mech': { price: 250, name: 'Quần Cơ Giới 🛡️' },
-  'accessory_visor': { price: 150, name: 'Kính Quét Hologram 🥽' },
-  'accessory_wings': { price: 350, name: 'Cánh Ánh Sáng Photon 🪶' },
-  'crown': { price: 500, name: 'Vương miện Đại Đế 👑' }
+  'chocolate': { price: 150, name: 'Màu da Chocolate' },
+  'neon_blue': { price: 250, name: 'Màu da Xanh Neon' },
+  'cosmic_purple': { price: 350, name: 'Màu da Tím Vũ Trụ' },
+  'emerald_alien': { price: 200, name: 'Màu da Alien Ngọc Lục' },
+  'cyborg_silver': { price: 380, name: 'Màu da Cyborg Bạc' },
+  'sunfire_gold': { price: 420, name: 'Màu da Thái Dương Vàng' },
+  'cyberpunk_spiky': { price: 200, name: 'Tóc Gai Nhọn Cyber' },
+  'long_nebula': { price: 350, name: 'Tóc Tinh Vân Nebula' },
+  'curly': { price: 150, name: 'Tóc Curly Lãng Tử' },
+  'ponytail': { price: 160, name: 'Tóc Đuôi Ngựa Nữ Tính' },
+  'dreadlocks': { price: 240, name: 'Tóc Tết Dreadlocks' },
+  'mohawk': { price: 220, name: 'Tóc Chỏm Mohawk Nam' },
+  'side_part': { price: 130, name: 'Tóc Rẽ Ngôi Tài Phiệt' },
+  'bob': { price: 140, name: 'Tóc Bob Ngắn' },
+  'double_bun': { price: 180, name: 'Búi Đôi Lượng Tử' },
+  'quantum_pixie': { price: 220, name: 'Tóc tém Pixie Tiên Nữ' },
+  'crystal_waterfall': { price: 380, name: 'Tóc Thác Nước Tinh Thể' },
+  'lab_coat': { price: 150, name: 'Áo Choàng Phòng Lab' },
+  'astronaut_suit': { price: 250, name: 'Giáp Phi Hành Vũ Trụ' },
+  'mech_armor': { price: 400, name: 'Giáp Cơ Giới Lượng Tử' },
+  'cyber_hoodie': { price: 220, name: 'Hoodie Cyberpunk Tối' },
+  'steampunk_vest': { price: 160, name: 'Áo Gile Steampunk' },
+  'royal_cape': { price: 450, name: 'Choàng Hoàng Gia Đỏ' },
+  'bio_hazard': { price: 180, name: 'Đồ Bảo Hộ Chống Độc' },
+  'ninja_suit': { price: 260, name: 'Y Phục Ninja Bóng Đêm' },
+  'quantum_dress': { price: 460, name: 'Đầm Dạ Hội Lượng Tử' },
+  'space_shorts': { price: 120, name: 'Quần Đùi Vũ Trụ' },
+  'robotic_legs': { price: 350, name: 'Chân Robot Cybernetic' },
+  'cyber_skirt': { price: 200, name: 'Chân Váy Cyber Neon' },
+  'steampunk_pants': { price: 140, name: 'Quần Steampunk Ông Côn' },
+  'ninja_pants': { price: 210, name: 'Quần Ninja Quấn Băng' },
+  'lightweight_joggers': { price: 130, name: 'Quần Jogger Thể Thao' },
+  'tennis_skirt': { price: 150, name: 'Chân Váy Tennis Trắng' },
+  'sci_glasses': { price: 100, name: 'Kính Trí Tuệ Giáo Sư' },
+  'vr_goggles': { price: 250, name: 'Kính Thực Tế Ảo VR' },
+  'headphones': { price: 200, name: 'Tai Nghe Lượng Tử Đỏ' },
+  'gas_mask': { price: 180, name: 'Mặt Nạ Phòng Độc Lab' },
+  'cyber_eyepatch': { price: 240, name: 'Bịt Mắt Laser Cyber' },
+  'scientific_magnifier': { price: 220, name: 'Kính Vi Phẫu Nhãn Quang' },
+  'crown': { price: 500, name: 'Vương Miện Đại Đế' },
+  'butterfly_hairpin': { price: 230, name: 'Kẹp Tóc Bướm Hologram' }
 };
 
 const ALL_GACHA_TITLES = [
@@ -498,17 +835,47 @@ const ALL_GACHA_TITLES = [
 ];
 
 const ALL_COSMETICS_LIST = [
-  { id: 'hair_punk', name: 'Tóc Punk Bộc Phá 🎸', rarity: 'Rare', type: 'cosmetic', price: 200 },
-  { id: 'hair_quantum', name: 'Tóc Rực Sáng Lượng Tử 🌀', rarity: 'Epic', type: 'cosmetic', price: 250 },
-  { id: 'hair_cyberspace', name: 'Kiểu Tóc Thế Giới Mới 🌐', rarity: 'Epic', type: 'cosmetic', price: 300 },
-  { id: 'top_cyber', name: 'Giáp Khoa Học Cyber 🦾', rarity: 'Epic', type: 'cosmetic', price: 300 },
-  { id: 'top_scifi_suit', name: 'Trang Phục Phi Hành Gia 🛰️', rarity: 'Epic', type: 'cosmetic', price: 350 },
-  { id: 'top_dimension', name: 'Áo Khoác Đấng Kiến Tạo 🌌', rarity: 'Legendary', type: 'cosmetic', price: 400 },
-  { id: 'bottom_neon', name: 'Quần Da Sọc Neon ⚡', rarity: 'Rare', type: 'cosmetic', price: 200 },
-  { id: 'bottom_mech', name: 'Quần Cơ Giới 🛡️', rarity: 'Epic', type: 'cosmetic', price: 250 },
-  { id: 'accessory_visor', name: 'Kính Quét Hologram 🥽', rarity: 'Rare', type: 'cosmetic', price: 150 },
-  { id: 'accessory_wings', name: 'Cánh Ánh Sáng Photon 🪶', rarity: 'Legendary', type: 'cosmetic', price: 350 },
-  { id: 'crown', name: 'Vương miện Đại Đế 👑', rarity: 'Legendary', type: 'cosmetic', price: 500 }
+  { id: 'chocolate', name: 'Màu da Chocolate', rarity: 'Rare', type: 'cosmetic', price: 150 },
+  { id: 'neon_blue', name: 'Màu da Xanh Neon', rarity: 'Epic', type: 'cosmetic', price: 250 },
+  { id: 'cosmic_purple', name: 'Màu da Tím Vũ Trụ', rarity: 'Legendary', type: 'cosmetic', price: 350 },
+  { id: 'emerald_alien', name: 'Màu da Alien Ngọc Lục', rarity: 'Epic', type: 'cosmetic', price: 200 },
+  { id: 'cyborg_silver', name: 'Màu da Cyborg Bạc', rarity: 'Legendary', type: 'cosmetic', price: 380 },
+  { id: 'sunfire_gold', name: 'Màu da Thái Dương Vàng', rarity: 'Legendary', type: 'cosmetic', price: 420 },
+  { id: 'cyberpunk_spiky', name: 'Tóc Gai Nhọn Cyber', rarity: 'Epic', type: 'cosmetic', price: 200 },
+  { id: 'long_nebula', name: 'Tóc Tinh Vân Nebula', rarity: 'Legendary', type: 'cosmetic', price: 350 },
+  { id: 'curly', name: 'Tóc Curly Lãng Tử', rarity: 'Rare', type: 'cosmetic', price: 150 },
+  { id: 'ponytail', name: 'Tóc Đuôi Ngựa Nữ Tính', rarity: 'Rare', type: 'cosmetic', price: 160 },
+  { id: 'dreadlocks', name: 'Tóc Tết Dreadlocks', rarity: 'Epic', type: 'cosmetic', price: 240 },
+  { id: 'mohawk', name: 'Tóc Chỏm Mohawk Nam', rarity: 'Epic', type: 'cosmetic', price: 220 },
+  { id: 'side_part', name: 'Tóc Rẽ Ngôi Tài Phiệt', rarity: 'Rare', type: 'cosmetic', price: 130 },
+  { id: 'bob', name: 'Tóc Bob Ngắn', rarity: 'Rare', type: 'cosmetic', price: 140 },
+  { id: 'double_bun', name: 'Búi Đôi Lượng Tử', rarity: 'Rare', type: 'cosmetic', price: 180 },
+  { id: 'quantum_pixie', name: 'Tóc tém Pixie Tiên Nữ', rarity: 'Epic', type: 'cosmetic', price: 220 },
+  { id: 'crystal_waterfall', name: 'Tóc Thác Nước Tinh Thể', rarity: 'Legendary', type: 'cosmetic', price: 380 },
+  { id: 'lab_coat', name: 'Áo Choàng Phòng Lab', rarity: 'Rare', type: 'cosmetic', price: 150 },
+  { id: 'astronaut_suit', name: 'Giáp Phi Hành Vũ Trụ', rarity: 'Epic', type: 'cosmetic', price: 250 },
+  { id: 'mech_armor', name: 'Giáp Cơ Giới Lượng Tử', rarity: 'Legendary', type: 'cosmetic', price: 400 },
+  { id: 'cyber_hoodie', name: 'Hoodie Cyberpunk Tối', rarity: 'Epic', type: 'cosmetic', price: 220 },
+  { id: 'steampunk_vest', name: 'Áo Gile Steampunk', rarity: 'Rare', type: 'cosmetic', price: 160 },
+  { id: 'royal_cape', name: 'Choàng Hoàng Gia Đỏ', rarity: 'Legendary', type: 'cosmetic', price: 450 },
+  { id: 'bio_hazard', name: 'Đồ Bảo Hộ Chống Độc', rarity: 'Rare', type: 'cosmetic', price: 180 },
+  { id: 'ninja_suit', name: 'Y Phục Ninja Bóng Đêm', rarity: 'Epic', type: 'cosmetic', price: 260 },
+  { id: 'quantum_dress', name: 'Đầm Dạ Hội Lượng Tử', rarity: 'Legendary', type: 'cosmetic', price: 460 },
+  { id: 'space_shorts', name: 'Quần Đùi Vũ Trụ', rarity: 'Rare', type: 'cosmetic', price: 120 },
+  { id: 'robotic_legs', name: 'Chân Robot Cybernetic', rarity: 'Legendary', type: 'cosmetic', price: 350 },
+  { id: 'cyber_skirt', name: 'Chân Váy Cyber Neon', rarity: 'Epic', type: 'cosmetic', price: 200 },
+  { id: 'steampunk_pants', name: 'Quần Steampunk Ông Côn', rarity: 'Rare', type: 'cosmetic', price: 140 },
+  { id: 'ninja_pants', name: 'Quần Ninja Quấn Băng', rarity: 'Epic', type: 'cosmetic', price: 210 },
+  { id: 'lightweight_joggers', name: 'Quần Jogger Thể Thao', rarity: 'Rare', type: 'cosmetic', price: 130 },
+  { id: 'tennis_skirt', name: 'Chân Váy Tennis Trắng', rarity: 'Rare', type: 'cosmetic', price: 150 },
+  { id: 'sci_glasses', name: 'Kính Trí Tuệ Giáo Sư', rarity: 'Rare', type: 'cosmetic', price: 100 },
+  { id: 'vr_goggles', name: 'Kính Thực Tế Ảo VR', rarity: 'Epic', type: 'cosmetic', price: 250 },
+  { id: 'headphones', name: 'Tai Nghe Lượng Tử Đỏ', rarity: 'Epic', type: 'cosmetic', price: 200 },
+  { id: 'gas_mask', name: 'Mặt Nạ Phòng Độc Lab', rarity: 'Rare', type: 'cosmetic', price: 180 },
+  { id: 'cyber_eyepatch', name: 'Bịt Mắt Laser Cyber', rarity: 'Epic', type: 'cosmetic', price: 240 },
+  { id: 'scientific_magnifier', name: 'Kính Vi Phẫu Nhãn Quang', rarity: 'Epic', type: 'cosmetic', price: 220 },
+  { id: 'crown', name: 'Vương Miện Đại Đế', rarity: 'Legendary', type: 'cosmetic', price: 500 },
+  { id: 'butterfly_hairpin', name: 'Kẹp Tóc Bướm Hologram', rarity: 'Epic', type: 'cosmetic', price: 230 }
 ];
 
 const ALL_GACHA_POOL = [...ALL_COSMETICS_LIST, ...ALL_GACHA_TITLES];
@@ -581,6 +948,59 @@ exports.processCrystalTransaction = functions.https.onCall(async (data, context)
         return { success: true, newCrystals, itemPurchased: itemId };
       }
 
+      case 'PURCHASE_EQUIPMENT_CARD': {
+        const { cardId, count = 1 } = payload || {};
+        if (!cardId) {
+          throw new functions.https.HttpsError('invalid-argument', 'Missing cardId.');
+        }
+
+        const qty = Math.max(1, Number(count) || 1);
+        const EQUIPMENT_PRICES = {
+          'card_elo_shield': 2400,
+          'card_crystal_magnet': 1800,
+          'card_subject_ban': 1400,
+          'card_incognito': 1200,
+          'card_wildcard_slot': 3500,
+          'card_time_freeze': 2500,
+          'card_smoke_fog': 2000,
+          'card_progress_steal': 3000,
+          'card_ai_assist': 1600,
+          'card_dispel': 1500
+        };
+
+        const unitPrice = EQUIPMENT_PRICES[cardId];
+        if (!unitPrice) {
+          throw new functions.https.HttpsError('not-found', 'Thẻ bài không tồn tại.');
+        }
+
+        const totalPrice = unitPrice * qty;
+        if (currentCrystals < totalPrice) {
+          throw new functions.https.HttpsError('failed-precondition', `Không đủ Pha Lê (Cần ${totalPrice} Pha Lê).`);
+        }
+
+        const currentInventory = userData.inventory || [];
+        const existingItemIndex = currentInventory.findIndex(item => item.cardId === cardId);
+
+        let updatedInventory = [...currentInventory];
+        if (existingItemIndex !== -1) {
+          updatedInventory[existingItemIndex] = {
+            ...updatedInventory[existingItemIndex],
+            quantity: (updatedInventory[existingItemIndex].quantity || 0) + qty
+          };
+        } else {
+          updatedInventory.push({ cardId, quantity: qty });
+        }
+
+        const newCrystals = currentCrystals - totalPrice;
+
+        transaction.update(userRef, {
+          'personalization.crystals': newCrystals,
+          inventory: updatedInventory
+        });
+
+        return { success: true, newCrystals, inventory: updatedInventory, cardPurchased: cardId, count: qty };
+      }
+
       case 'GACHA_ROLL': {
         const { pullCount } = payload || {}; // pullCount có thể là 1 hoặc 10
         const count = Number(pullCount) || 1;
@@ -641,16 +1061,15 @@ exports.processCrystalTransaction = functions.https.onCall(async (data, context)
             compensation
           });
         }
-
-        const newCrystals = currentCrystals - cost + totalCompensation;
-
+        
+        // Cập nhật sau khi roll
         transaction.update(userRef, {
-          'personalization.crystals': newCrystals,
+          'personalization.crystals': currentCrystals - cost + totalCompensation,
           'personalization.unlockedParts': newUnlockedParts,
           'personalization.unlockedTitles': newUnlockedTitles
         });
-
-        return { success: true, newCrystals, results };
+        
+        return { success: true, results, totalCompensation };
       }
 
       case 'CHECKIN': {
@@ -663,26 +1082,26 @@ exports.processCrystalTransaction = functions.https.onCall(async (data, context)
 
         const lastDayIndex = pers.checkInDayIndex || 0;
         let nextDayIndex = 1;
-        if (lastDayIndex > 0 && lastDayIndex < 7) {
+        if (lastDayIndex > 0 && lastDayIndex < 30) {
           nextDayIndex = lastDayIndex + 1;
         } else {
           nextDayIndex = 1;
         }
 
         let bonusCrystals = 50;
-        if (nextDayIndex === 1) bonusCrystals = 50;
-        else if (nextDayIndex === 2) bonusCrystals = 60;
-        else if (nextDayIndex === 3) bonusCrystals = 70;
-        else if (nextDayIndex === 4) bonusCrystals = 80;
-        else if (nextDayIndex === 5) bonusCrystals = 100;
-        else if (nextDayIndex === 6) bonusCrystals = 120;
-        else if (nextDayIndex === 7) bonusCrystals = 200;
+        if (nextDayIndex === 30) bonusCrystals = 300;
+        else if (nextDayIndex >= 26) bonusCrystals = 150;
+        else if (nextDayIndex >= 21) bonusCrystals = 120;
+        else if (nextDayIndex >= 16) bonusCrystals = 100;
+        else if (nextDayIndex >= 11) bonusCrystals = 80;
+        else if (nextDayIndex >= 6) bonusCrystals = 60;
+        else bonusCrystals = 50;
 
         const unlocked = pers.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default'];
         let newUnlocked = [...unlocked];
         let giftMsg = "";
 
-        if (nextDayIndex === 7) {
+        if (nextDayIndex === 30) {
           if (!newUnlocked.includes('crown')) {
             newUnlocked.push('crown');
             giftMsg = " và nhận được thêm Vương miện Đại Đế 👑!";
@@ -710,7 +1129,7 @@ exports.processCrystalTransaction = functions.https.onCall(async (data, context)
         
         let questsData = stats.dailyQuests || {};
         let needsUpdate = false;
-        
+
         if (questsData.lastQuestDate !== todayStr) {
           questsData = {
             lastQuestDate: todayStr,
@@ -1074,3 +1493,35 @@ async function runStaleMatchesCleanup() {
   await Promise.all(promises);
   return cleaned;
 }
+
+// === 5. GET LEADERBOARD FUNCTION (SAFE ELO RANKING WITHOUT INSUBFFICIENT PERMISSIONS) ===
+exports.getLeaderboard = functions.https.onCall(async (data, context) => {
+  try {
+    const usersSnap = await db.collection('users').get();
+    const list = [];
+    usersSnap.forEach((docSnap) => {
+      const uData = docSnap.data();
+      if (uData.role === 'admin' || uData.email?.toLowerCase() === 'admin123@gmail.com' || docSnap.id === 'admin') {
+        return;
+      }
+      list.push({
+        uid: docSnap.id,
+        displayName: uData.displayName || uData.name || 'Học viên ẩn danh',
+        elo: uData.stats?.elo !== undefined ? uData.stats.elo : 1000,
+        level: uData.stats?.level || 1,
+        wins: uData.stats?.wins || 0,
+        losses: uData.stats?.losses || 0,
+        activeTitle: uData.personalization?.activeTitle || 'apprentice',
+        avatarFrame: uData.personalization?.avatarFrame || 'default',
+        avatarParts: uData.personalization?.avatarParts || null
+      });
+    });
+    // Sắp xếp ELO giảm dần
+    list.sort((a, b) => b.elo - a.elo);
+    // Trả về top 100
+    return { leaderboard: list.slice(0, 100) };
+  } catch (err) {
+    functions.logger.error("Error fetching leaderboard:", err);
+    throw new functions.https.HttpsError('internal', err.message || 'Error fetching leaderboard');
+  }
+});

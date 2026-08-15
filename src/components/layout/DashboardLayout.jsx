@@ -14,6 +14,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { playSound } from '@/lib/sound';
 import html2canvas from 'html2canvas-pro';
 import { motion, AnimatePresence } from 'framer-motion';
+import { savePendingShare } from '@/lib/indexedDB';
+
 
 export default function DashboardLayout({ children }) {
   const user = useAppStore((state) => state.user);
@@ -22,6 +24,8 @@ export default function DashboardLayout({ children }) {
   const personalization = useAppStore((state) => state.personalization);
   const arenaState = useAppStore((state) => state.arenaState);
   const activeLab = useAppStore((state) => state.activeLab);
+  const isSidebarOpen = useAppStore((state) => state.isSidebarOpen);
+  const toggleSidebar = useAppStore((state) => state.toggleSidebar);
 
   const pathname = usePathname();
   const router = useRouter();
@@ -141,7 +145,7 @@ export default function DashboardLayout({ children }) {
                   unlockedTitles: ['apprentice'],
                   customCursor: 'default',
                   soundEnabled: true,
-                  theme: 'dark',
+                  theme: 'light',
                   crystals: 500,
                   avatarParts: {
                     gender: 'male',
@@ -397,43 +401,98 @@ export default function DashboardLayout({ children }) {
     if (isCapturing) return;
     setIsCapturing(true);
     
-    // Play sound click and camera shutter
+    // Play initial sound click
     playSound.click();
-    playSound.shutter();
-    setShowFlash(true);
     
-    // Wait for the flash to display, then capture
-    setTimeout(async () => {
-      setShowFlash(false);
+    try {
+      // Target body to capture the entire viewport as seen on screen
+      const captureTarget = document.body;
       
-      try {
-        // Target main element
-        const mainArea = document.querySelector('main') || document.body;
-        
-        // Hide screenshot-hide class elements (like custom cursor and the camera FAB itself)
-        const elementsToHide = document.querySelectorAll('.screenshot-hide');
-        elementsToHide.forEach((el) => {
-          el.style.opacity = '0';
-          el.style.pointerEvents = 'none';
-        });
-        
-        // Let it layout briefly
-        await new Promise((resolve) => setTimeout(resolve, 40));
-        
-        const canvas = await html2canvas(mainArea, {
-          useCORS: true,
-          backgroundColor: '#1c1e29',
-          scale: 1.5,
-          logging: false,
-        });
-        
-        // Show hidden elements back
-        elementsToHide.forEach((el) => {
-          el.style.opacity = '';
-          el.style.pointerEvents = '';
-        });
-        
-        const base64Image = canvas.toDataURL('image/png');
+      // Hide screenshot-hide class elements (like custom cursor and the camera FAB itself)
+      const elementsToHide = document.querySelectorAll('.screenshot-hide');
+      elementsToHide.forEach((el) => {
+        el.style.opacity = '0';
+        el.style.pointerEvents = 'none';
+      });
+      
+      // Let it layout briefly
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      
+      const scrollX = window.scrollX || 0;
+      const scrollY = window.scrollY || 0;
+      
+      const canvas = await html2canvas(captureTarget, {
+        useCORS: true,
+        backgroundColor: '#1c1e29',
+        scale: 1.0,
+        logging: false,
+        width: window.innerWidth,
+        height: window.innerHeight,
+        windowWidth: window.innerWidth,
+        windowHeight: window.innerHeight,
+        scrollX: scrollX,
+        scrollY: scrollY,
+        onclone: (clonedDoc) => {
+          clonedDoc.documentElement.className = document.documentElement.className;
+          clonedDoc.body.className = document.body.className;
+
+          // Force the width to match the desktop size to trigger desktop responsive styles (lg:)
+          clonedDoc.documentElement.style.width = `${window.innerWidth}px`;
+          clonedDoc.documentElement.style.minWidth = `${window.innerWidth}px`;
+          clonedDoc.body.style.width = `${window.innerWidth}px`;
+          clonedDoc.body.style.minWidth = `${window.innerWidth}px`;
+
+          // 1. Hide all elements marked with screenshot-hide using display: none
+          const clonedHides = clonedDoc.querySelectorAll('.screenshot-hide');
+          clonedHides.forEach((el) => {
+            el.style.display = 'none';
+          });
+
+          // Remove max-width constraints to let content span fully
+          const maxWScreens = clonedDoc.querySelectorAll('.screenshot-max-w');
+          maxWScreens.forEach((el) => {
+            el.classList.remove('max-w-5xl');
+            el.classList.add('max-w-none', 'w-full');
+          });
+
+          // Expand specific grid column (Middle Column) to cover space left by hidden Clock Column
+          const expandCols = clonedDoc.querySelectorAll('.screenshot-expand-col');
+          expandCols.forEach((el) => {
+            el.classList.remove('lg:col-span-2');
+            el.classList.add('lg:col-span-3');
+          });
+
+          // 2. Remove margin-left from the main layout wrapper to shift it to full width
+          const mainWrapper = clonedDoc.querySelector('main')?.parentElement;
+          if (mainWrapper) {
+            mainWrapper.classList.remove('ml-[260px]');
+            mainWrapper.classList.add('ml-0');
+            mainWrapper.style.paddingTop = '0';
+          }
+
+          // 3. Make left columns span 12 grid units instead of 8 to occupy full width
+          const fullWidths = clonedDoc.querySelectorAll('.screenshot-full-width');
+          fullWidths.forEach((el) => {
+            el.classList.remove('lg:col-span-8');
+            el.classList.add('lg:col-span-12');
+          });
+        }
+      });
+      
+      // Show hidden elements back
+      elementsToHide.forEach((el) => {
+        el.style.opacity = '';
+        el.style.pointerEvents = '';
+      });
+
+      // Play camera shutter and trigger flash overlay AFTER capturing is completed successfully
+      playSound.shutter();
+      setShowFlash(true);
+      setTimeout(() => {
+        setShowFlash(false);
+      }, 150);
+      
+      const base64Image = canvas.toDataURL('image/jpeg', 0.8);
         
         // Contextual title / caption / subject based on route
         let subject = 'chemistry';
@@ -470,20 +529,23 @@ export default function DashboardLayout({ children }) {
           imageUrl: base64Image
         };
         
-        localStorage.setItem('pending_share_story', JSON.stringify(pendingShare));
-        
-        playSound.success();
-        router.push('/story');
+        const isSaved = await savePendingShare(pendingShare);
+        if (isSaved) {
+          playSound.success();
+          router.push('/story');
+        } else {
+          alert('⚠️ Ảnh chụp màn hình quá lớn hoặc bộ nhớ trình duyệt bị giới hạn, không thể chia sẻ câu chuyện lúc này. Vui lòng thử lại!');
+        }
       } catch (err) {
         console.error("Lỗi chụp màn hình:", err);
       } finally {
         setIsCapturing(false);
       }
-    }, 150);
   };
 
   const isAdminRoute = pathname?.startsWith('/admin');
-  const isPlaying = arenaState.status === 'playing' || !!activeLab || isAdminRoute;
+  const isHome = pathname === '/';
+  const isPlaying = arenaState.status === 'playing' || arenaState.status === 'matching' || !!activeLab || isAdminRoute;
   const showFloatingShutter = !isPlaying && pathname !== '/story' && pathname !== '/auth';
 
   const bgImage = personalization?.bgImage || '';
@@ -536,7 +598,7 @@ export default function DashboardLayout({ children }) {
           </div>
           
           <div className="text-[9px] text-zinc-550 font-bold uppercase tracking-widest font-mono pt-2">
-            STEM Arena v2.6.0
+            STEM Hub v2.6.0
           </div>
         </div>
       </div>
@@ -545,36 +607,9 @@ export default function DashboardLayout({ children }) {
 
   return (
     <div 
-      style={bgStyle}
-      className="flex min-h-screen bg-slate-50 text-slate-900 dark:bg-[#1c1e29] dark:text-white transition-colors duration-300 relative overflow-x-clip"
+      className="flex min-h-screen bg-bg-primary text-text-primary transition-colors duration-300 relative overflow-x-clip"
     >
-      {/* Hình nền động Lượng tử đặc sắc */}
-      {isAnimatedBg && bgImage === 'animated-supernova' && (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 bg-[#1a1b26]">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-tr from-purple-600/20 to-pink-600/20 rounded-full blur-[110px] animate-[spin_40s_linear_infinite]" />
-          <div className="absolute top-1/3 left-1/4 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[90px] animate-[pulse_10s_ease-in-out_infinite]" />
-          <div className="absolute bottom-1/3 right-1/4 w-[500px] h-[500px] bg-rose-500/15 rounded-full blur-[80px] animate-[pulse_8s_ease-in-out_infinite_1.5s]" />
-          <div className="absolute inset-0 opacity-[0.02] bg-[radial-gradient(ellipse_at_center,_#ffffff_1px,_transparent_1px)] bg-[size:32px_32px]" />
-        </div>
-      )}
-      
-      {isAnimatedBg && bgImage === 'animated-cybergrid' && (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 bg-[#0c0d14]">
-          <div className="absolute inset-0 bg-gradient-to-t from-[#141522] via-[#0c0d14] to-[#0c0d14]" />
-          <div className="absolute inset-0" style={{ perspective: '500px' }}>
-            <div 
-              className="absolute inset-0 origin-[50%_100%]"
-              style={{
-                transform: 'rotateX(60deg) translateY(-100px)',
-                backgroundImage: 'linear-gradient(to right, rgba(34, 211, 238, 0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(34, 211, 238, 0.06) 1px, transparent 1px)',
-                backgroundSize: '45px 45px',
-                animation: 'cybergrid-scroll 25s linear infinite',
-              }}
-            />
-          </div>
-          <div className="absolute bottom-0 inset-x-0 h-1/2 bg-gradient-to-t from-cyan-500/5 to-transparent blur-md" />
-        </div>
-      )}
+
 
       {isAnimatedBg && bgImage === 'animated-matrix' && (
         <MatrixRainBackground />
@@ -589,9 +624,29 @@ export default function DashboardLayout({ children }) {
         <div className="absolute inset-0 bg-white/75 dark:bg-[#1c1e29]/80 backdrop-blur-[2px] pointer-events-none z-0" />
       )}
       <CustomCursor />
-      {!isPlaying && <Sidebar />}
-      <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 relative z-10 ${isPlaying ? 'ml-0' : 'ml-[260px]'}`}>
-        {!isPlaying && <Header />}
+      {!isPlaying && (
+        <div className="screenshot-hide">
+          <Sidebar />
+          {/* Mobile backdrop overlay when Sidebar is open */}
+          <AnimatePresence>
+            {isSidebarOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={toggleSidebar}
+                className="fixed inset-0 bg-black/40 backdrop-blur-xs z-30 lg:hidden"
+              />
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+      <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out relative z-10 ${isPlaying ? 'ml-0' : isSidebarOpen ? 'ml-0 lg:ml-[260px]' : 'ml-0'}`}>
+        {!isPlaying && (
+          <div className="screenshot-hide">
+            <Header />
+          </div>
+        )}
         {!isPlaying && banner.enabled && banner.text && (
           <div className={`w-full py-2 px-6 border-b text-xs font-bold transition-all relative z-30 flex items-center justify-between gap-4 select-none ${
             banner.type === 'warning' 
@@ -607,16 +662,27 @@ export default function DashboardLayout({ children }) {
           </div>
         )}
         <main className="flex-1 overflow-x-clip relative z-10">
-          {children}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 14, scale: 0.992 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.995 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              className="w-full h-full"
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
 
       {/* Global Floating Screenshot Shutter FAB (Game-like Camera tool) */}
       {showFloatingShutter && (
-        <div className={`fixed bottom-6 screenshot-hide group select-none transition-all duration-300 ${pathname === '/ho-so' ? 'right-28 z-[40]' : 'right-6 z-[999]'}`}>
+        <div className={`fixed screenshot-hide group select-none transition-all duration-300 ${pathname === '/ho-so' ? 'bottom-6 right-28 z-[40]' : pathname === '/xep-hang' ? 'bottom-22 right-6 z-[999]' : 'bottom-6 right-6 z-[999]'}`}>
           {/* Neon Floating Tooltip */}
-          <div className="absolute bottom-16 right-0 w-max invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 pointer-events-none bg-black/90 border border-pink-500/30 backdrop-blur-md px-3.5 py-2 rounded-2xl text-[10px] font-black text-pink-400 tracking-wider shadow-[0_0_20px_rgba(244,63,94,0.2)] select-none flex items-center gap-1.5 uppercase">
-            <Sparkles className="w-3.5 h-3.5 text-yellow-400 animate-pulse" /> Chụp & Đăng Story 📸
+          <div className="absolute bottom-16 right-0 w-max invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 pointer-events-none bg-bg-secondary/95 border border-border-theme backdrop-blur-md px-3.5 py-2 rounded-2xl text-[10px] font-black text-accent-pink tracking-wider shadow-lg select-none flex items-center gap-1.5 uppercase">
+            <Sparkles className="w-3.5 h-3.5 text-warning animate-pulse" /> Chụp & Đăng Story 📸
           </div>
           
           <button

@@ -29,17 +29,18 @@ export const hairColors = {
   sky_blue: '#3b82f6'
 };
 
-function STEMAvatarSVG({ parts = {}, className = "w-full h-full" }) {
-  const gender = parts.gender || 'male'; // 'male' | 'female'
-  const bodyType = parts.bodyType || 'chibi'; // 'chibi' | 'tall' | 'muscular'
-  const pose = parts.pose || 'standard'; // 'standard' | 'wave' | 'thinker' | 'victory'
+function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
+  const safeParts = parts || {};
+  const gender = safeParts.gender || 'male'; // 'male' | 'female'
+  const bodyType = safeParts.bodyType || 'chibi'; // 'chibi' | 'tall' | 'muscular'
+  const pose = safeParts.pose || 'standard'; // 'standard' | 'wave' | 'thinker' | 'victory'
 
-  const body = parts.body || 'peach';
-  const hair = parts.hair || 'default';
-  const hairColor = parts.hairColor || 'black';
-  const top = parts.top || 'default';
-  const bottom = parts.bottom || 'default';
-  const accessory = parts.accessory || 'none';
+  const body = safeParts.body || 'peach';
+  const hair = safeParts.hair || 'default';
+  const hairColor = safeParts.hairColor || 'black';
+  const top = safeParts.top || 'default';
+  const bottom = safeParts.bottom || 'default';
+  const accessory = safeParts.accessory || 'none';
 
   // Lấy màu da thực tế
   const skin = skinColors[body] || skinColors.peach;

@@ -1,0 +1,28 @@
+HƯỚNG DẪN CHẠY DỰ ÁN DÀNH CHO BAN GIÁM KHẢO
+===========================================
+
+Để khởi chạy dự án "Đấu Trường & Phòng Thí Nghiệm STEM" trên máy tính của quý giám khảo, vui lòng làm theo các bước đơn giản sau:
+
+1. Yêu cầu môi trường máy tính:
+   - Đã cài đặt Node.js (khuyến nghị phiên bản v18.x hoặc v20.x trở lên).
+
+2. Các bước khởi chạy dự án:
+   - Bước 1: Mở Terminal (Command Prompt / PowerShell / Terminal trên Mac) tại thư mục này.
+   - Bước 2: Nhập và chạy lệnh sau để tải các thư viện phụ thuộc (cần kết nối Internet):
+     
+     npm install
+     
+   - Bước 3: Sau khi cài đặt hoàn tất, nhập và chạy lệnh sau để khởi động dự án:
+     
+     npm run dev
+     
+   - Bước 4: Mở trình duyệt Web (Google Chrome, Edge, Safari...) và truy cập địa chỉ:
+     
+     http://localhost:3000
+
+3. Tài khoản trải nghiệm hệ thống:
+   - Vui lòng xem file "Danh_sach_20_tai_khoan_test.docx" đính kèm ở thư mục gốc để lấy thông tin các tài khoản học sinh và giáo viên đã được tạo sẵn trên Cloud phục vụ trải nghiệm các tính năng PvP thời gian thực, kết bạn, làm nhiệm vụ, bảng xếp hạng và quản lý lớp học.
+
+4. Ghi chú kỹ thuật quan trọng:
+   - Ứng dụng đã được tích hợp sẵn cấu hình kết nối an toàn đến database đám mây Firebase (gói miễn phí Spark). Quý giám khảo KHÔNG cần tự tạo hay khai báo thêm bất kỳ khóa bảo mật nào để dự án hoạt động.
+   - Hệ thống sử dụng cơ chế điều hướng thông minh Client-Side Callable (tại src/lib/clientFunctions.js), giúp toàn bộ nghiệp vụ (tính toán ELO, kết cặp trận đấu đấu trường, điểm danh 30 ngày, quay thưởng gacha) tự chạy trực tiếp trên Client mà không cần cài đặt hoặc deploy Firebase Cloud Functions.

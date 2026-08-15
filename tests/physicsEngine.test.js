@@ -101,4 +101,20 @@ runTestCase("Case 5: Handle infinite reflection loops gracefully (capped at 10)"
   console.log(`Note: Reflection loop stopped after ${result.path.length - 1} steps.`);
 });
 
+// Case 6: Dynamic offset on custom coordinates
+runTestCase("Case 6: Dynamic offset on custom coordinates", () => {
+  const mirrors = [
+    { x: 100, y: 100, angle: 0, offset: 135 } // Tọa độ tùy ý, góc logic 0 với offset 135 độ
+  ];
+  const source = { x: 100, y: 200 };
+  const target = { x: 200, y: 100 };
+  const result = calculateLaserPath(mirrors, source, target);
+  
+  assert.strictEqual(result.isHit, true, "Laser should hit the target with custom offset");
+  assert.strictEqual(result.path.length, 3, "Path should have 3 points");
+  assert.deepStrictEqual(result.path[0], source);
+  assert.deepStrictEqual(result.path[1], { x: 100, y: 100 });
+  assert.deepStrictEqual(result.path[2], target);
+});
+
 console.log("=== ALL PHYSICS ENGINE UNIT TESTS PASSED SUCCESSFULLY! ===");

@@ -11,260 +11,20 @@ import {
 import { playSound } from '@/lib/sound';
 import { logAdminAction } from '@/lib/adminLogger';
 
-// Cấu hình bản đồ chỉ số dưới hóa học/toán học sang Unicode subscripts
-const subscriptMap = {
-  '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄',
-  '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉',
-  'a': 'ₐ', 'e': 'ₑ', 'o': 'ₒ', 'x': 'ₓ', 'h': 'ₕ',
-  'n': 'ₙ', 'm': 'ₘ', 'p': 'ₚ', 's': 'ₛ', 't': 'ₜ'
-};
+import { formatMathText } from '@/lib/mathFormatter';
 
-// Cấu hình bản đồ số mũ, điện tích sang Unicode superscripts
-const superscriptMap = {
-  '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
-  '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
-  '+': '⁺', '-': '⁻', '=': '⁼', '(': '⁽', ')': '⁾',
-  'a': 'ᵃ', 'b': 'ᵇ', 'c': 'ᶜ', 'd': 'ᵈ', 'e': 'ᵉ', 
-  'g': 'ᵍ', 'h': 'ʰ', 'i': 'ⁱ', 'k': 'ᵏ', 'm': 'ᵐ', 
-  'n': 'ⁿ', 'o': 'ᵒ', 'p': 'ᵖ', 'r': 'ʳ', 's': 'ˢ', 
-  't': 'ᵗ', 'u': 'ᵘ', 'v': 'ᵛ', 'x': 'ˣ', 'y': 'ʸ',
-  'T': 'ᵀ', 'L': 'ᴸ'
-};
-
-// Danh sách các ánh xạ kí tự đặc biệt LaTeX sang Unicode
-const latexTranslations = [
-  { regex: /\\text\{\s*(.*?)\s*\}/g, replacement: '$1' },
-  { regex: /\\left/g, replacement: '' },
-  { regex: /\\right/g, replacement: '' },
-  { regex: /\\pi/g, replacement: 'π' },
-  { regex: /\\lambda/g, replacement: 'λ' },
-  { regex: /\\mu/g, replacement: 'μ' },
-  { regex: /\\alpha/g, replacement: 'α' },
-  { regex: /\\beta/g, replacement: 'β' },
-  { regex: /\\gamma/g, replacement: 'γ' },
-  { regex: /\\delta/g, replacement: 'δ' },
-  { regex: /\\epsilon/g, replacement: 'ε' },
-  { regex: /\\varepsilon/g, replacement: 'ε' },
-  { regex: /\\varphi/g, replacement: 'φ' },
-  { regex: /\\phi/g, replacement: 'φ' },
-  { regex: /\\omega/g, replacement: 'ω' },
-  { regex: /\\theta/g, replacement: 'θ' },
-  { regex: /\\eta/g, replacement: 'η' },
-  { regex: /\\rho/g, replacement: 'ρ' },
-  { regex: /\\sigma/g, replacement: 'σ' },
-  { regex: /\\tau/g, replacement: 'τ' },
-  { regex: /\\Delta/g, replacement: 'Δ' },
-  { regex: /\\Omega/g, replacement: 'Ω' },
-  { regex: /\^\\circ/g, replacement: '°' },
-  { regex: /\\circ/g, replacement: '°' },
-  { regex: /\\degree/g, replacement: '°' },
-  { regex: /\\rightarrow/g, replacement: ' ➔ ' },
-  { regex: /\\Rightarrow/g, replacement: ' ➔ ' },
-  { regex: /\\to/g, replacement: ' ➔ ' },
-  { regex: /\\Leftrightarrow/g, replacement: ' ⇔ ' },
-  { regex: /\\times/g, replacement: ' × ' },
-  { regex: /\\approx/g, replacement: ' ≈ ' },
-  { regex: /\\cdot/g, replacement: ' · ' },
-  { regex: /\\pm/g, replacement: '±' },
-  { regex: /\\neq/g, replacement: '≠' },
-  { regex: /\\infty/g, replacement: '∞' },
-  { regex: /\\cup/g, replacement: ' ∪ ' },
-  { regex: /\\le/g, replacement: '≤' },
-  { regex: /\\ge/g, replacement: '≥' },
-  { regex: /\\leq/g, replacement: '≤' },
-  { regex: /\\geq/g, replacement: '≥' },
-  { regex: /\\perp/g, replacement: '⊥' },
-  { regex: /\\parallel/g, replacement: '∥' },
-  { regex: /\\int/g, replacement: '∫' },
-  { regex: /\\in\b/g, replacement: ' ∈ ' },
-  { regex: /\\setminus/g, replacement: ' ∖ ' },
-  { regex: /\\uparrow/g, replacement: '↑' },
-  { regex: /\\downarrow/g, replacement: '↓' },
-  { regex: /\\pieces/g, replacement: '.' },
-  { regex: /\\mathbb\{R\}/g, replacement: 'ℝ' },
-  { regex: /\\mathbb\{C\}/g, replacement: 'ℂ' },
-  { regex: /\\mathbb\{N\}/g, replacement: 'ℕ' },
-  { regex: /\\mathbb\{Z\}/g, replacement: 'ℤ' },
-  { regex: /\\log/g, replacement: 'log' },
-  { regex: /\\ln/g, replacement: 'ln' },
-  { regex: /\\lim/g, replacement: 'lim' },
-  { regex: /\\sin/g, replacement: 'sin' },
-  { regex: /\\cos/g, replacement: 'cos' },
-  { regex: /\\tan/g, replacement: 'tan' },
-  { regex: /\\vec\{([^}]+)\}/g, replacement: 'vectơ $1' },
-  { regex: /\\overrightarrow\{([^}]+)\}/g, replacement: 'vectơ $1' },
-  { regex: /\\overline\{([^}]+)\}/g, replacement: '$1' },
-  { regex: /\\,/g, replacement: ' ' },
-  { regex: /\\;/g, replacement: ' ' },
-  { regex: /\\quad/g, replacement: ' ' },
-  { regex: /\\qquad/g, replacement: ' ' },
-  { regex: /\\text/g, replacement: '' }
-];
-
-// Bộ phân tích biểu thức Toán lý hóa chuẩn sang Unicode đẹp mắt, không lỗi font
-const formatMathText = (text) => {
-  if (!text) return '';
-  let formatted = text;
-  
-  // 1. Loại bỏ các kí hiệu mở đóng LaTeX \ ( và \ ) và $
-  formatted = formatted.replace(/\\\(|\\\)/g, '');
-  formatted = formatted.replace(/\$/g, '');
-  
-  // 1b. Inject referrerpolicy="no-referrer" và URL-encode cho thẻ img
-  formatted = formatted.replace(/#colorend/g, ''); // dọn dẹp các thẻ màu cũ nếu có
-  formatted = formatted.replace(/<img\s+([^>]*?)src="([^"]+?)"([^>]*?)>/gi, (match, before, src, after) => {
-    return `<img referrerpolicy="no-referrer" ${before}src="${encodeURI(src.trim())}"${after}>`;
-  });
-
-  // 1c. Xử lý phân số \frac{A}{B} hoặc \dfrac{A}{B} thành HTML phân số chồng tuyệt đẹp
-  while (formatted.includes('\\frac{') || formatted.includes('\\dfrac{')) {
-    const isDfrac = formatted.includes('\\dfrac{');
-    const startToken = isDfrac ? '\\dfrac{' : '\\frac{';
-    const startIdx = formatted.indexOf(startToken);
-    
-    let depth = 0;
-    let midIdx = -1;
-    for (let i = startIdx + startToken.length; i < formatted.length; i++) {
-      if (formatted[i] === '{') depth++;
-      else if (formatted[i] === '}') {
-        if (depth === 0) {
-          midIdx = i;
-          break;
-        }
-        depth--;
-      }
-    }
-    
-    if (midIdx === -1) break;
-    const numerator = formatted.slice(startIdx + startToken.length, midIdx);
-    
-    if (formatted[midIdx + 1] !== '{') break;
-    let endIdx = -1;
-    depth = 0;
-    for (let i = midIdx + 2; i < formatted.length; i++) {
-      if (formatted[i] === '{') depth++;
-      else if (formatted[i] === '}') {
-        if (depth === 0) {
-          endIdx = i;
-          break;
-        }
-        depth--;
-      }
-    }
-    
-    if (endIdx === -1) break;
-    const denominator = formatted.slice(midIdx + 2, endIdx);
-    
-    const replacement = `<span class="inline-flex flex-col items-center align-middle mx-1" style="font-size: 0.85em; line-height: 1.15;"><span class="border-b border-zinc-400 pb-0.5 px-0.5 text-center w-full">${numerator}</span><span class="pt-0.5 px-0.5 text-center w-full">${denominator}</span></span>`;
-    formatted = formatted.slice(0, startIdx) + replacement + formatted.slice(endIdx + 1);
-  }
-
-  // 1d. Xử lý hệ phương trình \begin{cases} ... \end{cases}
-  while (formatted.includes('\\begin{cases}')) {
-    const startIdx = formatted.indexOf('\\begin{cases}');
-    const endIdx = formatted.indexOf('\\end{cases}', startIdx);
-    if (endIdx === -1) break;
-    
-    const content = formatted.slice(startIdx + 13, endIdx);
-    const rawLines = content.split(/\\\\+|\\cr/g);
-    const lines = rawLines
-      .map(line => line.trim().replace(/&/g, '&nbsp;&nbsp;&nbsp;&nbsp;'))
-      .filter(line => line.length > 0);
-      
-    const htmlLines = lines.map(line => `<span class="block">${line}</span>`).join('');
-    
-    const bracketSize = lines.length <= 2 ? '1.8em' : (lines.length === 3 ? '2.4em' : '3.2em');
-    const scaleY = lines.length <= 2 ? '1.2' : (lines.length === 3 ? '1.45' : '1.7');
-    
-    const replacement = `<span class="inline-flex items-center align-middle mx-1"><span style="font-size: ${bracketSize}; font-weight: 100; line-height: 0.8; margin-right: 0.1em; font-family: sans-serif; opacity: 0.85; user-select: none; transform: scaleY(${scaleY}); transform-origin: center; display: inline-block;">{</span><span class="inline-flex flex-col text-left justify-center font-mono" style="font-size: 0.9em; line-height: 1.45;">${htmlLines}</span></span>`;
-    
-    formatted = formatted.slice(0, startIdx) + replacement + formatted.slice(endIdx + 11);
-  }
-
-  // 1e. Xử lý các khối aligned \begin{aligned} ... \end{aligned}
-  while (formatted.includes('\\begin{aligned}')) {
-    const startIdx = formatted.indexOf('\\begin{aligned}');
-    const endIdx = formatted.indexOf('\\end{aligned}', startIdx);
-    if (endIdx === -1) break;
-    
-    const content = formatted.slice(startIdx + 15, endIdx);
-    const rawLines = content.split(/\\\\+|\\cr/g);
-    const lines = rawLines
-      .map(line => line.trim().replace(/&/g, '&nbsp;&nbsp;'))
-      .filter(line => line.length > 0);
-      
-    const htmlLines = lines.map(line => `<span class="block">${line}</span>`).join('');
-    const replacement = `<span class="inline-flex flex-col text-left justify-center mx-1 font-mono" style="font-size: 0.9em; line-height: 1.45;">${htmlLines}</span>`;
-    
-    formatted = formatted.slice(0, startIdx) + replacement + formatted.slice(endIdx + 13);
-  }
-
-  // 2. Chạy dịch kí tự đặc biệt trước
-  latexTranslations.forEach(t => {
-    formatted = formatted.replace(t.regex, t.replacement);
-  });
-
-  // 3. Bảo vệ các khối lim_{...} khỏi việc bị chuyển đổi chỉ số dưới sai lệch
-  formatted = formatted.replace(/lim_\{([^}]+)\}/g, '@@@LIMSTART@@@$1@@@LIMEND@@@');
-
-  // 4. Chuyển đổi chỉ số dưới hóa học/toán học sang Unicode subscripts
-  formatted = formatted.replace(/_\{([^}]+)\}/g, (match, p1) => {
-    return p1.split('').map(char => subscriptMap[char] || char).join('');
-  });
-  
-  formatted = formatted.replace(/_([0-9a-zA-Z])/g, (match, p1) => {
-    return subscriptMap[p1] || p1;
-  });
-
-  // 5. Chuyển đổi số mũ, điện tích sang Unicode superscripts
-  formatted = formatted.replace(/\^\{([^}]+)\}/g, (match, p1) => {
-    return p1.split('').map(char => superscriptMap[char] || char).join('');
-  });
-  
-  formatted = formatted.replace(/\^([0-9a-zA-Z+-])/g, (match, p1) => {
-    return superscriptMap[p1] || p1;
-  });
-
-  // 6. Xử lý căn thức \sqrt{x} -> √(x)
-  while (formatted.includes('\\sqrt{')) {
-    const startIdx = formatted.indexOf('\\sqrt{');
-    let depth = 0;
-    let endIdx = -1;
-    for (let i = startIdx + 6; i < formatted.length; i++) {
-      if (formatted[i] === '{') {
-        depth++;
-      } else if (formatted[i] === '}') {
-        if (depth === 0) {
-          endIdx = i;
-          break;
-        }
-        depth--;
-      }
-    }
-    if (endIdx === -1) break;
-    const content = formatted.slice(startIdx + 6, endIdx);
-    formatted = formatted.slice(0, startIdx) + `√(${content})` + formatted.slice(endIdx + 1);
-  }
-
-  // 7. Khôi phục lại khối lim_{...} đã được bảo vệ
-  formatted = formatted.replace(/@@@LIMSTART@@@(.*?)@@@LIMEND@@?/g, (match, limitContent) => {
-    return `<span class="inline-flex flex-col items-center align-middle mx-1" style="line-height: 0.9;"><span style="font-size: 13px; font-weight: 600; color: #e4e4e7;">lim</span><span style="font-size: 9px; color: #a1a1aa; user-select: none; margin-top: -0.1em;">${limitContent}</span></span>`;
-  });
-
-  // 7b. Dọn dẹp trùng lặp từ "vectơ vectơ"
-  formatted = formatted.replace(/(vectơ\s+)+/gi, 'vectơ ');
-
-  return formatted;
-};
+import { generateAllSubjectQuestions } from '@/lib/questionAiGenerator';
 
 export default function QuestionManagement() {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [seeding, setSeeding] = useState(false);
+  const [seedProgress, setSeedProgress] = useState('');
 
   // Filters & Search
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('all');
+  const [selectedType, setSelectedType] = useState('all');
 
   // Form Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -272,6 +32,7 @@ export default function QuestionManagement() {
   
   // Form Values
   const [formValues, setFormValues] = useState({
+    type: 'mcq',
     text: '',
     choiceA: '',
     choiceB: '',
@@ -310,53 +71,76 @@ export default function QuestionManagement() {
     fetchQuestions();
   }, []);
 
-  // Nạp 80 câu hỏi mẫu từ EXAM_DATABASE vào Firestore (20 câu mỗi môn)
+  // Xóa cũ & AI Nạp >2.200 câu hỏi mẫu đa dạng (>550 câu/môn: Toán, Lý, Hóa, Sinh)
   const handleSeedQuestions = async () => {
     playSound.click();
-    if (confirm("Hệ thống sẽ nạp 80 câu hỏi trắc nghiệm chuẩn từ cơ sở dữ liệu mẫu THPT (20 câu mỗi môn: Toán, Lý, Hóa, Sinh) vào Firestore. Các câu hỏi hiện tại sẽ được giữ nguyên. Bạn muốn tiếp tục?")) {
+    if (confirm("⚠️ CẢNH BÁO: Hệ thống sẽ XÓA SẠCH TOÀN BỘ câu hỏi trùng lặp hiện tại trong Firestore và tiến hành AI NẠP MỚI >2.200 CÂU HỎI ĐA DẠNG (>550 câu/môn: Toán, Lý, Hóa, Sinh - gồm Trắc nghiệm, Đúng/Sai, Trả lời ngắn).\n\nBạn có chắc chắn muốn tiếp tục không?")) {
       try {
         setSeeding(true);
-        const batch = writeBatch(db);
-        let countTotal = 0;
-        const subjects = ['math', 'physics', 'chemistry', 'biology'];
+        setSeedProgress('Đang xóa các câu hỏi trùng lặp cũ...');
 
-        for (const sub of subjects) {
-          let countSub = 0;
-          for (const exam of EXAM_DATABASE) {
-            if (exam.subject !== sub || !exam.questions) continue;
-            for (const q of exam.questions) {
-              if (q.type === 'mcq' && q.options && q.options.length === 4) {
-                const newDocRef = doc(collection(db, 'questions'));
-                batch.set(newDocRef, {
-                  text: q.text.trim(),
-                  choices: q.options,
-                  correct: q.correctAnswer !== undefined ? q.correctAnswer : 0,
-                  subject: sub,
-                  difficulty: 'medium',
-                  status: 'public',
-                  explanation: q.explanation || '',
-                  createdAt: new Date().toISOString()
-                });
-                countSub++;
-                countTotal++;
-                
-                if (countSub >= 20) break;
-              }
-            }
-            if (countSub >= 20) break;
+        // 1. Lấy toàn bộ danh sách câu hỏi cũ để xóa theo đợt batch (400 items/batch)
+        const oldSnap = await getDocs(collection(db, 'questions'));
+        const oldDocs = oldSnap.docs;
+
+        let batch = writeBatch(db);
+        let countOp = 0;
+        for (let i = 0; i < oldDocs.length; i++) {
+          batch.delete(doc(db, 'questions', oldDocs[i].id));
+          countOp++;
+          if (countOp >= 400) {
+            await batch.commit();
+            batch = writeBatch(db);
+            countOp = 0;
+            setSeedProgress(`Đã xóa ${i + 1}/${oldDocs.length} câu hỏi cũ...`);
+          }
+        }
+        if (countOp > 0) {
+          await batch.commit();
+        }
+
+        // 2. Sinh ngân hàng câu hỏi AI mới (>2200 câu)
+        setSeedProgress('AI đang khởi tạo >2.200 câu hỏi mới...');
+        const generatedData = generateAllSubjectQuestions();
+        const allNewQuestions = generatedData.all;
+
+        // 3. Ghi dữ liệu mới vào Firestore theo batch (400 items/batch)
+        batch = writeBatch(db);
+        countOp = 0;
+        let insertedTotal = 0;
+
+        for (let i = 0; i < allNewQuestions.length; i++) {
+          const qObj = allNewQuestions[i];
+          const newDocRef = doc(collection(db, 'questions'));
+          batch.set(newDocRef, {
+            ...qObj,
+            createdAt: new Date().toISOString()
+          });
+          countOp++;
+          insertedTotal++;
+
+          if (countOp >= 400) {
+            await batch.commit();
+            batch = writeBatch(db);
+            countOp = 0;
+            setSeedProgress(`Đã nạp ${insertedTotal}/${allNewQuestions.length} câu hỏi mới...`);
           }
         }
 
-        await batch.commit();
+        if (countOp > 0) {
+          await batch.commit();
+        }
+
         playSound.success();
-        await logAdminAction("SEED_QUESTIONS", "all", "Nạp câu hỏi mẫu", `Nạp thành công ${countTotal} câu hỏi mẫu vào Firestore`);
-        alert(`Nạp thành công ${countTotal} câu hỏi mẫu (20 câu/môn: Toán, Lý, Hóa, Sinh) vào Firestore!`);
+        await logAdminAction("SEED_QUESTIONS", "all", "AI Nạp ngân hàng câu hỏi mới", `Đã xóa cũ và nạp thành công ${insertedTotal} câu hỏi mới (>550 câu/môn)`);
+        alert(`🎉 THÀNH CÔNG: Đã xóa toàn bộ câu hỏi cũ và nạp thành công ${insertedTotal} câu hỏi AI mới đa dạng (>550 câu mỗi môn Toán, Lý, Hóa, Sinh) bao gồm Trắc nghiệm, Đúng/Sai và Trả lời ngắn!`);
         fetchQuestions();
       } catch (err) {
         console.error("Lỗi khi nạp câu hỏi mẫu:", err);
-        alert("Đã xảy ra lỗi khi nạp câu hỏi mẫu.");
+        alert("Đã xảy ra lỗi trong quá trình xóa và nạp câu hỏi.");
       } finally {
         setSeeding(false);
+        setSeedProgress('');
       }
     }
   };
@@ -488,7 +272,9 @@ export default function QuestionManagement() {
   const filteredQuestions = questions.filter(q => {
     const matchesSearch = (q.text || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSubject = selectedSubject === 'all' || q.subject === selectedSubject;
-    return matchesSearch && matchesSubject;
+    const qType = q.type || 'mcq';
+    const matchesType = selectedType === 'all' || qType === selectedType;
+    return matchesSearch && matchesSubject && matchesType;
   });
 
   const getSubjectLabel = (subj) => {
@@ -499,6 +285,15 @@ export default function QuestionManagement() {
       biology: { label: 'Sinh học', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' }
     };
     return subjects[subj] || { label: 'Khác', color: 'bg-zinc-800 text-zinc-400' };
+  };
+
+  const getTypeLabel = (type) => {
+    const types = {
+      mcq: { label: 'Trắc nghiệm (MCQ)', color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' },
+      tf: { label: 'Đúng / Sai (TF)', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
+      sa: { label: 'Trả lời ngắn (SA)', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' }
+    };
+    return types[type] || { label: 'Trắc nghiệm', color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' };
   };
 
   const getDifficultyLabel = (diff) => {
@@ -519,7 +314,7 @@ export default function QuestionManagement() {
             Ngân hàng câu hỏi
           </h1>
           <p className="text-xs text-zinc-500 font-semibold mt-1">
-            Quản lý câu hỏi trắc nghiệm cho phòng đấu PvP và các phòng luyện tập.
+            Quản lý ngân hàng câu hỏi 4 môn STEM (Toán, Lý, Hóa, Sinh) đa dạng chuẩn GDPT.
           </p>
         </div>
 
@@ -529,10 +324,10 @@ export default function QuestionManagement() {
             <button
               onClick={handleSeedQuestions}
               disabled={seeding}
-              className="px-4.5 py-2.5 bg-gradient-to-r from-purple-600/10 to-pink-600/10 hover:from-purple-600/30 hover:to-pink-600/30 border border-purple-500/20 hover:border-pink-500/40 text-xs font-bold text-white rounded-xl transition-all cursor-pointer shadow-lg active:scale-95 flex items-center gap-1.5"
+              className="px-4.5 py-2.5 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-blue-600/20 hover:from-purple-600/40 hover:to-pink-600/40 border border-purple-500/30 hover:border-pink-500/50 text-xs font-bold text-white rounded-xl transition-all cursor-pointer shadow-lg active:scale-95 flex items-center gap-1.5"
             >
-              <Sparkles className="w-4 h-4 text-yellow-400" /> 
-              {seeding ? 'Đang nạp...' : 'Nạp câu hỏi mẫu (80 câu)'}
+              <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" /> 
+              {seeding ? (seedProgress || 'Đang xử lý...') : 'Xóa cũ & AI Nạp 2200+ câu hỏi (>550 câu/môn)'}
             </button>
           )}
 
@@ -546,41 +341,69 @@ export default function QuestionManagement() {
       </div>
 
       {/* Search and Tab filter area */}
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-4 bg-[#0f1017]/60 border border-[#1f2235] p-4 rounded-2xl shadow-lg">
-        {/* Search */}
-        <div className="relative w-full lg:w-96">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-500" />
-          <input
-            type="text"
-            placeholder="Tìm kiếm nội dung câu hỏi..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-[#08090d] border border-[#1f2235] focus:border-pink-500/50 rounded-xl py-2.5 pl-10 pr-4 text-xs font-semibold text-white focus:outline-none placeholder-zinc-500 transition-all font-mono"
-          />
+      <div className="flex flex-col gap-3 bg-[#0f1017]/60 border border-[#1f2235] p-4 rounded-2xl shadow-lg">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+          {/* Search */}
+          <div className="relative w-full lg:w-96">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-500" />
+            <input
+              type="text"
+              placeholder="Tìm kiếm nội dung câu hỏi..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-[#08090d] border border-[#1f2235] focus:border-pink-500/50 rounded-xl py-2.5 pl-10 pr-4 text-xs font-semibold text-white focus:outline-none placeholder-zinc-500 transition-all font-mono"
+            />
+          </div>
+
+          {/* Subject Tab Filters */}
+          <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-start lg:justify-end">
+            {[
+              { id: 'all', label: 'Tất cả môn' },
+              { id: 'math', label: 'Toán học' },
+              { id: 'physics', label: 'Vật lý' },
+              { id: 'chemistry', label: 'Hóa học' },
+              { id: 'biology', label: 'Sinh học' },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  playSound.click();
+                  setSelectedSubject(tab.id);
+                }}
+                className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all border ${
+                  selectedSubject === tab.id
+                    ? 'bg-pink-500/10 border-pink-500/30 text-white shadow-md'
+                    : 'bg-transparent border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Tab Filters */}
-        <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-start lg:justify-end">
+        {/* Type Format Filters */}
+        <div className="flex items-center gap-2 pt-2 border-t border-[#1f2235]/40 text-xs font-bold font-mono">
+          <span className="text-zinc-500 text-[10px] uppercase">Dạng bài:</span>
           {[
-            { id: 'all', label: 'Tất cả' },
-            { id: 'math', label: 'Toán học' },
-            { id: 'physics', label: 'Vật lý' },
-            { id: 'chemistry', label: 'Hóa học' },
-            { id: 'biology', label: 'Sinh học' },
-          ].map(tab => (
+            { id: 'all', label: 'Tất cả dạng' },
+            { id: 'mcq', label: 'Trắc nghiệm (MCQ)' },
+            { id: 'tf', label: 'Đúng / Sai (TF)' },
+            { id: 'sa', label: 'Trả lời ngắn (SA)' },
+          ].map(tTab => (
             <button
-              key={tab.id}
+              key={tTab.id}
               onClick={() => {
                 playSound.click();
-                setSelectedSubject(tab.id);
+                setSelectedType(tTab.id);
               }}
-              className={`px-4 py-2 text-xs font-bold rounded-xl transition-all border ${
-                selectedSubject === tab.id
-                  ? 'bg-pink-500/10 border-pink-500/30 text-white shadow-md'
-                  : 'bg-transparent border-transparent text-zinc-400 hover:text-white hover:bg-white/5'
+              className={`px-3 py-1 text-[11px] rounded-lg transition-all border ${
+                selectedType === tTab.id
+                  ? 'bg-cyan-500/10 border-cyan-500/40 text-cyan-300'
+                  : 'bg-transparent border-transparent text-zinc-500 hover:text-zinc-300'
               }`}
             >
-              {tab.label}
+              {tTab.label}
             </button>
           ))}
         </div>
@@ -592,7 +415,7 @@ export default function QuestionManagement() {
           <div className="py-20 bg-[#0f1017]/60 border border-[#1f2235] rounded-2xl flex flex-col items-center justify-center gap-3">
             <div className="w-8 h-8 border-2 border-pink-500 border-t-transparent rounded-full animate-spin" />
             <span className="text-xs font-mono font-bold text-zinc-550 tracking-widest uppercase animate-pulse">
-              Đang tải danh sách câu hỏi...
+              {seeding ? (seedProgress || 'Đang xử lý nạp câu hỏi...') : 'Đang tải danh sách câu hỏi...'}
             </span>
           </div>
         ) : filteredQuestions.length === 0 ? (
@@ -607,6 +430,8 @@ export default function QuestionManagement() {
             {filteredQuestions.map((q, idx) => {
               const subj = getSubjectLabel(q.subject);
               const diff = getDifficultyLabel(q.difficulty);
+              const typeInfo = getTypeLabel(q.type || 'mcq');
+              const qType = q.type || 'mcq';
 
               return (
                 <div 
@@ -614,10 +439,11 @@ export default function QuestionManagement() {
                   className="bg-[#0f1017]/60 border border-[#1f2235] hover:border-pink-500/10 p-5 rounded-2xl transition-all duration-200 group relative flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl"
                 >
                   <div className="space-y-3 flex-1">
-                    {/* Header: Subject & Difficulty tags */}
+                    {/* Header: Subject, Type & Difficulty tags */}
                     <div className="flex items-center gap-2 flex-wrap text-[9px] font-black uppercase tracking-wider font-mono">
                       <span className="text-zinc-500">#{idx + 1}</span>
                       <span className={`px-2 py-0.5 rounded border ${subj.color}`}>{subj.label}</span>
+                      <span className={`px-2 py-0.5 rounded border ${typeInfo.color}`}>{typeInfo.label}</span>
                       <span className={`px-2 py-0.5 rounded ${diff.color}`}>{diff.label}</span>
                       
                       {/* Status Tag */}
@@ -634,22 +460,47 @@ export default function QuestionManagement() {
                       dangerouslySetInnerHTML={{ __html: formatMathText(q.text) }}
                     />
 
-                    {/* Choices Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono text-zinc-400">
-                      {q.choices?.map((choice, cIdx) => (
-                        <div 
-                          key={cIdx} 
-                          className={`flex items-start gap-2 p-2 rounded-lg border ${
-                            q.correct === cIdx 
-                              ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-400 font-bold' 
-                              : 'bg-[#08090d]/60 border-zinc-800/40'
-                          }`}
-                        >
-                          <span className="text-zinc-500 uppercase font-black">{String.fromCharCode(65 + cIdx)}.</span>
-                          <span dangerouslySetInnerHTML={{ __html: formatMathText(choice) }} />
-                        </div>
-                      ))}
-                    </div>
+                    {/* Choices / Sub-statements / Short Answer Content */}
+                    {qType === 'mcq' && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono text-zinc-400">
+                        {q.choices?.map((choice, cIdx) => (
+                          <div 
+                            key={cIdx} 
+                            className={`flex items-start gap-2 p-2 rounded-lg border ${
+                              q.correct === cIdx 
+                                ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-400 font-bold' 
+                                : 'bg-[#08090d]/60 border-zinc-800/40'
+                            }`}
+                          >
+                            <span className="text-zinc-500 uppercase font-black">{String.fromCharCode(65 + cIdx)}.</span>
+                            <span dangerouslySetInnerHTML={{ __html: formatMathText(choice) }} />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {qType === 'tf' && (
+                      <div className="space-y-1.5 text-xs font-mono">
+                        {(q.statements || q.choices || []).map((st, sIdx) => {
+                          const isTrue = Array.isArray(q.correct) ? q.correct[sIdx] : true;
+                          return (
+                            <div key={sIdx} className="flex items-center justify-between p-2 rounded-lg bg-[#08090d]/60 border border-zinc-800/40">
+                              <span className="text-zinc-300 font-semibold" dangerouslySetInnerHTML={{ __html: formatMathText(typeof st === 'string' ? st : (st.text || '')) }} />
+                              <span className={`px-2 py-0.5 rounded font-black text-[10px] ${isTrue ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'}`}>
+                                {isTrue ? 'ĐÚNG' : 'SAI'}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {qType === 'sa' && (
+                      <div className="p-2.5 rounded-xl bg-indigo-500/5 border border-indigo-500/20 text-xs font-mono flex items-center gap-2">
+                        <span className="text-indigo-400 font-bold">👉 Đáp số đúng:</span>
+                        <span className="text-white font-black">{q.correctAnswer || q.choices?.[0] || 'N/A'}</span>
+                      </div>
+                    )}
 
                     {/* Explanation */}
                     {q.explanation && (

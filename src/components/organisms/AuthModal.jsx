@@ -285,27 +285,27 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-2xl bg-white dark:bg-[#2a2c3a] rounded-2xl shadow-2xl p-8 border border-slate-200 dark:border-white/10 z-10 text-slate-800 dark:text-zinc-200 transition-all duration-300"
+          className="relative w-full max-w-2xl bg-bg-secondary rounded-2xl shadow-2xl p-8 border border-border-theme z-10 text-text-primary transition-all duration-300"
         >
           <button 
             onClick={onClose}
-            className="absolute -top-4 -right-4 w-10 h-10 bg-slate-100 hover:bg-slate-200 dark:bg-white rounded-full flex items-center justify-center text-zinc-900 hover:text-zinc-700 transition-colors shadow-lg"
+            className="absolute -top-4 -right-4 w-10 h-10 bg-bg-tertiary hover:opacity-90 rounded-full flex items-center justify-center text-text-primary transition-colors shadow-lg border border-border-theme"
           >
-            <X className="w-5 h-5 text-slate-700 dark:text-zinc-900" />
+            <X className="w-5 h-5 text-text-primary" />
           </button>
 
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white text-center mb-6">
+          <h2 className="text-2xl font-bold text-text-primary text-center mb-6">
             {view === 'login' ? 'Đăng nhập' : view === 'register' ? 'Đăng ký' : view === 'forgot-password' ? 'Khôi phục mật khẩu' : 'Xác thực tài khoản'}
           </h2>
 
           {error && (
-            <div className="mb-6 p-3 bg-red-500/10 border border-red-500/50 rounded-xl text-red-650 dark:text-red-400 text-sm text-center">
+            <div className="mb-6 p-3 bg-danger/10 border border-danger/40 rounded-xl text-danger text-sm text-center">
               {error}
             </div>
           )}
 
           {successMessage && (
-            <div className="mb-6 p-3 bg-emerald-500/10 border border-emerald-500/50 rounded-xl text-emerald-650 dark:text-emerald-400 text-sm text-center">
+            <div className="mb-6 p-3 bg-success/10 border border-success/40 rounded-xl text-success text-sm text-center">
               {successMessage}
             </div>
           )}
@@ -316,27 +316,27 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
               <div className="space-y-4">
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <User className="w-5 h-5 text-pink-500" />
+                    <User className="w-5 h-5 text-accent-pink" />
                   </div>
                   <input 
                     type="email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Email đăng nhập" 
-                    className="w-full bg-slate-100 dark:bg-[#1c1e29] border border-slate-200 dark:border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-pink-500 transition-colors"
+                    className="w-full bg-bg-tertiary border border-border-theme rounded-xl py-3.5 pl-12 pr-4 text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-accent-pink transition-colors"
                   />
                 </div>
                 
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Lock className="w-5 h-5 text-pink-500" />
+                    <Lock className="w-5 h-5 text-accent-pink" />
                   </div>
                   <input 
                     type="password" 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Mật khẩu" 
-                    className="w-full bg-slate-100 dark:bg-[#1c1e29] border border-slate-200 dark:border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-pink-500 transition-colors"
+                    className="w-full bg-bg-tertiary border border-border-theme rounded-xl py-3.5 pl-12 pr-4 text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-accent-pink transition-colors"
                   />
                 </div>
               </div>
@@ -345,20 +345,20 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
                 <button 
                   type="button" 
                   onClick={() => { setView('forgot-password'); setError(''); setSuccessMessage(''); }}
-                  className="text-sky-600 dark:text-sky-400 hover:underline text-sm transition-colors"
+                  className="text-sky-500 hover:underline text-sm transition-colors"
                 >
                   Quên mật khẩu
                 </button>
               </div>
 
-              <button disabled={loading} type="submit" className="w-full py-3.5 flex justify-center items-center gap-2 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-xl shadow-lg shadow-pink-500/20 transition-all active:scale-95 text-lg disabled:opacity-70 disabled:cursor-not-allowed">
+              <button disabled={loading} type="submit" className="w-full py-3.5 flex justify-center items-center gap-2 bg-accent-pink hover:bg-accent-pink/90 text-white font-bold rounded-xl shadow-lg shadow-accent-pink/20 transition-all active:scale-95 text-lg disabled:opacity-70 disabled:cursor-not-allowed">
                 {loading && <Loader2 className="w-5 h-5 animate-spin" />}
                 Đăng nhập
               </button>
 
-              <div className="text-center text-slate-500 dark:text-zinc-400 text-sm mt-6">
+              <div className="text-center text-text-secondary text-sm mt-6">
                 Không có tài khoản?{' '}
-                <button type="button" onClick={() => {setView('register'); setError(''); setSuccessMessage('');}} className="text-sky-600 dark:text-sky-400 hover:underline transition-colors font-medium">
+                <button type="button" onClick={() => {setView('register'); setError(''); setSuccessMessage('');}} className="text-sky-500 hover:underline transition-colors font-medium">
                   Đăng ký ngay
                 </button>
               </div>
@@ -371,87 +371,87 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Col 1 */}
                 <div className="space-y-4">
-                  <h3 className="font-bold text-slate-900 dark:text-white mb-4">1. Thông tin tài khoản</h3>
+                  <h3 className="font-bold text-text-primary mb-4">1. Thông tin tài khoản</h3>
                   
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Mail className="w-5 h-5 text-pink-500" />
+                      <Mail className="w-5 h-5 text-accent-pink" />
                     </div>
                     <input 
                       type="email" 
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Email đăng nhập*" 
-                      className="w-full bg-slate-100 dark:bg-[#1c1e29] border border-slate-200 dark:border-white/10 rounded-xl py-3 pl-12 pr-4 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-pink-500 transition-colors"
+                      className="w-full bg-bg-tertiary border border-border-theme rounded-xl py-3 pl-12 pr-4 text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-accent-pink transition-colors"
                     />
                   </div>
 
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Lock className="w-5 h-5 text-pink-500" />
+                      <Lock className="w-5 h-5 text-accent-pink" />
                     </div>
                     <input 
                       type="password" 
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Mật khẩu*" 
-                      className="w-full bg-slate-100 dark:bg-[#1c1e29] border border-slate-200 dark:border-white/10 rounded-xl py-3 pl-12 pr-4 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-pink-500 transition-colors"
+                      className="w-full bg-bg-tertiary border border-border-theme rounded-xl py-3 pl-12 pr-4 text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-accent-pink transition-colors"
                     />
                   </div>
 
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Lock className="w-5 h-5 text-pink-500" />
+                      <Lock className="w-5 h-5 text-accent-pink" />
                     </div>
                     <input 
                       type="password" 
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Xác nhận mật khẩu*" 
-                      className="w-full bg-slate-100 dark:bg-[#1c1e29] border border-slate-200 dark:border-white/10 rounded-xl py-3 pl-12 pr-4 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-pink-500 transition-colors"
+                      className="w-full bg-bg-tertiary border border-border-theme rounded-xl py-3 pl-12 pr-4 text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-accent-pink transition-colors"
                     />
                   </div>
                 </div>
 
                 {/* Col 2 */}
                 <div className="space-y-4">
-                  <h3 className="font-bold text-slate-900 dark:text-white mb-4">2. Thông tin cá nhân</h3>
+                  <h3 className="font-bold text-text-primary mb-4">2. Thông tin cá nhân</h3>
                   
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <User className="w-5 h-5 text-pink-500" />
+                      <User className="w-5 h-5 text-accent-pink" />
                     </div>
                     <input 
                       type="text" 
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="Họ và tên*" 
-                      className="w-full bg-slate-100 dark:bg-[#1c1e29] border border-slate-200 dark:border-white/10 rounded-xl py-3 pl-12 pr-4 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-pink-500 transition-colors"
+                      className="w-full bg-bg-tertiary border border-border-theme rounded-xl py-3 pl-12 pr-4 text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-accent-pink transition-colors"
                     />
                   </div>
 
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Phone className="w-5 h-5 text-pink-500" />
+                      <Phone className="w-5 h-5 text-accent-pink" />
                     </div>
                     <input 
                       type="tel" 
                       placeholder="Số điện thoại (Tuỳ chọn)" 
-                      className="w-full bg-slate-100 dark:bg-[#1c1e29] border border-slate-200 dark:border-white/10 rounded-xl py-3 pl-12 pr-4 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-pink-500 transition-colors"
+                      className="w-full bg-bg-tertiary border border-border-theme rounded-xl py-3 pl-12 pr-4 text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-accent-pink transition-colors"
                     />
                   </div>
                 </div>
               </div>
 
               <div className="max-w-sm mx-auto mt-8">
-                <button disabled={loading} type="submit" className="w-full py-3.5 flex justify-center items-center gap-2 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-xl shadow-lg shadow-pink-500/20 transition-all active:scale-95 text-lg disabled:opacity-70 disabled:cursor-not-allowed">
+                <button disabled={loading} type="submit" className="w-full py-3.5 flex justify-center items-center gap-2 bg-accent-pink hover:bg-accent-pink/90 text-white font-bold rounded-xl shadow-lg shadow-accent-pink/20 transition-all active:scale-95 text-lg disabled:opacity-70 disabled:cursor-not-allowed">
                   {loading && <Loader2 className="w-5 h-5 animate-spin" />}
                   Đăng ký tài khoản
                 </button>
                 
-                <div className="text-center text-slate-500 dark:text-zinc-400 text-sm mt-6">
+                <div className="text-center text-text-secondary text-sm mt-6">
                   Đã có tài khoản?{' '}
-                  <button type="button" onClick={() => {setView('login'); setError(''); setSuccessMessage('');}} className="text-sky-600 dark:text-sky-400 hover:underline transition-colors font-medium">
+                  <button type="button" onClick={() => {setView('login'); setError(''); setSuccessMessage('');}} className="text-sky-500 hover:underline transition-colors font-medium">
                     Đăng nhập ngay
                   </button>
                 </div>
@@ -463,32 +463,32 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
           {view === 'forgot-password' && (
             <form onSubmit={handleForgotPassword} className="max-w-md mx-auto space-y-6">
               <div className="text-center space-y-2">
-                <p className="text-sm text-slate-500 dark:text-zinc-400">
+                <p className="text-sm text-text-secondary">
                   Nhập địa chỉ email đăng ký tài khoản của bạn để nhận liên kết đặt lại mật khẩu qua thư.
                 </p>
               </div>
 
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Mail className="w-5 h-5 text-pink-500" />
+                  <Mail className="w-5 h-5 text-accent-pink" />
                 </div>
                 <input 
                   type="email" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Nhập email của bạn" 
-                  className="w-full bg-slate-100 dark:bg-[#1c1e29] border border-slate-200 dark:border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-pink-500 transition-colors"
+                  className="w-full bg-bg-tertiary border border-border-theme rounded-xl py-3.5 pl-12 pr-4 text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-accent-pink transition-colors"
                   required
                 />
               </div>
 
-              <button disabled={loading} type="submit" className="w-full py-3.5 flex justify-center items-center gap-2 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-xl shadow-lg shadow-pink-500/20 transition-all active:scale-95 text-lg disabled:opacity-70 disabled:cursor-not-allowed">
+              <button disabled={loading} type="submit" className="w-full py-3.5 flex justify-center items-center gap-2 bg-accent-pink hover:bg-accent-pink/90 text-white font-bold rounded-xl shadow-lg shadow-accent-pink/20 transition-all active:scale-95 text-lg disabled:opacity-70 disabled:cursor-not-allowed">
                 {loading && <Loader2 className="w-5 h-5 animate-spin" />}
                 Gửi yêu cầu khôi phục
               </button>
 
-              <div className="text-center text-slate-500 dark:text-zinc-400 text-sm mt-6">
-                <button type="button" onClick={() => {setView('login'); setError(''); setSuccessMessage('');}} className="text-sky-600 dark:text-sky-400 hover:underline transition-colors font-medium">
+              <div className="text-center text-text-secondary text-sm mt-6">
+                <button type="button" onClick={() => {setView('login'); setError(''); setSuccessMessage('');}} className="text-sky-500 hover:underline transition-colors font-medium">
                   Quay lại Đăng nhập
                 </button>
               </div>
@@ -499,37 +499,37 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
           {view === 'verification-pending' && (
             <div className="max-w-md mx-auto space-y-6 text-center select-none py-4">
               <div className="flex justify-center">
-                <div className="w-16 h-16 rounded-full bg-pink-500/10 flex items-center justify-center text-pink-500 border border-pink-500/20 shadow-lg">
-                  <Mail className="w-8 h-8 animate-pulse text-pink-500" />
+                <div className="w-16 h-16 rounded-full bg-accent-pink/10 flex items-center justify-center text-accent-pink border border-accent-pink/20 shadow-lg">
+                  <Mail className="w-8 h-8 animate-pulse text-accent-pink" />
                 </div>
               </div>
 
               <div className="space-y-3">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Kiểm tra hộp thư của bạn</h3>
-                <p className="text-sm text-slate-650 dark:text-zinc-400 leading-relaxed">
+                <h3 className="text-xl font-bold text-text-primary">Kiểm tra hộp thư của bạn</h3>
+                <p className="text-sm text-text-secondary leading-relaxed">
                   Một liên kết xác thực đã được gửi tới:<br />
-                  <strong className="text-pink-600 dark:text-pink-400 font-semibold">{email}</strong>
+                  <strong className="text-accent-pink font-semibold">{email}</strong>
                 </p>
-                <p className="text-xs text-slate-500 dark:text-zinc-500">
+                <p className="text-xs text-text-secondary">
                   Vui lòng nhấn vào liên kết trong email để kích hoạt tài khoản của bạn. Đừng quên kiểm tra thư mục Spam hoặc Junk nếu không nhận được.
                 </p>
               </div>
 
-              <div className="space-y-3 pt-6 border-t border-slate-200 dark:border-white/5">
+              <div className="space-y-3 pt-6 border-t border-border-theme">
                 <button 
                   onClick={() => {
                     setView('login');
                     setError('');
                     setSuccessMessage('');
                   }}
-                  className="w-full py-3 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-xl transition-all shadow-lg active:scale-95 text-sm"
+                  className="w-full py-3 bg-accent-pink hover:bg-accent-pink/90 text-white font-bold rounded-xl transition-all shadow-lg active:scale-95 text-sm"
                 >
                   Tôi đã xác thực, đi tới Đăng nhập
                 </button>
 
                 <button 
                   onClick={handleResendVerification}
-                  className="w-full py-3 bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-white border border-slate-200 dark:border-white/10 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-bg-tertiary hover:opacity-90 text-text-primary border border-border-theme text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2"
                 >
                   Gửi lại email xác thực
                 </button>

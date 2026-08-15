@@ -13,6 +13,9 @@ import {
 } from 'lucide-react';
 import { AvatarFrame } from '@/components/atoms/AvatarFrame';
 import STEMAvatarSVG from '@/components/atoms/STEMAvatarSVG';
+import { savePendingShare } from '@/lib/indexedDB';
+import ArenaBackground from '@/components/organisms/ArenaBackground';
+import CrystalIcon from '@/components/atoms/CrystalIcon';
 
 const labs = [
   {
@@ -29,7 +32,7 @@ const labs = [
     title: 'Sinh học',
     name: 'BioSTEM Virtual AI',
     status: 'active',
-    link: '/labs/lab_sinh/dist/index.html',
+    link: '/labs/lab_sinh/dist/index.html?v=4.0.6',
     image: '/bio_stem_cover.png',
     desc: 'Giải mã bản đồ gene di truyền, trắc nghiệm sinh học chuẩn THPT Quốc gia.',
   },
@@ -205,9 +208,14 @@ export default function Home() {
       authorTitle: personalization.activeTitle || 'apprentice'
     };
 
-    localStorage.setItem('pending_share_story', JSON.stringify(pendingData));
-    localStorage.setItem('daily_quest_lab_done', 'completed');
-    setShowShareConfirm(true);
+    savePendingShare(pendingData).then((isSaved) => {
+      if (isSaved) {
+        localStorage.setItem('daily_quest_lab_done', 'completed');
+        setShowShareConfirm(true);
+      } else {
+        alert('⚠️ Không thể lưu trữ thông tin chia sẻ do dung lượng bộ nhớ tạm bị giới hạn. Vui lòng thử lại!');
+      }
+    });
   };
 
   const handleConfirmShareToStories = () => {
@@ -337,46 +345,53 @@ export default function Home() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto min-h-screen">
+    <div className="relative min-h-screen bg-bg-primary overflow-hidden transition-colors duration-300">
+      {/* 🚀 LỚP NỀN ĐỘNG CINEMAGRAPH BACKGROUND (Z-INDEX 0) */}
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-20 dark:opacity-25 mix-blend-multiply dark:mix-blend-screen overflow-hidden">
+        <ArenaBackground subject="math" />
+      </div>
+
+      {/* 🚀 LỚP GIAO DIỆN UI THAO TÁC NGƯỜI DÙNG (Z-INDEX 10) */}
+      <div className="relative z-10 w-full min-h-screen p-6 max-w-7xl mx-auto">
       
       {/* 2-COLUMN HUB LAYOUT */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* CỘT TRÁI (COL-SPAN-8): DANH SÁCH PHÒNG LABS THỰC HÀNH */}
-        <div className="lg:col-span-8 flex flex-col gap-6">
+        <div className="lg:col-span-8 flex flex-col gap-6 screenshot-full-width">
           <div className="flex flex-col mb-2">
-            <h2 className="text-xl font-black text-white tracking-widest uppercase font-mono flex items-center gap-2">
-              <Zap className="w-5 h-5 text-pink-500 animate-pulse" /> HỆ THỐNG PHÒNG THÍ NGHIỆM ẢO STEM
+            <h2 className="text-xl font-black text-text-primary tracking-widest uppercase font-mono flex items-center gap-2">
+              <Zap className="w-5 h-5 text-accent-pink animate-pulse" /> HỆ THỐNG PHÒNG THÍ NGHIỆM ẢO STEM
             </h2>
-            <p className="text-zinc-500 text-xs font-mono mt-1">CHỌN PHÒNG THÍ NGHIỆM ĐỂ KHỞI CHẠY MÔ PHỎNG LƯỢNG TỬ</p>
+            <p className="text-text-secondary text-xs font-mono mt-1">CHỌN PHÒNG THÍ NGHIỆM ĐỂ KHỞI CHẠY MÔ PHỎNG LƯỢNG TỬ</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {labs.map((lab) => (
-              <div key={lab.id} className="bg-[#1e202b]/95 rounded-3xl overflow-hidden border border-white/5 hover:border-pink-500/20 transition-all duration-300 group flex flex-col justify-between shadow-2xl relative">
+              <div key={lab.id} className="bg-bg-secondary/95 rounded-3xl overflow-hidden border border-border-theme hover:border-accent-pink/40 hover:shadow-[0_8px_30px_rgba(240,57,140,0.12)] transition-all duration-300 group flex flex-col justify-between shadow-lg relative">
                 <div>
                   <div className="h-44 overflow-hidden relative">
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#1e202b] via-[#1e202b]/30 to-transparent z-10" />
-                    <img src={lab.image} alt={lab.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                    <div className="absolute top-4 left-4 z-20 px-3.5 py-1.5 bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-[10px] font-bold text-pink-400 uppercase tracking-widest font-mono">
+                    <div className="absolute inset-0 bg-gradient-to-t from-bg-secondary via-bg-secondary/30 to-transparent z-10 group-hover:via-bg-secondary/60 transition-colors duration-300" />
+                    <img src={lab.image} alt={lab.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <div className="absolute top-4 left-4 z-20 px-3.5 py-1.5 bg-bg-primary/80 backdrop-blur-md border border-border-theme rounded-full text-[10px] font-bold text-accent-pink uppercase tracking-widest font-mono shadow-sm">
                       {lab.title}
                     </div>
                   </div>
                   <div className="p-6">
-                    <h3 className="text-lg font-bold mb-2 text-white group-hover:text-pink-400 transition-colors tracking-wide">{lab.name}</h3>
-                    <p className="text-xs text-zinc-400 leading-relaxed min-h-[40px]">{lab.desc}</p>
+                    <h3 className="text-lg font-bold mb-2 text-text-primary group-hover:text-accent-pink transition-colors tracking-wide">{lab.name}</h3>
+                    <p className="text-xs text-text-secondary leading-relaxed min-h-[40px]">{lab.desc}</p>
                   </div>
                 </div>
                 
-                <div className="p-6 pt-0 flex justify-between items-center mt-auto border-t border-white/5 pt-4">
-                  <span className="text-[10px] font-mono text-zinc-500">MÁY CHỦ: VIỆT NAM (HN-1)</span>
+                <div className="p-6 pt-0 flex justify-between items-center mt-auto border-t border-border-theme pt-4">
+                  <span className="text-[10px] font-mono text-text-secondary">MÁY CHỦ: VIỆT NAM (HN-1)</span>
                   <button 
                     onClick={() => handleLaunchLab(lab)}
                     onMouseEnter={playSound.hover}
-                    className={`px-5 py-2.5 rounded-2xl text-[11px] font-bold transition-all active:scale-95 flex items-center gap-1.5 ${
+                    className={`px-5 py-2.5 rounded-2xl text-[11px] font-bold transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98] flex items-center gap-1.5 ${
                       lab.status === 'active' 
-                        ? 'bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white shadow-lg shadow-pink-500/10' 
-                        : 'bg-zinc-800 text-zinc-500 border border-white/5 cursor-default pointer-events-none'
+                        ? 'bg-accent-pink hover:opacity-90 text-white shadow-lg shadow-accent-pink/20 cursor-pointer' 
+                        : 'bg-bg-tertiary text-text-secondary border border-border-theme cursor-default pointer-events-none'
                     }`}
                   >
                     <BookOpen className="w-3.5 h-3.5" />
@@ -389,7 +404,7 @@ export default function Home() {
         </div>
 
         {/* CỘT PHẢI (COL-SPAN-4): Spaceship Cockpit HUD */}
-        <div className="lg:col-span-4 flex flex-col gap-6">
+        <div className="lg:col-span-4 flex flex-col gap-6 screenshot-hide">
           
           {/* STYLE NHÚNG CHO HIỆU ỨNG RA-ĐA VÀ GIAO DIỆN HOÀNG GIA */}
           <style dangerouslySetInnerHTML={{__html: `
@@ -398,25 +413,25 @@ export default function Home() {
               to { transform: rotate(360deg); }
             }
             .neon-border-glow {
-              box-shadow: 0 0 15px rgba(236, 72, 153, 0.12), inset 0 0 15px rgba(236, 72, 153, 0.03);
+              box-shadow: 0 0 15px rgba(240, 57, 140, 0.12), inset 0 0 15px rgba(240, 57, 140, 0.03);
             }
             .cyber-glitch-text {
-              text-shadow: 0 0 5px rgba(236, 72, 153, 0.4), 0 0 10px rgba(236, 72, 153, 0.2);
+              text-shadow: 0 0 5px rgba(240, 57, 140, 0.4), 0 0 10px rgba(240, 57, 140, 0.2);
             }
           `}} />
 
           {/* USER CONSOLE HUD: BẢNG ĐIỀU KHIỂN BẰNG KÍNH */}
-          <div className="bg-[#1e202b]/95 border border-pink-500/10 rounded-3xl p-6 shadow-2xl relative overflow-hidden neon-border-glow">
+          <div className="bg-bg-secondary/95 border border-border-theme rounded-3xl p-6 shadow-2xl relative overflow-hidden neon-border-glow">
             {/* Họa tiết trang trí góc điều khiển */}
-            <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-pink-500/30 rounded-tl-xl pointer-events-none" />
-            <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-pink-500/30 rounded-tr-xl pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-pink-500/30 rounded-bl-xl pointer-events-none" />
-            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-pink-500/30 rounded-br-xl pointer-events-none" />
-            <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/5 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-accent-pink/30 rounded-tl-xl pointer-events-none" />
+            <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-accent-pink/30 rounded-tr-xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-accent-pink/30 rounded-bl-xl pointer-events-none" />
+            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-accent-pink/30 rounded-br-xl pointer-events-none" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-accent-pink/5 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="flex items-center gap-1.5 mb-5 border-b border-white/5 pb-3">
-              <Activity className="w-4.5 h-4.5 text-pink-400 animate-pulse" />
-              <span className="text-[10px] font-black text-white uppercase tracking-widest font-mono cyber-glitch-text">
+            <div className="flex items-center gap-1.5 mb-5 border-b border-border-theme pb-3">
+              <Activity className="w-4.5 h-4.5 text-accent-pink animate-pulse" />
+              <span className="text-[10px] font-black text-text-primary uppercase tracking-widest font-mono cyber-glitch-text">
                 BUỒNG LÁI LƯỢNG TỬ v4.0
               </span>
             </div>
@@ -424,98 +439,98 @@ export default function Home() {
             {user ? (
               <div className="flex flex-col gap-4">
                 {/* Khu vực thông tin Avatar và Rank */}
-                <div className="flex items-center gap-4 bg-[#14151f]/80 p-4 border border-white/5 rounded-2xl relative">
+                <div className="flex items-center gap-4 bg-bg-tertiary/80 p-4 border border-border-theme rounded-2xl relative">
                   <div className="relative shrink-0 w-16 h-16 flex items-center justify-center">
                     <AvatarFrame frame={personalization.avatarFrame || 'default'} className="w-16 h-16">
                       <STEMAvatarSVG parts={personalization.avatarParts} className="w-11 h-11" />
                     </AvatarFrame>
-                    <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-pink-500 border-2 border-[#1e202b] flex items-center justify-center text-[9px] font-black text-white font-mono shadow-md">
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-accent-pink border-2 border-bg-primary flex items-center justify-center text-[9px] font-black text-white font-mono shadow-md">
                       {personalization.level || 1}
                     </div>
                   </div>
 
                   <div className="text-left flex-1 min-w-0">
-                    <h4 className="text-sm font-black text-white truncate font-mono uppercase tracking-wide">
+                    <h4 className="text-sm font-black text-text-primary truncate font-mono uppercase tracking-wide">
                       {personalization.name || user.displayName || 'Người chơi ẩn danh'}
                     </h4>
-                    <span className="text-[9px] font-bold text-pink-400 bg-pink-500/10 border border-pink-500/20 px-2.5 py-0.5 rounded-full inline-block mt-1 font-mono uppercase tracking-wider">
+                    <span className="text-[9px] font-bold text-accent-pink bg-accent-pink/10 border border-accent-pink/20 px-2.5 py-0.5 rounded-full inline-block mt-1 font-mono uppercase tracking-wider">
                       {getTitleLabel(personalization.activeTitle || 'apprentice')}
                     </span>
-                    <p className="text-[9px] text-zinc-500 font-mono mt-1 uppercase">HẠNG: TÂN BINH</p>
+                    <p className="text-[9px] text-text-secondary font-mono mt-1 uppercase">HẠNG: TÂN BINH</p>
                   </div>
                 </div>
 
                 {/* Grid Chỉ số phụ ELO & Tinh thể */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-[#14151f]/80 border border-white/5 p-3 rounded-2xl flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center shrink-0">
-                      <Trophy className="w-5 h-5 text-pink-400" />
+                  <div className="bg-bg-tertiary/80 border border-border-theme p-3 rounded-2xl flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-accent-pink/10 border border-accent-pink/20 flex items-center justify-center shrink-0">
+                      <Trophy className="w-5 h-5 text-accent-pink" />
                     </div>
                     <div className="text-left">
-                      <span className="text-[9px] text-zinc-500 font-mono block">ĐIỂM ELO</span>
-                      <strong className="text-sm font-black text-white font-mono">{personalization.elo || 1000}</strong>
+                      <span className="text-[9px] text-text-secondary font-mono block">ĐIỂM ELO</span>
+                      <strong className="text-sm font-black text-text-primary font-mono">{personalization.elo || 1000}</strong>
                     </div>
                   </div>
 
-                  <div className="bg-[#14151f]/80 border border-white/5 p-3 rounded-2xl flex items-center gap-3">
+                  <div className="bg-bg-tertiary/80 border border-border-theme p-3 rounded-2xl flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
-                      <Gem className="w-5 h-5 text-amber-400 animate-bounce" />
+                      <CrystalIcon className="w-5.5 h-5.5" />
                     </div>
                     <div className="text-left">
-                      <span className="text-[9px] text-zinc-500 font-mono block">TINH THỂ</span>
+                      <span className="text-[9px] text-text-secondary font-mono block">TINH THỂ</span>
                       <strong className="text-sm font-black text-amber-400 font-mono">+{personalization.crystals || 0}</strong>
                     </div>
                   </div>
                 </div>
 
                 {/* Năng lượng hệ thống */}
-                <div className="bg-[#14151f]/80 border border-white/5 p-3 rounded-2xl text-left">
+                <div className="bg-bg-tertiary/80 border border-border-theme p-3 rounded-2xl text-left">
                   <div className="flex justify-between items-center mb-1.5">
-                    <span className="text-[9px] text-zinc-500 font-mono uppercase">Năng lượng hệ thống</span>
-                    <span className="text-[9px] text-pink-400 font-mono font-bold">100% (Ổn định)</span>
+                    <span className="text-[9px] text-text-secondary font-mono uppercase">Năng lượng hệ thống</span>
+                    <span className="text-[9px] text-accent-pink font-mono font-bold">100% (Ổn định)</span>
                   </div>
-                  <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden p-[1px] border border-white/5">
-                    <div className="h-full bg-gradient-to-r from-pink-500 to-rose-500 rounded-full w-full shadow-lg shadow-pink-500/50" />
+                  <div className="h-2 w-full bg-bg-primary rounded-full overflow-hidden p-[1px] border border-border-theme">
+                    <div className="h-full bg-gradient-to-r from-accent-pink to-accent-purple rounded-full w-full shadow-lg shadow-accent-pink/30" />
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="p-6 bg-[#14151f]/80 border border-white/5 rounded-2xl text-center">
-                <User className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
-                <p className="text-xs text-zinc-400 font-mono">Đăng nhập để khởi tạo bảng điều khiển của bạn</p>
+              <div className="p-6 bg-bg-tertiary/80 border border-border-theme rounded-2xl text-center">
+                <User className="w-8 h-8 text-text-secondary mx-auto mb-2" />
+                <p className="text-xs text-text-secondary font-mono">Đăng nhập để khởi tạo bảng điều khiển của bạn</p>
               </div>
             )}
           </div>
 
           {/* DYNAMIC RADAR CONSOLE (CHỈ SỐ SỨC MẠNH MÔN HỌC) */}
           {user && (
-            <div className="bg-[#1e202b]/95 border border-pink-500/10 rounded-3xl p-6 shadow-2xl relative overflow-hidden neon-border-glow">
-              <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-pink-500/30 rounded-tl-xl pointer-events-none" />
-              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-pink-500/30 rounded-br-xl pointer-events-none" />
+            <div className="bg-bg-secondary/95 border border-border-theme rounded-3xl p-6 shadow-2xl relative overflow-hidden neon-border-glow">
+              <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-accent-pink/30 rounded-tl-xl pointer-events-none" />
+              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-accent-pink/30 rounded-br-xl pointer-events-none" />
 
-              <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
-                <h3 className="text-[10px] font-black text-white uppercase tracking-widest font-mono flex items-center gap-1.5 cyber-glitch-text">
-                  <Sparkles className="w-4 h-4 text-pink-400" /> QUÉT RADAR ĐA MÔN
+              <div className="flex items-center justify-between mb-4 border-b border-border-theme pb-3">
+                <h3 className="text-[10px] font-black text-text-primary uppercase tracking-widest font-mono flex items-center gap-1.5 cyber-glitch-text">
+                  <Sparkles className="w-4 h-4 text-accent-pink" /> QUÉT RADAR ĐA MÔN
                 </h3>
-                <span className="text-[8px] text-pink-400/70 font-mono border border-pink-500/20 px-1.5 py-0.5 rounded uppercase">
+                <span className="text-[8px] text-accent-pink/70 font-mono border border-accent-pink/20 px-1.5 py-0.5 rounded uppercase">
                   Chỉ số thực tế
                 </span>
               </div>
 
               {/* Radar Chart Visual */}
-              <div className="relative w-full flex items-center justify-center py-4 bg-[#14151f]/50 rounded-2xl border border-white/5">
+              <div className="relative w-full flex items-center justify-center py-4 bg-bg-tertiary/50 rounded-2xl border border-border-theme">
                 <svg width="200" height="200" className="relative z-10 overflow-visible">
                   {/* Radar grid circles */}
-                  <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(236, 72, 153, 0.15)" strokeWidth="1" />
-                  <circle cx="100" cy="100" r="45" fill="none" stroke="rgba(236, 72, 153, 0.1)" strokeWidth="1" strokeDasharray="3,3" />
-                  <circle cx="100" cy="100" r="20" fill="none" stroke="rgba(236, 72, 153, 0.1)" strokeWidth="1" />
+                  <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(240, 57, 140, 0.15)" strokeWidth="1" />
+                  <circle cx="100" cy="100" r="45" fill="none" stroke="rgba(240, 57, 140, 0.1)" strokeWidth="1" strokeDasharray="3,3" />
+                  <circle cx="100" cy="100" r="20" fill="none" stroke="rgba(240, 57, 140, 0.1)" strokeWidth="1" />
                   
                   {/* Radar axis lines */}
-                  <line x1="100" y1="30" x2="100" y2="170" stroke="rgba(236, 72, 153, 0.15)" strokeWidth="1" />
-                  <line x1="30" y1="100" x2="170" y2="100" stroke="rgba(236, 72, 153, 0.15)" strokeWidth="1" />
+                  <line x1="100" y1="30" x2="100" y2="170" stroke="rgba(240, 57, 140, 0.15)" strokeWidth="1" />
+                  <line x1="30" y1="100" x2="170" y2="100" stroke="rgba(240, 57, 140, 0.15)" strokeWidth="1" />
                   
                   {/* Rotating sweep line */}
-                  <line x1="100" y1="100" x2="100" y2="30" stroke="rgba(236, 72, 153, 0.3)" strokeWidth="1.5" style={{
+                  <line x1="100" y1="100" x2="100" y2="30" stroke="rgba(240, 57, 140, 0.3)" strokeWidth="1.5" style={{
                     transformOrigin: '100px 100px',
                     animation: 'radar-sweep 4s linear infinite'
                   }} />
@@ -523,10 +538,10 @@ export default function Home() {
                   {/* Filled polygon for subject strengths */}
                   <polygon 
                     points={getRadarPoints()} 
-                    fill="rgba(236, 72, 153, 0.25)" 
-                    stroke="rgba(236, 72, 153, 0.85)" 
+                    fill="rgba(240, 57, 140, 0.25)" 
+                    stroke="rgba(240, 57, 140, 0.85)" 
                     strokeWidth="2" 
-                    className="drop-shadow-[0_0_8px_rgba(236,72,153,0.5)]"
+                    className="drop-shadow-[0_0_8px_rgba(240,57,140,0.5)]"
                   />
 
                   {/* Vertices indicator points */}
@@ -541,15 +556,15 @@ export default function Home() {
                       { x: center, y: center + (strengths.chemistry / maxVal) * r },
                       { x: center - (strengths.biology / maxVal) * r, y: center }
                     ].map((pt, idx) => (
-                      <circle key={idx} cx={pt.x} cy={pt.y} r="3.5" className="fill-white stroke-pink-500 stroke-2" />
+                      <circle key={idx} cx={pt.x} cy={pt.y} r="3.5" className="fill-white stroke-accent-pink stroke-2" />
                     ));
                   })()}
 
                   {/* Label Texts */}
-                  <text x="100" y="22" textAnchor="middle" className="fill-zinc-400 font-mono text-[9px] font-bold">TOÁN</text>
-                  <text x="178" y="103" textAnchor="start" className="fill-zinc-400 font-mono text-[9px] font-bold">LÝ</text>
-                  <text x="100" y="188" textAnchor="middle" className="fill-zinc-400 font-mono text-[9px] font-bold">HÓA</text>
-                  <text x="22" y="103" textAnchor="end" className="fill-zinc-400 font-mono text-[9px] font-bold">SINH</text>
+                  <text x="100" y="22" textAnchor="middle" className="fill-text-secondary font-mono text-[9px] font-bold">TOÁN</text>
+                  <text x="178" y="103" textAnchor="start" className="fill-text-secondary font-mono text-[9px] font-bold">LÝ</text>
+                  <text x="100" y="188" textAnchor="middle" className="fill-text-secondary font-mono text-[9px] font-bold">HÓA</text>
+                  <text x="22" y="103" textAnchor="end" className="fill-text-secondary font-mono text-[9px] font-bold">SINH</text>
                 </svg>
               </div>
 
@@ -558,21 +573,21 @@ export default function Home() {
                 const strengths = personalization.subjectStrengths || { math: 50, physics: 50, chemistry: 50, biology: 50 };
                 return (
                   <div className="grid grid-cols-2 gap-2 mt-4 text-[10px] font-mono">
-                    <div className="flex items-center justify-between px-3 py-1.5 bg-[#14151f]/75 border border-white/5 rounded-xl">
-                      <span className="text-zinc-500">Toán học:</span>
-                      <strong className="text-white">{strengths.math}%</strong>
+                    <div className="flex items-center justify-between px-3 py-1.5 bg-bg-tertiary/75 border border-border-theme rounded-xl">
+                      <span className="text-text-secondary">Toán học:</span>
+                      <strong className="text-text-primary">{strengths.math}%</strong>
                     </div>
-                    <div className="flex items-center justify-between px-3 py-1.5 bg-[#14151f]/75 border border-white/5 rounded-xl">
-                      <span className="text-zinc-500">Vật lý:</span>
-                      <strong className="text-white">{strengths.physics}%</strong>
+                    <div className="flex items-center justify-between px-3 py-1.5 bg-bg-tertiary/75 border border-border-theme rounded-xl">
+                      <span className="text-text-secondary">Vật lý:</span>
+                      <strong className="text-text-primary">{strengths.physics}%</strong>
                     </div>
-                    <div className="flex items-center justify-between px-3 py-1.5 bg-[#14151f]/75 border border-white/5 rounded-xl">
-                      <span className="text-zinc-500">Hóa học:</span>
-                      <strong className="text-white">{strengths.chemistry}%</strong>
+                    <div className="flex items-center justify-between px-3 py-1.5 bg-bg-tertiary/75 border border-border-theme rounded-xl">
+                      <span className="text-text-secondary">Hóa học:</span>
+                      <strong className="text-text-primary">{strengths.chemistry}%</strong>
                     </div>
-                    <div className="flex items-center justify-between px-3 py-1.5 bg-[#14151f]/75 border border-white/5 rounded-xl">
-                      <span className="text-zinc-500">Sinh học:</span>
-                      <strong className="text-white">{strengths.biology}%</strong>
+                    <div className="flex items-center justify-between px-3 py-1.5 bg-bg-tertiary/75 border border-border-theme rounded-xl">
+                      <span className="text-text-secondary">Sinh học:</span>
+                      <strong className="text-text-primary">{strengths.biology}%</strong>
                     </div>
                   </div>
                 );
@@ -582,19 +597,19 @@ export default function Home() {
 
 
           {/* DAILY QUESTS PANEL */}
-          <div className="bg-[#1e202b]/95 border border-white/5 p-6 rounded-3xl shadow-2xl relative overflow-hidden">
-            <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
-              <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-pink-400 animate-pulse" /> Nhiệm vụ hàng ngày
+          <div className="bg-bg-secondary/95 border border-border-theme p-6 rounded-3xl shadow-2xl relative overflow-hidden">
+            <div className="flex items-center justify-between mb-4 border-b border-border-theme pb-3">
+              <h3 className="text-[10px] font-black text-text-secondary uppercase tracking-widest font-mono flex items-center gap-1.5">
+                <Clock className="w-4 h-4 text-accent-pink animate-pulse" /> Nhiệm vụ hàng ngày
               </h3>
               <div className="flex items-center gap-2">
                 <button 
                   onClick={handleResetQuests}
-                  className="px-2 py-0.5 bg-white/5 hover:bg-white/10 border border-white/10 text-[9px] font-mono text-zinc-400 hover:text-white rounded transition-all active:scale-95 flex items-center gap-1"
+                  className="px-2 py-0.5 bg-bg-tertiary hover:bg-border-theme border border-border-theme text-[9px] font-mono text-text-secondary hover:text-text-primary rounded transition-all active:scale-95 flex items-center gap-1"
                 >
                   <RefreshCw className="w-2.5 h-2.5" /> Reset
                 </button>
-                <span className="text-[9px] text-zinc-500 font-mono">MỖI 24 GIỜ</span>
+                <span className="text-[9px] text-text-secondary font-mono">MỖI 24 GIỜ</span>
               </div>
             </div>
 
@@ -602,41 +617,41 @@ export default function Home() {
               {dailyQuests.map((quest) => {
                 const isClaimed = claimedQuests[quest.id];
                 return (
-                  <div key={quest.id} className="flex flex-col gap-2.5 p-3.5 bg-[#14151f] border border-white/5 rounded-2xl">
+                  <div key={quest.id} className="flex flex-col gap-2.5 p-3.5 bg-bg-tertiary border border-border-theme rounded-2xl">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-2.5">
                         <span className="text-lg shrink-0">{quest.icon}</span>
                         <div>
-                          <h4 className="text-xs font-bold text-white leading-tight">{quest.title}</h4>
-                          <p className="text-[10px] text-zinc-500 mt-0.5">{quest.desc}</p>
+                          <h4 className="text-xs font-bold text-text-primary leading-tight">{quest.title}</h4>
+                          <p className="text-[10px] text-text-secondary mt-0.5">{quest.desc}</p>
                         </div>
                       </div>
                     </div>
                     
-                    <div className="flex items-center justify-between border-t border-white/5 pt-2 mt-1">
+                    <div className="flex items-center justify-between border-t border-border-theme pt-2 mt-1">
                       <span className="text-[9px] font-bold text-amber-400 flex items-center gap-1">
-                        PHẦN THƯỞNG: <Gem className="w-3.5 h-3.5 text-amber-500 fill-amber-500" /> +{quest.reward}
+                        PHẦN THƯỞNG: <CrystalIcon className="w-4 h-4" /> +{quest.reward}
                       </span>
                       
                       {user ? (
                         isClaimed ? (
-                          <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-xl flex items-center gap-1">
+                          <span className="text-[9px] font-bold text-success bg-success/10 border border-success/20 px-2.5 py-1 rounded-xl flex items-center gap-1">
                             <CheckCircle className="w-3.5 h-3.5" /> ĐÃ NHẬN
                           </span>
                         ) : checkQuestCompleted(quest.id) ? (
                           <button
                             onClick={() => handleClaimReward(quest.id, quest.reward)}
-                            className="px-3 py-1.5 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-[10px] font-bold text-white rounded-xl transition-all shadow-md cursor-pointer hover:scale-105 active:scale-95 animate-pulse"
+                            className="px-3 py-1.5 bg-gradient-to-r from-accent-pink to-rose-600 hover:opacity-90 text-[10px] font-bold text-white rounded-xl transition-all shadow-md cursor-pointer hover:scale-105 active:scale-95 animate-pulse"
                           >
                             NHẬN THƯỞNG
                           </button>
                         ) : (
-                          <span className="text-[9px] text-zinc-500 font-mono font-bold bg-zinc-800/40 border border-white/5 px-2.5 py-1.5 rounded-xl">
+                          <span className="text-[9px] text-text-secondary font-mono font-bold bg-bg-primary/40 border border-border-theme px-2.5 py-1.5 rounded-xl">
                             CHƯA HOÀN THÀNH
                           </span>
                         )
                       ) : (
-                        <span className="text-[9px] text-zinc-500 font-mono italic">YÊU CẦU ĐĂNG NHẬP</span>
+                        <span className="text-[9px] text-text-secondary font-mono italic">YÊU CẦU ĐĂNG NHẬP</span>
                       )}
                     </div>
                   </div>
@@ -651,9 +666,9 @@ export default function Home() {
 
       {/* ================== OVERLAY IFRAME PORTAL (FULLSCREEN SANDBOX LAB) ================== */}
       {activeLab && (
-        <div className="fixed inset-0 z-[9999] bg-zinc-950 flex flex-col">
+        <div className="fixed inset-0 z-[9999] bg-bg-primary flex flex-col">
           {/* Body chính: Iframe Lab + Sidebar AI */}
-          <div className="flex-1 flex relative overflow-hidden bg-zinc-900">
+          <div className="flex-1 flex relative overflow-hidden bg-bg-primary">
             {/* Iframe load trang Lab */}
             <div className="flex-1 h-full relative">
               <iframe 
@@ -670,7 +685,7 @@ export default function Home() {
                     playSound.click();
                     setActiveLab(null);
                   }}
-                  className="px-4 py-2.5 bg-rose-600/90 hover:bg-rose-600 border border-rose-500/30 hover:border-rose-500 text-white rounded-2xl transition-all active:scale-95 flex items-center gap-1.5 shadow-lg shadow-rose-600/20 backdrop-blur-md group cursor-pointer"
+                  className="px-4 py-2.5 bg-danger hover:opacity-90 border border-danger/30 text-white rounded-2xl transition-all active:scale-95 flex items-center gap-1.5 shadow-lg shadow-danger/20 backdrop-blur-md group cursor-pointer"
                 >
                   <X className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
                   <span className="text-[11px] font-black uppercase tracking-wider">Về Hub</span>
@@ -681,8 +696,8 @@ export default function Home() {
                   onClick={() => setShowAiCompanion(!showAiCompanion)}
                   className={`p-2.5 border rounded-2xl transition-all active:scale-95 flex items-center justify-center shadow-lg backdrop-blur-md cursor-pointer ${
                     showAiCompanion 
-                      ? 'bg-pink-500 border-pink-500 text-white shadow-pink-500/20' 
-                      : 'bg-zinc-900/80 border-white/10 text-zinc-300 hover:text-white hover:border-pink-500/35 shadow-black/30'
+                      ? 'bg-accent-pink border-accent-pink text-white shadow-accent-pink/20' 
+                      : 'bg-bg-secondary/80 border-border-theme text-text-secondary hover:text-text-primary shadow-black/30'
                   }`}
                   title="Trợ lý thí nghiệm AI"
                 >
@@ -692,10 +707,10 @@ export default function Home() {
                 {/* Nút chụp ảnh kết quả */}
                 <button 
                   onClick={handleTakeScreenshot}
-                  className="p-2.5 bg-zinc-900/80 border border-white/10 hover:border-pink-500/35 text-zinc-300 hover:text-white rounded-2xl transition-all active:scale-95 flex items-center justify-center shadow-lg backdrop-blur-md cursor-pointer shadow-black/30"
+                  className="p-2.5 bg-bg-secondary/80 border border-border-theme hover:border-accent-pink/35 text-text-secondary hover:text-text-primary rounded-2xl transition-all active:scale-95 flex items-center justify-center shadow-lg backdrop-blur-md cursor-pointer shadow-black/30"
                   title="Chụp ảnh kết quả"
                 >
-                  <Camera className="w-4.5 h-4.5 text-pink-400" />
+                  <Camera className="w-4.5 h-4.5 text-accent-pink" />
                 </button>
               </div>
               
@@ -707,16 +722,16 @@ export default function Home() {
 
             {/* Sidebar Trợ lý AI */}
             {showAiCompanion && (
-              <div className="w-80 h-full bg-[#14151f] border-l border-white/5 flex flex-col justify-between z-20 shadow-2xl animate-in slide-in-from-right duration-300">
+              <div className="w-80 h-full bg-bg-secondary border-l border-border-theme flex flex-col justify-between z-20 shadow-2xl animate-in slide-in-from-right duration-300">
                 {/* Header Sidebar */}
-                <div className="p-4 border-b border-white/5 flex items-center justify-between">
+                <div className="p-4 border-b border-border-theme flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="w-4.5 h-4.5 text-pink-400 animate-pulse" />
-                    <span className="text-xs font-black text-white">Trợ lý AI Companion</span>
+                    <Sparkles className="w-4.5 h-4.5 text-accent-pink animate-pulse" />
+                    <span className="text-xs font-black text-text-primary">Trợ lý AI Companion</span>
                   </div>
                   <button 
                     onClick={() => setShowAiCompanion(false)}
-                    className="p-1 hover:bg-white/5 rounded-full text-zinc-500 hover:text-white transition-colors"
+                    className="p-1 hover:bg-bg-tertiary rounded-full text-text-secondary hover:text-text-primary transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -729,13 +744,13 @@ export default function Home() {
                       key={i} 
                       className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
                     >
-                      <div className={`text-[9px] text-zinc-500 mb-1 font-mono`}>
+                      <div className={`text-[9px] text-text-secondary mb-1 font-mono`}>
                         {msg.sender === 'user' ? 'Bạn' : 'Companion AI'}
                       </div>
                       <div className={`p-3 rounded-2xl text-xs max-w-[85%] leading-relaxed ${
                         msg.sender === 'user' 
-                          ? 'bg-pink-500 text-white rounded-tr-none shadow-md shadow-pink-500/5' 
-                          : 'bg-[#1e202b] border border-white/5 text-zinc-300 rounded-tl-none whitespace-pre-wrap'
+                          ? 'bg-accent-pink text-white rounded-tr-none shadow-md shadow-accent-pink/10' 
+                          : 'bg-bg-tertiary border border-border-theme text-text-primary rounded-tl-none whitespace-pre-wrap'
                       }`}>
                         {msg.text}
                       </div>
@@ -744,9 +759,9 @@ export default function Home() {
 
                   {chatLoading && (
                     <div className="flex flex-col items-start">
-                      <div className="text-[9px] text-zinc-500 mb-1 font-mono">Companion AI</div>
-                      <div className="p-3 bg-[#1e202b] border border-white/5 rounded-2xl rounded-tl-none text-xs text-zinc-500 flex items-center gap-1.5">
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-pink-400" />
+                      <div className="text-[9px] text-text-secondary mb-1 font-mono">Companion AI</div>
+                      <div className="p-3 bg-bg-tertiary border border-border-theme rounded-2xl rounded-tl-none text-xs text-text-secondary flex items-center gap-1.5">
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-accent-pink" />
                         Đang phân tích dữ liệu...
                       </div>
                     </div>
@@ -754,17 +769,17 @@ export default function Home() {
                 </div>
 
                 {/* Chân Sidebar: gợi ý câu hỏi & ô nhập */}
-                <div className="p-4 border-t border-white/5 space-y-3 bg-[#181924]">
+                <div className="p-4 border-t border-border-theme space-y-3 bg-bg-tertiary">
                   {/* Câu hỏi gợi ý */}
                   {aiCompanionData[activeLab.id] && (
                     <div className="space-y-1.5">
-                      <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest font-mono text-left">Gợi ý chủ đề nhanh:</p>
+                      <p className="text-[9px] font-bold text-text-secondary uppercase tracking-widest font-mono text-left">Gợi ý chủ đề nhanh:</p>
                       <div className="flex flex-col gap-1.5">
                         {aiCompanionData[activeLab.id].suggestions.map((sug, i) => (
                           <button
                             key={i}
                             onClick={() => handleSendChatMessage(sug)}
-                            className="w-full text-[10px] text-zinc-400 hover:text-white bg-[#14151f] hover:bg-zinc-800 border border-white/5 hover:border-white/10 p-2 rounded-xl text-left transition-all truncate"
+                            className="w-full text-[10px] text-text-secondary hover:text-text-primary bg-bg-primary hover:bg-bg-secondary border border-border-theme p-2 rounded-xl text-left transition-all truncate"
                           >
                             💡 {sug}
                           </button>
@@ -786,11 +801,11 @@ export default function Home() {
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
                       placeholder="Hỏi trợ lý công thức, lý thuyết..."
-                      className="flex-1 bg-[#14151f] border border-white/5 focus:border-pink-500 focus:outline-none rounded-xl px-3 py-2 text-xs text-white placeholder:text-zinc-600 transition-colors"
+                      className="flex-1 bg-bg-primary border border-border-theme focus:border-accent-pink focus:outline-none rounded-xl px-3 py-2 text-xs text-text-primary placeholder:text-text-secondary transition-colors"
                     />
                     <button
                       type="submit"
-                      className="p-2 bg-pink-500 hover:bg-pink-600 text-white rounded-xl transition-colors"
+                      className="p-2 bg-accent-pink hover:opacity-90 text-white rounded-xl transition-colors"
                     >
                       <Send className="w-4 h-4" />
                     </button>
@@ -802,26 +817,26 @@ export default function Home() {
         </div>
       )}
 
-      {/* ================== MODAL XÁC NHẬN CHIA SẺ STORIES ================== */}
+      {/* ================== MODAL XÁC NHẬN CHIA SỄ STORIES ================== */}
       {showShareConfirm && (
-        <div className="fixed inset-0 z-[100000] bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#1e202b]/95 border border-white/10 rounded-3xl w-full max-w-md p-8 shadow-2xl relative overflow-hidden text-center">
+        <div className="fixed inset-0 z-[100000] bg-bg-primary/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-bg-secondary border border-border-theme rounded-3xl w-full max-w-md p-8 shadow-2xl relative overflow-hidden text-center">
             {/* Light effect */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/5 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-accent-pink/5 rounded-full blur-2xl pointer-events-none" />
             
-            <div className="w-16 h-16 rounded-full bg-pink-500/10 border border-pink-500/20 flex items-center justify-center mx-auto mb-5">
-              <Camera className="w-8 h-8 text-pink-400" />
+            <div className="w-16 h-16 rounded-full bg-accent-pink/10 border border-accent-pink/20 flex items-center justify-center mx-auto mb-5">
+              <Camera className="w-8 h-8 text-accent-pink" />
             </div>
 
-            <h3 className="text-lg font-black text-white tracking-wide">ĐÃ CHỤP ẢNH BÁO CÁO THÍ NGHIỆM!</h3>
-            <p className="text-xs text-zinc-400 leading-relaxed mt-2.5 px-2">
-              Kết quả thí nghiệm của bạn đã được ghi nhận. Bạn có muốn chia sẻ khoảnh khắc học tập xuất sắc này lên bảng tin <strong className="text-pink-400">Stories Cộng đồng</strong> không?
+            <h3 className="text-lg font-black text-text-primary tracking-wide">ĐÃ CHỤP ẢNH BÁO CÁO THÍ NGHIỆM!</h3>
+            <p className="text-xs text-text-secondary leading-relaxed mt-2.5 px-2">
+              Kết quả thí nghiệm của bạn đã được ghi nhận. Bạn có muốn chia sẻ khoảnh khắc học tập xuất sắc này lên bảng tin <strong className="text-accent-pink">Stories Cộng đồng</strong> không?
             </p>
 
             <div className="flex gap-3 mt-8">
               <button
                 onClick={handleConfirmShareToStories}
-                className="flex-1 py-3 bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold rounded-2xl transition-all active:scale-95 shadow-lg shadow-pink-500/10"
+                className="flex-1 py-3 bg-accent-pink hover:opacity-90 text-white text-xs font-bold rounded-2xl transition-all active:scale-95 shadow-lg shadow-accent-pink/20 cursor-pointer"
               >
                 Chia sẻ ngay 🚀
               </button>
@@ -830,7 +845,7 @@ export default function Home() {
                   playSound.click();
                   setShowShareConfirm(false);
                 }}
-                className="px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-400 text-xs font-bold rounded-2xl transition-all active:scale-95"
+                className="px-5 py-3 bg-bg-tertiary hover:bg-border-theme border border-border-theme text-text-secondary hover:text-text-primary text-xs font-bold rounded-2xl transition-all active:scale-95 cursor-pointer"
               >
                 Để sau
               </button>
@@ -839,6 +854,7 @@ export default function Home() {
         </div>
       )}
 
+      </div>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
+@import "katex/dist/katex.min.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -10,56 +11,93 @@
    ======================================================== */
 
 :root {
-  /* Surface */
-  --background:        #F5F5F7;
-  --background-alt:    #FAFAFA;
-  --surface:           #FFFFFF;
-  --surface-secondary: #F2F2F5;
-  --surface-hover:     #EBEBEF;
-  --foreground:        #1D1D1F;
-  --foreground-muted:  #6E6E73;
-  --foreground-subtle: #9a9aa0;
+  /* Design Tokens - Light Mode */
+  --bg-primary:        #F8F6FC;
+  --bg-secondary:      #FFFFFF;
+  --bg-tertiary:       #F0EBFA;
+  --border:            #E2D9F3;
+  --text-primary:      #1E152A;
+  --text-secondary:    #6B5E85;
 
-  /* Borders */
-  --border:            rgba(0,0,0,0.09);
-  --border-strong:     rgba(0,0,0,0.15);
+  /* Accent & State Colors */
+  --accent-pink:       #F0398C;
+  --accent-purple:     #7C3AED;
+  --accent-cyan:       #0284C7;
+  --success:           #059669;
+  --warning:           #D97706;
+  --danger:            #DC2626;
 
-  /* Brand Accent — kept from original */
-  --accent-primary:    #f43f5e;   /* rose-500 */
-  --accent-secondary:  #a855f7;   /* purple-500 */
+  /* Card & Shadows */
+  --card-shadow:       0 4px 20px rgba(30, 21, 42, 0.06);
+  --glow-shadow:       rgba(240, 57, 140, 0.25);
 
-  /* Card */
-  --card-bg:           #FFFFFF;
-  --card-shadow:       0 1px 3px rgba(0,0,0,0.06), 0 6px 20px rgba(0,0,0,0.05);
-  --card-shadow-hover: 0 4px 12px rgba(0,0,0,0.10), 0 16px 40px rgba(0,0,0,0.08);
+  /* Legacy variable mappings for backward compatibility */
+  --background:        var(--bg-primary);
+  --background-alt:    var(--bg-secondary);
+  --surface:           var(--bg-secondary);
+  --surface-secondary: var(--bg-tertiary);
+  --surface-hover:     var(--bg-tertiary);
+  --foreground:        var(--text-primary);
+  --foreground-muted:  var(--text-secondary);
+  --foreground-subtle: #6B5E85;
+  --border-strong:     #D5CEE5;
+  --accent-primary:    var(--accent-pink);
+  --accent-secondary:  var(--accent-purple);
+  --card-bg:           var(--bg-secondary);
+  --card-shadow-hover: 0 8px 30px rgba(30, 21, 42, 0.1);
 }
 
 .dark {
-  /* Surface */
-  --background:        #1c1e29;
-  --background-alt:    #14151f;
-  --surface:           rgba(255,255,255,0.03);
-  --surface-secondary: rgba(255,255,255,0.02);
-  --surface-hover:     rgba(255,255,255,0.06);
-  --foreground:        #f4f4f5;
-  --foreground-muted:  #a1a1aa;
-  --foreground-subtle: #71717a;
+  /* Design Tokens - Dark Mode */
+  --bg-primary:        #0F0B1A;
+  --bg-secondary:      #1A1428;
+  --bg-tertiary:       #241C38;
+  --border:            #33284A;
+  --text-primary:      #F2EDFA;
+  --text-secondary:    #A99BC4;
 
-  /* Borders */
-  --border:            rgba(255,255,255,0.07);
-  --border-strong:     rgba(255,255,255,0.12);
+  /* Accent & State Colors */
+  --accent-pink:       #F0398C;
+  --accent-purple:     #8B5CF6;
+  --accent-cyan:       #06B6D4;
+  --success:           #34D399;
+  --warning:           #FBBF24;
+  --danger:            #F87171;
 
-  /* Brand Accent */
-  --accent-primary:    #f43f5e;
-  --accent-secondary:  #a855f7;
-
-  /* Card */
-  --card-bg:           rgba(255,255,255,0.03);
+  /* Card & Shadows */
   --card-shadow:       none;
-  --card-shadow-hover: 0 0 0 1px rgba(255,255,255,0.08);
+  --glow-shadow:       rgba(240, 57, 140, 0.35);
+
+  /* Legacy variable mappings for backward compatibility */
+  --background:        var(--bg-primary);
+  --background-alt:    var(--bg-secondary);
+  --surface:           var(--bg-secondary);
+  --surface-secondary: var(--bg-tertiary);
+  --surface-hover:     var(--bg-tertiary);
+  --foreground:        var(--text-primary);
+  --foreground-muted:  var(--text-secondary);
+  --foreground-subtle: #A99BC4;
+  --border-strong:     #473866;
+  --accent-primary:    var(--accent-pink);
+  --accent-secondary:  var(--accent-purple);
+  --card-bg:           var(--bg-secondary);
+  --card-shadow-hover: 0 0 0 1px #473866;
 }
 
 @theme inline {
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary: var(--bg-tertiary);
+  --color-border-theme: var(--border);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-accent-pink: var(--accent-pink);
+  --color-accent-purple: var(--accent-purple);
+  --color-accent-cyan: var(--accent-cyan);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: 'Outfit', sans-serif;
@@ -70,18 +108,27 @@
    BASE STYLES
    ======================================================== */
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg-primary);
+  color: var(--text-primary);
   font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Smooth global theme transition for backgrounds, borders, text colors, and shadows */
+body, header, nav, main, footer, aside, section, article, div, button, input, select, textarea, p, span, h1, h2, h3, h4, h5, h6, a {
+  transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ========================================================
    LIGHT MODE — COMPREHENSIVE OVERRIDES
-   We use the `html:not(.dark)` to avoid !important wars.
-   These fix hardcoded dark-only Tailwind classes.
+   We use `html:not(.dark)` to avoid !important wars.
+   These map dark-only Tailwind classes to light tokens.
    ======================================================== */
 
 /* --- Page backgrounds --- */
+html:not(.dark) .bg-\[\#0F0B1A\],
 html:not(.dark) .bg-\[\#1c1e29\],
 html:not(.dark) .bg-\[\#14151f\],
 html:not(.dark) .bg-\[\#131524\],
@@ -94,9 +141,10 @@ html:not(.dark) .bg-\[\#141622\],
 html:not(.dark) .bg-\[\#1a1b26\],
 html:not(.dark) .bg-\[\#1a1c29\],
 html:not(.dark) .bg-\[\#1b1e30\],
-html:not(.dark) .bg-\[\#20222f\] { background-color: var(--background) !important; }
+html:not(.dark) .bg-\[\#20222f\] { background-color: var(--bg-primary) !important; }
 
 /* --- Card / panel backgrounds --- */
+html:not(.dark) .bg-\[\#1A1428\],
 html:not(.dark) .bg-\[\#242633\],
 html:not(.dark) .bg-\[\#2a2c3a\],
 html:not(.dark) .bg-\[\#1f212e\],
@@ -109,60 +157,113 @@ html:not(.dark) .bg-\[\#14151f\],
 html:not(.dark) .bg-\[\#1a1b26\],
 html:not(.dark) .bg-\[\#1a1c29\],
 html:not(.dark) .bg-\[\#1b1e30\],
-html:not(.dark) .bg-\[\#1c1e29\]\/80,
-html:not(.dark) .bg-\[\#141526\]\/80,
-html:not(.dark) .bg-\[\#1e202b\]\/95,
-html:not(.dark) .bg-\[\#14151f\]\/80,
-html:not(.dark) .bg-\[\#14151f\]\/50,
-html:not(.dark) .bg-\[\#14151f\]\/75,
+html:not(.dark) [class*="bg-[#2a2c3a]"],
+html:not(.dark) [class*="bg-[#1c1e29]"],
+html:not(.dark) [class*="bg-[#141526]"],
+html:not(.dark) [class*="bg-[#191a27]"],
+html:not(.dark) [class*="bg-[#1e1d30]"],
+html:not(.dark) [class*="bg-[#181a2e]"],
+html:not(.dark) [class*="bg-[#121422]"],
+html:not(.dark) [class*="bg-[#1f212e]"],
+html:not(.dark) [class*="bg-[#1b1e30]"],
+html:not(.dark) [class*="bg-[#141727]"],
+html:not(.dark) [class*="bg-[#131622]"],
+html:not(.dark) [class*="bg-[#151824]"],
+html:not(.dark) [class*="bg-[#191d2f]"],
+html:not(.dark) [class*="bg-[#1a1e31]"],
+html:not(.dark) [class*="bg-[#10121e]"],
+html:not(.dark) [class*="bg-[#181b2a]"],
+html:not(.dark) [class*="bg-[#171a28]"],
+html:not(.dark) [class*="bg-[#141724]"],
+html:not(.dark) [class*="bg-[#10121b]"],
+html:not(.dark) [class*="bg-zinc-900"],
+html:not(.dark) [class*="bg-zinc-800"],
+html:not(.dark) [class*="bg-zinc-950"],
 html:not(.dark) .bg-white\/\[0\.02\],
 html:not(.dark) .bg-white\/\[0\.03\],
 html:not(.dark) .bg-white\/\[0\.01\] {
-  background-color: var(--card-bg) !important;
+  background-color: var(--bg-secondary) !important;
   border-color: var(--border) !important;
   box-shadow: var(--card-shadow) !important;
 }
 
+html:not(.dark) [class*="bg-[#1c1e29]/"],
+html:not(.dark) [class*="bg-[#2a2c3a]/"],
+html:not(.dark) [class*="bg-[#141727]/"],
+html:not(.dark) [class*="bg-[#131622]/"],
+html:not(.dark) [class*="bg-[#151824]/"],
+html:not(.dark) [class*="bg-[#191d2f]/"],
+html:not(.dark) [class*="bg-[#1a1e31]/"],
+html:not(.dark) [class*="bg-[#10121e]/"],
+html:not(.dark) [class*="bg-zinc-900/"],
+html:not(.dark) [class*="bg-zinc-800/"],
+html:not(.dark) [class*="bg-zinc-950/"] {
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border) !important;
+}
+
 /* --- Subtle panels & hover states --- */
+html:not(.dark) .bg-\[\#241C38\],
 html:not(.dark) .bg-white\/5,
 html:not(.dark) .bg-white\/\[0\.05\],
 html:not(.dark) .bg-white\/2,
 html:not(.dark) .hover\:bg-white\/5:hover,
 html:not(.dark) .hover\:bg-white\/10:hover {
-  background-color: var(--surface-secondary) !important;
+  background-color: var(--bg-tertiary) !important;
 }
 
-html:not(.dark) .hover\:bg-white\/\[0\.02\]:hover { background-color: var(--surface-hover) !important; }
+html:not(.dark) .hover\:bg-white\/\[0\.02\]:hover { background-color: var(--bg-tertiary) !important; }
 
-/* --- Subtle dark bg sections (e.g. table rows) --- */
+/* --- Subtle dark bg sections --- */
 html:not(.dark) .bg-\[\#08090d\]\/60,
 html:not(.dark) .bg-black\/20,
 html:not(.dark) .bg-black\/30 {
-  background-color: var(--surface-secondary) !important;
+  background-color: var(--bg-tertiary) !important;
   border-color: var(--border) !important;
 }
 
 /* --- Input / select backgrounds --- */
 html:not(.dark) .bg-\[\#161726\],
 html:not(.dark) .bg-black\/30 {
-  background-color: var(--surface) !important;
+  background-color: var(--bg-secondary) !important;
 }
 
 html:not(.dark) select option {
-  background-color: #ffffff !important;
-  color: #1D1D1F !important;
+  background-color: #FFFFFF !important;
+  color: var(--text-primary) !important;
 }
 
 /* --- Text colors --- */
 html:not(.dark) .text-white,
 html:not(.dark) .text-zinc-100,
-html:not(.dark) .text-zinc-200 { color: var(--foreground) !important; }
+html:not(.dark) .text-zinc-200 { color: var(--text-primary) !important; }
+
+/* Keep text white on buttons, badges and colorful cards in Light mode */
+html:not(.dark) button.text-white,
+html:not(.dark) a.text-white,
+html:not(.dark) .bg-accent-pink .text-white,
+html:not(.dark) .bg-accent-pink.text-white,
+html:not(.dark) .bg-rose-500 .text-white,
+html:not(.dark) .bg-rose-500.text-white,
+html:not(.dark) .bg-emerald-500.text-white,
+html:not(.dark) .bg-amber-500.text-white,
+html:not(.dark) .bg-pink-500.text-white,
+html:not(.dark) .bg-purple-600.text-white,
+html:not(.dark) .bg-red-500.text-white,
+html:not(.dark) [class*="bg-gradient-"] .text-white,
+html:not(.dark) [class*="bg-gradient-"].text-white,
+html:not(.dark) [class*="bg-accent-"].text-white,
+html:not(.dark) [class*="bg-rose-"].text-white,
+html:not(.dark) [class*="bg-emerald-"].text-white,
+html:not(.dark) [class*="bg-pink-"].text-white {
+  color: #ffffff !important;
+}
 
 html:not(.dark) .text-zinc-300,
-html:not(.dark) .text-zinc-400 { color: var(--foreground-muted) !important; }
+html:not(.dark) .text-zinc-400 { color: var(--text-secondary) !important; }
 
 html:not(.dark) .text-zinc-500,
-html:not(.dark) .text-zinc-600 { color: var(--foreground-subtle) !important; }
+html:not(.dark) .text-zinc-600 { color: var(--text-secondary) !important; }
 
 /* --- Borders --- */
 html:not(.dark) .border-white\/5,
@@ -170,14 +271,14 @@ html:not(.dark) .border-white\/10,
 html:not(.dark) .border-\[\#1f2235\],
 html:not(.dark) .border-\[\#1f2235\]\/40 { border-color: var(--border) !important; }
 
-html:not(.dark) .border-white\/\[0\.07\] { border-color: var(--border-strong) !important; }
+html:not(.dark) .border-white\/\[0\.07\] { border-color: var(--border) !important; }
 
 /* --- Dividers & separators --- */
 html:not(.dark) .divide-white\/5 > * + * { border-color: var(--border) !important; }
 
 /* --- Specific dark bg classes used in leaderboard, admin etc --- */
 html:not(.dark) .bg-\[\#0c0d14\]\/85 {
-  background-color: rgba(245,245,247,0.92) !important;
+  background-color: rgba(250,250,252,0.92) !important;
   backdrop-filter: blur(12px) !important;
 }
 
@@ -188,16 +289,16 @@ html:not(.dark) .bg-\[\#161726\]\/90 {
 }
 
 /* --- Admin sidebar background fix --- */
-html:not(.dark) .bg-\[\#0c0d14\] { background-color: #F0F0F5 !important; }
+html:not(.dark) .bg-\[\#0c0d14\] { background-color: #FAFAFC !important; }
 
 /* --- Recharts axis/grid light mode fix --- */
-html:not(.dark) .recharts-cartesian-axis-tick-value { fill: #6E6E73 !important; }
-html:not(.dark) .recharts-cartesian-grid line { stroke: rgba(0,0,0,0.07) !important; }
-html:not(.dark) .recharts-legend-item-text { color: #6E6E73 !important; }
+html:not(.dark) .recharts-cartesian-axis-tick-value { fill: var(--text-secondary) !important; }
+html:not(.dark) .recharts-cartesian-grid line { stroke: var(--border) !important; }
+html:not(.dark) .recharts-legend-item-text { color: var(--text-secondary) !important; }
 html:not(.dark) .recharts-tooltip-wrapper .recharts-default-tooltip {
   background-color: #FFFFFF !important;
-  border-color: rgba(0,0,0,0.1) !important;
-  color: #1D1D1F !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
 }
 
 /* ========================================================
@@ -222,3 +323,71 @@ html:not(.dark) .recharts-tooltip-wrapper .recharts-default-tooltip {
     margin-left: 260px;
   }
 }
+
+/* ========================================================
+   STEM ARENA — OPTIMIZED QUESTION IMAGES SIZING
+   ======================================================== */
+
+/* Default: các môn khác (Hóa, Lý, Toán) */
+.dau-truong-game-area img,
+.arena-question-box img,
+.arena-context-box img,
+h3 img,
+div[dangerouslySetInnerHTML] img,
+span[dangerouslySetInnerHTML] img {
+  max-width: 100% !important;
+  max-height: 120px !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  display: block !important;
+  margin: 8px auto !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  padding: 4px !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Sinh học: Ngữ cảnh — ảnh lớn hơn để nhìn rõ sơ đồ, tháp tuổi, phả hệ */
+.bio-context-box img,
+.bio-question-box img {
+  max-width: 100% !important;
+  max-height: 280px !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  display: block !important;
+  margin: 10px auto !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(6, 182, 212, 0.25) !important;
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  padding: 6px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* ========================================================
+   CUSTOM SCROLLBAR & LOADING SKELETONS (DESIGN TOKENS)
+   ======================================================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+.skeleton-loader {
+  background-color: var(--bg-tertiary);
+  border-radius: 0.5rem;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+

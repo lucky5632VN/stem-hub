@@ -1,21 +1,26 @@
 'use client';
 
 import { useState, useEffect, useRef, Suspense } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAppStore } from '@/store/useAppStore';
 import { playSound } from '@/lib/sound';
 import { db, functions, httpsCallable } from '@/lib/firebase';
-import { doc, updateDoc, onSnapshot, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, updateDoc, onSnapshot, getDoc, collection, query, where, getDocs, arrayUnion } from 'firebase/firestore';
 import { 
   Swords, Timer, Activity, Zap, RotateCcw, 
   Compass, Cpu, Flame, Trophy, Beaker, CheckCircle2, AlertTriangle, Sparkles, Orbit,
-  ArrowRight, Clock, User, Send, Gem
+  ArrowRight, Clock, User, Send, Gem, ShieldCheck, Ban, UserX, Layers, Snowflake, CloudFog, Bot,
+  ShoppingBag, X, Plus, ShoppingCart, Store, ShieldAlert, Hand
 } from 'lucide-react';
+import { EQUIPMENT_CATALOG, getEquipmentById } from '@/data/equipmentCatalog';
+import CrystalIcon from '@/components/atoms/CrystalIcon';
 import { 
   joinMatchmakingQueue, 
   leaveMatchmakingQueue, 
   getRankInfo,
-  checkForRoomMerge
+  checkForRoomMerge,
+  requestBotOpponent
 } from '@/lib/matchmaker';
 import { 
   BIO_BANKS, 
@@ -25,11 +30,18 @@ import {
   generateBioPool, 
   generateMathPool, 
   generatePhysicsPool, 
-  generateChemistryPool
+  generateChemistryPool,
+  generateMathMatchPool,
+  generatePhysicsMatchPool,
+  generateBiologyMatchPool
 } from '@/lib/arenaGenerator';
 import { AvatarFrame } from '@/components/atoms/AvatarFrame';
 import STEMAvatarSVG from '@/components/atoms/STEMAvatarSVG';
 import { EXAM_DATABASE } from '@/data/exams';
+import { savePendingShare } from '@/lib/indexedDB';
+import ArenaBackground from '@/components/organisms/ArenaBackground';
+
+import { formatMathText, formatBioText } from '@/lib/mathFormatter';
 
 const getTitleLabel = (title) => {
   const titles = {
@@ -42,235 +54,6 @@ const getTitleLabel = (title) => {
     grandmaster: 'Trưởng ban Học thuật'
   };
   return titles[title] || 'Học viên';
-};
-
-// Cấu hình bản đồ chỉ số dưới hóa học/toán học sang Unicode subscripts
-const subscriptMap = {
-  '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄',
-  '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉',
-  'a': 'ₐ', 'e': 'ₑ', 'o': 'ₒ', 'x': 'ₓ', 'h': 'ₕ',
-  'n': 'ₙ', 'm': 'ₘ', 'p': 'ₚ', 's': 'ₛ', 't': 'ₜ'
-};
-
-// Cấu hình bản đồ số mũ, điện tích sang Unicode superscripts
-const superscriptMap = {
-  '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
-  '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
-  '+': '⁺', '-': '⁻', '=': '⁼', '(': '⁽', ')': '⁾',
-  'a': 'ᵃ', 'b': 'ᵇ', 'c': 'ᶜ', 'd': 'ᵈ', 'e': 'ᵉ', 
-  'g': 'ᵍ', 'h': 'ʰ', 'i': 'ⁱ', 'k': 'ᵏ', 'm': 'ᵐ', 
-  'n': 'ⁿ', 'o': 'ᵒ', 'p': 'ᵖ', 'r': 'ʳ', 's': 'ˢ', 
-  't': 'ᵗ', 'u': 'ᵘ', 'v': 'ᵛ', 'x': 'ˣ', 'y': 'ʸ',
-  'T': 'ᵀ', 'L': 'ᴸ'
-};
-
-// Danh sách các ánh xạ kí tự đặc biệt LaTeX sang Unicode
-const latexTranslations = [
-  { regex: /\\text\{\s*(.*?)\s*\}/g, replacement: '$1' },
-  { regex: /\\pi/g, replacement: 'π' },
-  { regex: /\\lambda/g, replacement: 'λ' },
-  { regex: /\\mu/g, replacement: 'μ' },
-  { regex: /\\alpha/g, replacement: 'α' },
-  { regex: /\\beta/g, replacement: 'β' },
-  { regex: /\\gamma/g, replacement: 'γ' },
-  { regex: /\\epsilon/g, replacement: 'ε' },
-  { regex: /\\varepsilon/g, replacement: 'ε' },
-  { regex: /\\varphi/g, replacement: 'φ' },
-  { regex: /\\phi/g, replacement: 'φ' },
-  { regex: /\\omega/g, replacement: 'ω' },
-  { regex: /\\Delta/g, replacement: 'Δ' },
-  { regex: /\\Omega/g, replacement: 'Ω' },
-  { regex: /\^\\circ/g, replacement: '°' },
-  { regex: /\\circ/g, replacement: '°' },
-  { regex: /\\rightarrow/g, replacement: ' ➔ ' },
-  { regex: /\\Rightarrow/g, replacement: ' ➔ ' },
-  { regex: /\\to/g, replacement: ' ➔ ' },
-  { regex: /\\Leftrightarrow/g, replacement: ' ⇔ ' },
-  { regex: /\\xrightarrow\{([^}]+)\}/g, replacement: ' ──($1)──> ' },
-  { regex: /\\xrightarrow/g, replacement: ' ➔ ' },
-  { regex: /\\times/g, replacement: ' × ' },
-  { regex: /\\approx/g, replacement: ' ≈ ' },
-  { regex: /\\cdot/g, replacement: ' · ' },
-  { regex: /\\pm/g, replacement: '±' },
-  { regex: /\\neq/g, replacement: '≠' },
-  { regex: /\\infty/g, replacement: '∞' },
-  { regex: /\\cup/g, replacement: ' ∪ ' },
-  { regex: /\\le/g, replacement: '≤' },
-  { regex: /\\ge/g, replacement: '≥' },
-  { regex: /\\int/g, replacement: '∫' },
-  { regex: /\\in\b/g, replacement: ' ∈ ' },
-  { regex: /\\setminus/g, replacement: ' ∖ ' },
-  { regex: /\\uparrow/g, replacement: '↑' },
-  { regex: /\\downarrow/g, replacement: '↓' },
-  { regex: /\\pieces/g, replacement: '.' },
-  { regex: /\\mathbb\{R\}/g, replacement: 'ℝ' },
-  { regex: /\\mathbb\{C\}/g, replacement: 'ℂ' },
-  { regex: /\\mathbb\{N\}/g, replacement: 'ℕ' },
-  { regex: /\\mathbb\{Z\}/g, replacement: 'ℤ' },
-  { regex: /\\log/g, replacement: 'log' },
-  { regex: /\\ln/g, replacement: 'ln' },
-  { regex: /\\lim/g, replacement: 'lim' },
-  { regex: /\\sin/g, replacement: 'sin' },
-  { regex: /\\cos/g, replacement: 'cos' },
-  { regex: /\\tan/g, replacement: 'tan' },
-  { regex: /\\vec\{([^}]+)\}/g, replacement: 'vectơ $1' },
-  { regex: /\\overrightarrow\{([^}]+)\}/g, replacement: 'vectơ $1' },
-  { regex: /\\overline\{([^}]+)\}/g, replacement: '$1' },
-  { regex: /\\,/g, replacement: ' ' },
-  { regex: /\\;/g, replacement: ' ' },
-  { regex: /\\quad/g, replacement: ' ' },
-  { regex: /\\qquad/g, replacement: ' ' },
-  { regex: /\\text/g, replacement: '' }
-];
-
-// Bộ phân tích biểu thức Toán lý hóa chuẩn sang Unicode đẹp mắt, không lỗi font
-const formatMathText = (text) => {
-  if (!text) return '';
-  
-  let formatted = text;
-  
-  // 1. Loại bỏ các kí hiệu mở đóng LaTeX \ ( và \ ) và $
-  formatted = formatted.replace(/\\\(|\\\)/g, '');
-  formatted = formatted.replace(/\$/g, '');
-  
-  // 1b. Inject referrerpolicy="no-referrer" và URL-encode cho thẻ img để tránh lỗi font/accent trong link ảnh
-  formatted = formatted.replace(/<img\s+([^>]*?)src="([^"]+?)"([^>]*?)>/gi, (match, before, src, after) => {
-    return `<img referrerpolicy="no-referrer" ${before}src="${encodeURI(src.trim())}"${after}>`;
-  });
-  
-  // 2. Chạy dịch kí tự đặc biệt trước để tránh va chạm với bộ chuyển đổi subscript/superscript
-  latexTranslations.forEach(t => {
-    formatted = formatted.replace(t.regex, t.replacement);
-  });
-
-  // 3. Bảo vệ các khối lim_{...} khỏi việc bị chuyển đổi chỉ số dưới sai lệch
-  formatted = formatted.replace(/lim_\{([^}]+)\}/g, '@@@LIMSTART@@@$1@@@LIMEND@@@');
-
-  // 4. Chuyển đổi chỉ số dưới hóa học/toán học sang Unicode subscripts
-  formatted = formatted.replace(/_\{([^}]+)\}/g, (match, p1) => {
-    return p1.split('').map(char => subscriptMap[char] || char).join('');
-  });
-  
-  formatted = formatted.replace(/_([0-9a-zA-Z])/g, (match, p1) => {
-    return subscriptMap[p1] || p1;
-  });
-
-  // 5. Chuyển đổi số mũ, điện tích sang Unicode superscripts
-  formatted = formatted.replace(/\^\{([^}]+)\}/g, (match, p1) => {
-    return p1.split('').map(char => superscriptMap[char] || char).join('');
-  });
-  
-  formatted = formatted.replace(/\^([0-9a-zA-Z+-])/g, (match, p1) => {
-    return superscriptMap[p1] || p1;
-  });
-
-  // 6. Xử lý căn thức \sqrt{x} -> √(x) hỗ trợ ngoặc lồng nhau (ví dụ: \sqrt{\frac{l}{g}})
-  while (formatted.includes('\\sqrt{')) {
-    const startIdx = formatted.indexOf('\\sqrt{');
-    let depth = 0;
-    let endIdx = -1;
-    for (let i = startIdx + 6; i < formatted.length; i++) {
-      if (formatted[i] === '{') {
-        depth++;
-      } else if (formatted[i] === '}') {
-        if (depth === 0) {
-          endIdx = i;
-          break;
-        }
-        depth--;
-      }
-    }
-    
-    if (endIdx !== -1) {
-      const content = formatted.substring(startIdx + 6, endIdx);
-      formatted = formatted.substring(0, startIdx) + `√(${content})` + formatted.substring(endIdx + 1);
-    } else {
-      break;
-    }
-  }
-
-  // 7. Khôi phục lại khối lim_{...} đã được bảo vệ
-  formatted = formatted.replace(/@@@LIMSTART@@@(.*?)@@@LIMEND@@?/g, 'lim_{$1}');
-
-  // 7b. Dọn dẹp trùng lặp từ "vectơ vectơ" do cả text và regex cùng sinh ra
-  formatted = formatted.replace(/(vectơ\s+)+/gi, 'vectơ ');
-
-  // 8. Tách chuỗi và sinh HTML cho phân số và giới hạn
-  if (!formatted.includes('\\frac') && !formatted.includes('lim_')) {
-    return formatted;
-  }
-
-  let htmlParts = '';
-  let lastIndex = 0;
-  
-  while (true) {
-    const fracIdx = formatted.indexOf('\\frac{', lastIndex);
-    const limIdx = formatted.indexOf('lim_{', lastIndex);
-    
-    let nextIdx = -1;
-    let type = '';
-    
-    if (fracIdx !== -1 && limIdx !== -1) {
-      if (fracIdx < limIdx) {
-        nextIdx = fracIdx;
-        type = 'frac';
-      } else {
-        nextIdx = limIdx;
-        type = 'lim';
-      }
-    } else if (fracIdx !== -1) {
-      nextIdx = fracIdx;
-      type = 'frac';
-    } else if (limIdx !== -1) {
-      nextIdx = limIdx;
-      type = 'lim';
-    }
-    
-    if (nextIdx === -1) {
-      break;
-    }
-    
-    const textBefore = formatted.substring(lastIndex, nextIdx);
-    if (textBefore) {
-      htmlParts += textBefore;
-    }
-    
-    if (type === 'frac') {
-      const fracMatchRegex = /^\\frac\{([^{}]+)\}\{([^{}]+)\}/;
-      const subStr = formatted.substring(nextIdx);
-      const match = fracMatchRegex.exec(subStr);
-      
-      if (match) {
-        const num = match[1];
-        const den = match[2];
-        htmlParts += `<span class="inline-flex flex-col items-center align-middle mx-1" style="font-size: 0.85em; line-height: 1.15;"><span class="border-b border-zinc-400 pb-0.5 px-0.5 text-center w-full">${num}</span><span class="pt-0.5 px-0.5 text-center w-full">${den}</span></span>`;
-        lastIndex = nextIdx + match[0].length;
-      } else {
-        htmlParts += '\\frac';
-        lastIndex = nextIdx + 6;
-      }
-    } else if (type === 'lim') {
-      const limMatchRegex = /^lim_\{([^{}]+)\}/;
-      const subStr = formatted.substring(nextIdx);
-      const match = limMatchRegex.exec(subStr);
-      
-      if (match) {
-        const limitContent = match[1];
-        htmlParts += `<span class="inline-flex flex-col items-center align-middle mx-1" style="line-height: 0.9;"><span style="font-size: 13px; font-weight: 600; color: #e4e4e7;">lim</span><span style="font-size: 9px; color: #a1a1aa; user-select: none; margin-top: -0.1em;">${limitContent}</span></span>`;
-        lastIndex = nextIdx + match[0].length;
-      } else {
-        htmlParts += 'lim_';
-        lastIndex = nextIdx + 4;
-      }
-    }
-  }
-  
-  const textAfter = formatted.substring(lastIndex);
-  if (textAfter) {
-    htmlParts += textAfter;
-  }
-  
-  return htmlParts;
 };
 
 // --- CÁC HÀM TRỘN VÀ QUẢN LÝ LỊCH SỬ CÂU HỎI ---
@@ -514,6 +297,832 @@ const generateBioGame = () => {
   };
 };
 
+// MODAL CỬA HÀNG TRANG BỊ MINI CHO ĐẤU TRƯỜNG 1V1
+const MiniEquipmentShopModal = ({
+  isOpen,
+  onClose,
+  user,
+  personalization,
+  setPersonalization,
+  onInventoryUpdate
+}) => {
+  const [mounted, setMounted] = useState(false);
+  const [selectedTab, setSelectedTab] = useState('all');
+  const [purchasingId, setPurchasingId] = useState(null);
+  const [userInventory, setUserInventory] = useState([]);
+  const [notice, setNotice] = useState({ type: '', msg: '' });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!user || !isOpen) return;
+    const userDocRef = doc(db, 'users', user.uid);
+    getDoc(userDocRef).then((snap) => {
+      let inv = [];
+      let isAdminUser = false;
+      if (snap.exists()) {
+        const data = snap.data();
+        inv = data.inventory || [];
+        if (data.role === 'admin' || user?.role === 'admin' || user?.email?.includes('admin') || user?.displayName?.toLowerCase().includes('admin')) {
+          isAdminUser = true;
+        }
+      } else if (user?.role === 'admin' || user?.email?.includes('admin') || user?.displayName?.toLowerCase().includes('admin')) {
+        isAdminUser = true;
+      }
+
+      if (isAdminUser) {
+        inv = EQUIPMENT_CATALOG.map(card => ({ cardId: card.id, quantity: 99 }));
+      }
+      setUserInventory(inv);
+    }).catch(err => console.warn("Lỗi tải kho đồ:", err));
+  }, [user, isOpen, personalization]);
+
+  if (!isOpen || !mounted) return null;
+
+  const handleBuyCard = async (cardId, qty = 1) => {
+    if (!user) {
+      setNotice({ type: 'error', msg: 'Vui lòng đăng nhập để mua trang bị!' });
+      return;
+    }
+
+    const cardDef = getEquipmentById(cardId);
+    if (!cardDef) return;
+
+    const totalPrice = cardDef.crystalPrice * qty;
+    const currentCrystals = personalization?.crystals !== undefined ? personalization.crystals : 500;
+
+    if (currentCrystals < totalPrice) {
+      playSound.click();
+      setNotice({ type: 'error', msg: `Không đủ Pha Lê! Cần ${totalPrice.toLocaleString()} 💎 nhưng bạn chỉ có ${currentCrystals.toLocaleString()} 💎.` });
+      setTimeout(() => setNotice({ type: '', msg: '' }), 4000);
+      return;
+    }
+
+    setPurchasingId(cardId);
+    playSound.click();
+
+    try {
+      const processTransaction = httpsCallable(functions, 'processCrystalTransaction');
+      const res = await processTransaction({
+        actionType: 'PURCHASE_EQUIPMENT_CARD',
+        payload: { cardId, count: qty }
+      });
+
+      if (res.data && res.data.success) {
+        playSound.success();
+        const newCrystals = res.data.newCrystals;
+        const newInventory = res.data.inventory || [];
+        
+        setPersonalization({ crystals: newCrystals });
+        setUserInventory(newInventory);
+        if (onInventoryUpdate) onInventoryUpdate(newInventory);
+
+        setNotice({ 
+          type: 'success', 
+          msg: `🎉 Mua thành công ${qty}x ${cardDef.name}! (-${totalPrice.toLocaleString()} Pha Lê)` 
+        });
+      } else {
+        throw new Error('Giao dịch thất bại.');
+      }
+    } catch (err) {
+      console.warn("Lỗi giao dịch Cloud Function, đang dùng fallback client transaction:", err);
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        const snap = await getDoc(userRef);
+        if (snap.exists()) {
+          const uData = snap.data();
+          const pCrystals = uData.personalization?.crystals !== undefined ? uData.personalization.crystals : 500;
+          if (pCrystals < totalPrice) {
+            throw new Error(`Không đủ Pha Lê (${pCrystals}/${totalPrice})`);
+          }
+          const curInv = uData.inventory || [];
+          const idx = curInv.findIndex(i => i.cardId === cardId);
+          let newInv = [...curInv];
+          if (idx !== -1) {
+            newInv[idx] = { ...newInv[idx], quantity: (newInv[idx].quantity || 0) + qty };
+          } else {
+            newInv.push({ cardId, quantity: qty });
+          }
+          const nextCrystals = pCrystals - totalPrice;
+          await updateDoc(userRef, {
+            'personalization.crystals': nextCrystals,
+            inventory: newInv
+          });
+          playSound.success();
+          setPersonalization({ crystals: nextCrystals });
+          setUserInventory(newInv);
+          if (onInventoryUpdate) onInventoryUpdate(newInv);
+          setNotice({ 
+            type: 'success', 
+            msg: `🎉 Mua thành công ${qty}x ${cardDef.name}! (-${totalPrice.toLocaleString()} Pha Lê)` 
+          });
+        }
+      } catch (fbErr) {
+        playSound.click();
+        setNotice({ type: 'error', msg: fbErr.message || 'Lỗi hệ thống khi mua thẻ bài!' });
+      }
+    } finally {
+      setPurchasingId(null);
+      setTimeout(() => setNotice({ type: '', msg: '' }), 4000);
+    }
+  };
+
+  const filteredCards = EQUIPMENT_CATALOG.filter(card => {
+    if (selectedTab === 'all') return true;
+    return card.type === selectedTab;
+  });
+
+  const getItemQty = (cId) => {
+    const found = userInventory.find(i => i.cardId === cId);
+    return found ? found.quantity : 0;
+  };
+
+  return createPortal(
+    <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 md:p-6 bg-black/80 backdrop-blur-md animate-fade-in overflow-hidden">
+      <div className="relative w-full max-w-4xl max-h-[85vh] bg-bg-secondary border border-amber-500/40 rounded-3xl shadow-2xl shadow-amber-500/20 overflow-hidden flex flex-col my-auto">
+        {/* Header Shop */}
+        <div className="p-6 border-b border-border-theme flex items-center justify-between bg-bg-tertiary shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-500 dark:text-amber-400 shadow-lg shadow-amber-500/20">
+              <Store className="w-6 h-6 animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-extrabold text-text-primary uppercase tracking-wider font-mono">
+                  CỬA HÀNG TRANG BỊ SCI-FI
+                </h2>
+                <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-700 dark:text-amber-300 font-mono text-[10px] font-bold">
+                  HIGH TIER
+                </span>
+              </div>
+              <p className="text-xs text-text-secondary">Sở hữu thẻ bài chiến thuật cao cấp để áp đảo đối thủ trên Đấu trường</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {/* Số dư Pha Lê */}
+            <div className="flex items-center gap-2 bg-bg-secondary px-4 py-2 rounded-2xl border border-amber-500/40 shadow-inner">
+              <CrystalIcon className="w-6 h-6" />
+              <div className="flex flex-col text-right">
+                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-mono font-bold leading-none uppercase">Pha Lê Hiện Có</span>
+                <span className="text-base font-extrabold font-mono text-amber-600 dark:text-amber-300 leading-tight">
+                  {(personalization?.crystals !== undefined ? personalization.crystals : 500).toLocaleString()}
+                </span>
+              </div>
+            </div>
+
+            <button
+              onClick={onClose}
+              className="p-2.5 rounded-2xl bg-bg-secondary border border-border-theme hover:bg-rose-500/20 hover:border-rose-500/40 text-text-secondary hover:text-rose-400 transition-all cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Thông báo mua hàng */}
+        {notice.msg && (
+          <div className={`px-6 py-3 text-xs font-bold font-mono flex items-center justify-between transition-all shrink-0 ${
+            notice.type === 'success' ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border-b border-emerald-500/30' : 'bg-rose-500/20 text-rose-600 dark:text-rose-300 border-b border-rose-500/30'
+          }`}>
+            <span>{notice.msg}</span>
+            <button onClick={() => setNotice({ type: '', msg: '' })} className="underline text-[10px] cursor-pointer">Đóng</button>
+          </div>
+        )}
+
+        {/* Dynamic Category Tabs */}
+        <div className="px-6 py-3 border-b border-border-theme bg-bg-tertiary flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => setSelectedTab('all')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer ${
+              selectedTab === 'all'
+                ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
+                : 'bg-bg-secondary text-text-secondary hover:text-text-primary border border-border-theme'
+            }`}
+          >
+            Tất cả Thẻ Bài ({EQUIPMENT_CATALOG.length})
+          </button>
+          <button
+            onClick={() => setSelectedTab('pre_match')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer ${
+              selectedTab === 'pre_match'
+                ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
+                : 'bg-bg-secondary text-text-secondary hover:text-text-primary border border-border-theme'
+            }`}
+          >
+            🛡️ Trước Trận Đấu
+          </button>
+          <button
+            onClick={() => setSelectedTab('in_match')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer ${
+              selectedTab === 'in_match'
+                ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
+                : 'bg-bg-secondary text-text-secondary hover:text-text-primary border border-border-theme'
+            }`}
+          >
+            ⚡ Trong Trận Thi Đấu
+          </button>
+        </div>
+
+        {/* Card Grid Container */}
+        <div className="p-6 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 custom-scrollbar">
+          {filteredCards.map((card) => {
+            const qtyOwned = getItemQty(card.id);
+            const isBuying = purchasingId === card.id;
+
+            return (
+              <div 
+                key={card.id}
+                className={`relative bg-bg-tertiary rounded-2xl border ${card.borderColor || 'border-amber-500/30'} p-4 flex flex-col justify-between transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-amber-500/10 group`}
+              >
+                <div>
+                  {/* Top Badge: Type & Quantity */}
+                  <div className="flex items-center justify-between mb-3">
+                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider font-mono bg-gradient-to-r ${card.color} text-white shadow-md`}>
+                      {card.type === 'pre_match' ? 'Trước Trận' : 'Chiêu Trong Trận'}
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg bg-bg-secondary border border-border-theme text-[11px] font-bold font-mono text-cyan-600 dark:text-cyan-300">
+                      Sở hữu: <strong className="text-amber-600 dark:text-amber-400 font-extrabold">{qtyOwned}</strong>
+                    </span>
+                  </div>
+
+                  {/* Card Name */}
+                  <h3 className="text-base font-bold text-text-primary mb-1 flex items-center gap-2">
+                    {card.name}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-xs text-text-secondary leading-relaxed mb-4 min-h-[36px]">
+                    {card.description}
+                  </p>
+                </div>
+
+                {/* Bottom Action Section */}
+                <div className="pt-3 border-t border-border-theme flex items-center justify-between gap-2">
+                  {/* Price Tag */}
+                  <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-mono font-bold text-sm">
+                    <CrystalIcon className="w-4.5 h-4.5" />
+                    <span>{card.crystalPrice.toLocaleString()}</span>
+                  </div>
+
+                  {/* Buy Buttons */}
+                  <div className="flex items-center gap-1.5">
+                    {/* +1 Button */}
+                    <button
+                      disabled={isBuying}
+                      onClick={() => handleBuyCard(card.id, 1)}
+                      className="px-3 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black font-extrabold text-xs transition-all shadow-md shadow-amber-500/20 active:scale-95 disabled:opacity-50 cursor-pointer flex items-center gap-1"
+                    >
+                      {isBuying ? <Sparkles className="w-3.5 h-3.5 animate-spin" /> : <ShoppingCart className="w-3.5 h-3.5" />}
+                      <span>Mua 1x</span>
+                    </button>
+
+                    {/* +5 Combo Button */}
+                    <button
+                      disabled={isBuying}
+                      onClick={() => handleBuyCard(card.id, 5)}
+                      className="px-2.5 py-2 rounded-xl bg-bg-secondary border border-amber-500/40 hover:border-amber-500 text-amber-600 dark:text-amber-300 font-bold text-xs transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                      title="Mua nhanh 5 thẻ"
+                    >
+                      +5x
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Footer info */}
+        <div className="px-6 py-3 bg-bg-tertiary border-t border-border-theme flex items-center justify-between text-[11px] text-text-secondary font-mono shrink-0">
+          <span>💡 Thẻ bài đã mua sẽ tự động lưu vào Kho đồ và sẵn sàng chọn ở màn hình 30s trước trận.</span>
+          <button 
+            onClick={onClose}
+            className="px-4 py-1.5 rounded-xl bg-bg-secondary hover:bg-border-theme border border-border-theme text-text-primary font-bold cursor-pointer"
+          >
+            Đóng Cửa Hàng
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+};
+
+// Hàm helper trừ thẻ bài trong Kho đồ người dùng sau khi sử dụng
+const deductUsedCardsFromInventory = async (uid, cardIds) => {
+  if (!uid || !cardIds || cardIds.length === 0) return;
+  try {
+    const userRef = doc(db, 'users', uid);
+    const snap = await getDoc(userRef);
+    if (!snap.exists()) return;
+    const data = snap.data();
+    let inventory = [...(data.inventory || [])];
+
+    cardIds.forEach(cId => {
+      if (!cId) return;
+      const idx = inventory.findIndex(item => item.cardId === cId);
+      if (idx !== -1) {
+        const newQty = (inventory[idx].quantity || 1) - 1;
+        if (newQty > 0) {
+          inventory[idx] = { ...inventory[idx], quantity: newQty };
+        } else {
+          inventory.splice(idx, 1);
+        }
+      }
+    });
+
+    await updateDoc(userRef, { inventory });
+    console.log("🎒 Đã trừ các thẻ bài đã sử dụng khỏi Kho đồ:", cardIds);
+  } catch (err) {
+    console.warn("Lỗi khi trừ kho đồ:", err);
+  }
+};
+
+// Component màn hình chọn trang bị / thẻ bài 30 giây trước trận (CHỈ DÀNH CHO THẺ CHIÊU TRONG TRẬN)
+const EquipmentSelectionView = ({
+  user,
+  activeRoomId,
+  isPlayer1Role,
+  roomData,
+  preMatchCardId = null,
+  onConfirmed
+}) => {
+  const [selectedCards, setSelectedCards] = useState([]);
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [inventory, setInventory] = useState([]);
+  const [maxSlots, setMaxSlots] = useState(3);
+  const [mounted, setMounted] = useState(false);
+  const autoConfirmTriggeredRef = useRef(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Khởi tạo kho đồ học sinh
+  useEffect(() => {
+    if (!user) return;
+    const userDocRef = doc(db, 'users', user.uid);
+    getDoc(userDocRef).then((snap) => {
+      let inv = [];
+      let pendingExtra = false;
+      let isAdminUser = false;
+
+      if (snap.exists()) {
+        const data = snap.data();
+        inv = data.inventory || [];
+        pendingExtra = data.pendingExtraSlot || false;
+        if (data.role === 'admin' || user?.role === 'admin' || user?.email?.includes('admin') || user?.displayName?.toLowerCase().includes('admin')) {
+          isAdminUser = true;
+        }
+      } else if (user?.role === 'admin' || user?.email?.includes('admin') || user?.displayName?.toLowerCase().includes('admin')) {
+        isAdminUser = true;
+      }
+      
+      // ADMIN: Được dùng miễn phí TẤT CẢ 10 thẻ bài
+      if (isAdminUser) {
+        inv = EQUIPMENT_CATALOG.map(card => ({ cardId: card.id, quantity: 99 }));
+      }
+
+      setInventory(inv);
+      if (pendingExtra) {
+        setMaxSlots(4);
+      }
+    }).catch(err => console.warn("Lỗi tải kho đồ:", err));
+  }, [user]);
+
+  // Bộ đếm ngược 30 giây
+  useEffect(() => {
+    const expiresAt = roomData?.equipmentPhase?.expiresAt || (Date.now() + 30000);
+    const interval = setInterval(() => {
+      const remaining = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
+      setTimeLeft(remaining);
+
+      if (remaining <= 0 && !isConfirmed && !autoConfirmTriggeredRef.current) {
+        autoConfirmTriggeredRef.current = true;
+        handleAutoPickAndConfirm();
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [roomData, isConfirmed]);
+
+  // Logic bot tự chọn thẻ
+  useEffect(() => {
+    if (roomData?.isBotMatch && !roomData?.equipmentPhase?.p2Ready && activeRoomId) {
+      const timer = setTimeout(async () => {
+        try {
+          const roomRef = doc(db, 'match_rooms', activeRoomId);
+          const allInMatchCards = ['card_time_freeze', 'card_smoke_fog', 'card_progress_steal', 'card_counter', 'card_magic_hand', 'card_dispel'];
+          const botPicks = [...allInMatchCards].sort(() => 0.5 - Math.random()).slice(0, 3);
+          await updateDoc(roomRef, {
+            player2Equipment: botPicks,
+            'equipmentPhase.p2Ready': true
+          });
+          console.log("🤖 Bot đã tự động chọn xong 3 Thẻ chiêu trong trận!");
+        } catch (e) {
+          console.warn("Lỗi bot chọn thẻ:", e);
+        }
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [roomData, activeRoomId]);
+
+  // Kiểm tra cả 2 sẵn sàng để hoàn thành phase chọn trang bị
+  useEffect(() => {
+    if (roomData?.equipmentPhase?.p1Ready && roomData?.equipmentPhase?.p2Ready && activeRoomId) {
+      const roomRef = doc(db, 'match_rooms', activeRoomId);
+      updateDoc(roomRef, {
+        status: 'playing',
+        'equipmentPhase.status': 'completed'
+      }).then(() => {
+        if (onConfirmed) onConfirmed();
+      }).catch(err => console.warn("Lỗi chuyển trạng thái phòng:", err));
+    }
+  }, [roomData?.equipmentPhase?.p1Ready, roomData?.equipmentPhase?.p2Ready, activeRoomId]);
+
+  const toggleSelectCard = (cardId) => {
+    if (isConfirmed) return;
+    playSound.click();
+
+    if (selectedCards.includes(cardId)) {
+      setSelectedCards(selectedCards.filter(id => id !== cardId));
+    } else {
+      if (selectedCards.length < maxSlots) {
+        setSelectedCards([...selectedCards, cardId]);
+      } else {
+        playSound.hover();
+      }
+    }
+  };
+
+  // Chỉ lấy thẻ loại trong trận (type === 'in_match')
+  const inMatchInventory = inventory.filter(item => {
+    const card = getEquipmentById(item.cardId);
+    return card && card.type === 'in_match' && item.quantity > 0;
+  });
+
+  const handleAutoPickAndConfirm = async () => {
+    let picks = [...selectedCards];
+    const availableCardIds = inMatchInventory.map(i => i.cardId);
+
+    for (const cardId of availableCardIds) {
+      if (picks.length >= maxSlots) break;
+      if (!picks.includes(cardId)) {
+        picks.push(cardId);
+      }
+    }
+
+    setSelectedCards(picks);
+    await confirmSelection(picks);
+  };
+
+  const confirmSelection = async (cardsToSave = selectedCards) => {
+    if (!activeRoomId || !user || isPlayer1Role === null) return;
+    playSound.success();
+    setIsConfirmed(true);
+
+    try {
+      const roomRef = doc(db, 'match_rooms', activeRoomId);
+      const isP1 = isPlayer1Role;
+
+      // Danh sách thẻ chiêu trong trận (30s phase)
+      const allEquippedCards = cardsToSave;
+
+      const updates = {
+        [isP1 ? 'player1Equipment' : 'player2Equipment']: allEquippedCards,
+        [`equipmentPhase.${isP1 ? 'p1Ready' : 'p2Ready'}`]: true
+      };
+      await updateDoc(roomRef, updates);
+
+      // Trừ số lượng thẻ chiêu trong trận khỏi Kho đồ KHI BẮT ĐẦU TRẬN ĐẤU
+      const isAdminUser = user?.role === 'admin' || user?.email?.includes('admin') || user?.displayName?.toLowerCase().includes('admin');
+      if (!isAdminUser && allEquippedCards && allEquippedCards.length > 0) {
+        const userRef = doc(db, 'users', user.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const curInv = userSnap.data().inventory || [];
+          let updatedInv = [...curInv];
+
+          allEquippedCards.forEach(cId => {
+            const idx = updatedInv.findIndex(item => item.cardId === cId);
+            if (idx !== -1) {
+              const newQty = (updatedInv[idx].quantity || 1) - 1;
+              if (newQty > 0) {
+                updatedInv[idx] = { ...updatedInv[idx], quantity: newQty };
+              } else {
+                updatedInv.splice(idx, 1);
+              }
+            }
+          });
+
+          await updateDoc(userRef, {
+            inventory: updatedInv,
+            pendingExtraSlot: false
+          });
+        }
+      } else {
+        const userRef = doc(db, 'users', user.uid);
+        updateDoc(userRef, { pendingExtraSlot: false }).catch(() => {});
+      }
+    } catch (err) {
+      console.error("Lỗi xác nhận trang bị:", err);
+    }
+  };
+
+  const preMatchCardDef = preMatchCardId ? getEquipmentById(preMatchCardId) : null;
+
+  const getCardVisuals = (cardId) => {
+    switch (cardId) {
+      case 'card_time_freeze':
+        return { 
+          border: 'border-cyan-500/60 hover:border-cyan-400', 
+          bg: 'bg-cyan-950/40 hover:bg-cyan-900/40', 
+          glow: 'shadow-[0_0_20px_rgba(6,182,212,0.25)]', 
+          text: 'text-cyan-300', 
+          icon: <Clock className="w-4 h-4 text-cyan-400 animate-spin-slow" />,
+          tagBg: 'bg-cyan-500/15 border-cyan-500/30 text-cyan-300' 
+        };
+      case 'card_smoke_fog':
+        return { 
+          border: 'border-purple-500/60 hover:border-purple-400', 
+          bg: 'bg-purple-950/40 hover:bg-purple-900/40', 
+          glow: 'shadow-[0_0_20px_rgba(168,85,247,0.25)]', 
+          text: 'text-purple-300', 
+          icon: <CloudFog className="w-4 h-4 text-purple-400" />,
+          tagBg: 'bg-purple-500/15 border-purple-500/30 text-purple-300' 
+        };
+      case 'card_progress_steal':
+        return { 
+          border: 'border-rose-500/60 hover:border-rose-400', 
+          bg: 'bg-rose-950/40 hover:bg-rose-900/40', 
+          glow: 'shadow-[0_0_20px_rgba(244,63,94,0.25)]', 
+          text: 'text-rose-300', 
+          icon: <Swords className="w-4 h-4 text-rose-400" />,
+          tagBg: 'bg-rose-500/15 border-rose-500/30 text-rose-300' 
+        };
+      case 'card_ai_assist':
+        return { 
+          border: 'border-amber-500/60 hover:border-amber-400', 
+          bg: 'bg-amber-950/40 hover:bg-amber-900/40', 
+          glow: 'shadow-[0_0_20px_rgba(245,158,11,0.25)]', 
+          text: 'text-amber-300', 
+          icon: <Bot className="w-4 h-4 text-amber-400" />,
+          tagBg: 'bg-amber-500/15 border-amber-500/30 text-amber-300' 
+        };
+      case 'card_dispel':
+        return { 
+          border: 'border-emerald-500/60 hover:border-emerald-400', 
+          bg: 'bg-emerald-950/40 hover:bg-emerald-900/40', 
+          glow: 'shadow-[0_0_20px_rgba(16,185,129,0.25)]', 
+          text: 'text-emerald-300', 
+          icon: <ShieldCheck className="w-4 h-4 text-emerald-400" />,
+          tagBg: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300' 
+        };
+      case 'card_counter':
+        return { 
+          border: 'border-orange-500/60 hover:border-orange-400', 
+          bg: 'bg-orange-950/40 hover:bg-orange-900/40', 
+          glow: 'shadow-[0_0_20px_rgba(249,115,22,0.25)]', 
+          text: 'text-orange-300', 
+          icon: <ShieldAlert className="w-4 h-4 text-orange-400 animate-pulse" />,
+          tagBg: 'bg-orange-500/15 border-orange-500/30 text-orange-300' 
+        };
+      case 'card_magic_hand':
+        return { 
+          border: 'border-fuchsia-500/60 hover:border-fuchsia-400', 
+          bg: 'bg-fuchsia-950/40 hover:bg-fuchsia-900/40', 
+          glow: 'shadow-[0_0_20px_rgba(217,70,239,0.25)]', 
+          text: 'text-fuchsia-300', 
+          icon: <Hand className="w-4 h-4 text-fuchsia-400" />,
+          tagBg: 'bg-fuchsia-500/15 border-fuchsia-500/30 text-fuchsia-300' 
+        };
+      default:
+        return { 
+          border: 'border-cyan-500/60 hover:border-cyan-400', 
+          bg: 'bg-cyan-950/40 hover:bg-cyan-900/40', 
+          glow: 'shadow-[0_0_20px_rgba(6,182,212,0.25)]', 
+          text: 'text-cyan-300', 
+          icon: <Sparkles className="w-4 h-4 text-cyan-400" />,
+          tagBg: 'bg-cyan-500/15 border-cyan-500/30 text-cyan-300' 
+        };
+    }
+  };
+
+  const modalContent = (
+    <div className="fixed inset-0 z-[999999] bg-[#070914]/98 backdrop-blur-3xl flex flex-col items-center justify-center p-4 md:p-6 select-none animate-fadeIn font-sans text-white overflow-y-auto">
+      <div className="max-w-3xl w-full bg-[#111424]/95 border border-cyan-500/40 rounded-3xl p-5 md:p-7 shadow-[0_0_80px_rgba(6,182,212,0.2)] relative overflow-hidden">
+        {/* Futuristic Background Glows */}
+        <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Cyber Header bar */}
+        <div className="flex items-center justify-between border-b border-[#232840] pb-4 mb-5 relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-cyan-500/15 border border-cyan-500/30 rounded-2xl text-cyan-400">
+              <Zap className="w-6 h-6 animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 text-cyan-400 font-mono text-[10px] uppercase tracking-widest">
+                <span>GIAI ĐOẠN CHUẨN BỊ CHIẾN THUẬT 1V1</span>
+              </div>
+              <h2 className="text-lg font-black text-white uppercase tracking-wider font-mono">
+                TRANG BỊ CHIÊU THỨC TRONG TRẬN
+              </h2>
+            </div>
+          </div>
+
+          {/* Sci-Fi Countdown Badge */}
+          <div className="flex items-center gap-3 bg-[#171b30] border border-cyan-500/30 px-4 py-2 rounded-2xl">
+            <Clock className="w-5 h-5 text-cyan-400 animate-spin-slow" />
+            <div className="text-right font-mono">
+              <div className="text-[9px] text-zinc-400 uppercase tracking-wider">THỜI GIAN CÒN</div>
+              <div className={`text-xl font-black ${timeLeft <= 5 ? 'text-rose-400 animate-ping' : 'text-cyan-300'}`}>
+                {timeLeft}s
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Pre-Match Equipped Card Notice (If active) */}
+        {preMatchCardDef && (
+          <div className="mb-4 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-xs font-mono relative z-10">
+            <div className="flex items-center gap-2 text-amber-300">
+              <Sparkles className="w-4 h-4 text-amber-400 shrink-0 animate-pulse" />
+              <span>⚡ THẺ NỘI TẠI TRƯỚC TRẬN ĐÃ KÍCH HOẠT: <strong className="text-amber-400 font-black">{preMatchCardDef.name}</strong></span>
+            </div>
+            <span className="text-[9px] px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 uppercase font-bold shrink-0">Kích hoạt sẵn</span>
+          </div>
+        )}
+
+        {/* SLOTS TRANG BỊ ĐÃ CHỌN (Compact 3 horizontal slots) */}
+        <div className="mb-5 bg-[#0d0f1a] p-4 rounded-2xl border border-[#232840] relative z-10">
+          <div className="text-xs font-mono uppercase tracking-wider text-zinc-400 mb-3 flex items-center justify-between">
+            <span className="flex items-center gap-1.5 font-bold text-white">
+              <Layers className="w-3.5 h-3.5 text-cyan-400" /> DECK KỸ NĂNG ({selectedCards.length}/{maxSlots})
+            </span>
+            {selectedCards.length > 0 && !isConfirmed && (
+              <button 
+                onClick={() => setSelectedCards([])}
+                className="text-rose-400 hover:text-rose-300 text-[11px] font-mono cursor-pointer transition-colors"
+              >
+                [Xóa tất cả]
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            {Array.from({ length: maxSlots }).map((_, index) => {
+              const cardId = selectedCards[index];
+              const cardInfo = cardId ? getEquipmentById(cardId) : null;
+              const cardVis = cardId ? getCardVisuals(cardId) : null;
+
+              return (
+                <div 
+                  key={index}
+                  onClick={() => cardId && toggleSelectCard(cardId)}
+                  className={`h-20 rounded-2xl border flex items-center p-3 transition-all relative cursor-pointer ${
+                    cardInfo && cardVis
+                      ? `${cardVis.border} ${cardVis.bg} ${cardVis.glow}` 
+                      : 'border-dashed border-[#2b314d] bg-[#141728]/50 hover:border-cyan-500/40 text-zinc-500'
+                  }`}
+                >
+                  {cardInfo && cardVis ? (
+                    <div className="flex items-center gap-3 w-full">
+                      <div className={`p-2 rounded-xl border shrink-0 ${cardVis.tagBg}`}>
+                        {cardVis.icon}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className={`text-xs font-black block truncate ${cardVis.text}`}>{cardInfo.name}</span>
+                        <span className="text-[9px] text-zinc-400 line-clamp-1 mt-0.5">{cardInfo.description}</span>
+                      </div>
+                      <span className="text-rose-400 text-xs font-black hover:scale-125 transition-transform">✕</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center gap-2 w-full text-zinc-500">
+                      <Sparkles className="w-4 h-4 opacity-40 text-cyan-400" />
+                      <span className="text-[10px] font-mono tracking-wider font-bold">SLOT {index + 1} TRỐNG</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* KHO ĐỒ THẺ CHIÊU TRONG TRẬN */}
+        <div className="mb-4 relative z-10">
+          <div className="text-xs font-mono uppercase tracking-wider text-zinc-400 mb-3 flex items-center justify-between">
+            <span>KHO ĐỒ KỸ NĂNG KHẢ DỤNG ({inMatchInventory.length} THẺ):</span>
+            <span className="text-[10px] text-cyan-400 font-mono">* Bấm vào thẻ để trang bị vào Deck</span>
+          </div>
+
+          {inMatchInventory.length === 0 ? (
+            <div className="p-4 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 flex items-center justify-between text-xs text-cyan-300 font-mono">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-cyan-400 shrink-0" />
+                <span>Bạn chưa sở hữu thẻ Chiêu Trong Trận nào. Bạn vẫn có thể thi đấu bình thường.</span>
+              </div>
+              <button
+                onClick={() => confirmSelection([])}
+                className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-black text-xs shrink-0 cursor-pointer transition-all active:scale-95"
+              >
+                VÀO TRẬN ➔
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-56 overflow-y-auto pr-1 custom-scrollbar">
+              {inMatchInventory.map((item) => {
+                const card = getEquipmentById(item.cardId);
+                if (!card) return null;
+                const isSelected = selectedCards.includes(item.cardId);
+                const vis = getCardVisuals(item.cardId);
+
+                return (
+                  <div
+                    key={item.cardId}
+                    onClick={() => toggleSelectCard(item.cardId)}
+                    className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
+                      isSelected 
+                        ? `${vis.border} ${vis.bg} ${vis.glow} ring-1 ring-cyan-400` 
+                        : 'border-[#262c45] bg-[#141728] hover:border-cyan-500/50 hover:bg-[#1a1f36]'
+                    } ${isConfirmed ? 'opacity-50 pointer-events-none' : ''}`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className={`p-1.5 rounded-xl border ${vis.tagBg}`}>
+                            {vis.icon}
+                          </div>
+                          <span className="font-extrabold text-xs text-white truncate max-w-[130px]">{card.name}</span>
+                        </div>
+                        <span className="text-[10px] font-mono font-black px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300">
+                          x{item.quantity}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-zinc-400 leading-relaxed line-clamp-2">{card.description}</p>
+                    </div>
+
+                    <div className="mt-3 pt-2 border-t border-[#232840] flex items-center justify-between">
+                      <span className="text-[9px] font-mono text-zinc-400 uppercase font-bold">
+                        CHIÊU TRONG TRẬN
+                      </span>
+                      <span className={`text-[10px] font-black font-mono px-2 py-0.5 rounded-lg transition-all ${
+                        isSelected 
+                          ? 'bg-cyan-500 text-black shadow-md shadow-cyan-500/30' 
+                          : 'bg-[#1e233b] text-zinc-300 hover:text-white border border-[#2b314d]'
+                      }`}>
+                        {isSelected ? '✓ ĐÃ TRANG BỊ' : '+ TRANG BỊ'}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Nút hành động */}
+        <div className="pt-4 border-t border-[#232840] flex items-center justify-between gap-4 relative z-10">
+          <button
+            onClick={handleAutoPickAndConfirm}
+            disabled={isConfirmed}
+            className="px-4 py-2.5 rounded-xl border border-[#2b314d] bg-[#161a2e] text-xs font-mono font-bold text-zinc-300 hover:text-white hover:border-cyan-500/40 transition-all active:scale-95 disabled:opacity-40 cursor-pointer flex items-center gap-1.5"
+          >
+            <Orbit className="w-4 h-4 text-cyan-400" /> TỰ ĐỘNG CHỌN
+          </button>
+
+          <button
+            onClick={() => confirmSelection()}
+            disabled={isConfirmed}
+            className={`px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-wider transition-all active:scale-95 cursor-pointer flex items-center gap-2 shadow-xl ${
+              isConfirmed
+                ? 'bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 animate-pulse'
+                : 'bg-gradient-to-r from-cyan-500 via-pink-500 to-rose-500 hover:from-cyan-400 hover:via-pink-400 hover:to-rose-400 text-white shadow-pink-500/25 border border-white/10'
+            }`}
+          >
+            {isConfirmed ? (
+              <>
+                <Sparkles className="w-4 h-4 animate-spin" /> ĐÃ XÁC NHẬN - ĐANG CHỜ ĐỐI THỦ...
+              </>
+            ) : (
+              <>
+                <Swords className="w-4 h-4" /> XÁC NHẬN SẴN SÀNG THI ĐẤU
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (!mounted) return null;
+  return createPortal(modalContent, document.body);
+};
+
 function DauTruongContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -536,8 +1145,36 @@ function DauTruongContent() {
   const startChallengeGame = useAppStore((state) => state.startChallengeGame);
   const setArenaTimeRemaining = useAppStore((state) => state.setArenaTimeRemaining);
 
-  const [theoryTimeLimit, setTheoryTimeLimit] = useState(180);
+  const [theoryTimeLimit, setTheoryTimeLimit] = useState(300);
+  const [isShopOpen, setIsShopOpen] = useState(false);
+  const [preMatchEquippedCard, setPreMatchEquippedCard] = useState(null);
+  const [isPreMatchPickerOpen, setIsPreMatchPickerOpen] = useState(false);
+  const [lobbyInventory, setLobbyInventory] = useState([]);
   const latestRoomDataRef = useRef(null);
+  const isFinalizingRef = useRef(false);
+
+  // Khởi tạo kho đồ học sinh ở sảnh Đấu trường
+  useEffect(() => {
+    if (!user) return;
+    const userDocRef = doc(db, 'users', user.uid);
+    getDoc(userDocRef).then((snap) => {
+      let inv = [];
+      let isAdminUser = false;
+      if (snap.exists()) {
+        const data = snap.data();
+        inv = data.inventory || [];
+        if (data.role === 'admin' || user?.role === 'admin' || user?.email?.includes('admin') || user?.displayName?.toLowerCase().includes('admin')) {
+          isAdminUser = true;
+        }
+      } else if (user?.role === 'admin' || user?.email?.includes('admin') || user?.displayName?.toLowerCase().includes('admin')) {
+        isAdminUser = true;
+      }
+      if (isAdminUser) {
+        inv = EQUIPMENT_CATALOG.map(card => ({ cardId: card.id, quantity: 99 }));
+      }
+      setLobbyInventory(inv);
+    }).catch(err => console.warn("Lỗi tải kho đồ lobby:", err));
+  }, [user, isShopOpen]);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -564,7 +1201,7 @@ function DauTruongContent() {
     setIsPlayer1Role(true);
     setOpponentInfo({
       name: "Robot AI Luyện tập",
-      elo: 1000,
+      elo: 100,
       level: 1,
       title: "robot_practice"
     });
@@ -572,8 +1209,8 @@ function DauTruongContent() {
     // Gán ID phòng là local_sandbox
     setActiveRoomId("local_sandbox");
     
-    // Đặt thời lượng phòng chơi luyện tập là 180 giây
-    setArenaTimeRemaining(180);
+    // Đặt thời lượng phòng chơi luyện tập là Vô Hạn (không tính giờ)
+    setArenaTimeRemaining(300);
     
     // Reset toàn bộ trạng thái game với dữ liệu ngẫu nhiên mới
     setChemHCl(0);
@@ -601,14 +1238,36 @@ function DauTruongContent() {
       // Gán câu hỏi
       setChemMission(chemPool[0]);
     } else if (subjectId === 'physics') {
-      const target = generatePhysicsTarget();
-      setPhysTarget(target);
+      const questions = generatePhysicsMatchPool([]);
+      setPhysGame({
+        questions,
+        currentQ: 0,
+        score: 0,
+        answered: []
+      });
+      setPhysSelected(null);
+      setPhysRevealed(false);
     } else if (subjectId === 'math') {
-      const ast = generateRandomMathAsteroids();
-      setMathAsteroids(ast);
+      const questions = generateMathMatchPool([]);
+      setMathGame({
+        questions,
+        currentQ: 0,
+        score: 0,
+        answered: []
+      });
+      setMathSelected(null);
+      setMathRevealed(false);
     } else if (subjectId === 'biology') {
-      const bio = generateBioGame();
-      setBioGame(bio);
+      const questions = generateBiologyMatchPool([]);
+      setBioGame({
+        questions,
+        currentQ: 0,
+        score: 0,
+        answered: []
+      });
+      setBioSelected(null);
+      setBioRevealed(false);
+      setBioTfAnswers([null, null, null, null]);
     }
     
     // Đặt trạng thái chủ đề luyện tập
@@ -618,8 +1277,8 @@ function DauTruongContent() {
         subject: subjectId,
         playerProgress: 0,
         opponentProgress: 0,
-        timeRemaining: 180,
-        logs: ["Chào mừng đến phòng luyện tập tự do!", "Không tính ELO, hãy thoải mái thực hành."]
+        timeRemaining: 300,
+        logs: ["Chào mừng đến phòng luyện tập tự do!", "Không giới hạn thời gian & Không tính ELO."]
       }
     }));
   };
@@ -642,8 +1301,13 @@ function DauTruongContent() {
         ? `Tôi vừa xuất sắc chiến thắng Đấu trường môn ${arenaState.subject === 'math' ? 'Toán học' : arenaState.subject === 'physics' ? 'Vật lý' : arenaState.subject === 'chemistry' ? 'Hóa học' : 'Sinh học'}! ELO tăng vọt! 🏆⚡` 
         : `Trận đấu trí môn ${arenaState.subject === 'math' ? 'Toán học' : arenaState.subject === 'physics' ? 'Vật lý' : arenaState.subject === 'chemistry' ? 'Hóa học' : 'Sinh học'} diễn ra cực kỳ kịch tính!`
     };
-    localStorage.setItem('pending_share_story', JSON.stringify(shareData));
-    router.push('/story');
+    savePendingShare(shareData).then((isSaved) => {
+      if (isSaved) {
+        router.push('/story');
+      } else {
+        alert('⚠️ Không thể lưu trữ thông tin chia sẻ do dung lượng bộ nhớ tạm bị giới hạn. Vui lòng thử lại!');
+      }
+    });
   };
 
   // States cục bộ phục vụ các mini-game ảo
@@ -660,6 +1324,244 @@ function DauTruongContent() {
   const [playerChat, setPlayerChat] = useState(null); // { text, type, timestamp }
   const [opponentChat, setOpponentChat] = useState(null); // { text, type, timestamp }
   const [customChat, setCustomChat] = useState('');
+
+  // Tab Exit Penalty states (5s / 10s / 20s / 40s / 80s, lần 6 xử thua)
+  const [tabExitCount, setTabExitCount] = useState(0);
+  const [tabExitModal, setTabExitModal] = useState(null); // { count, penalty, forfeited }
+
+  // State cho câu hỏi Trả lời ngắn (SA) và Đúng/Sai (TF)
+  const [saInput, setSaInput] = useState('');
+  const [physTfAnswers, setPhysTfAnswers] = useState([null, null, null, null]);
+  const [mathTfAnswers, setMathTfAnswers] = useState([null, null, null, null]);
+
+  useEffect(() => {
+    console.log("🧪 [Math Formatter Verification]");
+    console.log("x^2 ->", formatMathText("x^2"));
+    console.log("x^{10} ->", formatMathText("x^{10}"));
+    console.log("x_1 ->", formatMathText("x_1"));
+    console.log("normal_text ->", formatMathText("normal_text"));
+  }, []);
+
+  const syncProgressToFirestore = async (newProgress, currentLogs = []) => {
+    if (!activeRoomId || activeRoomId === 'local_sandbox' || !user || isPlayer1Role === null) return;
+    try {
+      const roomRef = doc(db, 'match_rooms', activeRoomId);
+      const updates = {};
+      if (isPlayer1Role) {
+        updates.player1Progress = newProgress;
+        if (currentLogs.length > 0) {
+          updates.player1Logs = currentLogs;
+        }
+      } else {
+        updates.player2Progress = newProgress;
+        if (currentLogs.length > 0) {
+          updates.player2Logs = currentLogs;
+        }
+      }
+      await updateDoc(roomRef, updates);
+    } catch (err) {
+      console.error("Lỗi đồng bộ tiến độ lên Firestore:", err);
+    }
+  };
+
+  // KÍCH HOẠT THẺ BÀI STRATEGY TRONG TRẬN THI ĐẤU
+  const handleUseCard = async (cardId) => {
+    if (!activeRoomId || !user || isPlayer1Role === null) return;
+    playSound.click();
+
+    try {
+      const roomRef = doc(db, 'match_rooms', activeRoomId);
+      const isP1 = isPlayer1Role;
+      const oppRoleKey = isP1 ? 'p2' : 'p1';
+      const myRoleKey = isP1 ? 'p1' : 'p2';
+
+      const roomSnap = await getDoc(roomRef);
+      const roomDocData = roomSnap.exists() ? roomSnap.data() : {};
+      const currentActiveEffects = roomDocData.activeEffects || {
+        p1: { frozenUntil: 0, fogUntil: 0 },
+        p2: { frozenUntil: 0, fogUntil: 0 }
+      };
+
+      const currentLogs = isP1 ? (roomDocData.player1Logs || []) : (roomDocData.player2Logs || []);
+
+      if (cardId === 'card_counter') {
+        addArenaLogStore('🛡️ Thẻ Phản Đòn là Thẻ Thụ Động! Sẽ tự động kích hoạt để chặn & phản đòn khi đối thủ tấn công Mù Sương hoặc Đánh Cắp.');
+        playSound.hover?.();
+        return;
+      } else if (cardId === 'card_magic_hand') {
+        const stolenCountMap = roomDocData.stolenCount || { p1: 0, p2: 0 };
+        const myStolenCount = stolenCountMap[myRoleKey] || 0;
+
+        if (myStolenCount >= 2) {
+          addArenaLogStore('⚠️ Bạn đã dùng tối đa 2 lần Bàn Tay Ma Thuật trong trận đấu này!');
+          playSound.hover?.();
+          return;
+        }
+
+        const oppEquip = isP1 ? (roomDocData.player2Equipment || []) : (roomDocData.player1Equipment || []);
+        if (oppEquip.length === 0) {
+          addArenaLogStore('⚠️ Đối thủ hiện tại không có lá bài nào trong khay để đánh cắp!');
+          playSound.hover?.();
+          return;
+        }
+
+        const randIdx = Math.floor(Math.random() * oppEquip.length);
+        const stolenCardId = oppEquip[randIdx];
+        const stolenCardDef = getEquipmentById(stolenCardId);
+
+        const newOppEquip = [...oppEquip];
+        newOppEquip.splice(randIdx, 1);
+
+        const myEquip = isP1 ? (roomDocData.player1Equipment || []) : (roomDocData.player2Equipment || []);
+        const newMyEquip = [...myEquip];
+        const handIdx = newMyEquip.indexOf('card_magic_hand');
+        if (handIdx !== -1) {
+          newMyEquip.splice(handIdx, 1, stolenCardId);
+        } else {
+          newMyEquip.push(stolenCardId);
+        }
+
+        const updatedStolenMap = {
+          ...stolenCountMap,
+          [myRoleKey]: myStolenCount + 1
+        };
+
+        await updateDoc(roomRef, {
+          [isP1 ? 'player1Equipment' : 'player2Equipment']: newMyEquip,
+          [isP1 ? 'player2Equipment' : 'player1Equipment']: newOppEquip,
+          stolenCount: updatedStolenMap,
+          [isP1 ? 'player1Logs' : 'player2Logs']: arrayUnion(`🖐️ BÀN TAY MA THUẬT: Đã cướp thành công thẻ [${stolenCardDef?.name || stolenCardId}] của đối thủ!`),
+          [isP1 ? 'player2Logs' : 'player1Logs']: arrayUnion(`⚠️ ĐỐI THỦ ĐÃ DÙNG BÀN TAY MA THUẬT CƯỚP THẺ [${stolenCardDef?.name || stolenCardId}] CỦA BẠN!`)
+        });
+
+        addArenaLogStore(`🖐️ Bàn Tay Ma Thuật thành công! Bạn đã cướp thẻ [${stolenCardDef?.name || stolenCardId}] của đối thủ!`);
+        playSound.success?.();
+        return;
+      } else if (cardId === 'card_time_freeze') {
+        const updatedEffects = {
+          ...currentActiveEffects,
+          [oppRoleKey]: {
+            ...(currentActiveEffects[oppRoleKey] || {}),
+            frozenUntil: Date.now() + 3000
+          }
+        };
+        await updateDoc(roomRef, {
+          activeEffects: updatedEffects,
+          [isP1 ? 'player1Logs' : 'player2Logs']: arrayUnion('❄️ ĐÃ SỬ DỤNG THẺ ĐÔNG BĂNG THỜI GIAN 3S VÀO ĐỐI THỦ!')
+        });
+        addArenaLogStore('❄️ Kích hoạt Thẻ Đông Băng! Màn hình đối thủ bị khóa trong 3 giây!');
+      } else if (cardId === 'card_smoke_fog') {
+        const oppEquip = isP1 ? (roomDocData.player2Equipment || []) : (roomDocData.player1Equipment || []);
+        const oppHasCounterIdx = oppEquip.indexOf('card_counter');
+
+        if (oppHasCounterIdx !== -1) {
+          // Đối thủ CÓ Thẻ Phản Đòn -> Tự động phản ngược Mù Sương về cho người dùng chiêu!
+          const newOppEquip = [...oppEquip];
+          newOppEquip.splice(oppHasCounterIdx, 1);
+
+          const updatedEffects = {
+            ...currentActiveEffects,
+            [myRoleKey]: {
+              ...(currentActiveEffects[myRoleKey] || {}),
+              fogUntil: Date.now() + 5000
+            }
+          };
+
+          await updateDoc(roomRef, {
+            activeEffects: updatedEffects,
+            [isP1 ? 'player2Equipment' : 'player1Equipment']: newOppEquip,
+            [isP1 ? 'player1Logs' : 'player2Logs']: arrayUnion('⚠️ ĐỐI THỦ KÍCH HOẠT THẺ PHẢN ĐÒN! MÙ SƯƠNG DẬP NGƯỢC LẠI BẠN!'),
+            [isP1 ? 'player2Logs' : 'player1Logs']: arrayUnion('🛡️ THẺ PHẢN ĐÒN TỰ ĐỘNG KÍCH HOẠT! Mù sương phản ngược sang đối thủ!')
+          });
+          addArenaLogStore('⚠️ ĐỐI THỦ KÍCH HOẠT THẺ PHẢN ĐÒN! Bạn bị che phủ bởi Mù Sương 5s!');
+          playSound.warning?.() || playSound.click?.();
+        } else {
+          const updatedEffects = {
+            ...currentActiveEffects,
+            [oppRoleKey]: {
+              ...(currentActiveEffects[oppRoleKey] || {}),
+              fogUntil: Date.now() + 5000
+            }
+          };
+          await updateDoc(roomRef, {
+            activeEffects: updatedEffects,
+            [isP1 ? 'player1Logs' : 'player2Logs']: arrayUnion('🌫️ ĐÃ SỬ DỤNG THẺ MÙ SƯƠNG 5S VÀO ĐỐI THỦ!')
+          });
+          addArenaLogStore('🌫️ Kích hoạt Thẻ Mù Sương! Màn hình đối thủ bị che phủ trong 5 giây!');
+        }
+      } else if (cardId === 'card_progress_steal') {
+        const oppEquip = isP1 ? (roomDocData.player2Equipment || []) : (roomDocData.player1Equipment || []);
+        const oppHasCounterIdx = oppEquip.indexOf('card_counter');
+
+        const currentOppProg = isP1 ? (roomDocData.player2Progress || 0) : (roomDocData.player1Progress || 0);
+        const currentMyProg = isP1 ? (roomDocData.player1Progress || 0) : (roomDocData.player2Progress || 0);
+        const stolen = 10;
+
+        if (oppHasCounterIdx !== -1) {
+          // Đối thủ CÓ Thẻ Phản Đòn -> Phản ngược cướp 10% tiến độ của người dùng!
+          const newOppEquip = [...oppEquip];
+          newOppEquip.splice(oppHasCounterIdx, 1);
+
+          const newMyProg = Math.max(0, currentMyProg - stolen);
+          const newOppProg = Math.min(100, currentOppProg + stolen);
+
+          await updateDoc(roomRef, {
+            [isP1 ? 'player1Progress' : 'player2Progress']: newMyProg,
+            [isP1 ? 'player2Progress' : 'player1Progress']: newOppProg,
+            [isP1 ? 'player2Equipment' : 'player1Equipment']: newOppEquip,
+            [isP1 ? 'player1Logs' : 'player2Logs']: arrayUnion(`⚠️ ĐỐI THỦ KÍCH HOẠT THẺ PHẢN ĐÒN! BẠN BỊ TRỪ ${stolen}% TIẾN ĐỘ!`),
+            [isP1 ? 'player2Logs' : 'player1Logs']: arrayUnion(`🛡️ THẺ PHẢN ĐÒN TỰ ĐỘNG KÍCH HOẠT! +${stolen}% tiến độ phản ngược từ đối thủ!`)
+          });
+          updatePlayerProgress(newMyProg);
+          addArenaLogStore(`⚠️ ĐỐI THỦ KÍCH HOẠT THẺ PHẢN ĐÒN! Bạn bị cướp ngược ${stolen}% tiến độ!`);
+          playSound.warning?.() || playSound.click?.();
+        } else {
+          const newOppProg = Math.max(0, currentOppProg - stolen);
+          const newMyProg = Math.min(100, currentMyProg + stolen);
+
+          await updateDoc(roomRef, {
+            [isP1 ? 'player2Progress' : 'player1Progress']: newOppProg,
+            [isP1 ? 'player1Progress' : 'player2Progress']: newMyProg,
+            [isP1 ? 'player1Logs' : 'player2Logs']: arrayUnion(`🥷 ĐÃ ĐÁNH CẮP ${stolen}% TIẾN ĐỘ CỦA ĐỐI THỦ!`)
+          });
+          updatePlayerProgress(newMyProg);
+          addArenaLogStore(`🥷 Kích hoạt Thẻ Đánh Cắp! +10% tiến độ cho bạn, -10% của đối thủ!`);
+        }
+      } else if (cardId === 'card_ai_assist') {
+        addArenaLogStore('🤖 AI Copilot: Đã loại bỏ 2 phương án sai! Hãy chọn đáp án chính xác còn lại.');
+        setAiEliminatedOptions([1, 2]);
+      } else if (cardId === 'card_dispel') {
+        const updatedEffects = {
+          ...currentActiveEffects,
+          [myRoleKey]: {
+            ...(currentActiveEffects[myRoleKey] || {}),
+            frozenUntil: 0,
+            fogUntil: 0
+          }
+        };
+        await updateDoc(roomRef, {
+          activeEffects: updatedEffects,
+          [isP1 ? 'player1Logs' : 'player2Logs']: arrayUnion('✨ ĐÃ GIẢI TRỪ TẤT CẢ HIỆU ỨNG TIÊU CỰC!')
+        });
+        addArenaLogStore('✨ Kích hoạt Thẻ Giải Trừ! Mọi hiệu ứng Đông băng / Mù sương đã được xóa bỏ!');
+      }
+
+      // Trừ 1 thẻ khỏi playerEquipment trên Firestore
+      const currentEquip = isP1 ? (roomDocData.player1Equipment || []) : (roomDocData.player2Equipment || []);
+      const updatedEquip = [...currentEquip];
+      const idx = updatedEquip.indexOf(cardId);
+      if (idx !== -1) {
+        updatedEquip.splice(idx, 1);
+        await updateDoc(roomRef, {
+          [isP1 ? 'player1Equipment' : 'player2Equipment']: updatedEquip
+        });
+      }
+    } catch (err) {
+      console.error("Lỗi sử dụng thẻ:", err);
+    }
+  };
+
+
 
   useEffect(() => {
     if (playerChat) {
@@ -824,6 +1726,10 @@ function DauTruongContent() {
   }, []);
 
   // Game 1: H�a học States (Titration & Evaporation) - target ngẫu nhi�n mỗi trận
+  const [currentRoomData, setCurrentRoomData] = useState(null);
+  const [aiEliminatedOptions, setAiEliminatedOptions] = useState([]);
+  const [tabPenaltyWarning, setTabPenaltyWarning] = useState(null);
+
   const [chemHCl, setChemHCl] = useState(0); // ml
   const [chemNaOH, setChemNaOH] = useState(0); // ml
   const [chemBurner, setChemBurner] = useState(false); // On/Off
@@ -840,17 +1746,28 @@ function DauTruongContent() {
   const [physTarget, setPhysTarget] = useState(() => generatePhysicsTarget()); // Mục tiêu gương
   const [physHint, setPhysHint] = useState(0); // Số lần xem gợi ý
 
-  // Game 3: Toán học
-  const [mathTargetIndex, setMathTargetIndex] = useState(0);
-  const [mathInputs, setMathInputs] = useState({ x: '', y: '' });
-  const [mathAsteroids, setMathAsteroids] = useState(() => generateRandomMathAsteroids());
-  const [mathLaserPath, setMathLaserPath] = useState(null);
-  const [mathCombo, setMathCombo] = useState(0); // Combo liên tiếp
-  const [mathWrongCount, setMathWrongCount] = useState(0); // Số lần sai
+  // Game 2: Vật lý (MCQ 30 câu)
+  const [physGame, setPhysGame] = useState({ questions: [], currentQ: 0, score: 0, answered: [] });
+  const [physSelected, setPhysSelected] = useState(null);
+  const [physRevealed, setPhysRevealed] = useState(false);
+
+  // Game 3: Toán học (MCQ 30 câu)
+  const [mathGame, setMathGame] = useState({ questions: [], currentQ: 0, score: 0, answered: [] });
+  const [mathSelected, setMathSelected] = useState(null);
+  const [mathRevealed, setMathRevealed] = useState(false);
 
   // Game 4: Sinh học
-  const [bioGame, setBioGame] = useState(() => generateBioGame());
-  const [bioSelected, setBioSelected] = useState(null); // index đáp án đang chọn
+  const [bioGame, setBioGame] = useState({ questions: [], currentQ: 0, score: 0, answered: [] });
+  const [bioSelected, setBioSelected] = useState(null);
+  const [bioTfAnswers, setBioTfAnswers] = useState([null, null, null, null]);
+
+  // Giữ lại các biến state cũ để tránh lỗi reference
+  const [mathTargetIndex, setMathTargetIndex] = useState(0);
+  const [mathInputs, setMathInputs] = useState({ x: '', y: '' });
+  const [mathAsteroids, setMathAsteroids] = useState(() => []);
+  const [mathLaserPath, setMathLaserPath] = useState(null);
+  const [mathCombo, setMathCombo] = useState(0);
+  const [mathWrongCount, setMathWrongCount] = useState(0);
   const [bioRevealed, setBioRevealed] = useState(false); // hiện đáp án đúng // hiện đ�p �n đ�ng
   const [leaderboard, setLeaderboard] = useState([]);
   const [matchFoundData, setMatchFoundData] = useState(null);
@@ -864,8 +1781,8 @@ function DauTruongContent() {
         setMatchFoundCountdown(prev => prev - 1);
       }, 1000);
     } else if (matchFoundData && matchFoundCountdown === 0) {
-      // Kết thúc đếm ngược, chính thức bắt đầu trận đấu
-      setArenaStatus('playing');
+      // Kết thúc đếm ngược VS, chuyển sang giai đoạn chọn trang bị trước trận
+      setArenaStatus('equipment_selecting');
       setMatchFoundData(null);
     }
     return () => {
@@ -973,9 +1890,64 @@ function DauTruongContent() {
   };
 
 
-  // Refs điều khiển game loop
+  // Refs điều khiển game loop & playback bot
   const matchmakingTimerRef = useRef(null);
   const gameLoopTimerRef = useRef(null);
+  const botPlaybackTimersRef = useRef([]);
+  const isBotRequestPendingRef = useRef(false);
+  const arenaStatusRef = useRef(arenaState.status);
+
+  useEffect(() => {
+    arenaStatusRef.current = arenaState.status;
+    if (arenaState.status !== 'playing') {
+      clearBotPlaybackTimers();
+    }
+  }, [arenaState.status]);
+
+  const clearBotPlaybackTimers = () => {
+    if (botPlaybackTimersRef.current && botPlaybackTimersRef.current.length > 0) {
+      botPlaybackTimersRef.current.forEach(t => clearTimeout(t));
+      botPlaybackTimersRef.current = [];
+    }
+  };
+
+  const startBotPlaybackEngine = (roomId, botUid, playbackSchedule) => {
+    clearBotPlaybackTimers();
+    if (!playbackSchedule || !Array.isArray(playbackSchedule)) return;
+
+    console.log(`🤖 [Bot Playback Engine] Kích hoạt kịch bản playback cho Bot (${botUid}) với ${playbackSchedule.length} bước!`);
+
+    playbackSchedule.forEach((step) => {
+      const delay = step.cumulativeTimeMs !== undefined ? step.cumulativeTimeMs : (step.delayMs || 5000);
+      const timerId = setTimeout(async () => {
+        try {
+          if (arenaStatusRef.current === 'idle' || arenaStatusRef.current === 'result') {
+            clearBotPlaybackTimers();
+            return;
+          }
+          if (arenaStatusRef.current === 'equipment_selecting' || arenaStatusRef.current === 'matching') {
+            // Đang ở phase chọn trang bị/ghép trận, hoãn lại cho tới khi vào trận thi đấu
+            return;
+          }
+          console.log(`🤖 [Bot Action Trigger] Gửi submitAnswer cho bước ${step.stepIndex} (Offset: ${delay}ms)...`);
+          const submitAnswerFn = httpsCallable(functions, 'submitAnswer');
+          const res = await submitAnswerFn({
+            matchId: roomId,
+            actingForBotId: botUid,
+            stepIndex: step.stepIndex
+          });
+          if (res && res.data && res.data.success === false) {
+            clearBotPlaybackTimers();
+          }
+        } catch (err) {
+          console.warn(`⚠️ [Bot Action Trigger] Lỗi khi kích hoạt bước ${step.stepIndex}:`, err);
+          clearBotPlaybackTimers();
+        }
+      }, delay);
+
+      botPlaybackTimersRef.current.push(timerId);
+    });
+  };
 
   // LẮNG NGHE BẢNG XẾP HẠNG ONLINE THỜI GIAN THỰC
   useEffect(() => {
@@ -1017,16 +1989,46 @@ function DauTruongContent() {
       playSound.click();
       setMatchmakingTime(0);
       setMatchmakingError('');
+      isBotRequestPendingRef.current = false;
+      clearBotPlaybackTimers();
       
       matchmakingTimerRef.current = setInterval(() => {
         playSound.hover();
         setMatchmakingTime((prev) => {
           const nextTime = prev + 1;
+
+          // Fallback gán Bot sau quá 5s chờ không tìm được đối thủ thật
+          if (nextTime >= 5 && !isBotRequestPendingRef.current && currentActiveRoomId) {
+            isBotRequestPendingRef.current = true;
+            console.log("⏱️ [Bot Fallback Trigger] Đã quá 5s chờ! Đang gọi máy chủ gán đối thủ Bot...");
+
+            (async () => {
+              try {
+                const botRes = await requestBotOpponent(arenaState.subject, currentActiveRoomId);
+                if (botRes && botRes.success && botRes.roomId && !isCancelled) {
+                  console.log("🤖 [Bot Fallback] Đã ghép thành công đối thủ Bot:", botRes.botUid);
+
+                  if (unsubscribeQueue) unsubscribeQueue();
+
+                  if (botRes.playbackSchedule && Array.isArray(botRes.playbackSchedule)) {
+                    startBotPlaybackEngine(botRes.roomId, botRes.botUid, botRes.playbackSchedule);
+                  }
+
+                  if (matchmakingTimerRef.current) clearInterval(matchmakingTimerRef.current);
+                  handleMatchFoundReal(botRes.roomId);
+                }
+              } catch (botErr) {
+                console.error("🚨 [Bot Fallback Error] Lỗi gán đối thủ Bot:", botErr);
+                isBotRequestPendingRef.current = false;
+              }
+            })();
+          }
           
           if (
             nextTime - lastMergeCheck >= 3 && 
             currentActiveRoomId && 
-            currentActiveRoomId.startsWith(`room_${user.uid}`)
+            currentActiveRoomId.startsWith(`room_${user.uid}`) &&
+            !isBotRequestPendingRef.current
           ) {
             lastMergeCheck = nextTime;
             
@@ -1061,7 +2063,7 @@ function DauTruongContent() {
                 unsubscribeQueue = onSnapshot(newRoomDocRef, (docSnap) => {
                   if (docSnap.exists()) {
                     const roomData = docSnap.data();
-                    if (roomData.status === 'playing' && roomData.player2) {
+                    if ((roomData.status === 'equipment_selecting' || roomData.status === 'playing') && roomData.player2) {
                       if (matchmakingTimerRef.current) clearInterval(matchmakingTimerRef.current);
                       handleMatchFoundReal(mergedId);
                     }
@@ -1071,7 +2073,7 @@ function DauTruongContent() {
                 });
                 
                 const newRoomSnap = await getDoc(newRoomDocRef);
-                if (newRoomSnap.exists() && newRoomSnap.data().status === 'playing') {
+                if (newRoomSnap.exists() && (newRoomSnap.data().status === 'equipment_selecting' || newRoomSnap.data().status === 'playing')) {
                   if (matchmakingTimerRef.current) clearInterval(matchmakingTimerRef.current);
                   handleMatchFoundReal(mergedId);
                 }
@@ -1096,42 +2098,38 @@ function DauTruongContent() {
               matchData.questionPool = chemPool.map(m => m.id);
             } else if (subject === 'physics') {
               localHistory = getSessionHistory('seen_phys_targets');
-              const physPool = generatePhysicsPool(localHistory, 10);
-              matchData.questionPool = physPool.map(arr => arr.join('-'));
+              matchData.questionPool = await generatePhysicsMatchPool(localHistory);
             } else if (subject === 'math') {
               localHistory = getSessionHistory('seen_math_questions');
-              const mathPool = generateMathPool(localHistory, 20);
-              matchData.questionPool = mathPool;
+              matchData.questionPool = await generateMathMatchPool(localHistory);
             } else if (subject === 'biology') {
               localHistory = getSessionHistory('seen_bio_questions');
-              let bioPool = [];
-              try {
-                const qRef = collection(db, 'questions');
-                const q = query(qRef, where('subject', '==', 'biology'), where('status', '==', 'public'));
-                const querySnap = await getDocs(q);
-                querySnap.forEach(docSnap => {
-                  const data = docSnap.data();
-                  bioPool.push({
-                    text: data.text,
-                    choices: data.choices,
-                    correct: data.correct,
-                    note: data.explanation || ''
-                  });
-                });
-              } catch (err) {
-                console.warn("Lỗi tải câu hỏi từ Firestore, dùng fallback:", err);
-              }
+              matchData.questionPool = await generateBiologyMatchPool(localHistory);
+            }
 
-              if (bioPool.length === 0) {
-                bioPool = generateBioPool(localHistory, 30);
-              } else {
-                let available = bioPool.filter(q => !localHistory.includes(q.text));
-                if (available.length < 30) {
-                  available = bioPool;
-                }
-                bioPool = shuffleArray(available).slice(0, 30);
+            // Khi ghép trận -> KÍCH HOẠT VÀ TRỪ THẺ TRƯỚC TRẬN NGAY LẬP TỨC
+            const preCardToUse = preMatchEquippedCard;
+            if (preCardToUse) {
+              setPreMatchEquippedCard(null); // Đã tiêu hao ở sảnh
+              const isAdminUser = user?.role === 'admin' || user?.email?.includes('admin') || user?.displayName?.toLowerCase().includes('admin');
+              if (!isAdminUser) {
+                const userRef = doc(db, 'users', user.uid);
+                getDoc(userRef).then((snap) => {
+                  if (snap.exists()) {
+                    const curInv = snap.data().inventory || [];
+                    let updatedInv = [...curInv];
+                    const idx = updatedInv.findIndex(i => i.cardId === preCardToUse);
+                    if (idx !== -1) {
+                      const newQty = (updatedInv[idx].quantity || 1) - 1;
+                      if (newQty > 0) updatedInv[idx] = { ...updatedInv[idx], quantity: newQty };
+                      else updatedInv.splice(idx, 1);
+                      updateDoc(userRef, { inventory: updatedInv }).catch(e => console.warn("Lỗi trừ kho đồ thẻ trước trận:", e));
+                    }
+                  }
+                });
               }
-              matchData.questionPool = bioPool;
+              const preCardDef = getEquipmentById(preCardToUse);
+              addArenaLogStore(`⚡ Kích hoạt ngay lập tức Thẻ Trước Trận [${preCardDef?.name || preCardToUse}] khi ghép trận!`);
             }
 
             const joinedRoomId = await joinMatchmakingQueue(
@@ -1145,7 +2143,8 @@ function DauTruongContent() {
               personalization.avatarParts || null,
               matchData,
               localHistory,
-              theoryTimeLimit
+              theoryTimeLimit,
+              preCardToUse
             );
  
             if (isCancelled) {
@@ -1166,7 +2165,7 @@ function DauTruongContent() {
  
               if (roomSnap && roomSnap.exists()) {
                 const roomData = roomSnap.data();
-                if (roomData.status === 'playing' && roomData.player2) {
+                if ((roomData.status === 'equipment_selecting' || roomData.status === 'playing') && roomData.player2) {
                   if (matchmakingTimerRef.current) clearInterval(matchmakingTimerRef.current);
                   handleMatchFoundReal(joinedRoomId);
                   return;
@@ -1176,7 +2175,7 @@ function DauTruongContent() {
               unsubscribeQueue = onSnapshot(roomDocRef, (docSnap) => {
                 if (docSnap.exists()) {
                   const roomData = docSnap.data();
-                  if (roomData.status === 'playing' && roomData.player2) {
+                  if ((roomData.status === 'equipment_selecting' || roomData.status === 'playing') && roomData.player2) {
                     if (matchmakingTimerRef.current) clearInterval(matchmakingTimerRef.current);
                     handleMatchFoundReal(joinedRoomId);
                   }
@@ -1304,26 +2303,83 @@ function DauTruongContent() {
     };
   }, [arenaState.status, arenaState.subject, activeRoomId, arenaState.playerProgress, chemMission]);
 
-  // LẮNG NGHE SỰ KIỆN CHUYỂN TAB ĐỂ CẢNH BÁO GIAN LẬN
+  // LẮNG NGHE SỰ KIỆN CHUYỂN TAB VÀ TRỪ THỜI GIAN / XỬ THUA RIÊNG CHO NGƯỜI RỜI TAB
   useEffect(() => {
     if (arenaState.status !== 'playing' || !activeRoomId || !user || isPlayer1Role === null) return;
 
-    let tabSwitchCount = 0;
-
     const handleVisibilityChange = async () => {
-      if (document.hidden) {
-        tabSwitchCount += 1;
-        const msg = `🚨 CẢNH BÁO: Người chơi chuyển tab/rời màn hình lần ${tabSwitchCount}!`;
-        addArenaLog(msg);
-        
-        // Cập nhật trường tabSwitches trong match room
-        const roomDocRef = doc(db, 'match_rooms', activeRoomId);
-        try {
-          await updateDoc(roomDocRef, {
-            [isPlayer1Role ? 'player1TabSwitches' : 'player2TabSwitches']: tabSwitchCount
+      if (document.hidden && arenaState.status === 'playing') {
+        const isP1 = isPlayer1Role;
+        const myTabSwitchesKey = isP1 ? 'player1TabSwitches' : 'player2TabSwitches';
+
+        const currentCount = isP1 
+          ? (latestRoomDataRef.current?.player1TabSwitches || 0) 
+          : (latestRoomDataRef.current?.player2TabSwitches || 0);
+
+        const N = currentCount + 1;
+        playSound.click();
+
+        const myLogsKey = isP1 ? 'player1Logs' : 'player2Logs';
+        const currentLogs = isP1 
+          ? (latestRoomDataRef.current?.player1Logs || []) 
+          : (latestRoomDataRef.current?.player2Logs || []);
+
+        if (N >= 5) {
+          // Vi phạm 5 lần -> Xử thua ngay lập tức cho chính người rời tab!
+          const forfeitLog = `🚨 XỬ THUA: Rời màn hình 5/5 lần! Bạn đã bị truất quyền thi đấu!`;
+          addArenaLog(forfeitLog);
+
+          if (activeRoomId !== 'local_sandbox') {
+            const roomDocRef = doc(db, 'match_rooms', activeRoomId);
+            const opponentUid = isP1 ? latestRoomDataRef.current?.player2?.uid : latestRoomDataRef.current?.player1?.uid;
+            try {
+              await updateDoc(roomDocRef, {
+                [myTabSwitchesKey]: N,
+                winnerId: opponentUid || 'opponent',
+                status: 'result',
+                forfeitReason: 'tab_violation_5_times',
+                [myLogsKey]: [...currentLogs, forfeitLog]
+              });
+            } catch (err) {
+              console.warn("Lỗi cập nhật xử thua do rời tab:", err);
+            }
+          }
+          handleMatchEnd('defeat');
+        } else {
+          // Vi phạm < 5 lần -> Chỉ trừ 5% tiến độ cá nhân của chính người đó & cảnh báo Toast
+          const penaltyPct = 5;
+          const myProgKey = isP1 ? 'player1Progress' : 'player2Progress';
+          const currentMyProg = isP1 
+            ? (latestRoomDataRef.current?.player1Progress || arenaState.playerProgress) 
+            : (latestRoomDataRef.current?.player2Progress || arenaState.playerProgress);
+          const newMyProg = Math.max(0, currentMyProg - penaltyPct);
+
+          const warningLogText = `⚠️ CẢNH BÁO VI PHẠM (LẦN ${N}/5): Rời màn hình! Trừ -${penaltyPct}% tiến độ của bạn.`;
+          addArenaLog(warningLogText);
+
+          setTabPenaltyWarning({
+            count: N,
+            deducted: penaltyPct,
+            timestamp: Date.now()
           });
-        } catch (err) {
-          console.warn("Lỗi cập nhật số lần chuyển tab:", err);
+
+          setTimeout(() => {
+            setTabPenaltyWarning(null);
+          }, 5000);
+
+          if (activeRoomId !== 'local_sandbox') {
+            const roomDocRef = doc(db, 'match_rooms', activeRoomId);
+            try {
+              await updateDoc(roomDocRef, {
+                [myTabSwitchesKey]: N,
+                [myProgKey]: newMyProg,
+                [myLogsKey]: [...currentLogs, warningLogText]
+              });
+            } catch (err) {
+              console.warn("Lỗi cập nhật vi phạm rời tab:", err);
+            }
+          }
+          updatePlayerProgress(newMyProg);
         }
       }
     };
@@ -1332,19 +2388,100 @@ function DauTruongContent() {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [arenaState.status, activeRoomId, user, isPlayer1Role]);
+  }, [arenaState.status, activeRoomId, user, isPlayer1Role, arenaState.playerProgress]);
+
+  // KÍCH HOẠT THẺ STRATEGY CHO BOT KHI ĐẤU VỚI BOT
+  useEffect(() => {
+    if (arenaState.status !== 'playing' || !activeRoomId || !user) return;
+
+    const currentRoom = latestRoomDataRef.current || currentRoomData;
+    if (!currentRoom || !currentRoom.isBotMatch) return;
+
+    const botCardInterval = setInterval(async () => {
+      const roomData = latestRoomDataRef.current || currentRoomData;
+      if (!roomData || roomData.status !== 'playing') return;
+
+      const isP1User = roomData.player1?.uid === user.uid;
+      const botEquipKey = isP1User ? 'player2Equipment' : 'player1Equipment';
+      const userRoleKey = isP1User ? 'p1' : 'p2';
+
+      const botCards = roomData[botEquipKey] || [];
+      if (!botCards || botCards.length === 0) return;
+
+      const cardToUse = botCards[Math.floor(Math.random() * botCards.length)];
+      const roomRef = doc(db, 'match_rooms', activeRoomId);
+
+      const currentActiveEffects = roomData.activeEffects || { p1: {}, p2: {} };
+      const oppLogs = isP1User ? (roomData.player2Logs || []) : (roomData.player1Logs || []);
+
+      let updatedEffects = { ...currentActiveEffects };
+      let logMsg = `🤖 Bot đã kích hoạt thẻ chiêu!`;
+
+      if (cardToUse === 'card_time_freeze') {
+        updatedEffects[userRoleKey] = {
+          ...(updatedEffects[userRoleKey] || {}),
+          frozenUntil: Date.now() + 3000
+        };
+        logMsg = '❄️ [Bot] Đối thủ Bot đã dùng Thẻ Đông Băng lên bạn (3s)!';
+        addArenaLogStore(logMsg);
+      } else if (cardToUse === 'card_smoke_fog') {
+        updatedEffects[userRoleKey] = {
+          ...(updatedEffects[userRoleKey] || {}),
+          fogUntil: Date.now() + 5000
+        };
+        logMsg = '🌫️ [Bot] Đối thủ Bot đã dùng Thẻ Mù Sương lên bạn (5s)!';
+        addArenaLogStore(logMsg);
+      } else if (cardToUse === 'card_progress_steal') {
+        const userProgKey = isP1User ? 'player1Progress' : 'player2Progress';
+        const botProgKey = isP1User ? 'player2Progress' : 'player1Progress';
+        const currentUserProg = roomData[userProgKey] || 0;
+        const currentBotProg = roomData[botProgKey] || 0;
+
+        const stolen = 10;
+        const newUserProg = Math.max(0, currentUserProg - stolen);
+        const newBotProg = Math.min(100, currentBotProg + stolen);
+
+        logMsg = `🥷 [Bot] Đối thủ Bot đã đánh cắp 10% tiến độ của bạn!`;
+        addArenaLogStore(logMsg);
+        updatePlayerProgress(newUserProg);
+
+        await updateDoc(roomRef, {
+          [userProgKey]: newUserProg,
+          [botProgKey]: newBotProg
+        });
+      }
+
+      const nextBotCards = botCards.filter(c => c !== cardToUse);
+      await updateDoc(roomRef, {
+        activeEffects: updatedEffects,
+        [botEquipKey]: nextBotCards,
+        [isP1User ? 'player2Logs' : 'player1Logs']: [logMsg, ...oppLogs].slice(0, 5)
+      });
+      console.log("🤖 [Bot Card Engine] Bot vừa sử dụng thẻ:", cardToUse);
+    }, 15000);
+
+    return () => clearInterval(botCardInterval);
+  }, [arenaState.status, activeRoomId, user, currentRoomData]);
 
   // LẮNG NGHE ĐỒNG BỘ PHÒNG ĐẤU TRẬN THỜI GIAN THỰC
   useEffect(() => {
     let unsubscribeRoom = null;
 
-    if (arenaState.status === 'playing' && activeRoomId && user) {
+    if ((arenaState.status === 'playing' || arenaState.status === 'equipment_selecting') && activeRoomId && user) {
       const roomDocRef = doc(db, 'match_rooms', activeRoomId);
 
       unsubscribeRoom = onSnapshot(roomDocRef, (docSnap) => {
         if (docSnap.exists()) {
           const roomData = docSnap.data();
           latestRoomDataRef.current = roomData;
+          setCurrentRoomData(roomData);
+
+          if (roomData.status === 'playing' && (arenaState.status === 'equipment_selecting' || arenaState.status === 'matching')) {
+            setArenaStatus('playing');
+            if (preMatchEquippedCard) {
+              setPreMatchEquippedCard(null);
+            }
+          }
           
           // Xác định vai trò của bản thân (Player 1 hay Player 2)
           const isPlayer1 = roomData.player1.uid === user.uid;
@@ -1452,7 +2589,7 @@ function DauTruongContent() {
         if (roomData.timeRemaining !== undefined) {
           setArenaTimeRemaining(roomData.timeRemaining);
         } else {
-          setArenaTimeRemaining(theoryTimeLimit);
+          setArenaTimeRemaining(300);
         }
         
         if (opponent) {
@@ -1510,8 +2647,32 @@ function DauTruongContent() {
     setPlayerChat(null);
     setOpponentChat(null);
 
-    // --- ĐỒNG BỘ HÓA CÂU HỎI VÀ LỌC TRÙNG CHÉO ---
-    const subject = roomData?.subject || arenaState.subject;
+    // --- ĐỒNG BỘ HÓA MÔN HỌC VÀ LỌC TRÙNG CHÉO ---
+    let subject = roomData?.subject || arenaState.subject;
+
+    // SỬA LỖI MATCHMAKING RANDOM: Đảm bảo subject được giải mã từ 'random' thành 1 trong 4 môn thi chính xác!
+    if (!subject || subject === 'random' || !['math', 'physics', 'chemistry', 'biology'].includes(subject)) {
+      const validSubjects = ['math', 'physics', 'chemistry', 'biology'];
+      let seed = 0;
+      for (let i = 0; i < roomId.length; i++) seed += roomId.charCodeAt(i);
+      subject = validSubjects[seed % validSubjects.length];
+
+      try {
+        const roomRef = doc(db, 'match_rooms', roomId);
+        await updateDoc(roomRef, { subject: subject });
+      } catch (err) {
+        console.warn("⚠️ Lỗi cập nhật môn học cho phòng random:", err);
+      }
+    }
+
+    // ĐỒNG BỘ HÓA TRỰC TIẾP VÀO ZUSTAND STORE
+    useAppStore.setState((state) => ({
+      arenaState: {
+        ...state.arenaState,
+        subject: subject
+      }
+    }));
+
     const matchData = roomData?.matchData || {};
     const player1Seen = roomData?.player1Seen || [];
     const player2Seen = roomData?.player2Seen || [];
@@ -1543,75 +2704,59 @@ function DauTruongContent() {
       updateSessionHistory('seen_chem_missions', [finalMission.id], 7);
 
     } else if (subject === 'physics') {
-      let finalTarget = null;
-
-      if (matchData.physTarget) {
-        finalTarget = matchData.physTarget;
-      } else if (matchData.questionPool && Array.isArray(matchData.questionPool)) {
-        const pool = matchData.questionPool;
-        const filtered = pool.filter(t => {
-          const key = Array.isArray(t) ? t.join('-') : t;
-          return !player1Seen.includes(key) && !player2Seen.includes(key);
-        });
-        const chosen = filtered.length > 0 ? filtered[0] : pool[0];
-        finalTarget = Array.isArray(chosen) ? chosen : chosen.split('-').map(Number);
+      let questions = [];
+      if (matchData.questionPool && Array.isArray(matchData.questionPool) && matchData.questionPool.length > 0) {
+        questions = matchData.questionPool;
+      } else {
+        const localHistory = getSessionHistory('seen_phys_targets');
+        questions = await generatePhysicsMatchPool(localHistory);
       }
-
-      if (!finalTarget) {
-        finalTarget = selectPhysicsTargetFromRoomId(roomId);
-      }
-      setPhysTarget(finalTarget);
-      updateSessionHistory('seen_phys_targets', [finalTarget.join('-')], 15);
+      setPhysGame({
+        questions: questions,
+        currentQ: 0,
+        score: 0,
+        answered: []
+      });
+      setPhysSelected(null);
+      setPhysRevealed(false);
+      updateSessionHistory('seen_phys_targets', questions.map(q => q.text), 30);
 
     } else if (subject === 'math') {
-      let finalAsteroids = null;
-
-      if (matchData.mathAsteroids) {
-        finalAsteroids = matchData.mathAsteroids;
-      } else if (matchData.questionPool && Array.isArray(matchData.questionPool)) {
-        const pool = matchData.questionPool;
-        const filtered = pool.filter(q => !player1Seen.includes(q.eq) && !player2Seen.includes(q.eq));
-        const chosen = filtered.length >= 3 ? filtered.slice(0, 3) : pool.slice(0, 3);
-        finalAsteroids = chosen.map((q, idx) => ({
-          eq: q.eq,
-          ans: q.ans,
-          status: idx === 0 ? 'active' : 'pending',
-          coord: q.coord
-        }));
+      let questions = [];
+      if (matchData.questionPool && Array.isArray(matchData.questionPool) && matchData.questionPool.length > 0) {
+        questions = matchData.questionPool;
+      } else {
+        const localHistory = getSessionHistory('seen_math_questions');
+        questions = await generateMathMatchPool(localHistory);
       }
-
-      if (!finalAsteroids) {
-        finalAsteroids = selectMathAsteroidsFromRoomId(roomId);
-      }
-      setMathAsteroids(finalAsteroids);
-      updateSessionHistory('seen_math_questions', finalAsteroids.map(a => a.eq), 40);
+      setMathGame({
+        questions: questions,
+        currentQ: 0,
+        score: 0,
+        answered: []
+      });
+      setMathSelected(null);
+      setMathRevealed(false);
+      updateSessionHistory('seen_math_questions', questions.map(q => q.text), 30);
 
     } else if (subject === 'biology') {
-      let finalBioGame = null;
-
-      if (matchData.bioGame) {
-        finalBioGame = matchData.bioGame;
-      } else if (matchData.questionPool && Array.isArray(matchData.questionPool)) {
-        const pool = matchData.questionPool;
-        const filtered = pool.filter(q => !player1Seen.includes(q.text) && !player2Seen.includes(q.text));
-        const chosen = filtered.length >= 5 ? filtered.slice(0, 5) : pool.slice(0, 5);
-        finalBioGame = {
-          type: 'general',
-          label: 'Sinh học Tổng hợp',
-          icon: '🧬',
-          questions: chosen,
-          currentQ: 0,
-          score: 0,
-          mistakes: 0,
-          answered: []
-        };
+      let questions = [];
+      if (matchData.questionPool && Array.isArray(matchData.questionPool) && matchData.questionPool.length > 0) {
+        questions = matchData.questionPool;
+      } else {
+        const localHistory = getSessionHistory('seen_bio_questions');
+        questions = await generateBiologyMatchPool(localHistory);
       }
-
-      if (!finalBioGame) {
-        finalBioGame = selectBioGameFromRoomId(roomId);
-      }
-      setBioGame(finalBioGame);
-      updateSessionHistory('seen_bio_questions', finalBioGame.questions.map(q => q.text), 100);
+      setBioGame({
+        questions: questions,
+        currentQ: 0,
+        score: 0,
+        answered: []
+      });
+      setBioSelected(null);
+      setBioRevealed(false);
+      setBioTfAnswers([null, null, null, null]);
+      updateSessionHistory('seen_bio_questions', questions.map(q => q.text || q.context), 30);
     }
     addArenaLogStore('Trận đấu bắt đầu! Giải mã phòng thí nghiệm ngay!');
   };
@@ -1671,7 +2816,7 @@ function DauTruongContent() {
     if (arenaState.status === 'playing') {
       gameLoopTimerRef.current = setInterval(async () => {
         if (activeRoomId === 'local_sandbox') {
-          tickArenaTime();
+          // Luyện tập không đếm ngược thời gian
           if (arenaState.subject === 'chemistry') {
             handleChemistryRealtimeTick();
           }
@@ -1718,39 +2863,130 @@ function DauTruongContent() {
     };
   }, [arenaState.status, arenaState.timeRemaining, chemBurner, chemTemp, chemEvap, chemHCl, chemNaOH, activeRoomId, user]);
 
-  // Cảnh báo hết giờ hoặc thua cuộc thời gian thực
+  // Cảnh báo hết giờ hoặc thua cuộc/thắng cuộc thời gian thực khi player hoặc đối thủ đạt 100%
   useEffect(() => {
     if (arenaState.status === 'playing') {
       const checkMatchEnd = async () => {
+        if (isFinalizingRef.current) return;
         if (arenaState.timeRemaining <= 0) {
+          isFinalizingRef.current = true;
           if (activeRoomId === 'local_sandbox') {
             handleMatchEnd('defeat');
           } else if (activeRoomId) {
             try {
               const finalizeMatchFn = httpsCallable(functions, 'finalizeMatch');
-              await finalizeMatchFn({ matchId: activeRoomId });
+              await finalizeMatchFn({ matchId: activeRoomId, force: true });
             } catch (err) {
               console.error("Lỗi gọi finalizeMatch khi hết giờ:", err);
+              isFinalizingRef.current = false;
             }
           }
-        } else if (arenaState.playerProgress >= 100) {
+        } else if (arenaState.playerProgress >= 100 || arenaState.opponentProgress >= 100) {
+          isFinalizingRef.current = true;
           if (activeRoomId === 'local_sandbox') {
-            handleMatchEnd('victory');
+            handleMatchEnd(arenaState.playerProgress >= 100 ? 'victory' : 'defeat');
           } else if (activeRoomId) {
             try {
               const finalizeMatchFn = httpsCallable(functions, 'finalizeMatch');
-              await finalizeMatchFn({ matchId: activeRoomId });
+              await finalizeMatchFn({ matchId: activeRoomId, force: true });
             } catch (err) {
               console.error("Lỗi gọi finalizeMatch khi hoàn thành 100%:", err);
+              isFinalizingRef.current = false;
             }
           }
         }
       };
-      // Defer state update to avoid React Bad setState warnings
       const timer = setTimeout(checkMatchEnd, 0);
       return () => clearTimeout(timer);
+    } else {
+      isFinalizingRef.current = false;
     }
-  }, [arenaState.timeRemaining, arenaState.playerProgress, arenaState.status, activeRoomId]);
+  }, [arenaState.timeRemaining, arenaState.playerProgress, arenaState.opponentProgress, arenaState.status, activeRoomId]);
+
+  // Reset tab exit count khi bắt đầu trận đấu mới
+  useEffect(() => {
+    if (arenaState.status === 'playing') {
+      setTabExitCount(0);
+      setTabExitModal(null);
+    }
+  }, [arenaState.status]);
+
+  // ⚡ CƠ CHẾ CHỐNG GIAN LẬN: THOÁT TAB BỊ TRỪ THỜI GIAN LŨY TIẾN (5s / 10s / 20s / 40s / 80s, lần 6 xử thua)
+  useEffect(() => {
+    if (arenaState.status !== 'playing' || !activeRoomId) return;
+
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'hidden') {
+        const nextCount = tabExitCount + 1;
+        setTabExitCount(nextCount);
+
+        if (nextCount >= 6) {
+          // Vi phạm lần thứ 6: Xử thua ngay lập tức
+          setTabExitModal({
+            count: nextCount,
+            penalty: 0,
+            forfeited: true
+          });
+          addArenaLogStore('🚨 VI PHẠM RỜI TAB QUÁ 5 LẦN! XỬ THUA LẬP TỨC DO GIAN LẬN!');
+
+          if (activeRoomId && activeRoomId !== 'local_sandbox') {
+            try {
+              const roomRef = doc(db, 'match_rooms', activeRoomId);
+              const roomSnap = await getDoc(roomRef);
+              const roomData = roomSnap.exists() ? roomSnap.data() : {};
+              const winnerId = isPlayer1Role ? (roomData.player2?.uid || 'bot') : (roomData.player1?.uid || 'bot');
+
+              await updateDoc(roomRef, {
+                [isPlayer1Role ? 'player1Progress' : 'player2Progress']: 0,
+                winnerId: winnerId,
+                status: 'result',
+                [isPlayer1Role ? 'player1Logs' : 'player2Logs']: arrayUnion('🚨 VI PHẠM RỜI TAB 6 LẦN — XỬ THUA LẬP TỨC!')
+              });
+              
+              const finalizeMatchFn = httpsCallable(functions, 'finalizeMatch');
+              await finalizeMatchFn({ matchId: activeRoomId, force: true });
+            } catch (err) {
+              console.error("Lỗi xử thua khi vi phạm 6 lần rời tab:", err);
+            }
+          } else {
+            handleMatchEnd('defeat');
+          }
+        } else {
+          // Công thức phạt: 5 * 2^(nextCount - 1) => 5s, 10s, 20s, 40s, 80s
+          const penaltySec = 5 * Math.pow(2, nextCount - 1);
+          const currentTimer = arenaState.timeRemaining;
+          const newTimer = Math.max(0, currentTimer - penaltySec);
+          setArenaTimeRemaining(newTimer);
+
+          setTabExitModal({
+            count: nextCount,
+            penalty: penaltySec,
+            forfeited: false
+          });
+
+          addArenaLogStore(`⚠️ VI PHẠM RỜI TAB LẦN ${nextCount}/5: BỊ TRỪ ${penaltySec}s THỜI GIAN THI ĐẤU!`);
+
+          if (activeRoomId && activeRoomId !== 'local_sandbox') {
+            try {
+              const roomRef = doc(db, 'match_rooms', activeRoomId);
+              const myRoleLogKey = isPlayer1Role ? 'player1Logs' : 'player2Logs';
+              await updateDoc(roomRef, {
+                timeRemaining: newTimer,
+                [myRoleLogKey]: arrayUnion(`⚠️ VI PHẠM RỜI TAB LẦN ${nextCount}/5: BỊ TRỪ ${penaltySec} GIÂY!`)
+              });
+            } catch (err) {
+              console.error("Lỗi cập nhật hình phạt rời tab:", err);
+            }
+          }
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [arenaState.status, activeRoomId, tabExitCount, arenaState.timeRemaining, isPlayer1Role]);
 
   // 3. ĐỒNG BỘ TIẾN ĐỘ VẬT LÝ THEO TRẠNG THÁI MẠCH QUANG HỌC
   // Debounce 300ms để chặn spam Cloud Function khi người dùng xoay gương liên tục.
@@ -1857,6 +3093,33 @@ function DauTruongContent() {
       };
 
       setPersonalization(updatedStats);
+    }
+
+    // THƯỞNG 1 THẺ BÀI NGẪU NHIÊN VÀO KHO ĐỒ KHI HOÀN THÀNH TRẬN ĐẤU
+    if (user?.uid) {
+      try {
+        const randomCard = EQUIPMENT_CATALOG[Math.floor(Math.random() * EQUIPMENT_CATALOG.length)];
+        const userRef = doc(db, 'users', user.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const uData = userSnap.data();
+          const currentInv = uData.inventory || [];
+          const existingIdx = currentInv.findIndex(item => item.cardId === randomCard.id);
+          let newInv = [...currentInv];
+          if (existingIdx !== -1) {
+            newInv[existingIdx] = {
+              ...newInv[existingIdx],
+              quantity: (newInv[existingIdx].quantity || 0) + 1
+            };
+          } else {
+            newInv.push({ cardId: randomCard.id, quantity: 1 });
+          }
+          await updateDoc(userRef, { inventory: newInv });
+          console.log(`🎁 [Match Reward] Đã thưởng 1 Thẻ bài ${randomCard.name} vào Kho đồ!`);
+        }
+      } catch (e) {
+        console.warn("Lỗi thưởng thẻ bài sau trận:", e);
+      }
     }
 
     setArenaStatus('result');
@@ -2105,73 +3368,250 @@ function DauTruongContent() {
   };
 
   // ----------------------------------------------------
-  // LOGIC MINI-GAME 4: SINH HỌC (Genome Staircase Helix)
+  // LOGIC ĐẤU TRƯỜNG VÔ TẬN (INFINITE ARENA GAMEPLAY ENGINE)
   // ----------------------------------------------------
+
+  const calculateAndSyncProgress = async (subject, gameData, selectedAnswerPayload) => {
+    const newScore = gameData.score;
+    const currentProgress = Math.min(100, Math.round((newScore / 20) * 100));
+
+    if (activeRoomId === 'local_sandbox') {
+      updatePlayerProgress(currentProgress);
+    } else if (activeRoomId) {
+      try {
+        const submitAnswerFn = httpsCallable(functions, 'submitAnswer');
+        const res = await submitAnswerFn({
+          matchId: activeRoomId,
+          questionId: String(gameData.currentQ),
+          selectedAnswer: selectedAnswerPayload
+        });
+        const { currentProgress: serverProgress } = res.data || {};
+        if (typeof serverProgress === 'number') {
+          updatePlayerProgress(serverProgress);
+        } else {
+          updatePlayerProgress(currentProgress);
+        }
+      } catch (err) {
+        console.error(`Lỗi submitAnswer ${subject}:`, err);
+        updatePlayerProgress(currentProgress);
+      }
+    }
+    return currentProgress;
+  };
+
+  const handleNextQuestion = (subject) => {
+    setSaInput('');
+    setAiEliminatedOptions([]);
+
+    if (subject === 'physics') {
+      setPhysSelected(null);
+      setPhysRevealed(false);
+      setPhysTfAnswers([null, null, null, null]);
+      setPhysGame(prev => ({ ...prev, currentQ: prev.currentQ + 1 }));
+    } else if (subject === 'math') {
+      setMathSelected(null);
+      setMathRevealed(false);
+      setMathTfAnswers([null, null, null, null]);
+      setMathGame(prev => ({ ...prev, currentQ: prev.currentQ + 1 }));
+    } else if (subject === 'biology') {
+      setBioSelected(null);
+      setBioRevealed(false);
+      setBioTfAnswers([null, null, null, null]);
+      setBioGame(prev => ({ ...prev, currentQ: prev.currentQ + 1 }));
+    }
+  };
+
+  const handleSaSubmit = async (subject) => {
+    if (!saInput.trim()) return;
+
+    if (subject === 'physics') {
+      if (physRevealed) return;
+      setPhysRevealed(true);
+      const currQ = physGame.questions[physGame.currentQ % (physGame.questions.length || 1)];
+      const targetVal = String(currQ?.correctAnswer || currQ?.correct || '').trim().toLowerCase();
+      const userVal = saInput.trim().toLowerCase();
+      const targetNum = parseFloat(targetVal);
+      const userNum = parseFloat(userVal);
+      const isCorrect = (!isNaN(targetNum) && !isNaN(userNum)) ? Math.abs(targetNum - userNum) <= 0.1 : targetVal === userVal;
+
+      if (isCorrect) playSound.success(); else playSound.click();
+
+      const nextGame = {
+        ...physGame,
+        score: physGame.score + (isCorrect ? 1 : 0),
+        answered: [...physGame.answered, { qIndex: physGame.currentQ, selected: saInput, correct: isCorrect }]
+      };
+      setPhysGame(nextGame);
+      await calculateAndSyncProgress('physics', nextGame, saInput);
+    } else if (subject === 'math') {
+      if (mathRevealed) return;
+      setMathRevealed(true);
+      const currQ = mathGame.questions[mathGame.currentQ % (mathGame.questions.length || 1)];
+      const targetVal = String(currQ?.correctAnswer || currQ?.correct || '').trim().toLowerCase();
+      const userVal = saInput.trim().toLowerCase();
+      const targetNum = parseFloat(targetVal);
+      const userNum = parseFloat(userVal);
+      const isCorrect = (!isNaN(targetNum) && !isNaN(userNum)) ? Math.abs(targetNum - userNum) <= 0.1 : targetVal === userVal;
+
+      if (isCorrect) playSound.success(); else playSound.click();
+
+      const nextGame = {
+        ...mathGame,
+        score: mathGame.score + (isCorrect ? 1 : 0),
+        answered: [...mathGame.answered, { qIndex: mathGame.currentQ, selected: saInput, correct: isCorrect }]
+      };
+      setMathGame(nextGame);
+      await calculateAndSyncProgress('math', nextGame, saInput);
+    } else if (subject === 'biology') {
+      if (bioRevealed) return;
+      setBioRevealed(true);
+      const currQ = bioGame.questions[bioGame.currentQ % (bioGame.questions.length || 1)];
+      const targetVal = String(currQ?.correctAnswer || currQ?.correct || '').trim().toLowerCase();
+      const userVal = saInput.trim().toLowerCase();
+      const targetNum = parseFloat(targetVal);
+      const userNum = parseFloat(userVal);
+      const isCorrect = (!isNaN(targetNum) && !isNaN(userNum)) ? Math.abs(targetNum - userNum) <= 0.1 : targetVal === userVal;
+
+      if (isCorrect) playSound.success(); else playSound.click();
+
+      const nextGame = {
+        ...bioGame,
+        score: bioGame.score + (isCorrect ? 1 : 0),
+        answered: [...bioGame.answered, { qIndex: bioGame.currentQ, selected: saInput, correct: isCorrect }]
+      };
+      setBioGame(nextGame);
+      await calculateAndSyncProgress('biology', nextGame, saInput);
+    }
+  };
+
+  const handleTfSubmit = async (subject) => {
+    if (subject === 'physics') {
+      if (physRevealed || physTfAnswers.includes(null)) {
+        if (physTfAnswers.includes(null)) alert("Vui lòng chọn Đúng hoặc Sai cho cả 4 nhận định trước khi xác nhận!");
+        return;
+      }
+      setPhysRevealed(true);
+      const currQ = physGame.questions[physGame.currentQ % (physGame.questions.length || 1)];
+      const correctAnswers = currQ?.correct || [];
+      const isCorrect = Array.isArray(correctAnswers) && physTfAnswers.every((val, idx) => val === correctAnswers[idx]);
+      
+      if (isCorrect) playSound.success(); else playSound.click();
+      const nextGame = {
+        ...physGame,
+        score: physGame.score + (isCorrect ? 1 : 0),
+        answered: [...physGame.answered, { qIndex: physGame.currentQ, selected: [...physTfAnswers], correct: isCorrect }]
+      };
+      setPhysGame(nextGame);
+      await calculateAndSyncProgress('physics', nextGame, physTfAnswers);
+    } else if (subject === 'math') {
+      if (mathRevealed || mathTfAnswers.includes(null)) {
+        if (mathTfAnswers.includes(null)) alert("Vui lòng chọn Đúng hoặc Sai cho cả 4 nhận định trước khi xác nhận!");
+        return;
+      }
+      setMathRevealed(true);
+      const currQ = mathGame.questions[mathGame.currentQ % (mathGame.questions.length || 1)];
+      const correctAnswers = currQ?.correct || [];
+      const isCorrect = Array.isArray(correctAnswers) && mathTfAnswers.every((val, idx) => val === correctAnswers[idx]);
+      
+      if (isCorrect) playSound.success(); else playSound.click();
+      const nextGame = {
+        ...mathGame,
+        score: mathGame.score + (isCorrect ? 1 : 0),
+        answered: [...mathGame.answered, { qIndex: mathGame.currentQ, selected: [...mathTfAnswers], correct: isCorrect }]
+      };
+      setMathGame(nextGame);
+      await calculateAndSyncProgress('math', nextGame, mathTfAnswers);
+    } else if (subject === 'biology') {
+      if (bioRevealed || bioTfAnswers.includes(null)) {
+        if (bioTfAnswers.includes(null)) alert("Vui lòng chọn Đúng hoặc Sai cho cả 4 nhận định trước khi xác nhận!");
+        return;
+      }
+      setBioRevealed(true);
+      const currQ = bioGame.questions[bioGame.currentQ % (bioGame.questions.length || 1)];
+      const correctAnswers = currQ?.correct || [];
+      const isCorrect = Array.isArray(correctAnswers) && bioTfAnswers.every((val, idx) => val === correctAnswers[idx]);
+      
+      if (isCorrect) playSound.success(); else playSound.click();
+      const nextGame = {
+        ...bioGame,
+        score: bioGame.score + (isCorrect ? 1 : 0),
+        answered: [...bioGame.answered, { qIndex: bioGame.currentQ, selected: [...bioTfAnswers], correct: isCorrect }]
+      };
+      setBioGame(nextGame);
+      await calculateAndSyncProgress('biology', nextGame, bioTfAnswers);
+    }
+  };
+
+  const handlePhysMcqAnswer = async (choiceIndex) => {
+    if (physRevealed) return;
+    setPhysSelected(choiceIndex);
+    setPhysRevealed(true);
+
+    const currQ = physGame.questions[physGame.currentQ % (physGame.questions.length || 1)];
+    const isCorrect = choiceIndex === currQ?.correct;
+    
+    if (isCorrect) playSound.success(); else playSound.click();
+
+    const nextGame = {
+      ...physGame,
+      score: physGame.score + (isCorrect ? 1 : 0),
+      answered: [...physGame.answered, { qIndex: physGame.currentQ, selected: choiceIndex, correct: isCorrect }]
+    };
+    setPhysGame(nextGame);
+    await calculateAndSyncProgress('physics', nextGame, choiceIndex);
+  };
+
+  const handleMathMcqAnswer = async (choiceIndex) => {
+    if (mathRevealed) return;
+    setMathSelected(choiceIndex);
+    setMathRevealed(true);
+
+    const currQ = mathGame.questions[mathGame.currentQ % (mathGame.questions.length || 1)];
+    const isCorrect = choiceIndex === currQ?.correct;
+    
+    if (isCorrect) playSound.success(); else playSound.click();
+
+    const nextGame = {
+      ...mathGame,
+      score: mathGame.score + (isCorrect ? 1 : 0),
+      answered: [...mathGame.answered, { qIndex: mathGame.currentQ, selected: choiceIndex, correct: isCorrect }]
+    };
+    setMathGame(nextGame);
+    await calculateAndSyncProgress('math', nextGame, choiceIndex);
+  };
+
   const handleBioAnswer = async (choiceIndex) => {
     if (bioRevealed) return;
     setBioSelected(choiceIndex);
     setBioRevealed(true);
-    const q = bioGame.questions[bioGame.currentQ];
-    const isCorrect = choiceIndex === q.correct;
+
+    const currQ = bioGame.questions[bioGame.currentQ % (bioGame.questions.length || 1)];
+    const isCorrect = choiceIndex === currQ?.correct;
     
-    if (isCorrect) {
-      playSound.success();
-      setBioGame((prev) => ({ ...prev, score: prev.score + 1 }));
-    } else {
-      playSound.click();
-      setBioGame((prev) => ({ ...prev, mistakes: prev.mistakes + 1 }));
-    }
+    if (isCorrect) playSound.success(); else playSound.click();
 
-    if (activeRoomId === 'local_sandbox') {
-      addArenaLog(isCorrect ? `✅ Đúng! ${q.note}` : `❌ Sai! Đáp án: ${q.choices[q.correct]}. ${q.note}`);
-      return;
-    }
-
-    try {
-      const submitAnswerFn = httpsCallable(functions, 'submitAnswer');
-      const res = await submitAnswerFn({
-        matchId: activeRoomId,
-        questionId: String(bioGame.currentQ),
-        selectedAnswer: choiceIndex
-      });
-
-      const { correct, currentProgress, explanation } = res.data;
-      updatePlayerProgress(currentProgress);
-
-      if (correct) {
-        addArenaLog(`[Server] ✅ Đúng! ${explanation || q.note}`);
-      } else {
-        addArenaLog(`[Server] ❌ Sai! Đáp án: ${q.choices[q.correct]}. ${explanation || q.note}`);
-      }
-    } catch (err) {
-      console.error("Lỗi submitAnswer biology:", err);
-      addArenaLog(`🚨 Lỗi kết nối server khi nộp bài!`);
-    }
+    const nextGame = {
+      ...bioGame,
+      score: bioGame.score + (isCorrect ? 1 : 0),
+      answered: [...bioGame.answered, { qIndex: bioGame.currentQ, selected: choiceIndex, correct: isCorrect }]
+    };
+    setBioGame(nextGame);
+    await calculateAndSyncProgress('biology', nextGame, choiceIndex);
   };
 
-  const handleBioNext = () => {
-    const nextQ = bioGame.currentQ + 1;
-    setBioSelected(null);
-    setBioRevealed(false);
-    if (nextQ >= bioGame.questions.length) {
-      if (activeRoomId === 'local_sandbox') {
-        const pct = Math.round((bioGame.score / bioGame.questions.length) * 100);
-        updatePlayerProgress(pct >= 60 ? Math.min(100, pct + 10) : pct);
-      }
-      addArenaLog(`🏁 Hoàn thành ${bioGame.label}! Đúng: ${bioGame.score}/${bioGame.questions.length}`);
-    } else {
-      setBioGame((prev) => ({ ...prev, currentQ: nextQ }));
-      if (activeRoomId === 'local_sandbox') {
-        updatePlayerProgress(Math.round((nextQ / bioGame.questions.length) * 100));
-      }
-    }
-  };
 
   const phVal = getChemPH();
   const fluidColorClass = getChemFluidColor(phVal);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto min-h-[calc(100vh-100px)] flex flex-col justify-center select-none font-sans text-zinc-100">
+    <div className="relative min-h-screen bg-bg-primary overflow-hidden transition-colors duration-300">
+      {/* 🚀 LỚP NỀN ĐỘNG CINEMAGRAPH BACKGROUND THEO MÔN HỌC (Z-INDEX 0) */}
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-20 dark:opacity-25 mix-blend-multiply dark:mix-blend-screen overflow-hidden">
+        <ArenaBackground subject={arenaState.subject || 'math'} />
+      </div>
+
+      {/* 🚀 LỚP GIAO DIỆN UI ĐẤU TRƯỜNG THAO TÁC NGƯỜI DÙNG (Z-INDEX 10) */}
+      <div className="relative z-10 w-full min-h-[calc(100vh-100px)] p-6 max-w-7xl mx-auto flex flex-col justify-center select-none font-sans text-text-primary">
       
       {/* CẢNH BÁO KẾT NỐI MẠNG ĐẾN FIRESTORE BỊ CHẶN */}
       {isFirebaseBlocked && (
@@ -2196,56 +3636,305 @@ function DauTruongContent() {
         <div className="flex flex-col items-center justify-center py-6 animate-in fade-in duration-300 w-full">
           <div className="flex items-center gap-4 mb-4 text-center sm:text-left flex-col sm:flex-row">
             <div className="relative">
-              <Swords className="w-14 h-14 text-rose-500 animate-pulse relative z-10 filter drop-shadow-[0_0_10px_#f43f5e]" />
-              <div className="absolute inset-0 bg-rose-500/20 blur-md rounded-full" />
+              <Swords className="w-14 h-14 text-accent-pink animate-pulse relative z-10 filter drop-shadow-[0_0_10px_rgba(240,57,140,0.5)]" />
+              <div className="absolute inset-0 bg-accent-pink/20 blur-md rounded-full" />
             </div>
             <div>
-              <h1 className="text-4xl font-black text-white tracking-wider uppercase bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-rose-400">Đấu trường Khoa học 1v1</h1>
-              <p className="text-zinc-500 text-xs mt-1 font-mono tracking-widest">[ COHERENT REAL-TIME SIMULATION PROTOCOL ]</p>
+              <h1 className="text-4xl font-black text-text-primary tracking-wider uppercase bg-clip-text bg-gradient-to-r from-text-primary via-accent-pink to-accent-cyan">Đấu trường Khoa học 1v1</h1>
+              <p className="text-text-secondary text-xs mt-1 font-mono tracking-widest">[ COHERENT REAL-TIME SIMULATION PROTOCOL ]</p>
             </div>
           </div>
-          <p className="text-zinc-400 text-sm max-w-lg text-center mb-10 leading-relaxed">
-            Chào mừng bạn đến với hệ thống đấu trí đối kháng khoa học chuẩn hóa. Giải quyết nhanh các thử thách thực hành vật lý, hóa học, toán học, sinh học để cướp ELO của đối thủ.
+          <p className="text-text-secondary text-sm max-w-xl text-center mb-6 leading-relaxed">
+            Bước vào đấu trường tri thức Sci-Fi đỉnh cao! So tài tốc độ và độ chính xác qua các bộ câu hỏi trắc nghiệm Toán - Lý - Hóa - Sinh chuẩn hóa (Trắc nghiệm, Đúng/Sai, Trả lời ngắn) cùng mô phỏng phòng lab Hóa học đối kháng.
           </p>
 
-          <div className="flex flex-col gap-8 w-full max-w-6xl mt-2">
+          {/* NÚT CỬA HÀNG TRANG BỊ MINI & SỐ DƯ PHA LÊ */}
+          <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
+            <button
+              onClick={() => {
+                playSound.click();
+                setIsShopOpen(true);
+              }}
+              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:to-yellow-600 text-black font-extrabold text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-amber-500/20 transition-all hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-2 border border-amber-300"
+            >
+              <Store className="w-5 h-5 text-black animate-pulse" />
+              <span>🛒 CỬA HÀNG TRANG BỊ SCI-FI</span>
+              <span className="px-2 py-0.5 rounded-full bg-black/20 text-black text-[10px] font-mono font-black">HIGH TIER</span>
+            </button>
+
+            <div className="px-4 py-2.5 rounded-2xl bg-bg-secondary border border-amber-500/30 flex items-center gap-2 font-mono shadow-md">
+              <CrystalIcon className="w-5 h-5" />
+              <span className="text-xs text-text-secondary">Pha Lê:</span>
+              <strong className="text-sm font-black text-amber-300">
+                {(personalization?.crystals !== undefined ? personalization.crystals : 500).toLocaleString()}
+              </strong>
+            </div>
+          </div>
+
+          {/* BĂNG 1 SLOT TRANG BỊ THẺ TRƯỚC TRẬN TẠI SẢNH (SLIM COMPACT BAR) */}
+          <div className="w-full max-w-6xl mb-6 bg-bg-secondary/90 border border-amber-500/30 rounded-2xl p-3 px-4 shadow-lg backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-3 relative overflow-hidden">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-500 dark:text-amber-400 shrink-0">
+                <Zap className="w-4 h-4 animate-pulse text-amber-600 dark:text-amber-300" />
+              </div>
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <span className="text-xs font-black text-amber-600 dark:text-amber-300 font-mono tracking-wider uppercase">THẺ TRƯỚC TRẬN:</span>
+                {preMatchEquippedCard ? (() => {
+                  const cardDef = getEquipmentById(preMatchEquippedCard);
+                  if (!cardDef) return null;
+                  return (
+                    <div className="flex items-center gap-2 bg-amber-500/15 border border-amber-500/50 px-3 py-1 rounded-xl shadow-sm">
+                      <span className="text-xs font-extrabold text-text-primary">{cardDef.name}</span>
+                      <span className="text-[10px] text-text-secondary hidden md:inline">({cardDef.description})</span>
+                      <button
+                        onClick={() => {
+                          playSound.click();
+                          setPreMatchEquippedCard(null);
+                        }}
+                        className="ml-1 p-0.5 rounded text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 cursor-pointer transition-all"
+                        title="Tháo thẻ này"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  );
+                })() : (
+                  <span className="text-xs text-text-secondary italic font-mono">[ Chưa trang bị ]</span>
+                )}
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                playSound.click();
+                setIsPreMatchPickerOpen(true);
+              }}
+              className="px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-700 dark:text-amber-300 font-bold text-xs transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 shrink-0"
+            >
+              <Layers className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+              <span>{preMatchEquippedCard ? 'Đổi Thẻ' : '+ Trang Bị Thẻ'} ({lobbyInventory.filter(i => { const c = getEquipmentById(i.cardId); return c && c.type === 'pre_match' && i.quantity > 0; }).length})</span>
+            </button>
+          </div>
+
+          {/* MODAL BẢNG CHỌN THẺ TRƯỚC TRẬN TỪ KHO ĐỒ */}
+          {isPreMatchPickerOpen && (
+            <div className="fixed inset-0 z-[99999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+              <div className="bg-bg-secondary border border-amber-500/40 rounded-3xl max-w-xl w-full p-6 shadow-2xl relative">
+                <div className="flex items-center justify-between border-b border-border-theme pb-4 mb-4">
+                  <div>
+                    <h3 className="text-base font-bold text-amber-600 dark:text-amber-300 font-mono flex items-center gap-2">
+                      <Zap className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+                      CHỌN THẺ BÀI SỬ DỤNG TRƯỚC TRẬN
+                    </h3>
+                    <p className="text-xs text-text-secondary mt-0.5">
+                      Danh sách các Thẻ Bài Nội Tại kích hoạt khi vừa bước vào trận đấu.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setIsPreMatchPickerOpen(false)}
+                    className="p-1.5 rounded-xl bg-bg-tertiary text-text-secondary hover:text-text-primary cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="max-h-[60vh] overflow-y-auto space-y-3 custom-scrollbar pr-1">
+                  {(() => {
+                    const preMatchItems = lobbyInventory.filter(i => {
+                      const c = getEquipmentById(i.cardId);
+                      return c && c.type === 'pre_match' && i.quantity > 0;
+                    });
+
+                    if (preMatchItems.length === 0) {
+                      return (
+                        <div className="text-center py-10 text-text-secondary text-xs font-mono">
+                          Bạn chưa có thẻ bài Trước Trận nào! Ghé <strong className="text-amber-600 dark:text-amber-400">🛒 Cửa hàng Sci-Fi</strong> để mua thêm (Thẻ Bảo Hộ ELO, Nam Châm Pha Lê, Cấm Thuật...).
+                        </div>
+                      );
+                    }
+
+                    return preMatchItems.map((invItem) => {
+                      const cardDef = getEquipmentById(invItem.cardId);
+                      if (!cardDef) return null;
+                      const isEquipped = preMatchEquippedCard === cardDef.id;
+
+                      return (
+                        <div
+                          key={cardDef.id}
+                          onClick={() => {
+                            playSound.click();
+                            if (isEquipped) {
+                              setPreMatchEquippedCard(null);
+                            } else {
+                              setPreMatchEquippedCard(cardDef.id);
+                            }
+                            setIsPreMatchPickerOpen(false);
+                          }}
+                          className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 cursor-pointer transition-all ${
+                            isEquipped
+                              ? 'bg-amber-500/15 border-amber-500/60'
+                              : 'bg-bg-tertiary border-border-theme hover:border-amber-500/40'
+                          }`}
+                        >
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="px-2 py-0.5 rounded text-[9px] font-bold font-mono uppercase bg-gradient-to-r from-amber-500 to-yellow-500 text-black">
+                                ⚡ Trước Trận
+                              </span>
+                              <h4 className="font-bold text-xs text-text-primary">{cardDef.name}</h4>
+                            </div>
+                            <p className="text-[11px] text-text-secondary">{cardDef.description}</p>
+                          </div>
+
+                          <div className="text-right shrink-0">
+                            <span className="text-xs font-mono font-bold text-amber-600 dark:text-amber-300 block">
+                              Sở hữu: <strong className="text-amber-700 dark:text-amber-400">{invItem.quantity}</strong>
+                            </span>
+                            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold">
+                              {isEquipped ? '✓ Đang trang bị' : '+ Trang bị'}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-6 w-full max-w-6xl mt-2">
+            {/* THẺ BANNER FEATURED GHÉP TRẬN NGẪU NHIÊN 1/4 MÔN */}
+            <div className="w-full bg-gradient-to-r dark:from-purple-950/80 dark:via-[#1e1738] dark:to-cyan-950/80 from-pink-500/10 via-purple-500/10 to-cyan-500/10 border border-accent-pink/50 hover:border-accent-pink rounded-3xl p-5 shadow-2xl relative overflow-hidden transition-all duration-300 group">
+              <div className="absolute -top-12 -right-12 w-48 h-48 bg-accent-pink/20 rounded-full blur-3xl group-hover:scale-125 transition-all pointer-events-none" />
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative z-10">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500 via-rose-500 to-purple-600 border border-white/30 flex items-center justify-center text-white shrink-0 shadow-lg shadow-pink-500/30 group-hover:rotate-12 transition-transform">
+                    <Sparkles className="w-7 h-7 animate-pulse text-amber-300" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase font-mono bg-gradient-to-r from-pink-500 to-purple-500 text-white animate-pulse">
+                        🔥 HOT - GHÉP TRẬN TỨC THỜI
+                      </span>
+                      <span className="text-[10px] text-cyan-400 font-mono font-bold">Tốc độ: &lt; 3 giây</span>
+                    </div>
+                    <h3 className="text-base font-black text-text-primary uppercase tracking-wide flex items-center gap-2">
+                      🎲 NGẪU NHIÊN 1/4 MÔN (TOÁN - LÝ - HÓA - SINH)
+                    </h3>
+                    <p className="text-xs text-text-secondary mt-0.5 max-w-xl">
+                      Tự động kết nối với đối thủ đang chờ ở BẤT KỲ môn học nào trong 4 phòng lab. Bắt đầu trận đấu ngay lập tức mà không phải chờ đúng môn!
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 w-full md:w-auto justify-end shrink-0">
+                  <button
+                    onClick={() => startMatching('random')}
+                    onMouseEnter={playSound.hover}
+                    className="px-6 py-3 bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-pink-500/30 transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2 border border-white/20"
+                  >
+                    <Swords className="w-4 h-4 text-amber-300 animate-bounce" /> ĐẤU HẠNG RANDOM
+                  </button>
+                  <button
+                    onClick={() => startFreePractice(['math', 'physics', 'chemistry', 'biology'][Math.floor(Math.random() * 4)])}
+                    onMouseEnter={playSound.hover}
+                    className="px-4 py-3 bg-bg-tertiary hover:bg-border-theme border border-border-theme text-text-primary rounded-2xl text-xs font-bold transition-all active:scale-95 cursor-pointer"
+                  >
+                    LUYỆN TẬP
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* Chọn phòng thí nghiệm đấu trí full-width */}
-            <div className="flex flex-col gap-6 w-full">
-              <h2 className="text-base font-bold text-zinc-300 flex items-center gap-2 font-mono tracking-wider uppercase border-b border-white/5 pb-3">
-                <span className="p-1.5 bg-rose-500/10 rounded-lg text-rose-400"><Swords className="w-4 h-4" /></span> CHỌN PHÒNG THÍ NGHIỆM ĐẤU TRÍ
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="flex flex-col gap-5 w-full">
+              <div className="flex items-center justify-between border-b border-border-theme pb-3">
+                <h2 className="text-sm font-black text-text-primary flex items-center gap-2 font-mono tracking-wider uppercase">
+                  <span className="p-1.5 bg-accent-pink/15 rounded-xl text-accent-pink border border-accent-pink/30"><Swords className="w-4 h-4" /></span> HOẶC CHỌN TRỰC TIẾP PHÒNG THÍ NGHIỆM MÔN HỌC
+                </h2>
+                <span className="text-[10px] text-text-secondary font-mono hidden sm:inline">Lựa chọn 1 trong 4 chuyên đề thực hành 1v1</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 {[
-                  { id: 'math', name: 'Đại số & Tọa độ Vector', color: 'from-amber-500/10 to-yellow-600/15 border-amber-500/20 hover:border-amber-500/40 text-amber-400 shadow-amber-500/5', icon: <Orbit className="w-8 h-8" />, spec: 'Toán Học', desc: 'Sử dụng các hệ thức vector không gian để bắn pháo plasma triệt tiêu các tiểu hành tinh đang lao xuống.' },
-                  { id: 'physics', name: 'Quang học Laser phản xạ', color: 'from-emerald-500/10 to-green-600/15 border-emerald-500/20 hover:border-emerald-500/40 text-emerald-400 shadow-emerald-500/5', icon: <Compass className="w-8 h-8 animate-spin" style={{ animationDuration: '6s' }} />, spec: 'Vật Lý', desc: 'Đóng mạch cấp nguồn, tính toán hướng xoay và góc phản xạ gương để đưa tia laser hội tụ vào lõi phản ứng.' },
-                  { id: 'chemistry', name: 'Chuẩn độ & Bốc hơi muối', color: 'from-pink-500/10 to-rose-600/15 border-pink-500/20 hover:border-pink-500/40 text-pink-400 shadow-pink-500/5', icon: <Beaker className="w-8 h-8" />, spec: 'Hóa Học', desc: 'Nhỏ dung dịch Axit và Bazơ trung hòa đúng tỷ lệ mol pH=7.0, gia nhiệt bay hơi kết tinh muối tinh khiết.' },
-                  { id: 'biology', name: 'Giải mã Di truyền & Tế bào', color: 'from-cyan-500/10 to-blue-600/15 border-cyan-500/20 hover:border-cyan-500/40 text-cyan-400 shadow-cyan-500/5', icon: <Sparkles className="w-8 h-8" />, spec: 'Sinh Học', desc: 'Đối kháng trả lời trắc nghiệm sinh học chuyên sâu về di truyền Mendel, phân bào, chức năng bào quan và quang hợp.' }
+                  { 
+                    id: 'math', 
+                    name: 'Đại Số & Hình Học Không Gian', 
+                    border: 'border-amber-500/30 hover:border-amber-500/80', 
+                    glow: 'group-hover:shadow-[0_0_25px_rgba(245,158,11,0.15)]',
+                    badgeBg: 'bg-amber-500/10 text-amber-300 border-amber-500/30',
+                    iconBg: 'bg-amber-500/15 border-amber-500/40 text-amber-400',
+                    icon: <Orbit className="w-6 h-6 animate-pulse" />, 
+                    spec: 'TOÁN HỌC', 
+                    desc: 'Thi đấu giải nhanh các dạng câu hỏi Trắc nghiệm 4 lựa chọn, Đúng/Sai và Trả lời ngắn về Đại số, Giải tích 3D và Vector.' 
+                  },
+                  { 
+                    id: 'physics', 
+                    name: 'Quang Học & Cơ Điện Lượng Tử', 
+                    border: 'border-emerald-500/30 hover:border-emerald-500/80', 
+                    glow: 'group-hover:shadow-[0_0_25px_rgba(16,185,129,0.15)]',
+                    badgeBg: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30',
+                    iconBg: 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400',
+                    icon: <Compass className="w-6 h-6 animate-spin" style={{ animationDuration: '6s' }} />, 
+                    spec: 'VẬT LÝ', 
+                    desc: 'Chinh phục ngân hàng câu hỏi đối kháng Vật lý chuyên sâu về Quang học, Cơ học lượng tử và Mạch điện năng lượng.' 
+                  },
+                  { 
+                    id: 'chemistry', 
+                    name: 'Chuẩn Độ & Thí Nghiệm Hóa Học', 
+                    border: 'border-pink-500/30 hover:border-pink-500/80', 
+                    glow: 'group-hover:shadow-[0_0_25px_rgba(236,72,153,0.15)]',
+                    badgeBg: 'bg-pink-500/10 text-pink-300 border-pink-500/30',
+                    iconBg: 'bg-pink-500/15 border-pink-500/40 text-pink-400',
+                    icon: <Beaker className="w-6 h-6" />, 
+                    spec: 'HÓA HỌC', 
+                    desc: 'Thực hành thao tác nhỏ dung dịch chuẩn độ Axit-Bazơ pH=7.0, gia nhiệt bốc hơi kết hợp trả lời trắc nghiệm Hóa học.' 
+                  },
+                  { 
+                    id: 'biology', 
+                    name: 'Di Truyền & Tế Bào Học', 
+                    border: 'border-cyan-500/30 hover:border-cyan-500/80', 
+                    glow: 'group-hover:shadow-[0_0_25px_rgba(6,182,212,0.15)]',
+                    badgeBg: 'bg-cyan-500/10 text-cyan-300 border-cyan-500/30',
+                    iconBg: 'bg-cyan-500/15 border-cyan-500/40 text-cyan-400',
+                    icon: <Sparkles className="w-6 h-6" />, 
+                    spec: 'SINH HỌC', 
+                    desc: 'Bứt phá tốc độ trả lời trắc nghiệm di truyền Mendel, cấu trúc ADN, phân bào và các chức năng bào quan tế bào.' 
+                  }
                 ].map((sub) => (
                   <div
                     key={sub.id}
-                    className={`flex flex-col items-start p-6 bg-gradient-to-br ${sub.color} border rounded-3xl text-left shadow-xl group relative overflow-hidden transition-all duration-300`}
+                    className={`flex flex-col items-start p-5 bg-bg-secondary border ${sub.border} rounded-3xl text-left shadow-xl group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 ${sub.glow}`}
                   >
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-white/2 rounded-full filter blur-xl transform translate-x-8 -translate-y-8 group-hover:scale-150 transition-all" />
-                    <div className="flex items-center justify-between w-full mb-5">
-                      <div className="p-2.5 bg-white/5 rounded-2xl border border-white/5 group-hover:border-white/10 transition-colors">
+                    <div className="flex items-center justify-between w-full mb-4">
+                      <div className={`p-2.5 rounded-2xl border ${sub.iconBg} transition-colors`}>
                         {sub.icon}
                       </div>
-                      <span className="text-[10px] font-bold font-mono tracking-widest px-2.5 py-1 bg-white/5 border border-white/5 rounded-full uppercase">{sub.spec}</span>
+                      <span className={`text-[9px] font-black font-mono tracking-wider px-2.5 py-1 rounded-full uppercase border ${sub.badgeBg}`}>
+                        {sub.spec}
+                      </span>
                     </div>
-                    <h3 className="text-sm font-bold mb-2 text-white transition-colors leading-snug h-[40px] overflow-hidden">{sub.name}</h3>
-                    <p className="text-[11px] text-zinc-400 leading-relaxed mb-6 flex-grow">{sub.desc}</p>
-                    <div className="grid grid-cols-2 gap-2 w-full mt-auto pt-4 border-t border-white/5">
+
+                    <h3 className="text-sm font-extrabold mb-1.5 text-text-primary group-hover:text-amber-400 transition-colors leading-snug h-[40px] overflow-hidden">
+                      {sub.name}
+                    </h3>
+                    <p className="text-[11px] text-text-secondary leading-relaxed mb-5 flex-grow font-sans">
+                      {sub.desc}
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-2 w-full mt-auto pt-3 border-t border-border-theme">
                       <button
                         onClick={() => startMatching(sub.id)}
                         onMouseEnter={playSound.hover}
-                        className="py-2.5 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white rounded-xl text-[10px] font-bold transition-all active:scale-95 flex items-center justify-center gap-1 shadow-md shadow-pink-500/10 cursor-pointer"
+                        className="py-2.5 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 flex items-center justify-center gap-1 shadow-md shadow-pink-500/20 cursor-pointer border border-white/10"
                       >
-                        ĐẤU HẠNG
+                        <Swords className="w-3.5 h-3.5" /> ĐẤU HẠNG
                       </button>
                       <button
                         onClick={() => startFreePractice(sub.id)}
                         onMouseEnter={playSound.hover}
-                        className="py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white rounded-xl text-[10px] font-bold transition-all active:scale-95 flex items-center justify-center gap-1 cursor-pointer"
+                        className="py-2.5 bg-bg-tertiary hover:bg-border-theme border border-border-theme text-text-secondary hover:text-text-primary rounded-xl text-[10px] font-bold transition-all active:scale-95 flex items-center justify-center gap-1 cursor-pointer"
                       >
                         LUYỆN TẬP
                       </button>
@@ -2256,16 +3945,21 @@ function DauTruongContent() {
             </div>
 
             {/* PVP DASHBOARD & HISTORY */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch mt-4 w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch mt-3 w-full">
               {/* PvP Stats Card (5/12) */}
-              <div className="lg:col-span-5 bg-gradient-to-br from-[#2a2c3a] to-[#1c1e29]/90 border border-white/5 p-6 rounded-3xl shadow-xl flex flex-col justify-between relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="lg:col-span-5 bg-bg-secondary border border-border-theme p-6 rounded-3xl shadow-2xl flex flex-col justify-between relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-36 h-36 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-36 h-36 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
                 
                 <div className="relative z-10 w-full">
-                  <h3 className="text-xs font-black text-pink-450 dark:text-pink-400 uppercase tracking-widest mb-4 font-mono">Chỉ số PvP cá nhân</h3>
+                  <div className="flex items-center justify-between border-b border-border-theme pb-3 mb-5">
+                    <h3 className="text-xs font-black text-amber-600 dark:text-amber-300 uppercase tracking-widest font-mono flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-amber-500 dark:text-amber-400" /> CHỈ SỐ PVP CÁ NHÂN
+                    </h3>
+                    <span className="text-[10px] text-text-secondary font-mono">SEASON 1</span>
+                  </div>
                   
-                  <div className="flex items-center gap-4 mb-6">
+                  <div className="flex items-center gap-4 mb-6 bg-bg-tertiary p-3.5 rounded-2xl border border-border-theme">
                     <div 
                       onClick={() => {
                         playSound.click();
@@ -2274,36 +3968,37 @@ function DauTruongContent() {
                       className="relative shrink-0 group/avatar cursor-pointer"
                       title="Thiết kế Avatar Chibi cá nhân"
                     >
-                      <AvatarFrame frame={personalization.avatarFrame} className="w-20 h-20 text-3xl transition-all duration-300 group-hover/avatar:scale-105">
+                      <AvatarFrame frame={personalization.avatarFrame} className="w-16 h-16 text-2xl transition-all duration-300 group-hover/avatar:scale-105">
                         {personalization.avatarParts ? (
                           <STEMAvatarSVG parts={personalization.avatarParts} className="w-full h-full transform scale-90" />
                         ) : (
-                          <User className="w-10 h-10 text-white" />
+                          <User className="w-8 h-8 text-text-primary" />
                         )}
-                        
-                        {/* Edit overlay */}
-                        <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover/avatar:opacity-100 transition-all duration-300 flex items-center justify-center z-20">
-                          <span className="text-[10px] font-black text-white uppercase tracking-wider">Thiết kế</span>
+                        <div className="absolute inset-0 bg-black/70 rounded-full opacity-0 group-hover/avatar:opacity-100 transition-all duration-300 flex items-center justify-center z-20">
+                          <span className="text-[8px] font-black text-amber-300 uppercase tracking-wider">Sửa</span>
                         </div>
                       </AvatarFrame>
                     </div>
+
                     <div>
-                      <h4 className="text-base font-bold text-white tracking-wide">{user?.displayName || 'Học viên'}</h4>
-                      <span className="text-[9px] px-2 py-0.5 rounded bg-pink-500/10 border border-pink-500/20 text-pink-450 dark:text-pink-400 font-bold uppercase tracking-wider">
-                        {getTitleLabel(personalization.activeTitle)}
-                      </span>
-                      <p className="text-[9px] text-zinc-500 mt-1.5 font-mono">Cấp độ: {personalization.level}</p>
+                      <h4 className="text-sm font-extrabold text-text-primary tracking-wide">{user?.displayName || 'Học viên'}</h4>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[9px] px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-300 font-extrabold uppercase font-mono tracking-wider">
+                          {getTitleLabel(personalization.activeTitle)}
+                        </span>
+                        <span className="text-[10px] text-text-secondary font-mono">Cấp {personalization.level}</span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-3 bg-white/2 border border-white/5 rounded-2xl p-4 text-center">
+                  <div className="grid grid-cols-3 gap-2.5 bg-bg-tertiary border border-border-theme rounded-2xl p-3.5 text-center">
                     <div>
-                      <p className="text-[10px] text-zinc-500 font-mono">Điểm Elo</p>
-                      <p className="text-base font-black text-pink-400 mt-0.5">{personalization.elo}</p>
+                      <p className="text-[10px] text-text-secondary font-mono">Điểm Elo</p>
+                      <p className="text-base font-black text-amber-600 dark:text-amber-400 mt-0.5">{personalization.elo}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-zinc-500 font-mono">Tỷ lệ thắng</p>
-                      <p className="text-base font-black text-emerald-400 mt-0.5">
+                      <p className="text-[10px] text-text-secondary font-mono">Tỷ lệ thắng</p>
+                      <p className="text-base font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
                         {personalization.wins + personalization.losses > 0
                           ? `${Math.round((personalization.wins / (personalization.wins + personalization.losses)) * 100)}%`
                           : '0%'
@@ -2311,67 +4006,69 @@ function DauTruongContent() {
                       </p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-zinc-500 font-mono">Trận thắng</p>
-                      <p className="text-base font-black text-white mt-0.5">{personalization.wins}</p>
+                      <p className="text-[10px] text-text-secondary font-mono">Trận thắng</p>
+                      <p className="text-base font-black text-text-primary mt-0.5">{personalization.wins}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="border-t border-white/5 pt-4 mt-6 flex justify-between items-center relative z-10 w-full">
-                  <div className="flex items-center gap-1">
-                    <span className="text-[10px] text-zinc-500 font-mono">Trận thua: {personalization.losses}</span>
+                <div className="border-t border-border-theme pt-3.5 mt-5 flex justify-between items-center relative z-10 w-full">
+                  <div className="flex items-center gap-1 text-[11px] text-text-secondary font-mono">
+                    <span>Trận thua: <strong className="text-rose-500 dark:text-rose-400">{personalization.losses}</strong></span>
                   </div>
-                  <div className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-xl">
-                    <Flame className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-                    <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider">Chuỗi: 0</span>
+                  <div className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-xl">
+                    <Flame className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 animate-pulse" />
+                    <span className="text-[10px] font-black text-amber-700 dark:text-amber-300 uppercase tracking-wider">Chuỗi: 0</span>
                   </div>
                 </div>
               </div>
 
               {/* PvP Combat Log (7/12) */}
-              <div className="lg:col-span-7 bg-[#1e202b]/80 backdrop-blur-2xl border border-white/5 p-6 rounded-3xl shadow-xl flex flex-col justify-between">
+              <div className="lg:col-span-7 bg-bg-secondary border border-border-theme p-6 rounded-3xl shadow-2xl flex flex-col justify-between">
                 <div>
-                  <h3 className="text-xs font-black text-zinc-400 uppercase tracking-widest mb-4 font-mono flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-rose-500" /> LỊCH SỬ THI ĐẤU PvP GẦN ĐÂY
-                  </h3>
+                  <div className="flex items-center justify-between border-b border-border-theme pb-3 mb-4">
+                    <h3 className="text-xs font-black text-text-primary uppercase tracking-widest font-mono flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-pink-400" /> LỊCH SỬ THI ĐẤU PVP GẦN ĐÂY
+                    </h3>
+                    <span className="text-[10px] text-text-secondary font-mono">10 trận đấu mới nhất</span>
+                  </div>
                   
-                  <div className="space-y-3">
+                  <div className="space-y-2.5 max-h-[220px] overflow-y-auto custom-scrollbar pr-1">
                     {loadingHistory ? (
-                      <div className="flex flex-col items-center justify-center py-10 text-zinc-500 text-xs font-mono">
-                        <Orbit className="w-6 h-6 animate-spin text-zinc-500 mb-2" />
+                      <div className="flex flex-col items-center justify-center py-10 text-text-secondary text-xs font-mono">
+                        <Orbit className="w-6 h-6 animate-spin text-pink-400 mb-2" />
                         ĐANG TẢI LỊCH SỬ ĐẤU...
                       </div>
                     ) : realHistory.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-10 text-zinc-550 dark:text-zinc-500 text-xs font-mono border border-dashed border-white/5 rounded-2xl">
-                        CHƯA CÓ DỮ LIỆU ĐẤU HẠNG PvP
+                      <div className="flex flex-col items-center justify-center py-10 text-text-secondary text-xs font-mono border border-dashed border-border-theme rounded-2xl">
+                        CHƯA CÓ DỮ LIỆU ĐẤU HẠNG PVP
                       </div>
                     ) : (
                       realHistory.map((log, idx) => (
-                        <div key={log.id || idx} className="flex items-center justify-between p-3 bg-white/2 border border-white/5 rounded-2xl hover:border-white/10 hover:bg-white/5 transition-colors">
+                        <div key={log.id || idx} className="flex items-center justify-between p-3 bg-bg-tertiary border border-border-theme rounded-2xl hover:border-pink-500/40 transition-all">
                           <div className="flex items-center gap-3">
                             <div className="shrink-0">
                               <AvatarFrame frame={log.avatarFrame} className="w-9 h-9 text-xs">
                                 {log.avatarParts ? (
                                   <STEMAvatarSVG parts={log.avatarParts} className="w-full h-full transform scale-90" />
                                 ) : (
-                                  <User className="w-4 h-4 text-white" />
+                                  <User className="w-4 h-4 text-text-primary" />
                                 )}
                               </AvatarFrame>
                             </div>
                             <div>
                               <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-white">{log.opponent}</span>
-                                <span className="text-[8px] px-1.5 py-0.5 bg-white/5 border border-white/5 text-zinc-400 rounded-full font-mono uppercase">{log.subject}</span>
+                                <span className="text-xs font-bold text-text-primary">{log.opponent}</span>
+                                <span className="text-[8px] px-2 py-0.5 bg-pink-500/10 border border-pink-500/20 text-pink-300 rounded-full font-mono uppercase">
+                                  {log.subject === 'math' ? 'Toán' : log.subject === 'physics' ? 'Vật lý' : log.subject === 'chemistry' ? 'Hóa học' : log.subject === 'biology' ? 'Sinh học' : log.subject}
+                                </span>
                               </div>
-                              <span className="text-[9px] text-zinc-500">{log.time}</span>
+                              <span className="text-[9px] text-text-secondary">{log.time}</span>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className={`text-[10px] font-bold font-mono ${log.result === 'win' ? 'text-emerald-400' : 'text-rose-500'}`}>
-                              {log.result === 'win' ? 'THẮNG' : 'THUA'}
-                            </span>
-                            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg ${log.result === 'win' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-450'}`}>
-                              {log.eloChange} ELO
+                            <span className={`text-[10px] font-black font-mono px-2.5 py-1 rounded-xl ${log.result === 'win' ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-400' : 'bg-rose-500/15 border border-rose-500/30 text-rose-400'}`}>
+                              {log.result === 'win' ? 'THẮNG' : 'THUA'} {log.eloChange} ELO
                             </span>
                           </div>
                         </div>
@@ -2380,7 +4077,7 @@ function DauTruongContent() {
                   </div>
                 </div>
 
-                <div className="text-[10px] text-zinc-500 italic mt-4 text-center">
+                <div className="text-[10px] text-text-secondary italic mt-3 text-center border-t border-border-theme pt-2.5">
                   * Kết quả đấu hạng sẽ được cộng/trừ ELO và EXP trực tiếp vào Hồ sơ của bạn sau mỗi trận.
                 </div>
               </div>
@@ -2394,28 +4091,28 @@ function DauTruongContent() {
         <div className="flex flex-col items-center justify-center py-20 animate-in fade-in duration-300">
           <div className="relative w-72 h-72 mb-10 flex items-center justify-center">
             {/* Holographic Radar Circle */}
-            <div className="absolute inset-0 border border-rose-500/10 rounded-full animate-ping" style={{ animationDuration: '2s' }} />
-            <div className="absolute inset-4 border border-rose-500/20 rounded-full animate-pulse" />
-            <div className="absolute inset-10 border border-rose-500/30 rounded-full" />
-            <div className="absolute inset-20 border border-rose-500/40 border-dashed rounded-full" />
-            <div className="absolute inset-0 rounded-full border border-rose-500/20 bg-gradient-to-t from-transparent via-rose-500/5 to-rose-500/15 animate-[spin_4s_linear_infinite]" />
+            <div className="absolute inset-0 border border-accent-pink/20 rounded-full animate-ping" style={{ animationDuration: '2s' }} />
+            <div className="absolute inset-4 border border-accent-pink/30 rounded-full animate-pulse" />
+            <div className="absolute inset-10 border border-accent-pink/40 rounded-full" />
+            <div className="absolute inset-20 border border-accent-pink/50 border-dashed rounded-full" />
+            <div className="absolute inset-0 rounded-full border border-accent-pink/20 bg-gradient-to-t from-transparent via-accent-pink/5 to-accent-pink/15 animate-[spin_4s_linear_infinite]" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center">
-                <Swords className="w-8 h-8 text-rose-500 animate-pulse" />
+              <div className="w-16 h-16 rounded-full bg-accent-pink/10 border border-accent-pink/30 flex items-center justify-center">
+                <Swords className="w-8 h-8 text-accent-pink animate-pulse" />
               </div>
             </div>
           </div>
           
-          <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-1 font-mono">CONNECTING TO LOBBY SERVER...</h2>
-          <p className="text-rose-400/80 text-xs font-mono tracking-widest mb-6 uppercase">ACTIVE DOMAIN: STOCHIOMETRIC {arenaState.subject} LABORATORY</p>
+          <h2 className="text-2xl font-black text-text-primary tracking-widest uppercase mb-1 font-mono">CONNECTING TO LOBBY SERVER...</h2>
+          <p className="text-accent-pink text-xs font-mono tracking-widest mb-6 uppercase">ACTIVE DOMAIN: STOCHIOMETRIC {arenaState.subject} LABORATORY</p>
           
-          <div className="flex items-center gap-2.5 px-4.5 py-2.5 bg-white/5 border border-white/5 rounded-2xl text-xs text-zinc-400 font-mono mb-10">
-            <Timer className="w-4 h-4 animate-spin text-rose-400" /> SECONDS ELAPSED: {matchmakingTime}s
+          <div className="flex items-center gap-2.5 px-4.5 py-2.5 bg-bg-secondary border border-border-theme rounded-2xl text-xs text-text-secondary font-mono mb-10">
+            <Timer className="w-4 h-4 animate-spin text-accent-pink" /> SECONDS ELAPSED: {matchmakingTime}s
           </div>
 
           {matchmakingError && (
-            <div className="mb-8 px-5 py-3.5 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-400 text-xs font-mono max-w-md text-center flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <AlertTriangle className="w-4 h-4 shrink-0 text-red-500 animate-bounce" />
+            <div className="mb-8 px-5 py-3.5 bg-danger/10 border border-danger/30 rounded-2xl text-danger text-xs font-mono max-w-md text-center flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <AlertTriangle className="w-4 h-4 shrink-0 text-danger animate-bounce" />
               <span>{matchmakingError}</span>
             </div>
           )}
@@ -2423,7 +4120,7 @@ function DauTruongContent() {
           <button
             onMouseEnter={playSound.hover}
             onClick={cancelMatching}
-            className="px-8 py-3 bg-[#1e202b] hover:bg-rose-600 hover:text-white border border-white/5 hover:border-rose-500 text-zinc-400 font-bold rounded-2xl transition-all cursor-pointer shadow-lg active:scale-95 flex items-center gap-2"
+            className="px-8 py-3 bg-bg-secondary hover:bg-danger hover:text-white border border-border-theme hover:border-danger text-text-primary font-bold rounded-2xl transition-all cursor-pointer shadow-lg active:scale-95 flex items-center gap-2"
           >
             <RotateCcw className="w-4 h-4" /> THOÁT HÀNG ĐỢI
           </button>
@@ -2546,491 +4243,726 @@ function DauTruongContent() {
         </div>
       )}
 
+      {/* 2.5 GIAI ĐOẠN CHỌN TRANG BỊ TRƯỚC TRẬN (30S) */}
+      {arenaState.status === 'equipment_selecting' && (
+        <EquipmentSelectionView 
+          user={user}
+          activeRoomId={activeRoomId}
+          isPlayer1Role={isPlayer1Role}
+          roomData={latestRoomDataRef.current}
+          preMatchCardId={preMatchEquippedCard}
+          onConfirmed={() => setArenaStatus('playing')}
+        />
+      )}
+
       {/* 3. TRẠNG THÁI PLAYING: SPLIT-SCREEN LAB ARENA */}
       {arenaState.status === 'playing' && (
-        <div className="fixed inset-0 w-screen h-screen overflow-hidden p-6 bg-[#0f111a] flex flex-col lg:flex-row gap-6 z-[99999] animate-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 w-screen h-screen overflow-hidden p-6 bg-bg-primary flex flex-col lg:flex-row gap-6 z-[99999] animate-in zoom-in-95 duration-300">
           
+          {/* TOAST CẢNH BÁO VI PHẠM CHUYỂN TAB (XỬ PHẠT TỰ ĐỘNG) */}
+          {tabPenaltyWarning && (
+            <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[999999] bg-gradient-to-r from-rose-600 to-red-700 text-white px-6 py-3.5 rounded-2xl border-2 border-rose-400 shadow-[0_0_35px_rgba(225,29,72,0.8)] flex items-center gap-3 font-mono animate-in slide-in-from-top duration-300 pointer-events-none">
+              <AlertTriangle className="w-6 h-6 text-yellow-300 animate-bounce shrink-0" />
+              <div>
+                <div className="font-black text-sm uppercase tracking-wider text-yellow-300">
+                  ⚠️ CẢNH BÁO VI PHẠM RỜI MÀN HÌNH (LẦN {tabPenaltyWarning.count})!
+                </div>
+                <div className="text-xs text-rose-100 mt-0.5">
+                  Bạn đã rời màn hình! Bị trừ <span className="font-black text-white bg-rose-950 px-1.5 py-0.5 rounded border border-rose-400">-{tabPenaltyWarning.deducted} GIÂY</span> khỏi thời gian còn lại.
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* CỘT TRÁI (COL-SPAN-8): THÍ NGHIỆM TƯƠNG TÁC CỦA NGƯỜI CHƠI */}
-          <div className="flex-1 flex flex-col bg-[#1e202b]/90 backdrop-blur-xl border border-white/5 rounded-3xl p-4 lg:p-5 pb-3 lg:pb-4 shadow-2xl overflow-hidden relative h-full">
+          <div className="flex-1 flex flex-col bg-bg-secondary/95 backdrop-blur-xl border border-border-theme rounded-3xl p-4 lg:p-5 pb-3 lg:pb-4 shadow-2xl overflow-hidden relative h-full">
+            
+            {/* OVERLAY HIỆU ỨNG ĐÔNG BĂNG HOẶC MÙ SƯƠNG TRÊN MÀN HÌNH BẢN THÂN */}
+            {(() => {
+              const isP1 = isPlayer1Role;
+              const activeData = currentRoomData || latestRoomDataRef.current;
+              const myEffects = isP1 ? activeData?.activeEffects?.p1 : activeData?.activeEffects?.p2;
+              const isFrozen = myEffects?.frozenUntil && myEffects.frozenUntil > Date.now();
+              const isFogged = myEffects?.fogUntil && myEffects.fogUntil > Date.now();
+
+              return (
+                <>
+                  {isFrozen && (
+                    <div className="absolute inset-0 z-[50] bg-cyan-950/70 backdrop-blur-md flex flex-col items-center justify-center pointer-events-auto rounded-3xl animate-fadeIn">
+                      <Snowflake className="w-16 h-16 text-cyan-400 animate-spin-slow mb-3" />
+                      <h3 className="text-xl font-black text-cyan-300 font-mono uppercase tracking-widest animate-pulse">
+                        BẠN ĐÃ BỊ ĐÔNG BĂNG THỜI GIAN!
+                      </h3>
+                      <p className="text-xs text-cyan-200 font-mono mt-1">
+                        Tất cả thao tác màn hình bị khóa tạm thời trong 3 giây...
+                      </p>
+                    </div>
+                  )}
+
+                  {isFogged && (
+                    <div className="absolute inset-0 z-[40] bg-zinc-950/80 backdrop-blur-lg flex flex-col items-center justify-center pointer-events-none rounded-3xl animate-fadeIn">
+                      <CloudFog className="w-16 h-16 text-zinc-400 animate-bounce mb-3" />
+                      <h3 className="text-xl font-black text-zinc-300 font-mono uppercase tracking-widest">
+                        MÀN HÌNH BỊ MÙ SƯƠNG CHE PHỦ!
+                      </h3>
+                      <p className="text-xs text-zinc-400 font-mono mt-1">
+                        Hiệu ứng sương mù gây cản trở tầm nhìn... (Dùng Thẻ Giải Trừ để xóa ngay)
+                      </p>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
             
             {/* Header Mini Game */}
-            <div className="flex justify-between items-center border-b border-white/5 pb-4 mb-6">
+            <div className="flex justify-between items-center border-b border-border-theme pb-4 mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-pink-500/10 border border-pink-500/20 rounded-xl flex items-center justify-center text-pink-400 shrink-0">
+                <div className="w-10 h-10 bg-accent-pink/10 border border-accent-pink/20 rounded-xl flex items-center justify-center text-accent-pink shrink-0">
                   <Beaker className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-md font-bold text-white leading-tight">
+                  <h2 className="text-md font-bold text-text-primary leading-tight">
                     {arenaState.subject === 'chemistry' && 'HÓA HỌC: BẢN ĐỒ THỰC HÀNH HÓA HỌC CHUYÊN SÂU'}
                     {arenaState.subject === 'physics' && 'VẬT LÝ: THIẾT KẾ MẠCH QUANG HỌC LASER'}
                     {arenaState.subject === 'math' && 'TOÁN HỌC: HỆ TỌA ĐỘ PHÒNG THỦ VŨ TRỤ'}
                     {arenaState.subject === 'biology' && 'SINH HỌC: MÃ TÁI TỔ HỢP ADN XOẮN KÉP'}
                   </h2>
-                  <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">LABORATORY EXPERIMENT INTERFACE</span>
+                  <span className="text-[10px] text-text-secondary font-mono uppercase tracking-widest">
+                    {activeRoomId === 'local_sandbox' ? 'PHÒNG LUYỆN TẬP TỰ DO [PRACTICE]' : 'LABORATORY EXPERIMENT INTERFACE [1V1 MATCH]'}
+                  </span>
                 </div>
               </div>
               
-              {/* Timer đếm ngược */}
-              <div className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold font-mono border ${
-                arenaState.timeRemaining <= 15 
-                  ? 'bg-rose-500/20 text-rose-400 border-rose-500/30 animate-pulse' 
-                  : 'bg-white/5 text-zinc-300 border-white/5'
-              }`}>
-                <Timer className="w-4 h-4 shrink-0 text-pink-400" /> SEC: {arenaState.timeRemaining}s
+              <div className="flex items-center gap-3">
+                {/* Nút thoát dành riêng cho chế độ Luyện Tập */}
+                {activeRoomId === 'local_sandbox' && (
+                  <button
+                    onClick={() => {
+                      playSound.click();
+                      setArenaStatus('idle');
+                      setActiveRoomId(null);
+                    }}
+                    className="px-3.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" /> THOÁT PHÒNG
+                  </button>
+                )}
+
+                {/* Timer đếm ngược (Chế độ đấu hạng) hoặc Vô hạn (Luyện tập) */}
+                <div className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold font-mono ${
+                  activeRoomId === 'local_sandbox'
+                    ? 'bg-bg-tertiary text-text-primary border-border-theme'
+                    : arenaState.timeRemaining <= 15 
+                      ? 'bg-rose-500/20 text-rose-400 border-rose-500/30 animate-pulse' 
+                      : 'bg-bg-tertiary text-text-primary border-border-theme'
+                }`}>
+                  <Timer className="w-4 h-4 shrink-0 text-accent-pink" /> 
+                  {activeRoomId === 'local_sandbox' ? 'THỜI GIAN: VÔ HẠN' : `SEC: ${arenaState.timeRemaining}s`}
+                </div>
               </div>
             </div>
 
-            {/* PHÒNG LAB 1: HÓA HỌC (QuantumLab v4.0 Embedded Sandbox) */}
-            {arenaState.subject === 'chemistry' && (() => {
-              const activeMission = chemMission;
-              return (
-                <div className="flex-1 flex flex-col gap-4 py-2 w-full overflow-y-auto h-full pr-1 scrollbar-thin scrollbar-thumb-pink-500/20 scrollbar-track-transparent">
-                  {/* Dashboard Nhiệm vụ Hóa Học Đấu Trường */}
-                  {activeMission && (
-                    showChemInstructions ? (
-                      <div className="bg-gradient-to-r from-pink-950/40 via-[#14151f] to-rose-950/30 border border-pink-500/20 rounded-3xl p-5 shadow-2xl flex flex-col md:flex-row gap-5 items-start justify-between shrink-0 relative transition-all duration-300">
-                        {/* Nút ẩn chi tiết */}
-                        <button 
-                          onClick={() => setShowChemInstructions(false)}
-                          className="absolute top-4 right-4 text-[10px] text-zinc-400 hover:text-zinc-200 font-mono bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-xl transition-all z-10"
-                        >
-                          Thu gọn ▴
-                        </button>
-                        
-                        <div className="flex-1 pr-12">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="px-2.5 py-0.5 bg-rose-500/10 border border-rose-500/30 rounded-full text-[9px] font-bold text-rose-400 tracking-wider uppercase font-mono animate-pulse">
-                              MỤC TIÊU ĐẤU TRƯỜNG
-                            </span>
-                            <span className="text-[10px] text-zinc-500 font-mono">ID: {activeMission.id}</span>
-                          </div>
-                          <h3 className="text-md font-black text-white flex items-center gap-2">
-                            🧪 {activeMission.name}
-                          </h3>
-                          <p className="text-zinc-400 text-xs mt-1.5 leading-relaxed font-sans">
-                            {activeMission.instructions}
-                          </p>
-                        </div>
-                        
-                        <div className="w-full md:w-80 shrink-0 bg-black/40 border border-white/5 p-4 rounded-2xl flex flex-col justify-between font-mono gap-3 select-none">
-                          <div>
-                            <span className="text-[9px] text-zinc-500 block uppercase tracking-wider mb-1">Phương trình mục tiêu</span>
-                            <div className="text-xs font-bold text-pink-400 bg-pink-500/5 border border-pink-500/10 py-1.5 px-3 rounded-xl tracking-wide text-center">
-                              {activeMission.equation}
-                            </div>
-                          </div>
-                          <div className="flex justify-between items-center text-xs">
-                            <span className="text-zinc-500 font-sans">Mức độ nguy hiểm:</span>
-                            <span className="text-[10px] font-bold text-rose-400 uppercase tracking-widest bg-rose-500/10 border border-rose-500/20 px-2.5 py-0.5 rounded-full">
-                              {activeMission.hazard}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="bg-[#1e202b]/60 border border-pink-500/10 rounded-2xl px-4 py-2.5 flex items-center justify-between shrink-0 transition-all duration-300">
-                        <div className="flex items-center gap-3">
-                          <span className="px-2 py-0.5 bg-rose-500/10 border border-rose-500/20 rounded-full text-[9px] font-bold text-rose-400 font-mono uppercase tracking-wider">
-                            MỤC TIÊU
-                          </span>
-                          <span className="text-xs font-bold text-white">🧪 {activeMission.name}</span>
-                          <span className="text-[10px] text-zinc-500 font-mono hidden md:inline">| Phương trình: {activeMission.equation}</span>
-                        </div>
-                        <button 
-                          onClick={() => setShowChemInstructions(true)}
-                          className="text-[10px] text-pink-400 hover:text-pink-300 font-mono bg-pink-500/10 hover:bg-pink-500/20 px-3 py-1 rounded-xl transition-all"
-                        >
-                          Hiện chi tiết ▾
-                        </button>
-                      </div>
-                    )
-                  )}
+            {/* PHÒNG LAB 2: VẬT LÝ (Multi-format Infinite Arena) */}
+            {arenaState.subject === 'physics' && (() => {
+              const currQ = physGame.questions[physGame.currentQ % (physGame.questions.length || 1)] || {};
+              const qType = currQ.type || 'mcq';
 
-                  {/* QuantumLab Sandbox Container */}
-                  <div className="w-full h-[680px] shrink-0 rounded-3xl border border-white/10 bg-black overflow-hidden shadow-2xl relative">
-                    {/* Lab Frame */}
-                    <iframe 
-                      src="/labs/lab-ktra15p/dist/index.html?v=4.0.4&mode=arena" 
-                      className="absolute inset-0 w-full h-full border-none"
-                      title="QuantumLab v4.0 Sandbox"
-                      id="chemistry-lab-iframe"
-                    />
+              return (
+                <div className="flex-1 flex flex-col items-stretch py-4 w-full overflow-hidden h-full">
+                  <div className="flex-1 flex flex-col justify-between bg-bg-tertiary rounded-3xl border border-border-theme p-6 shadow-inner select-none h-full overflow-y-auto">
+                    <div>
+                      {/* Header bar */}
+                      <div className="flex items-center justify-between mb-6">
+                        <span className="px-3 py-1 bg-cyan-500/10 border border-cyan-500/20 rounded-full text-xs font-bold text-cyan-400 flex items-center gap-1.5">
+                          ⚛️ Vật lý {qType === 'tf' ? '• Đúng / Sai' : qType === 'sa' ? '• Trả lời ngắn' : '• Trắc nghiệm'}
+                        </span>
+                        <div className="flex items-center gap-4 text-xs font-mono">
+                          <span className="text-emerald-400 font-bold">ĐÃ LÀM ĐÚNG: {physGame.score} CÂU</span>
+                          <span className="text-text-secondary">CÂU HỎI #{physGame.currentQ + 1}</span>
+                        </div>
+                      </div>
+
+                      {/* Question text / context */}
+                      <div className="bg-bg-secondary p-6 rounded-2xl border border-border-theme mb-6">
+                        {qType === 'tf' ? (
+                          <div>
+                            <span className="text-[10px] text-cyan-400 font-bold block uppercase mb-1 tracking-wider">[Ngữ cảnh / Đề bài]</span>
+                            <h3 className="text-base font-bold text-text-primary leading-relaxed" 
+                                dangerouslySetInnerHTML={{ __html: formatMathText(currQ.context || currQ.text || 'Đang tải câu hỏi...') }} />
+                          </div>
+                        ) : (
+                          <h3 className="text-base font-bold text-text-primary leading-relaxed" 
+                              dangerouslySetInnerHTML={{ __html: formatMathText(currQ.text || currQ.content || 'Đang tải câu hỏi...') }} />
+                        )}
+                      </div>
+
+                      {/* Render question interactions according to format */}
+                      {qType === 'tf' ? (
+                        <div className="flex flex-col gap-4">
+                          {(currQ.statements || []).map((stmt, sIdx) => {
+                            const userAns = physTfAnswers[sIdx];
+                            const correctVal = Array.isArray(currQ.correct) ? currQ.correct[sIdx] : null;
+                            return (
+                              <div key={sIdx} className="bg-bg-secondary p-4 rounded-xl border border-border-theme flex flex-col md:flex-row md:items-center justify-between gap-3 transition-all hover:border-cyan-500/20">
+                                <div className="flex-1 flex gap-3 items-start">
+                                  <span className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-[10px] font-mono shrink-0 font-bold text-cyan-400">
+                                    {String.fromCharCode(97 + sIdx)}
+                                  </span>
+                                  <p className="text-xs text-text-primary leading-relaxed" dangerouslySetInnerHTML={{ __html: formatMathText(stmt) }} />
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <button
+                                    disabled={physRevealed}
+                                    onClick={() => {
+                                      const next = [...physTfAnswers];
+                                      next[sIdx] = true;
+                                      setPhysTfAnswers(next);
+                                    }}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold font-mono transition-all cursor-pointer border ${
+                                      userAns === true
+                                        ? physRevealed 
+                                          ? correctVal === true ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' : 'bg-rose-500/20 border-rose-500 text-rose-400'
+                                          : 'bg-cyan-500/20 border-cyan-500 text-cyan-400'
+                                        : physRevealed && correctVal === true
+                                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500/60 opacity-50'
+                                          : 'bg-bg-tertiary border-border-theme text-text-secondary hover:text-text-primary'
+                                    }`}
+                                  >
+                                    ĐÚNG
+                                  </button>
+                                  <button
+                                    disabled={physRevealed}
+                                    onClick={() => {
+                                      const next = [...physTfAnswers];
+                                      next[sIdx] = false;
+                                      setPhysTfAnswers(next);
+                                    }}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold font-mono transition-all cursor-pointer border ${
+                                      userAns === false
+                                        ? physRevealed 
+                                          ? correctVal === false ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' : 'bg-rose-500/20 border-rose-500 text-rose-400'
+                                          : 'bg-cyan-500/20 border-cyan-500 text-cyan-400'
+                                        : physRevealed && correctVal === false
+                                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500/60 opacity-50'
+                                          : 'bg-bg-tertiary border-border-theme text-text-secondary hover:text-text-primary'
+                                    }`}
+                                  >
+                                    SAI
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                          {!physRevealed && (
+                            <button
+                              onClick={() => handleTfSubmit('physics')}
+                              className="mt-2 w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold rounded-2xl shadow-lg shadow-cyan-500/20 transition-all cursor-pointer text-xs uppercase tracking-wider flex items-center justify-center gap-2"
+                            >
+                              Xác nhận kết quả Đúng/Sai
+                            </button>
+                          )}
+                        </div>
+                      ) : qType === 'sa' ? (
+                        <div className="flex flex-col gap-4">
+                          <div className="flex items-center gap-3">
+                            <input 
+                              type="text"
+                              value={saInput}
+                              disabled={physRevealed}
+                              onChange={(e) => setSaInput(e.target.value)}
+                              placeholder="Nhập giá trị số hoặc đáp án câu hỏi..."
+                              className="flex-1 bg-bg-secondary border border-border-theme rounded-2xl px-5 py-3.5 text-sm text-text-primary placeholder:text-zinc-500 focus:outline-none focus:border-cyan-500 font-mono transition-all"
+                              onKeyDown={(e) => { if (e.key === 'Enter') handleSaSubmit('physics'); }}
+                            />
+                            {!physRevealed && (
+                              <button
+                                onClick={() => handleSaSubmit('physics')}
+                                className="px-6 py-3.5 bg-cyan-500 hover:bg-cyan-600 text-zinc-950 font-black rounded-2xl shadow-lg shadow-cyan-500/20 text-xs uppercase tracking-wider transition-all cursor-pointer shrink-0"
+                              >
+                                NỘP BÀI
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {(currQ.choices || []).map((choice, idx) => {
+                            const isSelected = physSelected === idx;
+                            const isCorrectIdx = idx === currQ.correct;
+                            const isEliminated = aiEliminatedOptions.includes(idx);
+
+                            let btnStyle = "border-border-theme bg-bg-secondary text-text-primary hover:border-cyan-500/30 hover:bg-cyan-500/5";
+                            if (isEliminated) {
+                              btnStyle = "border-zinc-800 bg-zinc-950/40 text-zinc-600 line-through opacity-30 pointer-events-none";
+                            } else if (physRevealed) {
+                              if (isCorrectIdx) {
+                                btnStyle = "border-emerald-500/50 bg-emerald-500/10 text-emerald-400 font-bold";
+                              } else if (isSelected) {
+                                btnStyle = "border-rose-500/50 bg-rose-500/10 text-rose-400 font-bold";
+                              } else {
+                                btnStyle = "border-border-theme bg-bg-secondary text-text-secondary opacity-50";
+                              }
+                            } else if (isSelected) {
+                              btnStyle = "border-cyan-500 bg-cyan-500/10 text-cyan-400 font-bold";
+                            }
+
+                            return (
+                              <button
+                                key={idx}
+                                disabled={physRevealed || isEliminated}
+                                onClick={() => handlePhysMcqAnswer(idx)}
+                                className={`p-4 rounded-xl text-left text-sm transition-all border flex items-center gap-3 cursor-pointer ${btnStyle}`}
+                              >
+                                <span className="w-6 h-6 rounded-full bg-bg-primary border border-border-theme flex items-center justify-center text-[11px] font-mono shrink-0 font-bold">
+                                  {String.fromCharCode(65 + idx)}
+                                </span>
+                                <span dangerouslySetInnerHTML={{ __html: formatMathText(choice) }} />
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Next Button and Explanation */}
+                    {physRevealed && (
+                      <div className="mt-6 flex flex-col gap-4">
+                        <div className="bg-emerald-950/20 border border-emerald-500/20 p-4 rounded-xl text-xs text-emerald-300 leading-relaxed flex items-start gap-2">
+                          <span className="shrink-0 bg-emerald-500/20 p-1 rounded-lg text-emerald-400 font-bold text-[10px]">✓ GIẢI THÍCH / ĐÁP ÁN</span>
+                          <span dangerouslySetInnerHTML={{ __html: formatMathText(currQ.note || (currQ.correctAnswer ? `Đáp án chính xác: ${currQ.correctAnswer}` : 'Đã ghi nhận câu trả lời.')) }} />
+                        </div>
+                        <button
+                          onClick={() => handleNextQuestion('physics')}
+                          className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold rounded-2xl shadow-lg shadow-cyan-500/20 transition-all cursor-pointer text-xs uppercase tracking-wider flex items-center justify-center gap-2"
+                        >
+                          CÂU HỎI TIẾP THEO →
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
             })()}
 
+            {/* PHÒNG LAB 3: TOÁN HỌC (Multi-format Infinite Arena) */}
+            {arenaState.subject === 'math' && (() => {
+              const currQ = mathGame.questions[mathGame.currentQ % (mathGame.questions.length || 1)] || {};
+              const qType = currQ.type || 'mcq';
 
-            {/* PHÒNG LAB 2: VẬT LÝ (Optical Laser Breadboard Layout) */}
-            {arenaState.subject === 'physics' && (
-              <div className="flex-1 flex flex-col md:flex-row items-stretch gap-6 py-4 w-full overflow-hidden h-full">
-                {/* Lưới Breadboard quang học cao cấp */}
-                <div className="flex-1 flex items-center justify-center relative w-full bg-[#14151f] rounded-3xl border border-white/5 p-6 shadow-inner select-none overflow-hidden min-w-0 h-full">
-                  <div className="min-w-[340px] max-w-md w-full relative flex items-center justify-center py-4">
-                    {/* Metal Dotted Breadboard Grid pattern */}
-                    <div className="absolute inset-0 opacity-15" style={{ backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
-
-                    {physPower && (
-                      <div className="absolute inset-0 pointer-events-none z-10">
-                        <svg className="w-full h-full" viewBox="0 0 350 200">
-                          {/* Glowing Red laser beam paths */}
-                          <line x1="45" y1="140" x2="45" y2="50" stroke="#f43f5e" strokeWidth="3.5" className="animate-[pulse_1s_infinite]" strokeLinecap="round" />
-                          
-                          {physMirrors[0] === physTarget[0] && (
-                            <line x1="45" y1="50" x2="175" y2="50" stroke="#f43f5e" strokeWidth="3.5" strokeLinecap="round" />
-                          )}
-                          
-                          {physMirrors[0] === physTarget[0] && physMirrors[1] === physTarget[1] && (
-                            <line x1="175" y1="50" x2="175" y2="140" stroke="#f43f5e" strokeWidth="3.5" strokeLinecap="round" />
-                          )}
-                          
-                          {physMirrors[0] === physTarget[0] && physMirrors[1] === physTarget[1] && physMirrors[2] === physTarget[2] && (
-                            <>
-                              <line x1="175" y1="140" x2="290" y2="140" stroke="#22d3ee" strokeWidth="5.5" className="animate-pulse" strokeLinecap="round" />
-                              {/* Particles floating in energy receiver */}
-                              <circle cx="295" cy="140" r="4" fill="#22d3ee" className="animate-ping" />
-                            </>
-                          )}
-                        </svg>
-                      </div>
-                    )}
-
-                    <div className="grid grid-cols-3 gap-8 w-full max-w-md relative z-20">
-                      {/* Emitter */}
-                      <div className="flex flex-col items-center justify-center bg-[#1e202b] p-3 rounded-2xl border border-white/5 h-24 relative shadow-lg">
-                        <div className={`absolute top-2 right-2 w-2.5 h-2.5 rounded-full ${physPower ? 'bg-rose-500 animate-pulse shadow-[0_0_8px_#f43f5e]' : 'bg-zinc-700'}`} />
-                        <Cpu className={`w-9 h-9 ${physPower ? 'text-rose-500' : 'text-zinc-600'}`} />
-                        <span className="text-[8px] font-mono text-zinc-500 font-bold uppercase mt-2">LASER EMITTER</span>
+              return (
+                <div className="flex-1 flex flex-col items-stretch py-4 w-full overflow-hidden h-full">
+                  <div className="flex-1 flex flex-col justify-between bg-bg-tertiary rounded-3xl border border-border-theme p-6 shadow-inner select-none h-full overflow-y-auto">
+                    <div>
+                      {/* Header bar */}
+                      <div className="flex items-center justify-between mb-6">
+                        <span className="px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                          📐 Toán học {qType === 'tf' ? '• Đúng / Sai' : qType === 'sa' ? '• Trả lời ngắn' : '• Trắc nghiệm'}
+                        </span>
+                        <div className="flex items-center gap-4 text-xs font-mono">
+                          <span className="text-emerald-400 font-bold">ĐÃ LÀM ĐÚNG: {mathGame.score} CÂU</span>
+                          <span className="text-text-secondary">CÂU HỎI #{mathGame.currentQ + 1}</span>
+                        </div>
                       </div>
 
-                      {/* Mirror A */}
-                      <button 
-                        onMouseEnter={playSound.hover}
-                        onClick={() => handlePhysRotateMirror(0)}
-                        className="flex flex-col items-center justify-center bg-[#1e202b] hover:bg-white/5 p-3 rounded-2xl border border-white/10 h-24 cursor-pointer relative shadow-lg transition-transform duration-200"
-                      >
-                        <div className="w-14 h-2.5 bg-gradient-to-r from-cyan-400 to-cyan-500 border border-white/20 rounded-full transition-transform duration-300 shadow-md" style={{ transform: `rotate(${physMirrors[0]}deg)` }} />
-                        <span className="text-[8px] font-mono text-zinc-400 font-bold uppercase mt-3">MIRROR A ({physMirrors[0]}°)</span>
-                      </button>
-
-                      <div className="border border-dashed border-white/5 rounded-2xl h-24" />
-
-                      <div className="border border-dashed border-white/5 rounded-2xl h-24" />
-
-                      {/* Mirror B */}
-                      <button 
-                        onMouseEnter={playSound.hover}
-                        onClick={() => handlePhysRotateMirror(1)}
-                        className="flex flex-col items-center justify-center bg-[#1e202b] hover:bg-white/5 p-3 rounded-2xl border border-white/10 h-24 cursor-pointer relative shadow-lg transition-transform duration-200"
-                      >
-                        <div className="w-14 h-2.5 bg-gradient-to-r from-cyan-400 to-cyan-500 border border-white/20 rounded-full transition-transform duration-300 shadow-md" style={{ transform: `rotate(${physMirrors[1]}deg)` }} />
-                        <span className="text-[8px] font-mono text-zinc-400 font-bold uppercase mt-3">MIRROR B ({physMirrors[1]}°)</span>
-                      </button>
-                  {/* Mirror C */}
-                      <button 
-                        onMouseEnter={playSound.hover}
-                        onClick={() => handlePhysRotateMirror(2)}
-                        className="flex flex-col items-center justify-center bg-[#1e202b] hover:bg-white/5 p-3 rounded-2xl border border-white/10 h-24 cursor-pointer relative shadow-lg transition-transform duration-200"
-                      >
-                        <div className="w-14 h-2.5 bg-gradient-to-r from-cyan-400 to-cyan-500 border border-white/20 rounded-full transition-transform duration-300 shadow-md" style={{ transform: `rotate(${physMirrors[2]}deg)` }} />
-                        <span className="text-[8px] font-mono text-zinc-400 font-bold uppercase mt-3">MIRROR C ({physMirrors[2]}°)</span>
-                      </button>
-
-                      <div className="border border-dashed border-white/5 rounded-2xl h-24" />
-
-                      {/* Receiver */}
-                      <div className="flex flex-col items-center justify-center bg-[#1e202b] p-3 rounded-2xl border border-white/5 h-24 relative shadow-lg">
-                        <Trophy className={`w-9 h-9 transition-colors ${physPower && physMirrors[0] === physTarget[0] && physMirrors[1] === physTarget[1] && physMirrors[2] === physTarget[2] ? 'text-cyan-400 animate-bounce' : 'text-zinc-700'}`} />
-                        <span className="text-[8px] font-mono text-zinc-500 font-bold uppercase mt-2">ENERGY RECEIVER</span>
+                      {/* Question text / context */}
+                      <div className="bg-bg-secondary p-6 rounded-2xl border border-border-theme mb-6">
+                        {qType === 'tf' ? (
+                          <div>
+                            <span className="text-[10px] text-amber-400 font-bold block uppercase mb-1 tracking-wider">[Ngữ cảnh / Đề bài]</span>
+                            <h3 className="text-base font-bold text-text-primary leading-relaxed" 
+                                dangerouslySetInnerHTML={{ __html: formatMathText(currQ.context || currQ.text || 'Đang tải câu hỏi...') }} />
+                          </div>
+                        ) : (
+                          <h3 className="text-base font-bold text-text-primary leading-relaxed" 
+                              dangerouslySetInnerHTML={{ __html: formatMathText(currQ.text || currQ.content || 'Đang tải câu hỏi...') }} />
+                        )}
                       </div>
 
-                      <div className="border border-dashed border-white/5 rounded-2xl h-24" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Laser config */}
-                <div className="w-full md:w-80 shrink-0 flex flex-col gap-5 bg-[#14151f] p-6 rounded-3xl border border-white/5 font-mono justify-between h-full overflow-y-auto">
-                  <div>
-                    <span className="text-xs font-bold text-zinc-400 border-b border-white/5 pb-2.5 mb-4 block uppercase tracking-widest">AC ELECTRICS PANEL</span>
-                    
-                    <button 
-                      onMouseEnter={playSound.hover}
-                      onClick={handlePhysPowerToggle}
-                      className={`w-full py-3.5 text-xs font-bold rounded-2xl transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2 ${
-                        physPower 
-                          ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/20' 
-                          : 'bg-[#1e202b] text-zinc-400 hover:text-white border border-white/5'
-                      }`}
-                    >
-                      <Zap className="w-4 h-4 fill-current shrink-0" /> {physPower ? 'POWER VOLTAGE: ON' : 'POWER VOLTAGE: OFF'}
-                    </button>
-                  </div>
-
-                  <div className="bg-[#1e202b] p-4 rounded-2xl border border-white/5 text-[10px] text-zinc-400 leading-relaxed font-sans">
-                    <div className="text-zinc-200 font-bold flex gap-1.5 items-center mb-1.5">
-                      <Compass className="w-4 h-4 text-cyan-400 animate-spin" style={{ animationDuration: '4s' }} />
-                      <span>QUANG HỌC CHÙM TIA:</span>
-                    </div>
-                    * Đóng nguồn điện AC để sáng Laser phát ra chùm ánh sáng liên tục.<br />
-                    * <strong className="text-cyan-300">Mục tiêu trận này:</strong> Gương A = <strong className="text-rose-300">{physTarget[0]}°</strong>, Gương B = <strong className="text-rose-300">{physTarget[1]}°</strong>, Gương C = <strong className="text-rose-300">{physTarget[2]}°</strong>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* PHÒNG LAB 3: TOÁN HỌC (Descartes Space Coordinate Radar Deck) */}
-            {arenaState.subject === 'math' && (
-              <div className="flex-1 flex flex-col md:flex-row items-stretch gap-6 py-4 w-full overflow-hidden h-full">
-                {/* Lưới radar không gian toán học */}
-                <div className="flex-1 flex items-center justify-center relative w-full bg-[#14151f] rounded-3xl border border-white/5 p-6 shadow-inner select-none overflow-hidden min-w-0 h-full">
-                  <div className="min-w-[260px] w-full flex items-center justify-center relative py-4">
-                    {/* Cartesian 2D Coordinate Grid plot */}
-                    <div className="w-64 h-64 border border-zinc-800 rounded-full relative flex items-center justify-center overflow-hidden">
-                      {/* Ring elements */}
-                      <div className="absolute inset-0 border border-zinc-800/40 rounded-full scale-75 pointer-events-none" />
-                      <div className="absolute inset-0 border border-zinc-800/40 rounded-full scale-50 pointer-events-none" />
-                      <div className="absolute inset-0 border border-zinc-800/40 rounded-full scale-25 pointer-events-none" />
-                      
-                      {/* Coordinate axes */}
-                      <div className="absolute inset-y-0 left-1/2 border-l border-zinc-800/60 pointer-events-none" />
-                      <div className="absolute inset-x-0 top-1/2 border-t border-zinc-800/60 pointer-events-none" />
-
-                      {/* Firing laser path animation */}
-                      {mathLaserPath && (
-                        <svg className="absolute inset-0 w-full h-full pointer-events-none z-30">
-                          {/* Line from center (0,0) to target mapped grid */}
-                          <line 
-                            x1="128" 
-                            y1="128" 
-                            x2={128 + (mathLaserPath.x * 11)} 
-                            y2={128 - (mathLaserPath.y * 11)} 
-                            stroke="#22d3ee" 
-                            strokeWidth="3.5" 
-                            className="animate-pulse animate-out fade-out duration-500"
-                          />
-                        </svg>
-                      )}
-
-                      {/* Active Radar Sweep */}
-                      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-cyan-500/5 to-cyan-500/10 rounded-full animate-[spin_6s_linear_infinite] pointer-events-none" />
-
-                      {/* Plot Asteroid Targets */}
-                      {mathAsteroids.map((ast, i) => {
-                        // Map math coordinates to 256x256 pixel grid centered at 128,128
-                        // Scale factor = 11px per coordinate unit
-                        const posX = 128 + (ast.coord.x * 11);
-                        const posY = 128 - (ast.coord.y * 11);
-
-                        return (
-                          <div 
-                            key={i}
-                            className="absolute w-4 h-4 -translate-x-2 -translate-y-2 z-20 flex items-center justify-center"
-                            style={{ left: `${posX}px`, top: `${posY}px` }}
-                          >
-                            {ast.status === 'active' && (
-                              <>
-                                <div className="absolute inset-0 bg-amber-500/30 rounded-full animate-ping" />
-                                <Flame className="w-4 h-4 text-amber-500 relative z-10 animate-bounce" />
-                              </>
-                            )}
-                            {ast.status === 'destroyed' && (
-                              <CheckCircle2 className="w-4 h-4 text-emerald-400 shadow-md animate-pulse" />
-                            )}
-                            {ast.status === 'pending' && (
-                              <div className="w-1.5 h-1.5 bg-zinc-600 rounded-full" />
+                      {/* Render question interactions according to format */}
+                      {qType === 'tf' ? (
+                        <div className="flex flex-col gap-4">
+                          {(currQ.statements || []).map((stmt, sIdx) => {
+                            const userAns = mathTfAnswers[sIdx];
+                            const correctVal = Array.isArray(currQ.correct) ? currQ.correct[sIdx] : null;
+                            return (
+                              <div key={sIdx} className="bg-bg-secondary p-4 rounded-xl border border-border-theme flex flex-col md:flex-row md:items-center justify-between gap-3 transition-all hover:border-amber-500/20">
+                                <div className="flex-1 flex gap-3 items-start">
+                                  <span className="w-5 h-5 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-[10px] font-mono shrink-0 font-bold text-amber-400">
+                                    {String.fromCharCode(97 + sIdx)}
+                                  </span>
+                                  <p className="text-xs text-text-primary leading-relaxed" dangerouslySetInnerHTML={{ __html: formatMathText(stmt) }} />
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <button
+                                    disabled={mathRevealed}
+                                    onClick={() => {
+                                      const next = [...mathTfAnswers];
+                                      next[sIdx] = true;
+                                      setMathTfAnswers(next);
+                                    }}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold font-mono transition-all cursor-pointer border ${
+                                      userAns === true
+                                        ? mathRevealed 
+                                          ? correctVal === true ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' : 'bg-rose-500/20 border-rose-500 text-rose-400'
+                                          : 'bg-amber-500/20 border-amber-500 text-amber-400'
+                                        : mathRevealed && correctVal === true
+                                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500/60 opacity-50'
+                                          : 'bg-bg-tertiary border-border-theme text-text-secondary hover:text-text-primary'
+                                    }`}
+                                  >
+                                    ĐÚNG
+                                  </button>
+                                  <button
+                                    disabled={mathRevealed}
+                                    onClick={() => {
+                                      const next = [...mathTfAnswers];
+                                      next[sIdx] = false;
+                                      setMathTfAnswers(next);
+                                    }}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold font-mono transition-all cursor-pointer border ${
+                                      userAns === false
+                                        ? mathRevealed 
+                                          ? correctVal === false ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' : 'bg-rose-500/20 border-rose-500 text-rose-400'
+                                          : 'bg-amber-500/20 border-amber-500 text-amber-400'
+                                        : mathRevealed && correctVal === false
+                                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500/60 opacity-50'
+                                          : 'bg-bg-tertiary border-border-theme text-text-secondary hover:text-text-primary'
+                                    }`}
+                                  >
+                                    SAI
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                          {!mathRevealed && (
+                            <button
+                              onClick={() => handleTfSubmit('math')}
+                              className="mt-2 w-full py-3.5 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white font-bold rounded-2xl shadow-lg shadow-amber-500/20 transition-all cursor-pointer text-xs uppercase tracking-wider flex items-center justify-center gap-2"
+                            >
+                              Xác nhận kết quả Đúng/Sai
+                            </button>
+                          )}
+                        </div>
+                      ) : qType === 'sa' ? (
+                        <div className="flex flex-col gap-4">
+                          <div className="flex items-center gap-3">
+                            <input 
+                              type="text"
+                              value={saInput}
+                              disabled={mathRevealed}
+                              onChange={(e) => setSaInput(e.target.value)}
+                              placeholder="Nhập giá trị số hoặc kết quả biểu thức..."
+                              className="flex-1 bg-bg-secondary border border-border-theme rounded-2xl px-5 py-3.5 text-sm text-text-primary placeholder:text-zinc-500 focus:outline-none focus:border-amber-500 font-mono transition-all"
+                              onKeyDown={(e) => { if (e.key === 'Enter') handleSaSubmit('math'); }}
+                            />
+                            {!mathRevealed && (
+                              <button
+                                onClick={() => handleSaSubmit('math')}
+                                className="px-6 py-3.5 bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black rounded-2xl shadow-lg shadow-amber-500/20 text-xs uppercase tracking-wider transition-all cursor-pointer shrink-0"
+                              >
+                                NỘP BÀI
+                              </button>
                             )}
                           </div>
-                        );
-                      })}
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {(currQ.choices || []).map((choice, idx) => {
+                            const isSelected = mathSelected === idx;
+                            const isCorrectIdx = idx === currQ.correct;
+                            const isEliminated = aiEliminatedOptions.includes(idx);
 
-                      <span className="absolute bottom-2 right-2 text-[8px] font-mono text-zinc-600">RANGE: 10ly</span>
+                            let btnStyle = "border-border-theme bg-bg-secondary text-text-primary hover:border-amber-500/30 hover:bg-amber-500/5";
+                            if (isEliminated) {
+                              btnStyle = "border-zinc-800 bg-zinc-950/40 text-zinc-600 line-through opacity-30 pointer-events-none";
+                            } else if (mathRevealed) {
+                              if (isCorrectIdx) {
+                                btnStyle = "border-emerald-500/50 bg-emerald-500/10 text-emerald-400 font-bold";
+                              } else if (isSelected) {
+                                btnStyle = "border-rose-500/50 bg-rose-500/10 text-rose-400 font-bold";
+                              } else {
+                                btnStyle = "border-border-theme bg-bg-secondary text-text-secondary opacity-50";
+                              }
+                            } else if (isSelected) {
+                              btnStyle = "border-amber-500 bg-amber-500/10 text-amber-400 font-bold";
+                            }
+
+                            return (
+                              <button
+                                key={idx}
+                                disabled={mathRevealed || isEliminated}
+                                onClick={() => handleMathMcqAnswer(idx)}
+                                className={`p-4 rounded-xl text-left text-sm transition-all border flex items-center gap-3 cursor-pointer ${btnStyle}`}
+                              >
+                                <span className="w-6 h-6 rounded-full bg-bg-primary border border-border-theme flex items-center justify-center text-[11px] font-mono shrink-0 font-bold">
+                                  {String.fromCharCode(65 + idx)}
+                                </span>
+                                <span dangerouslySetInnerHTML={{ __html: formatMathText(choice) }} />
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
 
-                    {/* Navigation HUD stats */}
-                    <div className="absolute left-4 top-4 bg-[#1e202b]/95 p-3 rounded-xl border border-white/5 font-mono text-[8px] text-zinc-500 flex flex-col gap-1 select-none">
-                      <span>SECTOR: DELTA-DES-9</span>
-                      <span>BEARING: {mathAsteroids[mathTargetIndex] ? `${120 + (mathTargetIndex * 45)}°` : '0°'}</span>
-                      <span>TGT DISTANCE: {mathAsteroids[mathTargetIndex] ? `${240 - (mathTargetIndex * 60)}k km` : 'N/A'}</span>
-                    </div>
+                    {/* Next Button and Explanation */}
+                    {mathRevealed && (
+                      <div className="mt-6 flex flex-col gap-4">
+                        <div className="bg-emerald-950/20 border border-emerald-500/20 p-4 rounded-xl text-xs text-emerald-300 leading-relaxed flex items-start gap-2">
+                          <span className="shrink-0 bg-emerald-500/20 p-1 rounded-lg text-emerald-400 font-bold text-[10px]">✓ GIẢI THÍCH / ĐÁP ÁN</span>
+                          <span dangerouslySetInnerHTML={{ __html: formatMathText(currQ.note || (currQ.correctAnswer ? `Đáp án chính xác: ${currQ.correctAnswer}` : 'Đã ghi nhận câu trả lời.')) }} />
+                        </div>
+                        <button
+                          onClick={() => handleNextQuestion('math')}
+                          className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white font-bold rounded-2xl shadow-lg shadow-amber-500/20 transition-all cursor-pointer text-xs uppercase tracking-wider flex items-center justify-center gap-2"
+                        >
+                          CÂU HỎI TIẾP THEO →
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
+              );
+            })()}
 
-                {/* Input pad */}
-                <form onSubmit={handleMathInputSubmit} className="w-full md:w-80 shrink-0 bg-[#14151f] p-6 rounded-3xl border border-white/5 flex flex-col gap-5 font-mono justify-between h-full overflow-y-auto">
-                  <div>
-                    <div className="flex items-center justify-between border-b border-white/5 pb-2.5 mb-4">
-                      <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">VECTOR TARGET LOCK</span>
-                      <span className="text-[10px] font-bold text-pink-400">{mathTargetIndex + 1} / 3</span>
-                    </div>
+            {/* PHÒNG LAB 4: SINH HỌC (Multi-format Infinite Arena) */}
+            {arenaState.subject === 'biology' && (() => {
+              const currQ = bioGame.questions[bioGame.currentQ % (bioGame.questions.length || 1)] || {};
+              const qType = currQ.type || 'mcq';
 
-                    <div className="bg-[#1e202b] p-3.5 rounded-2xl border border-white/5 text-center mb-4">
-                      <span className="text-[9px] text-zinc-500 block uppercase mb-2">PHƯƠNG TRÌNH QUỸ ĐẠO</span>
-                      <code className="text-sm font-bold text-white tracking-widest">{mathAsteroids[mathTargetIndex]?.eq}</code>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <label className="text-[9.5px] text-zinc-500 block uppercase mb-1.5 font-bold">Hoành độ x</label>
-                        <input 
-                          type="number" 
-                          required
-                          value={mathInputs.x}
-                          onChange={(e) => setMathInputs({ ...mathInputs, x: e.target.value })}
-                          placeholder="x = ?"
-                          className="w-full bg-[#1e202b] border border-white/5 focus:border-pink-500 focus:outline-none rounded-2xl text-center py-2.5 text-white font-mono font-bold"
-                        />
+              return (
+                <div className="flex-1 flex flex-col items-stretch py-4 w-full overflow-hidden h-full">
+                  <div className="flex-1 flex flex-col justify-between bg-bg-tertiary rounded-3xl border border-border-theme p-6 shadow-inner select-none h-full overflow-y-auto">
+                    <div>
+                      {/* Header bar */}
+                      <div className="flex items-center justify-between mb-6">
+                        <span className="px-3 py-1 bg-cyan-500/10 border border-cyan-500/20 rounded-full text-xs font-bold text-cyan-400 flex items-center gap-1.5">
+                          🧬 Sinh học {qType === 'tf' ? '• Đúng / Sai' : qType === 'sa' ? '• Trả lời ngắn' : '• Trắc nghiệm'}
+                        </span>
+                        <div className="flex items-center gap-4 text-xs font-mono">
+                          <span className="text-emerald-400 font-bold">ĐÃ LÀM ĐÚNG: {bioGame.score} CÂU</span>
+                          <span className="text-text-secondary">CÂU HỎI #{bioGame.currentQ + 1}</span>
+                        </div>
                       </div>
-                      <div>
-                        <label className="text-[9.5px] text-zinc-500 block uppercase mb-1.5 font-bold">Tung độ y</label>
-                        <input 
-                          type="number" 
-                          required
-                          value={mathInputs.y}
-                          onChange={(e) => setMathInputs({ ...mathInputs, y: e.target.value })}
-                          placeholder="y = ?"
-                          className="w-full bg-[#1e202b] border border-white/5 focus:border-pink-500 focus:outline-none rounded-2xl text-center py-2.5 text-white font-mono font-bold"
-                        />
+
+                      {/* Question text / context */}
+                      <div className="bg-bg-secondary p-6 rounded-2xl border border-border-theme mb-6">
+                        {qType === 'tf' ? (
+                          <div>
+                            <span className="text-[10px] text-cyan-400 font-bold block uppercase mb-1 tracking-wider">[Ngữ cảnh / Đề bài]</span>
+                            <h3 className="text-base font-bold text-text-primary leading-relaxed" 
+                                dangerouslySetInnerHTML={{ __html: formatBioText(currQ.context || currQ.text || 'Đang tải câu hỏi...') }} />
+                          </div>
+                        ) : (
+                          <h3 className="text-base font-bold text-text-primary leading-relaxed" 
+                              dangerouslySetInnerHTML={{ __html: formatBioText(currQ.text || currQ.content || 'Đang tải câu hỏi...') }} />
+                        )}
                       </div>
+
+                      {/* Render choice layout based on MCQ vs TF vs SA */}
+                      {qType === 'tf' ? (
+                        <div className="flex flex-col gap-4">
+                          {(currQ.statements || []).map((stmt, sIdx) => {
+                            const userAns = bioTfAnswers[sIdx];
+                            const correctVal = Array.isArray(currQ.correct) ? currQ.correct[sIdx] : null;
+                            
+                            return (
+                              <div key={sIdx} className="bg-bg-secondary p-4 rounded-xl border border-border-theme flex flex-col md:flex-row md:items-center justify-between gap-3 transition-all hover:border-accent-pink/20">
+                                <div className="flex-1 flex gap-3 items-start">
+                                  <span className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-[10px] font-mono shrink-0 font-bold text-cyan-400">
+                                    {String.fromCharCode(97 + sIdx)}
+                                  </span>
+                                  <p className="text-xs text-text-primary leading-relaxed" dangerouslySetInnerHTML={{ __html: formatBioText(stmt) }} />
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <button
+                                    disabled={bioRevealed}
+                                    onClick={() => {
+                                      const next = [...bioTfAnswers];
+                                      next[sIdx] = true;
+                                      setBioTfAnswers(next);
+                                    }}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold font-mono transition-all cursor-pointer border ${
+                                      userAns === true
+                                        ? bioRevealed 
+                                          ? correctVal === true ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' : 'bg-rose-500/20 border-rose-500 text-rose-400'
+                                          : 'bg-cyan-500/20 border-cyan-500 text-cyan-400'
+                                        : bioRevealed && correctVal === true
+                                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500/60 opacity-50'
+                                          : 'bg-bg-tertiary border-border-theme text-text-secondary hover:text-text-primary'
+                                    }`}
+                                  >
+                                    ĐÚNG
+                                  </button>
+                                  <button
+                                    disabled={bioRevealed}
+                                    onClick={() => {
+                                      const next = [...bioTfAnswers];
+                                      next[sIdx] = false;
+                                      setBioTfAnswers(next);
+                                    }}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold font-mono transition-all cursor-pointer border ${
+                                      userAns === false
+                                        ? bioRevealed 
+                                          ? correctVal === false ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' : 'bg-rose-500/20 border-rose-500 text-rose-400'
+                                          : 'bg-cyan-500/20 border-cyan-500 text-cyan-400'
+                                        : bioRevealed && correctVal === false
+                                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500/60 opacity-50'
+                                          : 'bg-bg-tertiary border-border-theme text-text-secondary hover:text-text-primary'
+                                    }`}
+                                  >
+                                    SAI
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+
+                          {!bioRevealed && (
+                            <button
+                              onClick={() => handleTfSubmit('biology')}
+                              className="mt-2 w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold rounded-2xl shadow-lg shadow-cyan-500/20 transition-all cursor-pointer text-xs uppercase tracking-wider flex items-center justify-center gap-2"
+                            >
+                              Xác nhận kết quả Đúng/Sai
+                            </button>
+                          )}
+                        </div>
+                      ) : qType === 'sa' ? (
+                        <div className="flex flex-col gap-4">
+                          <div className="flex items-center gap-3">
+                            <input 
+                              type="text"
+                              value={saInput}
+                              disabled={bioRevealed}
+                              onChange={(e) => setSaInput(e.target.value)}
+                              placeholder="Nhập giá trị số hoặc từ khóa trả lời..."
+                              className="flex-1 bg-bg-secondary border border-border-theme rounded-2xl px-5 py-3.5 text-sm text-text-primary placeholder:text-zinc-500 focus:outline-none focus:border-cyan-500 font-mono transition-all"
+                              onKeyDown={(e) => { if (e.key === 'Enter') handleSaSubmit('biology'); }}
+                            />
+                            {!bioRevealed && (
+                              <button
+                                onClick={() => handleSaSubmit('biology')}
+                                className="px-6 py-3.5 bg-cyan-500 hover:bg-cyan-600 text-zinc-950 font-black rounded-2xl shadow-lg shadow-cyan-500/20 text-xs uppercase tracking-wider transition-all cursor-pointer shrink-0"
+                              >
+                                NỘP BÀI
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {(currQ.choices || []).map((choice, idx) => {
+                            const isSelected = bioSelected === idx;
+                            const isCorrectIdx = idx === currQ.correct;
+                            const isEliminated = aiEliminatedOptions.includes(idx);
+                            
+                            let btnStyle = "border-border-theme bg-bg-secondary text-text-primary hover:border-cyan-500/30 hover:bg-cyan-500/5";
+                            if (isEliminated) {
+                              btnStyle = "border-zinc-800 bg-zinc-950/40 text-zinc-600 line-through opacity-30 pointer-events-none";
+                            } else if (bioRevealed) {
+                              if (isCorrectIdx) {
+                                btnStyle = "border-emerald-500/50 bg-emerald-500/10 text-emerald-400 font-bold";
+                              } else if (isSelected) {
+                                btnStyle = "border-rose-500/50 bg-rose-500/10 text-rose-400 font-bold";
+                              } else {
+                                btnStyle = "border-border-theme bg-bg-secondary text-text-secondary opacity-50";
+                              }
+                            } else if (isSelected) {
+                              btnStyle = "border-cyan-500 bg-cyan-500/10 text-cyan-400 font-bold";
+                            }
+
+                            return (
+                              <button
+                                key={idx}
+                                disabled={bioRevealed || isEliminated}
+                                onClick={() => handleBioAnswer(idx)}
+                                className={`p-4 rounded-xl text-left text-sm transition-all border flex items-center gap-3 cursor-pointer ${btnStyle}`}
+                              >
+                                <span className="w-6 h-6 rounded-full bg-bg-primary border border-border-theme flex items-center justify-center text-[11px] font-mono shrink-0 font-bold">
+                                  {String.fromCharCode(65 + idx)}
+                                </span>
+                                <span dangerouslySetInnerHTML={{ __html: formatBioText(choice) }} />
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
+
+                    {/* Next Button and Explanation */}
+                    {bioRevealed && (
+                      <div className="mt-6 flex flex-col gap-4">
+                        <div className="bg-emerald-950/20 border border-emerald-500/20 p-4 rounded-xl text-xs text-emerald-300 leading-relaxed flex items-start gap-2">
+                          <span className="shrink-0 bg-emerald-500/20 p-1 rounded-lg text-emerald-400 font-bold text-[10px]">✓ GIẢI THÍCH / ĐÁP ÁN</span>
+                          <span dangerouslySetInnerHTML={{ __html: formatBioText(currQ.note || (currQ.correctAnswer ? `Đáp án chính xác: ${currQ.correctAnswer}` : 'Đã ghi nhận câu trả lời.')) }} />
+                        </div>
+                        <button
+                          onClick={() => handleNextQuestion('biology')}
+                          className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold rounded-2xl shadow-lg shadow-cyan-500/20 transition-all cursor-pointer text-xs uppercase tracking-wider flex items-center justify-center gap-2"
+                        >
+                          CÂU HỎI TIẾP THEO →
+                        </button>
+                      </div>
+                    )}
                   </div>
-
-                  <button 
-                    type="submit"
-                    onMouseEnter={playSound.hover}
-                    className="w-full py-3.5 bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold rounded-2xl transition-all shadow-lg shadow-pink-500/20 active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <Zap className="w-3.5 h-3.5 fill-white shrink-0 animate-bounce" /> KÍCH PHÁO PLASMA
-                  </button>
-                </form>
-              </div>
-            )}
-
-            {/* PHÒNG LAB 4: SINH HỌC (Genome Staircase Helix) */}
-            {arenaState.subject === `biology` && (
-              <div className="flex-1 flex flex-col md:flex-row items-stretch gap-6 py-4 w-full overflow-hidden h-full">
-                {/* MCQ Question Area */}
-                <div className="flex-1 flex flex-col justify-between bg-[#14151f] rounded-3xl border border-white/5 p-6 shadow-inner select-none h-full overflow-y-auto">
-                  <div>
-                    {/* Header bar */}
-                    <div className="flex items-center justify-between mb-6">
-                      <span className="px-3 py-1 bg-cyan-500/10 border border-cyan-500/20 rounded-full text-xs font-bold text-cyan-400 flex items-center gap-1.5">
-                        {bioGame.icon} {bioGame.label}
-                      </span>
-                      <span className="text-xs font-mono text-zinc-500">
-                        CÂU HỎI {bioGame.currentQ + 1} / {bioGame.questions.length}
-                      </span>
-                    </div>
-
-                    {/* Question text */}
-                    <div className="bg-[#1e202b] p-6 rounded-2xl border border-white/5 mb-6">
-                      <h3 className="text-base font-bold text-zinc-100 leading-relaxed" dangerouslySetInnerHTML={{ __html: formatMathText(bioGame.questions[bioGame.currentQ]?.text) }} />
-                    </div>
-
-                    {/* Choices */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {bioGame.questions[bioGame.currentQ]?.choices.map((choice, idx) => {
-                        const isSelected = bioSelected === idx;
-                        const isCorrectIdx = idx === bioGame.questions[bioGame.currentQ]?.correct;
-                        
-                        let btnStyle = "border-white/5 bg-[#1a1b26] text-zinc-300 hover:border-cyan-500/30 hover:bg-cyan-500/5";
-                        if (bioRevealed) {
-                          if (isCorrectIdx) {
-                            btnStyle = "border-emerald-500/50 bg-emerald-500/10 text-emerald-400 font-bold";
-                          } else if (isSelected) {
-                            btnStyle = "border-rose-500/50 bg-rose-500/10 text-rose-400 font-bold";
-                          } else {
-                            btnStyle = "border-white/5 bg-[#1a1b26] text-zinc-600 opacity-50";
-                          }
-                        } else if (isSelected) {
-                          btnStyle = "border-cyan-500 bg-cyan-500/10 text-cyan-400 font-bold";
-                        }
-
-                        return (
-                          <button
-                            key={idx}
-                            disabled={bioRevealed}
-                            onClick={() => handleBioAnswer(idx)}
-                            className={`p-4 rounded-xl text-left text-sm transition-all border text-zinc-300 flex items-center gap-3 cursor-pointer ${btnStyle}`}
-                          >
-                            <span className="w-6 h-6 rounded-full bg-black/30 border border-white/10 flex items-center justify-center text-[11px] font-mono shrink-0 font-bold">
-                              {String.fromCharCode(65 + idx)}
-                            </span>
-                            <span dangerouslySetInnerHTML={{ __html: formatMathText(choice) }} />
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Next Button and Explanation */}
-                  {bioRevealed && (
-                    <div className="mt-6 flex flex-col gap-4">
-                      <div className="bg-emerald-950/20 border border-emerald-500/20 p-4 rounded-xl text-xs text-emerald-300 leading-relaxed flex items-start gap-2">
-                        <span className="shrink-0 bg-emerald-500/20 p-1 rounded-lg text-emerald-400 font-bold text-[10px]">✓ GIẢI THÍCH</span>
-                        <span dangerouslySetInnerHTML={{ __html: formatMathText(bioGame.questions[bioGame.currentQ]?.note) }} />
-                      </div>
-                      <button
-                        onClick={handleBioNext}
-                        className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold rounded-2xl shadow-lg shadow-cyan-500/20 transition-all cursor-pointer text-xs uppercase tracking-wider flex items-center justify-center gap-2"
-                      >
-                        {bioGame.currentQ + 1 >= bioGame.questions.length ? 'Ho�n th�nh đấu trường' : 'C�u hỏi tiếp theo'}
-                      </button>
-                    </div>
-                  )}
                 </div>
+              );
+            })()}
+            
+            {/* THANH THẺ BÀI STRATEGY TRONG TRẬN THI ĐẤU */}
+            {(() => {
+              const isP1 = isPlayer1Role;
+              const activeData = currentRoomData || latestRoomDataRef.current;
+              const myEquippedCardIds = isP1 ? (activeData?.player1Equipment || []) : (activeData?.player2Equipment || []);
+              if (!myEquippedCardIds || myEquippedCardIds.length === 0) return null;
 
-                {/* Right Panel HUD / Score stats */}
-                <div className="w-full md:w-80 shrink-0 flex flex-col gap-5 bg-[#14151f] p-6 rounded-3xl border border-white/5 font-mono justify-between">
-                  <div>
-                    <span className="text-xs font-bold text-zinc-400 border-b border-white/5 pb-2.5 mb-4 block uppercase tracking-widest">
-                      BẢNG TH�NG TIN GEN
-                    </span>
-
-                    <div className="flex flex-col gap-3.5 mb-6">
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-zinc-500">Chủ đề:</span>
-                        <span className="text-cyan-400 font-bold">{bioGame.label}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-zinc-500">Số c�u đ�ng:</span>
-                        <span className="text-emerald-400 font-bold">{bioGame.score} / {bioGame.questions.length}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-zinc-500">Số c�u sai:</span>
-                        <span className="text-rose-400 font-bold">{bioGame.mistakes}</span>
-                      </div>
-                    </div>
+              return (
+                <div className="mt-3 pt-2.5 border-t border-border-theme flex items-center justify-between gap-3 bg-bg-primary/80 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-amber-500/30 shrink-0">
+                  <div className="flex items-center gap-1.5 text-amber-400 font-mono text-xs font-bold shrink-0">
+                    <Zap className="w-3.5 h-3.5 animate-pulse text-amber-400" />
+                    <span>THẺ BÀI STRATEGY:</span>
                   </div>
 
-                  <div className="bg-[#1e202b] p-4 rounded-2xl border border-white/5 text-[10px] text-zinc-400 leading-relaxed font-sans">
-                    <div className="text-zinc-200 font-bold flex gap-1.5 items-center mb-1.5">
-                      <Zap className="w-4 h-4 text-cyan-400 animate-pulse" />
-                      <span>HƯỚNG DẪN ĐẤU TRƯỜNG</span>
-                    </div>
-                    * Đọc kỹ c�u hỏi v� chọn phương �n trả lời đ�ng nhất trong 4 đ�p �n.<br />
-                    * Trả lời đ�ng gi�p gia tăng tiến độ ph�ng thi đấu l�n 100%.<br />
-                    * Mỗi trận đấu sẽ sinh ngẫu nhi�n bộ c�u hỏi từ c�c chương sinh học tế b�o, ph�n b�o v� di truyền học.
+                  <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar py-0.5">
+                    {myEquippedCardIds.map((cardId, idx) => {
+                      const card = getEquipmentById(cardId);
+                      if (!card) return null;
+
+                      return (
+                        <button
+                          key={`${cardId}_${idx}`}
+                          onClick={() => handleUseCard(cardId)}
+                          className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:from-amber-500/30 hover:to-yellow-500/30 border border-amber-500/40 text-amber-300 hover:text-white transition-all text-xs font-mono font-bold active:scale-95 shrink-0 shadow-sm cursor-pointer"
+                          title={card.description}
+                        >
+                          <span>{card.name}</span>
+                          <span className="text-[10px] bg-amber-400 text-zinc-950 px-1.5 py-0.2 rounded-full font-black">
+                            DÙNG ⚡
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Progress Bar Toàn trận dưới đáy cột */}
-            <div className="mt-4 pt-3 border-t border-white/5 flex items-center gap-4 select-none relative">
-              <span className="text-[10px] text-zinc-500 font-bold font-mono uppercase shrink-0">MY EXPERIMENT STAGE:</span>
-              <div className="flex-1 h-3.5 bg-[#14151f] rounded-full overflow-hidden border border-white/5 relative">
+            <div className="mt-4 pt-3 border-t border-border-theme flex items-center gap-4 select-none relative">
+              <span className="text-[10px] text-text-secondary font-bold font-mono uppercase shrink-0">MY EXPERIMENT STAGE:</span>
+              <div className="flex-1 h-3.5 bg-bg-tertiary rounded-full overflow-hidden border border-border-theme relative">
                 <div 
                   className="h-full bg-gradient-to-r from-pink-500 via-rose-500 to-rose-600 rounded-full transition-all duration-500 shadow-md shadow-pink-500/10" 
                   style={{ width: `${arenaState.playerProgress}%` }}
                 />
-                <span className="absolute inset-0 flex items-center justify-center text-[8px] font-black text-white font-mono tracking-widest">
+                <span className="absolute inset-0 flex items-center justify-center text-[8px] font-black text-text-primary font-mono tracking-widest">
                   {arenaState.playerProgress}% COMPLETE
                 </span>
               </div>
 
               {/* Avatar người chơi thu nhỏ với bong bóng chat */}
-              <div className="relative shrink-0 w-8 h-8 rounded-xl bg-pink-500/10 border border-pink-500/30 flex items-center justify-center text-pink-400 font-bold text-xs">
+              <div className="relative shrink-0 w-8 h-8 rounded-xl bg-accent-pink/10 border border-accent-pink/30 flex items-center justify-center text-accent-pink font-bold text-xs">
                 {user?.displayName?.charAt(0).toUpperCase() || 'B'}
                 
                 {/* Bong bóng chat nổi của chính mình */}
@@ -3053,23 +4985,23 @@ function DauTruongContent() {
           <div className="w-full lg:w-96 shrink-0 flex flex-col gap-6 h-full overflow-y-auto pr-2 pb-8">
             
             {/* Monitor Card */}
-            <div className="bg-[#1e202b]/90 backdrop-blur-xl border border-white/5 rounded-3xl p-5 shadow-2xl flex flex-col justify-between">
+            <div className="bg-bg-secondary/95 backdrop-blur-xl border border-border-theme rounded-3xl p-5 shadow-2xl flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-4 select-none">
-                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest font-mono">OPPONENT TRACKER HUD</span>
+                <div className="flex items-center justify-between border-b border-border-theme pb-4 mb-4 select-none">
+                  <span className="text-xs font-bold text-text-secondary uppercase tracking-widest font-mono">OPPONENT TRACKER HUD</span>
                   <Activity className="w-4 h-4 text-rose-500 animate-pulse" />
                 </div>
 
                 {/* Opponent Info Header */}
-                <div className="flex items-center gap-3 bg-[#14151f] p-3 rounded-2xl border border-white/5 mb-6 relative">
+                <div className="flex items-center gap-3 bg-bg-tertiary p-3 rounded-2xl border border-border-theme mb-6 relative">
                   <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 text-xl font-bold relative shrink-0">
                     {arenaState.opponentInfo?.name ? arenaState.opponentInfo.name.charAt(0).toUpperCase() : 'O'}
-                    <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-rose-500 border border-[#14151f] text-[9px] font-bold text-white flex items-center justify-center">
+                    <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-rose-500 border border-bg-tertiary text-[9px] font-bold text-white flex items-center justify-center">
                       {arenaState.opponentInfo?.level || 1}
                     </div>
                   </div>
                   <div>
-                    <h4 className="text-white font-bold text-sm leading-tight">{arenaState.opponentInfo?.name || 'Đang chờ đối thủ...'}</h4>
+                    <h4 className="text-text-primary font-bold text-sm leading-tight">{arenaState.opponentInfo?.name || 'Đang chờ đối thủ...'}</h4>
                     <span className="text-[9px] text-rose-400 font-mono font-bold px-1.5 py-0.5 bg-rose-500/10 rounded mt-1 inline-block uppercase">
                       {arenaState.opponentInfo?.title || 'Tập sự'}
                     </span>
@@ -3090,11 +5022,11 @@ function DauTruongContent() {
 
                 {/* Opponent Progress meter */}
                 <div className="space-y-2 mb-6">
-                  <div className="flex justify-between text-[10px] text-zinc-400 font-bold uppercase font-mono">
+                  <div className="flex justify-between text-[10px] text-text-secondary font-bold uppercase font-mono">
                     <span>STAGE COMPLETE</span>
                     <span className="text-rose-400 font-extrabold">{arenaState.opponentProgress}%</span>
                   </div>
-                  <div className="w-full h-4 bg-[#14151f] rounded-full overflow-hidden border border-white/5 relative">
+                  <div className="w-full h-4 bg-bg-tertiary rounded-full overflow-hidden border border-border-theme relative">
                     <div 
                       className="h-full bg-gradient-to-r from-rose-500 to-orange-600 rounded-full transition-all duration-300 shadow-md" 
                       style={{ width: `${arenaState.opponentProgress}%` }}
@@ -3105,32 +5037,32 @@ function DauTruongContent() {
 
               {/* Log sự kiện kịch tính */}
               <div className="space-y-2">
-                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block font-mono">COHERENT SIGNAL FEED</span>
-                <div className="h-48 bg-[#14151f] p-3.5 rounded-2xl border border-white/5 overflow-y-auto text-[10px] font-semibold text-zinc-500 space-y-1.5 font-mono select-none">
+                <span className="text-[10px] font-bold text-text-secondary uppercase tracking-widest block font-mono">COHERENT SIGNAL FEED</span>
+                <div className="h-48 bg-bg-tertiary p-3.5 rounded-2xl border border-border-theme overflow-y-auto text-[10px] font-semibold text-text-secondary space-y-1.5 font-mono select-none">
                   {arenaState.logs.map((log, index) => (
                     <div key={index} className="flex gap-2 leading-relaxed items-start border-l border-rose-500/30 pl-2">
                       <span className="text-rose-500 shrink-0">»</span>
-                      <span className={index === 0 ? 'text-zinc-200 font-bold' : ''}>{log}</span>
+                      <span className={index === 0 ? 'text-text-primary font-bold' : ''}>{log}</span>
                     </div>
                   ))}
                   {arenaState.logs.length === 0 && (
-                    <div className="text-zinc-700 text-center py-12">LISTENING TO SECTOR SIGNALS...</div>
+                    <div className="text-text-secondary text-center py-12">LISTENING TO SECTOR SIGNALS...</div>
                   )}
                 </div>
               </div>
             </div>
 
             {/* Thanh công cụ Chat & Emoji tương tác */}
-            <div className="bg-[#1e202b]/90 backdrop-blur-xl border border-white/5 rounded-3xl p-5 shadow-2xl flex flex-col gap-4">
-              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block font-mono">TƯƠNG TÁC ĐẤU TRƯỜNG</span>
+            <div className="bg-bg-secondary/95 backdrop-blur-xl border border-border-theme rounded-3xl p-5 shadow-2xl flex flex-col gap-4">
+              <span className="text-[10px] font-bold text-text-secondary uppercase tracking-widest block font-mono">TƯƠNG TÁC ĐẤU TRƯỜNG</span>
               
               {/* Thả Emoji nhanh */}
-              <div className="flex justify-between items-center gap-2 bg-[#14151f] p-2 rounded-2xl border border-white/5">
+              <div className="flex justify-between items-center gap-2 bg-bg-tertiary p-2 rounded-2xl border border-border-theme">
                 {['😂', '🔥', '😱', '👑', '🤝', '⚡'].map((emoji) => (
                   <button
                     key={emoji}
                     onClick={() => sendQuickChat(emoji, 'emoji')}
-                    className="w-10 h-10 flex items-center justify-center text-lg hover:scale-125 hover:bg-white/5 active:scale-95 transition-all rounded-xl cursor-pointer"
+                    className="w-10 h-10 flex items-center justify-center text-lg hover:scale-125 hover:bg-bg-primary active:scale-95 transition-all rounded-xl cursor-pointer"
                   >
                     {emoji}
                   </button>
@@ -3144,7 +5076,7 @@ function DauTruongContent() {
                   value={customChat}
                   onChange={(e) => setCustomChat(e.target.value)}
                   placeholder="Nhập tin nhắn..."
-                  className="flex-1 bg-[#14151f] border border-white/5 focus:border-pink-500/30 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none transition-colors"
+                  className="flex-1 bg-bg-tertiary border border-border-theme focus:border-accent-pink/40 rounded-xl px-3.5 py-2.5 text-xs text-text-primary placeholder-text-secondary focus:outline-none transition-colors"
                 />
                 <button
                   type="submit"
@@ -3169,7 +5101,7 @@ function DauTruongContent() {
                   <button
                     key={msg}
                     onClick={() => sendQuickChat(msg, 'message')}
-                    className="w-full text-left px-3.5 py-2.5 text-xs text-zinc-400 hover:text-white bg-[#14151f] border border-white/5 hover:border-pink-500/20 rounded-xl transition-all cursor-pointer block truncate"
+                    className="w-full text-left px-3.5 py-2.5 text-xs text-text-secondary hover:text-text-primary bg-bg-tertiary border border-border-theme hover:border-accent-pink/30 rounded-xl transition-all cursor-pointer block truncate"
                   >
                     💬 {msg}
                   </button>
@@ -3178,13 +5110,13 @@ function DauTruongContent() {
             </div>
 
             {/* TRỢ LÝ AI TRỰC TUYẾN (AI COPILOT COCKPIT) */}
-            <div className="bg-[#1e202b]/90 backdrop-blur-xl border border-pink-500/10 rounded-3xl p-5 shadow-2xl flex flex-col gap-4 relative overflow-hidden">
+            <div className="bg-bg-secondary/95 backdrop-blur-xl border border-accent-pink/20 rounded-3xl p-5 shadow-2xl flex flex-col gap-4 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-24 h-24 bg-pink-500/5 rounded-full blur-2xl pointer-events-none" />
               
-              <div className="flex items-center justify-between border-b border-white/5 pb-3.5 select-none">
+              <div className="flex items-center justify-between border-b border-border-theme pb-3.5 select-none">
                 <div className="flex items-center gap-2">
-                  <Cpu className="w-4.5 h-4.5 text-pink-400 animate-pulse" />
-                  <span className="text-[10px] font-black text-white uppercase tracking-widest font-mono">
+                  <Cpu className="w-4.5 h-4.5 text-accent-pink animate-pulse" />
+                  <span className="text-[10px] font-black text-text-primary uppercase tracking-widest font-mono">
                     BUỒNG TRỢ LÝ AI (COPILOT)
                   </span>
                 </div>
@@ -3194,18 +5126,18 @@ function DauTruongContent() {
               </div>
 
               {/* Bong bóng tin nhắn hiển thị lời thoại gợi ý của AI */}
-              <div className="bg-[#14151f] p-4 rounded-2xl border border-white/5 relative">
-                <p className="text-[11px] text-zinc-300 leading-relaxed text-left font-sans whitespace-pre-wrap">
+              <div className="bg-bg-tertiary p-4 rounded-2xl border border-border-theme relative">
+                <p className="text-[11px] text-text-primary leading-relaxed text-left font-sans whitespace-pre-wrap">
                   {arenaAiText}
                 </p>
-                <div className="absolute top-3 -left-1.5 w-3 h-3 bg-[#14151f] border-l border-t border-white/5 transform rotate-[-45deg]" />
+                <div className="absolute top-3 -left-1.5 w-3 h-3 bg-bg-tertiary border-l border-t border-border-theme transform rotate-[-45deg]" />
               </div>
 
               <div className="flex gap-2">
                 {/* Nút yêu cầu gợi ý nhanh */}
                 <button
                   onClick={handleGetArenaAiHint}
-                  className="flex-1 py-2.5 bg-[#14151f] hover:bg-zinc-800 border border-white/10 hover:border-pink-500/30 text-pink-400 hover:text-white rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer font-mono"
+                  className="flex-1 py-2.5 bg-bg-tertiary hover:bg-bg-primary border border-border-theme hover:border-accent-pink/40 text-accent-pink hover:text-text-primary rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer font-mono"
                 >
                   <Sparkles className="w-3.5 h-3.5" /> GỢI Ý CÔNG THỨC
                 </button>
@@ -3218,7 +5150,7 @@ function DauTruongContent() {
                   value={arenaAiQuery}
                   onChange={(e) => setArenaAiQuery(e.target.value)}
                   placeholder="Hỏi công thức, phản ứng..."
-                  className="flex-1 bg-[#14151f] border border-white/5 focus:border-pink-500/30 rounded-xl px-3.5 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none transition-colors"
+                  className="flex-1 bg-bg-tertiary border border-border-theme focus:border-accent-pink/40 rounded-xl px-3.5 py-2 text-xs text-text-primary placeholder-text-secondary focus:outline-none transition-colors"
                 />
                 <button
                   type="submit"
@@ -3238,7 +5170,7 @@ function DauTruongContent() {
       {/* 4. TRẠNG THÁI RESULT: HIỂN THỊ HỘP THOẠI KẾT QUẢ CẬP NHẬT ELO */}
       {arenaState.status === 'result' && (
         <div className="flex items-center justify-center py-10 animate-in zoom-in-95 duration-300">
-          <div className="w-full max-w-md bg-[#1e202b]/95 backdrop-blur-xl border border-white/5 rounded-3xl p-8 shadow-2xl text-center relative overflow-hidden">
+          <div className="w-full max-w-md bg-bg-secondary/95 backdrop-blur-xl border border-border-theme rounded-3xl p-8 shadow-2xl text-center relative overflow-hidden">
             {arenaState.matchResult === 'victory' ? (
               <div className="absolute -top-10 -left-10 w-40 h-40 bg-amber-500/5 rounded-full filter blur-2xl pointer-events-none" />
             ) : (
@@ -3251,7 +5183,7 @@ function DauTruongContent() {
                   <div className="w-20 h-20 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-4 text-amber-400 animate-bounce">
                     <Trophy className="w-10 h-10 filter drop-shadow-[0_0_8px_rgba(245,158,11,0.2)]" />
                   </div>
-                  <h2 className="text-2xl font-black text-white tracking-widest uppercase font-mono">MISSION ACCOMPLISHED!</h2>
+                  <h2 className="text-2xl font-black text-text-primary tracking-widest uppercase font-mono">MISSION ACCOMPLISHED!</h2>
                   <p className="text-amber-400 text-xs font-bold uppercase mt-1">Xuất sắc hoàn tất thí nghiệm trước đối thủ!</p>
                 </>
               ) : (
@@ -3259,35 +5191,35 @@ function DauTruongContent() {
                   <div className="w-20 h-20 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-4 text-rose-400 animate-pulse">
                     <AlertTriangle className="w-10 h-10 filter drop-shadow-[0_0_8px_rgba(244,63,94,0.2)]" />
                   </div>
-                  <h2 className="text-2xl font-black text-white tracking-widest uppercase font-mono">MISSION FAILED</h2>
+                  <h2 className="text-2xl font-black text-text-primary tracking-widest uppercase font-mono">MISSION FAILED</h2>
                   <p className="text-rose-400 text-xs font-bold uppercase mt-1">Đối thủ hoặc giới hạn thời gian đã vượt qua bạn!</p>
                 </>
               )}
             </div>
 
             {/* Thống kê thay đổi */}
-            <div className={`grid ${arenaState.matchResult === 'victory' ? 'grid-cols-3' : 'grid-cols-2'} gap-4 bg-[#14151f] p-5 rounded-2xl border border-white/5 mb-8 font-mono`}>
+            <div className={`grid ${arenaState.matchResult === 'victory' ? 'grid-cols-3' : 'grid-cols-2'} gap-4 bg-bg-tertiary p-5 rounded-2xl border border-border-theme mb-8 font-mono`}>
               <div className="text-center">
-                <span className="text-[10px] text-zinc-500 font-bold block uppercase mb-1">Xếp hạng (ELO)</span>
+                <span className="text-[10px] text-text-secondary font-bold block uppercase mb-1">Xếp hạng (ELO)</span>
                 <span className={`text-2xl font-black ${arenaState.matchResult === 'victory' ? 'text-emerald-400' : 'text-rose-400'}`}>
                   {arenaState.matchResult === 'victory' ? '+25' : '-15'} ELO
                 </span>
-                <span className="text-[10px] text-zinc-400 block mt-1">Hiện tại: {personalization.elo} ELO</span>
+                <span className="text-[10px] text-text-secondary block mt-1">Hiện tại: {personalization.elo} ELO</span>
               </div>
               <div className="text-center">
-                <span className="text-[10px] text-zinc-500 font-bold block uppercase mb-1">Kinh nghiệm (EXP)</span>
+                <span className="text-[10px] text-text-secondary font-bold block uppercase mb-1">Kinh nghiệm (EXP)</span>
                 <span className="text-2xl font-black text-cyan-400">
                   +{arenaState.matchResult === 'victory' ? '250' : '50'} EXP
                 </span>
-                <span className="text-[10px] text-zinc-400 block mt-1">Lv.{personalization.level} ({personalization.exp}/{personalization.nextLevelExp})</span>
+                <span className="text-[10px] text-text-secondary block mt-1">Lv.{personalization.level} ({personalization.exp}/{personalization.nextLevelExp})</span>
               </div>
               {arenaState.matchResult === 'victory' && (
                 <div className="text-center animate-in fade-in slide-in-from-bottom-3 duration-500">
-                  <span className="text-[10px] text-zinc-550 dark:text-zinc-500 font-bold block uppercase mb-1">Pha lê (Crystal)</span>
+                  <span className="text-[10px] text-text-secondary font-bold block uppercase mb-1">Pha lê (Crystal)</span>
                   <span className="text-2xl font-black text-amber-400 flex items-center justify-center gap-1">
-                    +50 <Gem className="w-5 h-5 text-amber-400 animate-bounce" />
+                    +50 <CrystalIcon className="w-6 h-6" />
                   </span>
-                  <span className="text-[10px] text-zinc-400 block mt-1">Hiện tại: {personalization.crystals || 0}</span>
+                  <span className="text-[10px] text-text-secondary block mt-1">Hiện tại: {personalization.crystals || 0}</span>
                 </div>
               )}
             </div>
@@ -3304,7 +5236,7 @@ function DauTruongContent() {
               <button
                 onMouseEnter={playSound.hover}
                 onClick={() => setArenaStatus('idle')}
-                className="w-full py-3.5 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-white text-xs font-bold rounded-2xl transition-all cursor-pointer shadow-lg active:scale-95 flex items-center justify-center gap-2 font-mono"
+                className="w-full py-3.5 bg-bg-tertiary hover:bg-bg-primary border border-border-theme text-text-primary text-xs font-bold rounded-2xl transition-all cursor-pointer shadow-lg active:scale-95 flex items-center justify-center gap-2 font-mono"
               >
                 <RotateCcw className="w-4 h-4" /> RE-ENTER ARENA
               </button>
@@ -3313,6 +5245,56 @@ function DauTruongContent() {
         </div>
       )}
 
+      {/* MODAL CẢNH BÁO VI PHẠM RỜI TAB (THOÁT TAB) */}
+      {tabExitModal && (
+        <div className="fixed inset-0 z-[999999] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-[#111424] border border-rose-500/50 rounded-3xl p-6 md:p-8 max-w-md w-full shadow-[0_0_80px_rgba(244,63,94,0.35)] text-center relative overflow-hidden font-sans">
+            <div className="w-16 h-16 bg-rose-500/20 border border-rose-500/50 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-bounce">
+              <AlertTriangle className="w-8 h-8 text-rose-500" />
+            </div>
+
+            <h3 className="text-xl font-black text-rose-400 mb-2 uppercase tracking-wide">
+              {tabExitModal.forfeited ? '🚨 XỬ THUA DO GIAN LẬN!' : `⚠️ CẢNH BÁO VI PHẠM RỜI TAB (${tabExitModal.count}/5)`}
+            </h3>
+
+            <p className="text-sm text-gray-300 mb-6 leading-relaxed">
+              {tabExitModal.forfeited ? (
+                <span className="text-rose-300 font-semibold block">
+                  Bạn đã vi phạm rời khỏi tab quá 5 lần quy định. Trận đấu kết thúc và bạn bị xử thua ngay lập tức!
+                </span>
+              ) : (
+                <>
+                  Phát hiện chuyển tab trong lúc thi đấu! Bạn vừa bị trừ <span className="text-amber-400 font-bold">{tabExitModal.penalty} giây</span> vào quỹ thời gian.
+                  <span className="text-rose-400 font-semibold mt-3 block bg-rose-500/10 border border-rose-500/20 py-2 px-3 rounded-xl">
+                    Vi phạm thêm {6 - tabExitModal.count} lần nữa sẽ bị XỬ THUA LẬP TỨC!
+                  </span>
+                </>
+              )}
+            </p>
+
+            <button
+              onClick={() => {
+                playSound.click();
+                setTabExitModal(null);
+              }}
+              className="w-full py-3.5 bg-gradient-to-r from-rose-600 to-red-700 hover:from-rose-500 hover:to-red-600 text-white font-bold text-sm rounded-2xl shadow-lg transition-all active:scale-95 cursor-pointer uppercase tracking-wider"
+            >
+              {tabExitModal.forfeited ? 'Đã hiểu & Thoát' : 'Tôi đã hiểu — Tiếp tục thi đấu'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL CỬA HÀNG TRANG BỊ MINI CHO ĐẤU TRƯỜNG 1V1 (CHỈ MỞ Ở SẢNH IDLE) */}
+      <MiniEquipmentShopModal
+        isOpen={isShopOpen}
+        onClose={() => setIsShopOpen(false)}
+        user={user}
+        personalization={personalization}
+        setPersonalization={setPersonalization}
+      />
+
+      </div>
     </div>
   );
 }

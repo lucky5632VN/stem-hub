@@ -1,0 +1,4 @@
+**Context:** Trong tính năng Cửa hàng/Gacha của "Đấu Trường STEM", hệ thống Gacha nhả ra item có tên "Kiểu Tóc Thế Giới Mới" (kèm tag Trùng: +150). Tuy nhiên, vào kho đồ UI lại không hiển thị item này ở cả giới tính Nam và Nữ.
+**Task:**
+1. Kiểm tra lại dữ liệu `gachaPool` và mảng `hairOptions` trong component tùy chỉnh Avatar. Đảm bảo toàn bộ ID item sinh ra từ Gacha phải khớp chính xác 100% với ID được render trong `STEMAvatarSVG.jsx`.
+2. Kiểm tra lại hàm update State (Zustand). Khi người dùng quay ra đồ (không trùng), State `unlockedItems` phải được cập nhật và trigger re-render ngay lập tức để gỡ icon ổ khóa ở giao diện mà không cần F5.

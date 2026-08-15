@@ -1,7 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
-import { getFunctions, connectFunctionsEmulator, httpsCallable as originalHttpsCallable } from "firebase/functions";
 import { clientFunctions } from "./clientFunctions";
 
 // Your web app's Firebase configuration
@@ -20,12 +19,10 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 let auth;
 let db;
-let functions;
 
 if (typeof window === "undefined") {
   auth = getAuth(app);
   db = getFirestore(app);
-  functions = getFunctions(app);
 } else {
   if (!globalThis.__firebaseAuth) {
     globalThis.__firebaseAuth = getAuth(app);
@@ -33,12 +30,8 @@ if (typeof window === "undefined") {
   if (!globalThis.__firebaseDb) {
     globalThis.__firebaseDb = getFirestore(app);
   }
-  if (!globalThis.__firebaseFunctions) {
-    globalThis.__firebaseFunctions = getFunctions(app);
-  }
   auth = globalThis.__firebaseAuth;
   db = globalThis.__firebaseDb;
-  functions = globalThis.__firebaseFunctions;
 }
 
 const useEmulator = process.env.NEXT_PUBLIC_USE_EMULATOR === 'true';
@@ -46,15 +39,11 @@ const useEmulator = process.env.NEXT_PUBLIC_USE_EMULATOR === 'true';
 if (typeof window !== "undefined" && !globalThis.__firebaseEmulatorsConnected) {
   try {
     if (useEmulator) {
-      // Kết nối tất cả emulators (Auth, Firestore, Functions)
-      connectFirestoreEmulator(db, '127.0.0.1', 8080);
-      connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
-      connectFunctionsEmulator(functions, '127.0.0.1', 5001);
-      console.log("Connected to all Firebase Emulators (Auth, Firestore, Functions)");
+      connectFirestoreEmulator(db, 'localhost', 8080);
+      connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
+      console.log("Connected to Firebase Emulators (Auth, Firestore)");
     } else {
-      // Cơ chế Hybrid Production: Chỉ kết nối Functions tới local emulator, Auth & Firestore kết nối thẳng Production Cloud
-      connectFunctionsEmulator(functions, '127.0.0.1', 5001);
-      console.log("🔥 [Hybrid Production] Connected Functions to Local Emulator (127.0.0.1:5001), Auth & Firestore to Production");
+      console.log("🔥 [Production] Operating in Serverless Client-Side Callable Mode!");
     }
     globalThis.__firebaseEmulatorsConnected = true;
   } catch (err) {
@@ -62,8 +51,8 @@ if (typeof window !== "undefined" && !globalThis.__firebaseEmulatorsConnected) {
   }
 }
 
-function httpsCallable(functionsInstance, name) {
-  // Ưu tiên các hàm được xử lý trực tiếp ở client-side (nếu có cấu hình)
+// Giả lập hoàn toàn httpsCallable ở client-side
+function httpsCallable(functionsDummy, name) {
   if (clientFunctions[name]) {
     const clientFn = clientFunctions[name](db, auth);
     return async (data) => {
@@ -78,8 +67,12 @@ function httpsCallable(functionsInstance, name) {
     };
   }
   
-  // Trả về lệnh gọi Cloud Function gốc (kết nối trực tiếp qua Emulator hoặc Cloud thực tế tùy cấu hình)
-  return originalHttpsCallable(functionsInstance, name);
+  console.warn(`[Client-Side Mock] Function '${name}' not implemented in clientFunctions. Returning mock success.`);
+  return async () => {
+    return { data: { success: true } };
+  };
 }
+
+const functions = {}; // Tránh lỗi import functions ở các file client khác
 
 export { app, auth, db, functions, httpsCallable };

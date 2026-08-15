@@ -22,7 +22,7 @@ export const getFrameStyle = (frame) => {
     case 'top_100_silver':
       return 'border-2 border-slate-300 shadow-[0_0_12px_#cbd5e1]';
     default:
-      return 'border border-pink-500/30';
+      return 'border border-border-theme';
   }
 };
 
@@ -30,7 +30,7 @@ export const AvatarFrame = ({ frame, children, className = 'w-12 h-12 text-base'
   const frameStyle = getFrameStyle(frame);
 
   return (
-    <div className={`${className} rounded-full bg-pink-500/10 flex items-center justify-center text-pink-400 font-extrabold relative shrink-0 ${frameStyle}`}>
+    <div className={`${className} rounded-full bg-accent-pink/10 flex items-center justify-center text-accent-pink font-extrabold relative shrink-0 ${frameStyle}`}>
       {children}
       
       {/* 👑 TOP 1: Crown and Side Laurel/Wings */}

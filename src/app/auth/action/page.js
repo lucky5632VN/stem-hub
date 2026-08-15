@@ -260,16 +260,16 @@ function AuthActionContent() {
 
 export default function AuthActionPage() {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#1c1e29] flex items-center justify-center p-6 text-slate-800 dark:text-zinc-200 transition-colors duration-300">
+    <div className="min-h-screen bg-bg-primary flex items-center justify-center p-6 text-text-primary transition-colors duration-300">
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="w-full max-w-md bg-white dark:bg-[#2a2c3a] rounded-3xl shadow-xl p-8 border border-slate-250/60 dark:border-white/10 flex flex-col items-center justify-center transition-all duration-300 min-h-[300px]"
+        className="w-full max-w-md bg-bg-secondary rounded-3xl shadow-xl p-8 border border-border-theme flex flex-col items-center justify-center transition-all duration-300 min-h-[300px]"
       >
         <Suspense fallback={
           <div className="flex flex-col items-center justify-center space-y-4">
-            <Loader2 className="w-12 h-12 text-pink-500 animate-spin" />
-            <p className="text-slate-650 dark:text-zinc-400 font-medium">Đang chuẩn bị...</p>
+            <Loader2 className="w-12 h-12 text-accent-pink animate-spin" />
+            <p className="text-text-secondary font-medium">Đang chuẩn bị...</p>
           </div>
         }>
           <AuthActionContent />

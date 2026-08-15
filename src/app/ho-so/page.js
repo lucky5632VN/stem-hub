@@ -24,6 +24,7 @@ import {
 } from 'firebase/auth';
 import { AvatarFrame } from '@/components/atoms/AvatarFrame';
 import STEMAvatarSVG, { skinColors } from '@/components/atoms/STEMAvatarSVG';
+import CrystalIcon from '@/components/atoms/CrystalIcon';
 
 export const ALL_COSMETICS = [
   // Màu da (Unisex)
@@ -246,6 +247,7 @@ export default function ProfilePage() {
   const [outgoingRequests, setOutgoingRequests] = useState([]);
   const [richFriends, setRichFriends] = useState([]);
   const [richIncomingRequests, setRichIncomingRequests] = useState([]);
+  const [processingUid, setProcessingUid] = useState(null);
   
   const [searchQuery, setSearchQuery] = useState('');
   const [allPlayers, setAllPlayers] = useState([]);
@@ -767,8 +769,7 @@ export default function ProfilePage() {
       });
     }
   };
-
-  // Logic Điểm danh lượng tử 7 ngày
+  // Logic Điểm danh lượng tử 30 ngày
   const handleDailyCheckIn = async () => {
     playSound.click();
     const todayStr = new Date().toISOString().split('T')[0];
@@ -796,7 +797,7 @@ export default function ProfilePage() {
 
       const unlocked = personalization.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default'];
       let newUnlocked = [...unlocked];
-      if (nextDayIndex === 7 && !newUnlocked.includes('crown')) {
+      if (nextDayIndex === 30 && !newUnlocked.includes('crown')) {
         newUnlocked.push('crown');
       }
 
@@ -1132,7 +1133,7 @@ export default function ProfilePage() {
   const sendFriendRequest = async (targetUser) => {
     playSound.click();
     if (!user || !targetUser) return;
-    
+    setProcessingUid(targetUser.uid);
     try {
       const processFriend = httpsCallable(functions, 'processFriendAction');
       await processFriend({
@@ -1147,13 +1148,15 @@ export default function ProfilePage() {
     } catch (err) {
       console.error(err);
       setSettingsMessage({ type: 'error', text: `Lỗi khi gửi lời mời: ${err.message}` });
+    } finally {
+      setProcessingUid(null);
     }
   };
 
   const acceptFriendRequest = async (sender) => {
     playSound.success();
     if (!user || !sender) return;
-    
+    setProcessingUid(sender.uid);
     try {
       const processFriend = httpsCallable(functions, 'processFriendAction');
       await processFriend({
@@ -1168,13 +1171,15 @@ export default function ProfilePage() {
     } catch (err) {
       console.error(err);
       setSettingsMessage({ type: 'error', text: `Lỗi khi chấp nhận kết bạn: ${err.message}` });
+    } finally {
+      setProcessingUid(null);
     }
   };
 
   const declineFriendRequest = async (sender) => {
     playSound.click();
     if (!user || !sender) return;
-    
+    setProcessingUid(sender.uid);
     try {
       const processFriend = httpsCallable(functions, 'processFriendAction');
       await processFriend({
@@ -1189,6 +1194,8 @@ export default function ProfilePage() {
     } catch (err) {
       console.error(err);
       setSettingsMessage({ type: 'error', text: `Lỗi khi từ chối kết bạn: ${err.message}` });
+    } finally {
+      setProcessingUid(null);
     }
   };
 
@@ -1197,7 +1204,7 @@ export default function ProfilePage() {
     if (!user || !friend) return;
     
     if (!window.confirm(`Bạn có chắc chắn muốn hủy kết bạn với ${friend.displayName || 'Học viên'} không?`)) return;
-    
+    setProcessingUid(friend.uid);
     try {
       const processFriend = httpsCallable(functions, 'processFriendAction');
       await processFriend({
@@ -1212,6 +1219,8 @@ export default function ProfilePage() {
     } catch (err) {
       console.error(err);
       setSettingsMessage({ type: 'error', text: `Lỗi khi hủy kết bạn: ${err.message}` });
+    } finally {
+      setProcessingUid(null);
     }
   };
 
@@ -1691,10 +1700,10 @@ export default function ProfilePage() {
       </div>
 
       {/* Tabs list */}
-      <div className="flex gap-4 border-b border-white/5 mb-8 flex-wrap">
+      <div className="flex gap-4 border-b border-border-theme mb-8 flex-wrap">
         {[
           { id: 'overview', label: 'Tổng quan năng lực', icon: <User className="w-4 h-4" /> },
-          { id: 'daily_checkin', label: 'Điểm danh 7 ngày', icon: <Gift className="w-4 h-4" /> },
+          { id: 'daily_checkin', label: 'Điểm danh 30 ngày', icon: <Gift className="w-4 h-4" /> },
           { id: 'friends', label: 'Mạng lưới bạn bè', icon: <Users className="w-4 h-4" /> },
           { id: 'inventory', label: 'Kho đồ & Danh hiệu', icon: <Award className="w-4 h-4" /> },
           { id: 'personalization', label: 'Cá nhân hóa', icon: <Sparkles className="w-4 h-4" /> },
@@ -1707,16 +1716,17 @@ export default function ProfilePage() {
             onClick={() => {
               playSound.click();
               setActiveTab(tab.id);
+              setSettingsMessage(null);
             }}
             className={`pb-4 px-2 text-sm font-bold flex items-center gap-2 transition-colors relative ${
-              activeTab === tab.id ? 'text-pink-400 font-extrabold' : 'text-zinc-400 hover:text-zinc-200'
+              activeTab === tab.id ? 'text-accent-pink font-extrabold' : 'text-text-secondary hover:text-text-primary'
             }`}
           >
             {tab.icon} {tab.label}
             {activeTab === tab.id && (
               <motion.div 
                 layoutId="profileTabBorder"
-                className="absolute bottom-0 left-0 w-full h-[3px] bg-pink-500 rounded-t-full" 
+                className="absolute bottom-0 left-0 w-full h-[3px] bg-accent-pink rounded-t-full" 
               />
             )}
           </button>
@@ -1738,11 +1748,11 @@ export default function ProfilePage() {
                 transformStyle: 'preserve-3d',
                 transition: 'transform 0.1s ease-out'
               }}
-              className="relative w-full max-w-sm bg-white dark:bg-gradient-to-br dark:from-[#2a2c3a]/80 dark:to-[#1c1e29]/90 border border-slate-200 dark:border-white/10 rounded-3xl p-6 shadow-2xl flex flex-col items-center justify-between min-h-[420px] select-none group"
+              className="relative w-full max-w-sm bg-bg-secondary/95 border border-border-theme rounded-3xl p-6 shadow-2xl flex flex-col items-center justify-between min-h-[420px] select-none group"
             >
               {/* Sci-fi Hologram Lines & Grid Overlay */}
-              <div className="absolute inset-0 rounded-3xl bg-[linear-gradient(rgba(0,0,0,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.015)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none opacity-40 group-hover:opacity-60 transition-opacity" />
-              <div className="absolute top-4 right-4 text-[10px] text-pink-500/50 font-mono tracking-widest uppercase">ID: {user.uid.slice(0, 8)}</div>
+              <div className="absolute inset-0 rounded-3xl bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none opacity-40 group-hover:opacity-60 transition-opacity" />
+              <div className="absolute top-4 right-4 text-[10px] text-accent-pink font-mono tracking-widest uppercase">ID: {user.uid.slice(0, 8)}</div>
 
               {/* Holographic light reflection */}
               <div 
@@ -1776,52 +1786,52 @@ export default function ProfilePage() {
                      )}
                      
                      {/* Edit overlay */}
-                     <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover/avatar:opacity-100 transition-all duration-300 flex items-center justify-center z-20">
-                       <span className="text-[10px] font-black text-white uppercase tracking-wider">Thay đổi</span>
+                     <div className="absolute inset-0 bg-bg-primary/70 rounded-full opacity-0 group-hover/avatar:opacity-100 transition-all duration-300 flex items-center justify-center z-20">
+                       <span className="text-[10px] font-black text-text-primary uppercase tracking-wider">Thay đổi</span>
                      </div>
                      
                      {/* EXP Star float */}
-                     <div className="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-pink-500 border-2 border-[#1c1e29] text-[11px] font-extrabold text-white flex items-center justify-center shadow-lg z-30">
+                     <div className="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-accent-pink border-2 border-bg-primary text-[11px] font-extrabold text-white flex items-center justify-center shadow-lg z-30">
                        {personalization.level}
                      </div>
                    </AvatarFrame>
                  </div>
 
                 <div className="text-center mt-4">
-                  <h3 className="text-xl font-bold text-white tracking-wide">{user.displayName || 'Học viên'}</h3>
-                  <p className="text-xs text-pink-400 font-semibold uppercase tracking-wider mt-1 px-3 py-1 bg-pink-500/10 rounded-full inline-block">
+                  <h3 className="text-xl font-bold text-text-primary tracking-wide">{user.displayName || 'Học viên'}</h3>
+                  <p className="text-xs text-accent-pink font-semibold uppercase tracking-wider mt-1 px-3 py-1 bg-accent-pink/10 rounded-full inline-block">
                     {getTitleLabel(personalization.activeTitle)}
                   </p>
                 </div>
               </div>
 
               {/* Level progress info */}
-              <div className="w-full mt-6 space-y-2 border-t border-white/5 pt-4 z-10">
-                <div className="flex justify-between text-xs text-zinc-400">
+              <div className="w-full mt-6 space-y-2 border-t border-border-theme pt-4 z-10">
+                <div className="flex justify-between text-xs text-text-secondary">
                   <span>Trình độ Nhà nghiên cứu</span>
-                  <span className="font-semibold text-white">EXP: {personalization.exp} / {personalization.nextLevelExp}</span>
+                  <span className="font-semibold text-text-primary">EXP: {personalization.exp} / {personalization.nextLevelExp}</span>
                 </div>
-                <div className="w-full h-2 bg-[#1c1e29] rounded-full overflow-hidden border border-white/5">
+                <div className="w-full h-2 bg-bg-tertiary rounded-full overflow-hidden border border-border-theme">
                   <div 
-                    className="h-full bg-gradient-to-r from-pink-500 via-rose-500 to-amber-400 rounded-full transition-all duration-500"
+                    className="h-full bg-gradient-to-r from-accent-pink via-accent-purple to-amber-400 rounded-full transition-all duration-500"
                     style={{ width: `${(personalization.exp / personalization.nextLevelExp) * 100}%` }}
                   />
                 </div>
               </div>
 
               {/* Match Stats summary */}
-              <div className="grid grid-cols-3 gap-2 w-full mt-6 bg-[#1c1e29]/50 rounded-2xl p-3 border border-white/5 text-center text-xs z-10">
+              <div className="grid grid-cols-3 gap-2 w-full mt-6 bg-bg-tertiary rounded-2xl p-3 border border-border-theme text-center text-xs z-10">
                 <div>
-                  <div className="text-zinc-500 font-medium">Elo Hạng</div>
-                  <div className="text-pink-400 font-bold text-base mt-0.5">{personalization.elo}</div>
+                  <div className="text-text-secondary font-medium">Elo Hạng</div>
+                  <div className="text-accent-pink font-bold text-base mt-0.5">{personalization.elo}</div>
                 </div>
                 <div>
-                  <div className="text-zinc-500 font-medium">Trận đấu</div>
-                  <div className="text-white font-bold text-base mt-0.5">{personalization.wins + personalization.losses}</div>
+                  <div className="text-text-secondary font-medium">Trận đấu</div>
+                  <div className="text-text-primary font-bold text-base mt-0.5">{personalization.wins + personalization.losses}</div>
                 </div>
                 <div>
-                  <div className="text-zinc-500 font-medium">Tỷ lệ thắng</div>
-                  <div className="text-emerald-400 font-bold text-base mt-0.5">
+                  <div className="text-text-secondary font-medium">Tỷ lệ thắng</div>
+                  <div className="text-success font-bold text-base mt-0.5">
                     {personalization.wins + personalization.losses > 0 
                       ? `${Math.round((personalization.wins / (personalization.wins + personalization.losses)) * 100)}%` 
                       : '0%'
@@ -1836,12 +1846,12 @@ export default function ProfilePage() {
           <div className="xl:col-span-7 flex flex-col gap-6 w-full text-left">
             
             {/* radar card */}
-            <div className="bg-[#2a2c3a] border border-white/5 rounded-3xl p-6 flex flex-col md:flex-row items-center gap-8 shadow-xl">
+            <div className="bg-bg-secondary/95 border border-border-theme rounded-3xl p-6 flex flex-col md:flex-row items-center gap-8 shadow-xl">
               
               {/* SVG Radar implementation */}
-              <div className="w-48 h-48 shrink-0 relative bg-[#1c1e29]/40 rounded-full border border-white/5 p-4 flex items-center justify-center overflow-hidden">
+              <div className="w-48 h-48 shrink-0 relative bg-bg-tertiary rounded-full border border-border-theme p-4 flex items-center justify-center overflow-hidden">
                 {/* Radar sweep light overlay */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-pink-500/5 to-transparent animate-[spin_12s_linear_infinite] pointer-events-none" />
+                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-accent-pink/5 to-transparent animate-[spin_12s_linear_infinite] pointer-events-none" />
 
                 <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-45 relative z-10">
                   {/* Circular grid lines */}
@@ -1852,14 +1862,14 @@ export default function ProfilePage() {
                       cy={cy} 
                       r={r} 
                       fill="none" 
-                      stroke="rgba(255,255,255,0.05)" 
+                      stroke="rgba(255,255,255,0.08)" 
                       strokeWidth="1" 
                     />
                   ))}
                   
                   {/* Axis lines */}
-                  <line x1={cx} y1={cy - rMax} x2={cx} y2={cy + rMax} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-                  <line x1={cx - rMax} y1={cy} x2={cx + rMax} y2={cy} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+                  <line x1={cx} y1={cy - rMax} x2={cx} y2={cy + rMax} stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+                  <line x1={cx - rMax} y1={cy} x2={cx + rMax} y2={cy} stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
 
                   {/* Highlight axis line when hovered */}
                   {hoveredSubject === 'math' && (
@@ -1931,10 +1941,10 @@ export default function ProfilePage() {
 
               {/* radar details text */}
               <div className="flex-1 space-y-4 w-full">
-                <h4 className="text-lg font-bold text-white flex items-center gap-1.5">
-                  <Star className="w-5 h-5 text-pink-400" /> Chỉ số Năng lực STEM
+                <h4 className="text-lg font-bold text-text-primary flex items-center gap-1.5">
+                  <Star className="w-5 h-5 text-accent-pink" /> Chỉ số Năng lực STEM
                 </h4>
-                <p className="text-xs text-zinc-400 leading-relaxed">
+                <p className="text-xs text-text-secondary leading-relaxed">
                   Chỉ số radar thể hiện mức độ tích cực hoạt động và kết quả bài thi giải đố của bạn ở từng phòng lab. Điểm số tăng lên khi hoàn thành bài thi thực chiến môn đó.
                 </p>
                 
@@ -1944,48 +1954,48 @@ export default function ProfilePage() {
                     onMouseLeave={() => setHoveredSubject(null)}
                     className={`flex justify-between items-center p-2.5 rounded-xl border transition-all duration-355 cursor-pointer ${
                       hoveredSubject === 'math' 
-                        ? 'bg-pink-500/10 border-pink-500/30 shadow-md shadow-pink-500/5 scale-[1.02]' 
-                        : 'bg-[#1c1e29]/40 border-white/5'
+                        ? 'bg-accent-pink/10 border-accent-pink/30 shadow-md scale-[1.02]' 
+                        : 'bg-bg-tertiary border-border-theme'
                     }`}
                   >
-                    <span className="text-pink-400 font-semibold">Toán học</span>
-                    <span className="text-white font-bold">{strengths.math}%</span>
+                    <span className="text-accent-pink font-semibold">Toán học</span>
+                    <span className="text-text-primary font-bold">{strengths.math}%</span>
                   </div>
                   <div 
                     onMouseEnter={() => setHoveredSubject('physics')}
                     onMouseLeave={() => setHoveredSubject(null)}
                     className={`flex justify-between items-center p-2.5 rounded-xl border transition-all duration-355 cursor-pointer ${
                       hoveredSubject === 'physics' 
-                        ? 'bg-rose-500/10 border-rose-500/30 shadow-md shadow-rose-500/5 scale-[1.02]' 
-                        : 'bg-[#1c1e29]/40 border-white/5'
+                        ? 'bg-rose-500/10 border-rose-500/30 shadow-md scale-[1.02]' 
+                        : 'bg-bg-tertiary border-border-theme'
                     }`}
                   >
                     <span className="text-rose-500 font-semibold">Vật lý</span>
-                    <span className="text-white font-bold">{strengths.physics}%</span>
+                    <span className="text-text-primary font-bold">{strengths.physics}%</span>
                   </div>
                   <div 
                     onMouseEnter={() => setHoveredSubject('chemistry')}
                     onMouseLeave={() => setHoveredSubject(null)}
                     className={`flex justify-between items-center p-2.5 rounded-xl border transition-all duration-355 cursor-pointer ${
                       hoveredSubject === 'chemistry' 
-                        ? 'bg-amber-500/10 border-amber-500/30 shadow-md shadow-amber-500/5 scale-[1.02]' 
-                        : 'bg-[#1c1e29]/40 border-white/5'
+                        ? 'bg-amber-500/10 border-amber-500/30 shadow-md scale-[1.02]' 
+                        : 'bg-bg-tertiary border-border-theme'
                     }`}
                   >
                     <span className="text-amber-400 font-semibold">Hóa học</span>
-                    <span className="text-white font-bold">{strengths.chemistry}%</span>
+                    <span className="text-text-primary font-bold">{strengths.chemistry}%</span>
                   </div>
                   <div 
                     onMouseEnter={() => setHoveredSubject('biology')}
                     onMouseLeave={() => setHoveredSubject(null)}
                     className={`flex justify-between items-center p-2.5 rounded-xl border transition-all duration-355 cursor-pointer ${
                       hoveredSubject === 'biology' 
-                        ? 'bg-emerald-500/10 border-emerald-500/30 shadow-md shadow-emerald-500/5 scale-[1.02]' 
-                        : 'bg-[#1c1e29]/40 border-white/5'
+                        ? 'bg-emerald-500/10 border-emerald-500/30 shadow-md scale-[1.02]' 
+                        : 'bg-bg-tertiary border-border-theme'
                     }`}
                   >
                     <span className="text-emerald-400 font-semibold">Sinh học</span>
-                    <span className="text-white font-bold">{strengths.biology}%</span>
+                    <span className="text-text-primary font-bold">{strengths.biology}%</span>
                   </div>
                 </div>
               </div>
@@ -1997,19 +2007,19 @@ export default function ProfilePage() {
               {(() => {
                 const arch = getArchetype(strengths);
                 return (
-                  <div className={`p-5 rounded-3xl border ${arch.bgColor} ${arch.glowColor} flex flex-col justify-between space-y-3 transition-all duration-500 relative overflow-hidden group`}>
+                  <div className={`p-5 rounded-3xl border bg-bg-secondary/95 border-border-theme flex flex-col justify-between space-y-3 transition-all duration-500 relative overflow-hidden group shadow-xl`}>
                     <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:12px_12px] pointer-events-none" />
                     <div>
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                          <Shield className="w-4.5 h-4.5 text-pink-400" />
+                        <div className="w-8 h-8 rounded-full bg-bg-tertiary flex items-center justify-center border border-border-theme">
+                          <Shield className="w-4.5 h-4.5 text-accent-pink" />
                         </div>
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Hệ năng lực</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Hệ năng lực</span>
                       </div>
                       <h4 className={`text-lg font-black tracking-wide ${arch.color}`}>
                         {arch.title}
                       </h4>
-                      <p className="text-xs text-zinc-400 leading-relaxed mt-2">
+                      <p className="text-xs text-text-secondary leading-relaxed mt-2">
                         {arch.desc}
                       </p>
                     </div>
@@ -2018,19 +2028,19 @@ export default function ProfilePage() {
               })()}
 
               {/* Smart AI Advice Card */}
-              <div className="bg-[#2a2c3a] border border-white/5 rounded-3xl p-5 flex flex-col justify-between space-y-3 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-pink-500/5 rounded-full blur-xl pointer-events-none" />
+              <div className="bg-bg-secondary/95 border border-border-theme rounded-3xl p-5 flex flex-col justify-between space-y-3 relative overflow-hidden shadow-xl">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-accent-pink/5 rounded-full blur-xl pointer-events-none" />
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                      <Sparkles className="w-4.5 h-4.5 text-pink-400 animate-pulse" />
+                    <div className="w-8 h-8 rounded-full bg-bg-tertiary flex items-center justify-center border border-border-theme">
+                      <Sparkles className="w-4.5 h-4.5 text-accent-pink animate-pulse" />
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Khuyến nghị phát triển</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Khuyến nghị phát triển</span>
                   </div>
-                  <h4 className="text-sm font-bold text-white leading-snug">
+                  <h4 className="text-sm font-bold text-text-primary leading-snug">
                     Định hướng tối ưu hóa chỉ số
                   </h4>
-                  <p className="text-xs text-zinc-400 leading-relaxed mt-2">
+                  <p className="text-xs text-text-secondary leading-relaxed mt-2">
                     {getSubjectAdvice(strengths)}
                   </p>
                 </div>
@@ -2038,30 +2048,30 @@ export default function ProfilePage() {
             </div>
 
             {/* instructions alert */}
-            <div className="bg-pink-500/10 border border-pink-500/20 rounded-3xl p-6 flex items-start gap-4 shadow-md">
-              <Sparkles className="w-6 h-6 text-pink-400 shrink-0 mt-0.5" />
+            <div className="bg-accent-pink/10 border border-accent-pink/20 rounded-3xl p-6 flex items-start gap-4 shadow-md">
+              <Sparkles className="w-6 h-6 text-accent-pink shrink-0 mt-0.5" />
               <div>
-                <h5 className="text-sm font-bold text-white mb-1">Mẹo tăng xếp hạng khoa học</h5>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Bạn có thể tăng cấp độ (Level), điểm EXP và điểm Elo thông qua việc hoàn thành các phòng Lab thực hành hoặc chiến đấu 1v1 trong <strong className="text-pink-400">Đấu trường hạng thực chiến</strong> (Phòng thi thực chiến sắp ra mắt!). Khi thăng hạng, bạn sẽ mở khóa thêm nhiều Khung Avatar neon rực rỡ và Danh hiệu độc quyền để khoe với những người chơi khác.
+                <h5 className="text-sm font-bold text-text-primary mb-1">Mẹo tăng xếp hạng khoa học</h5>
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  Bạn có thể tăng cấp độ (Level), điểm EXP và điểm Elo thông qua việc hoàn thành các phòng Lab thực hành hoặc chiến đấu 1v1 trong <strong className="text-accent-pink">Đấu trường hạng thực chiến</strong> (Phòng thi thực chiến sắp ra mắt!). Khi thăng hạng, bạn sẽ mở khóa thêm nhiều Khung Avatar neon rực rỡ và Danh hiệu độc quyền để khoe với những người chơi khác.
                 </p>
               </div>
             </div>
 
             {/* TỦ TRƯNG BÀY HOLOGRAM 3D (STEM Holographic Showcase) */}
-            <div className="mt-8 bg-[#2a2c3a] border border-white/5 rounded-3xl p-6 shadow-xl relative overflow-hidden text-left">
+            <div className="mt-8 bg-bg-secondary/95 border border-border-theme rounded-3xl p-6 shadow-xl relative overflow-hidden text-left">
               {/* Grid background & sweep line */}
               <div className="absolute inset-0 rounded-3xl bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none opacity-40" />
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-pink-500/30 to-transparent" />
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent-pink/30 to-transparent" />
               
               <div className="flex items-center justify-between mb-6 relative z-10">
                 <div>
-                  <h4 className="text-lg font-bold text-white flex items-center gap-2">
-                    <Award className="w-5 h-5 text-pink-400" /> Tủ Trưng Bày Hologram 3D
+                  <h4 className="text-lg font-bold text-text-primary flex items-center gap-2">
+                    <Award className="w-5 h-5 text-accent-pink" /> Tủ Trưng Bày Hologram 3D
                   </h4>
-                  <p className="text-xs text-zinc-400 mt-1">Trình diễn những huy hiệu danh giá nhất của bạn trên bục năng lượng lượng tử.</p>
+                  <p className="text-xs text-text-secondary mt-1">Trình diễn những huy hiệu danh giá nhất của bạn trên bục năng lượng lượng tử.</p>
                 </div>
-                <span className="text-[9px] font-mono font-bold text-zinc-500 uppercase tracking-wider">Holographic Showcase v1.0</span>
+                <span className="text-[9px] font-mono font-bold text-text-secondary uppercase tracking-wider">Holographic Showcase v1.0</span>
               </div>
 
               {/* 3 Bục Hologram */}
@@ -2083,8 +2093,8 @@ export default function ProfilePage() {
                       {/* Cột sáng Hologram hình nón cụt bay lên */}
                       <div 
                         className={`absolute bottom-5 left-1/2 -translate-x-1/2 w-28 h-24 bg-gradient-to-t ${
-                          i === 0 ? 'from-cyan-500/20 to-transparent' :
-                          i === 1 ? 'from-fuchsia-500/20 to-transparent' :
+                          i === 0 ? 'from-accent-cyan/20 to-transparent' :
+                          i === 1 ? 'from-accent-pink/20 to-transparent' :
                           'from-amber-500/20 to-transparent'
                         } pointer-events-none transition-all duration-300 group-hover:scale-y-110 opacity-70 group-hover:opacity-100`}
                         style={{ clipPath: 'polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)' }}
@@ -2104,9 +2114,9 @@ export default function ProfilePage() {
                           }}
                           className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center justify-center pointer-events-none"
                         >
-                          <div className={`w-14 h-14 rounded-2xl bg-zinc-950/80 border-2 ${
-                            i === 0 ? 'border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.3)]' :
-                            i === 1 ? 'border-fuchsia-500/50 shadow-[0_0_15px_rgba(217,70,239,0.3)]' :
+                          <div className={`w-14 h-14 rounded-2xl bg-bg-tertiary border-2 ${
+                            i === 0 ? 'border-accent-cyan/50 shadow-[0_0_15px_rgba(34,211,238,0.3)]' :
+                            i === 1 ? 'border-accent-pink/50 shadow-[0_0_15px_rgba(240,57,140,0.3)]' :
                             'border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.3)]'
                           } flex items-center justify-center text-2xl relative overflow-hidden group`}>
                             {/* Lớp quét laser ngang */}
@@ -2114,32 +2124,32 @@ export default function ProfilePage() {
                             {badge.icon}
                           </div>
                           
-                          <span className="text-[9px] font-black text-white mt-2 px-1.5 py-0.5 bg-black/60 border border-white/10 rounded-md whitespace-nowrap">
+                          <span className="text-[9px] font-black text-text-primary mt-2 px-1.5 py-0.5 bg-bg-primary/80 border border-border-theme rounded-md whitespace-nowrap">
                             {badge.name}
                           </span>
                         </motion.div>
                       ) : (
                         <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center justify-center">
-                          <div className="w-10 h-10 rounded-full border border-dashed border-zinc-600 hover:border-zinc-400 bg-black/40 flex items-center justify-center transition-colors">
-                            <Plus className="w-4 h-4 text-zinc-500" />
+                          <div className="w-10 h-10 rounded-full border border-dashed border-border-theme hover:border-accent-pink bg-bg-tertiary flex items-center justify-center transition-colors">
+                            <Plus className="w-4 h-4 text-text-secondary" />
                           </div>
-                          <span className="text-[8px] font-bold text-zinc-500 mt-1.5">Click để ghim</span>
+                          <span className="text-[8px] font-bold text-text-secondary mt-1.5">Click để ghim</span>
                         </div>
                       )}
 
                       {/* Bục 3D nghiêng */}
                       <div 
-                        className="relative w-32 h-10 bg-zinc-800 rounded-full border border-white/10 flex items-center justify-center shadow-2xl transition-transform duration-300 group-hover:scale-105"
+                        className="relative w-32 h-10 bg-bg-tertiary rounded-full border border-border-theme flex items-center justify-center shadow-2xl transition-transform duration-300 group-hover:scale-105"
                         style={{ transform: 'rotateX(60deg) translateZ(0)' }}
                       >
                         {/* Vòng neon phát sáng ở viền bục */}
                         <div className={`absolute inset-[-1.5px] rounded-full border-2 ${
-                          i === 0 ? 'border-cyan-500 shadow-[0_0_10px_#06b6d4]' :
-                          i === 1 ? 'border-fuchsia-500 shadow-[0_0_10px_#d946ef]' :
+                          i === 0 ? 'border-accent-cyan shadow-[0_0_10px_#22d3ee]' :
+                          i === 1 ? 'border-accent-pink shadow-[0_0_10px_#f0398c]' :
                           'border-amber-500 shadow-[0_0_10px_#f59e0b]'
                         } blur-[0.5px]`} />
                         
-                        <div className="w-full h-full bg-zinc-950/90 rounded-full flex items-center justify-center overflow-hidden">
+                        <div className="w-full h-full bg-bg-primary/90 rounded-full flex items-center justify-center overflow-hidden">
                           <div className="w-20 h-4 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
                         </div>
                       </div>
@@ -2180,16 +2190,16 @@ export default function ProfilePage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            {/* Cột trái: Lịch điểm danh 7 ngày */}
+            {/* Cột trái: Lịch điểm danh 30 ngày */}
             <div className="lg:col-span-7 space-y-6">
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-pink-400 animate-pulse" />
-                Chu kỳ Đồng bộ 7 Ngày
+                Chu kỳ Đồng bộ 30 Ngày
               </h3>
               
-              {/* Grid 7 ngày điểm danh */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-                {[1, 2, 3, 4, 5, 6, 7].map((dayNum) => {
+              {/* Grid 30 ngày điểm danh */}
+              <div className="grid grid-cols-5 sm:grid-cols-6 lg:grid-cols-6 xl:grid-cols-10 gap-2">
+                {Array.from({ length: 30 }, (_, idx) => idx + 1).map((dayNum) => {
                   const lastDayIndex = personalization.checkInDayIndex || 0;
                   const todayStr = new Date().toISOString().split('T')[0];
                   const lastCheckIn = personalization.lastCheckInDate;
@@ -2201,62 +2211,62 @@ export default function ProfilePage() {
                     status = 'claimed';
                   } else if (dayNum === lastDayIndex + 1 && !hasCheckedInToday) {
                     status = 'active';
-                  } else if (dayNum === 1 && lastDayIndex === 7 && !hasCheckedInToday) {
+                  } else if (dayNum === 1 && lastDayIndex === 30 && !hasCheckedInToday) {
                     status = 'active';
                   }
 
                   let rewardVal = 50;
-                  if (dayNum === 1) rewardVal = 50;
-                  else if (dayNum === 2) rewardVal = 60;
-                  else if (dayNum === 3) rewardVal = 70;
-                  else if (dayNum === 4) rewardVal = 80;
-                  else if (dayNum === 5) rewardVal = 100;
-                  else if (dayNum === 6) rewardVal = 120;
-                  else if (dayNum === 7) rewardVal = 200;
+                  if (dayNum === 30) rewardVal = 300;
+                  else if (dayNum >= 26) rewardVal = 150;
+                  else if (dayNum >= 21) rewardVal = 120;
+                  else if (dayNum >= 16) rewardVal = 100;
+                  else if (dayNum >= 11) rewardVal = 80;
+                  else if (dayNum >= 6) rewardVal = 60;
+                  else rewardVal = 50;
 
                   return (
                     <div 
                       key={dayNum}
-                      className={`relative p-3.5 rounded-2xl border flex flex-col items-center justify-between text-center transition-all duration-300 min-h-[130px] ${
+                      className={`relative p-2 rounded-xl border flex flex-col items-center justify-between text-center transition-all duration-300 min-h-[105px] ${
                         status === 'claimed'
-                          ? 'bg-zinc-950/40 border-emerald-500/20 opacity-60'
+                          ? 'bg-bg-tertiary border-emerald-500/20 opacity-60'
                           : status === 'active'
-                          ? 'bg-gradient-to-b from-pink-500/10 to-[#1e1d30] border-pink-400 shadow-[0_0_15px_rgba(236,72,153,0.2)]'
-                          : 'bg-zinc-900/20 border-white/5'
+                          ? 'bg-gradient-to-b from-pink-500/10 to-bg-tertiary border-pink-400 shadow-[0_0_10px_rgba(236,72,153,0.15)]'
+                          : 'bg-bg-tertiary border-border-theme'
                       }`}
                     >
-                      <span className={`text-[9px] font-mono font-bold tracking-wider uppercase ${
-                        status === 'claimed' ? 'text-emerald-400' : status === 'active' ? 'text-pink-400' : 'text-zinc-500'
+                      <span className={`text-[8px] font-mono font-bold tracking-wider uppercase ${
+                        status === 'claimed' ? 'text-emerald-400' : status === 'active' ? 'text-pink-400' : 'text-text-secondary'
                       }`}>
                         Ngày {dayNum}
                       </span>
 
-                      <div className="my-2.5">
-                        {dayNum === 7 ? (
+                      <div className="my-1.5">
+                        {dayNum === 30 ? (
                           <div className="relative">
-                            <Gift className={`w-7 h-7 ${
-                              status === 'claimed' ? 'text-emerald-500' : status === 'active' ? 'text-amber-400 animate-bounce' : 'text-zinc-600'
+                            <Gift className={`w-6 h-6 ${
+                              status === 'claimed' ? 'text-emerald-500' : status === 'active' ? 'text-amber-400 animate-bounce' : 'text-text-secondary'
                             }`} />
                             {status === 'active' && (
-                              <span className="absolute -top-1 -right-2 text-[8px] px-1 py-0.5 bg-amber-500 text-zinc-950 rounded font-black uppercase tracking-widest animate-pulse">VIP</span>
+                              <span className="absolute -top-1 -right-2 text-[7px] px-1 py-0.2 bg-amber-500 text-white rounded font-black uppercase tracking-widest animate-pulse">VIP</span>
                             )}
                           </div>
                         ) : (
-                          <Sparkles className={`w-5 h-5 ${
-                            status === 'claimed' ? 'text-emerald-500' : status === 'active' ? 'text-pink-400' : 'text-zinc-600'
+                          <Sparkles className={`w-4 h-4 ${
+                            status === 'claimed' ? 'text-emerald-500' : status === 'active' ? 'text-pink-400' : 'text-text-secondary'
                           }`} />
                         )}
                       </div>
 
                       <div className="flex flex-col items-center gap-0.5">
-                        <span className={`text-[11px] font-mono font-black ${
-                          status === 'claimed' ? 'text-emerald-400' : status === 'active' ? 'text-pink-300' : 'text-zinc-400'
+                        <span className={`text-[10px] font-mono font-black ${
+                          status === 'claimed' ? 'text-emerald-400' : status === 'active' ? 'text-pink-400' : 'text-text-primary'
                         }`}>
                           +{rewardVal} 🔮
                         </span>
-                        {dayNum === 7 && (
-                          <span className={`text-[7px] font-bold font-sans ${
-                            status === 'claimed' ? 'text-emerald-500' : status === 'active' ? 'text-amber-400' : 'text-zinc-500'
+                        {dayNum === 30 && (
+                          <span className={`text-[6px] font-bold font-sans ${
+                            status === 'claimed' ? 'text-emerald-500' : status === 'active' ? 'text-amber-400' : 'text-text-secondary'
                           }`}>
                             + Vương miện 👑
                           </span>
@@ -2264,8 +2274,8 @@ export default function ProfilePage() {
                       </div>
 
                       {status === 'claimed' && (
-                        <div className="absolute -top-1.5 -right-1.5 bg-emerald-500 text-zinc-950 rounded-full p-0.5 border border-emerald-400 shadow-md">
-                          <CheckCircle className="w-3 h-3 text-zinc-950 fill-zinc-950" />
+                        <div className="absolute -top-1 -right-1 bg-emerald-500 text-white rounded-full p-0.5 border border-emerald-400 shadow-md">
+                          <CheckCircle className="w-2.5 h-2.5 text-white fill-white" />
                         </div>
                       )}
                     </div>
@@ -2273,16 +2283,16 @@ export default function ProfilePage() {
                 })}
               </div>
 
-              <div className="bg-white/[0.02] border border-white/5 p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-5">
+              <div className="bg-bg-secondary border border-border-theme p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-5">
                 <div className="text-left">
-                  <h4 className="text-xs font-bold text-white flex items-center gap-2 font-sans">
+                  <h4 className="text-xs font-bold text-text-primary flex items-center gap-2 font-sans">
                     <Gift className="w-4 h-4 text-pink-400" /> 
                     {personalization.lastCheckInDate === new Date().toISOString().split('T')[0]
                       ? "BẠN ĐÃ ĐỒNG BỘ NĂNG LƯỢNG HÔM NAY"
                       : "CHƯA ĐỒNG BỘ NĂNG LƯỢNG HÔM NAY"
                     }
                   </h4>
-                  <p className="text-[10px] text-zinc-400 mt-1 max-w-md leading-relaxed font-sans">
+                  <p className="text-[10px] text-text-secondary mt-1 max-w-md leading-relaxed font-sans">
                     {personalization.lastCheckInDate === new Date().toISOString().split('T')[0]
                       ? "Sóng sinh học của bạn đã được tối ưu hóa đồng đều với máy chủ. Hộp quà năng lượng tiếp theo sẽ mở khóa vào ngày mai."
                       : "Nhấn nút bên dưới để gửi tín hiệu đồng bộ lên đám mây, kích hoạt tinh thể hạt nhân và thu hoạch pha lê năng lượng."
@@ -2295,7 +2305,7 @@ export default function ProfilePage() {
                   disabled={personalization.lastCheckInDate === new Date().toISOString().split('T')[0]}
                   className={`px-6 py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all duration-300 shrink-0 font-sans ${
                     personalization.lastCheckInDate === new Date().toISOString().split('T')[0]
-                      ? 'bg-zinc-800 border border-zinc-700 text-zinc-500 cursor-not-allowed'
+                      ? 'bg-bg-tertiary border border-border-theme text-text-secondary cursor-not-allowed'
                       : 'bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 text-white font-black hover:opacity-95 shadow-[0_0_15px_rgba(236,72,153,0.3)] hover:shadow-[0_0_25px_rgba(236,72,153,0.5)] transform hover:-translate-y-0.5 active:translate-y-0'
                   }`}
                 >
@@ -2308,10 +2318,10 @@ export default function ProfilePage() {
             </div>
 
             {/* Cột phải: Nhiệm vụ hàng ngày */}
-            <div className="lg:col-span-5 space-y-6 bg-zinc-900/40 border border-white/5 rounded-3xl p-6 relative">
+            <div className="lg:col-span-5 space-y-6 bg-bg-secondary border border-border-theme rounded-3xl p-6 relative">
               <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full blur-2xl pointer-events-none" />
               
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+              <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
                 Nhiệm Vụ Hàng Ngày (Daily Quests)
               </h3>
@@ -2326,21 +2336,21 @@ export default function ProfilePage() {
                       key={q.id}
                       className={`p-4 rounded-2xl border transition-all ${
                         q.claimed
-                          ? 'bg-zinc-950/20 border-white/5 opacity-55'
+                          ? 'bg-bg-tertiary border-border-theme opacity-55'
                           : isDone
-                          ? 'bg-purple-950/10 border-purple-500/30 shadow-[0_0_12px_rgba(168,85,247,0.1)]'
-                          : 'bg-zinc-800/40 border-white/5'
+                          ? 'bg-purple-500/10 border-purple-500/30 shadow-[0_0_12px_rgba(168,85,247,0.1)]'
+                          : 'bg-bg-tertiary border-border-theme'
                       }`}
                     >
                       <div className="flex justify-between items-start gap-3">
                         <div className="text-left flex-1">
-                          <h4 className="text-xs font-bold text-white leading-snug">{q.label}</h4>
+                          <h4 className="text-xs font-bold text-text-primary leading-snug">{q.label}</h4>
                           <div className="flex items-center gap-2 mt-1.5">
                             <span className="text-[10px] text-purple-400 font-bold flex items-center gap-0.5 font-mono">
                               <span>🔮</span>
                               <span>+{q.reward}</span>
                             </span>
-                            <span className="text-[9px] text-zinc-500 font-mono">
+                            <span className="text-[9px] text-text-secondary font-mono">
                               Tiến trình: {q.current}/{q.target}
                             </span>
                           </div>
@@ -2355,12 +2365,12 @@ export default function ProfilePage() {
                           ) : isDone ? (
                             <button
                               onClick={() => handleClaimQuestReward(q.id)}
-                              className="px-3 py-1 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-zinc-950 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 shadow-md shadow-amber-500/20 animate-pulse"
+                              className="px-3 py-1 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white text-[10px] font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 shadow-md shadow-amber-500/20 animate-pulse"
                             >
                               Nhận quà
                             </button>
                           ) : (
-                            <span className="text-[10px] font-bold text-zinc-500 bg-[#1c1e29] border border-white/5 px-2.5 py-1 rounded-lg select-none">
+                            <span className="text-[10px] font-bold text-text-secondary bg-bg-primary border border-border-theme px-2.5 py-1 rounded-lg select-none">
                               Chưa xong
                             </span>
                           )}
@@ -2392,14 +2402,31 @@ export default function ProfilePage() {
 
       {/* Tab Bạn Bè & Xã Hội */}
       {activeTab === 'friends' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in duration-200">
+        <div className="flex flex-col gap-6 animate-in fade-in duration-200 w-full text-left">
+          {settingsMessage && (
+            <div className={`p-4 rounded-2xl text-xs font-semibold border flex items-center gap-2 relative z-10 animate-in slide-in-from-top-2 duration-200 ${
+              settingsMessage.type === 'success' 
+                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
+                : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+            }`}>
+              <span>{settingsMessage.text}</span>
+              <button 
+                onClick={() => setSettingsMessage(null)} 
+                className="ml-auto text-zinc-400 hover:text-white transition-all text-xs font-bold px-1"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* CỘT TRÁI: TÌM BẠN & LỜI MỜI (LG: Col-5) */}
           <div className="lg:col-span-5 flex flex-col gap-6">
             
             {/* 1. KHUNG TÌM KIẾM CHIẾN HỮU */}
-            <div className="bg-[#2a2c3a] border border-white/5 rounded-3xl p-6 shadow-xl relative overflow-hidden text-left">
+            <div className="bg-bg-secondary border border-border-theme rounded-3xl p-6 shadow-xl relative overflow-hidden text-left">
               <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/5 rounded-full blur-2xl pointer-events-none" />
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2 font-sans select-none">
+              <h3 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2 font-sans select-none">
                 <Search className="w-5 h-5 text-pink-400" /> Tìm kiếm chiến hữu
               </h3>
               
@@ -2410,12 +2437,12 @@ export default function ProfilePage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Nhập DisplayName, Email hoặc UID..."
-                  className="flex-1 bg-[#1c1e29] border border-white/5 focus:border-pink-500 focus:outline-none rounded-2xl px-4 py-3 text-xs text-white font-mono placeholder:text-zinc-500 transition-all"
+                  className="flex-1 bg-bg-tertiary border border-border-theme focus:border-pink-500 focus:outline-none rounded-2xl px-4 py-3 text-xs text-text-primary font-mono placeholder:text-text-secondary transition-all"
                 />
                 <button
                   type="submit"
                   disabled={searching}
-                  className="px-5 py-3 bg-pink-500 hover:bg-pink-600 disabled:bg-zinc-800 text-white text-xs font-bold rounded-2xl transition-all active:scale-95 flex items-center gap-1.5 shadow-md shadow-pink-500/10 whitespace-nowrap"
+                  className="px-5 py-3 bg-pink-500 hover:bg-pink-600 disabled:bg-bg-tertiary text-white text-xs font-bold rounded-2xl transition-all active:scale-95 flex items-center gap-1.5 shadow-md shadow-pink-500/10 whitespace-nowrap"
                 >
                   {searching ? 'Đang tìm...' : 'Tìm kiếm'}
                 </button>
@@ -2423,15 +2450,15 @@ export default function ProfilePage() {
 
               {/* Danh sách kết quả tìm kiếm */}
               {filteredSearchResults.length > 0 ? (
-                <div className="mt-6 space-y-3.5 border-t border-white/5 pt-4">
-                  <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2 select-none">Kết quả tìm kiếm</h4>
+                <div className="mt-6 space-y-3.5 border-t border-border-theme pt-4">
+                  <h4 className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-2 select-none">Kết quả tìm kiếm</h4>
                   {filteredSearchResults.map((resUser) => {
                     const isAlreadyFriend = friends.some(f => f.uid === resUser.uid);
                     const isOutgoing = outgoingRequests.includes(resUser.uid);
                     const isIncoming = incomingRequests.some(r => r.uid === resUser.uid);
 
                     return (
-                      <div key={resUser.uid} className="bg-[#1c1e29]/50 border border-white/5 rounded-2xl p-4 flex items-center justify-between gap-4 animate-in slide-in-from-bottom-2 duration-150">
+                      <div key={resUser.uid} className="bg-bg-tertiary border border-border-theme rounded-2xl p-4 flex items-center justify-between gap-4 animate-in slide-in-from-bottom-2 duration-150">
                         <div className="flex items-center gap-3">
                           <AvatarFrame frame={resUser.avatarFrame} className="w-11 h-11 text-base">
                             {resUser.avatarParts ? (
@@ -2445,23 +2472,27 @@ export default function ProfilePage() {
                             ) : (
                               resUser.displayName.charAt(0).toUpperCase()
                             )}
-                            <div className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-pink-500 border border-[#1c1e29] text-[8px] font-bold text-white flex items-center justify-center shadow-lg z-30">
+                            <div className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-pink-500 border border-border-theme text-[8px] font-bold text-white flex items-center justify-center shadow-lg z-30">
                               {resUser.level}
                             </div>
                           </AvatarFrame>
                           <div className="text-left">
-                            <div className="text-sm font-semibold text-white leading-snug">{resUser.displayName}</div>
+                            <div className="text-sm font-semibold text-text-primary leading-snug">{resUser.displayName}</div>
                             <div className="text-[9px] text-pink-400 font-bold uppercase tracking-wider mt-0.5">{getTitleLabel(resUser.activeTitle)}</div>
-                            <div className="text-[10px] text-zinc-500 mt-0.5">Elo: {resUser.elo}</div>
+                            <div className="text-[10px] text-text-secondary mt-0.5">Elo: {resUser.elo}</div>
                           </div>
                         </div>
 
-                        {isAlreadyFriend ? (
+                        {processingUid === resUser.uid ? (
+                          <span className="px-3.5 py-1.5 bg-bg-tertiary border border-border-theme rounded-full text-[10px] font-bold text-text-secondary tracking-wider uppercase select-none flex items-center gap-1.5 animate-pulse">
+                            <span className="w-2.5 h-2.5 border-2 border-text-secondary border-t-transparent rounded-full animate-spin" /> Xử lý...
+                          </span>
+                        ) : isAlreadyFriend ? (
                           <span className="px-3.5 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[10px] font-bold text-emerald-400 tracking-wider uppercase select-none flex items-center gap-1">
                             <UserCheck className="w-3.5 h-3.5" /> Bạn bè
                           </span>
                         ) : isOutgoing ? (
-                          <span className="px-3.5 py-1.5 bg-zinc-800 border border-white/5 rounded-full text-[10px] font-bold text-zinc-400 tracking-wider uppercase select-none flex items-center gap-1">
+                          <span className="px-3.5 py-1.5 bg-bg-tertiary border border-border-theme rounded-full text-[10px] font-bold text-text-secondary tracking-wider uppercase select-none flex items-center gap-1">
                             ⏳ Đã gửi
                           </span>
                         ) : isIncoming ? (
@@ -2484,23 +2515,23 @@ export default function ProfilePage() {
                   })}
                 </div>
               ) : searchQuery.trim() !== '' ? (
-                <div className="mt-6 border-t border-white/5 pt-4 text-xs text-zinc-500 select-none">
+                <div className="mt-6 border-t border-border-theme pt-4 text-xs text-text-secondary select-none">
                   Không tìm thấy người chơi nào khớp với "{searchQuery}"
                 </div>
               ) : null}
             </div>
 
             {/* 2. KHUNG YÊU CẦU KẾT BẠN NHẬN ĐƯỢC */}
-            <div className="bg-[#2a2c3a] border border-white/5 rounded-3xl p-6 shadow-xl relative overflow-hidden flex-1 flex flex-col min-h-[250px] text-left">
+            <div className="bg-bg-secondary border border-border-theme rounded-3xl p-6 shadow-xl relative overflow-hidden flex-1 flex flex-col min-h-[250px] text-left">
               <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2 font-sans select-none border-b border-white/5 pb-3">
+              <h3 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2 font-sans select-none border-b border-border-theme pb-3">
                 📩 Yêu cầu kết bạn ({richIncomingRequests.length})
               </h3>
               
               {richIncomingRequests.length > 0 ? (
                 <div className="space-y-3.5 flex-1 overflow-y-auto max-h-[350px] pr-1">
                   {richIncomingRequests.map((req) => (
-                    <div key={req.uid} className="bg-[#1c1e29]/50 border border-white/5 rounded-2xl p-4 flex items-center justify-between gap-4">
+                    <div key={req.uid} className="bg-bg-tertiary border border-border-theme rounded-2xl p-4 flex items-center justify-between gap-4">
                       <div className="flex items-center gap-3">
                         <AvatarFrame frame={req.avatarFrame} className="w-11 h-11 text-base">
                           {req.avatarParts ? (
@@ -2514,39 +2545,47 @@ export default function ProfilePage() {
                           ) : (
                             req.displayName.charAt(0).toUpperCase()
                           )}
-                          <div className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-pink-500 border border-[#1c1e29] text-[8px] font-bold text-white flex items-center justify-center shadow-lg z-30">
+                          <div className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-pink-500 border border-border-theme text-[8px] font-bold text-white flex items-center justify-center shadow-lg z-30">
                             {req.level}
                           </div>
                         </AvatarFrame>
                         <div className="text-left">
-                          <div className="text-sm font-semibold text-white leading-snug">{req.displayName}</div>
+                          <div className="text-sm font-semibold text-text-primary leading-snug">{req.displayName}</div>
                           <div className="text-[9px] text-pink-400 font-bold uppercase tracking-wider mt-0.5">{getTitleLabel(req.activeTitle)}</div>
-                          <div className="text-[10px] text-zinc-500 mt-0.5">Elo: {req.elo}</div>
+                          <div className="text-[10px] text-text-secondary mt-0.5">Elo: {req.elo}</div>
                         </div>
                       </div>
 
                       <div className="flex gap-1.5 shrink-0">
-                        <button
-                          onClick={() => acceptFriendRequest(req)}
-                          className="p-2 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white border border-emerald-500/20 rounded-xl transition-all active:scale-95"
-                          title="Chấp nhận"
-                        >
-                          <UserCheck className="w-4.5 h-4.5" />
-                        </button>
-                        <button
-                          onClick={() => declineFriendRequest(req)}
-                          className="p-2 bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white border border-rose-500/20 rounded-xl transition-all active:scale-95"
-                          title="Từ chối"
-                        >
-                          <UserX className="w-4.5 h-4.5" />
-                        </button>
+                        {processingUid === req.uid ? (
+                          <span className="px-3 py-1.5 bg-bg-tertiary border border-border-theme rounded-xl text-[10px] font-bold text-text-secondary tracking-wider uppercase select-none flex items-center gap-1 animate-pulse">
+                            <span className="w-2.5 h-2.5 border-2 border-text-secondary border-t-transparent rounded-full animate-spin" />
+                          </span>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => acceptFriendRequest(req)}
+                              className="p-2 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white border border-emerald-500/20 rounded-xl transition-all active:scale-95"
+                              title="Chấp nhận"
+                            >
+                              <UserCheck className="w-4.5 h-4.5" />
+                            </button>
+                            <button
+                              onClick={() => declineFriendRequest(req)}
+                              className="p-2 bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white border border-rose-500/20 rounded-xl transition-all active:scale-95"
+                              title="Từ chối"
+                            >
+                              <UserX className="w-4.5 h-4.5" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center flex-1 text-center py-8 text-zinc-500">
-                  <Smile className="w-12 h-12 text-zinc-700 animate-bounce mb-3" />
+                <div className="flex flex-col items-center justify-center flex-1 text-center py-8 text-text-secondary">
+                  <Smile className="w-12 h-12 text-text-secondary opacity-40 animate-bounce mb-3" />
                   <p className="text-xs">Không có lời mời kết bạn nào đang chờ duyệt.</p>
                 </div>
               )}
@@ -2557,9 +2596,9 @@ export default function ProfilePage() {
           {/* CỘT PHẢI: DANH SÁCH BẠN BÈ (LG: Col-7) */}
           <div className="lg:col-span-7 flex flex-col gap-6">
             
-            <div className="bg-[#2a2c3a] border border-white/5 rounded-3xl p-6 shadow-xl relative overflow-hidden min-h-[500px] flex flex-col text-left">
+            <div className="bg-bg-secondary border border-border-theme rounded-3xl p-6 shadow-xl relative overflow-hidden min-h-[500px] flex flex-col text-left">
               <div className="absolute top-0 right-0 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl pointer-events-none" />
-              <h3 className="text-lg font-bold text-white mb-6 flex items-center justify-between border-b border-white/5 pb-4 select-none">
+              <h3 className="text-lg font-bold text-text-primary mb-6 flex items-center justify-between border-b border-border-theme pb-4 select-none">
                 <span className="flex items-center gap-2">
                   <Users className="w-5 h-5 text-pink-400 animate-pulse" /> Bạn bè của tôi
                 </span>
@@ -2570,10 +2609,10 @@ export default function ProfilePage() {
 
               {richFriends.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 overflow-y-auto max-h-[600px] pr-1">
-                  {richFriends.map((friend) => (
+                  {richFriends.map((friend, idx) => (
                     <div 
-                      key={friend.uid} 
-                      className="bg-[#1c1e29]/40 border border-white/5 hover:border-pink-500/20 rounded-2xl p-4 flex flex-col justify-between gap-4 transition-all duration-300 relative group"
+                      key={`${friend.uid}-${idx}`} 
+                      className="bg-bg-tertiary border border-border-theme hover:border-pink-500/20 rounded-2xl p-4 flex flex-col justify-between gap-4 transition-all duration-300 relative group"
                     >
                       <div className="flex items-center gap-3">
                         <AvatarFrame frame={friend.avatarFrame} className="w-12 h-12 text-base">
@@ -2594,21 +2633,21 @@ export default function ProfilePage() {
                         </AvatarFrame>
                         <div className="text-left">
                           <div className="flex items-center gap-1.5">
-                            <div className="text-sm font-semibold text-white leading-snug group-hover:text-pink-400 transition-colors">{friend.displayName}</div>
+                            <div className="text-sm font-semibold text-text-primary leading-snug group-hover:text-pink-400 transition-colors">{friend.displayName}</div>
                             <span className={`w-2 h-2 rounded-full shrink-0 ${
                               friend.lastActive && (Date.now() - friend.lastActive < 45000)
                                 ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]'
-                                : 'bg-zinc-600'
+                                : 'bg-text-secondary opacity-40'
                             }`} />
                           </div>
                           <div className="text-[9px] text-pink-400 font-bold uppercase tracking-wider mt-0.5">{getTitleLabel(friend.activeTitle)}</div>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[10px] text-zinc-500">Elo: {friend.elo}</span>
-                            <span className="text-[10px] text-zinc-600">•</span>
+                            <span className="text-[10px] text-text-secondary">Elo: {friend.elo}</span>
+                            <span className="text-[10px] text-text-secondary">•</span>
                             <span className={`text-[10px] font-mono ${
                               friend.lastActive && (Date.now() - friend.lastActive < 45000)
                                 ? 'text-emerald-400 font-bold'
-                                : 'text-zinc-500'
+                                : 'text-text-secondary'
                             }`}>
                               {friend.lastActive && (Date.now() - friend.lastActive < 45000) ? 'Online' : 'Offline'}
                             </span>
@@ -2616,42 +2655,51 @@ export default function ProfilePage() {
                         </div>
                       </div>
 
-                      <div className="flex gap-2 border-t border-white/5 pt-3">
-                        <button
-                          onClick={() => viewFriendProfile(friend)}
-                          className="flex-1 py-2 bg-pink-500/10 hover:bg-pink-500 border border-pink-500/20 hover:text-white text-pink-400 text-xs font-bold rounded-xl transition-all active:scale-95 flex items-center justify-center gap-1.5"
-                        >
-                          <User className="w-3.5 h-3.5" /> Xem hồ sơ
-                        </button>
-                        <button
-                          onClick={() => openChallengeFor(friend)}
-                          className="px-3 py-2 bg-rose-500/10 hover:bg-rose-500 border border-rose-500/20 hover:text-white text-rose-400 rounded-xl transition-all active:scale-95"
-                          title="Thách đấu"
-                        >
-                          <Swords className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => unfriendPlayer(friend)}
-                          className="px-3 py-2 bg-zinc-800 hover:bg-rose-600/10 text-zinc-400 hover:text-rose-400 border border-white/5 hover:border-rose-500/20 rounded-xl transition-all active:scale-95"
-                          title="Hủy kết bạn"
-                        >
-                          <UserMinus className="w-4 h-4" />
-                        </button>
+                      <div className="flex gap-2 border-t border-border-theme pt-3">
+                        {processingUid === friend.uid ? (
+                          <div className="w-full py-2 bg-bg-tertiary border border-border-theme rounded-xl text-center text-xs font-semibold text-text-secondary flex items-center justify-center gap-2 animate-pulse">
+                            <span className="w-3.5 h-3.5 border-2 border-text-secondary border-t-transparent rounded-full animate-spin" /> Đang xử lý...
+                          </div>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => viewFriendProfile(friend)}
+                              className="flex-1 py-2 bg-pink-500/10 hover:bg-pink-500 border border-pink-500/20 hover:text-white text-pink-400 text-xs font-bold rounded-xl transition-all active:scale-95 flex items-center justify-center gap-1.5"
+                            >
+                              <User className="w-3.5 h-3.5" /> Xem hồ sơ
+                            </button>
+                            <button
+                              onClick={() => openChallengeFor(friend)}
+                              className="px-3 py-2 bg-rose-500/10 hover:bg-rose-500 border border-rose-500/20 hover:text-white text-rose-400 rounded-xl transition-all active:scale-95"
+                              title="Thách đấu"
+                            >
+                              <Swords className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => unfriendPlayer(friend)}
+                              className="px-3 py-2 bg-bg-tertiary hover:bg-rose-600/10 text-text-secondary hover:text-rose-400 border border-border-theme hover:border-rose-500/20 rounded-xl transition-all active:scale-95"
+                              title="Hủy kết bạn"
+                            >
+                              <UserMinus className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center flex-1 text-center py-20 text-zinc-500 select-none">
-                  <Users className="w-16 h-16 text-zinc-700 animate-pulse mb-4" />
-                  <h4 className="text-base font-bold text-white mb-1">Chưa có bạn bè nào</h4>
-                  <p className="text-xs max-w-xs leading-relaxed text-zinc-500">Hãy tìm kiếm bạn bè của bạn bằng tên hoặc ID ở thanh bên trái để cùng thi đấu và tiến xa hơn!</p>
+                <div className="flex flex-col items-center justify-center flex-1 text-center py-20 text-text-secondary select-none">
+                  <Users className="w-16 h-16 text-text-secondary opacity-30 animate-pulse mb-4" />
+                  <h4 className="text-base font-bold text-text-primary mb-1">Chưa có bạn bè nào</h4>
+                  <p className="text-xs max-w-xs leading-relaxed text-text-secondary">Hãy tìm kiếm bạn bè của bạn bằng tên hoặc ID ở thanh bên trái để cùng thi đấu và tiến xa hơn!</p>
                 </div>
               )}
             </div>
 
           </div>
         </div>
+      </div>
       )}
 
       {/* Tab Inventory & Titles */}
@@ -2717,16 +2765,16 @@ export default function ProfilePage() {
                   return (
                     <div 
                       key={frame.id} 
-                      className={`bg-[#2a2c3a] border rounded-2xl p-5 flex flex-col items-center text-center justify-between relative transition-all group ${
-                        isEquipped ? 'border-pink-500/80 shadow-lg shadow-pink-500/10' : 'border-white/5 hover:border-white/10'
+                      className={`bg-bg-secondary border rounded-2xl p-5 flex flex-col items-center text-center justify-between relative transition-all group ${
+                        isEquipped ? 'border-pink-500/80 shadow-lg shadow-pink-500/10' : 'border-border-theme hover:border-pink-500/30'
                       }`}
                     >
                       {!isUnlocked && (
-                        <div className="absolute inset-0 bg-black/60 backdrop-blur-[1px] rounded-2xl flex flex-col items-center justify-center p-4 z-20">
-                          <span className="text-xs font-bold text-zinc-400 bg-[#1c1e29] border border-white/5 px-2.5 py-1 rounded-full mb-1 flex items-center gap-1">
+                        <div className="absolute inset-0 bg-bg-primary/80 backdrop-blur-[2px] rounded-2xl flex flex-col items-center justify-center p-4 z-20">
+                          <span className="text-xs font-bold text-text-secondary bg-bg-tertiary border border-border-theme px-2.5 py-1 rounded-full mb-1 flex items-center gap-1">
                             Khóa 🔒
                           </span>
-                          <p className="text-[10px] text-zinc-500 leading-tight">
+                          <p className="text-[10px] text-text-secondary leading-tight">
                             {frame.id === 'top_1_sovereign'
                               ? 'Yêu cầu đạt TOP 1 bảng xếp hạng'
                               : frame.id === 'gold_vip'
@@ -2745,8 +2793,8 @@ export default function ProfilePage() {
                       </AvatarFrame>
 
                       <div>
-                        <h4 className="text-sm font-bold text-white">{frame.label}</h4>
-                        <p className="text-[10px] text-zinc-400 leading-snug mt-1 min-h-[30px]">{frame.desc}</p>
+                        <h4 className="text-sm font-bold text-text-primary">{frame.label}</h4>
+                        <p className="text-[10px] text-text-secondary leading-snug mt-1 min-h-[30px]">{frame.desc}</p>
                       </div>
 
                       <button
@@ -2767,11 +2815,11 @@ export default function ProfilePage() {
             </div>
 
             {/* Titles Equip section */}
-            <div className="border-t border-white/5 pt-8">
-              <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <div className="border-t border-border-theme pt-8">
+              <h3 className="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
                 <Award className="w-5 h-5 text-pink-400" /> Trang bị Danh hiệu cá nhân
               </h3>
-              <div className="bg-[#2a2c3a] border border-white/5 rounded-3xl p-6 space-y-4">
+              <div className="bg-bg-secondary border border-border-theme rounded-3xl p-6 space-y-4">
                  {dynamicTitles.map((title) => {
                   let isUnlocked = true;
                   if (user && (user.displayName === 'admin' || user.email?.includes('admin'))) {
@@ -2794,17 +2842,17 @@ export default function ProfilePage() {
                   return (
                     <div 
                       key={title.id} 
-                      className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-[#1c1e29]/50 border rounded-2xl transition-all ${
-                        isEquipped ? 'border-pink-500/40 bg-[#1c1e29]/80 shadow-md' : 'border-white/5'
+                      className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-bg-tertiary border rounded-2xl transition-all ${
+                        isEquipped ? 'border-pink-500/40 bg-bg-secondary shadow-md' : 'border-border-theme'
                       }`}
                     >
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="text-sm font-bold text-white">{title.label}</h4>
+                          <h4 className="text-sm font-bold text-text-primary">{title.label}</h4>
                           {isUnlocked ? (
                             <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/15">Đã mở khóa</span>
                           ) : (
-                            <span className="text-[9px] font-bold text-zinc-500 bg-[#1c1e29] px-2 py-0.5 rounded-full border border-white/5">
+                            <span className="text-[9px] font-bold text-text-secondary bg-bg-primary px-2 py-0.5 rounded-full border border-border-theme">
                               {title.id === 'top_1_universe'
                                 ? 'Yêu cầu đạt TOP 1 bảng xếp hạng'
                                 : title.id === 'top_10_legend'
@@ -2817,7 +2865,7 @@ export default function ProfilePage() {
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-zinc-400 mt-1 leading-snug">{title.desc}</p>
+                        <p className="text-xs text-text-secondary mt-1 leading-snug">{title.desc}</p>
                       </div>
 
                       <button
@@ -2828,7 +2876,7 @@ export default function ProfilePage() {
                             ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 cursor-default' 
                             : isUnlocked 
                               ? 'bg-pink-500 hover:bg-pink-600 text-white shadow-md' 
-                              : 'bg-zinc-700 text-zinc-550 cursor-not-allowed border border-white/5'
+                              : 'bg-bg-primary text-text-secondary cursor-not-allowed border border-border-theme'
                         }`}
                       >
                         {isEquipped ? 'Đang dùng' : 'Trang bị'}
@@ -2981,17 +3029,17 @@ export default function ProfilePage() {
               </div>
 
               {/* Cột phải: Customize Parts Panels */}
-              <div className="lg:col-span-7 bg-[#2a2c3a] border border-white/5 rounded-3xl p-6 space-y-6">
-                <h4 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
+              <div className="lg:col-span-7 bg-bg-secondary border border-border-theme rounded-3xl p-6 space-y-6">
+                <h4 className="text-sm font-bold text-text-primary mb-2 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
                   Tự thiết kế từng bộ phận cơ thể & thời trang
                 </h4>
 
                 {/* BỘ CHỌN THỂ HÌNH VÀ GIỚI TÍNH */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-zinc-900/40 p-4 rounded-2xl border border-white/5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-bg-tertiary p-4 rounded-2xl border border-border-theme">
                   {/* GIỚI TÍNH */}
                   <div>
-                    <h5 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2">Giới tính</h5>
+                    <h5 className="text-[10px] font-black text-text-secondary uppercase tracking-widest mb-2">Giới tính</h5>
                     <div className="flex gap-2">
                       <button
                         onClick={() => {
@@ -3011,7 +3059,7 @@ export default function ProfilePage() {
                         className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all active:scale-95 ${
                           tempAvatarParts.gender === 'male'
                             ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400'
-                            : 'bg-zinc-800/60 border-white/5 text-zinc-400 hover:text-zinc-200'
+                            : 'bg-bg-primary border-border-theme text-text-secondary hover:text-text-primary'
                         }`}
                       >
                         Nam 🧑
@@ -3033,7 +3081,7 @@ export default function ProfilePage() {
                         className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all active:scale-95 ${
                           tempAvatarParts.gender === 'female'
                             ? 'bg-pink-500/20 border-pink-500 text-pink-400'
-                            : 'bg-zinc-800/60 border-white/5 text-zinc-400 hover:text-zinc-200'
+                            : 'bg-bg-primary border-border-theme text-text-secondary hover:text-text-primary'
                         }`}
                       >
                         Nữ 👧
@@ -3043,7 +3091,7 @@ export default function ProfilePage() {
 
                   {/* THỂ HÌNH */}
                   <div>
-                    <h5 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2">Kiểu cơ thể</h5>
+                    <h5 className="text-[10px] font-black text-text-secondary uppercase tracking-widest mb-2">Kiểu cơ thể</h5>
                     <div className="flex gap-1.5">
                       {[
                         { id: 'chibi', label: 'Chibi 🧸' },
@@ -3059,7 +3107,7 @@ export default function ProfilePage() {
                           className={`flex-1 py-2 rounded-lg text-[10px] font-bold border transition-all active:scale-95 ${
                             tempAvatarParts.bodyType === bt.id
                               ? 'bg-purple-500/20 border-purple-500 text-purple-400'
-                              : 'bg-zinc-800/60 border-white/5 text-zinc-400 hover:text-zinc-200'
+                              : 'bg-bg-primary border-border-theme text-text-secondary hover:text-text-primary'
                           }`}
                         >
                           {bt.label}
@@ -3070,7 +3118,7 @@ export default function ProfilePage() {
 
                   {/* TẠO DÁNG */}
                   <div>
-                    <h5 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2">Tạo dáng</h5>
+                    <h5 className="text-[10px] font-black text-text-secondary uppercase tracking-widest mb-2">Tạo dáng</h5>
                     <div className="grid grid-cols-4 gap-1.5">
                       {[
                         { id: 'standard', label: 'Chuẩn 🧍' },
@@ -3091,7 +3139,7 @@ export default function ProfilePage() {
                           className={`py-1.5 rounded-lg text-[8px] font-bold border transition-all text-center active:scale-95 ${
                             tempAvatarParts.pose === ps.id
                               ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-sm shadow-amber-500/15'
-                              : 'bg-zinc-800/60 border-white/5 text-zinc-400 hover:text-zinc-200'
+                              : 'bg-bg-primary border-border-theme text-text-secondary hover:text-text-primary'
                           }`}
                         >
                           {ps.label}
@@ -3103,7 +3151,7 @@ export default function ProfilePage() {
 
                 {/* 1. MÀU DA */}
                 <div>
-                  <h5 className="text-[11px] font-black text-zinc-400 uppercase tracking-widest mb-2.5">1. Lớp da sinh học (Body)</h5>
+                  <h5 className="text-[11px] font-black text-text-secondary uppercase tracking-widest mb-2.5">1. Lớp da sinh học (Body)</h5>
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                     {/* Peach mặc định */}
                     <button
@@ -3111,10 +3159,10 @@ export default function ProfilePage() {
                       className={`px-3 py-2 rounded-xl text-[11px] font-bold border transition-all active:scale-95 text-center flex flex-col items-center gap-1 ${
                         tempAvatarParts.body === 'peach'
                           ? 'bg-pink-500/20 border-pink-500 text-pink-400'
-                          : 'bg-zinc-800/40 border-white/5 text-zinc-300'
+                          : 'bg-bg-tertiary border-border-theme text-text-primary'
                       }`}
                     >
-                      <span className="w-4 h-4 rounded-full bg-[#ffd1b3] border border-white/10" />
+                      <span className="w-4 h-4 rounded-full bg-[#ffd1b3] border border-border-theme" />
                       <span>Hồng Đào</span>
                     </button>
                     {/* Các màu da khác */}
@@ -3134,14 +3182,14 @@ export default function ProfilePage() {
                             isSelected
                               ? 'bg-pink-500/20 border-pink-500 text-pink-400'
                               : isUnlocked
-                              ? 'bg-zinc-800/40 border-white/5 text-zinc-300 active:scale-95'
-                              : 'bg-zinc-900/60 border-white/5 text-zinc-600 opacity-55 cursor-not-allowed'
+                              ? 'bg-bg-tertiary border-border-theme text-text-primary active:scale-95'
+                              : 'bg-bg-primary border-border-theme text-text-secondary opacity-55 cursor-not-allowed'
                           }`}
                         >
-                          <span className="w-4 h-4 rounded-full border border-white/10" style={{ backgroundColor: skinColors[item.value] }} />
+                          <span className="w-4 h-4 rounded-full border border-border-theme" style={{ backgroundColor: skinColors[item.value] }} />
                           <span className="truncate w-full">{item.name.replace('Màu da ', '')}</span>
                           {!isUnlocked && (
-                            <span className="absolute top-1 right-1 text-[8px] bg-zinc-900/90 text-amber-400 p-0.5 rounded">🔒</span>
+                            <span className="absolute top-1 right-1 text-[8px] bg-bg-primary text-amber-400 p-0.5 rounded">🔒</span>
                           )}
                         </button>
                       );
@@ -3150,9 +3198,9 @@ export default function ProfilePage() {
                 </div>
 
                 {/* 2. KIỂU TÓC & MÀU TÓC */}
-                <div className="border-t border-white/5 pt-5 space-y-4">
+                <div className="border-t border-border-theme pt-5 space-y-4">
                   <div>
-                    <h5 className="text-[11px] font-black text-zinc-400 uppercase tracking-widest mb-2.5">2. Kiểu tóc lượng tử (Hair)</h5>
+                    <h5 className="text-[11px] font-black text-text-secondary uppercase tracking-widest mb-2.5">2. Kiểu tóc lượng tử (Hair)</h5>
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                       {/* Tóc mặc định */}
                       <button
@@ -3160,7 +3208,7 @@ export default function ProfilePage() {
                         className={`px-3 py-2 rounded-xl text-[11px] font-bold border transition-all active:scale-95 text-center flex flex-col items-center gap-1 ${
                           tempAvatarParts.hair === 'default'
                             ? 'bg-pink-500/20 border-pink-500 text-pink-400'
-                            : 'bg-zinc-800/40 border-white/5 text-zinc-300'
+                            : 'bg-bg-tertiary border-border-theme text-text-primary'
                         }`}
                       >
                         <span>Cơ Bản</span>
@@ -3182,13 +3230,13 @@ export default function ProfilePage() {
                               isSelected
                                 ? 'bg-pink-500/20 border-pink-500 text-pink-400'
                                 : isUnlocked
-                                ? 'bg-zinc-800/40 border-white/5 text-zinc-300 active:scale-95'
-                                : 'bg-zinc-900/60 border-white/5 text-zinc-600 opacity-55 cursor-not-allowed'
+                                ? 'bg-bg-tertiary border-border-theme text-text-primary active:scale-95'
+                                : 'bg-bg-primary border-border-theme text-text-secondary opacity-55 cursor-not-allowed'
                             }`}
                           >
                             <span className="truncate w-full">{item.name.replace('Tóc ', '')}</span>
                             {!isUnlocked && (
-                              <span className="absolute top-1 right-1 text-[8px] bg-zinc-900/90 text-amber-400 p-0.5 rounded">🔒</span>
+                              <span className="absolute top-1 right-1 text-[8px] bg-bg-primary text-amber-400 p-0.5 rounded">🔒</span>
                             )}
                           </button>
                         );
@@ -3197,7 +3245,7 @@ export default function ProfilePage() {
                   </div>
 
                   <div>
-                    <h5 className="text-[10px] font-black text-zinc-500 uppercase tracking-wider mb-2">Chọn màu nhuộm tóc</h5>
+                    <h5 className="text-[10px] font-black text-text-secondary uppercase tracking-wider mb-2">Chọn màu nhuộm tóc</h5>
                     <div className="flex flex-wrap gap-2.5">
                       {HAIR_COLORS.map((hc) => (
                         <button
@@ -3206,10 +3254,10 @@ export default function ProfilePage() {
                           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[10px] font-bold transition-all active:scale-95 ${
                             tempAvatarParts.hairColor === hc.id
                               ? 'border-pink-500 bg-pink-500/10 text-pink-400'
-                              : 'border-white/5 bg-zinc-800/40 text-zinc-400'
+                              : 'border-border-theme bg-bg-tertiary text-text-primary'
                           }`}
                         >
-                          <span className="w-3.5 h-3.5 rounded-full border border-white/10" style={{ backgroundColor: hc.hex }} />
+                          <span className="w-3.5 h-3.5 rounded-full border border-border-theme" style={{ backgroundColor: hc.hex }} />
                           {hc.name}
                         </button>
                       ))}
@@ -3218,10 +3266,10 @@ export default function ProfilePage() {
                 </div>
 
                 {/* 3. TRANG PHỤC (ÁO & QUẦN) */}
-                <div className="border-t border-white/5 pt-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="border-t border-border-theme pt-5 grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* ÁO */}
                   <div>
-                    <h5 className="text-[11px] font-black text-zinc-400 uppercase tracking-widest mb-2.5">3. Trang phục Thượng y (Top)</h5>
+                    <h5 className="text-[11px] font-black text-text-secondary uppercase tracking-widest mb-2.5">3. Trang phục Thượng y (Top)</h5>
                     <div className="space-y-2">
                       {/* Mặc định */}
                       <button
@@ -3229,11 +3277,11 @@ export default function ProfilePage() {
                         className={`w-full px-3 py-2 rounded-xl text-[11px] font-bold border transition-all active:scale-95 text-left flex justify-between items-center ${
                           tempAvatarParts.top === 'default'
                             ? 'bg-pink-500/20 border-pink-500 text-pink-400'
-                            : 'bg-zinc-800/40 border-white/5 text-zinc-300'
+                            : 'bg-bg-tertiary border-border-theme text-text-primary'
                         }`}
                       >
                         <span>Áo Thun STEM cơ bản</span>
-                        <span className="text-[10px] text-zinc-500">Mặc định</span>
+                        <span className="text-[10px] text-text-secondary">Mặc định</span>
                       </button>
                       {/* Mở rộng */}
                       {ALL_COSMETICS.filter(c => c.category === 'top' && (c.genderTarget === 'unisex' || c.genderTarget === tempAvatarParts.gender)).map((item) => {
@@ -3252,8 +3300,8 @@ export default function ProfilePage() {
                               isSelected
                                 ? 'bg-pink-500/20 border-pink-500 text-pink-400'
                                 : isUnlocked
-                                ? 'bg-zinc-800/40 border-white/5 text-zinc-300 active:scale-95'
-                                : 'bg-zinc-900/60 border-white/5 text-zinc-600 opacity-55 cursor-not-allowed'
+                                ? 'bg-bg-tertiary border-border-theme text-text-primary active:scale-95'
+                                : 'bg-bg-primary border-border-theme text-text-secondary opacity-55 cursor-not-allowed'
                             }`}
                           >
                             <span>{item.name}</span>
@@ -3268,7 +3316,7 @@ export default function ProfilePage() {
 
                   {/* QUẦN */}
                   <div>
-                    <h5 className="text-[11px] font-black text-zinc-400 uppercase tracking-widest mb-2.5">4. Trang phục Hạ y (Bottom)</h5>
+                    <h5 className="text-[11px] font-black text-text-secondary uppercase tracking-widest mb-2.5">4. Trang phục Hạ y (Bottom)</h5>
                     <div className="space-y-2">
                       {/* Mặc định */}
                       <button
@@ -3276,11 +3324,11 @@ export default function ProfilePage() {
                         className={`w-full px-3 py-2 rounded-xl text-[11px] font-bold border transition-all active:scale-95 text-left flex justify-between items-center ${
                           tempAvatarParts.bottom === 'default'
                             ? 'bg-pink-500/20 border-pink-500 text-pink-400'
-                            : 'bg-zinc-800/40 border-white/5 text-zinc-300'
+                            : 'bg-bg-tertiary border-border-theme text-text-primary'
                         }`}
                       >
                         <span>Quần Jeans cơ bản</span>
-                        <span className="text-[10px] text-zinc-500">Mặc định</span>
+                        <span className="text-[10px] text-text-secondary">Mặc định</span>
                       </button>
                       {/* Mở rộng */}
                       {ALL_COSMETICS.filter(c => c.category === 'bottom' && (c.genderTarget === 'unisex' || c.genderTarget === tempAvatarParts.gender)).map((item) => {
@@ -3299,8 +3347,8 @@ export default function ProfilePage() {
                               isSelected
                                 ? 'bg-pink-500/20 border-pink-500 text-pink-400'
                                 : isUnlocked
-                                ? 'bg-zinc-800/40 border-white/5 text-zinc-300 active:scale-95'
-                                : 'bg-zinc-900/60 border-white/5 text-zinc-600 opacity-55 cursor-not-allowed'
+                                ? 'bg-bg-tertiary border-border-theme text-text-primary active:scale-95'
+                                : 'bg-bg-primary border-border-theme text-text-secondary opacity-55 cursor-not-allowed'
                             }`}
                           >
                             <span>{item.name}</span>
@@ -3315,8 +3363,8 @@ export default function ProfilePage() {
                 </div>
 
                 {/* 4. PHỤ KIỆN */}
-                <div className="border-t border-white/5 pt-5">
-                  <h5 className="text-[11px] font-black text-zinc-400 uppercase tracking-widest mb-2.5">4. Phụ kiện lượng tử (Accessory)</h5>
+                <div className="border-t border-border-theme pt-5">
+                  <h5 className="text-[11px] font-black text-text-secondary uppercase tracking-widest mb-2.5">4. Phụ kiện lượng tử (Accessory)</h5>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {/* Không đeo */}
                     <button
@@ -3324,7 +3372,7 @@ export default function ProfilePage() {
                       className={`px-3 py-2 rounded-xl text-[11px] font-bold border transition-all active:scale-95 text-center flex flex-col items-center justify-center min-h-[46px] ${
                         tempAvatarParts.accessory === 'none'
                           ? 'bg-pink-500/20 border-pink-500 text-pink-400'
-                          : 'bg-zinc-800/40 border-white/5 text-zinc-300'
+                          : 'bg-bg-tertiary border-border-theme text-text-primary'
                       }`}
                     >
                       Không đeo
@@ -3346,13 +3394,13 @@ export default function ProfilePage() {
                             isSelected
                               ? 'bg-pink-500/20 border-pink-500 text-pink-400'
                               : isUnlocked
-                              ? 'bg-zinc-800/40 border-white/5 text-zinc-300 active:scale-95'
-                              : 'bg-zinc-900/60 border-white/5 text-zinc-600 opacity-55 cursor-not-allowed'
+                              ? 'bg-bg-tertiary border-border-theme text-text-primary active:scale-95'
+                              : 'bg-bg-primary border-border-theme text-text-secondary opacity-55 cursor-not-allowed'
                           }`}
                         >
                           <span className="truncate w-full">{item.name.replace('Kính Thực Tế Ảo ', '')}</span>
                           {!isUnlocked && (
-                            <span className="absolute top-1 right-1 text-[8px] bg-zinc-900/90 text-amber-400 p-0.5 rounded">🔒</span>
+                            <span className="absolute top-1 right-1 text-[8px] bg-bg-primary text-amber-400 p-0.5 rounded">🔒</span>
                           )}
                         </button>
                       );
@@ -3371,8 +3419,8 @@ export default function ProfilePage() {
               {/* Crystals wallet display bar */}
               <div className="bg-[#2a2c3a] border border-purple-500/20 rounded-3xl p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center text-3xl animate-bounce">
-                    🔮
+                  <div className="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center">
+                    <CrystalIcon className="w-8 h-8" />
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-white">Số dư Pha lê Lượng tử của bạn</h4>
@@ -3380,7 +3428,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <div className="px-6 py-3 bg-purple-500/10 border border-purple-500/20 text-purple-400 dark:text-purple-300 rounded-2xl text-2xl font-black font-sans flex items-center justify-center gap-2 self-start sm:self-auto shadow-inner">
-                  <span>🔮</span>
+                  <CrystalIcon className="w-6 h-6" />
                   <span>{personalization.crystals !== undefined ? personalization.crystals : 500}</span>
                 </div>
               </div>
@@ -3407,7 +3455,7 @@ export default function ProfilePage() {
                         {isRolling ? (
                           <div className="text-3xl animate-bounce">🧬</div>
                         ) : (
-                          <div className="text-4xl drop-shadow-[0_0_15px_rgba(168,85,247,0.4)] animate-pulse select-none">🔮</div>
+                          <CrystalIcon className="w-16 h-16 drop-shadow-[0_0_20px_rgba(168,85,247,0.6)]" />
                         )}
                       </div>
                     </div>
@@ -3420,24 +3468,28 @@ export default function ProfilePage() {
                       <button
                         disabled={isRolling}
                         onClick={() => handleSpinGacha(1)}
-                        className={`py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg border ${
+                        className={`py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg border flex items-center justify-center gap-1.5 ${
                           isRolling
                             ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed border-white/5'
                             : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 border-purple-500/20 text-white shadow-purple-500/10'
                         }`}
                       >
-                        Quay x1 (100 🔮)
+                        <span>Quay x1 (100</span>
+                        <CrystalIcon className="w-4 h-4" />
+                        <span>)</span>
                       </button>
                       <button
                         disabled={isRolling}
                         onClick={() => handleSpinGacha(10)}
-                        className={`py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg border ${
+                        className={`py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg border flex items-center justify-center gap-1.5 ${
                           isRolling
                             ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed border-white/5'
                             : 'bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 border-pink-500/20 text-white shadow-pink-500/10'
                         }`}
                       >
-                        Quay x10 (900 🔮)
+                        <span>Quay x10 (900</span>
+                        <CrystalIcon className="w-4 h-4" />
+                        <span>)</span>
                       </button>
                     </div>
                     <p className="text-[8.5px] text-zinc-500 mt-3 leading-relaxed">
@@ -3642,8 +3694,8 @@ export default function ProfilePage() {
                             </div>
 
                             <div className="flex items-center gap-4 shrink-0 justify-between md:justify-end border-t md:border-t-0 border-white/5 pt-2 md:pt-0">
-                              <span className="text-xs font-bold text-purple-450 dark:text-purple-400 flex items-center gap-0.5 select-none font-mono">
-                                <span>🔮</span>
+                              <span className="text-xs font-bold text-purple-450 dark:text-purple-400 flex items-center gap-1 select-none font-mono">
+                                <CrystalIcon className="w-4 h-4" />
                                 <span>{item.price}</span>
                               </span>
 
@@ -3841,16 +3893,16 @@ export default function ProfilePage() {
                   </div>
 
                   {/* Custom Image Upload & URL input */}
-                  <div className="border-t border-white/5 pt-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="border-t border-border-theme pt-5 grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Upload Section */}
-                    <div className="bg-[#1c1e29]/40 border border-white/5 rounded-2xl p-5 text-left flex flex-col justify-between">
+                    <div className="bg-bg-tertiary border border-border-theme rounded-2xl p-5 text-left flex flex-col justify-between">
                       <div>
-                        <h5 className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-1">Tải lên ảnh từ máy tính</h5>
-                        <p className="text-[10px] text-zinc-500 leading-snug">Hệ thống sẽ tự động tối ưu dung lượng hình ảnh để lưu trữ ổn định.</p>
+                        <h5 className="text-xs font-black text-text-secondary uppercase tracking-wider mb-1">Tải lên ảnh từ máy tính</h5>
+                        <p className="text-[10px] text-text-secondary leading-snug">Hệ thống sẽ tự động tối ưu dung lượng hình ảnh để lưu trữ ổn định.</p>
                       </div>
-                      <label className="mt-4 flex flex-col items-center justify-center border-2 border-dashed border-white/10 hover:border-pink-500/35 rounded-2xl p-5 cursor-pointer bg-[#1c1e29]/20 transition-all hover:bg-[#1c1e29]/40 group">
-                        <Upload className="w-6 h-6 text-zinc-500 group-hover:text-pink-400 group-hover:scale-110 transition-all mb-2" />
-                        <span className="text-[11px] font-bold text-zinc-400 group-hover:text-zinc-300">Chọn tệp hình ảnh...</span>
+                      <label className="mt-4 flex flex-col items-center justify-center border-2 border-dashed border-border-theme hover:border-pink-500/35 rounded-2xl p-5 cursor-pointer bg-bg-primary transition-all hover:bg-bg-secondary group">
+                        <Upload className="w-6 h-6 text-text-secondary group-hover:text-pink-400 group-hover:scale-110 transition-all mb-2" />
+                        <span className="text-[11px] font-bold text-text-secondary group-hover:text-text-primary">Chọn tệp hình ảnh...</span>
                         <input 
                           type="file" 
                           accept="image/*" 
@@ -3861,10 +3913,10 @@ export default function ProfilePage() {
                     </div>
 
                     {/* Custom URL input */}
-                    <div className="bg-[#1c1e29]/40 border border-white/5 rounded-2xl p-5 text-left flex flex-col justify-between">
+                    <div className="bg-bg-tertiary border border-border-theme rounded-2xl p-5 text-left flex flex-col justify-between">
                       <div>
-                        <h5 className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-1">Hoặc sử dụng liên kết ảnh (URL)</h5>
-                        <p className="text-[10px] text-zinc-500 leading-snug">Dán liên kết hình ảnh trực tiếp từ Google hoặc bất kỳ trang web chia sẻ ảnh nào.</p>
+                        <h5 className="text-xs font-black text-text-secondary uppercase tracking-wider mb-1">Hoặc sử dụng liên kết ảnh (URL)</h5>
+                        <p className="text-[10px] text-text-secondary leading-snug">Dán liên kết hình ảnh trực tiếp từ Google hoặc bất kỳ trang web chia sẻ ảnh nào.</p>
                       </div>
                       <div className="mt-4 flex gap-2">
                         <input 
@@ -3872,7 +3924,7 @@ export default function ProfilePage() {
                           placeholder="https://example.com/background.jpg" 
                           value={customUrlInput}
                           onChange={(e) => setCustomUrlInput(e.target.value)}
-                          className="flex-1 bg-[#1c1e29] border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-pink-500/50"
+                          className="flex-1 bg-bg-primary border border-border-theme rounded-xl px-3 py-2 text-xs text-text-primary placeholder-text-secondary focus:outline-none focus:border-pink-500/50"
                         />
                         <button
                           onClick={handleApplyUrl}
@@ -3894,14 +3946,14 @@ export default function ProfilePage() {
           {activePersonalizationSubTab === 'upload_avatar' && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               {/* Cột trái: Hologram Preview của Avatar hiện tại */}
-              <div className="lg:col-span-5 bg-[#2a2c3a] border border-white/5 rounded-3xl p-6 flex flex-col items-center justify-center relative overflow-hidden group">
+              <div className="lg:col-span-5 bg-bg-secondary border border-border-theme rounded-3xl p-6 flex flex-col items-center justify-center relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
                 <div className="absolute bottom-0 left-0 w-32 h-32 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
                 
-                <h4 className="text-xs font-black text-zinc-400 uppercase tracking-widest mb-6">Ảnh đại diện hiện tại</h4>
+                <h4 className="text-xs font-black text-text-secondary uppercase tracking-widest mb-6">Ảnh đại diện hiện tại</h4>
                 
                 {/* Hologram Glass Box */}
-                <div className="w-56 h-56 rounded-2xl bg-gradient-to-b from-white/5 to-white/0 border border-white/10 flex items-center justify-center p-4 relative shadow-2xl backdrop-blur-sm">
+                <div className="w-56 h-56 rounded-2xl bg-bg-tertiary border border-border-theme flex items-center justify-center p-4 relative shadow-2xl backdrop-blur-sm">
                   {/* Neon laser corners */}
                   <div className="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-pink-500" />
                   <div className="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-pink-500" />
@@ -3927,47 +3979,47 @@ export default function ProfilePage() {
                           <span className="select-none text-6xl">{personalization.avatarUrl}</span>
                         )
                       ) : (
-                        user.displayName ? user.displayName.charAt(0).toUpperCase() : <User className="w-20 h-20 text-white" />
+                        user.displayName ? user.displayName.charAt(0).toUpperCase() : <User className="w-20 h-20 text-text-primary" />
                       )}
                     </AvatarFrame>
                   </div>
                 </div>
 
                 <div className="text-center mt-6">
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-[#1f212e] border border-white/5 text-zinc-400 font-mono uppercase tracking-wider">
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-bg-tertiary border border-border-theme text-text-secondary font-mono uppercase tracking-wider">
                     {personalization.avatarUrl === 'custom-avatar' ? 'Nhân vật Chibi' : personalization.avatarUrl?.startsWith('data:') ? 'Ảnh tải lên từ thiết bị' : personalization.avatarUrl?.startsWith('http') ? 'Ảnh từ URL' : 'Biểu tượng có sẵn'}
                   </span>
                 </div>
 
-                <p className="text-[10px] text-zinc-450 dark:text-zinc-450 text-center mt-4 leading-snug px-4">
+                <p className="text-[10px] text-text-secondary text-center mt-4 leading-snug px-4">
                   Ảnh đại diện của bạn sẽ hiển thị trên bảng xếp hạng ELO, thẻ PvP và danh sách bạn bè toàn game.
                 </p>
               </div>
 
               {/* Cột phải: Các phương thức đổi ảnh */}
-              <div className="lg:col-span-7 bg-[#2a2c3a] border border-white/5 rounded-3xl p-6 space-y-8">
+              <div className="lg:col-span-7 bg-bg-secondary border border-border-theme rounded-3xl p-6 space-y-8">
                 {/* 1. Tải ảnh từ thiết bị */}
                 <div className="space-y-4">
-                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                  <h4 className="text-sm font-bold text-text-primary flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-cyan-400" />
                     Tải ảnh từ máy tính của bạn
                   </h4>
-                  <div className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-700 hover:border-cyan-500/50 rounded-2xl p-6 transition-colors bg-zinc-900/30 group/upload relative overflow-hidden">
+                  <div className="flex flex-col items-center justify-center border-2 border-dashed border-border-theme hover:border-cyan-500/50 rounded-2xl p-6 transition-colors bg-bg-tertiary group/upload relative overflow-hidden">
                     <input 
                       type="file" 
                       accept="image/*" 
                       onChange={handleAvatarUpload}
                       className="absolute inset-0 opacity-0 cursor-pointer z-10" 
                     />
-                    <Upload className="w-10 h-10 text-zinc-500 group-hover/upload:text-cyan-400 transition-colors mb-3" />
-                    <p className="text-xs font-bold text-zinc-300">Nhấp hoặc kéo thả ảnh vào đây</p>
-                    <p className="text-[10px] text-zinc-500 mt-1">Hỗ trợ PNG, JPG, JPEG (Tự động nén và tối ưu hóa)</p>
+                    <Upload className="w-10 h-10 text-text-secondary group-hover/upload:text-cyan-400 transition-colors mb-3" />
+                    <p className="text-xs font-bold text-text-primary">Nhấp hoặc kéo thả ảnh vào đây</p>
+                    <p className="text-[10px] text-text-secondary mt-1">Hỗ trợ PNG, JPG, JPEG (Tự động nén và tối ưu hóa)</p>
                   </div>
                 </div>
 
                 {/* 2. Chọn biểu tượng có sẵn */}
                 <div className="space-y-4">
-                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                  <h4 className="text-sm font-bold text-text-primary flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-purple-400" />
                     Chọn biểu tượng Khoa học có sẵn
                   </h4>
@@ -3980,7 +4032,7 @@ export default function ProfilePage() {
                         className={`aspect-square rounded-2xl flex items-center justify-center text-2xl border transition-all active:scale-95 ${
                           personalization.avatarUrl === av.url
                             ? 'bg-purple-500/20 border-purple-500 shadow-lg shadow-purple-500/10'
-                            : 'bg-zinc-900/40 border-white/5 hover:border-white/10 hover:bg-zinc-900/60'
+                            : 'bg-bg-tertiary border-border-theme hover:border-purple-500/30 hover:bg-bg-primary'
                         }`}
                       >
                         {av.emoji}
@@ -3991,7 +4043,7 @@ export default function ProfilePage() {
 
                 {/* 3. Nhập liên kết ảnh */}
                 <div className="space-y-4">
-                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                  <h4 className="text-sm font-bold text-text-primary flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-amber-400" />
                     Sử dụng liên kết ảnh (URL)
                   </h4>
@@ -4001,7 +4053,7 @@ export default function ProfilePage() {
                       placeholder="https://example.com/your-image.png"
                       value={customAvatarUrlInput}
                       onChange={(e) => setCustomAvatarUrlInput(e.target.value)}
-                      className="flex-1 bg-zinc-900/60 border border-white/5 focus:border-amber-500/50 rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-500 outline-none transition-all"
+                      className="flex-1 bg-bg-tertiary border border-border-theme focus:border-amber-500/50 rounded-xl px-4 py-2.5 text-xs text-text-primary placeholder-text-secondary outline-none transition-all"
                     />
                     <button
                       onClick={handleApplyAvatarUrl}
@@ -4059,21 +4111,19 @@ export default function ProfilePage() {
       {/* Tab Settings / E-mail options */}
       {activeTab === 'settings' && (
         <div className="max-w-2xl mx-auto space-y-6">
-          <div className="bg-[#2a2c3a]/90 backdrop-blur-md border border-white/5 rounded-3xl p-6 shadow-2xl space-y-8 relative">
-            <div className="absolute inset-0 rounded-3xl bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none opacity-40" />
-            
-            <div className="border-b border-white/5 pb-4">
-              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+          <div className="bg-bg-secondary border border-border-theme rounded-3xl p-6 shadow-2xl space-y-8 relative">
+            <div className="border-b border-border-theme pb-4">
+              <h3 className="text-xl font-bold text-text-primary flex items-center gap-2">
                 <Mail className="w-6 h-6 text-pink-500" /> Cấu hình Tài khoản E-mail
               </h3>
-              <p className="text-xs text-zinc-400 mt-1">Quản lý trạng thái xác minh, mật khẩu bảo mật và thay đổi thông tin liên lạc.</p>
+              <p className="text-xs text-text-secondary mt-1">Quản lý trạng thái xác minh, mật khẩu bảo mật và thay đổi thông tin liên lạc.</p>
             </div>
 
             {/* 1. Xác minh địa chỉ email */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 bg-[#1c1e29]/50 border border-white/5 rounded-2xl relative z-10">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 bg-bg-tertiary border border-border-theme rounded-2xl relative z-10">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <h4 className="text-sm font-bold text-white">Xác minh địa chỉ email</h4>
+                  <h4 className="text-sm font-bold text-text-primary">Xác minh địa chỉ email</h4>
                   {(auth.currentUser?.emailVerified || auth.currentUser?.email?.toLowerCase() === 'admin123@gmail.com' || auth.currentUser?.email?.toLowerCase().startsWith('test')) ? (
                     <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/15 flex items-center gap-1">
                       <CheckCircle className="w-3.5 h-3.5" /> Đã xác minh
@@ -4084,15 +4134,15 @@ export default function ProfilePage() {
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-zinc-400">Địa chỉ hiện tại: <strong className="text-white">{auth.currentUser?.email || user.email}</strong></p>
-                <p className="text-[10px] text-zinc-500">Xác minh email giúp bảo mật tài khoản tốt hơn và nhận thông báo quan trọng.</p>
+                <p className="text-xs text-text-secondary">Địa chỉ hiện tại: <strong className="text-text-primary">{auth.currentUser?.email || user.email}</strong></p>
+                <p className="text-[10px] text-text-secondary">Xác minh email giúp bảo mật tài khoản tốt hơn và nhận thông báo quan trọng.</p>
               </div>
 
               {(!auth.currentUser?.emailVerified && auth.currentUser?.email?.toLowerCase() !== 'admin123@gmail.com' && !auth.currentUser?.email?.toLowerCase().startsWith('test')) && (
                 <button
                   onClick={handleSendVerification}
                   disabled={verifying}
-                  className="px-5 py-2.5 bg-pink-500 hover:bg-pink-600 disabled:bg-zinc-700 text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-95 shrink-0"
+                  className="px-5 py-2.5 bg-pink-500 hover:bg-pink-600 disabled:bg-bg-primary text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-95 shrink-0"
                 >
                   {verifying ? 'Đang gửi...' : 'Gửi email xác minh'}
                 </button>
@@ -4100,51 +4150,51 @@ export default function ProfilePage() {
             </div>
 
             {/* 2. Đặt lại mật khẩu */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 bg-[#1c1e29]/50 border border-white/5 rounded-2xl relative z-10">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 bg-bg-tertiary border border-border-theme rounded-2xl relative z-10">
               <div className="space-y-1">
-                <h4 className="text-sm font-bold text-white">Đặt lại mật khẩu</h4>
-                <p className="text-xs text-zinc-400">Yêu cầu liên kết đặt lại mật khẩu gửi về địa chỉ hòm thư liên kết của bạn.</p>
-                <p className="text-[10px] text-zinc-500">Bạn sẽ nhận được thư chứa liên kết thay đổi mật khẩu mới an toàn.</p>
+                <h4 className="text-sm font-bold text-text-primary">Đặt lại mật khẩu</h4>
+                <p className="text-xs text-text-secondary">Yêu cầu liên kết đặt lại mật khẩu gửi về địa chỉ hòm thư liên kết của bạn.</p>
+                <p className="text-[10px] text-text-secondary">Bạn sẽ nhận được thư chứa liên kết thay đổi mật khẩu mới an toàn.</p>
               </div>
 
               <button
                 onClick={handleResetPassword}
                 disabled={resetting}
-                className="px-5 py-2.5 bg-pink-500 hover:bg-pink-600 disabled:bg-zinc-700 text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-95 shrink-0"
+                className="px-5 py-2.5 bg-pink-500 hover:bg-pink-600 disabled:bg-bg-primary text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-95 shrink-0"
               >
                 {resetting ? 'Đang gửi...' : 'Đặt lại mật khẩu'}
               </button>
             </div>
 
             {/* 3. Thay đổi địa chỉ email */}
-            <div className="p-5 bg-[#1c1e29]/50 border border-white/5 rounded-2xl space-y-4 relative z-10">
+            <div className="p-5 bg-bg-tertiary border border-border-theme rounded-2xl space-y-4 relative z-10">
               <div className="space-y-1">
-                <h4 className="text-sm font-bold text-white">Thay đổi địa chỉ email</h4>
-                <p className="text-xs text-zinc-400">Cập nhật địa chỉ hòm thư liên kết mới cho tài khoản nhà khoa học của bạn.</p>
+                <h4 className="text-sm font-bold text-text-primary">Thay đổi địa chỉ email</h4>
+                <p className="text-xs text-text-secondary">Cập nhật địa chỉ hòm thư liên kết mới cho tài khoản nhà khoa học của bạn.</p>
               </div>
 
               <form onSubmit={handleChangeEmail} className="space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[10px] text-zinc-500 block mb-1 font-bold uppercase">Email mới</label>
+                    <label className="text-[10px] text-text-secondary block mb-1 font-bold uppercase">Email mới</label>
                     <input 
                       type="email" 
                       required
                       value={newEmailInput}
                       onChange={(e) => setNewEmailInput(e.target.value)}
                       placeholder="example@gmail.com"
-                      className="w-full bg-[#1c1e29] border border-white/5 focus:border-pink-500 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-white font-mono"
+                      className="w-full bg-bg-primary border border-border-theme focus:border-pink-500 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-text-primary font-mono"
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] text-zinc-500 block mb-1 font-bold uppercase">Mật khẩu hiện tại</label>
+                    <label className="text-[10px] text-text-secondary block mb-1 font-bold uppercase">Mật khẩu hiện tại</label>
                     <input 
                       type="password" 
                       required
                       value={currentPasswordInput}
                       onChange={(e) => setCurrentPasswordInput(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full bg-[#1c1e29] border border-white/5 focus:border-pink-500 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-white font-mono"
+                      className="w-full bg-bg-primary border border-border-theme focus:border-pink-500 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-text-primary font-mono"
                     />
                   </div>
                 </div>
@@ -4152,7 +4202,7 @@ export default function ProfilePage() {
                 <button
                   type="submit"
                   disabled={updatingEmail}
-                  className="w-full py-2.5 bg-pink-500 hover:bg-pink-600 disabled:bg-zinc-700 text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-95 mt-2"
+                  className="w-full py-2.5 bg-pink-500 hover:bg-pink-600 disabled:bg-bg-primary text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-95 mt-2"
                 >
                   {updatingEmail ? 'Đang cập nhật...' : 'Xác nhận thay đổi địa chỉ email'}
                 </button>
@@ -4459,8 +4509,8 @@ export default function ProfilePage() {
 
       {/* ================== MODAL QUAY GACHA LẬT THẺ LƯỢNG TỬ 3D HOLOGRAM ================== */}
       {showGachaModal && (
-        <div className="fixed top-0 bottom-0 right-0 left-0 md:left-[260px] z-[11000] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-          <div className="relative w-full max-w-2xl bg-gradient-to-br from-[#121324] via-[#1a1c35] to-[#0d0e1a] border border-purple-500/20 rounded-3xl p-6 sm:p-8 shadow-2xl text-center overflow-hidden my-8">
+        <div className="fixed top-0 bottom-0 right-0 left-0 md:left-[260px] z-[11000] bg-black/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div className="relative w-full max-w-2xl bg-bg-secondary border border-border-theme rounded-3xl p-6 sm:p-8 shadow-2xl text-center overflow-hidden my-8">
             {/* Lưới tọa độ laser nền */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(168,85,247,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.03)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
             <div className="absolute -top-48 -left-48 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -4469,7 +4519,7 @@ export default function ProfilePage() {
             <h3 className="text-xl font-black bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 uppercase tracking-widest mb-2 font-sans">
               GIẢI MÃ LIÊN KẾT LƯỢNG TỬ
             </h3>
-            <p className="text-zinc-400 text-xs font-mono uppercase tracking-wider mb-6">
+            <p className="text-text-secondary text-xs font-mono uppercase tracking-wider mb-6">
               Bạn đã tiêu hao {gachaCrystalsSpent} 🔮 tinh thể. Click vào từng thẻ lượng tử bên dưới để lật mở liên kết!
             </p>
 
@@ -4479,16 +4529,16 @@ export default function ProfilePage() {
                 const isFlipped = flippedGachaCards.includes(idx);
                 const item = res.item;
                 
-                let rarityColor = 'border-zinc-500 text-zinc-400 bg-zinc-950/80';
+                let rarityColor = 'border-border-theme text-text-primary bg-bg-tertiary';
                 let glowColor = '';
                 if (item.rarity === 'Legendary') {
-                  rarityColor = 'border-amber-500 text-amber-300 bg-gradient-to-b from-amber-500/10 to-[#121324]';
+                  rarityColor = 'border-amber-500 text-amber-500 bg-amber-500/10';
                   glowColor = 'shadow-[0_0_20px_rgba(245,158,11,0.25)]';
                 } else if (item.rarity === 'Epic') {
-                  rarityColor = 'border-purple-500 text-purple-300 bg-gradient-to-b from-purple-500/10 to-[#121324]';
+                  rarityColor = 'border-purple-500 text-purple-500 bg-purple-500/10';
                   glowColor = 'shadow-[0_0_20px_rgba(168,85,247,0.25)]';
                 } else if (item.rarity === 'Rare') {
-                  rarityColor = 'border-cyan-500 text-cyan-300 bg-gradient-to-b from-cyan-500/10 to-[#121324]';
+                  rarityColor = 'border-cyan-500 text-cyan-500 bg-cyan-500/10';
                   glowColor = 'shadow-[0_0_15px_rgba(6,182,212,0.2)]';
                 }
 
@@ -4513,14 +4563,14 @@ export default function ProfilePage() {
                     >
                       {/* CARD BACK (Mặt úp) */}
                       <div 
-                        className="absolute inset-0 rounded-2xl border-2 border-purple-500/30 bg-gradient-to-br from-[#1b1c30] to-[#0e0f1d] flex flex-col items-center justify-center p-4 shadow-xl hover:border-purple-400 transition-colors"
+                        className="absolute inset-0 rounded-2xl border-2 border-purple-500/30 bg-bg-tertiary flex flex-col items-center justify-center p-4 shadow-xl hover:border-purple-400 transition-colors"
                         style={{ backfaceVisibility: 'hidden' }}
                       >
                         <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20 mb-2 group-hover:scale-110 duration-300">
                           <span className="text-xl animate-pulse">🔮</span>
                         </div>
                         <span className="text-[9px] font-black text-purple-400 uppercase tracking-widest font-mono">Quantum</span>
-                        <span className="text-[8px] text-zinc-500 mt-1 uppercase">Click to open</span>
+                        <span className="text-[8px] text-text-secondary mt-1 uppercase">Click to open</span>
                       </div>
 
                       {/* CARD FRONT (Mặt ngửa) */}

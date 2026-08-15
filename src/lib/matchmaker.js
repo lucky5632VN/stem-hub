@@ -2,7 +2,7 @@ import {
   doc, setDoc, deleteDoc, getDocs, updateDoc, 
   query, collection, where, limit, getDoc, runTransaction
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { db, functions, httpsCallable } from './firebase';
 import { safeFirestoreCall } from './firestoreRetry';
 
 /**
@@ -70,18 +70,41 @@ export const getRankInfo = (elo) => {
  */
 export const joinMatchmakingQueue = async (
   uid, name, elo, level, subject, activeTitle, avatarFrame, avatarParts,
-  matchData = null, seenHistory = [], timeLimit = 180
+  matchData = null, seenHistory = [], timeLimit = 300, preMatchCardId = null
 ) => {
-  console.log("👉 [1] Bắt đầu tìm trận với môn:", subject);
+  console.log("👉 [1] Bắt đầu tìm trận với môn:", subject, "Pre-match Card:", preMatchCardId);
 
-  // BƯỚC 1: Tìm kiếm các phòng đang có status == "waiting" của môn học này
+  const isEloShield = preMatchCardId === 'card_elo_shield';
+  const crystalMult = preMatchCardId === 'card_crystal_magnet' ? 2 : 1;
+  const maxSlots = preMatchCardId === 'card_wildcard_slot' ? 4 : 3;
+
+  let finalName = name;
+  let finalAvatarFrame = avatarFrame;
+  let finalAvatarParts = avatarParts;
+
+  if (preMatchCardId === 'card_incognito') {
+    finalName = '🕵️ Người chơi ẩn danh';
+    finalAvatarFrame = 'incognito';
+    finalAvatarParts = null;
+  }
+
+  // BƯỚC 1: Tìm kiếm các phòng đang có status == "waiting"
   const roomsCollection = collection(db, 'match_rooms');
-  const q = query(
-    roomsCollection,
-    where('status', '==', 'waiting'),
-    where('subject', '==', subject),
-    limit(10)
-  );
+  let q;
+  if (subject === 'random') {
+    q = query(
+      roomsCollection,
+      where('status', '==', 'waiting'),
+      limit(10)
+    );
+  } else {
+    q = query(
+      roomsCollection,
+      where('status', '==', 'waiting'),
+      where('subject', '==', subject),
+      limit(10)
+    );
+  }
 
   let querySnapshot = { docs: [] };
   try {
@@ -98,8 +121,8 @@ export const joinMatchmakingQueue = async (
     const roomData = docSnap.data();
     console.log("👉 [3] Kiểm tra phòng:", docSnap.id, roomData);
 
-    // Bỏ qua phòng của chính mình tạo
-    if (roomData.player1.uid === uid) {
+    // Bỏ qua phòng do chính mình tạo
+    if (roomData.player1?.uid === uid) {
       console.log("⚠️ Bỏ qua phòng do chính mình tạo ra");
       continue;
     }
@@ -118,20 +141,52 @@ export const joinMatchmakingQueue = async (
 
         // Kiểm tra phòng có đang trống và ở trạng thái "waiting" không
         if (freshRoomData.status === 'waiting' && !freshRoomData.player2) {
+          let resolvedSubject = freshRoomData.subject;
+          if (resolvedSubject === 'random') {
+            const allSubs = ['math', 'physics', 'chemistry', 'biology'];
+            resolvedSubject = allSubs[Math.floor(Math.random() * allSubs.length)];
+          }
+
+          const currentP1Effects = freshRoomData.activeEffects?.p1 || { frozenUntil: 0, fogUntil: 0, eloShielded: false, crystalMultiplier: 1, stolenCount: 0, reflectActive: false, lastStolenCard: null };
+          const p2Effects = {
+            frozenUntil: 0,
+            fogUntil: 0,
+            eloShielded: isEloShield,
+            crystalMultiplier: crystalMult,
+            maxSlots: maxSlots,
+            stolenCount: 0,
+            reflectActive: false,
+            lastStolenCard: null
+          };
+
           transaction.update(roomRef, {
+            subject: resolvedSubject,
+            timeRemaining: 300,
             player2: {
               uid: uid,
-              name: name || 'Người chơi ẩn danh',
+              name: finalName || 'Người chơi ẩn danh',
               elo: elo || 0,
               level: level || 1,
               activeTitle: activeTitle || 'apprentice',
-              avatarFrame: avatarFrame || 'default',
-              avatarParts: avatarParts || null
+              avatarFrame: finalAvatarFrame || 'default',
+              avatarParts: finalAvatarParts || null
             },
             player2Seen: seenHistory || [],
-            status: 'playing'
+            status: 'equipment_selecting',
+            equipmentPhase: {
+              status: 'selecting',
+              expiresAt: Date.now() + 30000,
+              p1Ready: false,
+              p2Ready: false
+            },
+            player1Equipment: [],
+            player2Equipment: [],
+            activeEffects: {
+              p1: currentP1Effects,
+              p2: p2Effects
+            }
           });
-          console.log("✅ Giao dịch update phòng thành công!");
+          console.log("✅ Giao dịch update phòng thành công! Subject:", resolvedSubject);
           return roomDoc.id; // Giao dịch thành công
         }
 
@@ -158,18 +213,29 @@ export const joinMatchmakingQueue = async (
   const newRoomId = `room_${uid}_${Date.now()}`;
   const newRoomRef = doc(db, 'match_rooms', newRoomId);
 
+  const p1Effects = {
+    frozenUntil: 0,
+    fogUntil: 0,
+    eloShielded: isEloShield,
+    crystalMultiplier: crystalMult,
+    maxSlots: maxSlots,
+    stolenCount: 0,
+    reflectActive: false,
+    lastStolenCard: null
+  };
+
   const newRoomData = {
     id: newRoomId,
     subject: subject,
     status: 'waiting',
     player1: {
       uid: uid,
-      name: name || 'Người chơi ẩn danh',
+      name: finalName || 'Người chơi ẩn danh',
       elo: elo || 0,
       level: level || 1,
       activeTitle: activeTitle || 'apprentice',
-      avatarFrame: avatarFrame || 'default',
-      avatarParts: avatarParts || null
+      avatarFrame: finalAvatarFrame || 'default',
+      avatarParts: finalAvatarParts || null
     },
     player2: null,
     player1Progress: 0,
@@ -179,6 +245,12 @@ export const joinMatchmakingQueue = async (
     timeRemaining: timeLimit,
     winnerId: null,
     createdAt: new Date().toISOString(),
+    activeEffects: {
+      p1: p1Effects,
+      p2: { frozenUntil: 0, fogUntil: 0, eloShielded: false, crystalMultiplier: 1, maxSlots: 3, stolenCount: 0, reflectActive: false }
+    },
+    player1Equipment: [],
+    player2Equipment: [],
     matchData: matchData,
     player1Seen: seenHistory || [],
     player2Seen: []
@@ -192,12 +264,25 @@ export const joinMatchmakingQueue = async (
 /**
  * Hủy tìm trận (Xóa phòng "waiting" do chính mình tạo ra)
  */
-export const leaveMatchmakingQueue = async (uid) => {
+export const leaveMatchmakingQueue = async (uid, specificRoomId = null) => {
   try {
+    if (specificRoomId) {
+      const roomRef = doc(db, 'match_rooms', specificRoomId);
+      const roomSnap = await getDoc(roomRef);
+      if (roomSnap.exists()) {
+        const roomData = roomSnap.data();
+        if (roomData.status === 'waiting' && roomData.player1?.uid === uid) {
+          await deleteDoc(roomRef);
+          console.log("✅ Đã xóa phòng chờ specificRoomId thành công:", specificRoomId);
+          return;
+        }
+      }
+    }
+
+    // Fallback: Tìm kiếm tự lọc client-side để tránh lỗi thiếu Composite Index của Firestore
     const roomsCollection = collection(db, 'match_rooms');
     const q = query(
       roomsCollection,
-      where('player1.uid', '==', uid),
       where('status', '==', 'waiting')
     );
 
@@ -208,7 +293,11 @@ export const leaveMatchmakingQueue = async (uid) => {
       console.warn("⚠️ Không thể lấy danh sách phòng để xóa dọn dẹp:", err);
     }
     for (const docSnap of querySnapshot.docs) {
-      await deleteDoc(doc(db, 'match_rooms', docSnap.id));
+      const roomData = docSnap.data();
+      if (roomData.player1?.uid === uid) {
+        await deleteDoc(doc(db, 'match_rooms', docSnap.id));
+        console.log("✅ Đã xóa dọn dẹp phòng chờ thông qua fallback:", docSnap.id);
+      }
     }
   } catch (err) {
     console.warn("Lỗi khi hủy phòng chờ ghép trận:", err);
@@ -284,8 +373,19 @@ export const checkForRoomMerge = async (
                 avatarFrame: avatarFrame || 'default',
                 avatarParts: avatarParts || null
               },
-              player2Seen: seenHistory || [],
-              status: 'playing'
+              status: 'equipment_selecting',
+              equipmentPhase: {
+                status: 'selecting',
+                expiresAt: Date.now() + 30000,
+                p1Ready: false,
+                p2Ready: false
+              },
+              player1Equipment: [],
+              player2Equipment: [],
+              activeEffects: {
+                p1: { frozenUntil: 0, fogUntil: 0, eloShielded: false, crystalMultiplier: 1, stolenCount: 0, reflectActive: false, lastStolenCard: null },
+                p2: { frozenUntil: 0, fogUntil: 0, eloShielded: false, crystalMultiplier: 1, stolenCount: 0, reflectActive: false, lastStolenCard: null }
+              }
             });
             return targetRoom.id;
           }
@@ -305,3 +405,18 @@ export const checkForRoomMerge = async (
   }
   return null;
 };
+
+/**
+ * Hàm gọi Cloud Function ghép trận với Bot (fallback sau 5s chờ)
+ */
+export const requestBotOpponent = async (subject = 'math', activeRoomId = null) => {
+  try {
+    const assignBotFn = httpsCallable(functions, 'assignBotOpponent');
+    const res = await assignBotFn({ subject, activeRoomId });
+    return res.data;
+  } catch (err) {
+    console.error("🚨 Lỗi khi gọi Cloud Function assignBotOpponent:", err);
+    throw err;
+  }
+};
+

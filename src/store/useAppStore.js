@@ -12,6 +12,11 @@ export const useAppStore = create((set) => ({
   soundEnabled: true,
   toggleSound: () => set((state) => ({ soundEnabled: !state.soundEnabled })),
 
+  // Sidebar State
+  isSidebarOpen: true,
+  toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
+  setSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
+
   // Auth State
   user: null,
   setUser: (user) => set({ user }),
@@ -58,7 +63,7 @@ export const useAppStore = create((set) => ({
     opponentInfo: null,
     matchResult: null,
     logs: [],
-    timeRemaining: 60
+    timeRemaining: 300
   },
 
   startMatching: (subject) => set({
@@ -70,11 +75,11 @@ export const useAppStore = create((set) => ({
       opponentInfo: null,
       matchResult: null,
       logs: [],
-      timeRemaining: 60
+      timeRemaining: 300
     }
   }),
 
-  startChallengeGame: (subject, timeLimit = 60) => set({
+  startChallengeGame: (subject, timeLimit = 300) => set({
     arenaState: {
       status: 'playing',
       subject,

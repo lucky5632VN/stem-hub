@@ -90,7 +90,7 @@ assert(
   "VIỆC 4d: client iframe handler chuyển sang gọi server trong online mode"
 );
 assert(
-  dauTruongSrc.includes('chemTemp,\n                chemHCl,\n                chemNaOH,\n                chemEvap: nextEvap'),
+  dauTruongSrc.replace(/\r/g, '').includes('chemTemp,\n                chemHCl,\n                chemNaOH,\n                chemEvap: nextEvap'),
   "VIỆC 4e: handleChemistryRealtimeTick gửi kèm dữ liệu thô lên server"
 );
 

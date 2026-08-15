@@ -103,22 +103,26 @@ export function calculateLaserPath(mirrors, sourcePos = { x: 45, y: 140 }, targe
       break;
     }
 
-    // Tính toán góc phản xạ vật lý (theta_physical) tại gương dựa trên tọa độ
+    // Tính toán góc phản xạ vật lý (theta_physical) tại gương
     const theta = nextObstacle.angle;
     let theta_physical = 0;
 
-    // Ánh xạ góc vật lý tương ứng với vị trí 3 gương
-    if (Math.abs(nextObstacle.x - 45) < 5 && Math.abs(nextObstacle.y - 50) < 5) {
-      // Gương A
-      theta_physical = theta + 90;
-    } else if (Math.abs(nextObstacle.x - 175) < 5 && Math.abs(nextObstacle.y - 50) < 5) {
-      // Gương B
-      theta_physical = theta - 45;
-    } else if (Math.abs(nextObstacle.x - 175) < 5 && Math.abs(nextObstacle.y - 140) < 5) {
-      // Gương C
-      theta_physical = theta - 90;
+    if (nextObstacle.offset !== undefined) {
+      theta_physical = theta + nextObstacle.offset;
     } else {
-      theta_physical = theta;
+      // Ánh xạ góc vật lý tương ứng với vị trí 3 gương (tương thích ngược)
+      if (Math.abs(nextObstacle.x - 45) < 5 && Math.abs(nextObstacle.y - 50) < 5) {
+        // Gương A
+        theta_physical = theta + 90;
+      } else if (Math.abs(nextObstacle.x - 175) < 5 && Math.abs(nextObstacle.y - 50) < 5) {
+        // Gương B
+        theta_physical = theta - 45;
+      } else if (Math.abs(nextObstacle.x - 175) < 5 && Math.abs(nextObstacle.y - 140) < 5) {
+        // Gương C
+        theta_physical = theta - 90;
+      } else {
+        theta_physical = theta;
+      }
     }
 
     // Chuyển sang Radian

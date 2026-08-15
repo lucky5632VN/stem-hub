@@ -1,6 +1,22 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+<!-- DYNAMIC BASE TAG INJECTED -->
+<script>
+  (function() {
+    var path = window.location.pathname;
+    if (!path.endsWith('/')) {
+      var lastPart = path.substring(path.lastIndexOf('/') + 1);
+      if (lastPart.indexOf('.') !== -1) {
+        path = path.substring(0, path.lastIndexOf('/') + 1);
+      } else {
+        path = path + '/';
+      }
+    }
+    document.write('<base href="' + path + '">');
+  })();
+</script>
+
 <meta charset="UTF-8">
 <title>Hấp thụ ở rễ</title>
     <style>

@@ -128,13 +128,13 @@ export default function SettingsDropdown({ onClose }) {
 
   return (
     <div 
-      className="absolute right-0 w-[340px] bg-white dark:bg-[#1f212e]/98 backdrop-blur-2xl border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl p-5 z-[999] animate-in fade-in slide-in-from-top-3 duration-200 text-slate-800 dark:text-zinc-300"
+      className="absolute right-0 w-[340px] bg-bg-secondary backdrop-blur-2xl border border-border-theme rounded-2xl shadow-2xl p-5 z-[999] animate-in fade-in slide-in-from-top-3 duration-200 text-text-primary"
       style={{ top: '68px' }}
       onClick={(e) => e.stopPropagation()}
     >
       {/* User Info Header */}
       {user && (
-        <div className="flex flex-col items-center border-b border-slate-200 dark:border-white/5 pb-4 mb-4 select-none">
+        <div className="flex flex-col items-center border-b border-border-theme pb-4 mb-4 select-none">
           {/* Avatar with selected frame */}
           <div 
             onClick={() => {
@@ -155,7 +155,7 @@ export default function SettingsDropdown({ onClose }) {
                   <span className="select-none">{personalization.avatarUrl}</span>
                 )
               ) : (
-                user.displayName ? user.displayName.charAt(0).toUpperCase() : <User className="w-8 h-8 text-slate-700 dark:text-zinc-300" />
+                user.displayName ? user.displayName.charAt(0).toUpperCase() : <User className="w-8 h-8 text-text-primary" />
               )}
               
               {/* Edit overlay */}
@@ -164,15 +164,15 @@ export default function SettingsDropdown({ onClose }) {
               </div>
               
               {/* Level badge */}
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-pink-500 border-2 border-white dark:border-[#1f212e] text-[10px] font-bold text-white flex items-center justify-center shadow-lg z-30">
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-accent-pink border-2 border-bg-secondary text-[10px] font-bold text-white flex items-center justify-center shadow-lg z-30">
                 {personalization.level}
               </div>
             </AvatarFrame>
           </div>
 
           <div className="text-center flex flex-col items-center">
-            <h4 className="text-slate-900 dark:text-white font-semibold text-base leading-snug">{user.displayName || 'Học viên'}</h4>
-            <span className="text-[10px] text-pink-500 dark:text-pink-450 font-bold px-2 py-0.5 bg-pink-500/10 rounded-full inline-block mt-1 border border-pink-500/10">
+            <h4 className="text-text-primary font-semibold text-base leading-snug">{user.displayName || 'Học viên'}</h4>
+            <span className="text-[10px] text-accent-pink font-bold px-2 py-0.5 bg-accent-pink/10 rounded-full inline-block mt-1 border border-accent-pink/20">
               {getTitleLabel(personalization.activeTitle)}
             </span>
             <button
@@ -181,7 +181,7 @@ export default function SettingsDropdown({ onClose }) {
                 router.push('/ho-so?tab=personalization&subtab=character');
                 onClose();
               }}
-              className="mt-2 text-[10px] font-bold text-pink-550 dark:text-pink-400 hover:text-pink-600 dark:hover:text-pink-300 transition-all flex items-center gap-1 bg-pink-500/5 hover:bg-pink-500/10 px-2.5 py-1 rounded-lg border border-pink-550/15 dark:border-pink-400/20 active:scale-95 shadow-sm"
+              className="mt-2 text-[10px] font-bold text-accent-pink hover:opacity-80 transition-all flex items-center gap-1 bg-accent-pink/5 px-2.5 py-1 rounded-lg border border-accent-pink/20 active:scale-95 shadow-sm"
             >
               🎨 Thiết kế Avatar Chibi
             </button>
@@ -189,13 +189,13 @@ export default function SettingsDropdown({ onClose }) {
 
           {/* EXP Progress bar */}
           <div className="w-full mt-3">
-            <div className="flex justify-between text-[10px] text-slate-500 dark:text-zinc-400 mb-1">
+            <div className="flex justify-between text-[10px] text-text-secondary mb-1">
               <span>Tiến trình EXP</span>
               <span>{personalization.exp} / {personalization.nextLevelExp}</span>
             </div>
-            <div className="w-full h-1.5 bg-slate-100 dark:bg-[#14151f] rounded-full overflow-hidden border border-slate-200 dark:border-white/5">
+            <div className="w-full h-1.5 bg-bg-tertiary rounded-full overflow-hidden border border-border-theme">
               <div 
-                className="h-full bg-gradient-to-r from-pink-500 to-rose-500 rounded-full transition-all duration-300"
+                className="h-full bg-gradient-to-r from-accent-pink to-accent-purple rounded-full transition-all duration-300"
                 style={{ width: `${(personalization.exp / personalization.nextLevelExp) * 100}%` }}
               />
             </div>
@@ -204,27 +204,27 @@ export default function SettingsDropdown({ onClose }) {
       )}
 
       {/* Settings Options */}
-      <div className="space-y-4 text-xs sm:text-sm text-slate-750 dark:text-zinc-300">
-        <h5 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-1.5 select-none">Cài đặt hệ thống</h5>
+      <div className="space-y-4 text-xs sm:text-sm text-text-primary">
+        <h5 className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-1.5 select-none">Cài đặt hệ thống</h5>
 
         {/* 1. Theme Switch */}
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2 text-slate-800 dark:text-zinc-200 font-medium whitespace-nowrap">
-            {theme === 'dark' ? <Moon className="w-4 h-4 text-pink-550 dark:text-pink-400" /> : <Sun className="w-4 h-4 text-amber-500 dark:text-amber-400" />}
+          <span className="flex items-center gap-2 text-text-primary font-medium whitespace-nowrap">
+            {theme === 'dark' ? <Moon className="w-4 h-4 text-accent-pink" /> : <Sun className="w-4 h-4 text-warning" />}
             Chủ đề sáng/tối
           </span>
-          <div className="flex bg-slate-100 dark:bg-[#14151f] p-0.5 rounded-lg border border-slate-200 dark:border-white/5 select-none">
+          <div className="flex bg-bg-tertiary p-0.5 rounded-lg border border-border-theme select-none">
             <button 
               onMouseEnter={playSound.hover}
               onClick={() => handleThemeChange('light')}
-              className={`p-1 px-2.5 rounded-md transition-all text-xs font-semibold ${theme === 'light' ? 'bg-pink-500 text-white shadow-md' : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'}`}
+              className={`p-1 px-2.5 rounded-md transition-all text-xs font-semibold ${theme === 'light' ? 'bg-accent-pink text-white shadow-md' : 'text-text-secondary hover:text-text-primary'}`}
             >
               Sáng
             </button>
             <button 
               onMouseEnter={playSound.hover}
               onClick={() => handleThemeChange('dark')}
-              className={`p-1 px-2.5 rounded-md transition-all text-xs font-semibold ${theme === 'dark' ? 'bg-pink-500 text-white shadow-md' : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'}`}
+              className={`p-1 px-2.5 rounded-md transition-all text-xs font-semibold ${theme === 'dark' ? 'bg-accent-pink text-white shadow-md' : 'text-text-secondary hover:text-text-primary'}`}
             >
               Tối
             </button>
@@ -233,14 +233,14 @@ export default function SettingsDropdown({ onClose }) {
 
         {/* 2. Sound FX Toggle */}
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2 text-slate-800 dark:text-zinc-200 font-medium whitespace-nowrap">
-            {soundEnabled ? <Volume2 className="w-4 h-4 text-pink-550 dark:text-pink-400" /> : <VolumeX className="w-4 h-4 text-slate-400 dark:text-zinc-500" />}
+          <span className="flex items-center gap-2 text-text-primary font-medium whitespace-nowrap">
+            {soundEnabled ? <Volume2 className="w-4 h-4 text-accent-pink" /> : <VolumeX className="w-4 h-4 text-text-secondary" />}
             Âm thanh hiệu ứng
           </span>
           <button 
             onMouseEnter={playSound.hover}
             onClick={handleSoundToggle}
-            className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 focus:outline-none ${soundEnabled ? 'bg-pink-500' : 'bg-zinc-700'}`}
+            className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 focus:outline-none ${soundEnabled ? 'bg-accent-pink' : 'bg-bg-tertiary border border-border-theme'}`}
           >
             <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${soundEnabled ? 'translate-x-4' : 'translate-x-0'}`} />
           </button>
@@ -248,11 +248,11 @@ export default function SettingsDropdown({ onClose }) {
 
         {/* 3. Custom Cursor Select */}
         <div className="space-y-1.5">
-          <span className="flex items-center gap-2 text-slate-800 dark:text-zinc-200 font-medium whitespace-nowrap">
-            <MousePointer className="w-4 h-4 text-pink-550 dark:text-pink-400" />
+          <span className="flex items-center gap-2 text-text-primary font-medium whitespace-nowrap">
+            <MousePointer className="w-4 h-4 text-accent-pink" />
             Con trỏ chuột tùy biến
           </span>
-          <div className="grid grid-cols-3 gap-1 bg-slate-100 dark:bg-[#14151f] p-1 rounded-xl border border-slate-200 dark:border-white/5 select-none">
+          <div className="grid grid-cols-3 gap-1 bg-bg-tertiary p-1 rounded-xl border border-border-theme select-none">
             {[
               { id: 'default', label: 'Thường' },
               { id: 'neon', label: 'Neon' },
@@ -264,8 +264,8 @@ export default function SettingsDropdown({ onClose }) {
                 onClick={() => handleCursorChange(cursor.id)}
                 className={`py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
                   cursorType === cursor.id 
-                    ? 'bg-pink-500 text-white shadow-md' 
-                    : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/5'
+                    ? 'bg-accent-pink text-white shadow-md' 
+                    : 'text-text-secondary hover:text-text-primary'
                 }`}
               >
                 {cursor.label}
@@ -275,15 +275,15 @@ export default function SettingsDropdown({ onClose }) {
         </div>
 
         {/* 4. Language Switch */}
-        <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 pb-4">
-          <span className="flex items-center gap-2 text-slate-800 dark:text-zinc-200 font-medium whitespace-nowrap">
-            <Sparkles className="w-4 h-4 text-pink-550 dark:text-pink-400" />
+        <div className="flex items-center justify-between border-b border-border-theme pb-4">
+          <span className="flex items-center gap-2 text-text-primary font-medium whitespace-nowrap">
+            <Sparkles className="w-4 h-4 text-accent-pink" />
             Ngôn ngữ
           </span>
           <button 
             onMouseEnter={playSound.hover}
             onClick={handleLanguageToggle}
-            className="text-xs font-bold px-3 py-1 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-slate-700 dark:text-white hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/10 transition-all select-none"
+            className="text-xs font-bold px-3 py-1 bg-bg-tertiary border border-border-theme rounded-lg text-text-primary hover:opacity-80 transition-all select-none"
           >
             {language === 'vi' ? 'Tiếng Việt' : 'English'}
           </button>
@@ -300,7 +300,7 @@ export default function SettingsDropdown({ onClose }) {
               router.push('/admin');
               onClose();
             }}
-            className="w-full py-2.5 bg-gradient-to-r from-pink-550/20 to-purple-600/20 hover:from-pink-500 hover:to-purple-600 text-pink-550 dark:text-pink-400 hover:text-white border border-pink-550/30 dark:border-pink-400/25 hover:border-pink-500 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg active:scale-98 animate-pulse hover:animate-none"
+            className="w-full py-2.5 bg-gradient-to-r from-accent-pink/20 to-accent-purple/20 hover:from-accent-pink hover:to-accent-purple text-accent-pink hover:text-white border border-accent-pink/30 hover:border-accent-pink text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg active:scale-98 animate-pulse hover:animate-none"
           >
             <Shield className="w-3.5 h-3.5" /> Vào Trang Quản Trị
           </button>
@@ -308,15 +308,15 @@ export default function SettingsDropdown({ onClose }) {
         <button 
           onMouseEnter={playSound.hover}
           onClick={handleProfileClick}
-          className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg active:scale-98"
+          className="w-full py-2.5 bg-bg-tertiary hover:opacity-90 border border-border-theme text-text-primary text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg active:scale-98"
         >
-          <Trophy className="w-3.5 h-3.5 text-amber-400" /> Xem Hồ sơ Khoa học
+          <Trophy className="w-3.5 h-3.5 text-warning" /> Xem Hồ sơ Khoa học
         </button>
         
         <button 
           onMouseEnter={playSound.hover}
           onClick={handleLogout}
-          className="w-full py-2.5 bg-rose-500/10 hover:bg-rose-500 hover:text-white border border-rose-500/20 text-rose-450 dark:text-rose-400 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 active:scale-98"
+          className="w-full py-2.5 bg-danger/10 hover:bg-danger hover:text-white border border-danger/20 text-danger text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 active:scale-98"
         >
           <LogOut className="w-3.5 h-3.5" /> Đăng xuất tài khoản
         </button>

@@ -1,4 +1,51 @@
 import { EXAM_DATABASE } from '@/data/exams';
+import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+
+const fetchFirestoreQuestions = async (subject) => {
+  try {
+    const qRef = collection(db, 'questions');
+    const q = query(qRef, where('subject', '==', subject), where('status', '==', 'public'));
+    const snap = await getDocs(q);
+    const result = [];
+    snap.forEach(docSnap => {
+      const data = docSnap.data();
+      if (data && data.text) {
+        if (data.type === 'tf') {
+          const choices = data.statements || data.choices || [];
+          result.push({
+            type: 'tf',
+            text: data.text,
+            choices: Array.isArray(choices) ? choices : [],
+            correct: Array.isArray(data.correct) ? data.correct : [true, true, true, true],
+            note: data.explanation || ''
+          });
+        } else if (data.type === 'sa') {
+          result.push({
+            type: 'sa',
+            text: data.text,
+            choices: [data.correctAnswer || data.choices?.[0] || ''],
+            correct: 0,
+            correctAnswer: data.correctAnswer || '',
+            note: data.explanation || ''
+          });
+        } else if (Array.isArray(data.choices) && data.choices.length >= 2) {
+          result.push({
+            type: 'mcq',
+            text: data.text,
+            choices: data.choices,
+            correct: data.correct !== undefined ? Number(data.correct) : 0,
+            note: data.explanation || ''
+          });
+        }
+      }
+    });
+    return result;
+  } catch (e) {
+    console.warn(`[Firestore Question Bank] Chưa kết nối được câu hỏi môn ${subject}, dùng fallback:`, e);
+    return [];
+  }
+};
 
 // === DỮ LIỆU BÀI TẬP SINH HỌC ARENA ===
 export const BIO_BANKS = {
@@ -345,3 +392,429 @@ export const generateChemistryPool = (seenHistory = [], count = 5) => {
   }
   return shuffleArray(available).slice(0, count);
 };
+
+// === FALLBACK DATA FOR STEM ARENA ===
+export const FALLBACK_PHYSICS_MCQS = [
+  {
+    type: 'mcq',
+    text: 'Một vật dao động điều hòa với phương trình $x = A\\cos(\\omega t + \\varphi)$. Đại lượng $\\omega$ được gọi là:',
+    choices: ['Tần số góc của dao động', 'Chu kỳ của dao động', 'Pha ban đầu của dao động', 'Li độ của dao động'],
+    correct: 0,
+    note: 'Trong phương trình dao động điều hòa, omega là tần số góc.'
+  },
+  {
+    type: 'mcq',
+    text: 'Cơ năng của một con lắc lò xo dao động điều hòa tỉ lệ thuận với:',
+    choices: ['Li độ dao động', 'Tần số dao động', 'Bình phương biên độ dao động', 'Biên độ dao động'],
+    correct: 2,
+    note: 'Cơ năng W = 0.5 * k * A^2, do đó tỉ lệ thuận với bình phương biên độ.'
+  },
+  {
+    type: 'mcq',
+    text: 'Hiện tượng cộng hưởng xảy ra khi:',
+    choices: ['Tần số của lực cưỡng bức bằng tần số dao động riêng', 'Chu kỳ lực cưỡng bức lớn hơn chu kỳ riêng', 'Biên độ của lực cưỡng bức bằng biên độ riêng', 'Tần số lực cưỡng bức rất lớn'],
+    correct: 0,
+    note: 'Cộng hưởng xảy ra khi tần số lực cưỡng bức bằng tần số dao động riêng của hệ.'
+  },
+  {
+    type: 'mcq',
+    text: 'Một sóng cơ truyền trong một môi trường với tốc độ $v$ và tần số $f$. Bước sóng $\\lambda$ được tính bằng:',
+    choices: ['$\\lambda = v.f$', '$\\lambda = v/f$', '$\\lambda = f/v$', '$\\lambda = 2\\pi v/f$'],
+    correct: 1,
+    note: 'Công thức bước sóng: lambda = v / f.'
+  },
+  {
+    type: 'mcq',
+    text: 'Cường độ âm chuẩn là $I_0 = 10^{-12} \\, \\text{W/m}^2$. Tại một điểm có cường độ âm $I = 10^{-10} \\, \\text{W/m}^2$, mức cường độ âm tại đó là:',
+    choices: ['2 dB', '10 dB', '20 dB', '100 dB'],
+    correct: 2,
+    note: 'L = 10 log(I / I0) = 10 log(10^-10 / 10^-12) = 20 dB.'
+  },
+  {
+    type: 'mcq',
+    text: 'Trong sơ đồ khối của một máy phát thanh vô tuyến đơn giản, không có bộ phận nào sau đây?',
+    choices: ['Mạch biến điệu', 'Mạch khuếch đại', 'Mạch tách sóng', 'Mạch phát sóng'],
+    correct: 2,
+    note: 'Máy phát thanh không có mạch tách sóng (mạch tách sóng ở máy thu thanh).'
+  },
+  {
+    type: 'mcq',
+    text: 'Chiết suất của nước đối với ánh sáng đơn sắc màu lam, đỏ, lục, tím tăng dần theo thứ tự:',
+    choices: ['Đỏ, lục, lam, tím', 'Tím, lam, lục, đỏ', 'Đỏ, lam, lục, tím', 'Lục, đỏ, lam, tím'],
+    correct: 0,
+    note: 'Chiết suất tăng dần từ đỏ đến tím: n_đỏ < n_lục < n_lam < n_tím.'
+  },
+  {
+    type: 'mcq',
+    text: 'Tia hồng ngoại có tần số như thế nào so với ánh sáng nhìn thấy?',
+    choices: ['Nhỏ hơn tần số của ánh sáng đỏ', 'Lớn hơn tần số của ánh sáng tím', 'Lớn hơn tần số ánh sáng đỏ', 'Nhỏ hơn tần số ánh sáng tím'],
+    correct: 0,
+    note: 'Tia hồng ngoại có bước sóng lớn hơn ánh sáng đỏ nên tần số nhỏ hơn ánh sáng đỏ.'
+  },
+  {
+    type: 'mcq',
+    text: 'Giới hạn quang điện của một kim loại là $\\lambda_0 = 0.30 \\, \\mu\\text{m}$. Công thoát của electron khỏi kim loại này là (lấy $h = 6.625 \\cdot 10^{-34} \\, \\text{J.s}, c = 3 \\cdot 10^8 \\, \\text{m/s}$):',
+    choices: ['$\\approx 6.625 \\cdot 10^{-19} \\, \\text{J}$', '$\\approx 4.14 \\, \\text{eV}$', '$\\approx 6.625 \\cdot 10^{-20} \\, \\text{J}$', '$\\approx 1.24 \\, \\text{eV}$'],
+    correct: 1,
+    note: 'A = hc / lambda_0 = 6.625e-34 * 3e8 / 0.3e-6 = 6.625e-19 J ≈ 4.14 eV.'
+  },
+  {
+    type: 'mcq',
+    text: 'Theo thuyết lượng tử ánh sáng, phát biểu nào sau đây sai?',
+    choices: ['Năng lượng của mọi photon đều bằng nhau', 'Photon chỉ tồn tại ở trạng thái chuyển động', 'Trong chân không, photon bay với tốc độ c = 3.10^8 m/s', 'Ánh sáng được tạo thành bởi các hạt gọi là photon'],
+    correct: 0,
+    note: 'Năng lượng photon E = hf phụ thuộc vào tần số của ánh sáng đơn sắc, nên không phải mọi photon đều bằng nhau.'
+  }
+];
+
+export const FALLBACK_MATH_MCQS = [
+  {
+    type: 'mcq',
+    text: 'Tìm đạo hàm của hàm số $y = \\ln(x^2 + 1)$.',
+    choices: [
+      '$y\' = \\frac{2x}{x^2 + 1}$',
+      '$y\' = \\frac{1}{x^2 + 1}$',
+      '$y\' = \\frac{x}{x^2 + 1}$',
+      '$y\' = 2x(x^2 + 1)$'
+    ],
+    correct: 0,
+    note: 'Ta có (ln(u))\' = u\'/u = 2x/(x^2 + 1).'
+  },
+  {
+    type: 'mcq',
+    text: 'Cho hàm số $y = x^3 - 3x^2 + 2$. Điểm cực đại của đồ thị hàm số là:',
+    choices: [
+      '$(0; 2)$',
+      '$(2; -2)$',
+      '$(1; 0)$',
+      '$(0; 0)$'
+    ],
+    correct: 0,
+    note: 'Đạo hàm y\' = 3x^2 - 6x = 0 => x = 0 (cực đại, y = 2) hoặc x = 2 (cực tiểu, y = -2).'
+  },
+  {
+    type: 'mcq',
+    text: 'Tính tích phân $I = \\int_0^1 e^x \\, dx$.',
+    choices: [
+      '$e - 1$',
+      '$e$',
+      '$1$',
+      '$e + 1$'
+    ],
+    correct: 0,
+    note: 'I = [e^x] từ 0 đến 1 = e^1 - e^0 = e - 1.'
+  },
+  {
+    type: 'mcq',
+    text: 'Trong không gian Oxyz, cho mặt phẳng $(P): 2x - y + 3z - 4 = 0$. Một vectơ pháp tuyến của $(P)$ là:',
+    choices: [
+      '$\\vec{n} = (2; -1; 3)$',
+      '$\\vec{n} = (2; 1; 3)$',
+      '$\\vec{n} = (2; -1; -4)$',
+      '$\\vec{n} = (2; 1; -4)$'
+    ],
+    correct: 0,
+    note: 'Vectơ pháp tuyến của mặt phẳng Ax + By + Cz + D = 0 là n = (A; B; C) = (2; -1; 3).'
+  },
+  {
+    type: 'mcq',
+    text: 'Tìm tiệm cận ngang của đồ thị hàm số $y = \\frac{2x - 1}{x + 3}$.',
+    choices: [
+      '$y = 2$',
+      '$y = -3$',
+      '$x = -3$',
+      '$y = -\\frac{1}{3}$'
+    ],
+    correct: 0,
+    note: 'Tiệm cận ngang của đồ thị hàm số y = (ax+b)/(cx+d) là y = a/c = 2.'
+  },
+  {
+    type: 'mcq',
+    text: 'Tìm nguyên hàm của hàm số $f(x) = \\cos x + x$.',
+    choices: [
+      '$F(x) = \\sin x + \\frac{1}{2}x^2 + C$',
+      '$F(x) = -\\sin x + \\frac{1}{2}x^2 + C$',
+      '$F(x) = \\sin x + x^2 + C$',
+      '$F(x) = -\\sin x + x^2 + C$'
+    ],
+    correct: 0,
+    note: 'Ta có ∫(cos x + x)dx = sin x + x^2 / 2 + C.'
+  },
+  {
+    type: 'mcq',
+    text: 'Tính giá trị cực đại $y_{CĐ}$ của hàm số $y = -x^2 + 4x + 1$.',
+    choices: [
+      '$5$',
+      '$2$',
+      '$1$',
+      '$3$'
+    ],
+    correct: 0,
+    note: 'Hàm số đạt giá trị cực đại tại đỉnh x = -b/(2a) = 2. Khi đó y_CĐ = y(2) = 5.'
+  },
+  {
+    type: 'mcq',
+    text: 'Cho cấp số cộng $(u_n)$ có $u_1 = 3$, công sai $d = 2$. Tính $u_5$.',
+    choices: [
+      '$11$',
+      '$9$',
+      '$13$',
+      '$15$'
+    ],
+    correct: 0,
+    note: 'Ta có u_5 = u_1 + 4d = 3 + 4 * 2 = 11.'
+  },
+  {
+    type: 'mcq',
+    text: 'Tìm tập xác định của hàm số $y = (x - 2)^{-3}$.',
+    choices: [
+      '$\\mathbb{R} \\setminus \\{2\\}$',
+      '$(2; +\\infty)$',
+      '$\\mathbb{R}$',
+      '$[2; +\\infty)$'
+    ],
+    correct: 0,
+    note: 'Vì số mũ -3 là nguyên âm nên hàm số xác định khi x - 2 ≠ 0 <=> x ≠ 2. Tập xác định: D = ℝ \\ {2}.'
+  },
+  {
+    type: 'mcq',
+    text: 'Với a, b là các số thực dương tùy ý và $a \\neq 1$, giá trị của $\\log_a(a^3 b)$ bằng:',
+    choices: [
+      '$3 + \\log_a b$',
+      '$3 \\log_a b$',
+      '$3 - \\log_a b$',
+      '$\\frac{3}{\\log_a b}$'
+    ],
+    correct: 0,
+    note: 'log_a(a^3 * b) = log_a(a^3) + log_a(b) = 3 + log_a(b).'
+  }
+];
+
+export const FALLBACK_BIO_QUESTIONS = [
+  {
+    type: 'mcq',
+    text: 'Quy luật phân ly độc lập của Mendel áp dụng khi?',
+    choices: ['Các gen nằm trên NST khác nhau','Các gen liên kết cùng NST','Chỉ khi gen trội trội hoàn toàn','Gen trên NST giới tính'],
+    correct: 0,
+    note: 'Mendelian independent assortment: các gen nằm trên cặp NST tương đồng khác nhau'
+  },
+  {
+    type: 'mcq',
+    text: 'Ở đời F2 của phép lai đơn tính Aa × Aa, kiểu hình lặn chiếm tỉ lệ?',
+    choices: ['1/4','1/2','3/4','0'],
+    correct: 0,
+    note: 'F2: 1AA:2Aa:1aa → aa = 1/4 = 25%'
+  },
+  {
+    type: 'mcq',
+    text: 'Trong nguyên phân, NST kép xếp hàng ở mặt phẳng xích đạo vào kỳ nào?',
+    choices: ['Kỳ giữa','Kỳ đầu','Kỳ sau','Kỳ cuối'],
+    correct: 0,
+    note: 'Kỳ giữa (Metaphase): NST kép co ngắn cực đại, xếp một hàng ở mặt phẳng xích đạo'
+  },
+  {
+    type: 'tf',
+    context: 'Khi nói về cơ chế di truyền ở sinh vật nhân thực, các phát biểu sau đây đúng hay sai?',
+    statements: [
+      'Quá trình phiên mã luôn diễn ra đồng thời với dịch mã.',
+      'Enzyme RNA polymerase trượt trên mạch khuôn theo chiều từ 3\' đến 5\'.',
+      'Sự nhân đôi DNA diễn ra theo nguyên tắc bổ sung và bán bảo tồn.',
+      'Tất cả các codon đều mã hóa cho axit amin.'
+    ],
+    correct: [false, true, true, false],
+    note: 'Phiên mã dịch mã độc lập ở nhân thực. RNA polymerase đi 3\'->5\'. Codon kết thúc không mã hóa axit amin.'
+  }
+];
+
+// === HÀM BÓC TÁCH CÂU HỎI TỪ EXAM_DATABASE (HỖ TRỢ CẢ 3 DẠNG: MCQ, TF, SA) ===
+const parseExamQuestionsForSubject = (subject) => {
+  const result = [];
+  try {
+    if (typeof EXAM_DATABASE !== 'undefined' && Array.isArray(EXAM_DATABASE)) {
+      EXAM_DATABASE.forEach(exam => {
+        if (exam.subject === subject && Array.isArray(exam.questions)) {
+          const questions = exam.questions;
+          let i = 0;
+
+          const isOptionTrueFalse = (opts) => {
+            if (!Array.isArray(opts) || opts.length !== 2) return false;
+            const o0 = String(opts[0]).toLowerCase().trim();
+            const o1 = String(opts[1]).toLowerCase().trim();
+            const isTrueWord = (s) => s.includes('đúng') || s === 'đ' || s === 'true' || s === 't';
+            const isFalseWord = (s) => s.includes('sai') || s === 's' || s === 'false' || s === 'f';
+            return (isTrueWord(o0) && isFalseWord(o1)) || (isFalseWord(o0) && isTrueWord(o1));
+          };
+
+          const aRegex = /(?:^|\s|<p>|<strong>|<b>)(?:a|A)(?:\)|:|\.|\-)\s+/;
+          const bRegex = /(?:^|\s|<p>|<strong>|<b>)(?:b|B)(?:\)|:|\.|\-)\s+/;
+          const cRegex = /(?:^|\s|<p>|<strong>|<b>)(?:c|C)(?:\)|:|\.|\-)\s+/;
+          const dRegex = /(?:^|\s|<p>|<strong>|<b>)(?:d|D)(?:\)|:|\.|\-)\s+/;
+
+          while (i < questions.length) {
+            const q = questions[i];
+
+            // 1. Phân tích chuỗi 4 nhận định a, b, c, d liên tiếp dạng Đúng/Sai
+            if (
+              i + 3 < questions.length &&
+              isOptionTrueFalse(q.options) &&
+              aRegex.test(q.text) &&
+              isOptionTrueFalse(questions[i+1].options) &&
+              bRegex.test(questions[i+1].text) &&
+              isOptionTrueFalse(questions[i+2].options) &&
+              cRegex.test(questions[i+2].text) &&
+              isOptionTrueFalse(questions[i+3].options) &&
+              dRegex.test(questions[i+3].text)
+            ) {
+              const qA = questions[i];
+              const qB = questions[i+1];
+              const qC = questions[i+2];
+              const qD = questions[i+3];
+
+              const matchA = qA.text.match(aRegex);
+              let context = qA.text;
+              let aText = qA.text;
+              if (matchA) {
+                const idxA = qA.text.indexOf(matchA[0]);
+                context = qA.text.substring(0, idxA).trim();
+                aText = qA.text.substring(idxA + matchA[0].length).trim();
+              }
+
+              const matchB = qB.text.match(bRegex);
+              const bText = matchB ? qB.text.substring(qB.text.indexOf(matchB[0]) + matchB[0].length).trim() : qB.text;
+
+              const matchC = qC.text.match(cRegex);
+              const cText = matchC ? qC.text.substring(qC.text.indexOf(matchC[0]) + matchC[0].length).trim() : qC.text;
+
+              const matchD = qD.text.match(dRegex);
+              const dText = matchD ? qD.text.substring(qD.text.indexOf(matchD[0]) + matchD[0].length).trim() : qD.text;
+
+              const getCorrectValue = (qObj) => {
+                const correctIdx = qObj.correctAnswer;
+                const correctText = String(qObj.options[correctIdx]).toLowerCase().trim();
+                return correctText.includes('đúng') || correctText === 'đ' || correctText === 'true';
+              };
+
+              result.push({
+                type: 'tf',
+                context: context || 'Xác định Đúng/Sai cho các nhận định sau:',
+                statements: [aText || 'Nhận định A', bText || 'Nhận định B', cText || 'Nhận định C', dText || 'Nhận định D'],
+                correct: [getCorrectValue(qA), getCorrectValue(qB), getCorrectValue(qC), getCorrectValue(qD)],
+                note: [
+                  qA.explanation ? `a) ${qA.explanation}` : '',
+                  qB.explanation ? `b) ${qB.explanation}` : '',
+                  qC.explanation ? `c) ${qC.explanation}` : '',
+                  qD.explanation ? `d) ${qD.explanation}` : ''
+                ].filter(Boolean).join('<br/>')
+              });
+
+              i += 4;
+            } else {
+              // 2. Dạng Trả lời ngắn / Con số
+              if (q.type === 'short_answer' || q.type === 'sa' || q.correctShortAnswer !== undefined) {
+                result.push({
+                  type: 'sa',
+                  text: q.text,
+                  correctAnswer: q.correctShortAnswer ?? q.correctAnswer ?? q.correct ?? '',
+                  note: q.explanation || ''
+                });
+              }
+              // 3. Dạng Đúng/Sai đơn lẻ (có cấu trúc statements)
+              else if (q.type === 'true_false' || q.type === 'tf') {
+                result.push({
+                  type: 'tf',
+                  context: q.context || q.text,
+                  statements: (q.statements || []).map(s => typeof s === 'string' ? s : (s.text || '')),
+                  correct: (q.statements || []).map(s => typeof s === 'string' ? false : (s.correctValue ?? false)),
+                  note: q.explanation || ''
+                });
+              }
+              // 4. Dạng Trắc nghiệm 4 lựa chọn (MCQ)
+              else if ((q.type === 'mcq' || !q.type) && Array.isArray(q.options) && q.options.length >= 2) {
+                result.push({
+                  type: 'mcq',
+                  text: q.text,
+                  choices: q.options,
+                  correct: q.correctAnswer !== undefined ? Number(q.correctAnswer) : 0,
+                  note: q.explanation || ''
+                });
+              }
+              i += 1;
+            }
+          }
+        }
+      });
+    }
+  } catch (e) {
+    console.warn(`Lỗi tải câu hỏi môn ${subject} từ EXAM_DATABASE:`, e);
+  }
+  return result;
+};
+
+// === MULTIPLAYER INFINITE MATCH POOLS ===
+
+export const generateMathMatchPool = async (seenHistory = []) => {
+  let pool = await fetchFirestoreQuestions('math');
+  const examPool = parseExamQuestionsForSubject('math');
+  pool = [...pool, ...examPool];
+
+  if (pool.length === 0) {
+    pool = [...FALLBACK_MATH_MCQS];
+  }
+
+  let available = pool.filter(q => !seenHistory.includes(q.text || q.context));
+  if (available.length === 0) {
+    available = pool;
+  }
+
+  const shuffled = shuffleArray(available);
+  return shuffled.map((q, idx) => ({ ...q, id: `math_q_${idx}`, idx }));
+};
+
+export const generatePhysicsMatchPool = async (seenHistory = []) => {
+  let pool = await fetchFirestoreQuestions('physics');
+  const examPool = parseExamQuestionsForSubject('physics');
+  pool = [...pool, ...examPool];
+
+  if (pool.length === 0) {
+    pool = [...FALLBACK_PHYSICS_MCQS];
+  }
+
+  let available = pool.filter(q => !seenHistory.includes(q.text || q.context));
+  if (available.length === 0) {
+    available = pool;
+  }
+
+  const shuffled = shuffleArray(available);
+  return shuffled.map((q, idx) => ({ ...q, id: `phys_q_${idx}`, idx }));
+};
+
+export const generateBiologyMatchPool = async (seenHistory = []) => {
+  let pool = await fetchFirestoreQuestions('biology');
+  const examPool = parseExamQuestionsForSubject('biology');
+  pool = [...pool, ...examPool];
+
+  Object.values(BIO_BANKS).forEach(bank => {
+    bank.questions.forEach(q => {
+      pool.push({
+        type: 'mcq',
+        text: q.text,
+        choices: q.choices,
+        correct: q.correct,
+        note: q.note || ''
+      });
+    });
+  });
+
+  if (pool.length === 0) {
+    pool = [...FALLBACK_BIO_QUESTIONS];
+  }
+
+  let available = pool.filter(q => !seenHistory.includes(q.text || q.context));
+  if (available.length === 0) {
+    available = pool;
+  }
+
+  const shuffled = shuffleArray(available);
+  return shuffled.map((q, idx) => ({ ...q, id: `bio_q_${idx}`, idx }));
+};
+
