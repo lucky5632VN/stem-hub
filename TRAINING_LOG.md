@@ -12,7 +12,7 @@
 | **Lab Hóa (AI 1)** | Risk Assessment Classifier | Dense Neural Network / Softmax Classifier | `src/ai-training/datasets/chem-risk/risk-dataset.json` | **100.0% Accuracy** (Test Set) | ✅ **Đã hoàn thành (Phase 3)** |
 | **Lab Vật lý** | Lab Error Diagnostic Classifier | k-Nearest Neighbors (kNN Classifier) | `src/ai-training/datasets/physics-error/attempts.json` | **100.0% Accuracy** (Optics Error Diagnostic) | ✅ **Đã hoàn thành (Phase 4)** |
 | **Lab Toán** | Adaptive IRT Difficulty Predictor | Item Response Theory (1PL Rasch IRT Model) | `src/ai-training/datasets/math-irt/irt-samples.json` | **90.0% Binary Acc** (Log-Loss: 0.4557) | ✅ **Đã hoàn thành (Phase 5)** |
-| **Lab Sinh** | Multi-gene Probabilistic Reasoner | Bayesian Conditional Probability Tables (CPT) | Mendel Multi-locus Genetics Rules | 100% Deterministic Bayes Verification | *Đang chờ (Phase 6)* |
+| **Lab Sinh** | Multi-gene Probabilistic Reasoner | Bayesian Conditional Probability Tables (CPT) | Mendel Multi-locus Genetics Rules | **100% Bayes Verification** (10/10 Test Cases) | ✅ **Đã hoàn thành (Phase 6)** |
 | **Javit Assistant**| Text Intent Classifier | Naive Bayes Text Classification | `src/ai-training/datasets/intent/intent-samples.json` | Target Accuracy $\ge 90\%$ | *Đang chờ (Phase 7)* |
 
 ---
@@ -47,3 +47,9 @@
 - **Tập Dữ Liệu**: `src/ai-training/datasets/math-irt/irt-samples.json`.
 - **Mô hình IRT**: `src/ai-training/scripts/math-irt_train.js` (Rasch 1PL Logistic Model $P(\text{correct}) = \frac{1}{1 + e^{-1.7(\theta - b)}}$).
 - **Tích hợp Run-time**: `src/lib/mathAdaptiveEngine.js` (`selectAdaptiveMathQuestion`) lựa chọn độ khó thích ứng nhằm duy trì vùng học tập tối ưu $P(\text{correct}) \in [60\%, 75\%]$.
+
+#### 🟢 Phase 6: Multi-gene Bayesian Probabilistic Reasoner (Lab Sinh)
+- **Ngày hoàn thành**: 31/08/2026
+- **Nguyên tắc bảo tồn**: Giữ nguyên 100% định luật cân bằng Hardy-Weinberg 1 gen ($p^2 AA + 2pq Aa + q^2 aa = 1$).
+- **Mô hình Mạng Bayes**: `src/lib/geneticsBayes.js` (Tính bảng xác suất có điều kiện CPT cho các phép lai đa gen $AaBbDd \times AaBbDd$).
+- **Kiểm thử Kiểm định**: `src/ai-training/scripts/test-bayes-genetics.js` (Vượt qua 10/10 test cases, đạt độ chính xác 100%).
