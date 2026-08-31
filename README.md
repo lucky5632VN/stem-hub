@@ -47,14 +47,17 @@ npm run build
 
 ---
 
-## 📌 Ghi Chú Quan Trọng Dành Cho Ban Giám Khảo
+---
 
-1. **Bảo mật và Tự Động Đồng Bộ**:
-   - Toàn bộ thông tin Firebase Client đã được cấu hình dạng bảo mật Client-side.
-   - Cơ sở dữ liệu và Cơ chế xác thực chạy trực tiếp trên Cloud Firestore / Firebase Auth.
-2. **Không Cần Triển Khai Cloud Functions**:
-   - Dự án được tích hợp cơ chế tự động chuyển đổi thông minh (**Client-Side Callable Engine** tại `src/lib/clientFunctions.js`).
-   - Khi chạy ở môi trường ngoài, hệ thống sẽ tự động điều phối toàn bộ nghiệp vụ (tính toán ELO, kết hợp trận đấu PvP, vòng quay Gacha, điểm danh 30 ngày) chạy trực tiếp trên trình duyệt Client mà không phụ thuộc vào Firebase Cloud Functions.
-3. **Danh Sách Tài Khoản Khảo Sát**:
-   - Vui lòng tham khảo file đính kèm `Danh_sach_20_tai_khoan_test.docx` để có danh sách các tài khoản học sinh và giáo viên đã được tạo sẵn để trải nghiệm các tính năng kết bạn, đấu trường PvP và quản lý lớp học.
-"# vn-stem-hub" 
+## 🤖 Hệ Thống 6 Mô Hình AI Tự Huấn Luyện (Self-Trained AI Registry) & Minh Bạch AI
+
+Dự án STEM HUB tích hợp **6 Mô hình AI Tự Huấn Luyện 100% Cục bộ (Client-Side)** tuân thủ khắt khe các tiêu chuẩn minh bạch của Cuộc thi AI Cấp Quốc gia:
+1. **ChemLab Risk Classifier**: Dense Softmax NN (1000 Epochs GD) + Circuit Breaker (Accuracy 95.0%, 0 False Negatives).
+2. **Physics Multi-Label Diagnostic kNN**: kNN Z-Score StandardScaler chẩn đoán 3 loại lỗi thao tác 3D (80% Multi-error Detection).
+3. **Javit Text Intent Classifier**: Multinomial Naive Bayes + Text Normalizer teencode (Accuracy 83.33% trên tập unseen).
+4. **Math Adaptive Difficulty IRT Engine**: Mô hình 1PL Rasch IRT chọn câu hỏi vừa tầm năng lực ELO học sinh (P = 60%-75%).
+5. **Multi-Gene Genetics Bayesian Reasoner**: Suy luận xác suất di truyền đa gen theo quy luật Mendel (100% verification).
+6. **Multilingual TF-IDF Vector RAG Service**: Bộ trích xuất Ma trận TF-IDF (4,862 N-Gram tokens) & Cosine Similarity tìm kiếm tri thức bài giảng STEM.
+
+*Ghi chú: Giám khảo có thể bấm nút **"Minh bạch AI"** trên thanh Header ứng dụng hoặc mở file `TRAINING_LOG.md` & `STEM_HUB_WEB_ARCHITECTURE_AI_DOCUMENTATION.md` để xem chi tiết nhật ký huấn luyện và mã nguồn.*
+
