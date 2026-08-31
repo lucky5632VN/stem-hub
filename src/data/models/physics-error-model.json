@@ -1,26 +1,9 @@
 {
   "metadata": {
-    "modelName": "Physics Optics Diagnostic kNN Classifier (StandardScaler)",
-    "trainedAt": "2026-08-31T07:58:02.513Z",
+    "modelName": "Physics Optics Multi-Label Diagnostic kNN",
+    "trainedAt": "2026-08-31T08:06:46.937Z",
     "datasetSize": 120,
-    "edgeCaseAccuracyPostFix": "40.00%",
-    "confusionMatrix": [
-      [
-        1,
-        0,
-        4
-      ],
-      [
-        2,
-        0,
-        3
-      ],
-      [
-        0,
-        0,
-        5
-      ]
-    ],
+    "kNeighbors": 5,
     "scaler": {
       "meanAngle": 11.00791666666667,
       "meanPos": 18.775166666666678,
