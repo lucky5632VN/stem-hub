@@ -1,35 +1,1622 @@
 [
-  {"temp": 25, "energy": 100, "violations": 0, "chemCount": 2, "hasHazard": 0, "label": 0, "labelName": "An toàn"},
-  {"temp": 30, "energy": 95, "violations": 0, "chemCount": 3, "hasHazard": 0, "label": 0, "labelName": "An toàn"},
-  {"temp": 22, "energy": 90, "violations": 0, "chemCount": 1, "hasHazard": 0, "label": 0, "labelName": "An toàn"},
-  {"temp": 35, "energy": 85, "violations": 0, "chemCount": 4, "hasHazard": 0, "label": 0, "labelName": "An toàn"},
-  {"temp": 40, "energy": 80, "violations": 0, "chemCount": 2, "hasHazard": 0, "label": 0, "labelName": "An toàn"},
-  {"temp": 28, "energy": 88, "violations": 0, "chemCount": 3, "hasHazard": 0, "label": 0, "labelName": "An toàn"},
-  {"temp": 45, "energy": 75, "violations": 1, "chemCount": 4, "hasHazard": 0, "label": 1, "labelName": "Cảnh báo"},
-  {"temp": 55, "energy": 65, "violations": 1, "chemCount": 5, "hasHazard": 1, "label": 1, "labelName": "Cảnh báo"},
-  {"temp": 60, "energy": 60, "violations": 1, "chemCount": 3, "hasHazard": 1, "label": 1, "labelName": "Cảnh báo"},
-  {"temp": 50, "energy": 70, "violations": 0, "chemCount": 4, "hasHazard": 1, "label": 1, "labelName": "Cảnh báo"},
-  {"temp": 65, "energy": 55, "violations": 1, "chemCount": 5, "hasHazard": 0, "label": 1, "labelName": "Cảnh báo"},
-  {"temp": 70, "energy": 50, "violations": 1, "chemCount": 3, "hasHazard": 1, "label": 1, "labelName": "Cảnh báo"},
-  {"temp": 85, "energy": 35, "violations": 2, "chemCount": 6, "hasHazard": 1, "label": 2, "labelName": "Nguy hiểm"},
-  {"temp": 95, "energy": 20, "violations": 3, "chemCount": 7, "hasHazard": 1, "label": 2, "labelName": "Nguy hiểm"},
-  {"temp": 100, "energy": 10, "violations": 4, "chemCount": 5, "hasHazard": 1, "label": 2, "labelName": "Nguy hiểm"},
-  {"temp": 90, "energy": 25, "violations": 2, "chemCount": 4, "hasHazard": 1, "label": 2, "labelName": "Nguy hiểm"},
-  {"temp": 110, "energy": 15, "violations": 3, "chemCount": 6, "hasHazard": 1, "label": 2, "labelName": "Nguy hiểm"},
-  {"temp": 80, "energy": 30, "violations": 2, "chemCount": 5, "hasHazard": 1, "label": 2, "labelName": "Nguy hiểm"},
-  {"temp": 20, "energy": 100, "violations": 0, "chemCount": 2, "hasHazard": 0, "label": 0, "labelName": "An toàn"},
-  {"temp": 26, "energy": 98, "violations": 0, "chemCount": 1, "hasHazard": 0, "label": 0, "labelName": "An toàn"},
-  {"temp": 24, "energy": 92, "violations": 0, "chemCount": 3, "hasHazard": 0, "label": 0, "labelName": "An toàn"},
-  {"temp": 32, "energy": 89, "violations": 0, "chemCount": 2, "hasHazard": 0, "label": 0, "labelName": "An toàn"},
-  {"temp": 38, "energy": 82, "violations": 0, "chemCount": 3, "hasHazard": 0, "label": 0, "labelName": "An toàn"},
-  {"temp": 48, "energy": 72, "violations": 1, "chemCount": 4, "hasHazard": 0, "label": 1, "labelName": "Cảnh báo"},
-  {"temp": 52, "energy": 68, "violations": 1, "chemCount": 3, "hasHazard": 1, "label": 1, "labelName": "Cảnh báo"},
-  {"temp": 58, "energy": 62, "violations": 1, "chemCount": 5, "hasHazard": 1, "label": 1, "labelName": "Cảnh báo"},
-  {"temp": 64, "energy": 58, "violations": 1, "chemCount": 4, "hasHazard": 0, "label": 1, "labelName": "Cảnh báo"},
-  {"temp": 72, "energy": 48, "violations": 1, "chemCount": 5, "hasHazard": 1, "label": 1, "labelName": "Cảnh báo"},
-  {"temp": 82, "energy": 38, "violations": 2, "chemCount": 6, "hasHazard": 1, "label": 2, "labelName": "Nguy hiểm"},
-  {"temp": 88, "energy": 28, "violations": 2, "chemCount": 5, "hasHazard": 1, "label": 2, "labelName": "Nguy hiểm"},
-  {"temp": 92, "energy": 22, "violations": 3, "chemCount": 6, "hasHazard": 1, "label": 2, "labelName": "Nguy hiểm"},
-  {"temp": 98, "energy": 18, "violations": 3, "chemCount": 7, "hasHazard": 1, "label": 2, "labelName": "Nguy hiểm"},
-  {"temp": 105, "energy": 12, "violations": 4, "chemCount": 5, "hasHazard": 1, "label": 2, "labelName": "Nguy hiểm"}
+  {
+    "temp": 84,
+    "energy": 86,
+    "violations": 0,
+    "chemCount": 1,
+    "hasHazard": 1,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 43,
+    "energy": 89,
+    "violations": 4,
+    "chemCount": 7,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 17,
+    "energy": 44,
+    "violations": 0,
+    "chemCount": 1,
+    "hasHazard": 1,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 51,
+    "energy": 69,
+    "violations": 3,
+    "chemCount": 8,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 90,
+    "energy": 4,
+    "violations": 4,
+    "chemCount": 4,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 99,
+    "energy": 16,
+    "violations": 0,
+    "chemCount": 8,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 73,
+    "energy": 68,
+    "violations": 3,
+    "chemCount": 2,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 117,
+    "energy": 68,
+    "violations": 2,
+    "chemCount": 7,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 24,
+    "energy": 61,
+    "violations": 4,
+    "chemCount": 3,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 77,
+    "energy": 66,
+    "violations": 3,
+    "chemCount": 2,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 86,
+    "energy": 53,
+    "violations": 3,
+    "chemCount": 6,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 70,
+    "energy": 49,
+    "violations": 3,
+    "chemCount": 1,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 35,
+    "energy": 89,
+    "violations": 3,
+    "chemCount": 3,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 62,
+    "energy": 73,
+    "violations": 4,
+    "chemCount": 7,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 84,
+    "energy": 34,
+    "violations": 3,
+    "chemCount": 1,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 71,
+    "energy": 3,
+    "violations": 0,
+    "chemCount": 7,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 34,
+    "energy": 5,
+    "violations": 0,
+    "chemCount": 8,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 119,
+    "energy": 24,
+    "violations": 1,
+    "chemCount": 1,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 94,
+    "energy": 31,
+    "violations": 2,
+    "chemCount": 3,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 58,
+    "energy": 67,
+    "violations": 2,
+    "chemCount": 4,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 69,
+    "energy": 76,
+    "violations": 3,
+    "chemCount": 7,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 49,
+    "energy": 18,
+    "violations": 1,
+    "chemCount": 8,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 78,
+    "energy": 59,
+    "violations": 3,
+    "chemCount": 1,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 17,
+    "energy": 98,
+    "violations": 4,
+    "chemCount": 5,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 103,
+    "energy": 15,
+    "violations": 4,
+    "chemCount": 4,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 105,
+    "energy": 86,
+    "violations": 2,
+    "chemCount": 6,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 106,
+    "energy": 59,
+    "violations": 3,
+    "chemCount": 5,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 98,
+    "energy": 7,
+    "violations": 0,
+    "chemCount": 4,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 65,
+    "energy": 84,
+    "violations": 1,
+    "chemCount": 5,
+    "hasHazard": 0,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 93,
+    "energy": 29,
+    "violations": 2,
+    "chemCount": 1,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 86,
+    "energy": 49,
+    "violations": 1,
+    "chemCount": 1,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 23,
+    "energy": 99,
+    "violations": 2,
+    "chemCount": 2,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 28,
+    "energy": 73,
+    "violations": 2,
+    "chemCount": 1,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 36,
+    "energy": 20,
+    "violations": 3,
+    "chemCount": 8,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 39,
+    "energy": 76,
+    "violations": 2,
+    "chemCount": 1,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 101,
+    "energy": 20,
+    "violations": 0,
+    "chemCount": 6,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 41,
+    "energy": 32,
+    "violations": 1,
+    "chemCount": 3,
+    "hasHazard": 0,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 55,
+    "energy": 83,
+    "violations": 1,
+    "chemCount": 7,
+    "hasHazard": 0,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 101,
+    "energy": 3,
+    "violations": 3,
+    "chemCount": 5,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 75,
+    "energy": 92,
+    "violations": 4,
+    "chemCount": 4,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 61,
+    "energy": 65,
+    "violations": 4,
+    "chemCount": 4,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 47,
+    "energy": 44,
+    "violations": 2,
+    "chemCount": 8,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 51,
+    "energy": 82,
+    "violations": 2,
+    "chemCount": 4,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 47,
+    "energy": 48,
+    "violations": 1,
+    "chemCount": 7,
+    "hasHazard": 1,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 51,
+    "energy": 65,
+    "violations": 3,
+    "chemCount": 6,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 42,
+    "energy": 29,
+    "violations": 2,
+    "chemCount": 3,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 85,
+    "energy": 9,
+    "violations": 3,
+    "chemCount": 2,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 24,
+    "energy": 73,
+    "violations": 2,
+    "chemCount": 6,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 21,
+    "energy": 52,
+    "violations": 4,
+    "chemCount": 2,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 90,
+    "energy": 37,
+    "violations": 3,
+    "chemCount": 1,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 88,
+    "energy": 1,
+    "violations": 2,
+    "chemCount": 2,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 41,
+    "energy": 8,
+    "violations": 0,
+    "chemCount": 2,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 52,
+    "energy": 8,
+    "violations": 3,
+    "chemCount": 4,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 63,
+    "energy": 23,
+    "violations": 1,
+    "chemCount": 2,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 46,
+    "energy": 94,
+    "violations": 1,
+    "chemCount": 6,
+    "hasHazard": 0,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 32,
+    "energy": 32,
+    "violations": 1,
+    "chemCount": 4,
+    "hasHazard": 0,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 95,
+    "energy": 84,
+    "violations": 3,
+    "chemCount": 3,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 118,
+    "energy": 64,
+    "violations": 1,
+    "chemCount": 1,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 53,
+    "energy": 33,
+    "violations": 3,
+    "chemCount": 8,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 55,
+    "energy": 78,
+    "violations": 3,
+    "chemCount": 5,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 108,
+    "energy": 49,
+    "violations": 0,
+    "chemCount": 2,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 101,
+    "energy": 4,
+    "violations": 2,
+    "chemCount": 1,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 30,
+    "energy": 1,
+    "violations": 4,
+    "chemCount": 5,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 115,
+    "energy": 12,
+    "violations": 3,
+    "chemCount": 4,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 69,
+    "energy": 40,
+    "violations": 4,
+    "chemCount": 2,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 17,
+    "energy": 23,
+    "violations": 1,
+    "chemCount": 4,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 110,
+    "energy": 19,
+    "violations": 2,
+    "chemCount": 2,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 44,
+    "energy": 28,
+    "violations": 2,
+    "chemCount": 3,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 88,
+    "energy": 80,
+    "violations": 2,
+    "chemCount": 6,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 64,
+    "energy": 43,
+    "violations": 3,
+    "chemCount": 5,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 111,
+    "energy": 83,
+    "violations": 1,
+    "chemCount": 2,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 20,
+    "energy": 87,
+    "violations": 3,
+    "chemCount": 7,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 109,
+    "energy": 52,
+    "violations": 3,
+    "chemCount": 4,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 95,
+    "energy": 38,
+    "violations": 4,
+    "chemCount": 5,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 119,
+    "energy": 51,
+    "violations": 2,
+    "chemCount": 3,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 92,
+    "energy": 95,
+    "violations": 3,
+    "chemCount": 8,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 28,
+    "energy": 84,
+    "violations": 0,
+    "chemCount": 1,
+    "hasHazard": 0,
+    "label": 0,
+    "labelName": "An toàn"
+  },
+  {
+    "temp": 57,
+    "energy": 68,
+    "violations": 4,
+    "chemCount": 2,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 116,
+    "energy": 47,
+    "violations": 3,
+    "chemCount": 7,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 35,
+    "energy": 78,
+    "violations": 3,
+    "chemCount": 5,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 15,
+    "energy": 81,
+    "violations": 4,
+    "chemCount": 7,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 58,
+    "energy": 56,
+    "violations": 1,
+    "chemCount": 6,
+    "hasHazard": 0,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 48,
+    "energy": 32,
+    "violations": 2,
+    "chemCount": 2,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 19,
+    "energy": 78,
+    "violations": 2,
+    "chemCount": 7,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 77,
+    "energy": 54,
+    "violations": 3,
+    "chemCount": 7,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 41,
+    "energy": 73,
+    "violations": 3,
+    "chemCount": 7,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 16,
+    "energy": 68,
+    "violations": 0,
+    "chemCount": 1,
+    "hasHazard": 1,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 96,
+    "energy": 55,
+    "violations": 2,
+    "chemCount": 1,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 89,
+    "energy": 32,
+    "violations": 4,
+    "chemCount": 6,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 80,
+    "energy": 76,
+    "violations": 3,
+    "chemCount": 6,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 82,
+    "energy": 8,
+    "violations": 2,
+    "chemCount": 4,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 59,
+    "energy": 98,
+    "violations": 0,
+    "chemCount": 7,
+    "hasHazard": 0,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 118,
+    "energy": 50,
+    "violations": 3,
+    "chemCount": 7,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 57,
+    "energy": 83,
+    "violations": 2,
+    "chemCount": 3,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 55,
+    "energy": 91,
+    "violations": 1,
+    "chemCount": 4,
+    "hasHazard": 0,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 48,
+    "energy": 78,
+    "violations": 0,
+    "chemCount": 6,
+    "hasHazard": 1,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 102,
+    "energy": 61,
+    "violations": 2,
+    "chemCount": 8,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 29,
+    "energy": 64,
+    "violations": 4,
+    "chemCount": 8,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 96,
+    "energy": 97,
+    "violations": 0,
+    "chemCount": 3,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 72,
+    "energy": 67,
+    "violations": 2,
+    "chemCount": 3,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 56,
+    "energy": 75,
+    "violations": 1,
+    "chemCount": 6,
+    "hasHazard": 0,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 35,
+    "energy": 14,
+    "violations": 1,
+    "chemCount": 8,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 65,
+    "energy": 66,
+    "violations": 2,
+    "chemCount": 6,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 35,
+    "energy": 54,
+    "violations": 2,
+    "chemCount": 6,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 25,
+    "energy": 51,
+    "violations": 4,
+    "chemCount": 1,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 63,
+    "energy": 66,
+    "violations": 1,
+    "chemCount": 3,
+    "hasHazard": 0,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 22,
+    "energy": 30,
+    "violations": 0,
+    "chemCount": 3,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 64,
+    "energy": 15,
+    "violations": 2,
+    "chemCount": 7,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 59,
+    "energy": 18,
+    "violations": 4,
+    "chemCount": 6,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 99,
+    "energy": 73,
+    "violations": 2,
+    "chemCount": 2,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 107,
+    "energy": 88,
+    "violations": 4,
+    "chemCount": 5,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 65,
+    "energy": 3,
+    "violations": 2,
+    "chemCount": 2,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 62,
+    "energy": 78,
+    "violations": 4,
+    "chemCount": 6,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 114,
+    "energy": 83,
+    "violations": 2,
+    "chemCount": 2,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 118,
+    "energy": 62,
+    "violations": 0,
+    "chemCount": 8,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 29,
+    "energy": 43,
+    "violations": 0,
+    "chemCount": 8,
+    "hasHazard": 1,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 20,
+    "energy": 62,
+    "violations": 1,
+    "chemCount": 3,
+    "hasHazard": 1,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 28,
+    "energy": 4,
+    "violations": 3,
+    "chemCount": 6,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 26,
+    "energy": 58,
+    "violations": 4,
+    "chemCount": 3,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 119,
+    "energy": 4,
+    "violations": 4,
+    "chemCount": 8,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 77,
+    "energy": 49,
+    "violations": 1,
+    "chemCount": 4,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 105,
+    "energy": 98,
+    "violations": 3,
+    "chemCount": 6,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 19,
+    "energy": 40,
+    "violations": 3,
+    "chemCount": 8,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 104,
+    "energy": 63,
+    "violations": 0,
+    "chemCount": 7,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 111,
+    "energy": 10,
+    "violations": 0,
+    "chemCount": 5,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 86,
+    "energy": 73,
+    "violations": 1,
+    "chemCount": 3,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 47,
+    "energy": 10,
+    "violations": 4,
+    "chemCount": 2,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 87,
+    "energy": 38,
+    "violations": 1,
+    "chemCount": 7,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 86,
+    "energy": 17,
+    "violations": 2,
+    "chemCount": 6,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 97,
+    "energy": 6,
+    "violations": 0,
+    "chemCount": 6,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 109,
+    "energy": 38,
+    "violations": 0,
+    "chemCount": 1,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 71,
+    "energy": 39,
+    "violations": 3,
+    "chemCount": 2,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 99,
+    "energy": 87,
+    "violations": 0,
+    "chemCount": 2,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 75,
+    "energy": 71,
+    "violations": 2,
+    "chemCount": 2,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 85,
+    "energy": 62,
+    "violations": 2,
+    "chemCount": 3,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 20,
+    "energy": 34,
+    "violations": 2,
+    "chemCount": 6,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 105,
+    "energy": 58,
+    "violations": 4,
+    "chemCount": 2,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 85,
+    "energy": 75,
+    "violations": 0,
+    "chemCount": 3,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 119,
+    "energy": 71,
+    "violations": 4,
+    "chemCount": 6,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 51,
+    "energy": 67,
+    "violations": 3,
+    "chemCount": 1,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 82,
+    "energy": 57,
+    "violations": 1,
+    "chemCount": 7,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 68,
+    "energy": 18,
+    "violations": 2,
+    "chemCount": 2,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 117,
+    "energy": 51,
+    "violations": 2,
+    "chemCount": 3,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 72,
+    "energy": 75,
+    "violations": 1,
+    "chemCount": 3,
+    "hasHazard": 0,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 27,
+    "energy": 29,
+    "violations": 3,
+    "chemCount": 7,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 49,
+    "energy": 44,
+    "violations": 3,
+    "chemCount": 6,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 112,
+    "energy": 8,
+    "violations": 3,
+    "chemCount": 8,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 48,
+    "energy": 66,
+    "violations": 1,
+    "chemCount": 5,
+    "hasHazard": 1,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 16,
+    "energy": 71,
+    "violations": 1,
+    "chemCount": 4,
+    "hasHazard": 1,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 57,
+    "energy": 75,
+    "violations": 1,
+    "chemCount": 8,
+    "hasHazard": 0,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 89,
+    "energy": 66,
+    "violations": 0,
+    "chemCount": 4,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 20,
+    "energy": 57,
+    "violations": 3,
+    "chemCount": 8,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 67,
+    "energy": 12,
+    "violations": 2,
+    "chemCount": 1,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 111,
+    "energy": 14,
+    "violations": 1,
+    "chemCount": 7,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 28,
+    "energy": 17,
+    "violations": 4,
+    "chemCount": 4,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 96,
+    "energy": 27,
+    "violations": 2,
+    "chemCount": 4,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 97,
+    "energy": 64,
+    "violations": 3,
+    "chemCount": 6,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 67,
+    "energy": 90,
+    "violations": 4,
+    "chemCount": 4,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 29,
+    "energy": 73,
+    "violations": 3,
+    "chemCount": 5,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 30,
+    "energy": 87,
+    "violations": 2,
+    "chemCount": 6,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 71,
+    "energy": 14,
+    "violations": 4,
+    "chemCount": 3,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 48,
+    "energy": 52,
+    "violations": 2,
+    "chemCount": 1,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 42,
+    "energy": 34,
+    "violations": 4,
+    "chemCount": 6,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 103,
+    "energy": 22,
+    "violations": 0,
+    "chemCount": 5,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 86,
+    "energy": 19,
+    "violations": 1,
+    "chemCount": 5,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 75,
+    "energy": 56,
+    "violations": 1,
+    "chemCount": 1,
+    "hasHazard": 1,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 60,
+    "energy": 0,
+    "violations": 4,
+    "chemCount": 2,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 78,
+    "energy": 47,
+    "violations": 4,
+    "chemCount": 5,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 100,
+    "energy": 39,
+    "violations": 1,
+    "chemCount": 3,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 62,
+    "energy": 43,
+    "violations": 1,
+    "chemCount": 4,
+    "hasHazard": 0,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 43,
+    "energy": 9,
+    "violations": 3,
+    "chemCount": 4,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 101,
+    "energy": 89,
+    "violations": 1,
+    "chemCount": 3,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 42,
+    "energy": 47,
+    "violations": 0,
+    "chemCount": 6,
+    "hasHazard": 1,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 104,
+    "energy": 97,
+    "violations": 2,
+    "chemCount": 1,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 64,
+    "energy": 5,
+    "violations": 1,
+    "chemCount": 4,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 68,
+    "energy": 10,
+    "violations": 3,
+    "chemCount": 3,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 65,
+    "energy": 64,
+    "violations": 0,
+    "chemCount": 4,
+    "hasHazard": 0,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  },
+  {
+    "temp": 40,
+    "energy": 37,
+    "violations": 4,
+    "chemCount": 2,
+    "hasHazard": 0,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 95,
+    "energy": 60,
+    "violations": 1,
+    "chemCount": 8,
+    "hasHazard": 1,
+    "label": 2,
+    "labelName": "Nguy hiểm"
+  },
+  {
+    "temp": 23,
+    "energy": 59,
+    "violations": 0,
+    "chemCount": 4,
+    "hasHazard": 0,
+    "label": 1,
+    "labelName": "Cảnh báo"
+  }
 ]

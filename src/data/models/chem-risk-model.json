@@ -1,9 +1,10 @@
 {
   "metadata": {
     "modelName": "ChemLab Risk Assessment Neural Classifier",
-    "trainedAt": "2026-08-31T07:28:53.608Z",
-    "datasetSize": 33,
-    "accuracy": "100.0%",
+    "trainedAt": "2026-08-31T07:45:38.932Z",
+    "datasetSize": 180,
+    "crossValidationAccuracy": "100.0%",
+    "unseenTestAccuracy": "100.0%",
     "features": [
       "temp",
       "energy",

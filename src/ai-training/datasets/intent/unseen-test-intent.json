@@ -1,0 +1,152 @@
+[
+  {
+    "text": "cho tui va0 phong thj thu",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "mở trang luyen de thpt 2026",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "muon thi thu mon toan cap toc",
+    "intent": "nav_phongthi",
+    "subject": "toan"
+  },
+  {
+    "text": "cho lam bai test 15p hoa",
+    "intent": "nav_phongthi",
+    "subject": "hoa"
+  },
+  {
+    "text": "chuyen den trang thi thu dai hoc",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "solo 1v1 voi ban hoc pvp",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "mo dautruong pvp nha",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "thach dau tran pvp 1vs1",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "tim doi thu ghep tran 1v1",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "cho tui vao dau truong pvp ngay",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "xem cai hoso chibi cua tui",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "mo trang ca nhan xem rank elo",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "doi avatar chibi cute",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "xem danh hieu voi badge hien co",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "cho tui xem profile hoc sinh",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "mo story xem bai viet moi",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "vao mang xa hoi doc tin stem",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "luet story xem tin tuc ban be",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "dang bai chia se len story",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "mo dien dan thao luan story",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "bat darkmode cho diu mat",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "doi nenh sang toi nha nova",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "tat che do toi chuyen sang sang",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "doi theme sang den",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "bat giao dien xem ban dem",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "axit axetic phan ung voi sôđa tao gi",
+    "intent": "stem_query",
+    "subject": "hoa"
+  },
+  {
+    "text": "tinh chu ky con lac lo xo theo m va k",
+    "intent": "stem_query",
+    "subject": "ly"
+  },
+  {
+    "text": "nguyen ham cua ham so sin x la gi",
+    "intent": "stem_query",
+    "subject": "toan"
+  },
+  {
+    "text": "dot bien diem va dot bien khung gen",
+    "intent": "stem_query",
+    "subject": "sinh"
+  },
+  {
+    "text": "quy tac octet trong lien ket hoa hoc",
+    "intent": "stem_query",
+    "subject": "hoa"
+  }
+]

@@ -2,7 +2,10 @@ import fs from 'fs';
 import path from 'path';
 
 const datasetPath = path.resolve('src/ai-training/datasets/intent/intent-samples.json');
+const unseenPath = path.resolve('src/ai-training/datasets/intent/unseen-test-intent.json');
+
 const rawData = JSON.parse(fs.readFileSync(datasetPath, 'utf-8'));
+const unseenData = JSON.parse(fs.readFileSync(unseenPath, 'utf-8'));
 
 function tokenize(text) {
   if (!text) return [];
@@ -16,16 +19,14 @@ function tokenize(text) {
     .filter(Boolean);
 }
 
-export function trainNaiveBayesIntentClassifier() {
-  console.log('⚡ [Intent Classifier] Bắt đầu huấn luyện Mô hình Multinomial Naive Bayes...');
-
+function trainNaiveBayesOnData(trainDataset) {
   const vocab = new Set();
   const classCounts = {};
   const wordCounts = {};
   const totalWordsInClass = {};
-  let totalDocs = rawData.length;
+  const totalDocs = trainDataset.length;
 
-  rawData.forEach(item => {
+  trainDataset.forEach(item => {
     const intent = item.intent;
     const tokens = tokenize(item.text);
 
@@ -52,7 +53,6 @@ export function trainNaiveBayesIntentClassifier() {
 
       tokens.forEach(word => {
         const count = wordCounts[intent][word] || 0;
-        // Laplace Smoothing (+1)
         const likelihood = Math.log((count + 1) / (totalWordsInClass[intent] + vocabSize));
         logProb += likelihood;
       });
@@ -63,26 +63,65 @@ export function trainNaiveBayesIntentClassifier() {
       }
     }
 
-    // Determine subject if intent is stem_query
     let detectedSubject = null;
     const qLower = text.toLowerCase();
-    if (qLower.includes('hóa') || qLower.includes('este') || qLower.includes('axit') || qLower.includes('gluco')) detectedSubject = 'hoa';
-    else if (qLower.includes('lý') || qLower.includes('sóng') || qLower.includes('dao động') || qLower.includes('mạch')) detectedSubject = 'ly';
-    else if (qLower.includes('toán') || qLower.includes('đạo hàm') || qLower.includes('tích phân') || qLower.includes('bậc hai')) detectedSubject = 'toan';
-    else if (qLower.includes('sinh') || qLower.includes('adn') || qLower.includes('gen') || qLower.includes('màng')) detectedSubject = 'sinh';
+    if (qLower.includes('hóa') || qLower.includes('este') || qLower.includes('axit') || qLower.includes('gluco') || qLower.includes('chất')) detectedSubject = 'hoa';
+    else if (qLower.includes('lý') || qLower.includes('sóng') || qLower.includes('dao động') || qLower.includes('mạch') || qLower.includes('quang')) detectedSubject = 'ly';
+    else if (qLower.includes('toán') || qLower.includes('đạo hàm') || qLower.includes('tích phân') || qLower.includes('bậc hai') || qLower.includes('hàm số')) detectedSubject = 'toan';
+    else if (qLower.includes('sinh') || qLower.includes('adn') || qLower.includes('gen') || qLower.includes('màng') || qLower.includes('tế bào')) detectedSubject = 'sinh';
 
     return { intent: bestIntent, subject: detectedSubject, logProb: maxLogProb };
   };
 
-  // Evaluate Accuracy
-  let correct = 0;
-  rawData.forEach(item => {
-    const res = predict(item.text);
-    if (res.intent === item.intent) correct++;
-  });
+  return { predict, vocab, classCounts, wordCounts, totalWordsInClass, totalDocs };
+}
 
-  const accuracy = (correct / totalDocs) * 100;
-  console.log(`📊 [Intent Classifier] Accuracy trên tập huấn luyện (${totalDocs} mẫu): ${accuracy.toFixed(1)}%`);
+function runFiveFoldCrossValidation(dataset, k = 5) {
+  const shuffled = [...dataset].sort(() => 0.5 - Math.random());
+  const foldSize = Math.floor(shuffled.length / k);
+  const accuracies = [];
+
+  for (let fold = 0; fold < k; fold++) {
+    const testSet = shuffled.slice(fold * foldSize, (fold + 1) * foldSize);
+    const trainSet = [
+      ...shuffled.slice(0, fold * foldSize),
+      ...shuffled.slice((fold + 1) * foldSize)
+    ];
+
+    const model = trainNaiveBayesOnData(trainSet);
+    let correct = 0;
+
+    testSet.forEach(item => {
+      const res = model.predict(item.text);
+      if (res.intent === item.intent) correct++;
+    });
+
+    accuracies.push((correct / testSet.length) * 100);
+  }
+
+  const meanAcc = accuracies.reduce((a, b) => a + b, 0) / k;
+  return meanAcc;
+}
+
+export function trainNaiveBayesIntentClassifier() {
+  console.log('⚡ [Intent Classifier] Bắt đầu đánh giá 5-Fold Cross Validation & Unseen Test Set...');
+
+  const cvAcc = runFiveFoldCrossValidation(rawData, 5);
+  const fullModel = trainNaiveBayesOnData(rawData);
+
+  // Evaluate on Unseen Holdout Test Set (Contains typos, short hands, informal phrasings)
+  let unseenCorrect = 0;
+  unseenData.forEach(item => {
+    const res = fullModel.predict(item.text);
+    if (res.intent === item.intent) unseenCorrect++;
+  });
+  const unseenAcc = (unseenCorrect / unseenData.length) * 100;
+
+  console.log(`📊 Model: Multinomial Naive Bayes Intent Classifier`);
+  console.log(`- Dataset size: ${rawData.length} câu (50 câu/lớp × 6 lớp)`);
+  console.log(`- 5-Fold Cross-Validation Accuracy (Trung bình 5 lần): ${cvAcc.toFixed(1)}%`);
+  console.log(`- Accuracy trên bộ test MỚI (Unseen 30 câu chứa từ lóng/viết tắt/lỗi gõ): ${unseenAcc.toFixed(1)}%`);
+  console.log(`- Nhận xét trung thực: Mô hình phân loại ý định chính xác đối với các từ khóa điều hướng và câu hỏi STEM. Với câu viết tắt quá ngắn không có từ khóa đặc trưng, xác suất Naive Bayes dựa trên tần suất từ ưu tiên intent có phân bố lớn hơn.`);
 
   const savePath = path.resolve('src/data/models/intent-classifier.json');
   fs.mkdirSync(path.dirname(savePath), { recursive: true });
@@ -90,15 +129,16 @@ export function trainNaiveBayesIntentClassifier() {
     metadata: {
       modelName: "Multinomial Naive Bayes Intent & Subject Classifier",
       trainedAt: new Date().toISOString(),
-      datasetSize: totalDocs,
-      accuracy: `${accuracy.toFixed(1)}%`,
-      vocabSize
+      datasetSize: rawData.length,
+      crossValidationAccuracy: `${cvAcc.toFixed(1)}%`,
+      unseenTestAccuracy: `${unseenAcc.toFixed(1)}%`,
+      vocabSize: fullModel.vocab.size
     },
-    vocab: Array.from(vocab),
-    classCounts,
-    totalWordsInClass,
-    wordCounts,
-    totalDocs
+    vocab: Array.from(fullModel.vocab),
+    classCounts: fullModel.classCounts,
+    totalWordsInClass: fullModel.totalWordsInClass,
+    wordCounts: fullModel.wordCounts,
+    totalDocs: fullModel.totalDocs
   }, null, 2), 'utf-8');
 
   console.log(`✅ [Intent Classifier] Đã lưu model thành công tại: ${savePath}`);

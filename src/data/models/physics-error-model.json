@@ -1,72 +1,850 @@
 {
   "metadata": {
     "modelName": "Physics Optics Diagnostic kNN Classifier",
-    "trainedAt": "2026-08-31T07:29:38.354Z",
-    "datasetSize": 9,
+    "trainedAt": "2026-08-31T07:45:39.008Z",
+    "datasetSize": 120,
     "kNeighbors": 3,
-    "accuracy": "100.0%"
+    "crossValidationAccuracy": "100.0%",
+    "unseenTestAccuracy": "100.0%"
   },
   "dataset": [
     {
-      "angleDiff": 25.5,
-      "posOffset": 2.1,
-      "indexDiff": 0.02,
+      "angleDiff": 36.9,
+      "posOffset": 0.11,
+      "indexDiff": 0.027,
       "label": 0,
       "errorType": "Sai góc tới (Incidence Angle Error)"
     },
     {
-      "angleDiff": 18,
-      "posOffset": 1.5,
-      "indexDiff": 0.01,
-      "label": 0,
-      "errorType": "Sai góc tới (Incidence Angle Error)"
-    },
-    {
-      "angleDiff": 32,
-      "posOffset": 3,
-      "indexDiff": 0,
-      "label": 0,
-      "errorType": "Sai góc tới (Incidence Angle Error)"
-    },
-    {
-      "angleDiff": 2,
-      "posOffset": 45,
+      "angleDiff": 2.57,
+      "posOffset": 54.57,
       "indexDiff": 0.01,
       "label": 1,
       "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
     },
     {
-      "angleDiff": 1.5,
-      "posOffset": 60.2,
+      "angleDiff": 1.78,
+      "posOffset": 3.21,
+      "indexDiff": 0.7,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 39.75,
+      "posOffset": 0.68,
+      "indexDiff": 0.035,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 3.21,
+      "posOffset": 59.78,
+      "indexDiff": 0.019,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 3.01,
+      "posOffset": 0.19,
+      "indexDiff": 0.465,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 38.23,
+      "posOffset": 0.45,
+      "indexDiff": 0.023,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 2.13,
+      "posOffset": 65.26,
       "indexDiff": 0.02,
       "label": 1,
       "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
     },
     {
-      "angleDiff": 3,
-      "posOffset": 38.5,
-      "indexDiff": 0,
+      "angleDiff": 1.9,
+      "posOffset": 1.63,
+      "indexDiff": 0.401,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 38.96,
+      "posOffset": 2.74,
+      "indexDiff": 0.021,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 1.8,
+      "posOffset": 46.86,
+      "indexDiff": 0.011,
       "label": 1,
       "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
     },
     {
-      "angleDiff": 1,
-      "posOffset": 2,
-      "indexDiff": 0.45,
+      "angleDiff": 2.56,
+      "posOffset": 3.64,
+      "indexDiff": 0.236,
       "label": 2,
       "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
     },
     {
-      "angleDiff": 0.5,
-      "posOffset": 1,
-      "indexDiff": 0.6,
+      "angleDiff": 29.26,
+      "posOffset": 2.72,
+      "indexDiff": 0.011,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 3.62,
+      "posOffset": 43.21,
+      "indexDiff": 0.004,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 2.99,
+      "posOffset": 0.94,
+      "indexDiff": 0.674,
       "label": 2,
       "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
     },
     {
-      "angleDiff": 2,
-      "posOffset": 3,
-      "indexDiff": 0.35,
+      "angleDiff": 31.93,
+      "posOffset": 3.74,
+      "indexDiff": 0.02,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 2.67,
+      "posOffset": 37.21,
+      "indexDiff": 0.044,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 0.62,
+      "posOffset": 3.49,
+      "indexDiff": 0.386,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 26.54,
+      "posOffset": 1.36,
+      "indexDiff": 0.004,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 2.13,
+      "posOffset": 71.95,
+      "indexDiff": 0.009,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 2.7,
+      "posOffset": 2.49,
+      "indexDiff": 0.632,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 21.88,
+      "posOffset": 2.81,
+      "indexDiff": 0.039,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 1.19,
+      "posOffset": 54.58,
+      "indexDiff": 0.041,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 1.35,
+      "posOffset": 0.48,
+      "indexDiff": 0.64,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 23.77,
+      "posOffset": 0.97,
+      "indexDiff": 0.035,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 3.85,
+      "posOffset": 64.56,
+      "indexDiff": 0.024,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 2.63,
+      "posOffset": 1.78,
+      "indexDiff": 0.373,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 32.84,
+      "posOffset": 3.39,
+      "indexDiff": 0.008,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 2.24,
+      "posOffset": 40.1,
+      "indexDiff": 0.021,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 3.26,
+      "posOffset": 1.73,
+      "indexDiff": 0.642,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 34.21,
+      "posOffset": 0.8,
+      "indexDiff": 0.023,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 3.88,
+      "posOffset": 74.51,
+      "indexDiff": 0.026,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 2.69,
+      "posOffset": 3.13,
+      "indexDiff": 0.352,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 40,
+      "posOffset": 2.08,
+      "indexDiff": 0.008,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 0.6,
+      "posOffset": 40.19,
+      "indexDiff": 0.003,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 2.25,
+      "posOffset": 2.61,
+      "indexDiff": 0.507,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 16.54,
+      "posOffset": 3.05,
+      "indexDiff": 0.043,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 0.52,
+      "posOffset": 47.61,
+      "indexDiff": 0.017,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 1.75,
+      "posOffset": 2.88,
+      "indexDiff": 0.692,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 20.73,
+      "posOffset": 3.26,
+      "indexDiff": 0.036,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 0.72,
+      "posOffset": 37.7,
+      "indexDiff": 0.024,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 2.61,
+      "posOffset": 1.18,
+      "indexDiff": 0.414,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 24.84,
+      "posOffset": 1.19,
+      "indexDiff": 0.016,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 2.38,
+      "posOffset": 56.19,
+      "indexDiff": 0.022,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 2.65,
+      "posOffset": 2.34,
+      "indexDiff": 0.464,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 17.7,
+      "posOffset": 1.35,
+      "indexDiff": 0.013,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 0.75,
+      "posOffset": 53.17,
+      "indexDiff": 0.046,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 3.45,
+      "posOffset": 2.66,
+      "indexDiff": 0.663,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 35.84,
+      "posOffset": 2.57,
+      "indexDiff": 0.021,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 1.42,
+      "posOffset": 66.69,
+      "indexDiff": 0.014,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 2.84,
+      "posOffset": 0.25,
+      "indexDiff": 0.697,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 38.95,
+      "posOffset": 0.72,
+      "indexDiff": 0.035,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 0.23,
+      "posOffset": 53.83,
+      "indexDiff": 0.021,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 3.71,
+      "posOffset": 3.54,
+      "indexDiff": 0.272,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 15.44,
+      "posOffset": 1.42,
+      "indexDiff": 0.045,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 2.71,
+      "posOffset": 53.17,
+      "indexDiff": 0.005,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 3.76,
+      "posOffset": 3.5,
+      "indexDiff": 0.378,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 33.97,
+      "posOffset": 0.07,
+      "indexDiff": 0.008,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 0.54,
+      "posOffset": 43.5,
+      "indexDiff": 0.028,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 3.21,
+      "posOffset": 3.47,
+      "indexDiff": 0.607,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 19.9,
+      "posOffset": 1.1,
+      "indexDiff": 0.005,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 2.43,
+      "posOffset": 70.35,
+      "indexDiff": 0.001,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 3.46,
+      "posOffset": 0.34,
+      "indexDiff": 0.38,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 27.07,
+      "posOffset": 3.25,
+      "indexDiff": 0.004,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 2.99,
+      "posOffset": 51.41,
+      "indexDiff": 0.034,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 3.8,
+      "posOffset": 1.3,
+      "indexDiff": 0.205,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 30.37,
+      "posOffset": 0.83,
+      "indexDiff": 0.001,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 3.08,
+      "posOffset": 70.92,
+      "indexDiff": 0.023,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 3.79,
+      "posOffset": 0.31,
+      "indexDiff": 0.59,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 27.67,
+      "posOffset": 3.17,
+      "indexDiff": 0.002,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 1.88,
+      "posOffset": 27.07,
+      "indexDiff": 0.02,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 0.46,
+      "posOffset": 2.21,
+      "indexDiff": 0.46,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 35.06,
+      "posOffset": 1.25,
+      "indexDiff": 0.024,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 1.93,
+      "posOffset": 69.12,
+      "indexDiff": 0.027,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 3.41,
+      "posOffset": 0.74,
+      "indexDiff": 0.455,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 32.41,
+      "posOffset": 1.66,
+      "indexDiff": 0.022,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 1.86,
+      "posOffset": 53.76,
+      "indexDiff": 0.049,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 0.44,
+      "posOffset": 2.83,
+      "indexDiff": 0.607,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 25.46,
+      "posOffset": 2.84,
+      "indexDiff": 0.022,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 0.19,
+      "posOffset": 41.17,
+      "indexDiff": 0.001,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 2.8,
+      "posOffset": 0.62,
+      "indexDiff": 0.283,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 24.61,
+      "posOffset": 1.26,
+      "indexDiff": 0.031,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 2.5,
+      "posOffset": 29.38,
+      "indexDiff": 0.017,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 2.36,
+      "posOffset": 3.75,
+      "indexDiff": 0.232,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 38.92,
+      "posOffset": 1.65,
+      "indexDiff": 0.023,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 3.19,
+      "posOffset": 56.28,
+      "indexDiff": 0.019,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 2.38,
+      "posOffset": 0.16,
+      "indexDiff": 0.601,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 26.44,
+      "posOffset": 3.93,
+      "indexDiff": 0.017,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 1.91,
+      "posOffset": 52.64,
+      "indexDiff": 0.037,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 1.66,
+      "posOffset": 2.15,
+      "indexDiff": 0.44,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 18.04,
+      "posOffset": 3.43,
+      "indexDiff": 0.004,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 2.22,
+      "posOffset": 30.63,
+      "indexDiff": 0.022,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 2.84,
+      "posOffset": 0.92,
+      "indexDiff": 0.441,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 21.79,
+      "posOffset": 2.99,
+      "indexDiff": 0.033,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 3.89,
+      "posOffset": 56.14,
+      "indexDiff": 0.025,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 2.63,
+      "posOffset": 1.79,
+      "indexDiff": 0.227,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 26.23,
+      "posOffset": 2.25,
+      "indexDiff": 0.04,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 1.64,
+      "posOffset": 41.2,
+      "indexDiff": 0.046,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 1.01,
+      "posOffset": 1.51,
+      "indexDiff": 0.433,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 17.71,
+      "posOffset": 2.67,
+      "indexDiff": 0.039,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 1.07,
+      "posOffset": 47.31,
+      "indexDiff": 0.008,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 1.86,
+      "posOffset": 0.24,
+      "indexDiff": 0.611,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 39.08,
+      "posOffset": 1.33,
+      "indexDiff": 0.012,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 2.01,
+      "posOffset": 66.58,
+      "indexDiff": 0.032,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 1.74,
+      "posOffset": 0.58,
+      "indexDiff": 0.352,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 21.24,
+      "posOffset": 3.03,
+      "indexDiff": 0.013,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 3.09,
+      "posOffset": 57.39,
+      "indexDiff": 0.045,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 2.65,
+      "posOffset": 3.87,
+      "indexDiff": 0.359,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 35,
+      "posOffset": 0.18,
+      "indexDiff": 0.034,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 1.93,
+      "posOffset": 57.51,
+      "indexDiff": 0.007,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 0.12,
+      "posOffset": 3.92,
+      "indexDiff": 0.516,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 29.83,
+      "posOffset": 0.49,
+      "indexDiff": 0.043,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 0.89,
+      "posOffset": 53.08,
+      "indexDiff": 0.012,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 2.97,
+      "posOffset": 0.27,
+      "indexDiff": 0.675,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 24.48,
+      "posOffset": 1.76,
+      "indexDiff": 0.001,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 2.18,
+      "posOffset": 51.63,
+      "indexDiff": 0.046,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 0.76,
+      "posOffset": 2.42,
+      "indexDiff": 0.284,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 24.06,
+      "posOffset": 2.07,
+      "indexDiff": 0.008,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 1.9,
+      "posOffset": 50.09,
+      "indexDiff": 0.013,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 2.5,
+      "posOffset": 3.03,
+      "indexDiff": 0.364,
       "label": 2,
       "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
     }

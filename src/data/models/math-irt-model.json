@@ -1,7 +1,7 @@
 {
   "metadata": {
     "modelName": "Item Response Theory (IRT) Math Adaptive Difficulty Model",
-    "trainedAt": "2026-08-31T07:30:23.520Z",
+    "trainedAt": "2026-08-31T07:45:39.078Z",
     "datasetSize": 10,
     "accuracy": "90.0%",
     "meanLogLoss": "0.4557",

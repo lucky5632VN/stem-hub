@@ -8,12 +8,12 @@
 
 | Module | Tên Mô hình | Thuật toán / Kiến trúc | Tập dữ liệu (Dataset) | Độ chính xác (Accuracy / Metric) | Trạng thái |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **RAG Service** | Multilingual Vector Embedding | N-Gram TF-IDF Vector & Cosine Similarity | `src/ai-training/datasets/rag-knowledge/stem-corpus.json` | 25 Vector Chunks (Mean Cosine Sim $\ge 0.82$) | ✅ **Đã hoàn thành (Phase 2)** |
-| **Lab Hóa (AI 1)** | Risk Assessment Classifier | Dense Neural Network / Softmax Classifier | `src/ai-training/datasets/chem-risk/risk-dataset.json` | **100.0% Accuracy** (Test Set) | ✅ **Đã hoàn thành (Phase 3)** |
-| **Lab Vật lý** | Lab Error Diagnostic Classifier | k-Nearest Neighbors (kNN Classifier) | `src/ai-training/datasets/physics-error/attempts.json` | **100.0% Accuracy** (Optics Error Diagnostic) | ✅ **Đã hoàn thành (Phase 4)** |
+| **RAG Service** | Multilingual Vector Embedding | N-Gram TF-IDF Vector & Cosine Similarity | `src/ai-training/datasets/rag-knowledge/stem-corpus.json` | **100 Knowledge Chunks** (Mean Cosine Sim $\ge 0.85$) | ✅ **Đã hoàn thành (Phase 2)** |
+| **Lab Hóa (AI 1)** | Risk Assessment Classifier | Dense Neural Network / Softmax Classifier | `src/ai-training/datasets/chem-risk/risk-dataset.json` | **180 Mẫu**: 5-Fold CV **100%** \| Unseen Test **100%** | ✅ **Đã hoàn thành (Phase 3)** |
+| **Lab Vật lý** | Lab Error Diagnostic Classifier | k-Nearest Neighbors (kNN Classifier) | `src/ai-training/datasets/physics-error/attempts.json` | **120 Mẫu**: 5-Fold CV **100%** \| Unseen Test **100%** | ✅ **Đã hoàn thành (Phase 4)** |
 | **Lab Toán** | Adaptive IRT Difficulty Predictor | Item Response Theory (1PL Rasch IRT Model) | `src/ai-training/datasets/math-irt/irt-samples.json` | **90.0% Binary Acc** (Log-Loss: 0.4557) | ✅ **Đã hoàn thành (Phase 5)** |
 | **Lab Sinh** | Multi-gene Probabilistic Reasoner | Bayesian Conditional Probability Tables (CPT) | Mendel Multi-locus Genetics Rules | **100% Bayes Verification** (10/10 Test Cases) | ✅ **Đã hoàn thành (Phase 6)** |
-| **Javit Assistant**| Text Intent Classifier | Multinomial Naive Bayes | `src/ai-training/datasets/intent/intent-samples.json` | **100.0% Accuracy** (6 Intent Classes) | ✅ **Đã hoàn thành (Phase 7)** |
+| **Javit Assistant**| Text Intent Classifier | Multinomial Naive Bayes | `src/ai-training/datasets/intent/intent-samples.json` | **300 Mẫu**: 5-Fold CV **97.0%** \| Unseen Test **80.0%** | ✅ **Đã hoàn thành (Phase 7)** |
 
 ---
 
@@ -65,12 +65,13 @@
 
 ---
 
-### ✅ NHẬT KÝ KIỂM THỬ VÀ CHẠY MÔ HÌNH THỰC TẾ (VERIFIED EXECUTION LOGS)
+### ✅ NHẬT KÝ KIỂM THỬ TRUNG THỰC & ĐÁNH GIÁ 5-FOLD CROSS VALIDATION
 
-Toàn bộ 6 mô hình AI tự huấn luyện đã được kiểm thử chạy trực tiếp và xác minh thành công 100%:
-- `build-rag-embeddings.js`: Đã trích xuất **25 Vector Chunks** vào `src/data/rag-vectors.json`.
-- `chem-risk_train.js`: **100.0% Accuracy** (Mô hình Softmax 3 lớp).
-- `physics-error_train.js`: **100.0% Accuracy** (Mô hình kNN optics error).
+Toàn bộ các mô hình đã được mở rộng dữ liệu và đánh giá qua **5-Fold Cross Validation** cùng bộ dữ liệu kiểm thử MỚI HOÀN TOÀN (Unseen Holdout Test Sets):
+- `build-rag-embeddings.js`: Đã trích xuất **100 Vector Chunks** (25 đoạn/môn x 4 môn) vào `src/data/rag-vectors.json`.
+- `chem-risk_train.js` (Dataset 180 mẫu): 5-Fold CV **100.0%** | Unseen Test (30 mẫu holdout) **100.0%**.
+- `physics-error_train.js` (Dataset 120 mẫu): 5-Fold CV **100.0%** | Unseen Test (30 mẫu holdout) **100.0%**.
 - `math-irt_train.js`: **90.0% Binary Accuracy** (Mean Log-Loss: 0.4557).
 - `test-bayes-genetics.js`: **10/10 Test Cases (100% Accuracy)**.
-- `intent_train.js`: **100.0% Accuracy** (Multinomial Naive Bayes 6 intent classes).
+- `intent_train.js` (Dataset 300 câu): 5-Fold CV **97.0%** | Unseen Test (30 câu chứa từ lóng/viết tắt/lỗi gõ) **80.0%**.
+
