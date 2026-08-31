@@ -1,6 +1,8 @@
-import stemCorpus from '../ai-training/datasets/rag-knowledge/stem-corpus.json';
+import ragData from '../data/rag-vectors.json';
 
-// Simple Vietnamese Tokenizer & N-Gram Feature Extractor for Semantic Vector Matching
+const { idfWeights, corpus } = ragData;
+
+// Tokenizer & N-Gram Feature Extractor
 function tokenize(text) {
   if (!text) return [];
   const clean = text
@@ -12,74 +14,68 @@ function tokenize(text) {
   
   const words = clean.split(' ').filter(w => w.length > 0);
   const nGrams = [];
-
   for (let i = 0; i < words.length; i++) {
     nGrams.push(words[i]);
-    if (i < words.length - 1) {
-      nGrams.push(`${words[i]}_${words[i + 1]}`);
-    }
+    if (i < words.length - 1) nGrams.push(`${words[i]}_${words[i + 1]}`);
   }
   return nGrams;
 }
 
-// Compute Term Frequency Vector Object
-function buildTFVector(tokens) {
+// Compute TF-IDF Vector for Query using precalculated IDF Weights
+function buildQueryTFIDFVector(tokens) {
   const tfMap = {};
+  const len = tokens.length || 1;
   for (const token of tokens) {
     tfMap[token] = (tfMap[token] || 0) + 1;
   }
-  return tfMap;
+
+  const tfidfMap = {};
+  for (const word in tfMap) {
+    const tf = tfMap[word] / len;
+    const idf = idfWeights[word] || Math.log(ragData.metadata.totalDocs + 1) + 1.0;
+    tfidfMap[word] = tf * idf;
+  }
+  return tfidfMap;
 }
 
-// Compute Cosine Similarity between two TF Vector objects
-export function cosineSimilarity(tfA, tfB) {
+// Compute Cosine Similarity between two TF-IDF Vector Objects
+export function cosineSimilarity(vecA, vecB) {
   let dotProduct = 0;
   let normA = 0;
   let normB = 0;
 
-  for (const key in tfA) {
-    normA += tfA[key] * tfA[key];
-    if (tfB[key]) {
-      dotProduct += tfA[key] * tfB[key];
+  for (const key in vecA) {
+    normA += vecA[key] * vecA[key];
+    if (vecB[key]) {
+      dotProduct += vecA[key] * vecB[key];
     }
   }
 
-  for (const key in tfB) {
-    normB += tfB[key] * tfB[key];
+  for (const key in vecB) {
+    normB += vecB[key] * vecB[key];
   }
 
   if (normA === 0 || normB === 0) return 0;
   return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
-// Pre-index the stem corpus with precomputed TF Vectors
-const indexedCorpus = stemCorpus.map((item) => {
-  const fullText = `${item.topic} ${item.content} ${item.subject}`;
-  const tokens = tokenize(fullText);
-  return {
-    ...item,
-    tfVector: buildTFVector(tokens)
-  };
-});
-
 /**
- * Retrieve Top-K most relevant knowledge entries using Cosine Similarity
+ * Retrieve Top-K most relevant STEM knowledge entries using TF-IDF + Cosine Similarity
  * @param {string} query User query
  * @param {number} k Number of documents to return (default: 3)
- * @returns {Array<{id: string, subject: string, topic: string, content: string, score: number}>}
  */
 export function retrieveTopK(query, k = 3) {
   if (!query || typeof query !== 'string') return [];
 
   const queryTokens = tokenize(query);
-  const queryTF = buildTFVector(queryTokens);
+  const queryTFIDF = buildQueryTFIDFVector(queryTokens);
 
-  if (Object.keys(queryTF).length === 0) return [];
+  if (Object.keys(queryTFIDF).length === 0) return [];
 
-  const scored = indexedCorpus.map((doc) => {
-    let score = cosineSimilarity(queryTF, doc.tfVector);
+  const scored = corpus.map((doc) => {
+    let score = cosineSimilarity(queryTFIDF, doc.tfidfVector);
 
-    // Subject boost if query explicitly mentions subject
+    // Subject boost for explicit subject keywords
     const qLower = query.toLowerCase();
     if (doc.subject === 'hoa' && (qLower.includes('hóa') || qLower.includes('hoa') || qLower.includes('este') || qLower.includes('axit'))) {
       score *= 1.25;
@@ -101,12 +97,11 @@ export function retrieveTopK(query, k = 3) {
   });
 
   scored.sort((a, b) => b.score - a.score);
-
   return scored.slice(0, k).filter(doc => doc.score > 0.05);
 }
 
 export function getCorpus() {
-  return indexedCorpus;
+  return corpus;
 }
 
 export default {

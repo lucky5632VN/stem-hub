@@ -1,32 +1,41 @@
 {
   "metadata": {
-    "modelName": "ChemLab Risk Assessment Hybrid Engine (Ablation Verified)",
-    "trainedAt": "2026-08-31T08:17:18.190Z",
+    "modelName": "ChemLab Risk Assessment Perfected Hybrid Engine",
+    "trainedAt": "2026-08-31T12:32:57.467Z",
     "datasetSize": 180,
-    "edgeCaseAccuracy": "95.00%",
+    "epochs": 1000,
+    "discreteAccuracy": "95.00%",
     "falseNegativesCount": 0,
-    "confusionMatrix": [
-      [
-        3,
-        0,
-        0
-      ],
-      [
-        0,
-        9,
-        1
-      ],
-      [
-        0,
-        0,
-        7
-      ]
-    ]
+    "monotonicCorrelation": {
+      "meanSafeRiskScore": "22.51%",
+      "meanWarnRiskScore": "51.43%",
+      "meanDangerRiskScore": "71.57%",
+      "isMonotonic": true
+    }
   },
-  "weights": {
-    "tempWeight": 0.45,
-    "energyWeight": 0.25,
-    "violationWeight": 0.2,
-    "hazardWeight": 0.1
-  }
+  "weights": [
+    [
+      -0.9147912804654883,
+      -0.8544282536841148,
+      -0.9082027226689018,
+      -0.7076971450380954
+    ],
+    [
+      -1.144496593690135,
+      -0.8562873401285033,
+      -2.4401207347297285,
+      0.33461122083591355
+    ],
+    [
+      2.097105185078302,
+      1.5680692375383964,
+      3.40712774785097,
+      0.3853334773279209
+    ]
+  ],
+  "biases": [
+    -1.4080962796625551,
+    2.0519858407438827,
+    -0.6691177249768803
+  ]
 }
