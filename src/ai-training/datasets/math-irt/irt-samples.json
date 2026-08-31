@@ -1,0 +1,12 @@
+[
+  {"studentElo": 1000, "itemDiff": 1000, "isCorrect": 1},
+  {"studentElo": 1000, "itemDiff": 1400, "isCorrect": 0},
+  {"studentElo": 1200, "itemDiff": 1200, "isCorrect": 1},
+  {"studentElo": 1200, "itemDiff": 1600, "isCorrect": 0},
+  {"studentElo": 1500, "itemDiff": 1400, "isCorrect": 1},
+  {"studentElo": 1500, "itemDiff": 1800, "isCorrect": 0},
+  {"studentElo": 1800, "itemDiff": 1600, "isCorrect": 1},
+  {"studentElo": 1800, "itemDiff": 2200, "isCorrect": 0},
+  {"studentElo": 2000, "itemDiff": 1800, "isCorrect": 1},
+  {"studentElo": 2000, "itemDiff": 2200, "isCorrect": 1}
+]
