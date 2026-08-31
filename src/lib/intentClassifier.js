@@ -1,8 +1,10 @@
 import modelData from '../data/models/intent-classifier.json';
+import { normalizeText } from './textNormalizer.js';
 
 function tokenize(text) {
   if (!text) return [];
-  return text
+  const normalized = normalizeText(text);
+  return normalized
     .toLowerCase()
     .normalize('NFC')
     .replace(/[^\w\sàáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]/g, ' ')
@@ -13,7 +15,7 @@ function tokenize(text) {
 }
 
 /**
- * Classify user prompt intent & subject using precomputed Naive Bayes parameters
+ * Classify user prompt intent & subject using precomputed Naive Bayes parameters + Text Normalizer
  */
 export function predictUserIntent(text) {
   if (!text || typeof text !== 'string') {
@@ -26,6 +28,8 @@ export function predictUserIntent(text) {
 
   let bestIntent = 'stem_query';
   let maxLogProb = -Infinity;
+  const scores = {};
+  let sumScore = 0;
 
   for (const intent in classCounts) {
     const priorLogProb = Math.log(classCounts[intent] / totalDocs);
@@ -37,19 +41,27 @@ export function predictUserIntent(text) {
       logProb += likelihood;
     });
 
+    scores[intent] = Math.exp(logProb);
+    sumScore += scores[intent];
+
     if (logProb > maxLogProb) {
       maxLogProb = logProb;
       bestIntent = intent;
     }
   }
 
-  // Generate systemic command if applicable
+  const confidenceProb = sumScore > 0 ? (scores[bestIntent] / sumScore) : 0;
+  const isLowConfidence = confidenceProb < 0.65;
+
+  // Generate systemic command if applicable (only if confidence >= 0.65)
   let command = null;
-  if (bestIntent === 'nav_phongthi') command = '[[NAV:/phong-thi]]';
-  else if (bestIntent === 'nav_dautruong') command = '[[NAV:/dau-truong]]';
-  else if (bestIntent === 'nav_hoso') command = '[[NAV:/ho-so]]';
-  else if (bestIntent === 'nav_story') command = '[[NAV:/story]]';
-  else if (bestIntent === 'toggle_theme') command = '[[TOGGLE_THEME]]';
+  if (!isLowConfidence) {
+    if (bestIntent === 'nav_phongthi') command = '[[NAV:/phong-thi]]';
+    else if (bestIntent === 'nav_dautruong') command = '[[NAV:/dau-truong]]';
+    else if (bestIntent === 'nav_hoso') command = '[[NAV:/ho-so]]';
+    else if (bestIntent === 'nav_story') command = '[[NAV:/story]]';
+    else if (bestIntent === 'toggle_theme') command = '[[TOGGLE_THEME]]';
+  }
 
   // Detect subject
   let detectedSubject = null;
@@ -63,7 +75,8 @@ export function predictUserIntent(text) {
     intent: bestIntent,
     subject: detectedSubject,
     command,
-    confidenceLogProb: maxLogProb
+    confidenceProb,
+    isLowConfidence
   };
 }
 

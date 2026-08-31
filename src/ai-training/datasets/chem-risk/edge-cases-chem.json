@@ -1,0 +1,22 @@
+[
+  { "temp": 82, "energy": 95, "violations": 0, "chemCount": 2, "hasHazard": 0, "label": 1, "labelName": "Cảnh báo", "desc": "Nhiệt độ cao 82°C nhưng năng lượng 95%, 0 vi phạm - Tín hiệu mâu thuẫn" },
+  { "temp": 25, "energy": 100, "violations": 0, "chemCount": 3, "hasHazard": 1, "label": 1, "labelName": "Cảnh báo", "desc": "Có hóa chất nguy hiểm nhưng các chỉ số khác cực kỳ an toàn" },
+  { "temp": 45, "energy": 70, "violations": 0, "chemCount": 2, "hasHazard": 0, "label": 1, "labelName": "Cảnh báo", "desc": "Đúng ngưỡng nhiệt độ 45°C và năng lượng 70%" },
+  { "temp": 44, "energy": 71, "violations": 0, "chemCount": 2, "hasHazard": 0, "label": 0, "labelName": "An toàn", "desc": "Sát dưới ngưỡng 44°C và 71%" },
+  { "temp": 79, "energy": 36, "violations": 1, "chemCount": 4, "hasHazard": 0, "label": 1, "labelName": "Cảnh báo", "desc": "Sát dưới ngưỡng nguy hiểm (79°C, 36%, 1 vi phạm)" },
+  { "temp": 80, "energy": 35, "violations": 1, "chemCount": 4, "hasHazard": 0, "label": 2, "labelName": "Nguy hiểm", "desc": "Đúng ngưỡng nguy hiểm 80°C và 35%" },
+  { "temp": 30, "energy": 40, "violations": 0, "chemCount": 1, "hasHazard": 0, "label": 1, "labelName": "Cảnh báo", "desc": "Nhiệt độ thấp nhưng năng lượng tụt xuống 40%" },
+  { "temp": 110, "energy": 90, "violations": 0, "chemCount": 1, "hasHazard": 0, "label": 2, "labelName": "Nguy hiểm", "desc": "Nhiệt độ cực cao 110°C dù năng lượng còn nhiều" },
+  { "temp": 20, "energy": 100, "violations": 2, "chemCount": 2, "hasHazard": 0, "label": 2, "labelName": "Nguy hiểm", "desc": "Nhiệt độ an toàn nhưng vi phạm 2 lỗi an toàn nghiêm trọng" },
+  { "temp": 35, "energy": 80, "violations": 1, "chemCount": 6, "hasHazard": 0, "label": 1, "labelName": "Cảnh báo", "desc": "Chỉ 1 vi phạm đơn lẻ" },
+  { "temp": 50, "energy": 60, "violations": 0, "chemCount": 5, "hasHazard": 1, "label": 1, "labelName": "Cảnh báo", "desc": "Tín hiệu cảnh báo kết hợp hóa chất nguy hiểm" },
+  { "temp": 85, "energy": 80, "violations": 0, "chemCount": 2, "hasHazard": 0, "label": 2, "labelName": "Nguy hiểm", "desc": "Nhiệt độ vượt 85°C kích hoạt báo động đỏ" },
+  { "temp": 40, "energy": 30, "violations": 0, "chemCount": 2, "hasHazard": 0, "label": 2, "labelName": "Nguy hiểm", "desc": "Năng lượng cạn kiệt <= 30%" },
+  { "temp": 60, "energy": 55, "violations": 0, "chemCount": 3, "hasHazard": 0, "label": 1, "labelName": "Cảnh báo", "desc": "Mức trung bình không vi phạm" },
+  { "temp": 70, "energy": 50, "violations": 1, "chemCount": 4, "hasHazard": 1, "label": 1, "labelName": "Cảnh báo", "desc": "Ngưỡng cảnh báo cao" },
+  { "temp": 28, "energy": 95, "violations": 0, "chemCount": 8, "hasHazard": 0, "label": 0, "labelName": "An toàn", "desc": "Số hóa chất nhiều (8) nhưng chỉ số bình thường" },
+  { "temp": 75, "energy": 45, "violations": 1, "chemCount": 5, "hasHazard": 1, "label": 1, "labelName": "Cảnh báo", "desc": "Tiệm cận nguy hiểm" },
+  { "temp": 80, "energy": 34, "violations": 2, "chemCount": 3, "hasHazard": 1, "label": 2, "labelName": "Nguy hiểm", "desc": "Cả 4 yếu tố đều ở mức cảnh báo đỏ" },
+  { "temp": 38, "energy": 75, "violations": 0, "chemCount": 2, "hasHazard": 0, "label": 0, "labelName": "An toàn", "desc": "Gần sát ngưỡng cảnh báo" },
+  { "temp": 115, "energy": 10, "violations": 4, "chemCount": 7, "hasHazard": 1, "label": 2, "labelName": "Nguy hiểm", "desc": "Tình huống sự cố thảm họa" }
+]

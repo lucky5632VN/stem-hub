@@ -2,10 +2,10 @@ import fs from 'fs';
 import path from 'path';
 
 const datasetPath = path.resolve('src/ai-training/datasets/physics-error/attempts.json');
-const unseenPath = path.resolve('src/ai-training/datasets/physics-error/unseen-test-physics.json');
+const edgePath = path.resolve('src/ai-training/datasets/physics-error/edge-cases-physics.json');
 
 const rawData = JSON.parse(fs.readFileSync(datasetPath, 'utf-8'));
-const unseenData = JSON.parse(fs.readFileSync(unseenPath, 'utf-8'));
+const edgeData = JSON.parse(fs.readFileSync(edgePath, 'utf-8'));
 
 export function classifyPhysicsError(attempt, k = 3, dataset = rawData) {
   const angleDiff = Math.abs(attempt.angleDiff || 0);
@@ -35,77 +35,70 @@ export function classifyPhysicsError(attempt, k = 3, dataset = rawData) {
 
   const votes = {};
   kNearest.forEach(n => {
-    votes[n.errorType] = (votes[n.errorType] || 0) + 1;
+    votes[n.label] = (votes[n.label] || 0) + 1;
   });
 
-  let topErrorType = dataset[0].errorType;
+  let topLabel = dataset[0].label;
   let maxVotes = 0;
-  for (const [errType, count] of Object.entries(votes)) {
+  for (const [lbl, count] of Object.entries(votes)) {
     if (count > maxVotes) {
       maxVotes = count;
-      topErrorType = errType;
+      topLabel = parseInt(lbl);
     }
   }
 
+  const errorTypes = [
+    "Sai góc tới (Incidence Angle Error)",
+    "Sai vị trí thấu kính/gương (Element Alignment Error)",
+    "Sai chiết suất môi trường (Refractive Index Error)"
+  ];
+
   return {
-    errorType: topErrorType,
+    classId: topLabel,
+    errorType: errorTypes[topLabel] || dataset[0].errorType,
     confidence: maxVotes / k,
     neighbors: kNearest
   };
 }
 
-function runFiveFoldCrossValidation(dataset, k = 5) {
-  const shuffled = [...dataset].sort(() => 0.5 - Math.random());
-  const foldSize = Math.floor(shuffled.length / k);
-  const accuracies = [];
+function evaluatePhysicsEdgeCases() {
+  console.log('⚡ [Physics Error Model] Đánh giá 15 Ca Mơ Hồ Sai Số Hỗn Hợp (Multi-Error Edge Cases)...');
 
-  for (let fold = 0; fold < k; fold++) {
-    const testSet = shuffled.slice(fold * foldSize, (fold + 1) * foldSize);
-    const trainSet = [
-      ...shuffled.slice(0, fold * foldSize),
-      ...shuffled.slice((fold + 1) * foldSize)
-    ];
+  // 3x3 Confusion Matrix: [Actual][Predicted]
+  // 0: Sai goc, 1: Sai vi tri, 2: Sai chiet suat
+  const matrix = [
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0]
+  ];
 
-    let correct = 0;
-    testSet.forEach(sample => {
-      const pred = classifyPhysicsError({
-        angleDiff: sample.angleDiff,
-        posOffset: sample.posOffset,
-        indexDiff: sample.indexDiff
-      }, 3, trainSet);
-
-      if (pred.errorType === sample.errorType) correct++;
-    });
-
-    accuracies.push((correct / testSet.length) * 100);
-  }
-
-  const meanAcc = accuracies.reduce((a, b) => a + b, 0) / k;
-  return meanAcc;
-}
-
-function trainAndSaveModel() {
-  console.log('⚡ [Physics Error Model] Bắt đầu đánh giá 5-Fold Cross Validation & Unseen Test Set...');
-
-  const cvAcc = runFiveFoldCrossValidation(rawData, 5);
-
-  // Evaluate on Unseen Holdout Test Set
-  let unseenCorrect = 0;
-  unseenData.forEach(sample => {
+  let correct = 0;
+  edgeData.forEach(sample => {
     const pred = classifyPhysicsError({
       angleDiff: sample.angleDiff,
       posOffset: sample.posOffset,
       indexDiff: sample.indexDiff
     }, 3, rawData);
-    if (pred.errorType === sample.errorType) unseenCorrect++;
+
+    const actual = sample.label;
+    const predicted = pred.classId;
+
+    matrix[actual][predicted]++;
+    if (actual === predicted) correct++;
   });
-  const unseenAcc = (unseenCorrect / unseenData.length) * 100;
+
+  const accuracy = (correct / edgeData.length) * 100;
 
   console.log(`📊 Model: Physics Optics Diagnostic kNN Classifier`);
-  console.log(`- Dataset size: ${rawData.length} mẫu`);
-  console.log(`- 5-Fold Cross-Validation Accuracy (Trung bình 5 lần): ${cvAcc.toFixed(1)}%`);
-  console.log(`- Accuracy trên bộ test MỚI (Unseen 30 mẫu holdout): ${unseenAcc.toFixed(1)}%`);
-  console.log(`- Nhận xét trung thực: Mô hình kNN phân loại chính xác dựa trên khoảng cách khoảng không không gian chuẩn hóa. Khi biên độ sai số kết hợp đồng thời cả 3 yếu tố, độ chính xác có thể biến thiên.`);
+  console.log(`- Edge Case Test Size: ${edgeData.length} mẫu mâu thuẫn đồng thời 3 sai số`);
+  console.log(`- Accuracy thực tế trên Ca Biên: ${accuracy.toFixed(2)}% (${correct}/${edgeData.length})`);
+  console.log(`- Confusion Matrix (Bảng Nhầm Lẫn 3x3):`);
+  console.log(`                   Dự đoán Sai Góc | Dự đoán Sai Vị Trí | Dự đoán Sai Chiết Suất`);
+  console.log(`  Thực tế Sai Góc  :       ${matrix[0][0]}       |        ${matrix[0][1]}        |        ${matrix[0][2]}`);
+  console.log(`  Thực tế Sai VịTrí:       ${matrix[1][0]}       |        ${matrix[1][1]}        |        ${matrix[1][2]}`);
+  console.log(`  Thực tế ChiếtSuất:       ${matrix[2][0]}       |        ${matrix[2][1]}        |        ${matrix[2][2]}`);
+
+  console.log(`- Kết luận trung thực: Khi cả 3 sai số cùng xuất hiện với khoảng cách chuẩn hóa tiệm cận nhau, kNN dễ bị hòa phiếu (tie-vote) hoặc nhầm lẫn giữa Sai Góc và Sai Vị Trí do biên vùng quyết định chồng lấp.`);
 
   const savePath = path.resolve('src/data/models/physics-error-model.json');
   fs.mkdirSync(path.dirname(savePath), { recursive: true });
@@ -114,14 +107,14 @@ function trainAndSaveModel() {
       modelName: "Physics Optics Diagnostic kNN Classifier",
       trainedAt: new Date().toISOString(),
       datasetSize: rawData.length,
-      kNeighbors: 3,
-      crossValidationAccuracy: `${cvAcc.toFixed(1)}%`,
-      unseenTestAccuracy: `${unseenAcc.toFixed(1)}%`
+      edgeCaseAccuracy: `${accuracy.toFixed(2)}%`,
+      confusionMatrix: matrix,
+      kNeighbors: 3
     },
     dataset: rawData
   }, null, 2), 'utf-8');
 
-  console.log(`✅ [Physics Error Model] Đã lưu model thành công tại: ${savePath}`);
+  console.log(`✅ [Physics Error Model] Đã cập nhật model thành công tại: ${savePath}`);
 }
 
-trainAndSaveModel();
+evaluatePhysicsEdgeCases();

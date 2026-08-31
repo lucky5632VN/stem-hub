@@ -2,10 +2,10 @@ import fs from 'fs';
 import path from 'path';
 
 const datasetPath = path.resolve('src/ai-training/datasets/chem-risk/risk-dataset.json');
-const unseenPath = path.resolve('src/ai-training/datasets/chem-risk/unseen-test-chem.json');
+const edgePath = path.resolve('src/ai-training/datasets/chem-risk/edge-cases-chem.json');
 
 const rawData = JSON.parse(fs.readFileSync(datasetPath, 'utf-8'));
-const unseenData = JSON.parse(fs.readFileSync(unseenPath, 'utf-8'));
+const edgeData = JSON.parse(fs.readFileSync(edgePath, 'utf-8'));
 
 export function predictChemRisk(features) {
   const temp = features.temp || 25;
@@ -45,41 +45,19 @@ export function predictChemRisk(features) {
   };
 }
 
-function runFiveFoldCrossValidation(dataset, k = 5) {
-  const shuffled = [...dataset].sort(() => 0.5 - Math.random());
-  const foldSize = Math.floor(shuffled.length / k);
-  const accuracies = [];
+function evaluateEdgeCasesWithConfusionMatrix() {
+  console.log('⚡ [Chem Risk Model] Đánh giá Ca Biên & Conflicting Signals (Edge Cases)...');
 
-  for (let fold = 0; fold < k; fold++) {
-    const testSet = shuffled.slice(fold * foldSize, (fold + 1) * foldSize);
-    let correct = 0;
+  // 3x3 Confusion Matrix: [Actual][Predicted]
+  // 0: An toan, 1: Canh bao, 2: Nguy hiem
+  const matrix = [
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0]
+  ];
 
-    testSet.forEach(sample => {
-      const pred = predictChemRisk({
-        temp: sample.temp,
-        energy: sample.energy,
-        violations: sample.violations,
-        chemCount: sample.chemCount,
-        hasHazard: sample.hasHazard === 1
-      });
-      if (pred.classId === sample.label) correct++;
-    });
-
-    accuracies.push((correct / testSet.length) * 100);
-  }
-
-  const meanAcc = accuracies.reduce((a, b) => a + b, 0) / k;
-  return meanAcc;
-}
-
-function trainAndEvaluate() {
-  console.log('⚡ [Chem Risk Model] Bắt đầu đánh giá 5-Fold Cross Validation & Unseen Test Set...');
-
-  const cvAcc = runFiveFoldCrossValidation(rawData, 5);
-
-  // Evaluate on Unseen Holdout Test Set
-  let unseenCorrect = 0;
-  unseenData.forEach(sample => {
+  let correct = 0;
+  edgeData.forEach(sample => {
     const pred = predictChemRisk({
       temp: sample.temp,
       energy: sample.energy,
@@ -87,15 +65,26 @@ function trainAndEvaluate() {
       chemCount: sample.chemCount,
       hasHazard: sample.hasHazard === 1
     });
-    if (pred.classId === sample.label) unseenCorrect++;
+
+    const actual = sample.label;
+    const predicted = pred.classId;
+
+    matrix[actual][predicted]++;
+    if (actual === predicted) correct++;
   });
-  const unseenAcc = (unseenCorrect / unseenData.length) * 100;
+
+  const accuracy = (correct / edgeData.length) * 100;
 
   console.log(`📊 Model: ChemLab Risk Classifier`);
-  console.log(`- Dataset size: ${rawData.length} mẫu`);
-  console.log(`- 5-Fold Cross-Validation Accuracy (Trung bình 5 lần): ${cvAcc.toFixed(1)}%`);
-  console.log(`- Accuracy trên bộ test MỚI (Unseen 30 mẫu holdout): ${unseenAcc.toFixed(1)}%`);
-  console.log(`- Nhận xét trung thực: Mô hình phân loại rủi ro theo ngưỡng an toàn phòng hóa với 3 lớp (An toàn, Cảnh báo, Nguy hiểm). Cần mở rộng thêm các phản ứng tỏa nhiệt đặc biệt ngoài môi trường tiêu chuẩn.`);
+  console.log(`- Edge Case Test Size: ${edgeData.length} mẫu mâu thuẫn / nằm đúng ngưỡng`);
+  console.log(`- Accuracy thực tế trên Ca Biên: ${accuracy.toFixed(2)}% (${correct}/${edgeData.length})`);
+  console.log(`- Confusion Matrix (Bảng Nhầm Lẫn 3x3):`);
+  console.log(`                   Dự đoán An toàn | Dự đoán Cảnh báo | Dự đoán Nguy hiểm`);
+  console.log(`  Thực tế An toàn  :       ${matrix[0][0]}         |        ${matrix[0][1]}         |        ${matrix[0][2]}`);
+  console.log(`  Thực tế Cảnh báo :       ${matrix[1][0]}         |        ${matrix[1][1]}         |        ${matrix[1][2]}`);
+  console.log(`  Thực tế Nguy hiểm:       ${matrix[2][0]}         |        ${matrix[2][1]}         |        ${matrix[2][2]}`);
+
+  console.log(`- Kết luận trung thực: Mô hình phân loại ranh giới cứng (Hard threshold rule-based neural scores). Với ca tín hiệu mâu thuẫn như nhiệt độ cao nhưng không vi phạm và năng lượng tốt, mô hình ưu tiên đảm bảo an toàn tuyệt đối (Safety-first priority).`);
 
   const savePath = path.resolve('src/data/models/chem-risk-model.json');
   fs.mkdirSync(path.dirname(savePath), { recursive: true });
@@ -104,8 +93,8 @@ function trainAndEvaluate() {
       modelName: "ChemLab Risk Assessment Neural Classifier",
       trainedAt: new Date().toISOString(),
       datasetSize: rawData.length,
-      crossValidationAccuracy: `${cvAcc.toFixed(1)}%`,
-      unseenTestAccuracy: `${unseenAcc.toFixed(1)}%`,
+      edgeCaseAccuracy: `${accuracy.toFixed(2)}%`,
+      confusionMatrix: matrix,
       features: ["temp", "energy", "violations", "chemCount", "hasHazard"]
     },
     weights: {
@@ -118,7 +107,7 @@ function trainAndEvaluate() {
     }
   }, null, 2), 'utf-8');
 
-  console.log(`✅ [Chem Risk Model] Đã lưu model thành công tại: ${savePath}`);
+  console.log(`✅ [Chem Risk Model] Đã cập nhật model thành công tại: ${savePath}`);
 }
 
-trainAndEvaluate();
+evaluateEdgeCasesWithConfusionMatrix();

@@ -1,11 +1,27 @@
 {
   "metadata": {
     "modelName": "Physics Optics Diagnostic kNN Classifier",
-    "trainedAt": "2026-08-31T07:45:39.008Z",
+    "trainedAt": "2026-08-31T07:51:55.191Z",
     "datasetSize": 120,
-    "kNeighbors": 3,
-    "crossValidationAccuracy": "100.0%",
-    "unseenTestAccuracy": "100.0%"
+    "edgeCaseAccuracy": "33.33%",
+    "confusionMatrix": [
+      [
+        0,
+        0,
+        5
+      ],
+      [
+        0,
+        0,
+        5
+      ],
+      [
+        0,
+        0,
+        5
+      ]
+    ],
+    "kNeighbors": 3
   },
   "dataset": [
     {
