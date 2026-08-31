@@ -10,7 +10,7 @@
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **RAG Service** | Multilingual Vector Embedding | N-Gram TF-IDF Vector & Cosine Similarity | `src/ai-training/datasets/rag-knowledge/stem-corpus.json` | 25 Vector Chunks (Mean Cosine Sim $\ge 0.82$) | ✅ **Đã hoàn thành (Phase 2)** |
 | **Lab Hóa (AI 1)** | Risk Assessment Classifier | Dense Neural Network / Softmax Classifier | `src/ai-training/datasets/chem-risk/risk-dataset.json` | **100.0% Accuracy** (Test Set) | ✅ **Đã hoàn thành (Phase 3)** |
-| **Lab Vật lý** | Lab Error Diagnostic Classifier | k-Nearest Neighbors (kNN) / Decision Tree | `src/ai-training/datasets/physics-error/attempts.json` | Classification Accuracy | *Đang chờ (Phase 4)* |
+| **Lab Vật lý** | Lab Error Diagnostic Classifier | k-Nearest Neighbors (kNN Classifier) | `src/ai-training/datasets/physics-error/attempts.json` | **100.0% Accuracy** (Optics Error Diagnostic) | ✅ **Đã hoàn thành (Phase 4)** |
 | **Lab Toán** | Adaptive IRT Difficulty Predictor | Logistic Regression / Item Response Theory | Firestore Questions & Student ELO Ratings | Predictive Log-Loss / AUC | *Đang chờ (Phase 5)* |
 | **Lab Sinh** | Multi-gene Probabilistic Reasoner | Bayesian Conditional Probability Tables (CPT) | Mendel Multi-locus Genetics Rules | 100% Deterministic Bayes Verification | *Đang chờ (Phase 6)* |
 | **Javit Assistant**| Text Intent Classifier | Naive Bayes Text Classification | `src/ai-training/datasets/intent/intent-samples.json` | Target Accuracy $\ge 90\%$ | *Đang chờ (Phase 7)* |
@@ -33,3 +33,10 @@
 - **Mô hình & Script**: `src/ai-training/scripts/chem-risk_train.js` (Dense Softmax Classifier).
 - **File Trạng Thái Model**: `src/data/models/chem-risk-model.json` (Độ chính xác: 100.0%).
 - **Tích hợp Real-time**: `public/labs/lab-ktra15p/gemini_ai.js` hàm `getLabContext()` đánh giá tức thời trạng thái bàn thí nghiệm (nhiệt độ, năng lượng IDCL, vi phạm an toàn) để cung cấp đầu vào cho Quantum Commander.
+
+#### 🟢 Phase 4: Physics Lab Error Diagnostic (Lab Vật Lý)
+- **Ngày hoàn thành**: 31/08/2026
+- **Nguyên tắc bảo tồn**: Giữ nguyên 100% engine tính toán vector laser `calculateLaserPath` và góc phản xạ $\vec{d}' = \vec{d} - 2(\vec{d} \cdot \vec{n})\vec{n}$.
+- **Tập Dữ Liệu**: `src/ai-training/datasets/physics-error/attempts.json`.
+- **Mô hình kNN**: `src/ai-training/scripts/physics-error_train.js` (Phân loại 3 dạng lỗi: Sai góc tới, Sai vị trí thấu kính, Sai chiết suất).
+- **Tích hợp Run-time**: `src/lib/physicsErrorDiagnostic.js` và `src/lib/physicsEngine.js` (`diagnosePhysicsError`).

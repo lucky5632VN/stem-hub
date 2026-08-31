@@ -1,0 +1,11 @@
+[
+  {"angleDiff": 25.5, "posOffset": 2.1, "indexDiff": 0.02, "label": 0, "errorType": "Sai góc tới (Incidence Angle Error)"},
+  {"angleDiff": 18.0, "posOffset": 1.5, "indexDiff": 0.01, "label": 0, "errorType": "Sai góc tới (Incidence Angle Error)"},
+  {"angleDiff": 32.0, "posOffset": 3.0, "indexDiff": 0.00, "label": 0, "errorType": "Sai góc tới (Incidence Angle Error)"},
+  {"angleDiff": 2.0, "posOffset": 45.0, "indexDiff": 0.01, "label": 1, "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"},
+  {"angleDiff": 1.5, "posOffset": 60.2, "indexDiff": 0.02, "label": 1, "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"},
+  {"angleDiff": 3.0, "posOffset": 38.5, "indexDiff": 0.00, "label": 1, "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"},
+  {"angleDiff": 1.0, "posOffset": 2.0, "indexDiff": 0.45, "label": 2, "errorType": "Sai chiết suất môi trường (Refractive Index Error)"},
+  {"angleDiff": 0.5, "posOffset": 1.0, "indexDiff": 0.60, "label": 2, "errorType": "Sai chiết suất môi trường (Refractive Index Error)"},
+  {"angleDiff": 2.0, "posOffset": 3.0, "indexDiff": 0.35, "label": 2, "errorType": "Sai chiết suất môi trường (Refractive Index Error)"}
+]

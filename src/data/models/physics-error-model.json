@@ -1,0 +1,74 @@
+{
+  "metadata": {
+    "modelName": "Physics Optics Diagnostic kNN Classifier",
+    "trainedAt": "2026-08-31T07:29:38.354Z",
+    "datasetSize": 9,
+    "kNeighbors": 3,
+    "accuracy": "100.0%"
+  },
+  "dataset": [
+    {
+      "angleDiff": 25.5,
+      "posOffset": 2.1,
+      "indexDiff": 0.02,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 18,
+      "posOffset": 1.5,
+      "indexDiff": 0.01,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 32,
+      "posOffset": 3,
+      "indexDiff": 0,
+      "label": 0,
+      "errorType": "Sai góc tới (Incidence Angle Error)"
+    },
+    {
+      "angleDiff": 2,
+      "posOffset": 45,
+      "indexDiff": 0.01,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 1.5,
+      "posOffset": 60.2,
+      "indexDiff": 0.02,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 3,
+      "posOffset": 38.5,
+      "indexDiff": 0,
+      "label": 1,
+      "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+    },
+    {
+      "angleDiff": 1,
+      "posOffset": 2,
+      "indexDiff": 0.45,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 0.5,
+      "posOffset": 1,
+      "indexDiff": 0.6,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    },
+    {
+      "angleDiff": 2,
+      "posOffset": 3,
+      "indexDiff": 0.35,
+      "label": 2,
+      "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+    }
+  ]
+}
