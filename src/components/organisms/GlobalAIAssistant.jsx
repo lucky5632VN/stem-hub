@@ -211,32 +211,12 @@ function FormattedAIMessage({ text, onNavigate, isDark = true }) {
       trimmed = trimmed.replace(/^\s*[\*\-\•]\s*/, '').trim();
     }
 
-    const autoSearchObj = isBullet ? getTopicSearchObject(line) : null;
-
     if (isBullet) {
       return (
         <div key={idx} className="flex items-start gap-2 my-1.5 pl-1">
           <span className={`w-1.5 h-1.5 rounded-full mt-2 shrink-0 animate-pulse ${isDark ? 'bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,0.8)]' : 'bg-pink-500'}`} />
           <div className={`flex-1 leading-relaxed ${isDark ? 'text-[#e4e4e7]' : 'text-pink-900 font-medium'}`}>
             {renderInlineContent(trimmed, `line_${idx}`)}
-            
-            {/* Tự động chèn Nút Link Tra Cứu Google khớp chính xác nội dung trong khung chat */}
-            {autoSearchObj && (
-              <a
-                href={autoSearchObj.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`inline-flex items-center gap-1 px-2 py-0.5 ml-1.5 rounded-lg text-[10px] font-mono transition-all no-underline shrink-0 align-middle group/link ${
-                  isDark
-                    ? 'bg-cyan-500/15 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 hover:text-white shadow-[0_0_8px_rgba(34,211,238,0.15)]'
-                    : 'bg-pink-50/80 hover:bg-pink-100 border border-pink-200/70 text-pink-700 hover:text-pink-900 font-medium'
-                }`}
-                title={`Tra cứu Google: ${autoSearchObj.title}`}
-              >
-                <span>📖 {autoSearchObj.title}</span>
-                <ExternalLink className={`w-2.5 h-2.5 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform ${isDark ? 'text-cyan-400' : 'text-pink-500'}`} />
-              </a>
-            )}
           </div>
         </div>
       );
