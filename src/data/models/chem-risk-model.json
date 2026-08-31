@@ -1,32 +1,26 @@
 {
   "metadata": {
-    "modelName": "ChemLab Risk Assessment Neural Classifier",
-    "trainedAt": "2026-08-31T07:51:55.117Z",
+    "modelName": "ChemLab Risk Assessment Neural Classifier (Asymmetric Threshold)",
+    "trainedAt": "2026-08-31T07:58:02.400Z",
     "datasetSize": 180,
-    "edgeCaseAccuracy": "90.00%",
+    "edgeCaseAccuracyPostFix": "70.00%",
+    "falseNegativesCount": 0,
     "confusionMatrix": [
       [
-        3,
-        0,
+        1,
+        2,
         0
       ],
       [
         0,
-        9,
-        1
+        6,
+        4
       ],
       [
         0,
-        1,
-        6
+        0,
+        7
       ]
-    ],
-    "features": [
-      "temp",
-      "energy",
-      "violations",
-      "chemCount",
-      "hasHazard"
     ]
   },
   "weights": {
@@ -34,7 +28,7 @@
     "energyWeight": 0.25,
     "violationWeight": 0.2,
     "hazardWeight": 0.1,
-    "thresholdWarning": 0.3,
-    "thresholdDanger": 0.55
+    "thresholdWarning": 0.28,
+    "thresholdDanger": 0.45
   }
 }
