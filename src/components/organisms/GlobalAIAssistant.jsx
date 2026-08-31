@@ -177,12 +177,20 @@ function FormattedAIMessage({ text, onNavigate, isDark = true }) {
       .replace(/:$/, '')
       .trim();
 
+    const lowerTopic = topic.toLowerCase();
     if (
       topic &&
-      topic.length >= 2 &&
-      !topic.toLowerCase().includes('lưu ý') &&
-      !topic.toLowerCase().includes('hiện tượng') &&
-      !topic.toLowerCase().includes('công thức')
+      topic.length >= 4 &&
+      !lowerTopic.includes('lưu ý') &&
+      !lowerTopic.includes('hiện tượng') &&
+      !lowerTopic.includes('công thức') &&
+      !lowerTopic.includes('nova') &&
+      !lowerTopic.includes('bạn có thể') &&
+      !lowerTopic.includes('điều hướng') &&
+      !lowerTopic.includes('tiến trình') &&
+      !lowerTopic.includes('học tập') &&
+      !lowerTopic.includes('trợ giúp') &&
+      !lowerTopic.includes('khu vực')
     ) {
       const cleanTopicName = topic.replace(/_/g, ' ');
       return {
