@@ -13,7 +13,7 @@
 | **Lab Vật lý** | Lab Error Diagnostic Classifier | k-Nearest Neighbors (kNN Classifier) | `src/ai-training/datasets/physics-error/attempts.json` | **100.0% Accuracy** (Optics Error Diagnostic) | ✅ **Đã hoàn thành (Phase 4)** |
 | **Lab Toán** | Adaptive IRT Difficulty Predictor | Item Response Theory (1PL Rasch IRT Model) | `src/ai-training/datasets/math-irt/irt-samples.json` | **90.0% Binary Acc** (Log-Loss: 0.4557) | ✅ **Đã hoàn thành (Phase 5)** |
 | **Lab Sinh** | Multi-gene Probabilistic Reasoner | Bayesian Conditional Probability Tables (CPT) | Mendel Multi-locus Genetics Rules | **100% Bayes Verification** (10/10 Test Cases) | ✅ **Đã hoàn thành (Phase 6)** |
-| **Javit Assistant**| Text Intent Classifier | Naive Bayes Text Classification | `src/ai-training/datasets/intent/intent-samples.json` | Target Accuracy $\ge 90\%$ | *Đang chờ (Phase 7)* |
+| **Javit Assistant**| Text Intent Classifier | Multinomial Naive Bayes | `src/ai-training/datasets/intent/intent-samples.json` | **100.0% Accuracy** (6 Intent Classes) | ✅ **Đã hoàn thành (Phase 7)** |
 
 ---
 
@@ -53,3 +53,12 @@
 - **Nguyên tắc bảo tồn**: Giữ nguyên 100% định luật cân bằng Hardy-Weinberg 1 gen ($p^2 AA + 2pq Aa + q^2 aa = 1$).
 - **Mô hình Mạng Bayes**: `src/lib/geneticsBayes.js` (Tính bảng xác suất có điều kiện CPT cho các phép lai đa gen $AaBbDd \times AaBbDd$).
 - **Kiểm thử Kiểm định**: `src/ai-training/scripts/test-bayes-genetics.js` (Vượt qua 10/10 test cases, đạt độ chính xác 100%).
+
+#### 🟢 Phase 7: Javit Intent & Personalization Adaptive Loop (Javit Assistant)
+- **Ngày hoàn thành**: 31/08/2026
+- **Tập Dữ Liệu Intent**: `src/ai-training/datasets/intent/intent-samples.json` (27 mẫu huấn luyện phân loại 6 loại ý định).
+- **Mô hình Naive Bayes**: `src/ai-training/scripts/intent_train.js` (Multinomial Naive Bayes Intent Classifier).
+- **Tích hợp Adaptive Loop**:
+  - `src/lib/intentClassifier.js`: Tự động phân tích câu hỏi người dùng và kích hoạt lệnh hệ thống (`[[NAV:...]]`, `[[TOGGLE_THEME]]`).
+  - `src/store/useAppStore.js`: Theo dõi biến `subjectFrequency` ({hoa, ly, toan, sinh}) và `conciseMode`.
+  - `GlobalAIAssistant.jsx`: Tự động cập nhật bộ nhớ thích ứng `subjectFrequency` và kích hoạt chế độ trả lời ngắn gọn khi học sinh nhấn 👎 (chưa hài lòng $\ge 2$ lần).

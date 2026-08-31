@@ -133,4 +133,28 @@ export const useAppStore = create((set) => ({
   // Active Lab Sandbox State
   activeLab: null,
   setActiveLab: (lab) => set({ activeLab: lab }),
+
+  // AI Assistant Personalization & Adaptive Memory State
+  subjectFrequency: { hoa: 0, ly: 0, toan: 0, sinh: 0 },
+  conciseMode: false,
+  dislikeCount: 0,
+  incrementSubjectFrequency: (subject) => set((state) => {
+    if (!subject || state.subjectFrequency[subject] === undefined) return state;
+    return {
+      subjectFrequency: {
+        ...state.subjectFrequency,
+        [subject]: state.subjectFrequency[subject] + 1
+      }
+    };
+  }),
+  recordFeedback: (isLike) => set((state) => {
+    if (isLike) {
+      return { dislikeCount: Math.max(0, state.dislikeCount - 1) };
+    }
+    const newDislikes = state.dislikeCount + 1;
+    return {
+      dislikeCount: newDislikes,
+      conciseMode: newDislikes >= 2 ? true : state.conciseMode
+    };
+  }),
 }));

@@ -14,6 +14,7 @@ import { useTheme } from 'next-themes';
 import { playSound } from '@/lib/sound';
 import { motion, AnimatePresence } from 'framer-motion';
 import { retrieveTopK } from '@/lib/ragService';
+import { predictUserIntent } from '@/lib/intentClassifier';
 
 const GEMINI_API_KEYS = Array.from(new Set([
   process.env.NEXT_PUBLIC_GEMINI_API_KEY,
@@ -448,6 +449,10 @@ export default function GlobalAIAssistant() {
   const activeLab = useAppStore((state) => state.activeLab);
   const setActiveLab = useAppStore((state) => state.setActiveLab);
   const arenaState = useAppStore((state) => state.arenaState);
+  const subjectFrequency = useAppStore((state) => state.subjectFrequency);
+  const conciseMode = useAppStore((state) => state.conciseMode);
+  const incrementSubjectFrequency = useAppStore((state) => state.incrementSubjectFrequency);
+  const recordFeedback = useAppStore((state) => state.recordFeedback);
 
   // State thông báo cảnh báo tính công bằng học thuật
   const [showWarningModal, setShowWarningModal] = useState(false);
@@ -1199,6 +1204,13 @@ CuO (đen) + H₂ -t°→ Cu (đỏ) + H₂O
         `\nHãy sử dụng nội dung tri thức RAG trên để giải thích chính xác câu hỏi của học sinh.`;
     }
 
+    // Intent Classification & Subject Frequency Memory Tracking (Phase 7)
+    const intentResult = predictUserIntent(textToSend);
+    if (intentResult.subject && typeof incrementSubjectFrequency === 'function') {
+      incrementSubjectFrequency(intentResult.subject);
+    }
+    const conciseInstruction = conciseMode ? `\n[CHẾ ĐỘ TRẢ LỜI NGẮN GỌN IS ACTIVE]: Học sinh thích câu trả lời cực kỳ ngắn gọn. Hãy trả lời dưới 50 từ, cô đọng, đi thẳng vào trọng tâm!` : '';
+
     const systemInstructionText = `
 Bạn là NOVA - Trợ lý AI Chỉ huy Agentic của Hệ sinh thái Giáo dục STEM HUB (Website học tập STEM với Lab ảo 3D, Đấu trường PvP 1v1 & Phòng thi THPT QG).
 
@@ -1206,8 +1218,10 @@ Bạn là NOVA - Trợ lý AI Chỉ huy Agentic của Hệ sinh thái Giáo dụ
 - Họ tên: ${userDisplayName}
 - Cấp độ: Lv.${userLevel} | Điểm Elo: ${userElo} | Danh hiệu: ${userTitle} | Tinh thể: ${userCrystals}
 - Vị trí hiện tại trên trang web: ${currentPage}
+- Tần suất tương tác các môn: Hóa (${subjectFrequency?.hoa || 0}), Lý (${subjectFrequency?.ly || 0}), Toán (${subjectFrequency?.toan || 0}), Sinh (${subjectFrequency?.sinh || 0})
 ${memoryContext}
 ${ragContextText}
+${conciseInstruction}
 
 [QUY TẮC PHẢN HỒI NOVA]:
 1. Luôn xưng "NOVA" và gọi người dùng là "${userDisplayName}".
@@ -1605,14 +1619,36 @@ ${ragContextText}
                             : 'bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 text-white font-medium rounded-tr-sm shadow-xs'
                       }`}>
                         {isBot ? (
-                          <FormattedAIMessage text={m.text} onNavigate={(url) => {
-                            if (url.includes('/labs/')) {
-                              setActiveLab({ link: url, name: 'Phòng lab ảo' });
-                            } else {
-                              setActiveLab(null);
-                              router.push(url);
-                            }
-                          }} isDark={isDark} />
+                          <>
+                            <FormattedAIMessage text={m.text} onNavigate={(url) => {
+                              if (url.includes('/labs/')) {
+                                setActiveLab({ link: url, name: 'Phòng lab ảo' });
+                              } else {
+                                setActiveLab(null);
+                                router.push(url);
+                              }
+                            }} isDark={isDark} />
+                            
+                            {/* Feedback Adaptive Loop Controls */}
+                            <div className="flex items-center gap-3 mt-2 pt-1 border-t border-cyan-500/15 text-[10px]">
+                              <button
+                                type="button"
+                                onClick={() => recordFeedback(true)}
+                                className="text-emerald-400 hover:text-emerald-300 font-medium flex items-center gap-1 cursor-pointer"
+                                title="Câu trả lời hữu ích"
+                              >
+                                👍 Hay
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => recordFeedback(false)}
+                                className="text-rose-400 hover:text-rose-300 font-medium flex items-center gap-1 cursor-pointer"
+                                title="Câu trả lời quá dài (Hệ thống sẽ tự động bật chế độ trả lời ngắn gọn)"
+                              >
+                                👎 Dài quá / Chưa đúng
+                              </button>
+                            </div>
+                          </>
                         ) : (
                           <p className="whitespace-pre-wrap">{m.text}</p>
                         )}
