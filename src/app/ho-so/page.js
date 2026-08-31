@@ -6,14 +6,14 @@ import { motion } from 'framer-motion';
 import { useAppStore } from '@/store/useAppStore';
 import { playSound } from '@/lib/sound';
 import { auth, db, functions, httpsCallable } from '@/lib/firebase';
-import { doc, updateDoc, onSnapshot, collection, query, where, getDocs, getDoc, addDoc, serverTimestamp, deleteDoc, orderBy, limit } from 'firebase/firestore';
+import { doc, updateDoc, setDoc, onSnapshot, collection, query, where, getDocs, getDoc, addDoc, serverTimestamp, deleteDoc, orderBy, limit } from 'firebase/firestore';
 import { 
   Trophy, Sparkles, Shield, Award, BookOpen, Star, 
   Flame, CheckCircle, ChevronRight, User, Zap,
   Mail, Lock, ShieldAlert, Key, Users, UserPlus,
   UserMinus, UserCheck, UserX, Search, MessageSquare,
   Smile, Swords, Upload, ShoppingBag, Gift, X,
-  Atom, Crown, Cpu, Dna, FlaskConical
+  Atom, Crown, Cpu, Dna, FlaskConical, Camera, ShieldCheck
 } from 'lucide-react';
 import { 
   sendEmailVerification, 
@@ -25,6 +25,7 @@ import {
 import { AvatarFrame } from '@/components/atoms/AvatarFrame';
 import STEMAvatarSVG, { skinColors } from '@/components/atoms/STEMAvatarSVG';
 import CrystalIcon from '@/components/atoms/CrystalIcon';
+import FaceAuthModal from '@/components/organisms/FaceAuthModal';
 
 export const ALL_COSMETICS = [
   // Màu da (Unisex)
@@ -261,6 +262,7 @@ export default function ProfilePage() {
   const [showChallengeModal, setShowChallengeModal] = useState(null); // friend object
   const [sendingChallenge, setSendingChallenge] = useState(false);
   const [challengeSentMsg, setChallengeSentMsg] = useState('');  
+  const [isFaceAuthModalOpen, setIsFaceAuthModalOpen] = useState(false);
   // Hologram Card 3D tilt refs & states
   const cardRef = useRef(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
@@ -1438,6 +1440,28 @@ export default function ProfilePage() {
       });
     } finally {
       setUpdatingEmail(false);
+    }
+  };
+
+  const handleDisableFace2FA = async () => {
+    playSound.click();
+    setPersonalization({ face2FAEnabled: false });
+    if (auth.currentUser) {
+      try {
+        const userRef = doc(db, 'users', auth.currentUser.uid);
+        await setDoc(userRef, {
+          face2FAEnabled: false,
+          personalization: {
+            face2FAEnabled: false
+          }
+        }, { merge: true });
+        setSettingsMessage({
+          type: 'success',
+          text: 'Đã tắt tính năng Xác thực 2 bước bằng Khuôn mặt AI thành công.'
+        });
+      } catch (err) {
+        console.error('Lỗi khi tắt Face 2FA:', err);
+      }
     }
   };
 
@@ -4119,34 +4143,73 @@ export default function ProfilePage() {
               <p className="text-xs text-text-secondary mt-1">Quản lý trạng thái xác minh, mật khẩu bảo mật và thay đổi thông tin liên lạc.</p>
             </div>
 
+            {/* 0. Xác thực 2 bước bằng Khuôn mặt AI (AI Face 2FA) */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 bg-gradient-to-r from-bg-tertiary via-bg-tertiary to-pink-500/5 border border-pink-500/20 rounded-2xl relative z-10">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-bold text-text-primary flex items-center gap-2">
+                    <ShieldCheck className="w-4.5 h-4.5 text-pink-400" /> Xác thực 2 bước bằng Khuôn mặt AI (Face 2FA)
+                  </h4>
+                  {personalization.face2FAEnabled ? (
+                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/15 flex items-center gap-1">
+                      <CheckCircle className="w-3.5 h-3.5" /> Đã bật
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-bold text-text-secondary bg-bg-primary px-2.5 py-0.5 rounded-full border border-border-theme">
+                      Tùy chọn (Chưa bật)
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-text-secondary">
+                  Trích xuất mảng Vector AI 128D trên trình duyệt để đối chiếu 1-vs-1 khi đăng nhập.
+                </p>
+                <p className="text-[10px] text-text-secondary">
+                  {personalization.face2FAEnabled 
+                    ? 'Tài khoản của bạn đã được bảo vệ bằng lớp quét sinh trắc học AI.'
+                    : 'Tăng cường bảo mật tài khoản với công nghệ nhận diện đặc trưng khuôn mặt AI.'
+                  }
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                {personalization.face2FAEnabled ? (
+                  <>
+                    <button
+                      onClick={() => { playSound.click(); setIsFaceAuthModalOpen(true); }}
+                      className="px-4 py-2.5 bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 border border-pink-500/30 text-xs font-bold rounded-xl transition-all active:scale-95 flex items-center gap-1.5"
+                    >
+                      <Camera className="w-3.5 h-3.5" /> Quét lại khuôn mặt
+                    </button>
+                    <button
+                      onClick={handleDisableFace2FA}
+                      className="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold rounded-xl transition-all active:scale-95"
+                    >
+                      Tắt
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => { playSound.click(); setIsFaceAuthModalOpen(true); }}
+                    className="px-5 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-lg shadow-pink-500/20 transition-all active:scale-95 flex items-center gap-1.5"
+                  >
+                    <Camera className="w-3.5 h-3.5" /> Kích hoạt Face 2FA
+                  </button>
+                )}
+              </div>
+            </div>
+
             {/* 1. Xác minh địa chỉ email */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 bg-bg-tertiary border border-border-theme rounded-2xl relative z-10">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <h4 className="text-sm font-bold text-text-primary">Xác minh địa chỉ email</h4>
-                  {(auth.currentUser?.emailVerified || auth.currentUser?.email?.toLowerCase() === 'admin123@gmail.com' || auth.currentUser?.email?.toLowerCase().startsWith('test')) ? (
-                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/15 flex items-center gap-1">
-                      <CheckCircle className="w-3.5 h-3.5" /> Đã xác minh
-                    </span>
-                  ) : (
-                    <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/15 flex items-center gap-1">
-                      <ShieldAlert className="w-3.5 h-3.5 animate-pulse" /> Chưa xác minh
-                    </span>
-                  )}
+                  <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/15 flex items-center gap-1">
+                    <CheckCircle className="w-3.5 h-3.5" /> Đã xác minh
+                  </span>
                 </div>
                 <p className="text-xs text-text-secondary">Địa chỉ hiện tại: <strong className="text-text-primary">{auth.currentUser?.email || user.email}</strong></p>
-                <p className="text-[10px] text-text-secondary">Xác minh email giúp bảo mật tài khoản tốt hơn và nhận thông báo quan trọng.</p>
+                <p className="text-[10px] text-text-secondary">Tài khoản đã sẵn sàng sử dụng toàn bộ tính năng STEM HUB.</p>
               </div>
-
-              {(!auth.currentUser?.emailVerified && auth.currentUser?.email?.toLowerCase() !== 'admin123@gmail.com' && !auth.currentUser?.email?.toLowerCase().startsWith('test')) && (
-                <button
-                  onClick={handleSendVerification}
-                  disabled={verifying}
-                  className="px-5 py-2.5 bg-pink-500 hover:bg-pink-600 disabled:bg-bg-primary text-white text-xs font-bold rounded-xl shadow-md transition-all active:scale-95 shrink-0"
-                >
-                  {verifying ? 'Đang gửi...' : 'Gửi email xác minh'}
-                </button>
-              )}
             </div>
 
             {/* 2. Đặt lại mật khẩu */}
@@ -4773,6 +4836,18 @@ export default function ProfilePage() {
         </div>
       )}
 
+      {/* Modal Đăng ký Face 2FA bằng AI */}
+      <FaceAuthModal
+        isOpen={isFaceAuthModalOpen}
+        onClose={() => setIsFaceAuthModalOpen(false)}
+        mode="ENROLL"
+        onSuccess={() => {
+          setSettingsMessage({
+            type: 'success',
+            text: 'Đã bảo vệ tài khoản của bạn thành công bằng AI Face 2FA!'
+          });
+        }}
+      />
     </div>
   );
 }

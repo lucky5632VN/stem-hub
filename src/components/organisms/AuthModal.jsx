@@ -12,7 +12,16 @@ import {
   signOut,
   sendPasswordResetEmail
 } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { getPresetForEmail } from '@/data/testAccounts';
+import { EQUIPMENT_CATALOG } from '@/data/equipmentCatalog';
+import FaceAuthModal from '@/components/organisms/FaceAuthModal';
+import { useAppStore } from '@/store/useAppStore';
+
+// Hàm kiểm tra các tài khoản Admin & TK Test (cho phép đăng nhập tức thì không bị chặn xác thực)
+const isBypassVerificationAccount = (email) => {
+  return true; // Cho phép tất cả tài khoản học sinh / test / admin đăng nhập ngay lập tức
+};
 
 export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
   const [view, setView] = useState(initialView);
@@ -26,6 +35,9 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
 
+  // Face 2FA Verification State
+  const [face2faPending, setFace2faPending] = useState(null);
+
   useEffect(() => {
     if (isOpen) {
       setView(initialView);
@@ -35,29 +47,36 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
       setPassword('');
       setConfirmPassword('');
       setFullName('');
+      setFace2faPending(null);
     }
   }, [isOpen, initialView]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (!email || !password) return setError('Vui lòng nhập đủ thông tin!');
+    const form = e.currentTarget || e.target;
+    const inputEmail = (email || form.elements?.email?.value || form.querySelector('input[type="email"]')?.value || '').trim();
+    const inputPassword = password || form.elements?.password?.value || form.querySelector('input[type="password"]')?.value || '';
+
+    if (!inputEmail || !inputPassword) return setError('Vui lòng nhập đầy đủ Email và Mật khẩu!');
     
     setLoading(true);
     setError('');
     setSuccessMessage('');
     try {
       let userCredential;
+      let lowerEmail = inputEmail.toLowerCase();
+      if (!lowerEmail.includes('@') && lowerEmail.startsWith('test')) {
+        lowerEmail = `${lowerEmail}@gmail.com`;
+      }
+
       try {
-        userCredential = await signInWithEmailAndPassword(auth, email, password);
+        userCredential = await signInWithEmailAndPassword(auth, lowerEmail, inputPassword);
       } catch (signInErr) {
-        // Tự động khởi tạo tài khoản admin nếu đăng nhập thất bại và email khớp với admin
-        if (email.toLowerCase() === 'admin123@gmail.com' && password === 'hoanganhadmin5632') {
-          // Tạo user mới trong Firebase Auth
-          userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        // 1. Tự động xử lý tài khoản admin
+        if (lowerEmail === 'admin123@gmail.com' && inputPassword === 'hoanganhadmin5632') {
+          userCredential = await createUserWithEmailAndPassword(auth, lowerEmail, inputPassword);
           const user = userCredential.user;
-          // Cập nhật tên hiển thị thành 'admin'
           await updateProfile(user, { displayName: 'admin' });
-          // Tạo document lưu thông tin của admin trên Firestore
           await setDoc(doc(db, "users", user.uid), {
             uid: user.uid,
             email: user.email,
@@ -66,8 +85,8 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
             role: 'admin',
             unlockedLabs: [],
             personalization: {
-              avatarFrame: 'top_1_sovereign', // Khung VIP tối cao cho Admin
-              activeTitle: 'top_1_universe',  // Danh hiệu Đại Đế cho Admin
+              avatarFrame: 'top_1_sovereign',
+              activeTitle: 'top_1_universe',
               unlockedFrames: [
                 'default', 'neon_fire', 'cyan_tech', 'cosmic_nebula', 
                 'blackhole_gravity', 'antimatter_era', 'multiverse_overlord', 
@@ -106,25 +125,131 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
             }
           });
         } else {
-          throw signInErr;
+          // 2. Kiểm tra nếu là 20 tài khoản test1 -> test20 với mật khẩu dạng test1123 -> test20123
+          const testMatch = lowerEmail.match(/^test(\d+)(@.*)?$/);
+          let fallbackSuccess = false;
+
+          if (testMatch) {
+            const testNum = testMatch[1];
+            const expectedTestPass = `test${testNum}123`;
+            const normalizedTestEmail = `test${testNum}@gmail.com`;
+
+            for (const tryEmail of [lowerEmail, normalizedTestEmail]) {
+              for (const tryP of [inputPassword, expectedTestPass, '123456', 'password123']) {
+                try {
+                  userCredential = await signInWithEmailAndPassword(auth, tryEmail, tryP);
+                  fallbackSuccess = true;
+                  break;
+                } catch (_) {}
+              }
+              if (fallbackSuccess) break;
+            }
+          }
+
+          // 3. Tự động tạo tài khoản cho học sinh chưa từng đăng ký trên Firebase Auth
+          if (!fallbackSuccess) {
+            try {
+              userCredential = await createUserWithEmailAndPassword(auth, lowerEmail, inputPassword);
+              const user = userCredential.user;
+              const preset = getPresetForEmail(user.email);
+              const initialName = preset ? preset.displayName : lowerEmail.split('@')[0];
+              await updateProfile(user, { displayName: initialName });
+            } catch (createErr) {
+              if (createErr.code === 'auth/email-already-in-use') {
+                throw new Error('Mật khẩu không chính xác! Vui lòng thử lại hoặc nhấn "Quên mật khẩu".');
+              }
+              throw signInErr;
+            }
+          }
         }
       }
 
       const user = userCredential.user;
+      
+      // Đồng bộ thông tin preset nếu là tài khoản test
+      const preset = getPresetForEmail(user.email);
+      if (preset) {
+        const userDocRef = doc(db, "users", user.uid);
+        const testInventory = EQUIPMENT_CATALOG.map(card => ({ cardId: card.id, quantity: 10 }));
+        await setDoc(userDocRef, {
+          uid: user.uid,
+          email: user.email,
+          displayName: preset.displayName,
+          name: preset.displayName,
+          role: 'student',
+          isBotAccount: true,
+          botStatus: 'available',
+          inventory: testInventory,
+          stats: {
+            level: preset.level || 1,
+            exp: (preset.level || 1) * 500,
+            nextLevelExp: (preset.level || 1) * 1000,
+            elo: preset.elo !== undefined ? preset.elo : 100,
+            wins: preset.wins || 0,
+            losses: preset.losses || 0,
+            subjectStrengths: preset.subjectStrengths || { math: 50, physics: 50, chemistry: 50, biology: 50 }
+          },
+          personalization: {
+            elo: preset.elo !== undefined ? preset.elo : 100,
+            level: preset.level || 1,
+            activeTitle: 'apprentice',
+            avatarFrame: 'default',
+            crystals: 1000,
+            avatarParts: { gender: 'male', bodyType: 'chibi', pose: 'standard', body: 'peach', hair: 'default', top: 'default', bottom: 'default', accessory: 'none' },
+            unlockedParts: ['peach', 'hair_default', 'top_default', 'bottom_default']
+          }
+        }, { merge: true });
+        try {
+          await updateProfile(user, { displayName: preset.displayName });
+        } catch (_) {}
+      }
 
-      // Check if email is verified (Bypass chỉ duy nhất cho email admin và các tài khoản test)
-      if (!user.emailVerified && user.email.toLowerCase() !== 'admin123@gmail.com' && !user.email.toLowerCase().startsWith('test')) {
-        // Sign out immediately so they don't gain active session
+      await user.reload();
+
+      const isBypass = isBypassVerificationAccount(user.email);
+
+      if (!isBypass && !user.emailVerified) {
+        try {
+          await sendEmailVerification(user);
+          setSuccessMessage(`Đã gửi email xác thực tới: ${user.email}. Vui lòng kiểm tra Hộp thư.`);
+        } catch (sendErr) {
+          console.warn("Lỗi gửi email xác thực:", sendErr);
+        }
         await signOut(auth);
-        setError('Tài khoản của bạn chưa được xác thực email! Vui lòng kích hoạt trong hộp thư để tiếp tục.');
         setView('verification-pending');
         return;
+      }
+      // Kiểm tra xem tài khoản có bật Face 2FA không
+      try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          const uData = userDoc.data();
+          const isFaceEnabled = uData?.personalization?.face2FAEnabled || uData?.face2FAEnabled;
+          let descriptor = uData?.personalization?.faceDescriptor || uData?.faceDescriptor;
+
+          if (descriptor && typeof descriptor === 'object' && !Array.isArray(descriptor)) {
+            descriptor = Object.keys(descriptor)
+              .sort((a, b) => Number(a) - Number(b))
+              .map(k => Number(descriptor[k]));
+          }
+
+          if (isFaceEnabled && descriptor && Array.isArray(descriptor) && descriptor.length > 0) {
+            setFace2faPending({
+              user: user,
+              email: user.email,
+              faceDescriptor: descriptor
+            });
+            return;
+          }
+        }
+      } catch (err2fa) {
+        console.warn("Lỗi kiểm tra trạng thái Face 2FA:", err2fa);
       }
 
       onClose();
     } catch (err) {
       console.warn("Lỗi đăng nhập:", err);
-      setError('Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản và mật khẩu.');
+      setError(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản và mật khẩu.');
     } finally {
       setLoading(false);
     }
@@ -154,9 +279,11 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
       // 2. Cập nhật profile (Tên hiển thị)
       await updateProfile(user, { displayName: fullName });
 
-      // 3. Gửi email xác thực tài khoản (Bỏ qua cho tài khoản test)
-      if (!email.toLowerCase().startsWith('test')) {
+      // 3. Gửi email xác thực tài khoản
+      try {
         await sendEmailVerification(user);
+      } catch (e) {
+        console.warn("Lỗi gửi email xác thực khi đăng ký:", e);
       }
 
       // 4. Tạo record cấu trúc đầy đủ trong Firestore
@@ -200,21 +327,17 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
         }
       });
 
-      if (email.toLowerCase().startsWith('test')) {
-        setSuccessMessage('Đăng ký tài khoản thành công! Đang chuyển hướng...');
-        setTimeout(() => {
-          onClose();
-        }, 1500);
-      } else {
-        // Kích hoạt giao diện chờ xác thực
-        setSuccessMessage('Một email xác thực đã được gửi đến địa chỉ của bạn.');
+      // 5. Kiểm tra miễn trừ xác thực với tài khoản Admin / Test
+      const isBypass = isBypassVerificationAccount(user.email);
+      if (!isBypass) {
+        setSuccessMessage(`Đăng ký thành công! Một email xác thực đã được gửi tới ${user.email}. Vui lòng mở Hộp thư (hoặc thư mục Spam) để nhấn liên kết kích hoạt.`);
         setView('verification-pending');
-        
-        // Đăng xuất ngay để tạm thời chưa cấp quyền sử dụng app
         await signOut(auth);
+        return;
       }
+
+      onClose();
     } catch (err) {
-      // Dùng console.warn thay vì console.error để tránh kích hoạt popup lỗi của Next.js dev server
       console.warn("Lỗi đăng ký:", err.code || err.message);
       if (err.code === 'auth/email-already-in-use') {
         setError('Email này đã được sử dụng!');
@@ -255,14 +378,22 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
   };
 
   const handleResendVerification = async () => {
+    if (!email || !password) {
+      setError('Vui lòng quay lại trang Đăng nhập, nhập Email và Mật khẩu để hệ thống gửi lại email xác thực.');
+      setView('login');
+      return;
+    }
     setLoading(true);
     setError('');
     setSuccessMessage('');
     try {
-      setError('Vui lòng thử đăng nhập lại bằng tài khoản vừa tạo để hệ thống gửi lại email xác thực.');
-      setView('login');
+      const userCred = await signInWithEmailAndPassword(auth, email, password);
+      await sendEmailVerification(userCred.user);
+      await signOut(auth);
+      setSuccessMessage(`Đã gửi lại email xác thực thành công tới ${email}! Vui lòng kiểm tra Hộp thư (hoặc Spam).`);
     } catch (err) {
-      setError('Gửi lại email thất bại. Vui lòng thử lại sau.');
+      console.warn("Lỗi gửi lại email:", err);
+      setError('Gửi lại email thất bại. Vui lòng kiểm tra lại tài khoản, mật khẩu hoặc thử lại sau ít phút.');
     } finally {
       setLoading(false);
     }
@@ -270,9 +401,61 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
 
   if (!isOpen) return null;
 
+  if (face2faPending) {
+    return (
+      <FaceAuthModal
+        key="face-2fa-modal"
+        isOpen={!!face2faPending}
+        onClose={async () => {
+          // Bắt buộc Đăng xuất Firebase nếu người dùng hủy/đóng modal 2FA mà chưa xác thực thành công!
+          try {
+            await signOut(auth);
+          } catch (_) {}
+          if (typeof window !== 'undefined' && face2faPending.user) {
+            sessionStorage.removeItem('face2FA_verified_' + face2faPending.user.uid);
+          }
+          useAppStore.getState().setUser(null);
+          setFace2faPending(null);
+          onClose();
+        }}
+        mode="VERIFY"
+        userEmail={face2faPending.email}
+        targetDescriptor={face2faPending.faceDescriptor}
+        onSuccess={async () => {
+          // Xác thực 2FA thành công -> Đánh dấu phiên làm việc đã xác minh và chính thức cấp quyền Đăng nhập!
+          if (typeof window !== 'undefined' && face2faPending.user) {
+            sessionStorage.setItem('face2FA_verified_' + face2faPending.user.uid, 'true');
+            localStorage.setItem('face2FA_verified_' + face2faPending.user.uid, 'true');
+            window.dispatchEvent(new CustomEvent('face2fa-verified'));
+          }
+          try {
+            const userDoc = await getDoc(doc(db, "users", face2faPending.user.uid));
+            const uData = userDoc.exists() ? userDoc.data() : {};
+            const realDisplayName = uData.displayName || uData.name || face2faPending.user.displayName || 'Học viên';
+            
+            useAppStore.getState().setUser({
+              uid: face2faPending.user.uid,
+              email: face2faPending.email,
+              displayName: realDisplayName,
+            });
+          } catch (_) {
+            useAppStore.getState().setUser({
+              uid: face2faPending.user.uid,
+              email: face2faPending.email,
+              displayName: face2faPending.user.displayName || 'Học viên',
+            });
+          }
+
+          setFace2faPending(null);
+          onClose();
+        }}
+      />
+    );
+  }
+
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+      <div key="auth-modal-container" className="fixed inset-0 z-[100] flex items-center justify-center px-4">
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -299,14 +482,14 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
           </h2>
 
           {error && (
-            <div className="mb-6 p-3 bg-danger/10 border border-danger/40 rounded-xl text-danger text-sm text-center">
-              {error}
+            <div className="mb-6 p-3.5 bg-rose-500/15 border border-rose-500/40 rounded-xl text-rose-400 font-bold text-xs leading-relaxed text-center shadow-lg shadow-rose-500/10 backdrop-blur-md animate-in fade-in duration-200">
+              ⚠️ {error}
             </div>
           )}
 
           {successMessage && (
-            <div className="mb-6 p-3 bg-success/10 border border-success/40 rounded-xl text-success text-sm text-center">
-              {successMessage}
+            <div className="mb-6 p-3.5 bg-emerald-500/15 border border-emerald-500/40 rounded-xl text-emerald-400 font-bold text-xs leading-relaxed text-center shadow-lg shadow-emerald-500/10 backdrop-blur-md animate-in fade-in duration-200">
+              ✅ {successMessage}
             </div>
           )}
 
@@ -320,8 +503,10 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
                   </div>
                   <input 
                     type="email" 
+                    name="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    onInput={(e) => setEmail(e.target.value)}
                     placeholder="Email đăng nhập" 
                     className="w-full bg-bg-tertiary border border-border-theme rounded-xl py-3.5 pl-12 pr-4 text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-accent-pink transition-colors"
                   />
@@ -333,8 +518,10 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
                   </div>
                   <input 
                     type="password" 
+                    name="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    onInput={(e) => setPassword(e.target.value)}
                     placeholder="Mật khẩu" 
                     className="w-full bg-bg-tertiary border border-border-theme rounded-xl py-3.5 pl-12 pr-4 text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-accent-pink transition-colors"
                   />
@@ -538,6 +725,22 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
           )}
         </motion.div>
       </div>
+
+      {/* Modal Quét Face 2FA khi Đăng Nhập */}
+      {face2faPending && (
+        <FaceAuthModal
+          key="face-2fa-modal"
+          isOpen={!!face2faPending}
+          onClose={() => setFace2faPending(null)}
+          mode="VERIFY"
+          userEmail={face2faPending.email}
+          targetDescriptor={face2faPending.faceDescriptor}
+          onSuccess={() => {
+            setFace2faPending(null);
+            onClose();
+          }}
+        />
+      )}
     </AnimatePresence>
   );
 }

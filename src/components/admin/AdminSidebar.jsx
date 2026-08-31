@@ -52,6 +52,7 @@ export default function AdminSidebar() {
               <li key={index}>
                 <Link 
                   href={item.href}
+                  prefetch={false}
                   onClick={() => playSound.click()}
                   className={`flex items-center justify-center lg:justify-start gap-3.5 px-3 lg:px-4 py-3 rounded-xl transition-all duration-200 border group relative ${
                     isActive 

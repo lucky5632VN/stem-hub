@@ -1,0 +1,152 @@
+[
+  {
+    "id": "hoa-001",
+    "subject": "hoa",
+    "topic": "Cân bằng Le Chatelier",
+    "content": "Nguyên lý chuyển dịch cân bằng Le Chatelier: Một phản ứng thuận nghịch đang ở trạng thái cân bằng, khi chịu một tác động bên ngoài như biến đổi nồng độ, nhiệt độ hoặc áp suất, cân bằng sẽ chuyển dịch theo chiều làm giảm tác động bên ngoài đó. Đối với phản ứng tỏa nhiệt (Delta H < 0), tăng nhiệt độ làm cân bằng chuyển dịch theo chiều nghịch (chiều thu nhiệt). Tăng áp suất làm cân bằng chuyển dịch theo chiều làm giảm số mol khí."
+  },
+  {
+    "id": "hoa-002",
+    "subject": "hoa",
+    "topic": "Este và Phản ứng Xà phòng hóa",
+    "content": "Este có công thức tổng quát RCOOR'. Phản ứng xà phòng hóa este là phản ứng thủy phân este trong môi trường kiềm (NaOH hoặc KOH), tạo thành muối của axit cacboxylic và ancol. Đây là phản ứng một chiều, tỏa nhiệt. Công thức este no, đơn chức, mạch hở là C_n H_{2n} O_2 (n >= 2). Thủy phân este đơn chức thu được 1 mol muối và 1 mol ancol."
+  },
+  {
+    "id": "hoa-003",
+    "subject": "hoa",
+    "topic": "Cacbohidrat và Phản ứng Tráng bạc",
+    "content": "Glucozơ (C6H12O6) là monosaccarit chứa 5 nhóm OH và 1 nhóm CH=O (anđehit). Glucozơ tham gia phản ứng tráng bạc với AgNO3/NH3 đun nóng, thu được 2 mol Ag kết tủa cho mỗi mol Glucozơ. Fructozơ trong môi trường kiềm cũng chuyển hóa thành Glucozơ nên cũng có phản ứng tráng bạc. Saccarozơ không có phản ứng tráng bạc trực tiếp."
+  },
+  {
+    "id": "hoa-004",
+    "subject": "hoa",
+    "topic": "Amin và Amino Axit",
+    "content": "Amin có tính bazơ do cặp electron chưa sử dụng trên nguyên tử nitơ. Metylamin, đimetylamin, trimethylamin và etylamin là các chất khí ở điều kiện thường, mùi khai, tan nhiều trong nước. Amino axit chứa cả nhóm amino (-NH2) có tính bazơ và nhóm cacboxyl (-COOH) có tính axit nên có tính chất lưỡng tính."
+  },
+  {
+    "id": "hoa-005",
+    "subject": "hoa",
+    "topic": "Đại cương Kim loại và Dãy điện hóa",
+    "content": "Dãy điện hóa kim loại xếp theo chiều tăng tính oxi hóa của cation và giảm tính khử của kim loại: K/K+, Na/Na+, Mg/Mg2+, Al/Al3+, Zn/Zn2+, Fe/Fe2+, Ni/Ni2+, Sn/Sn2+, Pb/Pb2+, H/H+, Cu/Cu2+, Fe2+/Fe3+, Ag/Ag+, Au/Au3+. Kim loại đứng trước đẩy được kim loại đứng sau ra khỏi dung dịch muối của chúng."
+  },
+  {
+    "id": "hoa-006",
+    "subject": "hoa",
+    "topic": "Sắt và Các Hợp chất của Sắt",
+    "content": "Sắt (Fe) có cấu hình electron [Ar]3d6 4s2. Tác dụng với axit HCl, H2SO4 loãng tạo muối Fe(II) và H2. Tác dụng với HNO3 đặc nóng hoặc H2SO4 đặc nóng dư tạo muối Fe(III) và các sản phẩm khử như NO2, NO, SO2. Phản ứng giữa Fe2+ và dung dịch KMnO4/H2SO4 là phản ứng chuẩn độ oxi hóa khử."
+  },
+  {
+    "id": "hoa-007",
+    "subject": "hoa",
+    "topic": "Chất Lưỡng tính",
+    "content": "Các hợp chất lưỡng tính vừa phản ứng được với dung dịch axit mạnh vừa phản ứng với dung dịch bazơ mạnh. Ví dụ: Al(OH)3, Zn(OH)2, Cr(OH)3, Al2O3, ZnO, NaHCO3, (NH4)2CO3 và các amino axit. Phản ứng Al(OH)3 + NaOH -> NaAlO2 + 2H2O chứng minh tính lưỡng tính của Al(OH)3."
+  },
+  {
+    "id": "hoa-008",
+    "subject": "hoa",
+    "topic": "Tích số tan Ksp và Độ PH",
+    "content": "Độ pH = -log[H+]. pH < 7 là môi trường axit, pH = 7 là trung tính, pH > 7 là môi trường bazơ. Tích số tan Ksp của một chất ít tan M_a N_b là tích nồng độ các ion của nó nâng lên số mũ tương ứng trong dung dịch bão hòa. Nếu tích nồng độ ion vượt quá Ksp thì kết tủa xuất hiện."
+  },
+  {
+    "id": "ly-001",
+    "subject": "ly",
+    "topic": "Dao động Điều hòa Cơ học",
+    "content": "Phương trình dao động điều hòa: x = A*cos(omega*t + phi). Trong đó x là li độ (cm), A là biên độ (cm), omega là tần số góc (rad/s), phi là pha ban đầu. Vận tốc v = x' = -omega*A*sin(omega*t + phi), vận tốc cực đại v_max = omega*A tại VTCB. Gia tốc a = v' = -omega^2 * x, gia tốc cực đại a_max = omega^2 * A tại biên."
+  },
+  {
+    "id": "ly-002",
+    "subject": "ly",
+    "topic": "Con lắc Lò xo và Con lắc Đơn",
+    "content": "Chu kỳ con lắc lò xo T = 2*pi*sqrt(m/k), không phụ thuộc vào gia tốc trọng trường g. Tần số góc omega = sqrt(k/m). Chu kỳ con lắc đơn T = 2*pi*sqrt(l/g), phụ thuộc vào chiều dài dây l và gia tốc trọng trường g tại nơi treo con lắc. Lực kéo về của con lắc lò xo F = -k*x."
+  },
+  {
+    "id": "ly-003",
+    "subject": "ly",
+    "topic": "Sóng cơ và Giao thoa Sóng",
+    "content": "Bước sóng lambda = v*T = v/f là khoảng cách giữa hai điểm gần nhất trên cùng một phương truyền sóng dao động cùng pha. Giao thoa sóng xảy ra khi hai sóng kết hợp gặp nhau. Hai nguồn cùng pha: Cực đại giao thoa khi d2 - d1 = k*lambda, cực tiểu giao thoa khi d2 - d1 = (k + 0.5)*lambda."
+  },
+  {
+    "id": "ly-004",
+    "subject": "ly",
+    "topic": "Dòng điện Xoay chiều Mạch RLC Nối tiếp",
+    "content": "Mạch RLC nối tiếp có tổng trở Z = sqrt(R^2 + (Z_L - Z_C)^2) với Cảm kháng Z_L = omega*L và Dung kháng Z_C = 1/(omega*C). Độ lệch pha tan(phi) = (Z_L - Z_C)/R. Hiện tượng cộng hưởng điện xảy ra khi Z_L = Z_C (omega^2 * L * C = 1), lúc này Z_min = R, cường độ dòng điện I_max = U/R, hệ số công suất cos(phi) = 1."
+  },
+  {
+    "id": "ly-005",
+    "subject": "ly",
+    "topic": "Quang hình học và Phản xạ Gương",
+    "content": "Định luật phản xạ ánh sáng: Tia phản xạ nằm trong mặt phẳng tới và ở phía bên kia pháp tuyến so với tia tới. Góc phản xạ i' bằng góc tới i (i' = i). Theo dạng vector: vector_d' = vector_d - 2*(vector_d . vector_n)*vector_n. Tia sáng bị phản xạ đổi hướng nhưng tốc độ truyền ánh sáng không đổi."
+  },
+  {
+    "id": "ly-006",
+    "subject": "ly",
+    "topic": "Lượng tử Ánh sáng và Thuyết Photoelectron",
+    "content": "Thuyết lượng tử ánh sáng Planck: Ánh sáng gồm các hạt photon. Mỗi photon có năng lượng E = h*f = h*c/lambda (với h = 6.625x10^-34 J.s). Phản ứng quang điện ngoài: Năng lượng photon hấp thụ E truyền cho electron để bứt ra khỏi bề mặt kim loại: E = A + Wd_max (A là công thoát kim loại)."
+  },
+  {
+    "id": "toan-001",
+    "subject": "toan",
+    "topic": "Khảo sát Hàm số và Cực trị",
+    "content": "Cho hàm số y = f(x) xác định trên K. x0 là điểm cực đại nếu f'(x) đổi dấu từ dương sang âm khi x qua x0. x0 là điểm cực tiểu nếu f'(x) đổi dấu từ âm sang dương. Đối với hàm bậc ba y = ax^3 + bx^2 + cx + d (a != 0), y' = 3ax^2 + 2bx + c. Hàm số có 2 điểm cực trị khi Delta' của y' > 0, tức b^2 - 3ac > 0."
+  },
+  {
+    "id": "toan-002",
+    "subject": "toan",
+    "topic": "Hàm số Mũ và Logarit",
+    "content": "Hàm số mũ y = a^x (a > 0, a != 1) đồng biến khi a > 1, nghịch biến khi 0 < a < 1. Hàm số logarit y = log_a(x) (x > 0). Công thức logarit: log_a(b*c) = log_a(b) + log_a(c), log_a(b/c) = log_a(b) - log_a(c), log_a(b^k) = k*log_a(b). Đạo hàm (a^x)' = a^x * ln(a), (ln x)' = 1/x."
+  },
+  {
+    "id": "toan-003",
+    "subject": "toan",
+    "topic": "Nguyên hàm và Tích phân",
+    "content": "F(x) là một nguyên hàm của f(x) nếu F'(x) = f(x). Công thức: int x^n dx = x^(n+1)/(n+1) + C (n != -1), int (1/x) dx = ln|x| + C, int e^x dx = e^x + C. Tích phân xác định int_a^b f(x) dx = F(b) - F(a). Ứng dụng tính diện tích hình phẳng S = int_a^b |f(x)| dx và thể tích V = pi * int_a^b f^2(x) dx."
+  },
+  {
+    "id": "toan-004",
+    "subject": "toan",
+    "topic": "Số phức và Các phép toán",
+    "content": "Số phức z = a + bi (a, b thuộc R, i^2 = -1). a là phần thực, b là phần ảo. Số phức liên hợp z_bar = a - bi. Môđun |z| = sqrt(a^2 + b^2). Tổng hai số phức z1 + z2 = (a1 + a2) + (b1 + b2)i. Tích z1 * z2 = (a1*a2 - b1*b2) + (a1*b2 + a2*b1)i. Phương trình bậc hai ax^2 + bx + c = 0 có nghiệm phức khi Delta < 0."
+  },
+  {
+    "id": "toan-005",
+    "subject": "toan",
+    "topic": "Hình học Không gian Oxyz",
+    "content": "Trong hệ tọa độ Oxyz, phương trình mặt phẳng (P) đi qua M0(x0, y0, z0) có vector pháp tuyến n = (a, b, c) là a(x - x0) + b(y - y0) + c(z - z0) = 0. Phương trình đường thẳng d đi qua M0 có vector chỉ phương u = (a, b, c) là (x - x0)/a = (y - y0)/b = (z - z0)/c."
+  },
+  {
+    "id": "sinh-001",
+    "subject": "sinh",
+    "topic": "Cấu trúc ADN và Mã Di truyền",
+    "content": "Phân tử ADN gồm 2 chuỗi polinuclêôtit xoắn kép song song ngược chiều (5'-3' và 3'-5'). Nguyên tắc bổ sung: A liên kết với T bằng 2 liên kết hiđrô, G liên kết với X bằng 3 liên kết hiđrô. Tổng số liên kết hiđrô H = 2A + 3G. Mã di truyền là mã bộ ba (mỗi 3 nuclêôtit mã hóa 1 amino axit), có tính thoái hóa, tính phổ biến và tính đặc hiệu."
+  },
+  {
+    "id": "sinh-002",
+    "subject": "sinh",
+    "topic": "Sao chép ADN và Đoạn Okazaki",
+    "content": "Quá trình nhân đôi ADN diễn ra theo nguyên tắc bán bảo toàn và nguyên tắc bổ sung. Enzyme ADN Polymerase chỉ tổng hợp mạch mới theo chiều 5' -> 3'. Do đó, trên mạch khuôn 3' -> 5', mạch mới được tổng hợp liên tục; trên mạch khuôn 5' -> 3', mạch mới được tổng hợp gián đoạn thành các đoạn Okazaki ngắn, sau đó được enzyme Ligase nối lại."
+  },
+  {
+    "id": "sinh-003",
+    "subject": "sinh",
+    "topic": "Quy luật Di truyền Mendel",
+    "content": "Định luật phân ly Mendel: Mỗi tính trạng do một cặp alen quy định. Khi giảm phân, các alen trong cặp phân ly đồng đều về các giao tử. Lai hai cơ thể dị hợp Aa x Aa cho tỉ lệ kiểu hình 3 trội : 1 lặn, tỉ lệ kiểu gen 1AA : 2Aa : 1aa. Định luật phân ly độc lập: Các cặp alen phân ly độc lập trong quá trình hình thành giao tử."
+  },
+  {
+    "id": "sinh-004",
+    "subject": "sinh",
+    "topic": "Di truyền Quần thể Hardy-Weinberg",
+    "content": "Định luật cân bằng Hardy-Weinberg: Trong một quần thể giao phối tự do ngẫu nhiên và kích thước lớn, tần số các alen và tần số kiểu gen của quần thể duy trì không đổi qua các thế hệ. Cấu trúc di truyền quần thể đạt cân bằng có dạng: p^2 AA + 2pq Aa + q^2 aa = 1 (với p là tần số alen A, q là tần số alen a và p + q = 1)."
+  },
+  {
+    "id": "sinh-005",
+    "subject": "sinh",
+    "topic": "Mô hình Khảm Động Màng Tế bào",
+    "content": "Màng sinh chất được cấu tạo theo mô hình khảm động (Singer & Nicolson 1972). Khảm: Lớp kép Phospholipid tạo thành khung liên tục, trong đó các protein màng được khảm vào (protein xuyên màng và ngoại vi). Động: Các phân tử phospholipid và protein có khả năng di chuyển linh hoạt trên mặt phẳng màng. Thẩm thấu: Nước di chuyển từ nơi có nồng độ chất tan thấp (nhược trương) sang nơi có nồng độ chất tan cao (ưu trương)."
+  },
+  {
+    "id": "sinh-006",
+    "subject": "sinh",
+    "topic": "Cơ chế Vaccine và Trí nhớ Miễn dịch",
+    "content": "Vaccine chứa mầm bệnh suy yếu, bất hoạt hoặc đoạn ARN/protein kháng nguyên. Khi đưa vào cơ thể, vaccine kích thích hệ miễn dịch sản xuất kháng thể và hình thành các Tế bào nhớ (Memory B cells & T cells). Khi gặp mầm bệnh thật xâm nhập sau này, tế bào nhớ nhận diện và sản xuất kháng thể ồ ạt tiêu diệt mầm bệnh trước khi kịp gây bệnh."
+  }
+]

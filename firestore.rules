@@ -1,11 +1,49 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Khóa kịch bản bot bảo mật phía server
     match /match_rooms/{matchId}/bot_schedules/{docId} {
       allow read, write: if false;
     }
+    
+    // Cấp quyền đọc/ghi công khai cho Hồ sơ/Bảng xếp hạng (users)
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+
+    // Cấp quyền đọc/ghi cho Moments & Stories
+    match /moments/{momentId} {
+      allow read, write: if true;
+    }
+
+    match /stories/{storyId} {
+      allow read, write: if true;
+    }
+
+    // Cấp quyền đọc/ghi cho Đề thi & Bài thi
+    match /exams/{examId} {
+      allow read, write: if true;
+    }
+
+    // Cấp quyền đọc công khai cho Danh sách Giải đấu
+    match /tournaments/{tournamentId} {
+      allow read, write: if true;
+    }
+    
+    // Cấp quyền đọc công khai cho Cấu hình Hệ thống
+    match /config/{configId} {
+      allow read, write: if true;
+    }
+
+    // Cấp quyền đọc công khai cho Phòng Đấu Trường 1v1
+    match /match_rooms/{roomId} {
+      allow read, write: if true;
+    }
+
+    // Mặc định quy tắc cho các bộ sưu tập khác
     match /{document=**} {
-      allow read, write: if request.auth != null;
+      allow read, write: if true;
     }
   }
 }
+

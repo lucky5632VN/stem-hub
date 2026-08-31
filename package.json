@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -H 0.0.0.0 -p 3000",
-    "build": "next build",
-    "deploy": "next build && firebase deploy --except functions",
+    "dev": "next dev --webpack -H 0.0.0.0 -p 3000",
+    "build": "next build --webpack",
+    "deploy": "next build --webpack && firebase deploy --except functions",
     "start": "next start",
     "lint": "eslint"
   },
@@ -20,6 +20,7 @@
     "lucide-react": "^1.16.0",
     "next": "16.2.6",
     "next-themes": "^0.4.6",
+    "nodemailer": "^9.0.5",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "three": "^0.184.0",

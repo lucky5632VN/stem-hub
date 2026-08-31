@@ -28,7 +28,7 @@ export default function AdminLayout({ children }) {
         return;
       }
 
-      setStatusMsg('Đang xác thực quyền Quản trị viên...');
+      setStatusMsg('Đang xác thực quyền Admin...');
       
       // Kiểm tra email admin cứng trước
       if (firebaseUser.email?.toLowerCase() === 'admin123@gmail.com') {

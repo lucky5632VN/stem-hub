@@ -175,7 +175,7 @@ export const clientFunctions = {
   // 1. UPDATE PRESENCE (LAST ACTIVE)
   updateLastActive: (db, auth) => async () => {
     const user = auth.currentUser;
-    if (!user) throw new Error('Unauthenticated');
+    if (!user) return { success: false, reason: 'Unauthenticated' };
     const userRef = doc(db, 'users', user.uid);
     await runTransaction(db, async (transaction) => {
       transaction.update(userRef, { lastActive: Date.now() });
@@ -450,9 +450,12 @@ export const clientFunctions = {
           }
           
           if (needsUpdate) {
-            transaction.update(userRef, {
-              'stats.dailyQuests': questsData
-            });
+            transaction.set(userRef, {
+              stats: {
+                ...(stats || {}),
+                dailyQuests: questsData
+              }
+            }, { merge: true });
           }
           
           return { success: true, dailyQuests: questsData.quests || [] };
@@ -500,10 +503,19 @@ export const clientFunctions = {
             return q;
           });
 
-          transaction.update(userRef, {
-            'personalization.crystals': newCrystals,
-            'stats.dailyQuests.quests': newQuests
-          });
+          const currentQuestsData = stats.dailyQuests || {};
+          const updatedQuestsData = { ...currentQuestsData, quests: newQuests };
+
+          transaction.set(userRef, {
+            personalization: {
+              ...(pers || {}),
+              crystals: newCrystals
+            },
+            stats: {
+              ...(stats || {}),
+              dailyQuests: updatedQuestsData
+            }
+          }, { merge: true });
 
           return { success: true, newCrystals, questId, reward: quest.reward };
         }
@@ -760,7 +772,7 @@ export const clientFunctions = {
       player2Score: 0,
       player1Logs: ['Đấu thủ 1 đã sẵn sàng!'],
       player2Logs: ['Đối thủ đã sẵn sàng thi đấu!'],
-      timeRemaining: 300,
+      timeRemaining: 180,
       winnerId: null,
       createdAt: new Date().toISOString()
     };
@@ -886,6 +898,7 @@ export const clientFunctions = {
         return { success: false, reason: 'Invalid questionId.' };
       }
       const q = questionPool[qIndex];
+      let scoreAdded = 0;
       
       if (q.type === 'mcq' || Array.isArray(q.choices)) {
         const selectedStr = String(selectedAnswer);
@@ -895,6 +908,7 @@ export const clientFunctions = {
         const selectedChar = indexMap[selectedStr] || selectedStr;
         
         correct = (correctStr === selectedStr) || (correctChar.toUpperCase() === selectedChar.toUpperCase());
+        scoreAdded = correct ? 1 : 0;
         explanation = q.note || q.explanation || '';
       } else if (q.type === 'tf' || q.type === 'true_false') {
         const answers = Array.isArray(selectedAnswer)
@@ -902,13 +916,20 @@ export const clientFunctions = {
           : selectedAnswer && Array.isArray(selectedAnswer.answers)
             ? selectedAnswer.answers
             : [];
+        let correctCount = 0;
+        const totalStatements = Array.isArray(q.correct) ? q.correct.length : 4;
         if (Array.isArray(q.correct) && answers.length === q.correct.length) {
-          correct = q.correct.every((value, idx) => value === answers[idx]);
+          answers.forEach((value, idx) => {
+            if (value === q.correct[idx]) correctCount++;
+          });
         }
+        scoreAdded = totalStatements > 0 ? correctCount / totalStatements : 0;
+        correct = scoreAdded === 1;
         explanation = q.note || q.explanation || '';
       } else if (q.type === 'sa' || q.type === 'short_answer') {
         const userVal = String(selectedAnswer).trim().toLowerCase();
-        const targetVal = String(q.correctAnswer || q.correctShortAnswer || q.correct || '').trim().toLowerCase();
+        const rawTarget = q.correctShortAnswer ?? q.correctAnswer ?? q.correct ?? q.answer ?? '';
+        const targetVal = String(rawTarget).trim().toLowerCase();
         const userNum = parseFloat(userVal);
         const targetNum = parseFloat(targetVal);
         if (!isNaN(userNum) && !isNaN(targetNum)) {
@@ -916,14 +937,16 @@ export const clientFunctions = {
         } else {
           correct = userVal === targetVal;
         }
+        scoreAdded = correct ? 1 : 0;
         explanation = q.note || q.explanation || '';
       } else {
         correct = q.correct === selectedAnswer;
+        scoreAdded = correct ? 1 : 0;
         explanation = q.note || q.explanation || '';
       }
 
       const currentScore = matchDoc[scoreKey] || 0;
-      newScore = correct ? currentScore + 1 : currentScore;
+      newScore = currentScore + scoreAdded;
       currentProgress = Math.min(100, Math.round((newScore / 20) * 100));
     } else if (subject === 'math') {
       const qIndex = Number(questionId);
@@ -931,6 +954,7 @@ export const clientFunctions = {
         return { success: false, reason: 'Invalid questionId.' };
       }
       const q = questionPool[qIndex];
+      let scoreAdded = 0;
 
       if (q.type === 'mcq' || Array.isArray(q.choices)) {
         const selectedStr = String(selectedAnswer);
@@ -940,6 +964,7 @@ export const clientFunctions = {
         const selectedChar = indexMap[selectedStr] || selectedStr;
         
         correct = (correctStr === selectedStr) || (correctChar.toUpperCase() === selectedChar.toUpperCase());
+        scoreAdded = correct ? 1 : 0;
         explanation = q.note || q.explanation || '';
       } else if (q.type === 'tf' || q.type === 'true_false') {
         const answers = Array.isArray(selectedAnswer)
@@ -947,13 +972,20 @@ export const clientFunctions = {
           : selectedAnswer && Array.isArray(selectedAnswer.answers)
             ? selectedAnswer.answers
             : [];
+        let correctCount = 0;
+        const totalStatements = Array.isArray(q.correct) ? q.correct.length : 4;
         if (Array.isArray(q.correct) && answers.length === q.correct.length) {
-          correct = q.correct.every((value, idx) => value === answers[idx]);
+          answers.forEach((value, idx) => {
+            if (value === q.correct[idx]) correctCount++;
+          });
         }
+        scoreAdded = totalStatements > 0 ? correctCount / totalStatements : 0;
+        correct = scoreAdded === 1;
         explanation = q.note || q.explanation || '';
       } else if (q.type === 'sa' || q.type === 'short_answer') {
         const userVal = String(selectedAnswer).trim().toLowerCase();
-        const targetVal = String(q.correctAnswer || q.correctShortAnswer || q.correct || '').trim().toLowerCase();
+        const rawTarget = q.correctShortAnswer ?? q.correctAnswer ?? q.correct ?? q.answer ?? '';
+        const targetVal = String(rawTarget).trim().toLowerCase();
         const userNum = parseFloat(userVal);
         const targetNum = parseFloat(targetVal);
         if (!isNaN(userNum) && !isNaN(targetNum)) {
@@ -961,27 +993,31 @@ export const clientFunctions = {
         } else {
           correct = userVal === targetVal;
         }
+        scoreAdded = correct ? 1 : 0;
         explanation = q.note || q.explanation || '';
       } else if (q.type === 'practical_volume') {
         const userVal = (typeof selectedAnswer === 'object' && selectedAnswer !== null)
           ? Number(selectedAnswer.x !== undefined ? selectedAnswer.x : selectedAnswer)
           : Number(selectedAnswer);
         correct = Math.abs(userVal - Number(q.correct)) <= 0.1;
+        scoreAdded = correct ? 1 : 0;
         explanation = q.note || q.explanation || '';
       } else {
         const userX = (selectedAnswer && selectedAnswer.x !== undefined) ? Number(selectedAnswer.x) : NaN;
         const userY = (selectedAnswer && selectedAnswer.y !== undefined) ? Number(selectedAnswer.y) : NaN;
         const targetCoord = q.coord || q.ans || { x: 0, y: 0 };
         correct = targetCoord.x === userX && targetCoord.y === userY;
+        scoreAdded = correct ? 1 : 0;
         explanation = q.note || q.explanation || '';
       }
 
       const currentScore = matchDoc[scoreKey] || 0;
-      newScore = correct ? currentScore + 1 : currentScore;
+      newScore = currentScore + scoreAdded;
       currentProgress = Math.min(100, Math.round((newScore / 20) * 100));
     } else if (subject === 'physics') {
       const qIndex = Number(questionId);
       const q = (!isNaN(qIndex) && qIndex >= 0 && qIndex < questionPool.length) ? questionPool[qIndex] : null;
+      let scoreAdded = 0;
 
       if (q && (q.type === 'mcq' || Array.isArray(q.choices))) {
         const selectedStr = String(selectedAnswer);
@@ -991,6 +1027,7 @@ export const clientFunctions = {
         const selectedChar = indexMap[selectedStr] || selectedStr;
         
         correct = (correctStr === selectedStr) || (correctChar.toUpperCase() === selectedChar.toUpperCase());
+        scoreAdded = correct ? 1 : 0;
         explanation = q.note || q.explanation || '';
       } else if (q && (q.type === 'tf' || q.type === 'true_false')) {
         const answers = Array.isArray(selectedAnswer)
@@ -998,13 +1035,20 @@ export const clientFunctions = {
           : selectedAnswer && Array.isArray(selectedAnswer.answers)
             ? selectedAnswer.answers
             : [];
+        let correctCount = 0;
+        const totalStatements = Array.isArray(q.correct) ? q.correct.length : 4;
         if (Array.isArray(q.correct) && answers.length === q.correct.length) {
-          correct = q.correct.every((value, idx) => value === answers[idx]);
+          answers.forEach((value, idx) => {
+            if (value === q.correct[idx]) correctCount++;
+          });
         }
+        scoreAdded = totalStatements > 0 ? correctCount / totalStatements : 0;
+        correct = scoreAdded === 1;
         explanation = q.note || q.explanation || '';
       } else if (q && (q.type === 'sa' || q.type === 'short_answer')) {
         const userVal = String(selectedAnswer).trim().toLowerCase();
-        const targetVal = String(q.correctAnswer || q.correctShortAnswer || q.correct || '').trim().toLowerCase();
+        const rawTarget = q.correctShortAnswer ?? q.correctAnswer ?? q.correct ?? q.answer ?? '';
+        const targetVal = String(rawTarget).trim().toLowerCase();
         const userNum = parseFloat(userVal);
         const targetNum = parseFloat(targetVal);
         if (!isNaN(userNum) && !isNaN(targetNum)) {
@@ -1012,6 +1056,7 @@ export const clientFunctions = {
         } else {
           correct = userVal === targetVal;
         }
+        scoreAdded = correct ? 1 : 0;
         explanation = q.note || q.explanation || '';
       } else if (q && q.type === 'practical_oscillation') {
         let submittedT = undefined;
@@ -1028,6 +1073,7 @@ export const clientFunctions = {
         const targetT = Number(q.targetPeriod || q.correct || 0);
         if (!Number.isNaN(submittedT) && !Number.isNaN(targetT)) {
           correct = Math.abs(submittedT - targetT) <= 0.15;
+          scoreAdded = correct ? 1 : 0;
           explanation = `Mục tiêu T=${targetT.toFixed(2)}s`;
         }
       } else if (q && q.type === 'practical_circuit') {
@@ -1042,6 +1088,7 @@ export const clientFunctions = {
             else if (mode === 'parallel' && (R1 + R2) !== 0) eqR = (R1 * R2) / (R1 + R2);
             if (eqR !== null) {
               correct = Math.abs(eqR - reqR) <= 0.5;
+              scoreAdded = correct ? 1 : 0;
               explanation = `Mục tiêu R≈${reqR}`;
             }
           }
@@ -1051,6 +1098,7 @@ export const clientFunctions = {
         const correctVal = Number(q.correct);
         if (!Number.isNaN(numericAnswer) && !Number.isNaN(correctVal)) {
           correct = Math.abs(numericAnswer - correctVal) <= 0.25;
+          scoreAdded = correct ? 1 : 0;
           explanation = q.note || q.explanation || '';
         }
       } else {
@@ -1072,12 +1120,13 @@ export const clientFunctions = {
           const pathResult = calculateLaserPath(mirrors, { x: 45, y: 140 }, { x: 295, y: 140 });
 
           correct = !!(isMatchTarget && pathResult.isHit);
+          scoreAdded = correct ? 1 : 0;
         }
         explanation = '';
       }
 
       const currentScore = matchDoc[scoreKey] || 0;
-      newScore = correct ? currentScore + 1 : currentScore;
+      newScore = currentScore + scoreAdded;
 
       if (selectedAnswer && selectedAnswer.physMirrors) {
         currentProgress = correct ? 100 : 0;
@@ -1219,7 +1268,7 @@ export const clientFunctions = {
         const p1Prog = roomData.player1Progress || 0;
         const p2Prog = roomData.player2Progress || 0;
 
-        if (!force && p1Prog < 100 && p2Prog < 100 && (roomData.timeRemaining !== undefined ? roomData.timeRemaining : 300) > 0) {
+        if (!force && p1Prog < 100 && p2Prog < 100 && (roomData.timeRemaining !== undefined ? roomData.timeRemaining : 180) > 0) {
           throw new Error('Trận đấu chưa kết thúc (thời gian chưa hết và chưa có ai đạt 100% tiến độ).');
         }
 

@@ -48,7 +48,9 @@ export const useAppStore = create((set) => ({
     elo: 0,
     wins: 0,
     losses: 0,
-    subjectStrengths: { math: 50, physics: 50, chemistry: 50, biology: 50 }
+    subjectStrengths: { math: 50, physics: 50, chemistry: 50, biology: 50 },
+    face2FAEnabled: false,
+    faceDescriptor: null
   },
   setPersonalization: (data) => set((state) => ({
     personalization: { ...state.personalization, ...data }
@@ -63,7 +65,7 @@ export const useAppStore = create((set) => ({
     opponentInfo: null,
     matchResult: null,
     logs: [],
-    timeRemaining: 300
+    timeRemaining: 180
   },
 
   startMatching: (subject) => set({
@@ -75,11 +77,11 @@ export const useAppStore = create((set) => ({
       opponentInfo: null,
       matchResult: null,
       logs: [],
-      timeRemaining: 300
+      timeRemaining: 180
     }
   }),
 
-  startChallengeGame: (subject, timeLimit = 300) => set({
+  startChallengeGame: (subject, timeLimit = 180) => set({
     arenaState: {
       status: 'playing',
       subject,
@@ -132,4 +134,3 @@ export const useAppStore = create((set) => ({
   activeLab: null,
   setActiveLab: (lab) => set({ activeLab: lab }),
 }));
-

@@ -180,6 +180,20 @@ setTimeout(function injectTheorySystem() {
     }
     console.log('[Theme System] Injected Theory System via:', scriptPath);
 }, 100);
+
+// --- PHYSICS AI CHATBOT INJECTION ---
+setTimeout(function injectPhysicsAIChatbot() {
+    const path = window.location.pathname;
+    const isJsDir = path.includes('/js/') || path.includes('\\js\\');
+    const aiScript = document.createElement('script');
+    const scriptPath = isJsDir ? './physics-ai-chatbot.js?v=1.0.0' : 'js/physics-ai-chatbot.js?v=1.0.0';
+    aiScript.src = scriptPath;
+    aiScript.async = true;
+    if (!document.querySelector(`script[src*="physics-ai-chatbot.js"]`)) {
+        (document.head || document.documentElement).appendChild(aiScript);
+    }
+    console.log('[Theme System] Injected Physics AI Chatbot via:', scriptPath);
+}, 100);
 });
 
 function createGlobalSidebar() {

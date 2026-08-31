@@ -71,9 +71,26 @@ export default function SettingsDropdown({ onClose }) {
   };
 
   const handleLogout = async () => {
-    playSound.click();
-    await signOut(auth);
-    onClose();
+    try { playSound.click(); } catch (_) {}
+    try {
+      if (typeof window !== 'undefined') {
+        if (user?.uid) {
+          sessionStorage.removeItem('face2FA_verified_' + user.uid);
+          localStorage.removeItem('face2FA_verified_' + user.uid);
+        }
+        localStorage.removeItem('emailFor2FA');
+        sessionStorage.clear();
+      }
+      useAppStore.getState().setUser(null);
+      await signOut(auth);
+    } catch (err) {
+      console.error("Lỗi khi đăng xuất:", err);
+    } finally {
+      if (onClose) onClose();
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
+    }
   };
 
   const handleCursorChange = async (type) => {
@@ -146,16 +163,14 @@ export default function SettingsDropdown({ onClose }) {
             title="Thiết kế Avatar Chibi cá nhân"
           >
             <AvatarFrame frame={personalization.avatarFrame} className="w-16 h-16 text-2xl mb-2 transition-all duration-300 group-hover/avatar:scale-105">
-              {personalization.avatarUrl === 'custom-avatar' ? (
+              {personalization.avatarUrl === 'custom-avatar' || (!personalization.avatarUrl && personalization.avatarParts) || personalization.avatarParts ? (
                 <STEMAvatarSVG parts={personalization.avatarParts} />
-              ) : personalization.avatarUrl ? (
-                personalization.avatarUrl.startsWith('http') || personalization.avatarUrl.startsWith('data:image/') ? (
-                  <img src={personalization.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" onError={(e) => { e.target.onerror = null; e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a1a1aa'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"; }} />
-                ) : (
-                  <span className="select-none">{personalization.avatarUrl}</span>
-                )
+              ) : personalization.avatarUrl && (personalization.avatarUrl.startsWith('http') || personalization.avatarUrl.startsWith('data:image/')) ? (
+                <img src={personalization.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }} />
               ) : (
-                user.displayName ? user.displayName.charAt(0).toUpperCase() : <User className="w-8 h-8 text-text-primary" />
+                <span className="font-extrabold text-accent-pink select-none">
+                  {user?.displayName ? user.displayName.charAt(0).toUpperCase() : 'H'}
+                </span>
               )}
               
               {/* Edit overlay */}

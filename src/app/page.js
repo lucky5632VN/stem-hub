@@ -13,9 +13,11 @@ import {
 } from 'lucide-react';
 import { AvatarFrame } from '@/components/atoms/AvatarFrame';
 import STEMAvatarSVG from '@/components/atoms/STEMAvatarSVG';
+import dynamic from 'next/dynamic';
 import { savePendingShare } from '@/lib/indexedDB';
-import ArenaBackground from '@/components/organisms/ArenaBackground';
 import CrystalIcon from '@/components/atoms/CrystalIcon';
+
+const ArenaBackground = dynamic(() => import('@/components/organisms/ArenaBackground'), { ssr: false });
 
 const labs = [
   {
@@ -23,7 +25,7 @@ const labs = [
     title: 'Hóa học',
     name: 'QuantumLab v4.0',
     status: 'active',
-    link: '/labs/lab-ktra15p/dist/index.html?v=4.0.5',
+    link: '/labs/lab-ktra15p/dist/index.html?v=4.1.5',
     image: 'https://images.unsplash.com/photo-1532187643603-ba119ca4109e?q=80&w=600&auto=format&fit=crop',
     desc: 'Thiết lập phản ứng axit-bazơ ảo, theo dõi nồng độ pH thời gian thực.',
   },
@@ -360,10 +362,10 @@ export default function Home() {
         {/* CỘT TRÁI (COL-SPAN-8): DANH SÁCH PHÒNG LABS THỰC HÀNH */}
         <div className="lg:col-span-8 flex flex-col gap-6 screenshot-full-width">
           <div className="flex flex-col mb-2">
-            <h2 className="text-xl font-black text-text-primary tracking-widest uppercase font-mono flex items-center gap-2">
+            <h2 className="text-xl font-bold text-text-primary tracking-tight uppercase flex items-center gap-2">
               <Zap className="w-5 h-5 text-accent-pink animate-pulse" /> HỆ THỐNG PHÒNG THÍ NGHIỆM ẢO STEM
             </h2>
-            <p className="text-text-secondary text-xs font-mono mt-1">CHỌN PHÒNG THÍ NGHIỆM ĐỂ KHỞI CHẠY MÔ PHỎNG LƯỢNG TỬ</p>
+            <p className="text-text-secondary text-xs mt-1 tracking-wide">CHỌN PHÒNG THÍ NGHIỆM ĐỂ KHỞI CHẠY MÔ PHỎNG LƯỢNG TỬ</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -373,7 +375,7 @@ export default function Home() {
                   <div className="h-44 overflow-hidden relative">
                     <div className="absolute inset-0 bg-gradient-to-t from-bg-secondary via-bg-secondary/30 to-transparent z-10 group-hover:via-bg-secondary/60 transition-colors duration-300" />
                     <img src={lab.image} alt={lab.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    <div className="absolute top-4 left-4 z-20 px-3.5 py-1.5 bg-bg-primary/80 backdrop-blur-md border border-border-theme rounded-full text-[10px] font-bold text-accent-pink uppercase tracking-widest font-mono shadow-sm">
+                    <div className="absolute top-4 left-4 z-20 px-3.5 py-1.5 bg-bg-primary/80 backdrop-blur-md border border-border-theme rounded-full text-[10px] font-bold text-accent-pink uppercase tracking-wider shadow-sm">
                       {lab.title}
                     </div>
                   </div>
@@ -431,7 +433,7 @@ export default function Home() {
 
             <div className="flex items-center gap-1.5 mb-5 border-b border-border-theme pb-3">
               <Activity className="w-4.5 h-4.5 text-accent-pink animate-pulse" />
-              <span className="text-[10px] font-black text-text-primary uppercase tracking-widest font-mono cyber-glitch-text">
+              <span className="text-[11px] font-extrabold text-text-primary uppercase tracking-wider cyber-glitch-text">
                 BUỒNG LÁI LƯỢNG TỬ v4.0
               </span>
             </div>
@@ -509,10 +511,10 @@ export default function Home() {
               <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-accent-pink/30 rounded-br-xl pointer-events-none" />
 
               <div className="flex items-center justify-between mb-4 border-b border-border-theme pb-3">
-                <h3 className="text-[10px] font-black text-text-primary uppercase tracking-widest font-mono flex items-center gap-1.5 cyber-glitch-text">
+                <h3 className="text-[11px] font-extrabold text-text-primary uppercase tracking-wider flex items-center gap-1.5 cyber-glitch-text">
                   <Sparkles className="w-4 h-4 text-accent-pink" /> QUÉT RADAR ĐA MÔN
                 </h3>
-                <span className="text-[8px] text-accent-pink/70 font-mono border border-accent-pink/20 px-1.5 py-0.5 rounded uppercase">
+                <span className="text-[8px] text-accent-pink/70 border border-accent-pink/20 px-1.5 py-0.5 rounded uppercase">
                   Chỉ số thực tế
                 </span>
               </div>
@@ -599,7 +601,7 @@ export default function Home() {
           {/* DAILY QUESTS PANEL */}
           <div className="bg-bg-secondary/95 border border-border-theme p-6 rounded-3xl shadow-2xl relative overflow-hidden">
             <div className="flex items-center justify-between mb-4 border-b border-border-theme pb-3">
-              <h3 className="text-[10px] font-black text-text-secondary uppercase tracking-widest font-mono flex items-center gap-1.5">
+              <h3 className="text-[10px] font-bold text-text-secondary uppercase tracking-wider flex items-center gap-1.5">
                 <Clock className="w-4 h-4 text-accent-pink animate-pulse" /> Nhiệm vụ hàng ngày
               </h3>
               <div className="flex items-center gap-2">
@@ -773,7 +775,7 @@ export default function Home() {
                   {/* Câu hỏi gợi ý */}
                   {aiCompanionData[activeLab.id] && (
                     <div className="space-y-1.5">
-                      <p className="text-[9px] font-bold text-text-secondary uppercase tracking-widest font-mono text-left">Gợi ý chủ đề nhanh:</p>
+                      <p className="text-[9px] font-bold text-text-secondary uppercase tracking-wider text-left">Gợi ý chủ đề nhanh:</p>
                       <div className="flex flex-col gap-1.5">
                         {aiCompanionData[activeLab.id].suggestions.map((sug, i) => (
                           <button

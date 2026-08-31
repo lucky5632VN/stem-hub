@@ -69,7 +69,7 @@ export const EQUIPMENT_CATALOG = [
   {
     id: 'card_smoke_fog',
     name: 'Thẻ Mù Sương',
-    description: 'Gây mờ và giật màn hình đối thủ trong 5 giây.',
+    description: 'Gây mờ và giật màn hình đối thủ trong 30 giây.',
     type: 'in_match',
     category: 'debuff',
     crystalPrice: 2000,
@@ -113,7 +113,7 @@ export const EQUIPMENT_CATALOG = [
   {
     id: 'card_counter',
     name: 'Thẻ Phản Đòn',
-    description: 'Tự động đảo ngược hiệu ứng Mù Sương hoặc Đánh Cắp Tiến Độ của đối thủ sang chính đối thủ!',
+    description: 'Tự động hoặc chủ động bấm kích hoạt để phản ngược hiệu ứng Đóng Băng, Mù Sương, Đánh Cắp sang đối thủ!',
     type: 'in_match',
     category: 'defense',
     crystalPrice: 2800,

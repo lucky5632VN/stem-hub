@@ -12,6 +12,7 @@ const renderKaTeXSafe = (latex, displayMode = false) => {
     return katex.renderToString(latex, {
       displayMode,
       throwOnError: false,
+      strict: 'ignore',
       output: 'html'
     });
   } catch (e) {
@@ -19,7 +20,7 @@ const renderKaTeXSafe = (latex, displayMode = false) => {
   }
 };
 
-// Map LaTeX symbols to Unicode
+// Map LaTeX symbols to Unicode for text outside KaTeX
 const latexTranslations = [
   { regex: /\\text\{\s*(.*?)\s*\}/g, replacement: '$1' },
   { regex: /\\left/g, replacement: '' },
@@ -46,9 +47,9 @@ const latexTranslations = [
   { regex: /\^\\circ/g, replacement: '°' },
   { regex: /\\circ/g, replacement: '°' },
   { regex: /\\degree/g, replacement: '°' },
-  { regex: /\\rightarrow/g, replacement: ' ➔ ' },
-  { regex: /\\Rightarrow/g, replacement: ' ➔ ' },
-  { regex: /\\to/g, replacement: ' ➔ ' },
+  { regex: /\\rightarrow/g, replacement: ' → ' },
+  { regex: /\\Rightarrow/g, replacement: ' ⇒ ' },
+  { regex: /\\to/g, replacement: ' → ' },
   { regex: /\\Leftrightarrow/g, replacement: ' ⇔ ' },
   { regex: /\\times/g, replacement: ' × ' },
   { regex: /\\approx/g, replacement: ' ≈ ' },
@@ -86,8 +87,7 @@ const latexTranslations = [
   { regex: /\\,/g, replacement: ' ' },
   { regex: /\\;/g, replacement: ' ' },
   { regex: /\\quad/g, replacement: ' ' },
-  { regex: /\\qquad/g, replacement: ' ' },
-  { regex: /\\text/g, replacement: '' }
+  { regex: /\\qquad/g, replacement: ' ' }
 ];
 
 export const formatMathText = (text) => {
@@ -95,13 +95,14 @@ export const formatMathText = (text) => {
 
   let formatted = text;
 
-  // 1. Dọn dẹp thẻ cũ
+  // 1. Dọn dẹp thẻ rác cũ & ký tự thừa
   formatted = formatted.replace(/#colorend/g, '');
 
-  // 2. Bảo vệ các thẻ HTML có sẵn (như <img>, <sub>, <sup>, <span>, <p>, <br>, v.v.)
+  // 2. Bảo vệ các thẻ HTML token đơn lẻ (<tag...>, </tag>, <img...>)
+  // KHÔNG bọc toàn bộ khối <p>...</p> hay <div>...</div> để không làm ẩn văn bản chứa công thức bên trong!
   const htmlPlaceholders = [];
   
-  // Bảo vệ thẻ <img>
+  // a. Bảo vệ thẻ <img> (mã hóa URL an toàn)
   formatted = formatted.replace(/<img\s+([^>]*?)src="([^"]+?)"([^>]*?)>/gi, (match, before, src, after) => {
     const idx = htmlPlaceholders.length;
     const cleanImg = `<img referrerpolicy="no-referrer" ${before}src="${encodeURI(src.trim())}"${after}>`;
@@ -109,41 +110,51 @@ export const formatMathText = (text) => {
     return `###HTMLPH${idx}HTMLPH###`;
   });
 
-  // Bảo vệ tất cả các thẻ HTML khác (như <sub ...>...</sub>, <sup ...>...</sup>, v.v.)
-  formatted = formatted.replace(/<([a-z1-6]+)(?:\s+[^>]*)?>([\s\S]*?)<\/\1>|<[a-z1-6]+(?:\s+[^>]*)?\/>/gi, (match) => {
+  // b. Bảo vệ tất cả các thẻ HTML đơn lẻ độc lập (<tag...>, </tag>)
+  formatted = formatted.replace(/<[^>]+>/g, (match) => {
     const idx = htmlPlaceholders.length;
     htmlPlaceholders.push(match);
     return `###HTMLPH${idx}HTMLPH###`;
   });
 
-  // 3. Render các khối KaTeX: $$...$$, \[...\], $...$, \(...\)
-  formatted = formatted.replace(/\$\$(.*?)\$\$/gs, (match, p1) => renderKaTeXSafe(p1.trim(), true));
-  formatted = formatted.replace(/\\\[(.*?)\\\]/gs, (match, p1) => renderKaTeXSafe(p1.trim(), true));
-  formatted = formatted.replace(/\$(.*?)\$/gs, (match, p1) => renderKaTeXSafe(p1.trim(), false));
-  formatted = formatted.replace(/\\\((.*?)\\\)/gs, (match, p1) => renderKaTeXSafe(p1.trim(), false));
+  // 3. Mảng lưu trữ KaTeX đã render để bảo vệ khỏi các regex xử lý tiếp theo
+  const katexPlaceholders = [];
+  const protectKaTeX = (latex, displayMode = false) => {
+    if (!latex || !latex.trim()) return '';
+    const html = renderKaTeXSafe(latex.trim(), displayMode);
+    const idx = katexPlaceholders.length;
+    katexPlaceholders.push(html);
+    return `###KATEXPH${idx}KATEXPH###`;
+  };
 
-  // Render Hệ phương trình & môi trường LaTeX nhiều dòng
-  while (formatted.includes('\\begin{cases}')) {
-    const startIdx = formatted.indexOf('\\begin{cases}');
-    const endIdx = formatted.indexOf('\\end{cases}', startIdx);
-    if (endIdx === -1) break;
-    const block = formatted.slice(startIdx, endIdx + 11);
-    const cleanBlock = block.replace(/\r?\n/g, ' \\\\ ');
-    const html = renderKaTeXSafe(cleanBlock, true);
-    formatted = formatted.slice(0, startIdx) + html + formatted.slice(endIdx + 11);
-  }
+  // a. Render các khối KaTeX Display (Block math $$...$$ và \[...\])
+  formatted = formatted.replace(/\$\$([\s\S]+?)\$\$/g, (match, p1) => protectKaTeX(p1, true));
+  formatted = formatted.replace(/\\\[([\s\S]+?)\\\]/g, (match, p1) => protectKaTeX(p1, true));
 
-  while (formatted.includes('\\begin{aligned}')) {
-    const startIdx = formatted.indexOf('\\begin{aligned}');
-    const endIdx = formatted.indexOf('\\end{aligned}', startIdx);
-    if (endIdx === -1) break;
-    const block = formatted.slice(startIdx, endIdx + 13);
-    const cleanBlock = block.replace(/\r?\n/g, ' \\\\ ');
-    const html = renderKaTeXSafe(cleanBlock, true);
-    formatted = formatted.slice(0, startIdx) + html + formatted.slice(endIdx + 13);
-  }
+  // b. Render Inline math \(...\)
+  formatted = formatted.replace(/\\\(([\s\S]+?)\\\)/g, (match, p1) => protectKaTeX(p1, false));
 
-  // Render phân số chưa bọc \frac{...}{...} và \dfrac{...}{...}
+  // c. Render Inline math $...$
+  formatted = formatted.replace(/\$([^$]+?)\$/g, (match, p1) => protectKaTeX(p1, false));
+
+  // d. Render Môi trường Hệ phương trình / Ma trận / Bảng LaTeX nhiều dòng
+  const envNames = ['cases', 'aligned', 'matrix', 'pmatrix', 'bmatrix', 'vmatrix', 'gather', 'equation'];
+  envNames.forEach(env => {
+    const startTag = `\\begin{${env}}`;
+    const endTag = `\\end{${env}}`;
+    while (formatted.includes(startTag)) {
+      const startIdx = formatted.indexOf(startTag);
+      const endIdx = formatted.indexOf(endTag, startIdx);
+      if (endIdx === -1) break;
+      const fullLen = endTag.length;
+      const block = formatted.slice(startIdx, endIdx + fullLen);
+      const cleanBlock = block.replace(/\r?\n/g, ' \\\\ ');
+      const placeholder = protectKaTeX(cleanBlock, true);
+      formatted = formatted.slice(0, startIdx) + placeholder + formatted.slice(endIdx + fullLen);
+    }
+  });
+
+  // e. Render phân số chưa bọc $: \frac{...}{...} và \dfrac{...}{...}
   while (formatted.includes('\\frac{') || formatted.includes('\\dfrac{')) {
     const isDfrac = formatted.includes('\\dfrac{');
     const startToken = isDfrac ? '\\dfrac{' : '\\frac{';
@@ -174,13 +185,37 @@ export const formatMathText = (text) => {
     const denominator = formatted.slice(midIdx + 2, endIdx);
 
     const fracLatex = `\\dfrac{${numerator}}{${denominator}}`;
-    const fracHtml = renderKaTeXSafe(fracLatex, false);
-    formatted = formatted.slice(0, startIdx) + fracHtml + formatted.slice(endIdx + 1);
+    const placeholder = protectKaTeX(fracLatex, false);
+    formatted = formatted.slice(0, startIdx) + placeholder + formatted.slice(endIdx + 1);
   }
 
-  // Render căn thức chưa bọc \sqrt{...}
-  while (formatted.includes('\\sqrt{')) {
-    const startIdx = formatted.indexOf('\\sqrt{');
+  // f. Render căn thức chưa bọc $: \sqrt{...} hoặc \sqrt[n]{...}
+  while (formatted.includes('\\sqrt{') || formatted.includes('\\sqrt[')) {
+    const isBracket = formatted.includes('\\sqrt[');
+    const startToken = isBracket ? '\\sqrt[' : '\\sqrt{';
+    const startIdx = formatted.indexOf(startToken);
+    if (isBracket) {
+      const closeBracketIdx = formatted.indexOf(']', startIdx);
+      if (closeBracketIdx !== -1 && formatted[closeBracketIdx + 1] === '{') {
+        const rootIndex = formatted.slice(startIdx + 6, closeBracketIdx);
+        let depth = 0;
+        let endIdx = -1;
+        for (let i = closeBracketIdx + 2; i < formatted.length; i++) {
+          if (formatted[i] === '{') depth++;
+          else if (formatted[i] === '}') {
+            if (depth === 0) { endIdx = i; break; }
+            depth--;
+          }
+        }
+        if (endIdx !== -1) {
+          const content = formatted.slice(closeBracketIdx + 2, endIdx);
+          const placeholder = protectKaTeX(`\\sqrt[${rootIndex}]{${content}}`, false);
+          formatted = formatted.slice(0, startIdx) + placeholder + formatted.slice(endIdx + 1);
+          continue;
+        }
+      }
+    }
+    // \sqrt{...} tiêu chuẩn
     let depth = 0;
     let endIdx = -1;
     for (let i = startIdx + 6; i < formatted.length; i++) {
@@ -192,50 +227,36 @@ export const formatMathText = (text) => {
     }
     if (endIdx === -1) break;
     const content = formatted.slice(startIdx + 6, endIdx);
-    const sqrtHtml = renderKaTeXSafe(`\\sqrt{${content}}`, false);
-    formatted = formatted.slice(0, startIdx) + sqrtHtml + formatted.slice(endIdx + 1);
+    const placeholder = protectKaTeX(`\\sqrt{${content}}`, false);
+    formatted = formatted.slice(0, startIdx) + placeholder + formatted.slice(endIdx + 1);
   }
 
-  // Xử lý đồng vị hạt nhân: ^6_3Li hoặc ^{6}_{3}Li hoặc _3^6Li
+  // g. Đồng vị hạt nhân chưa bọc $: ^6_3Li hoặc ^{6}_{3}Li hoặc _3^6Li
   formatted = formatted.replace(/\^\{?([0-9]+)\}?_\{?([0-9]+)\}?([A-Z][a-z]?)/g, (match, top, bot, elem) => {
-    return renderKaTeXSafe(`{}^{${top}}_{${bot}}\\text{${elem}}`, false);
+    return protectKaTeX(`{}^{${top}}_{${bot}}\\text{${elem}}`, false);
   });
   formatted = formatted.replace(/_\{?([0-9]+)\}?\^\{?([0-9]+)\}?([A-Z][a-z]?)/g, (match, bot, top, elem) => {
-    return renderKaTeXSafe(`{}^{${top}}_{${bot}}\\text{${elem}}`, false);
+    return protectKaTeX(`{}^{${top}}_{${bot}}\\text{${elem}}`, false);
   });
 
-  // 4. Bảo vệ các khối KaTeX đã được render thành công trước khi xử lý chỉ số dưới/chỉ số trên văn bản thường
-  const katexPlaceholders = [];
-  formatted = formatted.replace(/<span class="katex(?:-display)?">[\s\S]*?<\/span>/gi, (match) => {
-    const idx = katexPlaceholders.length;
-    katexPlaceholders.push(match);
-    return `###KATEXPH${idx}KATEXPH###`;
-  });
-
-  // 5. Thay thế ký tự LaTeX thông thường trong phần văn bản còn lại
+  // h. Tự động chuyển các ký tự LaTeX thông thường trong phần văn bản còn lại
   latexTranslations.forEach(t => {
     formatted = formatted.replace(t.regex, t.replacement);
   });
 
-  // 6. Định dạng chỉ số dưới & chỉ số trên cho văn bản thường (Công thức hóa học, Sinh học, v.v.)
-  formatted = formatted.replace(/\\lim_\{([^}]+)\}/g, (match, limitContent) => renderKaTeXSafe(`\\lim_{${limitContent}}`, false));
-  formatted = formatted.replace(/lim_\{([^}]+)\}/g, (match, limitContent) => renderKaTeXSafe(`\\lim_{${limitContent}}`, false));
+  // 4. Định dạng chỉ số dưới & chỉ số trên cho văn bản thường (như H2O, CO2, x^2)
+  formatted = formatted.replace(/\\lim_\{([^}]+)\}/g, (match, limitContent) => protectKaTeX(`\\lim_{${limitContent}}`, false));
+  formatted = formatted.replace(/lim_\{([^}]+)\}/g, (match, limitContent) => protectKaTeX(`\\lim_{${limitContent}}`, false));
   
   formatted = formatted.replace(/_\{([^}]+)\}/g, '<sub style="font-size:0.75em; vertical-align:-0.25em; white-space:nowrap; display:inline-block; line-height:1;">$1</sub>');
-  formatted = formatted.replace(/_([0-9a-zA-Z]+)/g, '<sub style="font-size:0.75em; vertical-align:-0.25em; white-space:nowrap; display:inline-block; line-height:1;">$1</sub>');
-  
   formatted = formatted.replace(/\^\{([^}]+)\}/g, '<sup style="font-size:0.75em; vertical-align:0.35em; white-space:nowrap; display:inline-block; line-height:1;">$1</sup>');
-  formatted = formatted.replace(/\^([0-9a-zA-Z+\-]+)/g, '<sup style="font-size:0.75em; vertical-align:0.35em; white-space:nowrap; display:inline-block; line-height:1;">$1</sup>');
 
-  // Dọn dẹp tiền tố vectơ bị lặp
-  formatted = formatted.replace(/(vectơ\s+)+/gi, 'vectơ ');
-
-  // 7. Khôi phục các khối KaTeX đã bảo vệ
+  // 5. Khôi phục các khối KaTeX đã render
   katexPlaceholders.forEach((katexHtml, idx) => {
     formatted = formatted.split(`###KATEXPH${idx}KATEXPH###`).join(katexHtml);
   });
 
-  // 8. Khôi phục các thẻ HTML đã bảo vệ
+  // 6. Khôi phục các thẻ HTML đã bảo vệ
   htmlPlaceholders.forEach((htmlTag, idx) => {
     formatted = formatted.split(`###HTMLPH${idx}HTMLPH###`).join(htmlTag);
   });

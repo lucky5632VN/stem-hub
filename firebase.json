@@ -6,21 +6,20 @@
     "source": "functions"
   },
   "hosting": {
-    "site": "stem-hub-43e96",
+    "site": "cuoc-thi-ai-e2044",
     "public": "out",
     "cleanUrls": true,
     "trailingSlash": false,
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**",
-      "**/*.exe",
-      "**/*.dll",
-      "**/venv/**",
-      "**/*.py",
-      "**/*.pyc",
-      "labs/Spatial-Mindset-main/**",
-      "labs/lab-ktra15p/node_modules/**"
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
     ],
     "headers": [
       {

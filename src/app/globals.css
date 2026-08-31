@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 @import "katex/dist/katex.min.css";
 
@@ -97,10 +97,9 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
-
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: 'Outfit', sans-serif;
+  --font-sans: 'Be Vietnam Pro', 'Inter', 'Plus Jakarta Sans', sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
@@ -110,7 +109,8 @@
 body {
   background: var(--bg-primary);
   color: var(--text-primary);
-  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Be Vietnam Pro', 'Inter', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.01em;
 }
 
 /* Smooth global theme transition for backgrounds, borders, text colors, and shadows */
@@ -123,11 +123,7 @@ body, header, nav, main, footer, aside, section, article, div, button, input, se
 
 /* ========================================================
    LIGHT MODE — COMPREHENSIVE OVERRIDES
-   We use `html:not(.dark)` to avoid !important wars.
-   These map dark-only Tailwind classes to light tokens.
    ======================================================== */
-
-/* --- Page backgrounds --- */
 html:not(.dark) .bg-\[\#0F0B1A\],
 html:not(.dark) .bg-\[\#1c1e29\],
 html:not(.dark) .bg-\[\#14151f\],
@@ -141,9 +137,13 @@ html:not(.dark) .bg-\[\#141622\],
 html:not(.dark) .bg-\[\#1a1b26\],
 html:not(.dark) .bg-\[\#1a1c29\],
 html:not(.dark) .bg-\[\#1b1e30\],
+html:not(.dark) .bg-\[\#070914\],
+html:not(.dark) .bg-\[\#111424\],
+html:not(.dark) .bg-\[\#171b30\],
+html:not(.dark) .bg-\[\#232840\],
+html:not(.dark) .bg-black\/95,
 html:not(.dark) .bg-\[\#20222f\] { background-color: var(--bg-primary) !important; }
 
-/* --- Card / panel backgrounds --- */
 html:not(.dark) .bg-\[\#1A1428\],
 html:not(.dark) .bg-\[\#242633\],
 html:not(.dark) .bg-\[\#2a2c3a\],
@@ -202,7 +202,6 @@ html:not(.dark) [class*="bg-zinc-950/"] {
   border-color: var(--border) !important;
 }
 
-/* --- Subtle panels & hover states --- */
 html:not(.dark) .bg-\[\#241C38\],
 html:not(.dark) .bg-white\/5,
 html:not(.dark) .bg-white\/\[0\.05\],
@@ -214,7 +213,6 @@ html:not(.dark) .hover\:bg-white\/10:hover {
 
 html:not(.dark) .hover\:bg-white\/\[0\.02\]:hover { background-color: var(--bg-tertiary) !important; }
 
-/* --- Subtle dark bg sections --- */
 html:not(.dark) .bg-\[\#08090d\]\/60,
 html:not(.dark) .bg-black\/20,
 html:not(.dark) .bg-black\/30 {
@@ -222,7 +220,6 @@ html:not(.dark) .bg-black\/30 {
   border-color: var(--border) !important;
 }
 
-/* --- Input / select backgrounds --- */
 html:not(.dark) .bg-\[\#161726\],
 html:not(.dark) .bg-black\/30 {
   background-color: var(--bg-secondary) !important;
@@ -233,12 +230,10 @@ html:not(.dark) select option {
   color: var(--text-primary) !important;
 }
 
-/* --- Text colors --- */
 html:not(.dark) .text-white,
 html:not(.dark) .text-zinc-100,
 html:not(.dark) .text-zinc-200 { color: var(--text-primary) !important; }
 
-/* Keep text white on buttons, badges and colorful cards in Light mode */
 html:not(.dark) button.text-white,
 html:not(.dark) a.text-white,
 html:not(.dark) .bg-accent-pink .text-white,
@@ -265,7 +260,6 @@ html:not(.dark) .text-zinc-400 { color: var(--text-secondary) !important; }
 html:not(.dark) .text-zinc-500,
 html:not(.dark) .text-zinc-600 { color: var(--text-secondary) !important; }
 
-/* --- Borders --- */
 html:not(.dark) .border-white\/5,
 html:not(.dark) .border-white\/10,
 html:not(.dark) .border-\[\#1f2235\],
@@ -273,25 +267,20 @@ html:not(.dark) .border-\[\#1f2235\]\/40 { border-color: var(--border) !importan
 
 html:not(.dark) .border-white\/\[0\.07\] { border-color: var(--border) !important; }
 
-/* --- Dividers & separators --- */
 html:not(.dark) .divide-white\/5 > * + * { border-color: var(--border) !important; }
 
-/* --- Specific dark bg classes used in leaderboard, admin etc --- */
 html:not(.dark) .bg-\[\#0c0d14\]\/85 {
   background-color: rgba(250,250,252,0.92) !important;
   backdrop-filter: blur(12px) !important;
 }
 
-/* --- Sticky bottom bar on leaderboard/profile --- */
 html:not(.dark) .bg-\[\#161726\]\/90 {
   background-color: rgba(255,255,255,0.92) !important;
   border-color: var(--border) !important;
 }
 
-/* --- Admin sidebar background fix --- */
 html:not(.dark) .bg-\[\#0c0d14\] { background-color: #FAFAFC !important; }
 
-/* --- Recharts axis/grid light mode fix --- */
 html:not(.dark) .recharts-cartesian-axis-tick-value { fill: var(--text-secondary) !important; }
 html:not(.dark) .recharts-cartesian-grid line { stroke: var(--border) !important; }
 html:not(.dark) .recharts-legend-item-text { color: var(--text-secondary) !important; }
@@ -299,6 +288,22 @@ html:not(.dark) .recharts-tooltip-wrapper .recharts-default-tooltip {
   background-color: #FFFFFF !important;
   border-color: var(--border) !important;
   color: var(--text-primary) !important;
+}
+
+/* Custom Cyber Scrollbar cho Trình phát nhạc Cyber Audio */
+.custom-cyber-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.custom-cyber-scrollbar::-webkit-scrollbar-track {
+  background: rgba(24, 24, 27, 0.6);
+  border-radius: 9999px;
+}
+.custom-cyber-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(6, 182, 212, 0.6);
+  border-radius: 9999px;
+}
+.custom-cyber-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(6, 182, 212, 0.9);
 }
 
 /* ========================================================
@@ -328,7 +333,6 @@ html:not(.dark) .recharts-tooltip-wrapper .recharts-default-tooltip {
    STEM ARENA — OPTIMIZED QUESTION IMAGES SIZING
    ======================================================== */
 
-/* Default: các môn khác (Hóa, Lý, Toán) */
 .dau-truong-game-area img,
 .arena-question-box img,
 .arena-context-box img,
@@ -349,7 +353,6 @@ span[dangerouslySetInnerHTML] img {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Sinh học: Ngữ cảnh — ảnh lớn hơn để nhìn rõ sơ đồ, tháp tuổi, phả hệ */
 .bio-context-box img,
 .bio-question-box img {
   max-width: 100% !important;
@@ -389,5 +392,3 @@ span[dangerouslySetInnerHTML] img {
   border-radius: 0.5rem;
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
-
-

@@ -8,13 +8,13 @@ const fs = require('fs');
 const path = require('path');
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBGDJCKxedUMhxuOZ9QV305JnwZzWEi98Y",
-  authDomain: "stem-hub-43e96.firebaseapp.com",
-  projectId: "stem-hub-43e96",
-  storageBucket: "stem-hub-43e96.firebasestorage.app",
-  messagingSenderId: "182148750391",
-  appId: "1:182148750391:web:d9297f826abc285babf3b2",
-  measurementId: "G-1D80591ZNN"
+  apiKey: "AIzaSyD9YsaKNmUXDmDEAA4CcG_KXdGGfJVEOE",
+  authDomain: "cuoc-thi-ai-e2044.firebaseapp.com",
+  projectId: "cuoc-thi-ai-e2044",
+  storageBucket: "cuoc-thi-ai-e2044.firebasestorage.app",
+  messagingSenderId: "384565535158",
+  appId: "1:384565535158:web:b7c6ea2e48c718a05f6117",
+  measurementId: "G-W00VVRFZ40"
 };
 
 const app = initializeApp(firebaseConfig);

@@ -161,7 +161,7 @@ export const joinMatchmakingQueue = async (
 
           transaction.update(roomRef, {
             subject: resolvedSubject,
-            timeRemaining: 300,
+            timeRemaining: 180,
             player2: {
               uid: uid,
               name: finalName || 'Người chơi ẩn danh',
@@ -242,7 +242,7 @@ export const joinMatchmakingQueue = async (
     player2Progress: 0,
     player1Logs: ['Đấu thủ 1 đã sẵn sàng!'],
     player2Logs: ['Đấu thủ 2 đã sẵn sàng!'],
-    timeRemaining: timeLimit,
+    timeRemaining: Math.max(180, Number(timeLimit) || 180),
     winnerId: null,
     createdAt: new Date().toISOString(),
     activeEffects: {
