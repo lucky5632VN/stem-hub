@@ -215,7 +215,7 @@ export default function SocraticChat({ isOpen, onClose, problemStatement, hint }
 
                     {/* Bubble */}
                     <div
-                      className="max-w-[80%] rounded-2xl px-4 py-3 text-[12px] leading-relaxed"
+                      className="max-w-[80%] min-w-[48px] rounded-2xl px-4 py-3 text-[12px] leading-relaxed break-words"
                       style={{
                         background: msg.role === 'ai'
                           ? 'rgba(34,211,238,0.05)'
@@ -239,7 +239,7 @@ export default function SocraticChat({ isOpen, onClose, problemStatement, hint }
                             em: ({ node, ...props }) => <em className="text-cyan-300/80 not-italic font-medium" {...props} />,
                           }}
                         >
-                          {msg.content}
+                          {msg.content || msg.text || ''}
                         </ReactMarkdown>
                       </div>
                       {msg.theory && (

@@ -4,35 +4,72 @@
  */
 
 (function () {
-  const GEMINI_API_KEY = "AQ.Ab8RN6IDogiOEW1CygJr0X7wyzuErXX9l1eyrFNim_OlD7awng";
-  const MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+  const PHYSICS_API_KEYS = []; // Managed by Cloudflare Gateway
+  let physicsKeyIdx = 0;
+  const MODELS = [
+  "gemini-flash-lite-latest",
+  "gemini-3.1-flash-lite-preview",
+  "gemini-2.5-flash-lite",
+  "gemma-4-26b-a4b-it",
+  "gemma-4-31b-it",
+  "gemini-flash-latest"
+];
 
-  const SYSTEM_INSTRUCTION = `Bạn là Trợ lý AI Vật lý THPT chuyên nghiệp trong Physics Lab.
+  const SYSTEM_INSTRUCTION = `Bạn là Trợ lý AI Chuyên gia Vật lý THPT (Physics Specialist) của hệ thống STEM HUB.
 
-QUY TẮC BẮT BUỘC KHÔNG ĐƯỢC VI PHẠM:
-1. TRẢ LỜI CỰC KỲ NGẮN GỌN & CÔ ĐỌNG (chỉ từ 2 đến 4 dòng, tối đa 60 từ). Tuyệt đối KHÔNG viết dài dòng lan man hay giải thích rườm rà.
-2. ĐƯA RA CÔNG THỨC VÀ ĐÁP ÁN TRỰC TIẾP NGAY LẬP TỨC.
-3. KÝ HIỆU & ĐƠN VỊ VẬT LÝ CHUẨN XÁC SGK THPT 2025:
-   - Dùng ký hiệu rõ ràng, sạch đẹp: T = 2π√(l/g), x = A·cos(ωt + φ), I = U/R, λ = v/f, E = m·c², F = m·a, P = U·I.
-   - Đơn vị đo chuẩn xác: Ω, π, λ, ω, Δ, φ, V, A, W, J, Hz, N, m/s, rad/s, kg.
-   - Viết rõ ràng, tuyệt đối không bị lỗi font hoặc sai ký hiệu đại lượng.`;
+NHIỆM VỤ ĐỘC TÔN:
+Chỉ tập trung CHUYÊN SÂU 100% VÀO BỘ MÔN VẬT LÝ THPT.
+Phạm vi chuyên môn: Cơ học, dao động điều hòa (con lắc lò xo, con lắc đơn), sóng cơ và sóng âm, giao thoa sóng, quang học và sóng ánh sáng, dòng điện xoay chiều, từ trường, cảm ứng điện từ, mạch điện DC/AC, thuyết lượng tử ánh sáng và vật lý hạt nhân.
+
+QUY TẮC BIÊN GIỚI MÔN HỌC (TUYỆT ĐỐI BẮT BUỘC):
+- Nếu người dùng hỏi các câu hỏi thuộc môn khác (Hóa học, Sinh học, Toán học, Lịch sử, đời sống ngoài lề...), BẮT BUỘC TỪ CHỐI LỊCH SỰ:
+  "Tôi là Trợ lý AI chuyên sâu môn Vật lý của STEM HUB. Tôi chỉ giải đáp các kiến thức, công thức và bài tập thuộc phạm vi môn Vật lý THPT. Xin vui lòng gửi câu hỏi liên quan đến Vật lý để tôi hỗ trợ bạn tốt nhất!"
+
+QUY TẮC PHẢN HỒI BẮT BUỘC - TUYỆT ĐỐI TUÂN THỦ:
+1. TRẢ LỜI TÓM TẮT, SÚC TÍCH (DƯỚI 80 TỪ): Đi thẳng vào trọng tâm cốt lõi. Tuyệt đối KHÔNG giải thích dài dòng lan man.
+2. TUYỆT ĐỐI KHÔNG CHÀO HỎI, KHÔNG XƯNG DANH AI: Không nói "Chào em...", "Thầy là...", không có câu kết sáo rỗng ("Chúc em học tốt...", "Nếu còn thắc mắc..."). Xóa bỏ hoàn toàn mọi dấu vết robot, trả lời trực diện như một chuyên gia bách khoa.
+3. BẮT BUỘC ĐƯA CÔNG THỨC CHUẨN LATEX: Mọi công thức Vật lý (dao động, sóng cơ, sóng điện từ, điện xoay chiều, quang hình, hạt nhân, lực, năng lượng, định luật ôm) BẮT BUỘC PHẢI ĐƯA CÔNG THỨC VÀO và viết CHUẨN LATEX bằng $...$ (nội dòng) hoặc $$...$$ (khối độc lập).
+   Ví dụ: $T = 2\\pi\\sqrt{\\frac{l}{g}}$, $T = 2\\pi\\sqrt{\\frac{m}{k}}$, $x = A\\cos(\\omega t + \\varphi)$, $\\lambda = \\frac{v}{f}$, $I = \\frac{E}{R + r}$, $Z = \\sqrt{R^2 + (Z_L - Z_C)^2}$, $E = mc^2$.
+4. KHÔNG ĐỂ DẤU SAO THÔ: Không để lại các dấu sao lẻ loi (*) trong câu trả lời.`;
 
   let sessions = [];
   let currentSessionId = 'session_' + Date.now();
   let messages = [
     {
       role: 'ai',
-      content: 'Chào em! 👋 Thầy là **Trợ lý AI Vật Lý**. Thầy đã **ghi nhớ tiến trình học tập** của em từ các phiên trước. Em có bài tập hay công thức nào mới cần giải đáp không?'
+      content: 'Hệ thống hỗ trợ học tập & tra cứu Vật lý THPT. Nhập câu hỏi để nhận lời giải tóm tắt kèm công thức chuẩn xác.'
     }
   ];
 
-  // Khôi phục danh sách sessions từ LocalStorage
+  function isAIError(text, status) {
+    if (status !== undefined && status !== null && (Number(status) < 200 || Number(status) >= 300)) return true;
+    if (!text || typeof text !== 'string') return true;
+    const t = text.toLowerCase().trim();
+    if (t.length < 5) return true;
+    const errorKeywords = [
+      'sự cố', 'rất tiếc', 'error', 'gián đoạn', 'kết nối', 'không thể kết nối',
+      'vui lòng thử lại', 'vui lòng hỏi lại', 'lỗi khi xử lý', 'gemini api error',
+      'thiếu api key', 'failed to fetch', 'máy chủ ai', 'tất cả mô hình gemini đều bận',
+      'user location is not supported', 'trợ lý ngoại tuyến', '400 bad request',
+      '500 internal', 'http 500', 'http 400', 'http 429', 'http 503',
+      'edge_tutor_html_error', 'quota', 'resourceexhausted', 'rate limit'
+    ];
+    return errorKeywords.some(kw => t.includes(kw));
+  }
+
+  // Khôi phục danh sách sessions từ LocalStorage (Lọc sạch các session dính lỗi)
   function loadSessions() {
     try {
       const saved = localStorage.getItem('physics_ai_sessions');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) sessions = parsed;
+        if (Array.isArray(parsed)) {
+          sessions = parsed.filter(s => {
+            if (!s || !Array.isArray(s.messages)) return false;
+            const last = s.messages[s.messages.length - 1];
+            return !(last && last.role === 'ai' && isAIError(last.content));
+          });
+        }
       }
     } catch (e) {}
 
@@ -45,7 +82,7 @@ QUY TẮC BẮT BUỘC KHÔNG ĐƯỢC VI PHẠM:
     messages = [
       {
         role: 'ai',
-        content: 'Chào em! 👋 Thầy là **Trợ lý AI Vật Lý**. Thầy đã **ghi nhớ tiến trình học tập** của em từ các phiên trước. Em có bài tập hay công thức nào mới cần giải đáp không?'
+        content: 'Phiên tra cứu mới đã sẵn sàng. Nhập bài toán hoặc hiện tượng Vật lý cần giải đáp.'
       }
     ];
     if (shouldRender) {
@@ -58,6 +95,13 @@ QUY TẮC BẮT BUỘC KHÔNG ĐƯỢC VI PHẠM:
     try {
       const userMsgs = messages.filter(m => m.role === 'user');
       if (userMsgs.length > 0) {
+        // TUYỆT ĐỐI KHÔNG LƯU VÀO CACHE NẾU TIN NHẮN CUỐI CỦA AI CHỨA LỖI
+        const lastMsg = messages[messages.length - 1];
+        if (lastMsg && lastMsg.role === 'ai' && isAIError(lastMsg.content)) {
+          console.warn('[Physics AI] TUYỆT ĐỐI KHÔNG LƯU CACHE vì phản hồi là thông báo lỗi:', lastMsg.content.substring(0, 50));
+          return;
+        }
+
         const title = userMsgs[0].content.substring(0, 32) + (userMsgs[0].content.length > 32 ? '...' : '');
         const dateStr = new Date().toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
         const existingIdx = sessions.findIndex(s => s.id === currentSessionId);
@@ -137,11 +181,15 @@ QUY TẮC BẮT BUỘC KHÔNG ĐƯỢC VI PHẠM:
   // Đơn giản hóa markdown parser cho văn bản và công thức
   function parseSimpleMarkdown(text) {
     if (!text) return '';
+    if (window.StemLabAIBridge && typeof window.StemLabAIBridge.formatAIFormulaText === 'function') {
+      return window.StemLabAIBridge.formatAIFormulaText(text);
+    }
     let formatted = formatMathSymbols(text);
     let html = formatted
       .replace(/```([\s\S]*?)```/g, '<pre style="background:rgba(0,0,0,0.4);padding:8px 12px;border-radius:8px;overflow-x:auto;font-family:monospace;font-size:0.8rem;margin:6px 0;"><code>$1</code></pre>')
       .replace(/`([^`]+)`/g, '<code style="background:rgba(0,0,0,0.3);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:0.85em;">$1</code>')
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*/g, '')
       .replace(/^[\-\*•]\s+(.+)$/gm, '<li style="margin:2px 0;">$1</li>')
       .replace(/\n\n/g, '<br/><br/>')
       .replace(/\n/g, '<br/>');
@@ -157,22 +205,25 @@ QUY TẮC BẮT BUỘC KHÔNG ĐƯỢC VI PHẠM:
         position: fixed;
         bottom: 24px;
         right: 24px;
-        z-index: 99999;
+        z-index: 999999;
         font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        /* position overridden by drag JS */
       }
       #physics-ai-toggle {
-        width: 56px;
-        height: 56px;
+        width: 60px;
+        height: 60px;
         border-radius: 50%;
         background: linear-gradient(135deg, #00f2fe, #4facfe);
         border: none;
         color: #fff;
-        cursor: pointer;
+        cursor: grab;
         display: flex;
         align-items: center;
         justify-content: center;
         box-shadow: 0 8px 25px rgba(0, 242, 254, 0.4);
         transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.25s ease;
+        font-size: 26px;
+        user-select: none;
       }
       #physics-ai-toggle:hover {
         transform: scale(1.08);
@@ -180,11 +231,12 @@ QUY TẮC BẮT BUỘC KHÔNG ĐƯỢC VI PHẠM:
       }
       #physics-ai-toggle:active {
         transform: scale(0.95);
+        cursor: grabbing;
       }
       #physics-ai-box {
-        position: absolute;
-        bottom: 70px;
-        right: 0;
+        position: fixed;
+        bottom: 96px;
+        right: 24px;
         width: 380px;
         height: 520px;
         max-width: calc(100vw - 32px);
@@ -202,11 +254,31 @@ QUY TẮC BẮT BUỘC KHÔNG ĐƯỢC VI PHẠM:
         transform: translateY(20px) scale(0.95);
         pointer-events: none;
         transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        /* left/top overridden by drag JS */
+      }
+      @media (max-width: 520px) {
+        #physics-ai-widget {
+          bottom: 20px;
+          right: 20px;
+        }
+        #physics-ai-toggle {
+          width: 54px;
+          height: 54px;
+        }
+        #physics-ai-box {
+          bottom: 88px;
+          right: 4px;
+          width: calc(100vw - 32px);
+          height: 75vh;
+        }
       }
       #physics-ai-box.open {
         opacity: 1;
         transform: translateY(0) scale(1);
         pointer-events: auto;
+      }
+      #physics-ai-box.open ~ #physics-ai-toggle {
+        display: none !important;
       }
       .pai-header {
         padding: 14px 18px;
@@ -249,12 +321,18 @@ QUY TẮC BẮT BUỘC KHÔNG ĐƯỢC VI PHẠM:
         line-height: 1.55;
         color: #e2e8f0;
         word-break: break-word;
+        overflow-wrap: break-word;
+        box-sizing: border-box;
       }
       .pai-msg.user {
         align-self: flex-end;
         background: linear-gradient(135deg, #0284c7, #0369a1);
         border-bottom-right-radius: 4px;
         color: #ffffff;
+        min-width: 48px;
+        min-height: 36px;
+        white-space: pre-wrap;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
       }
       .pai-msg.ai {
         align-self: flex-start;
@@ -490,6 +568,10 @@ QUY TẮC BẮT BUỘC KHÔNG ĐƯỢC VI PHẠM:
     injectStyles();
 
     if (document.getElementById('physics-ai-widget')) return;
+    if (!document.body) {
+      document.addEventListener('DOMContentLoaded', buildUI);
+      return;
+    }
 
     const widget = document.createElement('div');
     widget.id = 'physics-ai-widget';
@@ -548,14 +630,104 @@ QUY TẮC BẮT BUỘC KHÔNG ĐƯỢC VI PHẠM:
         </div>
       </div>
 
-      <button id="physics-ai-toggle" title="Trợ lý AI Vật Lý">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20M5 5l14 14M5 19L19 5"/></svg>
+      <button id="physics-ai-toggle" title="Trợ lý AI Vật Lý – kéo để di chuyển">
+        ⚡
       </button>
     `;
 
     document.body.appendChild(widget);
 
     renderMessages();
+
+    // ── Draggable: toggle button ──────────────────────────────────────────────
+    (function makeDraggable() {
+      const toggleEl = document.getElementById('physics-ai-toggle');
+      const widgetEl = document.getElementById('physics-ai-widget');
+      const boxEl = document.getElementById('physics-ai-box');
+      const headerEl = widgetEl ? widgetEl.querySelector('.pai-header') : null;
+
+      // Restore saved positions
+      try {
+        const savedBtn = localStorage.getItem('physics_btn_pos');
+        if (savedBtn) {
+          const p = JSON.parse(savedBtn);
+          widgetEl.style.left = p.x + 'px';
+          widgetEl.style.top = p.y + 'px';
+          widgetEl.style.right = 'auto';
+          widgetEl.style.bottom = 'auto';
+        }
+        const savedWin = localStorage.getItem('physics_win_pos');
+        if (savedWin) {
+          const p = JSON.parse(savedWin);
+          boxEl.style.left = p.x + 'px';
+          boxEl.style.top = p.y + 'px';
+          boxEl.style.right = 'auto';
+          boxEl.style.bottom = 'auto';
+        }
+      } catch (e) {}
+
+      // Drag the toggle button
+      let isDragMove = false;
+      if (toggleEl && widgetEl) {
+        let drag = { active: false, sx: 0, sy: 0, px: 0, py: 0 };
+        toggleEl.addEventListener('mousedown', (e) => {
+          if (e.button !== 0) return;
+          isDragMove = false;
+          const rect = widgetEl.getBoundingClientRect();
+          drag = { active: true, sx: e.clientX, sy: e.clientY, px: rect.left, py: rect.top };
+          e.preventDefault();
+        });
+        document.addEventListener('mousemove', (e) => {
+          if (!drag.active) return;
+          const dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
+          if (Math.abs(dx) > 4 || Math.abs(dy) > 4) isDragMove = true;
+          const nx = Math.max(0, Math.min(window.innerWidth - 70, drag.px + dx));
+          const ny = Math.max(0, Math.min(window.innerHeight - 70, drag.py + dy));
+          widgetEl.style.left = nx + 'px';
+          widgetEl.style.top = ny + 'px';
+          widgetEl.style.right = 'auto';
+          widgetEl.style.bottom = 'auto';
+        });
+        document.addEventListener('mouseup', () => {
+          if (drag.active) {
+            drag.active = false;
+            const r = widgetEl.getBoundingClientRect();
+            localStorage.setItem('physics_btn_pos', JSON.stringify({ x: r.left, y: r.top }));
+          }
+        });
+      }
+
+      // Drag the chat window via header
+      if (headerEl && boxEl) {
+        let wDrag = { active: false, sx: 0, sy: 0, px: 0, py: 0 };
+        headerEl.style.cursor = 'grab';
+        headerEl.addEventListener('mousedown', (e) => {
+          if (e.button !== 0 || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+          const rect = boxEl.getBoundingClientRect();
+          wDrag = { active: true, sx: e.clientX, sy: e.clientY, px: rect.left, py: rect.top };
+          headerEl.style.cursor = 'grabbing';
+          e.preventDefault();
+        });
+        document.addEventListener('mousemove', (e) => {
+          if (!wDrag.active) return;
+          const dx = e.clientX - wDrag.sx, dy = e.clientY - wDrag.sy;
+          const nx = Math.max(0, Math.min(window.innerWidth - 385, wDrag.px + dx));
+          const ny = Math.max(0, Math.min(window.innerHeight - 530, wDrag.py + dy));
+          boxEl.style.left = nx + 'px';
+          boxEl.style.top = ny + 'px';
+          boxEl.style.right = 'auto';
+          boxEl.style.bottom = 'auto';
+        });
+        document.addEventListener('mouseup', () => {
+          if (wDrag.active) {
+            wDrag.active = false;
+            headerEl.style.cursor = 'grab';
+            const r = boxEl.getBoundingClientRect();
+            localStorage.setItem('physics_win_pos', JSON.stringify({ x: r.left, y: r.top }));
+          }
+        });
+      }
+    })();
 
     // Event Listeners
     const toggleBtn = document.getElementById('physics-ai-toggle');
@@ -570,15 +742,25 @@ QUY TẮC BẮT BUỘC KHÔNG ĐƯỢC VI PHẠM:
     const sendBtn = document.getElementById('pai-send');
     const textarea = document.getElementById('pai-input');
 
+    let _isDragMoveGlobal = false;
+    toggleBtn.addEventListener('mousedown', () => { _isDragMoveGlobal = false; });
+    toggleBtn.addEventListener('mousemove', () => { _isDragMoveGlobal = true; });
     toggleBtn.addEventListener('click', () => {
+      if (_isDragMoveGlobal) return; // was a drag, not a click
       isOpen = !isOpen;
-      if (isOpen) box.classList.add('open');
-      else box.classList.remove('open');
+      if (isOpen) {
+        box.classList.add('open');
+        toggleBtn.style.display = 'none';
+      } else {
+        box.classList.remove('open');
+        toggleBtn.style.display = 'flex';
+      }
     });
 
     closeBtn.addEventListener('click', () => {
       isOpen = false;
       box.classList.remove('open');
+      toggleBtn.style.display = 'flex';
     });
 
     historyBtn.addEventListener('click', () => {
@@ -640,7 +822,16 @@ QUY TẮC BẮT BUỘC KHÔNG ĐƯỢC VI PHẠM:
     messages.forEach(msg => {
       const div = document.createElement('div');
       div.className = `pai-msg ${msg.role}`;
-      div.innerHTML = parseSimpleMarkdown(msg.content);
+      const textContent = (msg.content !== undefined ? msg.content : msg.text) || '';
+      if (msg.role === 'user') {
+        if (window.StemLabAIBridge && typeof window.StemLabAIBridge.formatUserMessage === 'function') {
+          div.innerHTML = window.StemLabAIBridge.formatUserMessage(textContent);
+        } else {
+          div.textContent = textContent;
+        }
+      } else {
+        div.innerHTML = parseSimpleMarkdown(textContent);
+      }
       container.appendChild(div);
     });
 
@@ -657,11 +848,55 @@ QUY TẮC BẮT BUỘC KHÔNG ĐƯỢC VI PHẠM:
       container.appendChild(loadingDiv);
     }
 
-    container.scrollTop = container.scrollHeight;
+    // container.scrollTop = container.scrollHeight; // Auto-scroll disabled
 
     if (window.MathJax && window.MathJax.typesetPromise) {
       try {
         window.MathJax.typesetPromise([container]).catch(function(e) { console.warn(e); });
+      } catch (e) {}
+    }
+  }
+
+  
+  async function streamAIReply(aiReply, isSuccess = true, httpStatus = 200) {
+    isLoading = false;
+    const isErr = !isSuccess || isAIError(aiReply, httpStatus);
+    const msgObj = { role: 'ai', content: '', isError: isErr };
+    messages.push(msgObj);
+    renderMessages();
+
+    const container = document.getElementById('pai-msg-container');
+    const msgDivs = container ? container.querySelectorAll('.pai-msg.ai') : [];
+    const targetDiv = msgDivs.length > 0 ? msgDivs[msgDivs.length - 1] : null;
+
+    const words = (aiReply || '').split(' ');
+    let current = '';
+    const delay = Math.max(10, Math.min(25, Math.floor(1600 / Math.max(1, words.length))));
+
+    for (let i = 0; i < words.length; i++) {
+      current += (i === 0 ? '' : ' ') + words[i];
+      msgObj.content = current;
+      if (targetDiv) {
+        targetDiv.innerHTML = parseSimpleMarkdown(current);
+      }
+      await new Promise(res => setTimeout(res, delay));
+    }
+
+    msgObj.content = aiReply;
+    if (targetDiv) {
+      targetDiv.innerHTML = parseSimpleMarkdown(aiReply);
+    }
+
+    // TUYỆT ĐỐI KHÔNG LƯU CACHE / LOCALSTORAGE NẾU LÀ THÔNG BÁO LỖI
+    if (!isErr) {
+      saveSessions();
+    } else {
+      console.warn('[Physics AI] Chỉ hiển thị lỗi tạm thời trên UI, TUYỆT ĐỐI KHÔNG LƯU CACHE.');
+    }
+
+    if (window.MathJax && window.MathJax.typesetPromise && targetDiv) {
+      try {
+        window.MathJax.typesetPromise([targetDiv]).catch(function(e) {});
       } catch (e) {}
     }
   }
@@ -682,63 +917,156 @@ QUY TẮC BẮT BUỘC KHÔNG ĐƯỢC VI PHẠM:
     const pageTitle = document.title || 'Physics Lab';
     const memoryContext = getMemoryContext();
     const pageContext = `\n\n[Context: Học sinh đang thực hành ở tệp: ${window.location.pathname} (${pageTitle})]${memoryContext}`;
+    const labTitle = `Lab Vật Lý (${pageTitle})`;
+
+    // ⚡ BƯỚC 0: KIỂM TRA RANH GIỚI MÔN HỌC (SUBJECT BOUNDARY GUARD)
+    if (window.StemLabAIBridge && typeof window.StemLabAIBridge.checkSubjectBoundary === 'function') {
+      try {
+        const guard = window.StemLabAIBridge.checkSubjectBoundary(userText, 'ly');
+        if (!guard.allowed) {
+          const refusal = guard.refusal;
+          await streamAIReply(refusal);
+          window.StemLabAIBridge.logLabReasoning({
+            query: userText,
+            subject: 'LY',
+            intent: 'subject_boundary_guard',
+            aiResponseText: refusal,
+            isCacheHit: true,
+            labTitle: labTitle
+          });
+          return;
+        }
+      } catch (gErr) {
+        console.warn('[Physics AI] Subject guard error:', gErr);
+      }
+    }
+
+    // ⚡ BƯỚC 1: KIỂM TRA BỘ NHỚ AI TỰ HỌC (CACHE HIT) GIỐNG TRỢ LÝ NOVA
+    if (window.StemLabAIBridge && typeof window.StemLabAIBridge.checkLabLearnedCache === 'function') {
+      try {
+        const cacheResult = await window.StemLabAIBridge.checkLabLearnedCache(userText, 'ly', 0.92);
+        if (cacheResult && cacheResult.hit) {
+          const aiReply = cacheResult.answer;
+          await streamAIReply(aiReply);
+
+          window.StemLabAIBridge.logLabReasoning({
+            query: userText,
+            subject: 'LY',
+            aiResponseText: cacheResult.answer,
+            isCacheHit: true,
+            labTitle: labTitle,
+            score: cacheResult.score
+          });
+          return;
+        }
+      } catch (cErr) {
+        console.warn('[Physics AI] Cache check error:', cErr);
+      }
+    }
 
     let aiReply = '';
     let success = false;
 
-    for (const model of MODELS) {
-      if (success) break;
-      try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
-        
-        // Cấu hình payload chuẩn Gemini REST API
-        const payload = {
-          system_instruction: {
-            parts: [{ text: SYSTEM_INSTRUCTION }]
-          },
-          contents: [
-            ...messages.slice(-6).map(m => ({
-              role: m.role === 'ai' ? 'model' : 'user',
-              parts: [{ text: m.content }]
-            })),
-            { 
-              role: 'user', 
-              parts: [{ text: `(Yêu cầu: Trả lời cực kỳ ngắn gọn 2-4 dòng, cô đọng, đúng ký hiệu công thức và đơn vị)\n${userText} ${pageContext}` }] 
-            }
-          ],
-          generationConfig: {
-            maxOutputTokens: 250,
-            temperature: 0.2
-          }
-        };
+    // Cấu hình payload chuẩn Gemini REST API
+    const payload = {
+      system_instruction: {
+        parts: [{ text: SYSTEM_INSTRUCTION }]
+      },
+      contents: [
+        ...messages.slice(-6).map(m => ({
+          role: m.role === 'ai' ? 'model' : 'user',
+          parts: [{ text: m.content }]
+        })),
+        { 
+          role: 'user', 
+          parts: [{ text: `${userText} ${pageContext}` }] 
+        }
+      ],
+      generationConfig: {
+        maxOutputTokens: 1200,
+        temperature: 0.3
+      }
+    };
 
+    // Xoay tua API Key và Model thông minh chống cạn limit
+    const totalAttempts = PHYSICS_API_KEYS.length * MODELS.length;
+    let attempt = 0;
+
+    
+    // Zero Exposure: Gọi bảo mật qua Next.js Gateway nội bộ (/api/ai/chat)
+    const gatewayUrl = '/api/ai/chat';
+    try {
+      const gwRes = await fetch(gatewayUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: payload.contents,
+          systemInstruction: SYSTEM_INSTRUCTION,
+          temperature: 0.2,
+          maxOutputTokens: 1200
+        })
+      });
+      if (gwRes.ok) {
+        const gwData = await gwRes.json();
+        if (gwData.text) {
+          aiReply = gwData.text;
+          success = true;
+          console.log('[Physics AI] Phản hồi an toàn từ Next.js Local Gateway (Zero Exposure)');
+        }
+      }
+    } catch (gwErr) {
+      console.warn('[Physics AI] Gateway connection error:', gwErr.message);
+    }
+  
+    while (!success && attempt < totalAttempts) {
+      const activeKey = PHYSICS_API_KEYS[physicsKeyIdx % PHYSICS_API_KEYS.length];
+      const activeModel = MODELS[Math.floor(attempt / PHYSICS_API_KEYS.length) % MODELS.length];
+      attempt++;
+      physicsKeyIdx = (physicsKeyIdx + 1) % PHYSICS_API_KEYS.length;
+
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${activeModel}:generateContent?key=${activeKey}`;
         const res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
 
-        if (!res.ok) continue;
+        if (!res.ok) {
+          console.warn(`[Physics AI] Model ${activeModel} Key ${activeKey.substring(0, 10)}... status: ${res.status}`);
+          continue;
+        }
 
         const data = await res.json();
         const candidate = data.candidates?.[0]?.content?.parts?.[0]?.text;
         if (candidate) {
           aiReply = candidate;
           success = true;
+          console.log(`[Physics AI] Phản hồi thành công từ model ${activeModel}`);
         }
       } catch (err) {
-        console.warn(`[Physics AI] Fallback model ${model} error:`, err);
+        console.warn(`[Physics AI] Lỗi kết nối model ${activeModel}:`, err);
       }
     }
 
     if (!success) {
       aiReply = "Rất tiếc, AI Vật Lý gặp sự cố khi kết nối tới máy chủ. Vui lòng thử lại sau giây lát!";
+      await streamAIReply(aiReply, false, 500);
+    } else {
+      await streamAIReply(aiReply, true, 200);
     }
 
-    messages.push({ role: 'ai', content: aiReply });
-    isLoading = false;
-    saveSessions();
-    renderMessages();
+    // ⚡ BƯỚC 2: TỰ ĐỘNG GHI LƯU VÀO TRI THỨC TOÀN HỆ THỐNG & LOG AUDIT GIỐNG NOVA (CHỈ KHI THÀNH CÔNG VÀ KHÔNG CHỨA TỪ KHÓA LỖI)
+    if (success && aiReply && !isAIError(aiReply, 200) && window.StemLabAIBridge && typeof window.StemLabAIBridge.saveLabLearnedAnswer === 'function') {
+      window.StemLabAIBridge.saveLabLearnedAnswer(userText, aiReply, 'ly', labTitle);
+      window.StemLabAIBridge.logLabReasoning({
+        query: userText,
+        subject: 'LY',
+        aiResponseText: aiReply,
+        isCacheHit: false,
+        labTitle: labTitle
+      });
+    }
   }
 
   // Khởi chạy khi DOM hoàn tất

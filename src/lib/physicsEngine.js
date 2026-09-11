@@ -151,7 +151,7 @@ export function calculateLaserPath(mirrors, sourcePos = { x: 45, y: 140 }, targe
   return { isHit, path };
 }
 
-import { diagnosePhysicsAttempt } from './physicsErrorDiagnostic';
+import { diagnosePhysicsAttempt } from './physicsErrorDiagnostic.js';
 
 export function diagnosePhysicsError(userParams, targetParams) {
   return diagnosePhysicsAttempt(userParams, targetParams);

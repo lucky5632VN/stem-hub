@@ -1,4 +1,4 @@
-import modelData from '../data/models/math-irt-model.json';
+import modelData from '../data/models/math-irt-model.json' with { type: 'json' };
 
 /**
  * Item Response Theory (IRT) Adaptive Difficulty Engine

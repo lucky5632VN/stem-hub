@@ -344,7 +344,7 @@ export default function FaceAuthModal({
     };
   }, [scanStatus, targetEmail, onSuccess, onClose]);
 
-  // 1. Tắt tất cả phần cứng Camera
+  // 1. Tắt tất cả phần cứng Camera & Dọn dẹp WebGL Memory
   const stopCamera = () => {
     if (animFrameRef.current) {
       cancelAnimationFrame(animFrameRef.current);
@@ -361,6 +361,19 @@ export default function FaceAuthModal({
       }
       videoRef.current.srcObject = null;
     }
+
+    // ⚡ WEBGL MEMORY HYGIENE: Giải phóng toàn bộ tensor rác và purge WebGL VRAM
+    if (typeof window !== 'undefined' && window.faceapi && window.faceapi.tf) {
+      try {
+        window.faceapi.tf.disposeVariables();
+        if (typeof window.faceapi.tf.engine === 'function') {
+          window.faceapi.tf.engine().reset();
+        }
+      } catch (tfErr) {
+        console.warn('⚠️ [Face 2FA] WebGL Memory Purge warning:', tfErr);
+      }
+    }
+
     setCameraState('idle');
   };
 
@@ -480,10 +493,10 @@ export default function FaceAuthModal({
     animFrameRef.current = requestAnimationFrame(renderPreview);
   };
 
-  // Đếm ngược Căn chỉnh 3 giây trước khi Quét Laser AI
+  // Đếm ngược Căn chỉnh 1 giây trước khi Quét Laser AI (Tối ưu siêu nhanh)
   const startAlignCountdown = () => {
-    let current = 3;
-    setAlignCountdown(3);
+    let current = 1;
+    setAlignCountdown(1);
 
     const timer = setInterval(() => {
       current -= 1;
@@ -554,7 +567,7 @@ export default function FaceAuthModal({
           }
         }
 
-        progress += 1.2; // Quét nhanh mượt trong khoảng ~2.5s
+        progress += 2.5; // Quét siêu tốc và mượt mà trong ~1.0s
         setScanProgress(Math.min(Math.floor(progress), 100));
 
         if (progress < 100) {
@@ -751,16 +764,20 @@ export default function FaceAuthModal({
       }
     }
 
-    // 2. Gửi qua Nodemailer API (tạo email HTML chuyên nghiệp chứa nút xác minh)
+    // 2. Gửi qua Nodemailer API dự phòng (chỉ kích hoạt ở môi trường localhost có server Node.js)
     try {
-      const resp = await fetch('/api/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: targetEmail, magicLink: verifyUrl })
-      });
-      const resData = await resp.json();
-      if (resData?.previewUrl) {
-        setTestEmailPreviewUrl(resData.previewUrl);
+      if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+        const resp = await fetch('/api/send-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: targetEmail, magicLink: verifyUrl })
+        });
+        if (resp.ok) {
+          const resData = await resp.json().catch(() => null);
+          if (resData?.previewUrl) {
+            setTestEmailPreviewUrl(resData.previewUrl);
+          }
+        }
       }
     } catch (_) {}
 
@@ -888,7 +905,7 @@ export default function FaceAuthModal({
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-cyan-400 font-bold">3.</span>
-                  <span>Hệ thống sẽ đếm ngược 3 giây để bạn căn hình trước khi quét AI.</span>
+                  <span>Hệ thống sẽ đếm ngược 1 giây để bạn căn hình trước khi quét AI.</span>
                 </li>
               </ul>
             </div>

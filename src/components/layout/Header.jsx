@@ -14,6 +14,7 @@ import { playSound } from '@/lib/sound';
 import { AvatarFrame } from '@/components/atoms/AvatarFrame';
 import STEMAvatarSVG from '@/components/atoms/STEMAvatarSVG';
 import CyberMusicPlayer, { CyberMusicHeaderButton } from '@/components/atoms/CyberMusicPlayer';
+import { getTitleLabel } from '@/lib/titles';
 import { 
   generateBioPool, 
   generateMathPool, 
@@ -99,24 +100,7 @@ export default function Header() {
     }
   };
 
-  const getTitleLabel = (title) => {
-    const titles = {
-      apprentice: 'Tập sự STEM',
-      alchemist_expert: 'Bậc thầy Hóa',
-      math_wizard: 'Chiến thần Toán',
-      physics_guru: 'Kỹ sư Cơ học',
-      cosmic_explorer: 'T.Hiểm V.Trụ',
-      nuclear_engineer: 'K.Sư Hạt Nhân',
-      quantum_master: 'T.Sĩ Lượng Tử',
-      stem_legend: 'Huyền thoại',
-      multiverse_theorist: 'Thuyết Đa V.Trụ',
-      dimension_creator: 'Kiến Tạo K.Gian',
-      top_1_universe: 'Đại Đế STEM 👑',
-      top_10_legend: 'H.Thoại Đ.Trường',
-      top_100_elite: 'Đại Cao Thủ'
-    };
-    return titles[title] || 'Học viên';
-  };
+
 
   useEffect(() => {
     setMounted(true);

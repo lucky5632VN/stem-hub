@@ -1498,5 +1498,465 @@
     "text": "Định luật bảo toàn động lượng và năng lượng",
     "intent": "stem_query",
     "subject": null
+  },
+  {
+    "text": "Chào bạn",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Xin chào Javit",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Chào buổi sáng nhé",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Chào buổi chiều",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Chào buổi tối nha",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Hi NOVA",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Hello cậu",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Cảm ơn bạn nhiều",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Cảm ơn nhé",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Cảm ơn NOVA nha",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Cảm ơn trợ lý nhiều nhé",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn tên là gì",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Tên bạn là gì vậy",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn là ai",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Giới thiệu về bản thân đi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn bao nhiêu tuổi rồi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn đến từ đâu",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Ai tạo ra bạn",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn do ai lập trình vậy",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn sống ở đâu",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Hôm nay thế nào rồi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn có khỏe không",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Cậu khỏe không NOVA",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Thời tiết hôm nay thế nào",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Trời hôm nay có đẹp không",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn thích làm gì nhất",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn có thích học không",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn có biết hát không",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn có biết chơi game không",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Kể một câu chuyện cười đi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Kể cho tớ nghe chuyện vui đi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Tâm sự chút đi bạn",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Trò chuyện phiếm tí nha",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn thông minh thật đấy",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn giỏi quá NOVA ơi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "NOVA thật tuyệt vời",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn thật là đáng yêu",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Chúc bạn một ngày tốt lành",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Chúc buổi tối vui vẻ nha",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Chúc ngủ ngon nhé",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Tạm biệt bạn",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Hẹn gặp lại NOVA",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bye bye NOVA",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Tạm biệt nhé",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Chào nha",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn đang làm gì đấy",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Có gì mới không bạn",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Học mệt quá bạn ơi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Hôm nay tớ buồn quá",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Vui quá bạn ơi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Thi xong rồi sướng quá",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Cố lên nha NOVA",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Chúc bạn làm việc hiệu quả",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Cảm ơn cậu rất nhiều",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "NOVA ơi giúp tớ trò chuyện chút",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn biết tiếng Anh không",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn là con robot hả",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn có cảm xúc không",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn thích màu gì nhất",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn học trường nào",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn ăn cơm chưa",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn uống nước chưa",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Nói gì vui vui đi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Cậu đáng yêu thế",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Tôi yêu bạn NOVA",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Trêu bạn chút thôi hihi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Hihi chào cậu nha",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Good night Javit",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Good afternoon NOVA",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Thank you very much",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Nice to meet you",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Có khỏe không NOVA ơi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Hôm nay thế nào rồi bạn",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Mệt mỏi quá cậu ơi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Đỡ mệt hơn rồi cảm ơn",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Cảm ơn bạn vì tất cả nha",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Thật là tuyệt vời",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Quá siêu luôn NOVA",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Rất sẵn lòng giúp bạn",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Hẹn mai gặp lại nhé",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Tạm biệt Javit nha",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Chào thân ái",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Dạo này sao rồi cậu",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Mọi chuyện ổn chứ bạn",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Cảm ơn đã hỗ trợ tớ",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn nhiệt tình quá",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Độc đáo đấy NOVA",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Thú vị thật nha",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Haha buồn cười quá",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Ok cảm ơn bạn nha",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Rất vui được làm quen với bạn",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Chào mừng bạn đến đây",
+    "intent": "chitchat",
+    "subject": null
   }
 ]

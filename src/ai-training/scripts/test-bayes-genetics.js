@@ -1,51 +1,58 @@
 import { calculateSingleLocusProbabilities, calculateMultiLocusBayesianCross } from '../../lib/geneticsBayes.js';
+import { wilsonInterval } from './chem-risk_train.js';
 
-console.log('⚡ [Genetics Bayes Model] Đang kiểm thử 10 trường hợp suy luận xác suất di truyền Bayes...');
+export function runGeneticsAudit() {
+  const cases = [
+    { id: 1, p1: 'Aa', p2: 'Aa', name: 'Monohybrid (Aa x Aa)', expectedDom: 0.75, fn: () => calculateMultiLocusBayesianCross('Aa', 'Aa').probAllDominantPhenotype },
+    { id: 2, p1: 'AaBb', p2: 'AaBb', name: 'Dihybrid (AaBb x AaBb)', expectedDom: 0.5625, fn: () => calculateMultiLocusBayesianCross('AaBb', 'AaBb').probAllDominantPhenotype },
+    { id: 3, p1: 'AaBbDd', p2: 'AaBbDd', name: 'Trihybrid (AaBbDd x AaBbDd)', expectedDom: 0.421875, fn: () => calculateMultiLocusBayesianCross('AaBbDd', 'AaBbDd').probAllDominantPhenotype },
+    { id: 4, p1: 'AA', p2: 'aa', name: 'Single Locus Homozygous (AA x aa)', expectedAa: 1.0, fn: () => calculateSingleLocusProbabilities('AA', 'aa')['Aa'] },
+    { id: 5, p1: 'Aa', p2: 'aa', name: 'Testcross (Aa x aa)', expectedAa: 0.5, fn: () => calculateSingleLocusProbabilities('Aa', 'aa')['Aa'] },
+    { id: 6, p1: 'AABB', p2: 'aabb', name: 'Pure Breeding Dihybrid (AABB x aabb)', expectedDom: 1.0, fn: () => calculateMultiLocusBayesianCross('AABB', 'aabb').probAllDominantPhenotype },
+    { id: 7, p1: 'Aabb', p2: 'aaBb', name: 'Heterozygous Cross (Aabb x aaBb)', expectedDom: 0.25, fn: () => calculateMultiLocusBayesianCross('Aabb', 'aaBb').probAllDominantPhenotype },
+    { id: 8, p1: 'AaBbCcDd', p2: 'AaBbCcDd', name: 'Tetrahybrid (4 Loci AaBbCcDd x AaBbCcDd)', expectedDom: 0.31640625, fn: () => calculateMultiLocusBayesianCross('AaBbCcDd', 'AaBbCcDd').probAllDominantPhenotype },
+    { id: 9, p1: 'AABBCC', p2: 'AABBCC', name: 'Dominant Pure Cross (AABBCC x AABBCC)', expectedDom: 1.0, fn: () => calculateMultiLocusBayesianCross('AABBCC', 'AABBCC').probAllDominantPhenotype },
+    { id: 10, p1: 'aabbcc', p2: 'aabbcc', name: 'Recessive Pure Cross (aabbcc x aabbcc)', expectedDom: 0.0, fn: () => calculateMultiLocusBayesianCross('aabbcc', 'aabbcc').probAllDominantPhenotype }
+  ];
 
-let passed = 0;
+  let passed = 0;
+  const detailedResults = cases.map(c => {
+    const calculated = c.fn();
+    const target = c.expectedDom !== undefined ? c.expectedDom : c.expectedAa;
+    const isPassed = Math.abs(calculated - target) < 1e-5;
+    if (isPassed) passed++;
+    return {
+      id: c.id,
+      name: c.name,
+      expected: target,
+      calculated,
+      status: isPassed ? 'PASS' : 'FAIL'
+    };
+  });
 
-// Test 1: Aa x Aa (Monohybrid) -> 3/4 dominant phenotype
-const t1 = calculateMultiLocusBayesianCross('Aa', 'Aa');
-if (Math.abs(t1.probAllDominantPhenotype - 0.75) < 1e-5) passed++;
+  const accuracyPct = (passed / cases.length) * 100;
+  const ci = wilsonInterval(passed, cases.length);
 
-// Test 2: AaBb x AaBb (Dihybrid) -> 9/16 = 0.5625 dominant phenotype
-const t2 = calculateMultiLocusBayesianCross('AaBb', 'AaBb');
-if (Math.abs(t2.probAllDominantPhenotype - 0.5625) < 1e-5) passed++;
+  return {
+    modelName: "Genetics Multi-Gene Bayesian Reasoner",
+    totalCases: cases.length,
+    passedCases: passed,
+    accuracyPct: accuracyPct.toFixed(2),
+    ci,
+    sampleSizeNote: "Cỡ mẫu nhỏ (n=10), kết quả mang tính minh họa, không đại diện thống kê đầy đủ.",
+    detailedResults
+  };
+}
 
-// Test 3: AaBbDd x AaBbDd (Trihybrid) -> (3/4)^3 = 27/64 = 0.421875
-const t3 = calculateMultiLocusBayesianCross('AaBbDd', 'AaBbDd');
-if (Math.abs(t3.probAllDominantPhenotype - 0.421875) < 1e-5) passed++;
-
-// Test 4: AA x aa -> 100% Aa
-const t4 = calculateSingleLocusProbabilities('AA', 'aa');
-if (t4['Aa'] === 1.0) passed++;
-
-// Test 5: Aa x aa -> 50% Aa, 50% aa
-const t5 = calculateSingleLocusProbabilities('Aa', 'aa');
-if (t5['Aa'] === 0.5 && t5['aa'] === 0.5) passed++;
-
-// Test 6: AABB x aabb -> 100% AaBb (dominant phenotype prob = 1.0)
-const t6 = calculateMultiLocusBayesianCross('AABB', 'aabb');
-if (t6.probAllDominantPhenotype === 1.0) passed++;
-
-// Test 7: Aabb x aaBb -> (1/2) * (1/2) = 1/4 dominant
-const t7 = calculateMultiLocusBayesianCross('Aabb', 'aaBb');
-if (Math.abs(t7.probAllDominantPhenotype - 0.25) < 1e-5) passed++;
-
-// Test 8: AaBbCcDd x AaBbCcDd (4 Loci) -> (3/4)^4 = 81/256 = 0.31640625
-const t8 = calculateMultiLocusBayesianCross('AaBbCcDd', 'AaBbCcDd');
-if (Math.abs(t8.probAllDominantPhenotype - 0.31640625) < 1e-5) passed++;
-
-// Test 9: AABBCC x AABBCC -> 100% dominant
-const t9 = calculateMultiLocusBayesianCross('AABBCC', 'AABBCC');
-if (t9.probAllDominantPhenotype === 1.0) passed++;
-
-// Test 10: aabbcc x aabbcc -> 0% dominant phenotype
-const t10 = calculateMultiLocusBayesianCross('aabbcc', 'aabbcc');
-if (t10.probAllDominantPhenotype === 0.0) passed++;
-
-console.log(`📊 [Genetics Bayes Model] Số test cases vượt qua: ${passed}/10 (Accuracy: ${(passed / 10) * 100}%)`);
-
-if (passed === 10) {
-  console.log('✅ [Genetics Bayes Model] Tất cả 10 unit test cases Bayes di truyền đa gen đã ĐẠT CHUẨN XÁC NGUYÊN TẮC MENDEL!');
+if (process.argv[1] && process.argv[1].endsWith('test-bayes-genetics.js')) {
+  const result = runGeneticsAudit();
+  console.log('⚡ === AUDIT GENETICS BAYESIAN REASONER ===');
+  console.log(`- Total Benchmark Test Cases: ${result.totalCases}`);
+  console.log(`- Verification Accuracy (n=10): ${result.accuracyPct}% (${result.passedCases}/${result.totalCases})`);
+  console.log(`- 95% Wilson Score CI: [${result.ci.lower}%, ${result.ci.upper}%]`);
+  console.log(`- Chú thích: ${result.sampleSizeNote}`);
+  console.log(`- Detailed Test Case Outputs:`);
+  result.detailedResults.forEach(r => {
+    console.log(`   Case ${r.id}: ${r.name} | Target: ${r.expected} | Calc: ${r.calculated} | Status: ${r.status}`);
+  });
 }

@@ -51,20 +51,32 @@
     const quizStyle = document.createElement('style');
     quizStyle.innerHTML = `
         #quiz-fab {
-            position: fixed; bottom: 24px; right: 24px; z-index: 999998;
+            position: fixed; bottom: 28px; right: 92px; z-index: 999998;
             background: linear-gradient(135deg, #0f172a, #1e293b);
             border: 1px solid rgba(16, 185, 129, 0.4);
             box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15), inset 0 0 10px rgba(16, 185, 129, 0.1);
-            color: #10b981; border-radius: 9999px; padding: 12px 24px;
+            color: #10b981; border-radius: 9999px; padding: 0 22px; height: 48px;
             font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px;
             display: flex; align-items: center; gap: 10px; cursor: pointer;
             backdrop-filter: blur(8px); transition: all 0.3s;
+            box-sizing: border-box;
         }
         #quiz-fab:hover {
-            transform: translateY(-5px) scale(1.02);
+            transform: translateY(-4px) scale(1.02);
             box-shadow: 0 8px 30px rgba(16, 185, 129, 0.3), inset 0 0 15px rgba(16, 185, 129, 0.2);
         }
         .light #quiz-fab { background: #ffffff; border-color: #10b981; color: #059669; }
+
+        @media (max-width: 520px) {
+            #quiz-fab {
+                right: 84px;
+                bottom: 24px;
+                padding: 0 14px;
+                height: 42px;
+                font-size: 12px;
+                gap: 6px;
+            }
+        }
 
         #quiz-modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;

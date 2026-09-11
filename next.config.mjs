@@ -17,6 +17,8 @@ const nextConfig = {
     if (dev) {
       config.devtool = false; // Tắt source maps dung lượng lớn khi dev
     }
+    // Tắt cảnh báo Critical dependency từ thư viện protobufjs của Firebase Firestore
+    config.module.exprContextCritical = false;
     return config;
   },
 };

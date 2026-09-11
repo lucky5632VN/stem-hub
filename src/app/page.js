@@ -9,52 +9,82 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { 
   BookOpen, Trophy, Sparkles, Shield, Award, Star, 
   Flame, CheckCircle, Zap, User, Activity, Gem, Clock,
-  X, Camera, Send, RefreshCw, MessageSquare
+  X, Camera, Send, RefreshCw, MessageSquare, ChevronRight,
+  Calculator, FlaskConical, Dna, ArrowRight
 } from 'lucide-react';
 import { AvatarFrame } from '@/components/atoms/AvatarFrame';
 import STEMAvatarSVG from '@/components/atoms/STEMAvatarSVG';
 import dynamic from 'next/dynamic';
 import { savePendingShare } from '@/lib/indexedDB';
 import CrystalIcon from '@/components/atoms/CrystalIcon';
+import { getTitleLabel } from '@/lib/titles';
 
 const ArenaBackground = dynamic(() => import('@/components/organisms/ArenaBackground'), { ssr: false });
 
 const labs = [
   {
-    id: 'chem',
-    title: 'Hóa học',
-    name: 'QuantumLab v4.0',
-    status: 'active',
-    link: '/labs/lab-ktra15p/dist/index.html?v=4.1.5',
-    image: 'https://images.unsplash.com/photo-1532187643603-ba119ca4109e?q=80&w=600&auto=format&fit=crop',
-    desc: 'Thiết lập phản ứng axit-bazơ ảo, theo dõi nồng độ pH thời gian thực.',
-  },
-  {
-    id: 'bio',
-    title: 'Sinh học',
-    name: 'BioSTEM Virtual AI',
-    status: 'active',
-    link: '/labs/lab_sinh/dist/index.html?v=4.0.6',
-    image: '/bio_stem_cover.png',
-    desc: 'Giải mã bản đồ gene di truyền, trắc nghiệm sinh học chuẩn THPT Quốc gia.',
-  },
-  {
-    id: 'phys',
-    title: 'Vật lý',
-    name: 'PhysicsLab v3.0',
-    status: 'active',
-    link: '/labs/PhysicsLab/index.html',
-    image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop',
-    desc: 'Mô phỏng dao động điều hòa, giao thoa sóng cơ, đặc tuyến linh kiện và lắp ráp mạch điện DC tương tác.',
-  },
-  {
     id: 'math',
     title: 'Toán học',
-    name: 'SpatialMind AI',
+    name: 'Lab Toán',
+    code: 'MATH-3D',
     status: 'active',
     link: '/labs/toan/frontend/dist/index.html',
     image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=600&auto=format&fit=crop',
     desc: 'Khám phá hình học không gian 3D trực quan bằng công cụ giải toán thông minh.',
+    tags: ['Hình học 3D', 'Giải toán AI', 'Tương tác không gian'],
+    gradientText: 'from-cyan-400 via-sky-300 to-blue-500',
+    borderHover: 'hover:border-cyan-500/60 hover:shadow-[0_12px_40px_rgba(6,182,212,0.25)]',
+    badgeStyle: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/40',
+    btnGradient: 'bg-gradient-to-r from-cyan-500 via-sky-600 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-cyan-500/25',
+    icon: Calculator,
+  },
+  {
+    id: 'phys',
+    title: 'Vật lý',
+    name: 'Lab Lý',
+    code: 'PHYS-V3',
+    status: 'active',
+    link: '/labs/PhysicsLab/index.html',
+    image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop',
+    desc: 'Mô phỏng dao động điều hòa, giao thoa sóng cơ, đặc tuyến linh kiện và lắp ráp mạch điện DC tương tác.',
+    tags: ['Dao động điều hòa', 'Giao thoa sóng', 'Mạch điện DC'],
+    gradientText: 'from-purple-400 via-fuchsia-300 to-indigo-500',
+    borderHover: 'hover:border-purple-500/60 hover:shadow-[0_12px_40px_rgba(168,85,247,0.25)]',
+    badgeStyle: 'bg-purple-500/15 text-purple-300 border-purple-500/40',
+    btnGradient: 'bg-gradient-to-r from-purple-600 via-fuchsia-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-purple-500/25',
+    icon: Zap,
+  },
+  {
+    id: 'chem',
+    title: 'Hóa học',
+    name: 'Lab Hóa',
+    code: 'CHEM-V4',
+    status: 'active',
+    link: '/labs/lab-ktra15p/dist/index.html?v=4.1.5',
+    image: 'https://images.unsplash.com/photo-1532187643603-ba119ca4109e?q=80&w=600&auto=format&fit=crop',
+    desc: 'Thiết lập phản ứng axit-bazơ ảo, theo dõi nồng độ pH thời gian thực.',
+    tags: ['Phản ứng Axit-Bazơ', 'Chuẩn độ pH', 'Thí nghiệm ảo'],
+    gradientText: 'from-amber-400 via-yellow-300 to-emerald-400',
+    borderHover: 'hover:border-amber-500/60 hover:shadow-[0_12px_40px_rgba(245,158,11,0.25)]',
+    badgeStyle: 'bg-amber-500/15 text-amber-300 border-amber-500/40',
+    btnGradient: 'bg-gradient-to-r from-amber-500 via-orange-500 to-emerald-600 hover:from-amber-400 hover:to-emerald-500 text-white shadow-amber-500/25',
+    icon: FlaskConical,
+  },
+  {
+    id: 'bio',
+    title: 'Sinh học',
+    name: 'Lab Sinh',
+    code: 'BIO-GENE',
+    status: 'active',
+    link: '/labs/lab_sinh/dist/index.html?v=4.0.6',
+    image: '/bio_stem_cover.png',
+    desc: 'Giải mã bản đồ gene di truyền, trắc nghiệm sinh học chuẩn THPT Quốc gia.',
+    tags: ['Bản đồ Gene', 'Di truyền học', 'Ôn thi THPT'],
+    gradientText: 'from-emerald-400 via-teal-300 to-cyan-400',
+    borderHover: 'hover:border-emerald-500/60 hover:shadow-[0_12px_40px_rgba(16,185,129,0.25)]',
+    badgeStyle: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40',
+    btnGradient: 'bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-emerald-500/25',
+    icon: Dna,
   }
 ];
 
@@ -62,7 +92,6 @@ export default function Home() {
   const user = useAppStore((state) => state.user);
   const personalization = useAppStore((state) => state.personalization);
   const setPersonalization = useAppStore((state) => state.setPersonalization);
-  const [claimedQuests, setClaimedQuests] = useState({});
 
   const router = useRouter();
   const activeLab = useAppStore((state) => state.activeLab);
@@ -81,23 +110,9 @@ export default function Home() {
   const [screenshotFlash, setScreenshotFlash] = useState(false);
   const [showShareConfirm, setShowShareConfirm] = useState(false);
 
-  const checkQuestCompleted = (questId) => {
-    if (!user) return false;
-    if (questId === 1) {
-      return localStorage.getItem('daily_quest_pvp_win') === 'completed';
-    }
-    if (questId === 2) {
-      return localStorage.getItem('daily_quest_lab_done') === 'completed';
-    }
-    if (questId === 3) {
-      return (personalization.elo || 0) >= 1100;
-    }
-    return false;
-  };
-
   const aiCompanionData = {
     chem: {
-      welcome: "🔬 Xin chào! Tôi là Trợ lý Lượng tử phòng thí nghiệm Hóa học. Tôi có thể hỗ trợ bạn thiết lập các chuỗi phản ứng axit-bazơ, cân bằng phương trình hóa học hoặc đo lường nồng độ pH. Hãy chọn một câu hỏi gợi ý bên dưới hoặc nhập câu hỏi của bạn nhé!",
+      welcome: "🔬 Xin chào! Tôi là Trợ lý Lượng tử phòng Lab Hóa. Tôi có thể hỗ trợ bạn thiết lập các chuỗi phản ứng axit-bazơ, cân bằng phương trình hóa học hoặc đo lường nồng độ pH. Hãy chọn một câu hỏi gợi ý bên dưới hoặc nhập câu hỏi của bạn nhé!",
       suggestions: [
         "Làm thế nào để pha dung dịch HCl 0.1M?",
         "Giải thích phản ứng trung hòa axit-bazơ?",
@@ -110,7 +125,7 @@ export default function Home() {
       }
     },
     phys: {
-      welcome: "⚡ Chào bạn! Tôi là Trợ lý Lượng tử phòng thí nghiệm Vật lý. Bạn cần trợ giúp gì về dao động điều hòa, mạch điện xoay chiều AC hay các định luật Newton cơ học?",
+      welcome: "⚡ Chào bạn! Tôi là Trợ lý Lượng tử phòng Lab Lý. Bạn cần trợ giúp gì về dao động điều hòa, mạch điện xoay chiều AC hay các định luật Newton cơ học?",
       suggestions: [
         "Cách nối song song và nối tiếp các điện trở?",
         "Công thức tính chu kỳ dao động con lắc lò xo?",
@@ -123,7 +138,7 @@ export default function Home() {
       }
     },
     math: {
-      welcome: "📐 Xin chào! Tôi là Trợ lý Lượng tử phòng toán học SpatialMind. Tôi ở đây để hỗ trợ bạn dựng hình học không gian 3D, tính toán thể tích và khám phá các định lý Euler.",
+      welcome: "📐 Xin chào! Tôi là Trợ lý Lượng tử phòng Lab Toán. Tôi ở đây để hỗ trợ bạn dựng hình học không gian 3D, tính toán thể tích và khám phá các định lý Euler.",
       suggestions: [
         "Định lý Euler cho đa diện lồi là gì?",
         "Công thức tính thể tích khối cầu và diện tích mặt cầu?",
@@ -136,7 +151,7 @@ export default function Home() {
       }
     },
     bio: {
-      welcome: "🧬 Xin chào! Tôi là Trợ lý Lượng tử phòng thí nghiệm Sinh học BioSTEM. Hãy để tôi giúp bạn giải mã bản đồ gene di truyền, các quy luật phân ly Men-đen và cấu trúc mạch kép ADN nhé!",
+      welcome: "🧬 Xin chào! Tôi là Trợ lý Lượng tử phòng Lab Sinh. Hãy để tôi giúp bạn giải mã bản đồ gene di truyền, các quy luật phân ly Men-đen và cấu trúc mạch kép ADN nhé!",
       suggestions: [
         "Quy luật phân ly độc lập của Men-đen là gì?",
         "Cấu trúc cấu tạo của phân tử ADN?",
@@ -150,22 +165,21 @@ export default function Home() {
     }
   };
 
-  // Hàm chuyển đổi Rank Title sang tiếng Việt
-  const getTitleLabel = (titleKey) => {
-    const titles = {
-      apprentice: 'Tập sự STEM',
-      scholar: 'Học giả STEM',
-      adept: 'Chuyên gia STEM',
-      master: 'Bậc thầy STEM',
-      grandmaster: 'Huyền thoại STEM',
-      academician: 'Viện sĩ STEM'
-    };
-    return titles[titleKey] || 'Tập sự STEM';
+
+  const getRankTitle = (elo = 1000) => {
+    if (elo >= 2400) return 'ĐẠI CAO THỦ';
+    if (elo >= 2000) return 'HUYỀN THOẠI';
+    if (elo >= 1600) return 'CAO THỦ';
+    if (elo >= 1200) return 'TINH ANH';
+    return 'TÂN BINH';
   };
 
   const handleLaunchLab = (lab) => {
     playSound.click();
-    setActiveLab(lab);
+    setActiveLab({
+      ...lab,
+      launchUrl: `${lab.link}${lab.link.includes('?') ? '&' : '?'}_t=${Date.now()}`
+    });
     setShowAiCompanion(false);
     
     // Nạp tin nhắn welcome tương ứng môn học
@@ -260,92 +274,6 @@ export default function Home() {
     }, 1500);
   };
 
-
-
-  // Đọc danh sách nhiệm vụ đã claimed từ localStorage
-  useEffect(() => {
-    if (user) {
-      const claimed = {};
-      [1, 2, 3].forEach(id => {
-        const val = localStorage.getItem(`quest_${user.uid}_${id}`);
-        if (val === 'claimed') {
-          claimed[id] = true;
-        }
-      });
-      setClaimedQuests(claimed);
-    }
-  }, [user]);
-
-  const handleResetQuests = () => {
-    playSound.click();
-    if (user) {
-      [1, 2, 3].forEach(id => {
-        localStorage.removeItem(`quest_${user.uid}_${id}`);
-      });
-    }
-    localStorage.removeItem('daily_quest_pvp_win');
-    localStorage.removeItem('daily_quest_lab_done');
-    setClaimedQuests({});
-    alert("Đã reset trạng thái 3 nhiệm vụ hàng ngày về ban đầu để bạn dễ dàng chạy thử test!");
-  };
-
-  // Bộ câu hỏi/nhiệm vụ hàng ngày
-  const dailyQuests = [
-    { id: 1, title: 'Chiến thắng ít nhất 1 trận đấu trí PvP', reward: 50, icon: '⚔️', desc: 'Tham gia Đấu trường 1v1 và giành chiến thắng.' },
-    { id: 2, title: 'Thực hành thành công 1 thí nghiệm ảo', reward: 30, icon: '🧪', desc: 'Vào bất kỳ phòng Lab nào để hoàn thành bài thực hành.' },
-    { id: 3, title: 'Tích lũy ELO Đấu trường đạt mốc 1100', reward: 100, icon: '🏆', desc: 'Nâng cao trình độ đấu trí của bạn qua các môn học.' }
-  ];
-
-  // Nhận thưởng Crystals
-  const handleClaimReward = async (questId, amount) => {
-    if (!user) return;
-    playSound.success();
-    
-    try {
-      const processTransaction = httpsCallable(functions, 'processCrystalTransaction');
-      const res = await processTransaction({
-        actionType: 'CLAIM_HOMEPAGE_QUEST',
-        payload: { questId, amount }
-      });
-      if (res.data?.success) {
-        setPersonalization({ crystals: res.data.newCrystals });
-      }
-      localStorage.setItem(`quest_${user.uid}_${questId}`, 'claimed');
-      setClaimedQuests(prev => ({ ...prev, [questId]: true }));
-    } catch (err) {
-      console.warn("Lỗi đồng bộ Crystals lên Firestore:", err);
-    }
-  };
-
-
-  // Tính toán tọa độ vẽ biểu đồ Radar SVG
-  const getRadarPoints = () => {
-    const strengths = personalization.subjectStrengths || { math: 50, physics: 50, chemistry: 50, biology: 50 };
-    const center = 100;
-    const maxVal = 100;
-    const r = 70; // Bán kính tối đa
-
-    // Các trục: Math (Top), Physics (Right), Chemistry (Bottom), Biology (Left)
-    const pMath = {
-      x: center,
-      y: center - (strengths.math / maxVal) * r
-    };
-    const pPhys = {
-      x: center + (strengths.physics / maxVal) * r,
-      y: center
-    };
-    const pChem = {
-      x: center,
-      y: center + (strengths.chemistry / maxVal) * r
-    };
-    const pBio = {
-      x: center - (strengths.biology / maxVal) * r,
-      y: center
-    };
-
-    return `${pMath.x},${pMath.y} ${pPhys.x},${pPhys.y} ${pChem.x},${pChem.y} ${pBio.x},${pBio.y}`;
-  };
-
   return (
     <div className="relative min-h-screen bg-bg-primary overflow-hidden transition-colors duration-300">
       {/* 🚀 LỚP NỀN ĐỘNG CINEMAGRAPH BACKGROUND (Z-INDEX 0) */}
@@ -360,48 +288,95 @@ export default function Home() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* CỘT TRÁI (COL-SPAN-8): DANH SÁCH PHÒNG LABS THỰC HÀNH */}
-        <div className="lg:col-span-8 flex flex-col gap-6 screenshot-full-width">
-          <div className="flex flex-col mb-2">
-            <h2 className="text-xl font-bold text-text-primary tracking-tight uppercase flex items-center gap-2">
-              <Zap className="w-5 h-5 text-accent-pink animate-pulse" /> HỆ THỐNG PHÒNG THÍ NGHIỆM ẢO STEM
+        <div className="lg:col-span-8 flex flex-col gap-3.5 screenshot-full-width">
+          <div className="flex flex-col mb-1">
+            <h2 className="text-lg font-bold text-text-primary tracking-tight uppercase flex items-center gap-2">
+              <Zap className="w-4.5 h-4.5 text-accent-pink animate-pulse" /> HỆ THỐNG PHÒNG THÍ NGHIỆM ẢO STEM
             </h2>
-            <p className="text-text-secondary text-xs mt-1 tracking-wide">CHỌN PHÒNG THÍ NGHIỆM ĐỂ KHỞI CHẠY MÔ PHỎNG LƯỢNG TỬ</p>
+            <p className="text-text-secondary text-[11px] mt-0.5 tracking-wide">CHỌN PHÒNG THÍ NGHIỆM ĐỂ KHỞI CHẠY MÔ PHỎNG LƯỢNG TỬ</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {labs.map((lab) => (
-              <div key={lab.id} className="bg-bg-secondary/95 rounded-3xl overflow-hidden border border-border-theme hover:border-accent-pink/40 hover:shadow-[0_8px_30px_rgba(240,57,140,0.12)] transition-all duration-300 group flex flex-col justify-between shadow-lg relative">
-                <div>
-                  <div className="h-44 overflow-hidden relative">
-                    <div className="absolute inset-0 bg-gradient-to-t from-bg-secondary via-bg-secondary/30 to-transparent z-10 group-hover:via-bg-secondary/60 transition-colors duration-300" />
-                    <img src={lab.image} alt={lab.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    <div className="absolute top-4 left-4 z-20 px-3.5 py-1.5 bg-bg-primary/80 backdrop-blur-md border border-border-theme rounded-full text-[10px] font-bold text-accent-pink uppercase tracking-wider shadow-sm">
-                      {lab.title}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            {labs.map((lab) => {
+              const IconComponent = lab.icon;
+              return (
+                <div 
+                  key={lab.id} 
+                  className={`bg-bg-secondary/95 rounded-2xl overflow-hidden border border-border-theme ${lab.borderHover} transition-all duration-300 group flex flex-col justify-between shadow-xl relative`}
+                >
+                  {/* Background Ambient Glow on hover */}
+                  <div className="absolute top-0 right-0 w-36 h-36 bg-accent-pink/5 group-hover:bg-accent-pink/10 rounded-full blur-2xl pointer-events-none transition-all duration-500" />
+                  
+                  <div>
+                    {/* Card Image Banner */}
+                    <div className="h-28 overflow-hidden relative">
+                      <div className="absolute inset-0 bg-gradient-to-t from-bg-secondary via-bg-secondary/30 to-transparent z-10 group-hover:via-bg-secondary/10 transition-colors duration-300" />
+                      <img 
+                        src={lab.image} 
+                        alt={lab.title} 
+                        className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out" 
+                      />
+                      
+                      {/* Top Bar inside Image */}
+                      <div className="absolute top-2.5 left-2.5 z-20 flex items-center gap-2">
+                        {/* Subject Badge */}
+                        <div className={`px-2.5 py-0.5 bg-bg-primary/85 backdrop-blur-md border rounded-lg text-[9px] font-bold uppercase tracking-wider shadow-md flex items-center gap-1 ${lab.badgeStyle}`}>
+                          <IconComponent className="w-3 h-3" />
+                          <span>{lab.title}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card Body Content */}
+                    <div className="p-3.5 pt-2 relative z-20">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className={`text-base font-black text-text-primary group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r ${lab.gradientText} transition-all duration-300 tracking-wide font-mono`}>
+                          {lab.name}
+                        </h3>
+                        <span className="text-[8.5px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded font-bold">
+                          ● Sẵn sàng
+                        </span>
+                      </div>
+
+                      <p className="text-[11px] text-text-secondary leading-snug line-clamp-2 min-h-[30px] mb-2">
+                        {lab.desc}
+                      </p>
+
+                      {/* Feature Tag Chips */}
+                      <div className="flex flex-wrap gap-1">
+                        {lab.tags.map((tag, idx) => (
+                          <span 
+                            key={idx} 
+                            className="text-[8.5px] font-mono text-text-secondary bg-bg-tertiary/90 border border-border-theme/70 px-2 py-0.5 rounded-md transition-colors group-hover:border-border-theme"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                  <div className="p-6">
-                    <h3 className="text-lg font-bold mb-2 text-text-primary group-hover:text-accent-pink transition-colors tracking-wide">{lab.name}</h3>
-                    <p className="text-xs text-text-secondary leading-relaxed min-h-[40px]">{lab.desc}</p>
+
+                  {/* Card Footer Actions */}
+                  <div className="p-3 px-3.5 border-t border-border-theme/60 mt-auto flex items-center justify-between relative z-20 bg-bg-secondary/40">
+                    <div className="flex flex-col">
+                      <span className="text-[8px] font-mono text-text-secondary uppercase tracking-wider">MÁY CHỦ</span>
+                      <span className="text-[9.5px] font-mono font-bold text-text-primary flex items-center gap-1">
+                        <span className="text-accent-pink">🇻🇳</span> VN (HN-1)
+                      </span>
+                    </div>
+
+                    <button 
+                      onClick={() => handleLaunchLab(lab)}
+                      onMouseEnter={playSound.hover}
+                      className={`px-4 py-1.5 rounded-xl text-[10.5px] font-bold transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] flex items-center gap-1.5 cursor-pointer shadow-md ${lab.btnGradient}`}
+                    >
+                      <span>Vào Học</span>
+                      <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                    </button>
                   </div>
                 </div>
-                
-                <div className="p-6 pt-0 flex justify-between items-center mt-auto border-t border-border-theme pt-4">
-                  <span className="text-[10px] font-mono text-text-secondary">MÁY CHỦ: VIỆT NAM (HN-1)</span>
-                  <button 
-                    onClick={() => handleLaunchLab(lab)}
-                    onMouseEnter={playSound.hover}
-                    className={`px-5 py-2.5 rounded-2xl text-[11px] font-bold transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98] flex items-center gap-1.5 ${
-                      lab.status === 'active' 
-                        ? 'bg-accent-pink hover:opacity-90 text-white shadow-lg shadow-accent-pink/20 cursor-pointer' 
-                        : 'bg-bg-tertiary text-text-secondary border border-border-theme cursor-default pointer-events-none'
-                    }`}
-                  >
-                    <BookOpen className="w-3.5 h-3.5" />
-                    {lab.status === 'active' ? 'Vào học ngay' : 'Đang nâng cấp'}
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -431,11 +406,17 @@ export default function Home() {
             <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-accent-pink/30 rounded-br-xl pointer-events-none" />
             <div className="absolute top-0 right-0 w-32 h-32 bg-accent-pink/5 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="flex items-center gap-1.5 mb-5 border-b border-border-theme pb-3">
-              <Activity className="w-4.5 h-4.5 text-accent-pink animate-pulse" />
-              <span className="text-[11px] font-extrabold text-text-primary uppercase tracking-wider cyber-glitch-text">
-                BUỒNG LÁI LƯỢNG TỬ v4.0
-              </span>
+            <div className="flex items-center justify-between mb-5 border-b border-border-theme pb-3 gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <Activity className="w-4 h-4 text-accent-pink animate-pulse shrink-0" />
+                <span className="text-xs font-black text-text-primary uppercase tracking-wider cyber-glitch-text font-mono truncate">
+                  TRẠM CHỈ HUY STEM
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[9px] font-mono text-emerald-400 font-bold shrink-0 shadow-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>ONLINE</span>
+              </div>
             </div>
 
             {user ? (
@@ -458,7 +439,9 @@ export default function Home() {
                     <span className="text-[9px] font-bold text-accent-pink bg-accent-pink/10 border border-accent-pink/20 px-2.5 py-0.5 rounded-full inline-block mt-1 font-mono uppercase tracking-wider">
                       {getTitleLabel(personalization.activeTitle || 'apprentice')}
                     </span>
-                    <p className="text-[9px] text-text-secondary font-mono mt-1 uppercase">HẠNG: TÂN BINH</p>
+                    <p className="text-[9px] text-text-secondary font-mono mt-1 uppercase">
+                      HẠNG: <span className="text-amber-400 font-bold">{getRankTitle(personalization.elo)}</span>
+                    </p>
                   </div>
                 </div>
 
@@ -485,16 +468,15 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Năng lượng hệ thống */}
-                <div className="bg-bg-tertiary/80 border border-border-theme p-3 rounded-2xl text-left">
-                  <div className="flex justify-between items-center mb-1.5">
-                    <span className="text-[9px] text-text-secondary font-mono uppercase">Năng lượng hệ thống</span>
-                    <span className="text-[9px] text-accent-pink font-mono font-bold">100% (Ổn định)</span>
-                  </div>
-                  <div className="h-2 w-full bg-bg-primary rounded-full overflow-hidden p-[1px] border border-border-theme">
-                    <div className="h-full bg-gradient-to-r from-accent-pink to-accent-purple rounded-full w-full shadow-lg shadow-accent-pink/30" />
-                  </div>
-                </div>
+                {/* Nút hành động nhanh tới Trang cá nhân */}
+                <button
+                  onClick={() => router.push('/ho-so')}
+                  className="w-full py-2.5 px-4 bg-gradient-to-r from-accent-pink/15 via-purple-600/15 to-accent-pink/15 hover:from-accent-pink/30 hover:to-purple-600/30 border border-accent-pink/40 hover:border-accent-pink rounded-2xl text-xs font-bold text-accent-pink hover:text-white flex items-center justify-center gap-2 transition-all shadow-md active:scale-98 cursor-pointer mt-1"
+                >
+                  <User className="w-4 h-4" />
+                  <span>Mở Hồ Sơ & Trang Bị Nhân Vật</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
               </div>
             ) : (
               <div className="p-6 bg-bg-tertiary/80 border border-border-theme rounded-2xl text-center">
@@ -502,164 +484,6 @@ export default function Home() {
                 <p className="text-xs text-text-secondary font-mono">Đăng nhập để khởi tạo bảng điều khiển của bạn</p>
               </div>
             )}
-          </div>
-
-          {/* DYNAMIC RADAR CONSOLE (CHỈ SỐ SỨC MẠNH MÔN HỌC) */}
-          {user && (
-            <div className="bg-bg-secondary/95 border border-border-theme rounded-3xl p-6 shadow-2xl relative overflow-hidden neon-border-glow">
-              <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-accent-pink/30 rounded-tl-xl pointer-events-none" />
-              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-accent-pink/30 rounded-br-xl pointer-events-none" />
-
-              <div className="flex items-center justify-between mb-4 border-b border-border-theme pb-3">
-                <h3 className="text-[11px] font-extrabold text-text-primary uppercase tracking-wider flex items-center gap-1.5 cyber-glitch-text">
-                  <Sparkles className="w-4 h-4 text-accent-pink" /> QUÉT RADAR ĐA MÔN
-                </h3>
-                <span className="text-[8px] text-accent-pink/70 border border-accent-pink/20 px-1.5 py-0.5 rounded uppercase">
-                  Chỉ số thực tế
-                </span>
-              </div>
-
-              {/* Radar Chart Visual */}
-              <div className="relative w-full flex items-center justify-center py-4 bg-bg-tertiary/50 rounded-2xl border border-border-theme">
-                <svg width="200" height="200" className="relative z-10 overflow-visible">
-                  {/* Radar grid circles */}
-                  <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(240, 57, 140, 0.15)" strokeWidth="1" />
-                  <circle cx="100" cy="100" r="45" fill="none" stroke="rgba(240, 57, 140, 0.1)" strokeWidth="1" strokeDasharray="3,3" />
-                  <circle cx="100" cy="100" r="20" fill="none" stroke="rgba(240, 57, 140, 0.1)" strokeWidth="1" />
-                  
-                  {/* Radar axis lines */}
-                  <line x1="100" y1="30" x2="100" y2="170" stroke="rgba(240, 57, 140, 0.15)" strokeWidth="1" />
-                  <line x1="30" y1="100" x2="170" y2="100" stroke="rgba(240, 57, 140, 0.15)" strokeWidth="1" />
-                  
-                  {/* Rotating sweep line */}
-                  <line x1="100" y1="100" x2="100" y2="30" stroke="rgba(240, 57, 140, 0.3)" strokeWidth="1.5" style={{
-                    transformOrigin: '100px 100px',
-                    animation: 'radar-sweep 4s linear infinite'
-                  }} />
-
-                  {/* Filled polygon for subject strengths */}
-                  <polygon 
-                    points={getRadarPoints()} 
-                    fill="rgba(240, 57, 140, 0.25)" 
-                    stroke="rgba(240, 57, 140, 0.85)" 
-                    strokeWidth="2" 
-                    className="drop-shadow-[0_0_8px_rgba(240,57,140,0.5)]"
-                  />
-
-                  {/* Vertices indicator points */}
-                  {(() => {
-                    const strengths = personalization.subjectStrengths || { math: 50, physics: 50, chemistry: 50, biology: 50 };
-                    const center = 100;
-                    const maxVal = 100;
-                    const r = 70;
-                    return [
-                      { x: center, y: center - (strengths.math / maxVal) * r },
-                      { x: center + (strengths.physics / maxVal) * r, y: center },
-                      { x: center, y: center + (strengths.chemistry / maxVal) * r },
-                      { x: center - (strengths.biology / maxVal) * r, y: center }
-                    ].map((pt, idx) => (
-                      <circle key={idx} cx={pt.x} cy={pt.y} r="3.5" className="fill-white stroke-accent-pink stroke-2" />
-                    ));
-                  })()}
-
-                  {/* Label Texts */}
-                  <text x="100" y="22" textAnchor="middle" className="fill-text-secondary font-mono text-[9px] font-bold">TOÁN</text>
-                  <text x="178" y="103" textAnchor="start" className="fill-text-secondary font-mono text-[9px] font-bold">LÝ</text>
-                  <text x="100" y="188" textAnchor="middle" className="fill-text-secondary font-mono text-[9px] font-bold">HÓA</text>
-                  <text x="22" y="103" textAnchor="end" className="fill-text-secondary font-mono text-[9px] font-bold">SINH</text>
-                </svg>
-              </div>
-
-              {/* Legend with percentages */}
-              {(() => {
-                const strengths = personalization.subjectStrengths || { math: 50, physics: 50, chemistry: 50, biology: 50 };
-                return (
-                  <div className="grid grid-cols-2 gap-2 mt-4 text-[10px] font-mono">
-                    <div className="flex items-center justify-between px-3 py-1.5 bg-bg-tertiary/75 border border-border-theme rounded-xl">
-                      <span className="text-text-secondary">Toán học:</span>
-                      <strong className="text-text-primary">{strengths.math}%</strong>
-                    </div>
-                    <div className="flex items-center justify-between px-3 py-1.5 bg-bg-tertiary/75 border border-border-theme rounded-xl">
-                      <span className="text-text-secondary">Vật lý:</span>
-                      <strong className="text-text-primary">{strengths.physics}%</strong>
-                    </div>
-                    <div className="flex items-center justify-between px-3 py-1.5 bg-bg-tertiary/75 border border-border-theme rounded-xl">
-                      <span className="text-text-secondary">Hóa học:</span>
-                      <strong className="text-text-primary">{strengths.chemistry}%</strong>
-                    </div>
-                    <div className="flex items-center justify-between px-3 py-1.5 bg-bg-tertiary/75 border border-border-theme rounded-xl">
-                      <span className="text-text-secondary">Sinh học:</span>
-                      <strong className="text-text-primary">{strengths.biology}%</strong>
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-          )}
-
-
-          {/* DAILY QUESTS PANEL */}
-          <div className="bg-bg-secondary/95 border border-border-theme p-6 rounded-3xl shadow-2xl relative overflow-hidden">
-            <div className="flex items-center justify-between mb-4 border-b border-border-theme pb-3">
-              <h3 className="text-[10px] font-bold text-text-secondary uppercase tracking-wider flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-accent-pink animate-pulse" /> Nhiệm vụ hàng ngày
-              </h3>
-              <div className="flex items-center gap-2">
-                <button 
-                  onClick={handleResetQuests}
-                  className="px-2 py-0.5 bg-bg-tertiary hover:bg-border-theme border border-border-theme text-[9px] font-mono text-text-secondary hover:text-text-primary rounded transition-all active:scale-95 flex items-center gap-1"
-                >
-                  <RefreshCw className="w-2.5 h-2.5" /> Reset
-                </button>
-                <span className="text-[9px] text-text-secondary font-mono">MỖI 24 GIỜ</span>
-              </div>
-            </div>
-
-            <div className="space-y-3.5">
-              {dailyQuests.map((quest) => {
-                const isClaimed = claimedQuests[quest.id];
-                return (
-                  <div key={quest.id} className="flex flex-col gap-2.5 p-3.5 bg-bg-tertiary border border-border-theme rounded-2xl">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-2.5">
-                        <span className="text-lg shrink-0">{quest.icon}</span>
-                        <div>
-                          <h4 className="text-xs font-bold text-text-primary leading-tight">{quest.title}</h4>
-                          <p className="text-[10px] text-text-secondary mt-0.5">{quest.desc}</p>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between border-t border-border-theme pt-2 mt-1">
-                      <span className="text-[9px] font-bold text-amber-400 flex items-center gap-1">
-                        PHẦN THƯỞNG: <CrystalIcon className="w-4 h-4" /> +{quest.reward}
-                      </span>
-                      
-                      {user ? (
-                        isClaimed ? (
-                          <span className="text-[9px] font-bold text-success bg-success/10 border border-success/20 px-2.5 py-1 rounded-xl flex items-center gap-1">
-                            <CheckCircle className="w-3.5 h-3.5" /> ĐÃ NHẬN
-                          </span>
-                        ) : checkQuestCompleted(quest.id) ? (
-                          <button
-                            onClick={() => handleClaimReward(quest.id, quest.reward)}
-                            className="px-3 py-1.5 bg-gradient-to-r from-accent-pink to-rose-600 hover:opacity-90 text-[10px] font-bold text-white rounded-xl transition-all shadow-md cursor-pointer hover:scale-105 active:scale-95 animate-pulse"
-                          >
-                            NHẬN THƯỞNG
-                          </button>
-                        ) : (
-                          <span className="text-[9px] text-text-secondary font-mono font-bold bg-bg-primary/40 border border-border-theme px-2.5 py-1.5 rounded-xl">
-                            CHƯA HOÀN THÀNH
-                          </span>
-                        )
-                      ) : (
-                        <span className="text-[9px] text-text-secondary font-mono italic">YÊU CẦU ĐĂNG NHẬP</span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
           </div>
 
         </div>
@@ -674,7 +498,7 @@ export default function Home() {
             {/* Iframe load trang Lab */}
             <div className="flex-1 h-full relative">
               <iframe 
-                src={activeLab.link} 
+                src={activeLab.launchUrl || activeLab.link} 
                 className="w-full h-full border-none"
                 title={activeLab.name}
               />

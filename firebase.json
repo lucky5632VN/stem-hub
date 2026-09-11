@@ -10,10 +10,18 @@
     "public": "out",
     "cleanUrls": true,
     "trailingSlash": false,
+    "releaseStorageSettings": {
+      "numReleasesToKeep": 2
+    },
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "**/da_lab_instrumental.mp3",
+      "**/thanh_xuan.mp3",
+      "**/son_tung_remix.mp3",
+      "**/ly_keo_chai.mp3",
+      "**/science.mp3"
     ],
     "rewrites": [
       {
@@ -28,6 +36,16 @@
           {
             "key": "Cache-Control",
             "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
+      },
+
+      {
+        "source": "labs/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, must-revalidate"
           }
         ]
       },

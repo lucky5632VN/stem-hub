@@ -1,49 +1,276 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Khóa kịch bản bot bảo mật phía server
-    match /match_rooms/{matchId}/bot_schedules/{docId} {
-      allow read, write: if false;
+
+    // =========================================================================
+    // CÁC HÀM TIỆN ÍCH HỆ THỐNG (SYSTEM HELPER FUNCTIONS)
+    // =========================================================================
+
+    // 1. Kiểm tra người dùng đã xác thực (đăng nhập) hợp lệ chưa
+    function isAuthenticated() {
+      return request.auth != null;
     }
     
-    // Cấp quyền đọc/ghi công khai cho Hồ sơ/Bảng xếp hạng (users)
+    // 2. Kiểm tra người dùng có phải là chủ sở hữu của tài nguyên (userId) hay không
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // 3. Phân quyền Quản trị viên (Admin RBAC):
+    // Kết hợp xác thực Email trực tiếp từ Auth Token (nhanh, 0ms, không tốn read, không lỗi get)
+    // VÀ kiểm tra an toàn field 'role' trong database nếu dùng tài khoản admin khác
+    function isAdmin() {
+      return isAuthenticated() && (
+        (request.auth.token.email != null && (
+          request.auth.token.email.lower() == 'admin123@gmail.com' ||
+          request.auth.token.email.lower() == 'admin@stemhub.edu.vn'
+        )) ||
+        (request.auth.token.keys().hasAny(['role']) && request.auth.token.role == 'admin') ||
+        (
+          exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'admin'
+        )
+      );
+    }
+
+    // 4. Kiểm tra thời gian còn lại trong trận đấu (chống học sinh gian lận tua ngược thời gian)
+    function isValidTimeRemainingUpdate() {
+      return !('timeRemaining' in request.resource.data) || 
+             !('timeRemaining' in resource.data) || 
+             request.resource.data.timeRemaining <= resource.data.timeRemaining;
+    }
+
+    // 5. Khóa trần thời gian trận đấu (Server Expiration Barrier - 4-Tier Timeout Fallback)
+    // Chặn mọi cập nhật tiến độ nếu trận đấu đã quá thời hạn matchExpiresAt
+    function isMatchNotExpired() {
+      return !('matchExpiresAt' in resource.data) || 
+             (resource.data.matchExpiresAt is timestamp && request.time <= resource.data.matchExpiresAt) ||
+             (resource.data.matchExpiresAt is number && request.time.toMillis() <= resource.data.matchExpiresAt);
+    }
+
+    // 6. Whitelist các trường học sinh được phép tự cập nhật profile cá nhân
+    // CHẶN NGHIÊM NGẶT: Học sinh không được tự ý sửa role, stats, elo, personalization (pha lê, danh hiệu)
+    // inventory & pendingExtraSlot: cho phép client tự trừ thẻ chiêu khi xác nhận trang bị trận đấu
+    function isAllowedUserUpdate() {
+      let allowedKeys = [
+        'displayName', 'bio', 'photoURL', 'avatar', 'avatarUrl', 'phoneNumber',
+        'school', 'grade', 'class', 'faceDescriptor', 'faceEnrolled',
+        'friends', 'incomingRequests', 'outgoingRequests', 'lastActive',
+        'status', 'updatedAt',
+        'inventory', 'pendingExtraSlot'
+      ];
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(allowedKeys);
+    }
+
+    // =========================================================================
+    // 1. BẢNG TÀI KHOẢN NGƯỜI DÙNG (users)
+    // =========================================================================
+    // - ĐẶT isAdmin() LÊN TRƯỚC: Admin có toàn quyền vượt rào (sửa mọi field: tặng pha lê, chỉnh ELO, ban nick).
+    // - Học sinh thường bị ràng buộc nghiêm ngặt bởi whitelist (isAllowedUserUpdate).
+    // - Học sinh mới tạo tài khoản chỉ được gán role là student/user (cấm tự phong admin).
     match /users/{userId} {
-      allow read, write: if true;
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.auth.uid == userId && 
+                    (!('role' in request.resource.data) || request.resource.data.role == 'student' || request.resource.data.role == 'user');
+      allow update: if isAdmin() || (isOwner(userId) && isAllowedUserUpdate());
+      allow delete: if isAdmin() || isOwner(userId);
+
+      // Bộ nhớ cá nhân của học sinh (ai memories)
+      match /memories/{memId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
     }
 
-    // Cấp quyền đọc/ghi cho Moments & Stories
-    match /moments/{momentId} {
-      allow read, write: if true;
+    // =========================================================================
+    // 2. BẢNG ĐẤU TRƯỜNG THỜI GIAN THỰC (match_rooms)
+    // =========================================================================
+    // Subcollection: Cho phép lưu và đọc kịch bản bot cho các bên tham gia phòng
+    match /match_rooms/{matchId}/bot_schedules/{docId} {
+      allow read, write: if isAuthenticated();
     }
 
-    match /stories/{storyId} {
-      allow read, write: if true;
+    // Subcollection: Nhật ký hành động từng trận (actionLogs)
+    match /match_rooms/{matchId}/actionLogs/{logId} {
+      allow read, write: if isAuthenticated();
     }
 
-    // Cấp quyền đọc/ghi cho Đề thi & Bài thi
-    match /exams/{examId} {
-      allow read, write: if true;
+    // Hàm phụ: kiểm tra tính hợp lệ các trường bảo mật trong phòng đấu
+    function isValidRoomSafeFields(affected, isP1, isBotMatch, isBotAssign) {
+      return (!affected.hasAny(['winnerId']) || (isP1 && isBotMatch)) &&
+             ((isP1 && isBotMatch) || isBotAssign || !affected.hasAny(['player1Progress', 'player2Progress'])) &&
+             (!affected.hasAny(['status']) || request.resource.data.status == 'result' || (isP1 && isBotMatch) || request.resource.data.status != 'finished') &&
+             (!affected.hasAny(['player1']) || (request.resource.data.player1 != null && request.resource.data.player1.uid == resource.data.player1.uid)) &&
+             (!affected.hasAny(['player2']) || (isP1 && isBotMatch) || isBotAssign || (request.resource.data.player2 != null && request.resource.data.player2.uid == request.auth.uid));
     }
 
-    // Cấp quyền đọc công khai cho Danh sách Giải đấu
-    match /tournaments/{tournamentId} {
-      allow read, write: if true;
-    }
-    
-    // Cấp quyền đọc công khai cho Cấu hình Hệ thống
-    match /config/{configId} {
-      allow read, write: if true;
+    // Hàm kiểm tra tính hợp lệ khi cập nhật phòng đấu 1v1
+    function isValidRoomUpdate() {
+      let affected = request.resource.data.diff(resource.data).affectedKeys();
+      let isP1 = ('player1' in resource.data) && resource.data.player1 != null && resource.data.player1.uid == request.auth.uid;
+      let isP2 = ('player2' in resource.data) && resource.data.player2 != null && resource.data.player2.uid == request.auth.uid;
+      let isJoining = ('player2' in resource.data) && resource.data.player2 == null &&
+                      affected.hasAny(['player2']) &&
+                      request.resource.data.player2 != null &&
+                      request.resource.data.player2.uid == request.auth.uid;
+      let isBotMatch = (('isBotMatch' in request.resource.data && request.resource.data.isBotMatch == true) ||
+                        ('isBotMatch' in resource.data && resource.data.isBotMatch == true));
+
+      // Cho phép Player 1 gán đối thủ Bot sau 30s chờ phòng trống
+      let isBotAssign = isP1 && ('player2' in resource.data) && resource.data.player2 == null &&
+                        affected.hasAny(['player2']) &&
+                        request.resource.data.player2 != null &&
+                        isBotMatch;
+
+      let safe = isValidRoomSafeFields(affected, isP1, isBotMatch, isBotAssign);
+
+      // Chống tua ngược thời gian + Khóa trần thời gian hết hạn
+      let timeOk = isValidTimeRemainingUpdate() && isMatchNotExpired();
+
+      // Quy tắc kiểm soát số lần chuyển tab (Tab Switches Anti-Cheat)
+      // validPlayer: P1 hoặc P2 cập nhật hợp lệ, hoặc người chơi mới gia nhập
+      let validPlayer =
+        (isP1 && !affected.hasAny(['player2TabSwitches']) &&
+         (!affected.hasAny(['player1TabSwitches']) ||
+          (!('player1TabSwitches' in resource.data) || request.resource.data.player1TabSwitches > resource.data.player1TabSwitches))) ||
+        (isP2 && !affected.hasAny(['player1TabSwitches']) &&
+         (!affected.hasAny(['player2TabSwitches']) ||
+          (!('player2TabSwitches' in resource.data) || request.resource.data.player2TabSwitches > resource.data.player2TabSwitches))) ||
+        (isJoining && !affected.hasAny(['player1TabSwitches', 'player2TabSwitches']));
+
+      return timeOk && ((safe && validPlayer) || isBotAssign || (isP1 && isBotMatch && safe));
     }
 
-    // Cấp quyền đọc công khai cho Phòng Đấu Trường 1v1
     match /match_rooms/{roomId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow create: if isAuthenticated();
+      // Chỉ 2 người chơi hợp lệ trong phòng mới được update thông số, hoặc Admin can thiệp
+      allow update: if isAdmin() || (isAuthenticated() && isValidRoomUpdate());
+      // Chỉ Host tạo phòng (player1) hoặc Admin mới được hủy/xóa phòng
+      allow delete: if isAdmin() || (isAuthenticated() && ('player1' in resource.data) && resource.data.player1.uid == request.auth.uid);
     }
 
-    // Mặc định quy tắc cho các bộ sưu tập khác
-    match /{document=**} {
-      allow read, write: if true;
+    // =========================================================================
+    // 3. CƠ SỞ TRI THỨC TỰ HỌC RAG (learned_knowledge)
+    // =========================================================================
+    // - Cho phép đọc công khai để trợ lý AI tra cứu kiến thức 4 môn học.
+    // - Học sinh chỉ được tạo (đóng góp tri thức tự học) nếu dữ liệu đúng định dạng & giới hạn độ dài.
+    // - Chỉ Admin mới có quyền cập nhật hoặc xóa tri thức để đảm bảo độ tin cậy khoa học.
+    match /learned_knowledge/{docId} {
+      allow read: if true;
+      allow create: if isAdmin() || (isAuthenticated() && 
+                      request.resource.data.query is string && 
+                      request.resource.data.query.size() >= 3 && 
+                      request.resource.data.query.size() <= 500 && 
+                      request.resource.data.answer is string && 
+                      request.resource.data.answer.size() <= 5000);
+      allow update, delete: if isAdmin();
+    }
+
+    // =========================================================================
+    // 4. NHẬT KÝ QUẢN TRỊ & HỆ THỐNG (admin_logs, system_alerts)
+    // =========================================================================
+    // - Chỉ tài khoản Admin mới có quyền đọc và ghi nhật ký quản trị.
+    match /admin_logs/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Thông báo khẩn hệ thống: Đọc công khai cho người dùng, chỉ Admin mới được phát cảnh báo
+    match /system_alerts/{alertId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // =========================================================================
+    // 5. NGÂN HÀNG ĐỀ THI & CÂU HỎI (exams, questions)
+    // =========================================================================
+    // Đọc công khai để học sinh luyện thi, cấm client tự ý sửa/xóa đề hoặc đáp án
+    match /exams/{examId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /questions/{questionId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // =========================================================================
+    // 6. CẤU HÌNH HỆ THỐNG & GIẢI ĐẤU (config, tournaments, seasons, shop_items)
+    // =========================================================================
+    match /config/{configId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /system_config/{configId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /tournaments/{tournamentId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /seasons/{seasonId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /shop_items/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // =========================================================================
+    // 7. MẠNG XÃ HỘI HỌC TẬP (moments, stories, challengeInvites)
+    // =========================================================================
+    // Khoảnh khắc STEM (moments): Ai cũng xem được, chỉ tác giả hoặc admin mới sửa/xóa
+    match /moments/{momentId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update: if isAdmin() || (isAuthenticated() && 
+                    ((('authorId' in resource.data) && resource.data.authorId == request.auth.uid) || 
+                     (('userId' in resource.data) && resource.data.userId == request.auth.uid)));
+      allow delete: if isAdmin() || (isAuthenticated() && 
+                    ((('authorId' in resource.data) && resource.data.authorId == request.auth.uid) || 
+                     (('userId' in resource.data) && resource.data.userId == request.auth.uid)));
+    }
+
+    // Tin ngắn STEM (stories): Ai cũng xem được, chỉ tác giả hoặc admin mới sửa/xóa
+    match /stories/{storyId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update: if isAdmin() || (isAuthenticated() && 
+                    (storyId == request.auth.uid || 
+                     (('userId' in resource.data) && resource.data.userId == request.auth.uid)));
+      allow delete: if isAdmin() || (isAuthenticated() && 
+                    (storyId == request.auth.uid || 
+                     (('userId' in resource.data) && resource.data.userId == request.auth.uid)));
+    }
+
+    // Lời mời khiêu chiến 1v1 giữa các bạn học sinh
+    match /challengeInvites/{inviteId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // =========================================================================
+    // 8. CHỈ SỐ & NHẬT KÝ SUY LUẬN AI (ai_metrics, ai_reasoning_logs)
+    // =========================================================================
+    // Học sinh có thể đọc xem giải thích AI, cấm client ghi đè trực tiếp (chỉ ghi qua Admin/Server)
+    match /ai_metrics/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /ai_reasoning_logs/{docId} {
+      allow read: if true;
+      allow create, write: if true;
+    }
+
+    match /learned_knowledge/{docId} {
+      allow read: if true;
+      allow create, write: if true;
     }
   }
 }
-

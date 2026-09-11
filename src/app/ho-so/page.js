@@ -23,9 +23,11 @@ import {
   updateEmail 
 } from 'firebase/auth';
 import { AvatarFrame } from '@/components/atoms/AvatarFrame';
+import { getTitleLabel } from '@/lib/titles';
 import STEMAvatarSVG, { skinColors } from '@/components/atoms/STEMAvatarSVG';
 import CrystalIcon from '@/components/atoms/CrystalIcon';
-import FaceAuthModal from '@/components/organisms/FaceAuthModal';
+import dynamic from 'next/dynamic';
+const FaceAuthModal = dynamic(() => import('@/components/organisms/FaceAuthModal'), { ssr: false });
 
 export const ALL_COSMETICS = [
   // Màu da (Unisex)
@@ -1611,24 +1613,7 @@ export default function ProfilePage() {
     }
   };
 
-  const getTitleLabel = (title) => {
-    const titles = {
-      apprentice: 'Tập sự STEM',
-      alchemist_expert: 'Bậc thầy Hóa học',
-      math_wizard: 'Chiến thần Toán học',
-      physics_guru: 'Kỹ sư Cơ học',
-      cosmic_explorer: 'Nhà thám hiểm Vũ trụ',
-      nuclear_engineer: 'Kỹ sư Phản ứng hạt',
-      quantum_master: 'Thạc sĩ Lượng tử',
-      stem_legend: 'Huyền thoại STEM',
-      multiverse_theorist: 'Nhà lập thuyết Đa vũ trụ',
-      dimension_creator: 'Đấng kiến tạo Không gian',
-      top_1_universe: 'Đại Đế STEM 👑',
-      top_10_legend: 'Huyền thoại Đấu trường',
-      top_100_elite: 'Đại Cao Thủ STEM'
-    };
-    return titles[title] || title || 'Học viên';
-  };
+
 
   const allFrames = [
     { id: 'default', label: 'Cơ bản', desc: 'Khung mỏng mặc định ban đầu', style: 'border border-pink-500/30' },
@@ -1645,7 +1630,7 @@ export default function ProfilePage() {
 
   const allTitles = [
     { id: 'apprentice', label: 'Tập sự STEM', desc: 'Bước đầu tiên vào thế giới khoa học' },
-    { id: 'alchemist_expert', label: 'Bậc thầy Hóa học', desc: 'Đạt phản ứng hoàn hảo 100% trong QuantumLab', requiredLevel: 2 },
+    { id: 'alchemist_expert', label: 'Bậc thầy Hóa học', desc: 'Đạt phản ứng hoàn hảo 100% trong Lab Hóa', requiredLevel: 2 },
     { id: 'math_wizard', label: 'Chiến thần Toán học', desc: 'Giải đố không gian chính xác tuyệt đối', requiredLevel: 3 },
     { id: 'physics_guru', label: 'Kỹ sư Cơ học', desc: 'Bậc thầy chế tạo các bánh răng Newton', requiredLevel: 4 },
     { id: 'cosmic_explorer', label: 'Nhà thám hiểm Vũ trụ', desc: 'Khám phá bí ẩn của các vì sao và tinh cầu', requiredElo: 1100 },
@@ -1665,7 +1650,7 @@ export default function ProfilePage() {
     { id: 'badge3', name: 'Nhà thông thái', desc: 'Lọt top 100 Bảng xếp hạng thi đấu thực chiến', icon: <Trophy className="w-8 h-8 text-amber-400" />, unlocked: (personalization.level || 1) >= 1 || (user && (user.displayName === 'admin' || user.email?.includes('admin'))) },
     { id: 'badge4', name: 'Bách khoa toàn thư', desc: 'Mở khóa và học đầy đủ 3 môn Toán, Hóa, Sinh', icon: <BookOpen className="w-8 h-8 text-emerald-400" />, unlocked: (personalization.level || 1) >= 1 || (user && (user.displayName === 'admin' || user.email?.includes('admin'))) },
     { id: 'badge5', name: 'Bất bại', desc: 'Đạt chuỗi thắng 5 trận đấu hạng liên tiếp', icon: <Zap className="w-8 h-8 text-cyan-400" />, unlocked: true },
-    { id: 'badge6', name: 'Bác học Lượng tử', desc: 'Đạt thành tích giải đố QuantumLab trong thời gian kỷ lục', icon: <Atom className="w-8 h-8 text-purple-400" />, unlocked: (personalization.level || 1) >= 1 || (user && (user.displayName === 'admin' || user.email?.includes('admin'))) },
+    { id: 'badge6', name: 'Bác học Lượng tử', desc: 'Đạt thành tích giải đố Lab Hóa trong thời gian kỷ lục', icon: <Atom className="w-8 h-8 text-purple-400" />, unlocked: (personalization.level || 1) >= 1 || (user && (user.displayName === 'admin' || user.email?.includes('admin'))) },
     { id: 'badge7', name: 'Vua Đấu Trường', desc: 'Đạt Elo hạng Kim Cương trên Bảng xếp hạng Đấu trường', icon: <Crown className="w-8 h-8 text-amber-400" />, unlocked: (personalization.elo || 0) >= 1500 || (user && (user.displayName === 'admin' || user.email?.includes('admin'))) },
     { id: 'badge8', name: 'Kỹ sư Vi mạch', desc: 'Sáng tạo và lập trình vi điều khiển STM32 lượng tử', icon: <Cpu className="w-8 h-8 text-cyan-400" />, unlocked: (personalization.level || 1) >= 1 || (user && (user.displayName === 'admin' || user.email?.includes('admin'))) },
     { id: 'badge9', name: 'Sinh học Phân tử', desc: 'Ghép cặp chính xác chuỗi xoắn kép DNA và RNA trong phòng Lab', icon: <Dna className="w-8 h-8 text-pink-400" />, unlocked: (personalization.level || 1) >= 1 || (user && (user.displayName === 'admin' || user.email?.includes('admin'))) },

@@ -1,9 +1,8 @@
-import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
-const inter = Inter({ subsets: ['latin', 'vietnamese'], variable: '--font-inter' });
+const inter = { variable: 'font-sans' };
 
 export const metadata = {
   title: 'STEM HUB - Hệ sinh thái học tập số với phòng thí nghiệm ảo, thi đấu học thuật thời gian thực và game hóa trải nghiệm học tập',

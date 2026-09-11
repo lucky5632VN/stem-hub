@@ -1,7 +1,13 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
-import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
-import { clientFunctions } from "./clientFunctions";
+import { 
+  getFirestore, 
+  initializeFirestore, 
+  persistentLocalCache, 
+  persistentSingleTabManager, 
+  connectFirestoreEmulator 
+} from "firebase/firestore";
+import { clientFunctions } from "./clientFunctions.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -20,6 +26,60 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 let auth;
 let db;
 
+// Tự động dọn dẹp các key rác/lớn trong LocalStorage để đảm bảo dung lượng cho toàn hệ thống
+function cleanupLocalStorage() {
+  if (typeof window === "undefined" || !window.localStorage) return;
+  try {
+    const keysToRemove = [];
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const key = window.localStorage.key(i);
+      if (!key) continue;
+      // Dọn các token đồng bộ đa tab cũ của Firestore gây QuotaExceededError
+      if (key.startsWith("firestore_") || key.includes("firestore")) {
+        keysToRemove.push(key);
+      }
+      // Dọn các key dữ liệu nặng thừa (> 40KB)
+      try {
+        const val = window.localStorage.getItem(key);
+        if (
+          key.includes("pending_share") || 
+          key.includes("weights_") || 
+          key.includes("pvp_bot_population") ||
+          (val && val.length > 40000)
+        ) {
+          keysToRemove.push(key);
+        }
+      } catch (_) {}
+    }
+    keysToRemove.forEach((k) => {
+      try {
+        window.localStorage.removeItem(k);
+      } catch (_) {}
+    });
+  } catch (e) {
+    console.warn("[Firebase/Storage] Cleanup failed:", e);
+  }
+}
+
+function createFirestoreDb(appInstance) {
+  cleanupLocalStorage();
+  try {
+    return initializeFirestore(appInstance, {
+      localCache: persistentLocalCache({
+        tabManager: persistentSingleTabManager()
+      })
+    });
+  } catch (err) {
+    console.warn("[Firestore] persistentSingleTabManager fallback to default getFirestore:", err?.message || err);
+    try {
+      return getFirestore(appInstance);
+    } catch (e) {
+      console.error("[Firestore] Critical init error:", e);
+      return null;
+    }
+  }
+}
+
 if (typeof window === "undefined") {
   auth = getAuth(app);
   db = getFirestore(app);
@@ -28,7 +88,7 @@ if (typeof window === "undefined") {
     globalThis.__firebaseAuth = getAuth(app);
   }
   if (!globalThis.__firebaseDb) {
-    globalThis.__firebaseDb = getFirestore(app);
+    globalThis.__firebaseDb = createFirestoreDb(app);
   }
   auth = globalThis.__firebaseAuth;
   db = globalThis.__firebaseDb;

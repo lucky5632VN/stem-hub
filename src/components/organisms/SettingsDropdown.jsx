@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { AvatarFrame } from '@/components/atoms/AvatarFrame';
 import STEMAvatarSVG from '@/components/atoms/STEMAvatarSVG';
+import { getTitleLabel } from '@/lib/titles';
 
 export default function SettingsDropdown({ onClose }) {
   const router = useRouter();
@@ -51,24 +52,7 @@ export default function SettingsDropdown({ onClose }) {
     }
   };
 
-  const getTitleLabel = (title) => {
-    const titles = {
-      apprentice: 'Tập sự STEM',
-      alchemist_expert: 'Bậc thầy Hóa học',
-      math_wizard: 'Chiến thần Toán học',
-      physics_guru: 'Kỹ sư Cơ học',
-      cosmic_explorer: 'Nhà thám hiểm Vũ trụ',
-      nuclear_engineer: 'Kỹ sư Phản ứng hạt',
-      quantum_master: 'Thạc sĩ Lượng tử',
-      stem_legend: 'Huyền thoại STEM',
-      multiverse_theorist: 'Nhà lập thuyết Đa vũ trụ',
-      dimension_creator: 'Đấng kiến tạo Không gian',
-      top_1_universe: 'Đại Đế STEM 👑',
-      top_10_legend: 'Huyền thoại Đấu trường',
-      top_100_elite: 'Đại Cao Thủ STEM'
-    };
-    return titles[title] || 'Học viên';
-  };
+
 
   const handleLogout = async () => {
     try { playSound.click(); } catch (_) {}
@@ -307,7 +291,7 @@ export default function SettingsDropdown({ onClose }) {
 
       {/* Buttons Footer */}
       <div className="mt-4 space-y-2">
-        {user?.email?.toLowerCase() === 'admin123@gmail.com' && (
+        {(user?.role === 'admin' || user?.email?.toLowerCase() === 'admin123@gmail.com') && (
           <button 
             onMouseEnter={playSound.hover}
             onClick={() => {

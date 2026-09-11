@@ -30,20 +30,14 @@ export default function AdminLayout({ children }) {
 
       setStatusMsg('Đang xác thực quyền Admin...');
       
-      // Kiểm tra email admin cứng trước
-      if (firebaseUser.email?.toLowerCase() === 'admin123@gmail.com') {
-        playSound.success();
-        setIsAdmin(true);
-        setCheckingAuth(false);
-        return;
-      }
-
       // Kiểm tra thuộc tính role: 'admin' từ Firestore
       try {
         const userDocRef = doc(db, 'users', firebaseUser.uid);
         const docSnap = await getDoc(userDocRef);
+        const role = docSnap.exists() ? docSnap.data().role : null;
+        const emailLower = firebaseUser.email?.toLowerCase() || '';
         
-        if (docSnap.exists() && docSnap.data().role === 'admin') {
+        if (role === 'admin' || emailLower === 'admin123@gmail.com') {
           playSound.success();
           setIsAdmin(true);
         } else {

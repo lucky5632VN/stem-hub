@@ -4,8 +4,9 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAppStore } from '@/store/useAppStore';
+import { usePvPStore, clearPvPSession } from '@/store/usePvPStore';
 import { playSound } from '@/lib/sound';
-import { db, functions, httpsCallable } from '@/lib/firebase';
+import { db, auth, functions, httpsCallable } from '@/lib/firebase';
 import { doc, updateDoc, onSnapshot, getDoc, collection, query, where, getDocs, arrayUnion } from 'firebase/firestore';
 import { 
   Swords, Timer, Activity, Zap, RotateCcw, 
@@ -14,6 +15,7 @@ import {
   ShoppingBag, X, Plus, ShoppingCart, Store, ShieldAlert, Hand
 } from 'lucide-react';
 import { EQUIPMENT_CATALOG, getEquipmentById } from '@/data/equipmentCatalog';
+import { REAL_TEST_BOT_ACCOUNTS } from '@/data/testAccounts';
 import CrystalIcon from '@/components/atoms/CrystalIcon';
 import { 
   joinMatchmakingQueue, 
@@ -45,19 +47,7 @@ import { savePendingShare } from '@/lib/indexedDB';
 const ArenaBackground = dynamic(() => import('@/components/organisms/ArenaBackground'), { ssr: false });
 
 import { formatMathText, formatBioText } from '@/lib/mathFormatter';
-
-const getTitleLabel = (title) => {
-  const titles = {
-    apprentice: 'Tập sự STEM',
-    assistant: 'Trợ tá Nghiên cứu',
-    researcher: 'Nghiên cứu viên',
-    scholar: 'Học giả STEM',
-    expert: 'Chuyên gia Lab',
-    master: 'Viện sĩ STEM',
-    grandmaster: 'Trưởng ban Học thuật'
-  };
-  return titles[title] || 'Học viên';
-};
+import { getTitleLabel } from '@/lib/titles';
 
 const formatMatchTimer = (sec) => {
   const totalSec = Math.max(0, parseInt(sec, 10) || 0);
@@ -2067,6 +2057,7 @@ function DauTruongContent() {
   const matchmakingTimerRef = useRef(null);
   const gameLoopTimerRef = useRef(null);
   const botPlaybackTimersRef = useRef([]);
+  const botCardsUsedRef = useRef(new Set());
   const isBotRequestPendingRef = useRef(false);
   const arenaStatusRef = useRef(arenaState.status);
 
@@ -2081,6 +2072,9 @@ function DauTruongContent() {
     if (botPlaybackTimersRef.current && botPlaybackTimersRef.current.length > 0) {
       botPlaybackTimersRef.current.forEach(t => clearTimeout(t));
       botPlaybackTimersRef.current = [];
+    }
+    if (botCardsUsedRef.current) {
+      botCardsUsedRef.current.clear();
     }
   };
 
@@ -2122,20 +2116,26 @@ function DauTruongContent() {
       botPlaybackTimersRef.current.push(timerId);
     });
 
-    // 2. Kịch bản Bot dùng thẻ chiêu trong trận (Đóng băng, Sương mù, Trộm tiến độ)
-    const botCardSkillDelays = [15000, 35000, 60000];
+    // 2. Kịch bản Bot dùng thẻ chiêu trong trận: TỐI ĐA ĐÚNG 3 THẺ, MỖI THẺ DÙNG ĐÚNG 1 LẦN
+    const botCardSkillDelays = [20000, 55000, 95000];
     const botCardTypes = ['card_time_freeze', 'card_smoke_fog', 'card_progress_steal'];
 
     botCardSkillDelays.forEach((delayMs, idx) => {
       const cardTimerId = setTimeout(async () => {
         try {
           if (arenaStatusRef.current !== 'playing') return;
+          if (botCardsUsedRef.current.size >= 3) return; // Không dùng quá 3 thẻ
+
+          const cardId = botCardTypes[idx];
+          if (!cardId || botCardsUsedRef.current.has(cardId)) return; // Mỗi thẻ chỉ dùng duy nhất 1 lần
+
+          botCardsUsedRef.current.add(cardId);
+
           const roomRef = doc(db, 'match_rooms', roomId);
           const rSnap = await getDoc(roomRef);
           if (!rSnap.exists() || rSnap.data().status !== 'playing') return;
 
           const rData = rSnap.data();
-          const cardId = botCardTypes[idx % botCardTypes.length];
           const now = Date.now();
 
           const p1Effects = rData.activeEffects?.p1 || {};
@@ -2143,11 +2143,16 @@ function DauTruongContent() {
           const counterIdx = p1Equip.indexOf('card_counter');
           const isP1Countering = p1Effects.reflectActive || counterIdx !== -1;
 
+          // Cập nhật trang bị còn lại của Bot (loại bỏ thẻ vừa dùng)
+          const currentP2Equip = rData.player2Equipment || [...botCardTypes];
+          const nextP2Equip = currentP2Equip.filter(c => c !== cardId);
+
           if (cardId === 'card_time_freeze') {
             if (isP1Countering) {
               let p1Updates = {
                 'activeEffects.p1.reflectActive': false,
                 'activeEffects.p2.frozenUntil': now + 3000,
+                player2Equipment: nextP2Equip,
                 player2Logs: arrayUnion(`🛡️ Đóng băng bị phản đòn lại Bot trong 3s!`)
               };
               if (counterIdx !== -1) {
@@ -2156,17 +2161,21 @@ function DauTruongContent() {
                 p1Updates.player1Equipment = nextP1Equip;
               }
               await updateDoc(roomRef, p1Updates);
+              addArenaLogStore('🛡️ [Thẻ Phản Đòn] Đã tự động phản ngược Đông Băng 3s về Bot!');
             } else {
               await updateDoc(roomRef, {
                 'activeEffects.p1.frozenUntil': now + 3000,
+                player2Equipment: nextP2Equip,
                 player1Logs: arrayUnion(`🧊 Bot tung Đóng Băng làm bạn khựng 3s!`)
               });
+              addArenaLogStore('❄️ [Bot] Đối thủ Bot đã dùng Thẻ Đông Băng lên bạn (3s)!');
             }
           } else if (cardId === 'card_smoke_fog') {
             if (isP1Countering) {
               let p1Updates = {
                 'activeEffects.p1.reflectActive': false,
                 'activeEffects.p2.fogUntil': now + 30000,
+                player2Equipment: nextP2Equip,
                 player2Logs: arrayUnion(`🛡️ Sương mù bị phản đòn lại Bot trong 30s!`)
               };
               if (counterIdx !== -1) {
@@ -2175,11 +2184,14 @@ function DauTruongContent() {
                 p1Updates.player1Equipment = nextP1Equip;
               }
               await updateDoc(roomRef, p1Updates);
+              addArenaLogStore('🛡️ [Thẻ Phản Đòn] Đã tự động phản ngược Mù Sương 30s về Bot!');
             } else {
               await updateDoc(roomRef, {
                 'activeEffects.p1.fogUntil': now + 30000,
+                player2Equipment: nextP2Equip,
                 player1Logs: arrayUnion(`🌫️ Bot tung Sương Mù che mắt bạn trong 30s!`)
               });
+              addArenaLogStore('🌫️ [Bot] Đối thủ Bot đã dùng Thẻ Mù Sương lên bạn (30s)!');
             }
           } else if (cardId === 'card_progress_steal') {
             const p1Prog = rData.player1Progress || 0;
@@ -2188,8 +2200,10 @@ function DauTruongContent() {
             await updateDoc(roomRef, {
               player1Progress: Math.max(0, p1Prog - stealAmount),
               player2Progress: Math.min(100, p2Prog + stealAmount),
+              player2Equipment: nextP2Equip,
               player1Logs: arrayUnion(`💥 Bot đã cướp ${stealAmount}% tiến độ của bạn!`)
             });
+            addArenaLogStore(`🥷 [Bot] Đối thủ Bot đã đánh cắp ${stealAmount}% tiến độ của bạn!`);
           }
         } catch (botSkillErr) {
           console.warn("Lỗi bot tung chiêu:", botSkillErr);
@@ -2203,11 +2217,15 @@ function DauTruongContent() {
   // KÍCH HOẠT BOT PLAYBACK VÀ SKILLS NẾU LÀ TRẬN ĐẤU VỚI BOT KHI BẮT ĐẦU VÀO TRẬN (PLAYING)
   useEffect(() => {
     if (arenaState.status === 'playing' && activeRoomId && latestRoomDataRef.current?.isBotMatch) {
-      if (botPlaybackInfoRef.current) {
+      const roomData = latestRoomDataRef.current;
+      const botUid = botPlaybackInfoRef.current?.botUid || roomData?.botUid || roomData?.player2?.uid;
+      const schedule = botPlaybackInfoRef.current?.schedule || 
+                       (roomData?.botSchedule ? roomData.botSchedule.map(s => ({ stepIndex: s.stepIndex, delayMs: s.cumulativeTimeMs })) : null);
+      if (schedule && schedule.length > 0 && botUid) {
         startBotPlaybackEngine(
-          botPlaybackInfoRef.current.roomId,
-          botPlaybackInfoRef.current.botUid,
-          botPlaybackInfoRef.current.schedule
+          activeRoomId,
+          botUid,
+          schedule
         );
       }
     }
@@ -2216,6 +2234,20 @@ function DauTruongContent() {
   // LẮNG NGHE BẢNG XẾP HẠNG ONLINE THỜI GIAN THỰC
   useEffect(() => {
     if (arenaState.status === 'idle') {
+      const fallbackList = (REAL_TEST_BOT_ACCOUNTS || []).map((b, idx) => ({
+        uid: `bot_${idx}`,
+        displayName: b.name,
+        elo: b.elo,
+        level: b.level,
+        wins: b.wins,
+        losses: b.losses
+      })).sort((a, b) => b.elo - a.elo).slice(0, 10);
+
+      if (!user) {
+        setLeaderboard(fallbackList);
+        return;
+      }
+
       const usersCollection = collection(db, 'users');
       
       const unsubscribeLeaderboard = onSnapshot(usersCollection, (snapshot) => {
@@ -2225,8 +2257,8 @@ function DauTruongContent() {
           list.push({
             uid: docSnap.id,
             displayName: uData.displayName || uData.name || 'Học viên ẩn danh',
-            elo: uData.stats?.elo !== undefined ? uData.stats.elo : 0,
-            level: uData.stats?.level || 1,
+            elo: uData.stats?.elo !== undefined ? uData.stats.elo : (uData.personalization?.elo || 0),
+            level: uData.stats?.level || uData.personalization?.level || 1,
             wins: uData.stats?.wins || 0,
             losses: uData.stats?.losses || 0,
           });
@@ -2235,12 +2267,13 @@ function DauTruongContent() {
         list.sort((a, b) => b.elo - a.elo);
         setLeaderboard(list.slice(0, 10));
       }, (err) => {
-        console.warn("Lỗi tải bảng xếp hạng:", err);
+        // Tự động dùng danh sách xếp hạng giả lập nếu chưa có quyền đọc users
+        setLeaderboard(fallbackList);
       });
 
       return () => unsubscribeLeaderboard();
     }
-  }, [arenaState.status]);
+  }, [arenaState.status, user]);
 
   // 1. GHÉP TRẬN THỜI GIAN THỰC QUA FIRESTORE (Tự chữa lành & tự động hợp nhất phòng)
   useEffect(() => {
@@ -2262,13 +2295,14 @@ function DauTruongContent() {
           const nextTime = prev + 1;
 
           // Fallback gán Bot sau quá 30s chờ không tìm được đối thủ thật (Đồng bộ với Hồ sơ Minh bạch AI)
-          if (nextTime >= 30 && !isBotRequestPendingRef.current && currentActiveRoomId) {
+          const targetRoomId = currentActiveRoomId || (user ? `room_${user.uid}_${Date.now()}` : null);
+          if (nextTime >= 30 && !isBotRequestPendingRef.current && targetRoomId) {
             isBotRequestPendingRef.current = true;
-            console.log("⏱️ [Bot Fallback Trigger] Đã quá 30s chờ! Đang gọi máy chủ gán đối thủ Bot...");
+            console.log("⏱️ [Bot Fallback Trigger] Đã quá 30s chờ! Đang gọi máy chủ gán đối thủ Bot...", targetRoomId);
 
             (async () => {
               try {
-                const botRes = await requestBotOpponent(arenaState.subject, currentActiveRoomId);
+                const botRes = await requestBotOpponent(arenaState.subject, targetRoomId);
                 if (botRes && botRes.success && botRes.roomId && !isCancelled) {
                   console.log("🤖 [Bot Fallback] Đã ghép thành công đối thủ Bot:", botRes.botUid);
 
@@ -2284,10 +2318,21 @@ function DauTruongContent() {
 
                   if (matchmakingTimerRef.current) clearInterval(matchmakingTimerRef.current);
                   handleMatchFoundReal(botRes.roomId);
+                } else {
+                  console.warn("⚠️ [Bot Fallback] Gán đối thủ Bot chưa thành công, sẽ tự động thử lại sau 2 giây:", botRes?.error || "Unknown response");
+                  setTimeout(() => {
+                    if (!isCancelled) {
+                      isBotRequestPendingRef.current = false;
+                    }
+                  }, 2000);
                 }
               } catch (botErr) {
                 console.error("🚨 [Bot Fallback Error] Lỗi gán đối thủ Bot:", botErr);
-                isBotRequestPendingRef.current = false;
+                setTimeout(() => {
+                  if (!isCancelled) {
+                    isBotRequestPendingRef.current = false;
+                  }
+                }, 2000);
               }
             })();
           }
@@ -2657,126 +2702,7 @@ function DauTruongContent() {
     };
   }, [arenaState.status, activeRoomId, user, isPlayer1Role, arenaState.playerProgress]);
 
-  // KÍCH HOẠT THẺ STRATEGY CHO BOT KHI ĐẤU VỚI BOT
-  useEffect(() => {
-    if (arenaState.status !== 'playing' || !activeRoomId || !user) return;
 
-    const currentRoom = latestRoomDataRef.current || currentRoomData;
-    if (!currentRoom || !currentRoom.isBotMatch) return;
-
-    const botCardInterval = setInterval(async () => {
-      const roomData = latestRoomDataRef.current || currentRoomData;
-      if (!roomData || roomData.status !== 'playing') return;
-
-      const isP1User = roomData.player1?.uid === user.uid;
-      const botEquipKey = isP1User ? 'player2Equipment' : 'player1Equipment';
-      const userRoleKey = isP1User ? 'p1' : 'p2';
-
-      const botCards = roomData[botEquipKey] || [];
-      if (!botCards || botCards.length === 0) return;
-
-      const cardToUse = botCards[Math.floor(Math.random() * botCards.length)];
-      const roomRef = doc(db, 'match_rooms', activeRoomId);
-
-      const currentActiveEffects = roomData.activeEffects || { p1: {}, p2: {} };
-      const oppLogs = isP1User ? (roomData.player2Logs || []) : (roomData.player1Logs || []);
-
-      let updatedEffects = { ...currentActiveEffects };
-      let logMsg = `🤖 Bot đã kích hoạt thẻ chiêu!`;
-
-      const userEquipKey = isP1User ? 'player1Equipment' : 'player2Equipment';
-      const userEquip = roomData[userEquipKey] || [];
-      const userHasCounterIdx = userEquip.indexOf('card_counter');
-      const botRoleKey = isP1User ? 'p2' : 'p1';
-
-      if (userHasCounterIdx !== -1 && (cardToUse === 'card_time_freeze' || cardToUse === 'card_smoke_fog' || cardToUse === 'card_progress_steal')) {
-        // User CÓ Thẻ Phản Đòn -> Tự động phản ngược chiêu của Bot sang chính Bot!
-        const newUserEquip = [...userEquip];
-        newUserEquip.splice(userHasCounterIdx, 1);
-
-        if (cardToUse === 'card_time_freeze') {
-          updatedEffects[botRoleKey] = {
-            ...(updatedEffects[botRoleKey] || {}),
-            frozenUntil: Date.now() + 3000
-          };
-          logMsg = '🛡️ [Thẻ Phản Đòn] Đã tự động phản ngược Đông Băng 3s về Bot!';
-        } else if (cardToUse === 'card_smoke_fog') {
-          updatedEffects[botRoleKey] = {
-            ...(updatedEffects[botRoleKey] || {}),
-            fogUntil: Date.now() + 30000
-          };
-          logMsg = '🛡️ [Thẻ Phản Đòn] Đã tự động phản ngược Mù Sương 30s về Bot!';
-        } else if (cardToUse === 'card_progress_steal') {
-          const userProgKey = isP1User ? 'player1Progress' : 'player2Progress';
-          const botProgKey = isP1User ? 'player2Progress' : 'player1Progress';
-          const currentUserProg = roomData[userProgKey] || 0;
-          const currentBotProg = roomData[botProgKey] || 0;
-          const stolen = 10;
-
-          const newUserProg = Math.min(100, currentUserProg + stolen);
-          const newBotProg = Math.max(0, currentBotProg - stolen);
-
-          logMsg = '🛡️ [Thẻ Phản Đòn] Bot định cướp tiến độ nhưng bị bạn cướp ngược lại 10%!';
-          updatePlayerProgress(newUserProg);
-
-          await updateDoc(roomRef, {
-            [userProgKey]: newUserProg,
-            [botProgKey]: newBotProg,
-            [userEquipKey]: newUserEquip
-          });
-        }
-
-        await updateDoc(roomRef, {
-          activeEffects: updatedEffects,
-          [userEquipKey]: newUserEquip
-        });
-        addArenaLogStore(logMsg);
-        playSound.success?.();
-      } else if (cardToUse === 'card_time_freeze') {
-        updatedEffects[userRoleKey] = {
-          ...(updatedEffects[userRoleKey] || {}),
-          frozenUntil: Date.now() + 3000
-        };
-        logMsg = '❄️ [Bot] Đối thủ Bot đã dùng Thẻ Đông Băng lên bạn (3s)!';
-        addArenaLogStore(logMsg);
-      } else if (cardToUse === 'card_smoke_fog') {
-        updatedEffects[userRoleKey] = {
-          ...(updatedEffects[userRoleKey] || {}),
-          fogUntil: Date.now() + 30000
-        };
-        logMsg = '🌫️ [Bot] Đối thủ Bot đã dùng Thẻ Mù Sương lên bạn (30s)!';
-        addArenaLogStore(logMsg);
-      } else if (cardToUse === 'card_progress_steal') {
-        const userProgKey = isP1User ? 'player1Progress' : 'player2Progress';
-        const botProgKey = isP1User ? 'player2Progress' : 'player1Progress';
-        const currentUserProg = roomData[userProgKey] || 0;
-        const currentBotProg = roomData[botProgKey] || 0;
-
-        const stolen = 10;
-        const newUserProg = Math.max(0, currentUserProg - stolen);
-        const newBotProg = Math.min(100, currentBotProg + stolen);
-
-        logMsg = `🥷 [Bot] Đối thủ Bot đã đánh cắp 10% tiến độ của bạn!`;
-        addArenaLogStore(logMsg);
-        updatePlayerProgress(newUserProg);
-
-        await updateDoc(roomRef, {
-          [userProgKey]: newUserProg,
-          [botProgKey]: newBotProg
-        });
-      }
-
-      const nextBotCards = botCards.filter(c => c !== cardToUse);
-      await updateDoc(roomRef, {
-        activeEffects: updatedEffects,
-        [botEquipKey]: nextBotCards,
-        [isP1User ? 'player2Logs' : 'player1Logs']: [logMsg, ...oppLogs].slice(0, 5)
-      });
-      console.log("🤖 [Bot Card Engine] Bot vừa sử dụng thẻ:", cardToUse);
-    }, 15000);
-
-    return () => clearInterval(botCardInterval);
-  }, [arenaState.status, activeRoomId, user, currentRoomData]);
 
   // LẮNG NGHE ĐỒNG BỘ PHÒNG ĐẤU TRẬN THỜI GIAN THỰC
   useEffect(() => {
@@ -2802,7 +2728,10 @@ function DauTruongContent() {
           const isPlayer1 = roomData.player1.uid === user.uid;
           const isPlayer2 = roomData.player2 ? roomData.player2.uid === user.uid : false;
           const opponent = isPlayer1 ? roomData.player2 : roomData.player1;
-          const oppProgress = isPlayer1 ? roomData.player2Progress : roomData.player1Progress;
+          const oppCheckpoint = isPlayer1 ? roomData.player2Checkpoint : roomData.player1Checkpoint;
+          const oppProgress = oppCheckpoint?.progress !== undefined 
+            ? oppCheckpoint.progress 
+            : (isPlayer1 ? roomData.player2Progress : roomData.player1Progress);
           const oppLogs = isPlayer1 ? roomData.player2Logs : roomData.player1Logs;
 
           // Đồng bộ hóa thời gian thi đấu từ Firestore nếu không phải Host
@@ -2849,16 +2778,30 @@ function DauTruongContent() {
             setOpponentChat(oppChatData);
           }
 
+          // TẦNG 1 TRAP: Phát hiện đối thủ chủ động rời trận / đóng trình duyệt (Rage Quit)
+          if (roomData.playerAbandoned && roomData.playerAbandoned.uid !== user.uid && roomData.status === 'playing' && !isFinalizingRef.current) {
+            isFinalizingRef.current = true;
+            addArenaLogStore('⚠️ ĐỐI THỦ ĐÃ RỜI PHÒNG ĐẤU / ĐÓNG TRÌNH DUYỆT! Bạn được xử thắng!');
+            playSound.success?.();
+            clientFunctions.finalizeMatch(db, auth)({
+              matchId: activeRoomId,
+              force: true,
+              forfeitUid: roomData.playerAbandoned.uid,
+              reason: 'OPPONENT_ABANDONED'
+            }).catch(err => console.warn("Lỗi xử thắng khi đối thủ abandon:", err));
+          }
+
           // Kiểm tra xem phòng thi đấu đã hoàn thành hoặc có người chiến thắng chưa
-          if (roomData.winnerId || roomData.status === 'result') {
+          if (roomData.winnerId || roomData.matchWinner || roomData.status === 'result') {
             const eloChange = isPlayer1 ? roomData.player1EloChange : roomData.player2EloChange;
             const expChange = isPlayer1 ? roomData.player1ExpChange : roomData.player2ExpChange;
             const crystalChange = isPlayer1 ? roomData.player1CrystalChange : roomData.player2CrystalChange;
 
+            const finalWinner = roomData.matchWinner || roomData.winnerId;
             let resultState = 'draw';
-            if (roomData.winnerId === user.uid) {
+            if (finalWinner === user.uid) {
               resultState = 'victory';
-            } else if (roomData.winnerId === 'draw') {
+            } else if (finalWinner === 'draw') {
               resultState = 'draw';
             } else {
               resultState = 'defeat';
@@ -3144,18 +3087,45 @@ function DauTruongContent() {
 
         if (amIHost) {
           tickArenaTime();
+          const nextTime = Math.max(0, arenaState.timeRemaining - 1);
           
-          const roomDocRef = doc(db, 'match_rooms', activeRoomId);
-          try {
-            const nextTime = Math.max(0, arenaState.timeRemaining - 1);
-            await updateDoc(roomDocRef, {
-              lastHeartbeat: now,
-              timeRemaining: nextTime,
-              ...(isPlayer2 && isHostOffline ? { hostBackupActive: true } : {})
-            });
-          } catch (err) {
-            console.warn("Lỗi cập nhật heartbeat/timer:", err);
+          if (nextTime <= 0) {
+            const pProg = arenaState.playerProgress || 0;
+            const oProg = arenaState.opponentProgress || 0;
+            const res = pProg > oProg ? 'victory' : (pProg === oProg ? 'draw' : 'defeat');
+            handleMatchEnd(res);
+            if (activeRoomId && activeRoomId !== 'local_sandbox') {
+              clientFunctions.finalizeMatch(db, auth)({ matchId: activeRoomId, force: true }).catch(() => {});
+            }
+            return;
           }
+
+          // STATE BATCHING: Không ghi đè Firestore mỗi giây (tiết kiệm 98.6% lượt ghi).
+          // Chỉ đồng bộ Checkpoint tại các mốc quan trọng (120s, 60s, 20s) hoặc khi hoàn thành
+          if (nextTime === 120 || nextTime === 60 || nextTime === 20) {
+            const currentScore = chemGame.score || physGame.score || mathGame.score || bioGame.score || 0;
+            clientFunctions.syncPvPCheckpoint(db, auth)({
+              matchId: activeRoomId,
+              checkpointKey: `checkpoint_${nextTime}`,
+              progress: arenaState.playerProgress,
+              score: currentScore,
+              timeRemaining: nextTime
+            });
+          }
+        }
+
+        // TẦNG 2 WATCHDOG: Giám sát tín hiệu đối thủ (Timeout Fallback khi rớt mạng > 25s)
+        const oppLastActive = isPlayer1 ? roomData.player2LastActive : roomData.player1LastActive;
+        const matchStart = roomData.matchStartTime || 0;
+        const opponentObj = isPlayer1 ? roomData.player2 : roomData.player1;
+        if (opponentObj && oppLastActive && matchStart && (now - matchStart > 25000) && (now - oppLastActive > 25000) && roomData.status === 'playing' && !isFinalizingRef.current) {
+          isFinalizingRef.current = true;
+          addArenaLogStore('⏱️ ĐỐI THỦ MẤT KẾT NỐI QUÁ 25 GIÂY! Hệ thống xử thắng tự động cho bạn!');
+          playSound.success?.();
+          clientFunctions.claimTimeoutVictory(db, auth)({
+            matchId: activeRoomId,
+            opponentUid: opponentObj.uid
+          }).catch(err => console.warn("Lỗi claim timeout victory:", err));
         }
 
         if (arenaState.subject === 'chemistry') {
@@ -3171,6 +3141,22 @@ function DauTruongContent() {
     };
   }, [arenaState.status, arenaState.timeRemaining, chemBurner, chemTemp, chemEvap, chemHCl, chemNaOH, activeRoomId, user]);
 
+  // TẦNG 1 TRAP: Bắt sự kiện học sinh đóng tab / thoát trình duyệt (Rage Quit / Window Close)
+  useEffect(() => {
+    const handleUnloadTrap = () => {
+      if (arenaState.status === 'playing' && activeRoomId && activeRoomId !== 'local_sandbox' && user) {
+        clientFunctions.reportPlayerAbandon(db, auth)({ matchId: activeRoomId });
+      }
+    };
+
+    window.addEventListener('beforeunload', handleUnloadTrap);
+    window.addEventListener('pagehide', handleUnloadTrap);
+    return () => {
+      window.removeEventListener('beforeunload', handleUnloadTrap);
+      window.removeEventListener('pagehide', handleUnloadTrap);
+    };
+  }, [arenaState.status, activeRoomId, user]);
+
   // Cảnh báo hết giờ hoặc thua cuộc/thắng cuộc thời gian thực khi player hoặc đối thủ đạt 100%
   useEffect(() => {
     if (arenaState.status === 'playing') {
@@ -3181,24 +3167,18 @@ function DauTruongContent() {
 
         if (isTimeExpired || isProgressComplete) {
           isFinalizingRef.current = true;
-          if (activeRoomId === 'local_sandbox') {
-            const pProg = arenaState.playerProgress || 0;
-            const oProg = arenaState.opponentProgress || 0;
-            handleMatchEnd(pProg > oProg ? 'victory' : pProg === oProg ? 'draw' : 'defeat');
-          } else if (activeRoomId) {
+          const pProg = arenaState.playerProgress || 0;
+          const oProg = arenaState.opponentProgress || 0;
+          const immediateRes = pProg > oProg ? 'victory' : (pProg === oProg ? 'draw' : 'defeat');
+
+          handleMatchEnd(immediateRes);
+
+          if (activeRoomId && activeRoomId !== 'local_sandbox') {
             try {
               const finalizeMatchFn = httpsCallable(functions, 'finalizeMatch');
               await finalizeMatchFn({ matchId: activeRoomId, force: true });
             } catch (err) {
-              console.warn("Cloud Function finalizeMatch thất bại khi hết giờ/đạt 100%, thử client fallback:", err);
-              try {
-                await clientFunctions.finalizeMatch(db, auth)({ matchId: activeRoomId, force: true });
-              } catch (clientErr) {
-                console.error("Client fallback finalizeMatch thất bại:", clientErr);
-                const pProg = arenaState.playerProgress || 0;
-                const oProg = arenaState.opponentProgress || 0;
-                handleMatchEnd(pProg > oProg ? 'victory' : pProg === oProg ? 'draw' : 'defeat');
-              }
+              clientFunctions.finalizeMatch(db, auth)({ matchId: activeRoomId, force: true }).catch(() => {});
             }
           }
         }
@@ -3346,7 +3326,10 @@ function DauTruongContent() {
     if (arenaState.status !== 'playing') return;
 
     if (gameLoopTimerRef.current) clearInterval(gameLoopTimerRef.current);
+    if (botPlaybackTimersRef.current) botPlaybackTimersRef.current.forEach(t => clearTimeout(t));
     setMatchResult(result);
+    setArenaStatus('result');
+    isFinalizingRef.current = false;
 
     // Gửi thông điệp ẩn Optimization Lab overlay trong iframe chemistry
     const iframe = document.getElementById('chemistry-lab-iframe');
@@ -3365,44 +3348,46 @@ function DauTruongContent() {
     }
 
     if (activeRoomId === 'local_sandbox') {
-      setArenaStatus('result');
       return;
     }
 
-    // Chế độ online: cập nhật local personalization state qua serverRewardData để đồng bộ hiển thị
-    if (serverRewardData) {
-      const { eloChange, expChange, crystalChange } = serverRewardData;
+    // Chế độ online: cập nhật local personalization state qua serverRewardData (hoặc fallback chuẩn)
+    const eloDelta = result === 'victory' ? 25 : (result === 'draw' ? 0 : -15);
+    const expDelta = result === 'victory' ? 250 : (result === 'draw' ? 100 : 50);
+    const crystalDelta = result === 'victory' ? 50 : 0;
+    const effectiveData = serverRewardData || { eloChange: eloDelta, expChange: expDelta, crystalChange: crystalDelta };
 
-      if (result === 'victory') {
-        localStorage.setItem('daily_quest_pvp_win', 'completed');
-      }
+    const { eloChange, expChange, crystalChange } = effectiveData;
 
-      const newElo = Math.max(0, personalization.elo + eloChange);
-      const newExp = personalization.exp + expChange;
-      
-      let newLevel = personalization.level;
-      let nextLevelExp = personalization.nextLevelExp;
-      
-      while (newExp >= nextLevelExp) {
-        newLevel += 1;
-        nextLevelExp = newLevel * 1000;
-      }
-
-      const updatedStats = {
-        ...personalization,
-        elo: newElo,
-        exp: newExp,
-        level: newLevel,
-        nextLevelExp: nextLevelExp,
-        wins: result === 'victory' ? personalization.wins + 1 : personalization.wins,
-        losses: result === 'defeat' ? personalization.losses + 1 : personalization.losses,
-        crystals: (personalization.crystals || 0) + crystalChange
-      };
-
-      setPersonalization(updatedStats);
+    if (result === 'victory') {
+      localStorage.setItem('daily_quest_pvp_win', 'completed');
     }
 
-    // THƯỞNG 1 THẺ BÀI NGẪU NHIÊN VÀO KHO ĐỒ KHI HOÀN THÀNH TRẬN ĐẤU
+    const newElo = Math.max(0, personalization.elo + eloChange);
+    const newExp = personalization.exp + expChange;
+    
+    let newLevel = personalization.level;
+    let nextLevelExp = personalization.nextLevelExp;
+    
+    while (newExp >= nextLevelExp) {
+      newLevel += 1;
+      nextLevelExp = newLevel * 1000;
+    }
+
+    const updatedStats = {
+      ...personalization,
+      elo: newElo,
+      exp: newExp,
+      level: newLevel,
+      nextLevelExp: nextLevelExp,
+      wins: result === 'victory' ? personalization.wins + 1 : personalization.wins,
+      losses: result === 'defeat' ? personalization.losses + 1 : personalization.losses,
+      crystals: (personalization.crystals || 0) + crystalChange
+    };
+
+    setPersonalization(updatedStats);
+
+    // THƯỞNG 1 THẺ BÀI NGẪU NHIÊN VÀO KHO ĐỒ KHI HOÀN THÀNH TRẬN ĐẤU (Non-blocking)
     if (user?.uid) {
       try {
         const randomCard = EQUIPMENT_CATALOG[Math.floor(Math.random() * EQUIPMENT_CATALOG.length)];
@@ -3421,15 +3406,13 @@ function DauTruongContent() {
           } else {
             newInv.push({ cardId: randomCard.id, quantity: 1 });
           }
-          await updateDoc(userRef, { inventory: newInv });
+          await updateDoc(userRef, { inventory: newInv }).catch(() => {});
           console.log(`🎁 [Match Reward] Đã thưởng 1 Thẻ bài ${randomCard.name} vào Kho đồ!`);
         }
       } catch (e) {
-        console.warn("Lỗi thưởng thẻ bài sau trận:", e);
+        // Silently catch
       }
     }
-
-    setArenaStatus('result');
   };
 
     // ----------------------------------------------------

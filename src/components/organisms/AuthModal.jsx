@@ -15,7 +15,8 @@ import {
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { getPresetForEmail } from '@/data/testAccounts';
 import { EQUIPMENT_CATALOG } from '@/data/equipmentCatalog';
-import FaceAuthModal from '@/components/organisms/FaceAuthModal';
+import dynamic from 'next/dynamic';
+const FaceAuthModal = dynamic(() => import('@/components/organisms/FaceAuthModal'), { ssr: false });
 import { useAppStore } from '@/store/useAppStore';
 
 // Hàm kiểm tra các tài khoản Admin & TK Test (cho phép đăng nhập tức thì không bị chặn xác thực)
@@ -68,143 +69,109 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
       if (!lowerEmail.includes('@') && lowerEmail.startsWith('test')) {
         lowerEmail = `${lowerEmail}@gmail.com`;
       }
-
       try {
         userCredential = await signInWithEmailAndPassword(auth, lowerEmail, inputPassword);
       } catch (signInErr) {
-        // 1. Tự động xử lý tài khoản admin
-        if (lowerEmail === 'admin123@gmail.com' && inputPassword === 'hoanganhadmin5632') {
-          userCredential = await createUserWithEmailAndPassword(auth, lowerEmail, inputPassword);
-          const user = userCredential.user;
-          await updateProfile(user, { displayName: 'admin' });
-          await setDoc(doc(db, "users", user.uid), {
-            uid: user.uid,
-            email: user.email,
-            displayName: 'admin',
-            createdAt: new Date().toISOString(),
-            role: 'admin',
-            unlockedLabs: [],
-            personalization: {
-              avatarFrame: 'top_1_sovereign',
-              activeTitle: 'top_1_universe',
-              unlockedFrames: [
-                'default', 'neon_fire', 'cyan_tech', 'cosmic_nebula', 
-                'blackhole_gravity', 'antimatter_era', 'multiverse_overlord', 
-                'top_1_sovereign', 'gold_vip', 'top_100_silver'
-              ],
-              unlockedTitles: [
-                'apprentice', 'alchemist_expert', 'math_wizard', 'physics_guru', 
-                'cosmic_explorer', 'nuclear_engineer', 'quantum_master', 'stem_legend', 
-                'multiverse_theorist', 'dimension_creator', 'top_1_universe', 
-                'top_10_legend', 'top_100_elite'
-              ],
-              unlockedParts: [
-                'peach', 'hair_default', 'top_default', 'bottom_default',
-                'chocolate', 'neon_blue', 'cosmic_purple', 'emerald_alien', 'cyborg_silver', 'sunfire_gold',
-                'cyberpunk_spiky', 'long_nebula', 'curly', 'ponytail', 'dreadlocks', 'mohawk', 'side_part',
-                'bob', 'double_bun', 'quantum_pixie', 'crystal_waterfall',
-                'lab_coat', 'astronaut_suit', 'mech_armor', 'cyber_hoodie', 'steampunk_vest', 'royal_cape',
-                'bio_hazard', 'ninja_suit', 'quantum_dress',
-                'space_shorts', 'robotic_legs', 'cyber_skirt', 'steampunk_pants', 'ninja_pants', 'lightweight_joggers',
-                'tennis_skirt',
-                'sci_glasses', 'vr_goggles', 'headphones', 'gas_mask', 'cyber_eyepatch', 'scientific_magnifier',
-                'crown', 'butterfly_hairpin'
-              ],
-              customCursor: 'default',
-              soundEnabled: true,
-              theme: 'dark'
-            },
-            stats: {
-              level: 99,
-              exp: 0,
-              nextLevelExp: 1000,
-              elo: 9999,
-              wins: 999,
-              losses: 0,
-              subjectStrengths: { math: 999, physics: 999, chemistry: 999, biology: 999 }
-            }
-          });
-        } else {
-          // 2. Kiểm tra nếu là 20 tài khoản test1 -> test20 với mật khẩu dạng test1123 -> test20123
-          const testMatch = lowerEmail.match(/^test(\d+)(@.*)?$/);
-          let fallbackSuccess = false;
+        // 1. Kiểm tra nếu là 20 tài khoản test1 -> test20
+        const testMatch = lowerEmail.match(/^test(\d+)(@.*)?$/);
+        let fallbackSuccess = false;
 
-          if (testMatch) {
-            const testNum = testMatch[1];
-            const expectedTestPass = `test${testNum}123`;
-            const normalizedTestEmail = `test${testNum}@gmail.com`;
+        if (testMatch) {
+          const testNum = testMatch[1];
+          const expectedTestPass = `test${testNum}123`;
+          const normalizedTestEmail = `test${testNum}@gmail.com`;
 
-            for (const tryEmail of [lowerEmail, normalizedTestEmail]) {
-              for (const tryP of [inputPassword, expectedTestPass, '123456', 'password123']) {
-                try {
-                  userCredential = await signInWithEmailAndPassword(auth, tryEmail, tryP);
-                  fallbackSuccess = true;
-                  break;
-                } catch (_) {}
-              }
-              if (fallbackSuccess) break;
+          for (const tryEmail of [lowerEmail, normalizedTestEmail]) {
+            for (const tryP of [inputPassword, expectedTestPass, '123456', 'password123']) {
+              try {
+                userCredential = await signInWithEmailAndPassword(auth, tryEmail, tryP);
+                fallbackSuccess = true;
+                break;
+              } catch (_) {}
             }
+            if (fallbackSuccess) break;
           }
 
-          // 3. Tự động tạo tài khoản cho học sinh chưa từng đăng ký trên Firebase Auth
+          // Nếu tài khoản test chưa từng tồn tại trên Firebase Auth -> Tự động khởi tạo
           if (!fallbackSuccess) {
             try {
-              userCredential = await createUserWithEmailAndPassword(auth, lowerEmail, inputPassword);
-              const user = userCredential.user;
-              const preset = getPresetForEmail(user.email);
-              const initialName = preset ? preset.displayName : lowerEmail.split('@')[0];
-              await updateProfile(user, { displayName: initialName });
-            } catch (createErr) {
-              if (createErr.code === 'auth/email-already-in-use') {
-                throw new Error('Mật khẩu không chính xác! Vui lòng thử lại hoặc nhấn "Quên mật khẩu".');
-              }
-              throw signInErr;
+              userCredential = await createUserWithEmailAndPassword(auth, normalizedTestEmail, expectedTestPass);
+              fallbackSuccess = true;
+            } catch (_) {}
+          }
+        }
+
+        // 2. Tự động tạo tài khoản cho học sinh mới hoặc thông báo sai mật khẩu nếu email đã tồn tại
+        if (!fallbackSuccess) {
+          try {
+            userCredential = await createUserWithEmailAndPassword(auth, lowerEmail, inputPassword);
+            const user = userCredential.user;
+            const preset = getPresetForEmail(user.email);
+            const initialName = preset ? preset.displayName : lowerEmail.split('@')[0];
+            await updateProfile(user, { displayName: initialName });
+          } catch (createErr) {
+            if (createErr.code === 'auth/email-already-in-use') {
+              setError('Mật khẩu không chính xác! Vui lòng thử lại hoặc nhấn "Quên mật khẩu".');
+              setLoading(false);
+              return;
             }
+            setError('Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản và mật khẩu.');
+            setLoading(false);
+            return;
           }
         }
       }
 
       const user = userCredential.user;
       
-      // Đồng bộ thông tin preset nếu là tài khoản test
+      // Đồng bộ thông tin preset nếu là tài khoản test (chỉ tạo nếu doc chưa tồn tại)
       const preset = getPresetForEmail(user.email);
       if (preset) {
-        const userDocRef = doc(db, "users", user.uid);
-        const testInventory = EQUIPMENT_CATALOG.map(card => ({ cardId: card.id, quantity: 10 }));
-        await setDoc(userDocRef, {
-          uid: user.uid,
-          email: user.email,
-          displayName: preset.displayName,
-          name: preset.displayName,
-          role: 'student',
-          isBotAccount: true,
-          botStatus: 'available',
-          inventory: testInventory,
-          stats: {
-            level: preset.level || 1,
-            exp: (preset.level || 1) * 500,
-            nextLevelExp: (preset.level || 1) * 1000,
-            elo: preset.elo !== undefined ? preset.elo : 100,
-            wins: preset.wins || 0,
-            losses: preset.losses || 0,
-            subjectStrengths: preset.subjectStrengths || { math: 50, physics: 50, chemistry: 50, biology: 50 }
-          },
-          personalization: {
-            elo: preset.elo !== undefined ? preset.elo : 100,
-            level: preset.level || 1,
-            activeTitle: 'apprentice',
-            avatarFrame: 'default',
-            crystals: 1000,
-            avatarParts: { gender: 'male', bodyType: 'chibi', pose: 'standard', body: 'peach', hair: 'default', top: 'default', bottom: 'default', accessory: 'none' },
-            unlockedParts: ['peach', 'hair_default', 'top_default', 'bottom_default']
+        try {
+          const userDocRef = doc(db, "users", user.uid);
+          const snap = await getDoc(userDocRef);
+          if (!snap.exists()) {
+            const testInventory = EQUIPMENT_CATALOG.map(card => ({ cardId: card.id, quantity: 10 }));
+            await setDoc(userDocRef, {
+              uid: user.uid,
+              email: user.email,
+              displayName: preset.displayName,
+              name: preset.displayName,
+              role: 'student',
+              isBotAccount: true,
+              botStatus: 'available',
+              inventory: testInventory,
+              stats: {
+                level: preset.level || 1,
+                exp: (preset.level || 1) * 500,
+                nextLevelExp: (preset.level || 1) * 1000,
+                elo: preset.elo !== undefined ? preset.elo : 100,
+                wins: preset.wins || 0,
+                losses: preset.losses || 0,
+                subjectStrengths: preset.subjectStrengths || { math: 50, physics: 50, chemistry: 50, biology: 50 }
+              },
+              personalization: {
+                elo: preset.elo !== undefined ? preset.elo : 100,
+                level: preset.level || 1,
+                activeTitle: 'apprentice',
+                avatarFrame: 'default',
+                crystals: 1000,
+                avatarParts: { gender: 'male', bodyType: 'chibi', pose: 'standard', body: 'peach', hair: 'default', top: 'default', bottom: 'default', accessory: 'none' },
+                unlockedParts: ['peach', 'hair_default', 'top_default', 'bottom_default']
+              }
+            });
           }
-        }, { merge: true });
+        } catch (presetErr) {
+          console.warn("Bỏ qua đồng bộ preset tài khoản test:", presetErr?.message || presetErr);
+        }
         try {
           await updateProfile(user, { displayName: preset.displayName });
         } catch (_) {}
       }
 
-      await user.reload();
+      try {
+        await user.reload();
+      } catch (_) {}
 
       const isBypass = isBypassVerificationAccount(user.email);
 
@@ -248,8 +215,8 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
 
       onClose();
     } catch (err) {
-      console.warn("Lỗi đăng nhập:", err);
-      setError(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản và mật khẩu.');
+      console.warn("Lỗi đăng nhập:", err?.message || err);
+      setError(typeof err === 'string' ? err : (err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản và mật khẩu.'));
     } finally {
       setLoading(false);
     }

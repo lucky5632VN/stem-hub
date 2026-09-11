@@ -72,6 +72,7 @@ const tfidfCorpus = stemCorpus.map((item, idx) => {
   return {
     id: item.id,
     subject: item.subject,
+    grade: item.grade || null,
     topic: item.topic,
     content: item.content,
     tokenCount: tokens.length,

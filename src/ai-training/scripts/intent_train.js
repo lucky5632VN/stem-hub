@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { normalizeText } from '../../lib/textNormalizer.js';
+import { wilsonInterval } from './chem-risk_train.js';
 
 const datasetPath = path.resolve('src/ai-training/datasets/intent/intent-samples.json');
 const unseenPath = path.resolve('src/ai-training/datasets/intent/unseen-test-intent.json');
@@ -8,20 +9,30 @@ const unseenPath = path.resolve('src/ai-training/datasets/intent/unseen-test-int
 const rawData = JSON.parse(fs.readFileSync(datasetPath, 'utf-8'));
 const unseenData = JSON.parse(fs.readFileSync(unseenPath, 'utf-8'));
 
+function removeVietnameseTones(str) {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D');
+}
+
 function tokenize(text, applyNormalization = true) {
   if (!text) return [];
   const processedText = applyNormalization ? normalizeText(text) : text;
-  return processedText
+  const cleaned = processedText
     .toLowerCase()
     .normalize('NFC')
     .replace(/[^\w\sàáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]/g, ' ')
     .replace(/\s+/g, ' ')
-    .trim()
-    .split(' ')
-    .filter(Boolean);
+    .trim();
+
+  const tokens = cleaned.split(' ').filter(Boolean);
+  const unaccented = tokens.map(t => removeVietnameseTones(t));
+  return Array.from(new Set([...tokens, ...unaccented]));
 }
 
-function trainNaiveBayesOnData(trainDataset) {
+export function trainNaiveBayesOnData(trainDataset) {
   const vocab = new Set();
   const classCounts = {};
   const wordCounts = {};
@@ -70,15 +81,18 @@ function trainNaiveBayesOnData(trainDataset) {
       }
     }
 
-    // Probability calculation
     const maxProb = sumScore > 0 ? (scores[bestIntent] / sumScore) : 0;
 
     let detectedSubject = null;
-    const qLower = text.toLowerCase();
-    if (qLower.includes('hóa') || qLower.includes('este') || qLower.includes('axit') || qLower.includes('gluco') || qLower.includes('chất')) detectedSubject = 'hoa';
-    else if (qLower.includes('lý') || qLower.includes('sóng') || qLower.includes('dao động') || qLower.includes('mạch') || qLower.includes('quang')) detectedSubject = 'ly';
-    else if (qLower.includes('toán') || qLower.includes('đạo hàm') || qLower.includes('tích phân') || qLower.includes('bậc hai') || qLower.includes('hàm số')) detectedSubject = 'toan';
-    else if (qLower.includes('sinh') || qLower.includes('adn') || qLower.includes('gen') || qLower.includes('màng') || qLower.includes('tế bào')) detectedSubject = 'sinh';
+    if (bestIntent === 'chitchat') {
+      detectedSubject = null;
+    } else {
+      const qLower = text.toLowerCase();
+      if (qLower.includes('hóa') || qLower.includes('este') || qLower.includes('axit') || qLower.includes('gluco') || qLower.includes('chất')) detectedSubject = 'hoa';
+      else if (qLower.includes('lý') || qLower.includes('sóng') || qLower.includes('dao động') || qLower.includes('mạch') || qLower.includes('quang')) detectedSubject = 'ly';
+      else if (qLower.includes('toán') || qLower.includes('đạo hàm') || qLower.includes('tích phân') || qLower.includes('bậc hai') || qLower.includes('hàm số')) detectedSubject = 'toan';
+      else if (qLower.includes('sinh') || qLower.includes('adn') || qLower.includes('gen') || qLower.includes('màng') || qLower.includes('tế bào')) detectedSubject = 'sinh';
+    }
 
     return {
       intent: bestIntent,
@@ -91,44 +105,78 @@ function trainNaiveBayesOnData(trainDataset) {
   return { predict, vocab, classCounts, wordCounts, totalWordsInClass, totalDocs };
 }
 
-function evaluateIntentClassifier() {
-  console.log('⚡ [Intent Classifier] Đánh giá ảnh hưởng của Text Normalization trên Unseen Test Set...');
+export function runIntentAudit() {
+  // Check exact string overlap between train and unseen test
+  const trainTexts = new Set(rawData.map(d => d.text.trim().toLowerCase()));
+  const overlappingSamples = unseenData.filter(d => trainTexts.has(d.text.trim().toLowerCase()));
+  const overlapCount = overlappingSamples.length;
 
   const model = trainNaiveBayesOnData(rawData);
+
+  // Per-class metrics accumulator
+  const perClassStats = {};
+  const allIntents = Array.from(new Set([...rawData.map(d => d.intent), ...unseenData.map(d => d.intent)]));
+  allIntents.forEach(intent => {
+    perClassStats[intent] = { total: 0, rawCorrect: 0, normCorrect: 0 };
+  });
 
   // Raw without normalization
   let rawCorrect = 0;
   unseenData.forEach(item => {
     const res = model.predict(item.text, false);
-    if (res.intent === item.intent) rawCorrect++;
+    if (perClassStats[item.intent]) perClassStats[item.intent].total++;
+    if (res.intent === item.intent) {
+      rawCorrect++;
+      if (perClassStats[item.intent]) perClassStats[item.intent].rawCorrect++;
+    }
   });
-  const rawAcc = (rawCorrect / unseenData.length) * 100;
+  const rawAccPct = (rawCorrect / unseenData.length) * 100;
+  const rawCi = wilsonInterval(rawCorrect, unseenData.length);
 
   // With normalization
   let normCorrect = 0;
   unseenData.forEach(item => {
     const res = model.predict(item.text, true);
-    if (res.intent === item.intent) normCorrect++;
+    if (res.intent === item.intent) {
+      normCorrect++;
+      if (perClassStats[item.intent]) perClassStats[item.intent].normCorrect++;
+    }
   });
-  const normAcc = (normCorrect / unseenData.length) * 100;
+  const normAccPct = (normCorrect / unseenData.length) * 100;
+  const normCi = wilsonInterval(normCorrect, unseenData.length);
 
-  console.log(`📊 Model: Multinomial Naive Bayes Intent Classifier (Hybrid Pipeline)`);
-  console.log(`- Dataset size: ${rawData.length} câu (50 câu/lớp × 6 lớp)`);
-  console.log(`- Unseen Test Accuracy khi KHÔNG chuẩn hóa (Raw Teen-code): ${rawAcc.toFixed(1)}% (${rawCorrect}/${unseenData.length})`);
-  console.log(`- Unseen Test Accuracy sau khi CHUẨN HÓA (Text Normalizer): ${normAcc.toFixed(1)}% (${normCorrect}/${unseenData.length})`);
-  console.log(`- Cơ chế Fallback Hybrid: Đã tích hợp ngưỡng tin cậy (Confidence threshold = 0.65). Nếu confidence < 0.65, hệ thống không gọi lệnh [[NAV:...]] cứng mà sẽ fallback chuyển cho Gemini RAG.`);
+  // Format per-class results
+  const perClassMetrics = {};
+  for (const intent of allIntents) {
+    const stat = perClassStats[intent];
+    const acc = stat.total > 0 ? ((stat.normCorrect / stat.total) * 100).toFixed(1) : '0.0';
+    const ci = wilsonInterval(stat.normCorrect, stat.total);
+    perClassMetrics[intent] = {
+      unseenTotal: stat.total,
+      normCorrect: stat.normCorrect,
+      accuracyPct: acc,
+      wilsonCi95: ci
+    };
+  }
 
+  // Save model
   const savePath = path.resolve('src/data/models/intent-classifier.json');
   fs.mkdirSync(path.dirname(savePath), { recursive: true });
   fs.writeFileSync(savePath, JSON.stringify({
     metadata: {
       modelName: "Multinomial Naive Bayes Intent & Subject Classifier",
       trainedAt: new Date().toISOString(),
-      datasetSize: rawData.length,
-      rawUnseenAccuracy: `${rawAcc.toFixed(1)}%`,
-      normalizedUnseenAccuracy: `${normAcc.toFixed(1)}%`,
+      datasetTotal: rawData.length,
+      unseenSampleSize: unseenData.length,
+      exactOverlapCount: overlapCount,
+      rawUnseenAccuracyPct: rawAccPct.toFixed(2),
+      rawWilsonCi95: rawCi,
+      normalizedUnseenAccuracyPct: normAccPct.toFixed(2),
+      normalizedWilsonCi95: normCi,
+      perClassMetrics,
       confidenceThreshold: 0.65,
-      vocabSize: model.vocab.size
+      vocabSize: model.vocab.size,
+      sampleSizeNote: `Tập kiểm thử độc lập Unseen Test set (n=${unseenData.length}), phủ đủ 7 lớp ý định bao gồm cả chitchat.`
     },
     vocab: Array.from(model.vocab),
     classCounts: model.classCounts,
@@ -137,7 +185,29 @@ function evaluateIntentClassifier() {
     totalDocs: model.totalDocs
   }, null, 2), 'utf-8');
 
-  console.log(`✅ [Intent Classifier] Đã cập nhật model thành công tại: ${savePath}`);
+  return {
+    modelName: "Javit Intent Classifier",
+    trainSize: rawData.length,
+    unseenSize: unseenData.length,
+    overlapCount,
+    rawAccPct: rawAccPct.toFixed(2),
+    rawCi,
+    normAccPct: normAccPct.toFixed(2),
+    normCi,
+    perClassMetrics,
+    vocabSize: model.vocab.size
+  };
 }
 
-evaluateIntentClassifier();
+if (process.argv[1] && process.argv[1].endsWith('intent_train.js')) {
+  const result = runIntentAudit();
+  console.log('⚡ === AUDIT JAVIT INTENT CLASSIFIER ===');
+  console.log(`- Dataset: Total ${result.trainSize} Train samples, ${result.unseenSize} Unseen Test samples`);
+  console.log(`- Overlap Check (Train vs Unseen): ${result.overlapCount} trùng lặp (${result.overlapCount === 0 ? 'PASS - Hoàn toàn không trùng' : 'LƯU Ý'})`);
+  console.log(`- Raw Unseen Test Accuracy (n=${result.unseenSize}): ${result.rawAccPct}% (95% CI: [${result.rawCi.lower}%, ${result.rawCi.upper}%])`);
+  console.log(`- Normalized Unseen Test Accuracy (n=${result.unseenSize}): ${result.normAccPct}% (95% CI: [${result.normCi.lower}%, ${result.normCi.upper}%])`);
+  console.log('\n📊 Phân rã độ chính xác từng lớp (Per-Class Accuracy Breakdown):');
+  for (const [intent, stat] of Object.entries(result.perClassMetrics)) {
+    console.log(`  - Class '${intent}': ${stat.normCorrect}/${stat.unseenTotal} đúng (${stat.accuracyPct}%, 95% CI: [${stat.wilsonCi95.lower}%, ${stat.wilsonCi95.upper}%])`);
+  }
+}

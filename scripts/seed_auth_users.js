@@ -22,7 +22,8 @@ const auth = getAuth(app);
 const DEFAULT_PASSWORD = "password123";
 
 const CUSTOM_PASSWORDS = {
-  "admin123@gmail.com": "hoanganhadmin5632",
+  "admin@stemhub.edu.vn": "AdminStemHub2026!@",
+  "admin123@gmail.com": "AdminStemHub2026!@",
   "admin@gmail.com": "hoanganhadmin5632",
   "test1@gmail.com": "123456",
   "test2@gmail.com": "123456",
@@ -58,7 +59,7 @@ async function seedAuthUsers() {
     // 1. Đăng nhập Admin trước để lấy quyền đọc Firestore
     console.log("🔑 Đang đăng nhập tài khoản Admin...");
     try {
-      await signInWithEmailAndPassword(auth, "admin123@gmail.com", "hoanganhadmin5632");
+      await signInWithEmailAndPassword(auth, "admin@stemhub.edu.vn", "AdminStemHub2026!@");
       console.log(" ✅ Đã đăng nhập Admin thành công!");
     } catch (adminErr) {
       console.warn(" ⚠️ Lỗi đăng nhập Admin:", adminErr.message);

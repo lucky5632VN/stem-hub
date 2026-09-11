@@ -148,5 +148,55 @@
     "text": "quy tac octet trong lien ket hoa hoc",
     "intent": "stem_query",
     "subject": "hoa"
+  },
+  {
+    "text": "xin chao nova nhe",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "ban ten la gi vay",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "cam on ban rat nhieu nha",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "hom nay thoi tiet dep qua",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "ban co biet noi chuyen phiem khong",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "chuc ban mot ngay vui ve",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "tam biet nova hen gap lai",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "ban khoe khong va lam gi do",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "nova de thuong qua ah",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "good morning javitt nova",
+    "intent": "chitchat",
+    "subject": null
   }
 ]

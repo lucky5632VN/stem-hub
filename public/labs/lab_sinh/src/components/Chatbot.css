@@ -1,8 +1,5 @@
 .chatbot-container {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    z-index: 9999;
+    /* position managed via inline style - draggable */
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
@@ -56,6 +53,7 @@
     flex-direction: column;
     overflow: hidden;
     animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    /* position, left, top, right, bottom managed via inline styles */
 }
 
 @keyframes slideUp {
@@ -151,6 +149,11 @@
     color: white;
     border-bottom-right-radius: 4px;
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+    min-width: 48px;
+    min-height: 36px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    box-sizing: border-box;
 }
 
 .typing-indicator {

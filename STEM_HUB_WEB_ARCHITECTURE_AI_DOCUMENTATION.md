@@ -58,32 +58,37 @@
 
 ---
 
-## 3. KIẾN TRÚC MINH BẠCH 6 MÔ HÌNH AI TỰ HUẤN LUYỆN (SELF-TRAINED AI REGISTRY)
+## 3. KIẾN TRÚC MINH BẠCH 3 NHÓM AI (SELF-TRAINED REGISTRY & DISCLOSURE)
 
-Hệ thống STEM HUB phân định minh bạch 2 nhóm AI (khai báo công khai tại `AITransparencyModal.jsx` và `TRAINING_LOG.md`):
+Hệ thống STEM HUB phân định minh bạch **3 nhóm AI riêng biệt** (khai báo công khai tại `AITransparencyModal.jsx` và `TRAINING_LOG.md`):
 
 ```
 +---------------------------------------------------------------------------------------------------+
-|                                 STEM HUB DUAL-AI ENGINE ARCHITECTURE                              |
+|                                 STEM HUB TRIPLE-AI ENGINE ARCHITECTURE                            |
 +---------------------------------------------------------------------------------------------------+
 |                                                                                                   |
-|  [ NHÓM 1: MÔ HÌNH AI TỰ TRAIN 100% CỤC BỘ ]   --->   [ NHÓM 2: LLM NỀN TẢNG (GEMINI API) ]       |
-|  - Chạy Client-Side / Node.js, Trọng số local          - Chỉ dùng làm "Người phát ngôn"           |
-|  - Đảm nhận 100% Quyết định Kỹ thuật,                  - Chuyển ngữ cảnh từ RAG thành câu          |
-|    Phân loại, Chẩn đoán lỗi & Suy luận                    trả lời Tiếng Việt tự nhiên           |
+|  [ NHÓM 1: AI TỰ TRAIN 100% CỤC BỘ ]   --->   [ NHÓM 2: LLM NỀN TẢNG (GEMINI API) ]               |
+|  - 6 Modules (Chem, Phys, Intent, Math,        - Chỉ dùng làm "Language Synthesizer"              |
+|    Genetics, RAG TF-IDF).                      - Diễn đạt lại ngữ cảnh RAG thành câu              |
+|  - Chạy local 100%, tự ra quyết định.           trả lời Tiếng Việt tự nhiên.                       |
 |                                                                                                   |
+|  [ NHÓM 3: THƯ VIỆN AI PRETRAINED CÓ SẴN ]                                                       |
+|  - @vladmandic/face-api (ResNet-34 Face 2FA, 68 Landmarks). Chú thích rõ: KHÔNG thuộc phạm vi      |
+|    6 mô hình AI tự train của dự án.                                                               |
 +---------------------------------------------------------------------------------------------------+
 ```
 
-### Bảng Đăng ký 6 Mô hình AI Tự Train (Self-Trained Registry)
-| STT | Tên Mô hình Kỹ thuật | Thuật toán & Kiến trúc | Tập dữ liệu & Mã nguồn Huấn luyện | Chỉ số Kiểm thử Thực tế |
-|---|---|---|---|---|
-| **1** | **ChemLab Risk Classifier** | Hybrid: Dense Softmax NN (1000 Epochs GD) + Circuit Breaker | `src/ai-training/datasets/chem-risk/risk-dataset.json` (180 mẫu)<br>`src/ai-training/scripts/chem-risk_train.js` | Discrete Accuracy **95.00%**, 0 False Negatives. Monotonic Score Trend ($22.51\% < 51.43\% < 71.57\%$). |
-| **2** | **Physics Diagnostic Classifier** | Multi-Label kNN ($k=5$) + Z-Score StandardScaler | `src/ai-training/datasets/physics-error/attempts.json` (120 mẫu)<br>`src/ai-training/scripts/physics-error_train.js` | **80.00%** Multi-Error Combo Scenario Detection. |
-| **3** | **Javit Intent Classifier** | Multinomial Naive Bayes + Vietnamese Text Normalizer | `src/ai-training/datasets/intent/intent-samples.json` (300 mẫu)<br>`src/ai-training/scripts/intent_train.js` | Raw **60.0%** $\rightarrow$ Normalized **83.33%** Unseen Test Accuracy. Threshold = 0.65. |
-| **4** | **Math Adaptive IRT Engine** | 1PL Rasch Item Response Theory (ELO Parameterized) | `src/data/models/math-irt-model.json`<br>`src/lib/mathAdaptiveEngine.js` | Target Success Probability $P(\text{correct}) \in [60\%, 75\%]$. |
-| **5** | **Genetics Bayesian Reasoner** | Bayesian Conditional Probability Tables (CPT) | `src/lib/geneticsBayes.js`<br>`src/lib/test-bayes-genetics.js` | **100%** Mendel Verification (10/10 Test Cases). |
-| **6** | **Multilingual TF-IDF RAG Service** | N-Gram TF-IDF Matrix ($TF \times IDF$) & Cosine Similarity | `src/ai-training/datasets/rag-knowledge/stem-corpus.json` (100 chunks)<br>`src/ai-training/scripts/build-rag-embeddings.js` | 4,862 Vocab Tokens, Cosine Sim $\ge 0.85$, Top-3 Knowledge Retrieval. |
+### Bảng Đăng ký 6 Mô hình AI Tự Train (Self-Trained Registry & Real Audit Metrics)
+*Lưu ý: Tất cả các chỉ số dưới đây được sinh tự động 100% từ lệnh `node src/ai-training/scripts/run-all-audits.js` và được ghi trực tiếp vào `TRAINING_LOG.md`.*
+
+| STT | Tên Mô hình Kỹ thuật | Thuật toán & Kiến trúc | Tập dữ liệu & Mã nguồn Huấn luyện | Chỉ số Kiểm thử Tái lập Thực tế | 95% Wilson Score CI |
+|---|---|---|---|---|---|
+| **1** | **ChemLab Risk Classifier** | Hybrid: Dense Softmax NN (1000 Epochs GD) + Circuit Breaker | `risk-dataset.json` (144 Train / 36 Test) + 20 Edge<br>`src/ai-training/scripts/chem-risk_train.js` | **100.00%** Test Acc<br>**95.00%** Edge Acc (0 False Negatives) | Test: [90.4%, 100.0%]<br>Edge: [76.4%, 99.1%] |
+| **2** | **Physics Diagnostic Classifier** | Multi-Label kNN ($k=5$) + Z-Score StandardScaler | `attempts.json` (96 Train / 24 Test) + 15 Edge<br>`src/ai-training/scripts/physics-error_train.js` | **100.00%** Test Acc<br>**86.67%** Multi-Error Combo Acc | Test: [86.2%, 100.0%]<br>Edge: [62.1%, 96.3%] |
+| **3** | **Javit Intent Classifier** | Multinomial Naive Bayes + Text Normalizer | `intent-samples.json` (300 Train + 30 Unseen Test)<br>`src/ai-training/scripts/intent_train.js` | **83.33%** Normalized Unseen Test Acc (60.0% Raw) | Test: [66.4%, 92.7%] ($n=30$) |
+| **4** | **Math Adaptive IRT Engine** | 1PL Rasch Item Response Theory (ELO Parameterized) | `src/data/models/math-irt-model.json`<br>`src/lib/mathAdaptiveEngine.js` | Target Band Hits ($P(\text{correct}) \in [60\%, 75\%]$) | [16.8%, 68.7%] ($n=10$) |
+| **5** | **Genetics Bayesian Reasoner** | Bayesian Conditional Probability Tables (CPT) | `src/lib/geneticsBayes.js`<br>`src/lib/test-bayes-genetics.js` | **100.00%** Mendel Verification (10/10 Cases) | [72.2%, 100.0%] ($n=10$) |
+| **6** | **Multilingual TF-IDF RAG Service** | N-Gram TF-IDF Matrix ($TF \times IDF$) & Cosine Similarity | `stem-corpus.json` (100 chunks, 4862 tokens)<br>`src/ai-training/scripts/build-rag-embeddings.js` | **100.00%** Top-1 Match, **100.00%** Top-3 Hit | [75.7%, 100.0%] ($n=12$) |
 
 ---
 
@@ -140,7 +145,7 @@ Phòng Lab Hóa học chính (`QuantumLab v4.0`) được nhúng qua Iframe `/la
 - **Tập dữ liệu tri thức**: 100 đoạn bài giảng STEM chuẩn hóa (`stem-corpus.json`).
 - **Trích xuất Ma trận TF-IDF ($TF \times IDF$)**:
   $$IDF(w) = \ln\left(\frac{N + 1}{DF(w) + 1}\right) + 1.0, \quad TFIDF(w) = TF(w) \times IDF(w)$$
-  File `src/data/rag-vectors.json` lưu trữ 4,862 N-Gram tokens. Khi học sinh hỏi, `retrieveTopK(query, k=3)` tính Cosine Similarity client-side để trích xuất ngữ cảnh chính xác.
+  File `src/data/rag-vectors.json` lưu trữ 4,862 N-Gram tokens. Khi học sinh hỏi, hàm `retrieveTopK(query, k=3)` tính Cosine Similarity client-side **được cô lập hoàn toàn trong Web Worker (Background Thread) nhằm tránh đóng băng giao diện (UI Freezing)** để trích xuất ngữ cảnh chính xác.
 
 ### 5.2 Javit Intent Classifier & Normalizer (`src/lib/intentClassifier.js`)
 - **Thuật toán**: Naive Bayes phân loại ý định tiếng Việt kết hợp `textNormalizer.js` (chuyển đổi teencode học sinh sang tiếng Việt chuẩn).
@@ -154,11 +159,23 @@ Giao diện NOVA HUD bóc tách các lệnh hệ thống để tự động đi�
 
 ---
 
-## 6. ĐẤU TRƯỜNG 1V1 PVP & CƠ CHẾ BOT HEURISTICS
+## 6. ĐẤU TRƯỜNG 1V1 PVP & KIẾN TRÚC TỐI ƯU HẠNG NGẠCH 0 VNĐ
 
 ### 6.1 Ghép trận & Bot Heuristics (`src/lib/matchmaker.js`)
 - **Ghép trận người dùng**: Firestore `onSnapshot` lắng nghe ghép 2 người chơi $\pm 100$ ELO.
 - **Bot Heuristic 1v1**: Khi quá 10 giây không có người thật, Bot Heuristic tự động tham gia đấu. Bot hoạt động theo thuật toán luật quyết định (Deterministic Rules), không tiêu tốn API Key.
+
+### 6.2 Kiến trúc State Batching trên RAM (`src/store/usePvPStore.js`)
+- **Cô lập trên RAM trình duyệt**: Toàn bộ vòng đời trận đấu (thời gian đếm ngược `timeRemaining`, điểm số, mảng câu trả lời, hiệu ứng đóng băng 500ms, sương mù) được lưu trữ và tính toán trong Zustand RAM, đảm bảo 0ms UI latency.
+- **Đồng bộ hóa Checkpoint (Cắt giảm 98,6% lượt ghi)**: Loại bỏ triệt để lệnh ghi Firestore mỗi giây. Hệ thống chỉ đẩy dữ liệu tiến độ ở 3 mốc cố định: 120s, 60s, 20s.
+- **Giao dịch chốt hạ nguyên tử (Single Atomic Write)**: Kết thúc trận, `finalizeMatch()` sử dụng `runTransaction` gộp kết quả, ELO và crystal thành 1 lượt ghi duy nhất.
+- **Bảo vệ toàn vẹn F5**: Tự động mã hóa sao lưu vào `sessionStorage` để khôi phục tức thời nếu học sinh vô tình reload trang.
+
+### 6.3 Giao thức Xử thua tự động 4 Tầng (Zero-Cost 4-Tier Timeout Fallback)
+1. **Tầng 1 (Graceful Exit Trap)**: Bắt hook `beforeunload` / `pagehide`, gửi cờ `playerAbandoned` khi học sinh đóng tab / tắt trình duyệt; đối thủ nhận cờ qua `onSnapshot` sau 100ms và được xử thắng tức thì.
+2. **Tầng 2 (Opponent-Driven Watchdog Claim)**: Client của người chơi còn lại duy trì Watchdog giám sát. Nếu đối thủ im lặng $> 25$ giây, client còn lại chủ động kích hoạt `claimTimeoutVictory()` bằng `runTransaction` để xử thắng và trừ 20 ELO kẻ bỏ cuộc.
+3. **Tầng 3 (Server Expiration Barrier)**: Phòng đấu được khóa bởi `matchStartTime` và trần thời gian `expiresAt = matchStartTime + 180s + 30s`. Mọi cập nhật sau mốc này đều bị Firestore Rules chặn đứng.
+4. **Tầng 4 (Passive Lazy Garbage Collection)**: Khi người dùng mới tìm trận trong `matchmaker.js`, hệ thống tiện tay quét và dọn dẹp các phòng quá hạn mồ côi mà không phát sinh thêm bất kỳ chi phí nào.
 
 ---
 
@@ -173,6 +190,7 @@ Giao diện NOVA HUD bóc tách các lệnh hệ thống để tự động đi�
 
 ## 8. QUẢN LÝ TRẠNG THÁI (STATE MANAGEMENT) & CATALOGS DỮ LIỆU
 
+- **`usePvPStore.js`**: Quản lý State Batching Đấu trường 1v1, đồng bộ Checkpoint 120s/60s/20s, Watchdog Timeout và rehydrate từ `sessionStorage`.
 - **`useAppStore.js`**: Lưu giữ `user`, `personalization`, `chemGame` (10 bài sandbox), `subjectFrequency` (tần suất môn học) và `conciseMode` (chế độ trả lời súc tích).
 - **`useAudioStore.js`**: Quản lý nhạc nền Lo-Fi / Sci-Fi / Brainwave và âm thanh hiệu ứng Web Audio API.
 

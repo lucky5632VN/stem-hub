@@ -1,41 +1,70 @@
 {
   "metadata": {
-    "modelName": "ChemLab Risk Assessment Perfected Hybrid Engine",
-    "trainedAt": "2026-08-31T12:32:57.467Z",
-    "datasetSize": 180,
-    "epochs": 1000,
-    "discreteAccuracy": "95.00%",
-    "falseNegativesCount": 0,
-    "monotonicCorrelation": {
-      "meanSafeRiskScore": "22.51%",
-      "meanWarnRiskScore": "51.43%",
-      "meanDangerRiskScore": "71.57%",
+    "modelName": "ChemLab Risk Assessment Hybrid Engine",
+    "trainedAt": "2026-09-10T13:48:40.810Z",
+    "datasetTotal": 180,
+    "trainSize": 144,
+    "testSize": 36,
+    "testAccuracyPct": "100.00",
+    "testWilsonCi95": {
+      "lower": "90.4",
+      "upper": "100.0"
+    },
+    "edgeCaseSize": 20,
+    "edgeAccuracyPct": "95.00",
+    "edgeWilsonCi95": {
+      "lower": "76.4",
+      "upper": "99.1"
+    },
+    "falseNegatives": 0,
+    "lossHistory": [
+      {
+        "epoch": 1,
+        "loss": 1.0953293455409288
+      },
+      {
+        "epoch": 100,
+        "loss": 0.33727274472654734
+      },
+      {
+        "epoch": 500,
+        "loss": 0.2556973336336802
+      },
+      {
+        "epoch": 1000,
+        "loss": 0.22443100410520517
+      }
+    ],
+    "monotonicTrend": {
+      "meanSafeRiskScore": "25.33%",
+      "meanWarnRiskScore": "55.64%",
+      "meanDangerRiskScore": "73.23%",
       "isMonotonic": true
     }
   },
   "weights": [
     [
-      -0.9147912804654883,
-      -0.8544282536841148,
-      -0.9082027226689018,
-      -0.7076971450380954
+      -0.9107626949504393,
+      -0.7643302534324456,
+      -0.8097978328223043,
+      -0.6991951435083508
     ],
     [
-      -1.144496593690135,
-      -0.8562873401285033,
-      -2.4401207347297285,
-      0.33461122083591355
+      -1.0247166372537315,
+      -0.8147835868105361,
+      -2.2875066371541948,
+      0.15954728919292044
     ],
     [
-      2.097105185078302,
-      1.5680692375383964,
-      3.40712774785097,
-      0.3853334773279209
+      2.0656413692412094,
+      1.7430130171977138,
+      3.250342021416829,
+      0.46870649629073813
     ]
   ],
   "biases": [
-    -1.4080962796625551,
-    2.0519858407438827,
-    -0.6691177249768803
+    -1.1945226825558655,
+    1.9818921597979897,
+    -0.5509497241557055
   ]
 }

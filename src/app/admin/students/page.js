@@ -12,6 +12,7 @@ import { AvatarFrame } from '@/components/atoms/AvatarFrame';
 import STEMAvatarSVG from '@/components/atoms/STEMAvatarSVG';
 import { playSound } from '@/lib/sound';
 import { logAdminAction } from '@/lib/adminLogger';
+import { getTitleLabel } from '@/lib/titles';
 
 export default function StudentManagement() {
   const [students, setStudents] = useState([]);
@@ -336,24 +337,7 @@ export default function StudentManagement() {
   const currentStudents = sortedStudents.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(sortedStudents.length / itemsPerPage);
 
-  const getTitleLabel = (title) => {
-    const titles = {
-      apprentice: 'Tập sự STEM',
-      alchemist_expert: 'Bậc thầy Hóa học',
-      math_wizard: 'Chiến thần Toán học',
-      physics_guru: 'Kỹ sư Cơ học',
-      cosmic_explorer: 'Nhà thám hiểm Vũ trụ',
-      nuclear_engineer: 'Kỹ sư Phản ứng hạt',
-      quantum_master: 'Thạc sĩ Lượng tử',
-      stem_legend: 'Huyền thoại STEM',
-      multiverse_theorist: 'Nhà lập thuyết Đa vũ trụ',
-      dimension_creator: 'Đấng kiến tạo Không gian',
-      top_1_universe: 'Đại Đế STEM 👑',
-      top_10_legend: 'Huyền thoại Đấu trường',
-      top_100_elite: 'Đại Cao Thủ STEM'
-    };
-    return titles[title] || 'Học viên';
-  };
+
 
   const formatDate = (isoString) => {
     if (!isoString) return 'Chưa rõ';

@@ -1,0 +1,102 @@
+[
+  {
+    "text": "cho tui dô coi cái sảnh đấu trường coi",
+    "intent": "nav_dautruong"
+  },
+  {
+    "text": "chuyển hộ wa phòng thí nghiệm cái nhe",
+    "intent": "nav_phongthi"
+  },
+  {
+    "text": "lên đồ zô phòng thi liền nha má",
+    "intent": "nav_phongthi"
+  },
+  {
+    "text": "tối giao diện chuyển giùm tui",
+    "intent": "toggle_theme"
+  },
+  {
+    "text": "lý thuyết este hóa giải thích dùm cái đi",
+    "intent": "stem_query"
+  },
+  {
+    "text": "chào bbi nha chúc ngày mới zui zẻ",
+    "intent": "chitchat"
+  },
+  {
+    "text": "dạ hế lô sư huynh em tới chơi nè",
+    "intent": "chitchat"
+  },
+  {
+    "text": "chuyển sang giao diện darkmode giùm tui nha",
+    "intent": "toggle_theme"
+  },
+  {
+    "text": "môn hóa este là chi rứa thầy",
+    "intent": "stem_query"
+  },
+  {
+    "text": "đấu trường ngay và luôn nào",
+    "intent": "nav_dautruong"
+  },
+  {
+    "text": "tối thâu mốt sáng",
+    "intent": "toggle_theme"
+  },
+  {
+    "text": "mở trang hồ sơ cá nhân cái coi bro",
+    "intent": "nav_hoso"
+  },
+  {
+    "text": "xem câu chuyện hành trình học tập ở đâu ta",
+    "intent": "nav_story"
+  },
+  {
+    "text": "thế con lắc đơn dao động điều hòa là mần sao",
+    "intent": "stem_query"
+  },
+  {
+    "text": "ông là ai vậy bot ơi",
+    "intent": "chitchat"
+  },
+  {
+    "text": "tài khoản tui ELO bao nhiêu rồi ta",
+    "intent": "nav_hoso"
+  },
+  {
+    "text": "vô ngay chỗ thi đấu PvP 1v1",
+    "intent": "nav_dautruong"
+  },
+  {
+    "text": "bật theme sáng lên cho rõ coi",
+    "intent": "toggle_theme"
+  },
+  {
+    "text": "đột biến gen là cái giống gì zậy",
+    "intent": "stem_query"
+  },
+  {
+    "text": "bày tui giải bài toán tích phân này với",
+    "intent": "stem_query"
+  },
+  {
+    "text": "chúc bạn một ngày tốt lành nhé bot yêu",
+    "intent": "chitchat"
+  },
+  {
+    "text": "mở giao diện hồ sơ thành tích tui coi",
+    "intent": "nav_hoso"
+  },
+  {
+    "text": "truyện ngắn STEM nằm ở chỗ nào z",
+    "intent": "nav_story"
+  },
+  {
+    "text": "tui muốn học thực hành hóa học ngay",
+    "intent": "nav_phongthi"
+  },
+  {
+    "text": "tập nghiệm phương trình mũ logarit tính răng",
+    "intent": "stem_query"
+  }
+]

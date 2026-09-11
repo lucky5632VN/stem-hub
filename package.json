@@ -8,11 +8,17 @@
     "build": "next build --webpack",
     "deploy": "next build --webpack && firebase deploy --except functions",
     "start": "next start",
+    "audit:ai": "node src/ai-training/scripts/run-all-audits.js",
+    "test": "node tests/bugfix_validation.test.js && node tests/physicsEngine.test.js",
+    "test:rules": "firebase emulators:exec --only firestore \"node tests/firestore.rules.test.js\"",
     "lint": "eslint"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@huggingface/transformers": "^4.2.0",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
+    "@tensorflow/tfjs": "^4.22.0",
     "firebase": "^12.13.0",
     "firebase-admin": "^14.1.0",
     "framer-motion": "^12.39.0",

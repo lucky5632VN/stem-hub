@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import GlobalAIAssistant from '@/components/organisms/GlobalAIAssistant';
+import AdminAILogHUD from '@/components/organisms/AdminAILogHUD';
 import CyberMusicPlayer from '@/components/atoms/CyberMusicPlayer';
 import { auth, db, functions, httpsCallable } from '@/lib/firebase';
 import { onAuthStateChanged, isSignInWithEmailLink, signInWithEmailLink } from 'firebase/auth';
@@ -202,6 +203,10 @@ export default function DashboardLayout({ children }) {
             'crown', 'butterfly_hairpin'
           ];
 
+          const totalGames = (data.stats?.wins || 0) + (data.stats?.losses || 0);
+          const computedAccuracy = totalGames > 0 ? Number((data.stats.wins / totalGames).toFixed(2)) : 0.85;
+          const computedStreak = data.stats?.streakCount !== undefined ? data.stats.streakCount : Math.max(1, data.stats?.wins || 1);
+
           setPersonalization({
             avatarFrame: data.personalization?.avatarFrame || 'default',
             activeTitle: data.personalization?.activeTitle || 'apprentice',
@@ -221,6 +226,8 @@ export default function DashboardLayout({ children }) {
             elo: data.stats?.elo !== undefined ? data.stats.elo : (preset ? preset.elo : 0),
             wins: data.stats?.wins !== undefined ? data.stats.wins : (preset ? preset.wins : 0),
             losses: data.stats?.losses !== undefined ? data.stats.losses : (preset ? preset.losses : 0),
+            accuracyLast10: data.stats?.accuracyLast10 !== undefined ? data.stats.accuracyLast10 : computedAccuracy,
+            streakCount: computedStreak,
             subjectStrengths: data.stats?.subjectStrengths || { math: 50, physics: 50, chemistry: 50, biology: 50 }
           });
         } else {
@@ -876,6 +883,9 @@ export default function DashboardLayout({ children }) {
 
       {/* Global AI Commander Assistant HUD */}
       <GlobalAIAssistant />
+
+      {/* Hidden Admin-only Real-time AI Log Terminal (Alt+U) */}
+      <AdminAILogHUD />
     </div>
   );
 }

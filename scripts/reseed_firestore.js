@@ -26,7 +26,7 @@ async function run() {
 
   // 1. Đăng nhập với tài khoản Admin để có quyền ghi/xóa trên Firestore
   console.log("🔑 Đang đăng nhập tài khoản Admin...");
-  await signInWithEmailAndPassword(auth, 'admin123@gmail.com', 'hoanganhadmin5632');
+  await signInWithEmailAndPassword(auth, 'admin@stemhub.edu.vn', 'AdminStemHub2026!@');
   console.log("✅ Đăng nhập Admin thành công!");
 
   // 2. Đọc danh sách đề thi mẫu từ exams_seed.js

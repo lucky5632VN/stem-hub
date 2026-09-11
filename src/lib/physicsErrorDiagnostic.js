@@ -1,4 +1,4 @@
-import modelData from '../data/models/physics-error-model.json';
+import modelData from '../data/models/physics-error-model.json' with { type: 'json' };
 
 /**
  * Diagnostic Engine for Physics Laser Optics Lab
