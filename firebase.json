@@ -6,21 +6,28 @@
     "source": "functions"
   },
   "hosting": {
-    "site": "stem-hub-43e96",
+    "site": "cuoc-thi-ai-e2044",
     "public": "out",
     "cleanUrls": true,
     "trailingSlash": false,
+    "releaseStorageSettings": {
+      "numReleasesToKeep": 2
+    },
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**",
-      "**/*.exe",
-      "**/*.dll",
-      "**/venv/**",
-      "**/*.py",
-      "**/*.pyc",
-      "labs/Spatial-Mindset-main/**",
-      "labs/lab-ktra15p/node_modules/**"
+      "**/da_lab_instrumental.mp3",
+      "**/thanh_xuan.mp3",
+      "**/son_tung_remix.mp3",
+      "**/ly_keo_chai.mp3",
+      "**/science.mp3"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
     ],
     "headers": [
       {
@@ -29,6 +36,16 @@
           {
             "key": "Cache-Control",
             "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
+      },
+
+      {
+        "source": "labs/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, must-revalidate"
           }
         ]
       },

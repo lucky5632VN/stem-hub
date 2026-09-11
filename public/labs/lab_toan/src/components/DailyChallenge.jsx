@@ -78,7 +78,7 @@ export default function DailyChallenge({ onClose, onSelectChallenge, onXPGain })
     }
 
     // Fetch challenges – fallback to local bank if backend offline
-    apiClient.get('/api/daily-challenge', { timeout: 3000 })
+    apiClient.get('/api/daily-challenge', { timeout: 60000 })
       .then(res => {
         setChallenges(res.challenges || []);
         setIsOffline(false);

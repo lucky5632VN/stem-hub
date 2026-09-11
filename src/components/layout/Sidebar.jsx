@@ -55,7 +55,7 @@ export default function Sidebar() {
 
       {/* Menu Area */}
       <div className="flex-1 py-6 px-3 space-y-1">
-        <div className="px-3 pb-2 text-[10px] font-bold text-text-secondary uppercase tracking-widest font-mono">
+        <div className="px-3 pb-2 text-[10px] font-semibold text-text-secondary uppercase tracking-wider">
           Điều hướng chính
         </div>
         <ul className="space-y-1.5">
@@ -65,6 +65,7 @@ export default function Sidebar() {
               <li key={index}>
                 <Link 
                   href={item.href}
+                  prefetch={false}
                   className={`flex items-center gap-3.5 px-3.5 py-3 rounded-xl transition-all duration-200 group relative border ${
                     isActive 
                       ? item.highlight

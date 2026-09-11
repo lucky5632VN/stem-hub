@@ -1,17 +1,29 @@
-const { initializeTestEnvironment, assertSucceeds, assertFails } = require('@firebase/rules-unit-testing');
-const fs = require('fs');
+import { initializeTestEnvironment, assertSucceeds, assertFails } from '@firebase/rules-unit-testing';
+import fs from 'fs';
 
 async function runTests() {
   console.log("=== BẮT ĐẦU KIỂM THỬ FIRESTORE RULES ===");
   const rules = fs.readFileSync('firestore.rules', 'utf8');
-  const testEnv = await initializeTestEnvironment({
-    projectId: 'stem-hub-43e96',
-    firestore: {
-      rules: rules,
-      host: '127.0.0.1',
-      port: 8080
+  let testEnv;
+  try {
+    testEnv = await initializeTestEnvironment({
+      projectId: 'stem-hub-43e96',
+      firestore: {
+        rules: rules,
+        host: '127.0.0.1',
+        port: 8080
+      }
+    });
+  } catch (err) {
+    if (err?.message?.includes('fetch failed') || err?.cause?.code === 'ECONNREFUSED') {
+      console.error("\n❌ [LỖI KẾT NỐI]: Firestore Local Emulator chưa được bật trên cổng 8080!");
+      console.error("👉 Hãy chạy lệnh sau để tự động bật emulator và chạy test:");
+      console.error("   npx firebase emulators:exec --only firestore \"node tests/firestore.rules.test.js\"");
+      console.error("👉 Hoặc mở một terminal riêng và chạy: npx firebase emulators:start --only firestore\n");
+      process.exit(1);
     }
-  });
+    throw err;
+  }
 
   // Tạo client context
   const aliceContext = testEnv.authenticatedContext('alice', { email: 'alice@gmail.com' });

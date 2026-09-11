@@ -211,10 +211,10 @@ export default function LeaderboardTournamentManagement() {
   // Cập nhật trạng thái giải đấu
   const handleUpdateTournamentStatus = async (id, currentStatus) => {
     playSound.click();
+    const tDoc = tournaments.find(t => t.id === id);
     const nextStatus = currentStatus === 'upcoming' ? 'active' : 'ended';
 
     if (nextStatus === 'ended') {
-      const tDoc = tournaments.find(t => t.id === id);
       if (!tDoc) return;
 
       let winner = null;

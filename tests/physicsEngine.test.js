@@ -1,5 +1,5 @@
-const assert = require('assert');
-const { calculateLaserPath } = require('../functions/physicsEngine');
+import assert from 'assert';
+import { calculateLaserPath } from '../src/lib/physicsEngine.js';
 
 console.log("=== RUNNING PHYSICS ENGINE UNIT TESTS ===");
 

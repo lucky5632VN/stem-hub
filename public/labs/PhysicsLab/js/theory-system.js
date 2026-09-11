@@ -507,15 +507,16 @@
         /* Floating Action Button */
         #theory-fab {
             position: fixed;
-            bottom: 24px;
-            right: 170px;
-            z-index: 999999; /* Max possible z-index */
+            bottom: 28px;
+            right: 254px;
+            z-index: 999998;
             background: linear-gradient(135deg, #0f172a, #1e293b);
             border: 1px solid rgba(0, 242, 255, 0.4);
             box-shadow: 0 4px 20px rgba(0, 242, 255, 0.15), inset 0 0 10px rgba(0, 242, 255, 0.1);
             color: #00f2ff;
             border-radius: 9999px;
-            padding: 12px 24px;
+            padding: 0 22px;
+            height: 48px;
             font-family: 'Inter', sans-serif;
             font-weight: 600;
             font-size: 14px;
@@ -525,9 +526,10 @@
             cursor: pointer;
             backdrop-filter: blur(8px);
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-sizing: border-box;
         }
         #theory-fab:hover {
-            transform: translateY(-5px) scale(1.02);
+            transform: translateY(-4px) scale(1.02);
             box-shadow: 0 8px 30px rgba(0, 242, 255, 0.3), inset 0 0 15px rgba(0, 242, 255, 0.2);
             background: linear-gradient(135deg, #1e293b, #334155);
         }
@@ -540,6 +542,17 @@
         .light #theory-fab:hover {
             background: #f8fafc;
             box-shadow: 0 8px 30px rgba(178, 152, 211, 0.4);
+        }
+
+        @media (max-width: 520px) {
+            #theory-fab {
+                right: 24px;
+                bottom: 88px;
+                padding: 0 16px;
+                height: 42px;
+                font-size: 12px;
+                gap: 6px;
+            }
         }
 
         /* Modal Overlay */

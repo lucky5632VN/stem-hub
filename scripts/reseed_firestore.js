@@ -8,13 +8,13 @@ const fs = require('fs');
 const path = require('path');
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBGDJCKxedUMhxuOZ9QV305JnwZzWEi98Y",
-  authDomain: "stem-hub-43e96.firebaseapp.com",
-  projectId: "stem-hub-43e96",
-  storageBucket: "stem-hub-43e96.firebasestorage.app",
-  messagingSenderId: "182148750391",
-  appId: "1:182148750391:web:d9297f826abc285babf3b2",
-  measurementId: "G-1D80591ZNN"
+  apiKey: "AIzaSyD9YsaKNmUXDmDEAA4CcG_KXdGGfJVEOE",
+  authDomain: "cuoc-thi-ai-e2044.firebaseapp.com",
+  projectId: "cuoc-thi-ai-e2044",
+  storageBucket: "cuoc-thi-ai-e2044.firebasestorage.app",
+  messagingSenderId: "384565535158",
+  appId: "1:384565535158:web:b7c6ea2e48c718a05f6117",
+  measurementId: "G-W00VVRFZ40"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -26,7 +26,7 @@ async function run() {
 
   // 1. Đăng nhập với tài khoản Admin để có quyền ghi/xóa trên Firestore
   console.log("🔑 Đang đăng nhập tài khoản Admin...");
-  await signInWithEmailAndPassword(auth, 'admin123@gmail.com', 'hoanganhadmin5632');
+  await signInWithEmailAndPassword(auth, 'admin@stemhub.edu.vn', 'AdminStemHub2026!@');
   console.log("✅ Đăng nhập Admin thành công!");
 
   // 2. Đọc danh sách đề thi mẫu từ exams_seed.js

@@ -13,6 +13,8 @@ import { signOut } from 'firebase/auth';
 import { playSound } from '@/lib/sound';
 import { AvatarFrame } from '@/components/atoms/AvatarFrame';
 import STEMAvatarSVG from '@/components/atoms/STEMAvatarSVG';
+import CyberMusicPlayer, { CyberMusicHeaderButton } from '@/components/atoms/CyberMusicPlayer';
+import { getTitleLabel } from '@/lib/titles';
 import { 
   generateBioPool, 
   generateMathPool, 
@@ -52,6 +54,27 @@ export default function Header() {
   const lastIncomingUidsRef = useRef(null);
   const [newFriendRequest, setNewFriendRequest] = useState(null);
 
+  const dropdownRef = useRef(null);
+
+  // Tự động đóng Menu Cài đặt khi nhấp vào bất kỳ đâu ngoài Menu
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
+
   const getFrameStyle = (frame) => {
     switch (frame) {
       case 'neon_fire':
@@ -77,24 +100,7 @@ export default function Header() {
     }
   };
 
-  const getTitleLabel = (title) => {
-    const titles = {
-      apprentice: 'Tập sự',
-      alchemist_expert: 'Bậc thầy Hóa',
-      math_wizard: 'Chiến thần Toán',
-      physics_guru: 'Kỹ sư Cơ học',
-      cosmic_explorer: 'T.Hiểm V.Trụ',
-      nuclear_engineer: 'K.Sư Hạt Nhân',
-      quantum_master: 'T.Sĩ Lượng Tử',
-      stem_legend: 'Huyền thoại',
-      multiverse_theorist: 'Thuyết Đa V.Trụ',
-      dimension_creator: 'Kiến Tạo K.Gian',
-      top_1_universe: 'Đại Đế STEM 👑',
-      top_10_legend: 'H.Thoại Đ.Trường',
-      top_100_elite: 'Đại Cao Thủ'
-    };
-    return titles[title] || 'Học viên';
-  };
+
 
   useEffect(() => {
     setMounted(true);
@@ -362,7 +368,19 @@ export default function Header() {
       const roomData = {
         id: roomId,
         subject: subject,
-        status: 'playing',
+        status: 'equipment_selecting',
+        equipmentPhase: {
+          status: 'selecting',
+          expiresAt: Date.now() + 30000,
+          p1Ready: false,
+          p2Ready: false
+        },
+        player1Equipment: [],
+        player2Equipment: [],
+        activeEffects: {
+          p1: { frozenUntil: 0, fogUntil: 0, eloShielded: false, crystalMultiplier: 1, stolenCount: 0, reflectActive: false },
+          p2: { frozenUntil: 0, fogUntil: 0, eloShielded: false, crystalMultiplier: 1, stolenCount: 0, reflectActive: false }
+        },
         player1: {
           uid: incomingChallenge.fromUid,
           name: incomingChallenge.fromName,
@@ -385,7 +403,7 @@ export default function Header() {
         player2Progress: 0,
         player1Logs: ['Đấu thủ 1 thách đấu đã sẵn sàng!'],
         player2Logs: ['Đấu thủ 2 thách đấu đã sẵn sàng!'],
-        timeRemaining: 300,
+        timeRemaining: 180,
         winnerId: null,
         createdAt: new Date().toISOString(),
         isChallenge: true,
@@ -428,7 +446,25 @@ export default function Header() {
   };
 
   const handleLogout = async () => {
-    await signOut(auth);
+    try { playSound.click(); } catch (_) {}
+    try {
+      if (typeof window !== 'undefined') {
+        if (user?.uid) {
+          sessionStorage.removeItem('face2FA_verified_' + user.uid);
+          localStorage.removeItem('face2FA_verified_' + user.uid);
+        }
+        localStorage.removeItem('emailFor2FA');
+        sessionStorage.clear();
+      }
+      useAppStore.getState().setUser(null);
+      await signOut(auth);
+    } catch (err) {
+      console.error("Lỗi khi đăng xuất:", err);
+    } finally {
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
+    }
   };
 
   return (
@@ -496,7 +532,8 @@ export default function Header() {
         </nav>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 md:gap-4">
+          <CyberMusicHeaderButton />
           {mounted && (
             <button 
               onClick={() => {
@@ -534,7 +571,18 @@ export default function Header() {
           )}
           
           {user ? (
-            <div className="relative flex items-center gap-3 ml-2">
+            <div ref={dropdownRef} className="relative flex items-center gap-3 ml-2">
+              {/* Lớp phủ bắt sự kiện nhấp ra bất kỳ vị trí nào bên ngoài để đóng menu */}
+              {isDropdownOpen && (
+                <div 
+                  className="fixed inset-0 z-[990] bg-transparent cursor-default pointer-events-auto"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsDropdownOpen(false);
+                  }}
+                />
+              )}
+
               <button 
                 onMouseEnter={playSound.hover}
                 onClick={() => {
@@ -544,16 +592,14 @@ export default function Header() {
                 className="flex items-center gap-3 px-3 py-1.5 rounded-full hover:bg-bg-tertiary border border-transparent hover:border-border-theme transition-all select-none active:scale-95 relative z-[1001]"
               >
                 <AvatarFrame frame={personalization.avatarFrame} className="w-9 h-9 text-base">
-                  {personalization.avatarUrl === 'custom-avatar' ? (
+                  {personalization.avatarUrl === 'custom-avatar' || (!personalization.avatarUrl && personalization.avatarParts) || personalization.avatarParts ? (
                     <STEMAvatarSVG parts={personalization.avatarParts} />
-                  ) : personalization.avatarUrl ? (
-                    personalization.avatarUrl.startsWith('http') || personalization.avatarUrl.startsWith('data:image/') ? (
-                      <img src={personalization.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" onError={(e) => { e.target.onerror = null; e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a1a1aa'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"; }} />
-                    ) : (
-                      <span className="select-none">{personalization.avatarUrl}</span>
-                    )
+                  ) : personalization.avatarUrl && (personalization.avatarUrl.startsWith('http') || personalization.avatarUrl.startsWith('data:image/')) ? (
+                    <img src={personalization.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }} />
                   ) : (
-                    user.displayName ? user.displayName.charAt(0).toUpperCase() : <User className="w-5 h-5 text-text-primary" />
+                    <span className="font-extrabold text-accent-pink select-none">
+                      {user?.displayName ? user.displayName.charAt(0).toUpperCase() : 'H'}
+                    </span>
                   )}
                   {pendingRequestsCount > 0 && (
                     <span className="absolute -top-1 -right-1 w-4.5 h-4.5 bg-rose-500 border border-slate-200 dark:border-bg-primary text-[8px] font-bold text-white rounded-full flex items-center justify-center animate-bounce shadow-md z-30">

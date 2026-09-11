@@ -1,7 +1,8 @@
 // Quick validation test for all 5 bug fixes
 // Run from: node tests/bugfix_validation.test.js
 
-const { calculateLaserPath } = require('../functions/physicsEngine');
+import fs from 'fs';
+import { calculateLaserPath } from '../src/lib/physicsEngine.js';
 
 let passed = 0;
 let failed = 0;
@@ -21,7 +22,6 @@ console.log('\n=== BUG FIX VALIDATION TESTS ===\n');
 // ────────────────────────────────────────────────────────────────────
 // VIỆC 1: status 'result' (can't test Firestore query here, verify via grep)
 // ────────────────────────────────────────────────────────────────────
-const fs = require('fs');
 const dauTruongSrc = fs.readFileSync('src/app/dau-truong/page.js', 'utf-8');
 const adminMatchesSrc = fs.readFileSync('src/app/admin/matches/page.js', 'utf-8');
 const adminStudentsSrc = fs.readFileSync('src/app/admin/students/page.js', 'utf-8');

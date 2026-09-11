@@ -1,0 +1,1962 @@
+[
+  {
+    "text": "Mở phòng thi thử cho tôi",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Tôi muốn luyện đề thi THPT quốc gia",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Chuyển sang trang thi",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Làm đề thi thử hóa",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Vào phòng thi trực tuyến",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Cho tôi thi thử môn toán",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Thi thử môn vật lý 15 phút",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Vào làm bài thi THPT",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Trang thi thử đại học",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Mở danh sách đề thi",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Muốn làm đề thi thử sinh học",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Vào phòng thi 45 phút",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Mở trang thi trực tuyến",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Bắt đầu làm bài thi",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Luyện giải đề đại học",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Tôi cần thi thử ngay",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Mở phần thi trắc nghiệm",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Luyện đề trắc nghiệm toán",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Đề thi thử hóa học 2026",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Vào thi thử lý 12",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Cho làm đề thi thử",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Thi trực tuyến THPT QG",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Bắt đầu thi thử môn sinh",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Mở giao diện phòng thi",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Làm bài kiểm tra 15p",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Kiểm tra 45p hóa học",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Vào làm đề thi ngay",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Trang luyện đề THPT",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Tôi muốn làm bài thi",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Mở phòng thi toán",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Vào làm bài thi hóa",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Thi thử vật lý lớp 12",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Luyện tập đề thi tổng hợp",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Cho làm test 15 phút",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Vào phần làm đề thi",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Mở trang đề thi quốc gia",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Thi thử toán học",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Luyện đề sinh học 12",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Vào phòng thi trắc nghiệm",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Thi trắc nghiệm hóa 12",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Mở mục thi thử",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Đi tới phòng thi",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Làm đề thi thử ngay",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Vào phòng kiểm tra",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Bắt đầu làm bài kiểm tra",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Chuyển tới trang phòng thi",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Mở giao diện làm đề thi",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Vào thi thử pvp thi đấu",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Mở phòng thi trắc nghiệm online",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Làm bài thi thử toán lý hóa",
+    "intent": "nav_phongthi",
+    "subject": null
+  },
+  {
+    "text": "Vào đấu trường sinh tử pvp",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Thách đấu đấu trường 1v1",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Tôi muốn đấu pvp với bạn học",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Mở trang đấu trường PvP",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Chuyển sang đấu trường",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Thách đấu bạn bè 1v1",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Vào phòng chờ đấu trường",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Đấu pvp toán học",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Thách đấu môn hóa 1v1",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Tìm đối thủ đấu trường",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Vào làm trận pvp 1v1",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Mở bảng xếp hạng đấu trường",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Đấu trường tri thức 1v1",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Thách đấu vật lý pvp",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Tạo phòng đấu 1v1",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Ghép trận đấu trường ngay",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Vào chơi pvp trực tuyến",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Đấu 1v1 môn sinh học",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Mở chế độ thách đấu",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Tìm trận 1v1 nhanh",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Chơi đấu trường PvP",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Vào đấu trường học tập",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Thách đấu xem ai điểm cao hơn",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Vào thi đấu 1v1",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Mở sảnh chờ đấu trường",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Vào game pvp 1v1",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Đấu trường xếp hạng elo",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Tìm đối thủ pvp toán",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Thách đấu pvp lý hóa",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Mở trang thách đấu 1v1",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Vào chế độ thi đấu pvp",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Thách đấu sinh học 1v1",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Ghép hàng chờ đấu trường",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Mở đấu trường xếp hạng",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Vào chiến đấu pvp 1v1",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Chơi pvp cùng bạn",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Thách đấu trực tiếp 1v1",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Vào phòng đấu PvP",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Mở trang PvP Đấu trường",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Tìm trận đấu PvP ngay",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Bắt đầu trận đấu 1v1",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Vào giao diện đấu trường",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Đi tới sảnh PvP",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Thách đấu người chơi khác",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Vào phòng thi đấu 1v1",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Vào đấu trường điểm Elo",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Đấu 1v1 thách đấu tri thức",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Mở mục PvP Đấu trường",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Vào đấu trường trực tuyến",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Bắt đầu thách đấu 1v1",
+    "intent": "nav_dautruong",
+    "subject": null
+  },
+  {
+    "text": "Mở hồ sơ cá nhân của tôi",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Xem avatar chibi và danh hiệu",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Đổi trang phục hồ sơ",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Mở trang cá nhân",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Xem thông tin tài khoản",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Vào trang hồ sơ người dùng",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Xem danh hiệu đã đạt được",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Đổi khung avatar chibi",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Xem điểm kinh nghiệm exp",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Mở tủ đồ chibi",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Xem lịch sử học tập",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Xem thứ hạng Elo của tôi",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Trang trí avatar cá nhân",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Mở trang thông tin hồ sơ",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Xem bộ sưu tập danh hiệu",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Xem số tinh thể hiện có",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Đổi vật phẩm avatar",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Vào mục hồ sơ cá nhân",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Xem level và cấp độ",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Mở bảng trang bị chibi",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Xem hồ sơ thành tích",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Chỉnh sửa hồ sơ cá nhân",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Xem avatar và khung hình",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Vào xem profile cá nhân",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Mở trang thành tích học tập",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Xem huy hiệu đã nhận",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Thay đổi trang phục chibi",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Vào trang thông tin cá nhân",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Mở hồ sơ học sinh",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Xem điểm Elo và Rank",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Xem danh sách vật phẩm",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Mở tủ đồ thời trang chibi",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Xem số trận thắng thua",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Mở phần hồ sơ cá nhân",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Xem thông tin level",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Vào trang chỉnh sửa profile",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Mở trang bị danh hiệu",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Xem kinh nghiệm tích lũy",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Vào kiểm tra hồ sơ",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Mở avatar chibi của tôi",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Xem bộ trang phục avatar",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Vào trang cá nhân học viên",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Mở khung viền avatar",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Xem bảng thành tựu",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Vào trang cài đặt hồ sơ",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Mở trang cá nhân của tôi",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Xem tổng số tinh thể",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Xem lịch sử thi đấu pvp",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Vào xem thông tin profile",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Mở trang cá nhân học sinh",
+    "intent": "nav_hoso",
+    "subject": null
+  },
+  {
+    "text": "Vào mạng xã hội story xem bài viết",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Mở trang story học tập",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Xem bài đăng của các bạn",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Chuyển sang trang Story",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Mở bảng tin học tập",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Xem tin tức mạng xã hội",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Đăng bài viết lên story",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Vào mạng xã hội STEM",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Xem chia sẻ kinh nghiệm học tập",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Mở trang bài viết cộng đồng",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Xem tin mới trên story",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Vào lướt story học tập",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Xem thảo luận của học sinh",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Mở mục tin tức cộng đồng",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Đọc các bài viết hay",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Vào diễn đàn story",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Xem bài đăng mới nhất",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Mở trang mạng xã hội",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Xem story của bạn bè",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Đăng cảm nghĩ lên story",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Vào trang bảng tin",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Đọc bài viết chia sẻ mẹo thi",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Xem tin tức STEM HUB",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Mở giao diện Story mạng xã hội",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Lướt story học tập",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Xem bài viết môn hóa học",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Xem chia sẻ mẹo giải toán",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Vào feed bài viết story",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Mở trang cộng đồng học sinh",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Đăng câu hỏi lên story",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Xem bài đăng môn vật lý",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Vào mạng xã hội bài viết",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Đọc tin tức giáo dục",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Mở bảng tin cộng đồng",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Xem thảo luận bài tập",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Vào trang tin tức story",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Xem các bài chia sẻ kinh nghiệm",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Mở trang feeds bài viết",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Xem bài đăng nổi bật",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Đăng thảo luận lên story",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Vào mục story học tập",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Xem thông tin bài đăng mới",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Mở mạng xã hội STEM HUB",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Đọc các bài viết hướng dẫn",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Xem story cộng đồng học sinh",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Vào trang chia sẻ kiến thức",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Mở feed tin tức story",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Đọc thảo luận giải đề",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Xem bài đăng từ giáo viên",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Mở diễn đàn thảo luận story",
+    "intent": "nav_story",
+    "subject": null
+  },
+  {
+    "text": "Đổi giao diện sáng tối",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Bật chế độ dark mode",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Tắt chế độ tối đổi sang chế độ sáng",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Chuyển sang giao diện tối",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Bật chế độ sáng",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Đổi màu nền website",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Bật giao diện ban đêm",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Chuyển theme sáng tối",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Bật chế độ xem đêm",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Tắt dark mode",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Chuyển sang light mode",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Đổi giao diện sang màu tối",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Đổi giao diện sang màu sáng",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Bật phông nền tối",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Đổi chế độ hiển thị sáng tối",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Tắt giao diện tối",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Chuyển màu nền sáng",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Bật chế độ giao diện tối",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Bật chế độ giao diện sáng",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Đổi theme website sang dark",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Chuyển theme website sang light",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Bật chế độ ban ngày",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Bật dark theme",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Tắt dark theme",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Đổi tone màu sáng tối",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Chuyển sang phông nền sáng",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Chuyển sang phông nền tối",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Đổi màn hình sang chế độ tối",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Đổi màn hình sang chế độ sáng",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Bật chế độ đọc ban đêm",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Tắt chế độ đọc ban đêm",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Thay đổi theme sáng tối",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Chuyển màu màn hình",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Đổi giao diện tối cho đỡ mỏi mắt",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Bật chế độ ánh sáng đêm",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Tắt ánh sáng đêm",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Chuyển nền đen",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Chuyển nền trắng",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Đổi giao diện màu đen",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Đổi giao diện màu trắng",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Bật chế độ xem tối",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Tắt chế độ xem tối",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Thay đổi màu nền app",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Chuyển sang giao diện ban đêm",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Chuyển sang giao diện ban ngày",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Bật nền tối cyberpunk",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Đổi theme màn hình",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Bật chế độ hiển thị đêm",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Tắt giao diện ban đêm",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Chuyển đổi giao diện sáng tối",
+    "intent": "toggle_theme",
+    "subject": null
+  },
+  {
+    "text": "Phản ứng este xà phòng hóa là gì",
+    "intent": "stem_query",
+    "subject": "hoa"
+  },
+  {
+    "text": "Công thức glucozơ tráng bạc tạo bao nhiêu ag",
+    "intent": "stem_query",
+    "subject": null
+  },
+  {
+    "text": "Phương trình sắt tác dụng axit hcl",
+    "intent": "stem_query",
+    "subject": "hoa"
+  },
+  {
+    "text": "Giải thích phản ứng trùng hợp polime",
+    "intent": "stem_query",
+    "subject": "hoa"
+  },
+  {
+    "text": "Tính chất hóa học của anken ankin",
+    "intent": "stem_query",
+    "subject": "hoa"
+  },
+  {
+    "text": "Công thức dao động điều hòa x bằng a cos",
+    "intent": "stem_query",
+    "subject": "ly"
+  },
+  {
+    "text": "Hiện tượng cộng hưởng xảy ra khi nào",
+    "intent": "stem_query",
+    "subject": null
+  },
+  {
+    "text": "Tổng trở mạch rlc nối tiếp tính như thế nào",
+    "intent": "stem_query",
+    "subject": "ly"
+  },
+  {
+    "text": "Định luật khúc xạ ánh sáng n1 sin i",
+    "intent": "stem_query",
+    "subject": null
+  },
+  {
+    "text": "Công thức tính bước sóng lambda",
+    "intent": "stem_query",
+    "subject": "ly"
+  },
+  {
+    "text": "Công thức đạo hàm hàm số mũ và logarit",
+    "intent": "stem_query",
+    "subject": "toan"
+  },
+  {
+    "text": "Tính diện tích hình phẳng bằng tích phân",
+    "intent": "stem_query",
+    "subject": "toan"
+  },
+  {
+    "text": "Phương trình bậc hai có 2 nghiệm phân biệt khi nào",
+    "intent": "stem_query",
+    "subject": "toan"
+  },
+  {
+    "text": "Công thức tính thể tích khối chóp",
+    "intent": "stem_query",
+    "subject": null
+  },
+  {
+    "text": "Cách tìm tiệm cận đứng và tiệm cận ngang",
+    "intent": "stem_query",
+    "subject": null
+  },
+  {
+    "text": "Cấu trúc xoắn kép adn nguyên tắc bổ sung",
+    "intent": "stem_query",
+    "subject": "sinh"
+  },
+  {
+    "text": "Định luật cân bằng hardy-weinberg quần thể",
+    "intent": "stem_query",
+    "subject": null
+  },
+  {
+    "text": "Mô hình khảm động màng sinh chất tế bào",
+    "intent": "stem_query",
+    "subject": "hoa"
+  },
+  {
+    "text": "Quá trình phiên mã và dịch mã tổng hợp protein",
+    "intent": "stem_query",
+    "subject": null
+  },
+  {
+    "text": "Quy luật phân li độc lập của mendel",
+    "intent": "stem_query",
+    "subject": "sinh"
+  },
+  {
+    "text": "Tính khối lượng kết tủa baso4",
+    "intent": "stem_query",
+    "subject": null
+  },
+  {
+    "text": "Sóng dừng trên dây hai đầu cố định",
+    "intent": "stem_query",
+    "subject": "ly"
+  },
+  {
+    "text": "Tính tích phân xác định từ 0 đến 1",
+    "intent": "stem_query",
+    "subject": "toan"
+  },
+  {
+    "text": "Cơ chế di truyền và biến dị ở cấp độ tế bào",
+    "intent": "stem_query",
+    "subject": "sinh"
+  },
+  {
+    "text": "Phản ứng nhiệt nhôm tạo ra chất gì",
+    "intent": "stem_query",
+    "subject": "hoa"
+  },
+  {
+    "text": "Chu kỳ dao động của con lắc đơn",
+    "intent": "stem_query",
+    "subject": "ly"
+  },
+  {
+    "text": "Giải phương trình lượng giác cơ bản",
+    "intent": "stem_query",
+    "subject": "toan"
+  },
+  {
+    "text": "Đột biến gen và đột biến nhiễm sắc thể",
+    "intent": "stem_query",
+    "subject": "sinh"
+  },
+  {
+    "text": "Đồng đẳng và đồng phân là gì",
+    "intent": "stem_query",
+    "subject": null
+  },
+  {
+    "text": "Gia tốc trọng trường và lực hấp dẫn",
+    "intent": "stem_query",
+    "subject": null
+  },
+  {
+    "text": "Tính đạo hàm cấp hai của hàm số",
+    "intent": "stem_query",
+    "subject": "toan"
+  },
+  {
+    "text": "Quá trình quang hợp ở thực vật c3 c4",
+    "intent": "stem_query",
+    "subject": "ly"
+  },
+  {
+    "text": "Kim loại kiềm và kiềm thổ phản ứng với nước",
+    "intent": "stem_query",
+    "subject": "hoa"
+  },
+  {
+    "text": "Tần số góc và pha ban đầu của dao động",
+    "intent": "stem_query",
+    "subject": "ly"
+  },
+  {
+    "text": "Số phức và tọa độ điểm biểu diễn",
+    "intent": "stem_query",
+    "subject": null
+  },
+  {
+    "text": "Các giai đoạn nguyên phân và giảm phân",
+    "intent": "stem_query",
+    "subject": null
+  },
+  {
+    "text": "Axit béo khan và phản ứng thủy phân",
+    "intent": "stem_query",
+    "subject": "hoa"
+  },
+  {
+    "text": "Hiện tượng quang điện ngoài và thuyết lượng tử",
+    "intent": "stem_query",
+    "subject": "ly"
+  },
+  {
+    "text": "Tính khoảng cách từ điểm đến mặt phẳng",
+    "intent": "stem_query",
+    "subject": null
+  },
+  {
+    "text": "Hoạt động của enzim và màng tế bào",
+    "intent": "stem_query",
+    "subject": "sinh"
+  },
+  {
+    "text": "Đồng độ mol và nồng độ phần trăm",
+    "intent": "stem_query",
+    "subject": null
+  },
+  {
+    "text": "Vận tốc cực đại trong dao động điều hòa",
+    "intent": "stem_query",
+    "subject": "ly"
+  },
+  {
+    "text": "Cực trị của hàm số bậc ba",
+    "intent": "stem_query",
+    "subject": "toan"
+  },
+  {
+    "text": "Nhiễm sắc thể giới tính và di truyền liên kết",
+    "intent": "stem_query",
+    "subject": null
+  },
+  {
+    "text": "Sự điện phân dung dịch cuso4",
+    "intent": "stem_query",
+    "subject": null
+  },
+  {
+    "text": "Mạch dao động lc và sóng điện từ",
+    "intent": "stem_query",
+    "subject": "ly"
+  },
+  {
+    "text": "Tính thể tích khối cầu bán kính r",
+    "intent": "stem_query",
+    "subject": null
+  },
+  {
+    "text": "Sinh sản vô tính và hữu tính ở động vật",
+    "intent": "stem_query",
+    "subject": "sinh"
+  },
+  {
+    "text": "Phản ứng tráng gương của anđehit",
+    "intent": "stem_query",
+    "subject": "hoa"
+  },
+  {
+    "text": "Định luật bảo toàn động lượng và năng lượng",
+    "intent": "stem_query",
+    "subject": null
+  },
+  {
+    "text": "Chào bạn",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Xin chào Javit",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Chào buổi sáng nhé",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Chào buổi chiều",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Chào buổi tối nha",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Hi NOVA",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Hello cậu",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Cảm ơn bạn nhiều",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Cảm ơn nhé",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Cảm ơn NOVA nha",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Cảm ơn trợ lý nhiều nhé",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn tên là gì",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Tên bạn là gì vậy",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn là ai",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Giới thiệu về bản thân đi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn bao nhiêu tuổi rồi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn đến từ đâu",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Ai tạo ra bạn",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn do ai lập trình vậy",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn sống ở đâu",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Hôm nay thế nào rồi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn có khỏe không",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Cậu khỏe không NOVA",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Thời tiết hôm nay thế nào",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Trời hôm nay có đẹp không",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn thích làm gì nhất",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn có thích học không",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn có biết hát không",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn có biết chơi game không",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Kể một câu chuyện cười đi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Kể cho tớ nghe chuyện vui đi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Tâm sự chút đi bạn",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Trò chuyện phiếm tí nha",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn thông minh thật đấy",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn giỏi quá NOVA ơi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "NOVA thật tuyệt vời",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn thật là đáng yêu",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Chúc bạn một ngày tốt lành",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Chúc buổi tối vui vẻ nha",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Chúc ngủ ngon nhé",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Tạm biệt bạn",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Hẹn gặp lại NOVA",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bye bye NOVA",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Tạm biệt nhé",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Chào nha",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn đang làm gì đấy",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Có gì mới không bạn",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Học mệt quá bạn ơi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Hôm nay tớ buồn quá",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Vui quá bạn ơi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Thi xong rồi sướng quá",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Cố lên nha NOVA",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Chúc bạn làm việc hiệu quả",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Cảm ơn cậu rất nhiều",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "NOVA ơi giúp tớ trò chuyện chút",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn biết tiếng Anh không",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn là con robot hả",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn có cảm xúc không",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn thích màu gì nhất",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn học trường nào",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn ăn cơm chưa",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn uống nước chưa",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Nói gì vui vui đi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Cậu đáng yêu thế",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Tôi yêu bạn NOVA",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Trêu bạn chút thôi hihi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Hihi chào cậu nha",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Good night Javit",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Good afternoon NOVA",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Thank you very much",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Nice to meet you",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Có khỏe không NOVA ơi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Hôm nay thế nào rồi bạn",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Mệt mỏi quá cậu ơi",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Đỡ mệt hơn rồi cảm ơn",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Cảm ơn bạn vì tất cả nha",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Thật là tuyệt vời",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Quá siêu luôn NOVA",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Rất sẵn lòng giúp bạn",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Hẹn mai gặp lại nhé",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Tạm biệt Javit nha",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Chào thân ái",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Dạo này sao rồi cậu",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Mọi chuyện ổn chứ bạn",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Cảm ơn đã hỗ trợ tớ",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Bạn nhiệt tình quá",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Độc đáo đấy NOVA",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Thú vị thật nha",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Haha buồn cười quá",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Ok cảm ơn bạn nha",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Rất vui được làm quen với bạn",
+    "intent": "chitchat",
+    "subject": null
+  },
+  {
+    "text": "Chào mừng bạn đến đây",
+    "intent": "chitchat",
+    "subject": null
+  }
+]

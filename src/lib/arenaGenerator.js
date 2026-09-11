@@ -818,3 +818,89 @@ export const generateBiologyMatchPool = async (seenHistory = []) => {
   return shuffled.map((q, idx) => ({ ...q, id: `bio_q_${idx}`, idx }));
 };
 
+export const FALLBACK_CHEMISTRY_MCQS = [
+  {
+    type: 'mcq',
+    text: 'Dung dịch làm quỳ tím chuyển sang màu đỏ là:',
+    choices: ['HCl', 'NaOH', 'NaCl', 'H2O'],
+    correct: 0,
+    note: 'Dung dịch axit làm quỳ tím hóa đỏ (HCl).'
+  },
+  {
+    type: 'mcq',
+    text: 'Kim loại nào sau đây phản ứng mãnh liệt với nước ở nhiệt độ thường?',
+    choices: ['Natri (Na)', 'Sắt (Fe)', 'Đồng (Cu)', 'Vàng (Au)'],
+    correct: 0,
+    note: 'Natri (Na) là kim loại kiềm phản ứng mạnh với nước giải phóng H2.'
+  },
+  {
+    type: 'mcq',
+    text: 'Chất nào sau đây là este có mùi thơm đặc trưng của chuối chín?',
+    choices: ['Isoamyl axetat', 'Ethyl axetat', 'Methyl fomat', 'Benzyl axetat'],
+    correct: 0,
+    note: 'Isoamyl axetat (CH3COOCH2CH2CH(CH3)2) có mùi thơm quả chuối chín.'
+  },
+  {
+    type: 'mcq',
+    text: 'Công thức hóa học của vôi sống là:',
+    choices: ['CaO', 'Ca(OH)2', 'CaCO3', 'CaSO4'],
+    correct: 0,
+    note: 'Vôi sống là Canxi oxit (CaO).'
+  },
+  {
+    type: 'mcq',
+    text: 'Khí nào sau đây gây ra hiệu ứng nhà kính chính trên Trái Đất?',
+    choices: ['CO2', 'O2', 'N2', 'H2'],
+    correct: 0,
+    note: 'Khí cacbonic (CO2) là khí nhà kính phổ biến nhất.'
+  },
+  {
+    type: 'mcq',
+    text: 'Thuốc thử dùng để nhận biết hồ tinh bột là:',
+    choices: ['Dung dịch Iot (I2)', 'Dung dịch AgNO3', 'Dung dịch Cu(OH)2', 'Quỳ tím'],
+    correct: 0,
+    note: 'Iot tạo với hồ tinh bột hợp chất màu xanh tím đặc trưng.'
+  },
+  {
+    type: 'tf',
+    context: 'Cho các phát biểu về este và lipid, xác định Đúng hoặc Sai cho mỗi nhận định:',
+    statements: [
+      'Tất cả các este đều tan tốt trong nước.',
+      'Chất béo là trieste của glycerol với axit béo.',
+      'Thủy phân este trong môi trường kiềm gọi là phản ứng xà phòng hóa.',
+      'Dầu mỡ động thực vật có cùng thành phần với dầu mỡ bôi trơn máy.'
+    ],
+    correct: [false, true, true, false],
+    note: 'Este ít tan trong nước. Chất béo là trieste của glycerol. Thủy phân este trong kiềm = xà phòng hóa. Dầu bôi trơn máy là hydrocarbon.'
+  }
+];
+
+export const generateChemistryMatchPool = async (seenHistory = []) => {
+  let pool = await fetchFirestoreQuestions('chemistry');
+  const examPool = parseExamQuestionsForSubject('chemistry');
+  pool = [...pool, ...examPool];
+
+  CHEMISTRY_MISSIONS.forEach(m => {
+    pool.push({
+      type: 'mcq',
+      text: `Trong phản ứng điều chế/thí nghiệm "${m.name}", phương trình hóa học đúng là gì?`,
+      choices: [m.equation, '2NaOH + H2SO4 -> Na2SO4 + 2H2O', 'CaCO3 -> CaO + CO2', '2H2 + O2 -> 2H2O'],
+      correct: 0,
+      note: m.instructions
+    });
+  });
+
+  if (pool.length === 0) {
+    pool = [...FALLBACK_CHEMISTRY_MCQS];
+  }
+
+  let available = pool.filter(q => !seenHistory.includes(q.text || q.context));
+  if (available.length === 0) {
+    available = pool;
+  }
+
+  const shuffled = shuffleArray(available);
+  return shuffled.map((q, idx) => ({ ...q, id: `chem_q_${idx}`, idx }));
+};
+
+

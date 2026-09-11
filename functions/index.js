@@ -161,35 +161,69 @@ exports.submitAnswer = functions.https.onCall(async (data, context) => {
       throw new functions.https.HttpsError('invalid-argument', 'Invalid questionId.');
     }
     const target = questionPool[astIndex];
+    let scoreAdded = 0;
     
     // Nhận diện loại câu hỏi dựa trên type của câu hỏi đó
-    if (target.type === 'mcq') {
-      correct = String(target.correct) === String(selectedAnswer);
+    if (target.type === 'mcq' || Array.isArray(target.choices)) {
+      const selectedStr = String(selectedAnswer);
+      const correctStr = String(target.correct);
+      const indexMap = { '0': 'A', '1': 'B', '2': 'C', '3': 'D' };
+      const correctChar = indexMap[correctStr] || correctStr;
+      const selectedChar = indexMap[selectedStr] || selectedStr;
+      
+      correct = (correctStr === selectedStr) || (correctChar.toUpperCase() === selectedChar.toUpperCase());
+      scoreAdded = correct ? 1 : 0;
+      explanation = target.note || target.explanation || '';
+    } else if (target.type === 'tf' || target.type === 'true_false') {
+      const answers = Array.isArray(selectedAnswer)
+        ? selectedAnswer
+        : selectedAnswer && Array.isArray(selectedAnswer.answers)
+          ? selectedAnswer.answers
+          : [];
+      let correctCount = 0;
+      const totalStatements = Array.isArray(target.correct) ? target.correct.length : 4;
+      if (Array.isArray(target.correct) && answers.length === target.correct.length) {
+        answers.forEach((val, idx) => {
+          if (val === target.correct[idx]) correctCount++;
+        });
+      }
+      scoreAdded = totalStatements > 0 ? correctCount / totalStatements : 0;
+      correct = scoreAdded === 1;
+      explanation = target.note || target.explanation || '';
+    } else if (target.type === 'sa' || target.type === 'short_answer') {
+      const userVal = String(selectedAnswer).trim().toLowerCase();
+      const rawTarget = target.correctShortAnswer ?? target.correctAnswer ?? target.correct ?? target.answer ?? '';
+      const targetVal = String(rawTarget).trim().toLowerCase();
+      const userNum = parseFloat(userVal);
+      const targetNum = parseFloat(targetVal);
+      if (!isNaN(userNum) && !isNaN(targetNum)) {
+        correct = Math.abs(userNum - targetNum) <= 0.1;
+      } else {
+        correct = userVal === targetVal;
+      }
+      scoreAdded = correct ? 1 : 0;
       explanation = target.note || target.explanation || '';
     } else if (target.type === 'practical_volume') {
       const userVal = (typeof selectedAnswer === 'object' && selectedAnswer !== null)
         ? Number(selectedAnswer.x)
         : Number(selectedAnswer);
       correct = Math.abs(userVal - Number(target.correct)) <= 0.1;
+      scoreAdded = correct ? 1 : 0;
       explanation = target.note || target.explanation || '';
     } else {
       const userX = selectedAnswer && selectedAnswer.x !== undefined ? Number(selectedAnswer.x) : NaN;
       const userY = selectedAnswer && selectedAnswer.y !== undefined ? Number(selectedAnswer.y) : NaN;
       const targetCoord = target.coord || target.ans || { x: 0, y: 0 };
       correct = targetCoord.x === userX && targetCoord.y === userY;
+      scoreAdded = correct ? 1 : 0;
       explanation = target.note || target.explanation || '';
     }
 
     const scoreKey = isPlayer1 ? 'player1Score' : 'player2Score';
     const currentScore = roomData[scoreKey] || 0;
-    const newScore = correct ? currentScore + 1 : currentScore;
+    const newScore = currentScore + scoreAdded;
 
-    const nextIndex = astIndex + 1;
-    if (nextIndex >= questionPool.length) {
-      currentProgress = 100;
-    } else {
-      currentProgress = Math.floor((nextIndex / questionPool.length) * 100);
-    }
+    currentProgress = Math.min(100, Math.round((newScore / Math.max(1, questionPool.length)) * 100));
 
     const updateData = {
       [scoreKey]: newScore,
@@ -205,19 +239,46 @@ exports.submitAnswer = functions.https.onCall(async (data, context) => {
     if (!q) {
       throw new functions.https.HttpsError('not-found', 'Question not found.');
     }
+    let scoreAdded = 0;
 
-    if (q.type === 'mcq') {
-      correct = q.correct === selectedAnswer;
+    if (q.type === 'mcq' || Array.isArray(q.choices)) {
+      const selectedStr = String(selectedAnswer);
+      const correctStr = String(q.correct);
+      const indexMap = { '0': 'A', '1': 'B', '2': 'C', '3': 'D' };
+      const correctChar = indexMap[correctStr] || correctStr;
+      const selectedChar = indexMap[selectedStr] || selectedStr;
+
+      correct = (correctStr === selectedStr) || (correctChar.toUpperCase() === selectedChar.toUpperCase());
+      scoreAdded = correct ? 1 : 0;
       explanation = q.note || q.explanation || '';
-    } else if (q.type === 'tf') {
+    } else if (q.type === 'tf' || q.type === 'true_false') {
       const answers = Array.isArray(selectedAnswer)
         ? selectedAnswer
         : selectedAnswer && Array.isArray(selectedAnswer.answers)
           ? selectedAnswer.answers
           : [];
+      let correctCount = 0;
+      const totalStatements = Array.isArray(q.correct) ? q.correct.length : 4;
       if (Array.isArray(q.correct) && answers.length === q.correct.length) {
-        correct = q.correct.every((value, idx) => value === answers[idx]);
+        answers.forEach((val, idx) => {
+          if (val === q.correct[idx]) correctCount++;
+        });
       }
+      scoreAdded = totalStatements > 0 ? correctCount / totalStatements : 0;
+      correct = scoreAdded === 1;
+      explanation = q.note || q.explanation || '';
+    } else if (q.type === 'sa' || q.type === 'short_answer') {
+      const userVal = String(selectedAnswer).trim().toLowerCase();
+      const rawTarget = q.correctShortAnswer ?? q.correctAnswer ?? q.correct ?? q.answer ?? '';
+      const targetVal = String(rawTarget).trim().toLowerCase();
+      const userNum = parseFloat(userVal);
+      const targetNum = parseFloat(targetVal);
+      if (!isNaN(userNum) && !isNaN(targetNum)) {
+        correct = Math.abs(userNum - targetNum) <= 0.1;
+      } else {
+        correct = userVal === targetVal;
+      }
+      scoreAdded = correct ? 1 : 0;
       explanation = q.note || q.explanation || '';
     } else if (q.type === 'practical_dna') {
       const submitted = typeof selectedAnswer === 'object' && selectedAnswer.answer
@@ -234,6 +295,7 @@ exports.submitAnswer = functions.https.onCall(async (data, context) => {
         })
         .join('');
       correct = submitted === expected;
+      scoreAdded = correct ? 1 : 0;
       explanation = q.note || q.explanation || `Chuỗi đúng là: ${expected}.`;
     } else if (q.type === 'practical_cycle') {
       const answerOrder = Array.isArray(selectedAnswer)
@@ -243,18 +305,19 @@ exports.submitAnswer = functions.https.onCall(async (data, context) => {
           : [];
       const expectedOrder = Array.isArray(q.correctOrder) ? q.correctOrder : [];
       correct = answerOrder.length === expectedOrder.length && answerOrder.every((step, idx) => step === expectedOrder[idx]);
+      scoreAdded = correct ? 1 : 0;
       explanation = q.note || q.explanation || `Thứ tự đúng: ${expectedOrder.join(' → ')}.`;
     } else {
       correct = String(selectedAnswer) === String(q.correct);
+      scoreAdded = correct ? 1 : 0;
       explanation = q.note || q.explanation || '';
     }
 
     const scoreKey = isPlayer1 ? 'player1Score' : 'player2Score';
     const currentScore = roomData[scoreKey] || 0;
-    const newScore = correct ? currentScore + 1 : currentScore;
+    const newScore = currentScore + scoreAdded;
 
-    currentProgress = Math.round((newScore / questionPool.length) * 100);
-    // Nếu đã trả lời câu cuối cùng và điểm đúng >= 60%, thưởng thêm tiến độ 10%
+    currentProgress = Math.round((newScore / Math.max(1, questionPool.length)) * 100);
     if (qIndex === questionPool.length - 1 && newScore / questionPool.length >= 0.6) {
       currentProgress = Math.min(100, currentProgress + 10);
     }
@@ -273,21 +336,63 @@ exports.submitAnswer = functions.https.onCall(async (data, context) => {
     if (!q) {
       throw new functions.https.HttpsError('not-found', 'Question not found.');
     }
+    let scoreAdded = 0;
 
-    const selectedStr = String(selectedAnswer);
-    const correctStr = String(q.correct);
-    const indexMap = { '0': 'A', '1': 'B', '2': 'C', '3': 'D' };
-    const correctChar = indexMap[correctStr] || correctStr;
-    const selectedChar = indexMap[selectedStr] || selectedStr;
-    
-    correct = (correctStr === selectedStr) || (correctChar.toUpperCase() === selectedChar.toUpperCase());
-    explanation = q.note || q.explanation || '';
+    if (q.type === 'mcq' || Array.isArray(q.choices)) {
+      const selectedStr = String(selectedAnswer);
+      const correctStr = String(q.correct);
+      const indexMap = { '0': 'A', '1': 'B', '2': 'C', '3': 'D' };
+      const correctChar = indexMap[correctStr] || correctStr;
+      const selectedChar = indexMap[selectedStr] || selectedStr;
+      
+      correct = (correctStr === selectedStr) || (correctChar.toUpperCase() === selectedChar.toUpperCase());
+      scoreAdded = correct ? 1 : 0;
+      explanation = q.note || q.explanation || '';
+    } else if (q.type === 'tf' || q.type === 'true_false') {
+      const answers = Array.isArray(selectedAnswer)
+        ? selectedAnswer
+        : selectedAnswer && Array.isArray(selectedAnswer.answers)
+          ? selectedAnswer.answers
+          : [];
+      let correctCount = 0;
+      const totalStatements = Array.isArray(q.correct) ? q.correct.length : 4;
+      if (Array.isArray(q.correct) && answers.length === q.correct.length) {
+        answers.forEach((val, idx) => {
+          if (val === q.correct[idx]) correctCount++;
+        });
+      }
+      scoreAdded = totalStatements > 0 ? correctCount / totalStatements : 0;
+      correct = scoreAdded === 1;
+      explanation = q.note || q.explanation || '';
+    } else if (q.type === 'sa' || q.type === 'short_answer') {
+      const userVal = String(selectedAnswer).trim().toLowerCase();
+      const rawTarget = q.correctShortAnswer ?? q.correctAnswer ?? q.correct ?? q.answer ?? '';
+      const targetVal = String(rawTarget).trim().toLowerCase();
+      const userNum = parseFloat(userVal);
+      const targetNum = parseFloat(targetVal);
+      if (!isNaN(userNum) && !isNaN(targetNum)) {
+        correct = Math.abs(userNum - targetNum) <= 0.1;
+      } else {
+        correct = userVal === targetVal;
+      }
+      scoreAdded = correct ? 1 : 0;
+      explanation = q.note || q.explanation || '';
+    } else {
+      const selectedStr = String(selectedAnswer);
+      const correctStr = String(q.correct);
+      const indexMap = { '0': 'A', '1': 'B', '2': 'C', '3': 'D' };
+      const correctChar = indexMap[correctStr] || correctStr;
+      const selectedChar = indexMap[selectedStr] || selectedChar;
+      correct = (correctStr === selectedStr) || (correctChar.toUpperCase() === selectedChar.toUpperCase());
+      scoreAdded = correct ? 1 : 0;
+      explanation = q.note || q.explanation || '';
+    }
 
     const scoreKey = isPlayer1 ? 'player1Score' : 'player2Score';
     const currentScore = roomData[scoreKey] || 0;
-    const newScore = correct ? currentScore + 1 : currentScore;
+    const newScore = currentScore + scoreAdded;
 
-    currentProgress = Math.round((newScore / questionPool.length) * 100);
+    currentProgress = Math.round((newScore / Math.max(1, questionPool.length)) * 100);
     if (qIndex === questionPool.length - 1 && newScore / questionPool.length >= 0.6) {
       currentProgress = Math.min(100, currentProgress + 10);
     }
@@ -1174,9 +1279,12 @@ exports.processCrystalTransaction = functions.https.onCall(async (data, context)
         }
         
         if (needsUpdate) {
-          transaction.update(userRef, {
-            'stats.dailyQuests': questsData
-          });
+          transaction.set(userRef, {
+            stats: {
+              ...(stats || {}),
+              dailyQuests: questsData
+            }
+          }, { merge: true });
         }
         
         return { success: true, dailyQuests: questsData.quests || [] };
@@ -1231,10 +1339,19 @@ exports.processCrystalTransaction = functions.https.onCall(async (data, context)
           return q;
         });
 
-        transaction.update(userRef, {
-          'personalization.crystals': newCrystals,
-          'stats.dailyQuests.quests': newQuests
-        });
+        const currentQuestsData = stats.dailyQuests || {};
+        const updatedQuestsData = { ...currentQuestsData, quests: newQuests };
+
+        transaction.set(userRef, {
+          personalization: {
+            ...(pers || {}),
+            crystals: newCrystals
+          },
+          stats: {
+            ...(stats || {}),
+            dailyQuests: updatedQuestsData
+          }
+        }, { merge: true });
 
         return { success: true, newCrystals, questId, reward: quest.reward };
       }

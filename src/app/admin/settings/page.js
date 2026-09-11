@@ -18,7 +18,7 @@ export default function SystemSettings() {
   // Form States
   const [settings, setSettings] = useState({
     sabotageEnabled: true,
-    theoryTimeLimit: 60,
+    theoryTimeLimit: 180,
     pvpCrystalStake: 50,
     pvpEloFactor: 25,
     expMultiplier: 1.0,
@@ -41,7 +41,7 @@ export default function SystemSettings() {
         // Tạo mặc định nếu chưa tồn tại
         const defaultSettings = {
           sabotageEnabled: true,
-          theoryTimeLimit: 60,
+          theoryTimeLimit: 180,
           pvpCrystalStake: 50,
           pvpEloFactor: 25,
           expMultiplier: 1.0,
@@ -92,7 +92,7 @@ export default function SystemSettings() {
     if (confirm("Bạn có chắc chắn muốn khôi phục toàn bộ cấu hình hệ thống về trạng thái mặc định?")) {
       const defaultSettings = {
         sabotageEnabled: true,
-        theoryTimeLimit: 60,
+        theoryTimeLimit: 180,
         pvpCrystalStake: 50,
         pvpEloFactor: 25,
         expMultiplier: 1.0,

@@ -16,7 +16,7 @@ const db = getFirestore();
 const REAL_TEST_BOT_ACCOUNTS = [
   { email: 'test1@gmail.com', name: 'Nguyễn Minh Khang', elo: 130, level: 4, wins: 8, losses: 3 },
   { email: 'test2@gmail.com', name: 'Trần Thị Thanh Vân', elo: 70, level: 3, wins: 5, losses: 3 },
-  { email: 'test3@gmail.com', name: 'Lê Hoàng Nam', elo: 70, level: 3, wins: 5, losses: 3 },
+  { email: 'test3@gmail.com', name: 'Lê Hoàng Nam', elo: 70, level: 3, wins: 5, losses: 3, subjectStrengths: { math: 86, physics: 89, chemistry: 83, biology: 37 } },
   { email: 'test4@gmail.com', name: 'Phạm Minh Anh', elo: 90, level: 6, wins: 8, losses: 7 },
   { email: 'test5@gmail.com', name: 'Vũ Hoàng Bách', elo: 80, level: 3, wins: 5, losses: 2 },
   { email: 'test6@gmail.com', name: 'Đặng Thùy Dương', elo: 50, level: 3, wins: 4, losses: 3 },
@@ -74,6 +74,7 @@ async function run() {
       'stats.level': botData.level,
       'stats.wins': botData.wins,
       'stats.losses': botData.losses,
+      ...(botData.subjectStrengths ? { 'stats.subjectStrengths': botData.subjectStrengths } : {}),
       'personalization.elo': botData.elo,
       'personalization.level': botData.level,
       'personalization.activeTitle': 'apprentice',
@@ -98,7 +99,8 @@ async function run() {
           wins: botData.wins,
           losses: botData.losses,
           exp: botData.level * 500,
-          nextLevelExp: botData.level * 1000
+          nextLevelExp: botData.level * 1000,
+          subjectStrengths: botData.subjectStrengths || { math: 50, physics: 50, chemistry: 50, biology: 50 }
         },
         personalization: {
           elo: botData.elo,

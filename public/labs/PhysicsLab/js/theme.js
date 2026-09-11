@@ -180,7 +180,41 @@ setTimeout(function injectTheorySystem() {
     }
     console.log('[Theme System] Injected Theory System via:', scriptPath);
 }, 100);
+
+    // --- PHYSICS AI CHATBOT INJECTION ---
+    injectPhysicsAIChatbot();
 });
+
+// Định nghĩa hàm injectPhysicsAIChatbot toàn cục để tự động thực thi ngay lập tức
+function injectPhysicsAIChatbot() {
+    if (document.querySelector('script[src*="physics-ai-chatbot.js"]') || document.getElementById('physics-ai-widget')) {
+        return;
+    }
+    const isFile = typeof window !== 'undefined' && window.location.protocol === 'file:';
+    const path = typeof window !== 'undefined' ? window.location.pathname : '';
+    const isJsDir = path.includes('/js/') || path.includes('\\js\\');
+    let scriptPath;
+    if (isFile) {
+        scriptPath = isJsDir ? './physics-ai-chatbot.js?v=1.0.1' : 'js/physics-ai-chatbot.js?v=1.0.1';
+    } else {
+        scriptPath = '/labs/PhysicsLab/js/physics-ai-chatbot.js?v=1.0.1';
+    }
+    const aiScript = document.createElement('script');
+    aiScript.src = scriptPath;
+    aiScript.async = true;
+    (document.head || document.documentElement).appendChild(aiScript);
+    console.log('[Theme System] Injected Physics AI Chatbot via:', scriptPath);
+}
+
+// Tự kích hoạt ngay khi theme.js tải
+try {
+    injectPhysicsAIChatbot();
+    if (typeof document !== 'undefined' && document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectPhysicsAIChatbot);
+    }
+} catch (e) {
+    console.warn('[Theme System] injectPhysicsAIChatbot err:', e);
+}
 
 function createGlobalSidebar() {
     // 0. Sidebar is now enabled on all pages including Home for consistency

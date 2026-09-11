@@ -220,7 +220,7 @@ export default function DailyGeometryChallenge({ onClose, onSelectChallenge, onX
 
     // Fetch from backend, fallback to bundled data
     const baseUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'http://localhost:8000';
-    axios.get(`${baseUrl}/api/daily-geometry-challenge`, { timeout: 3000 })
+    axios.get(`${baseUrl}/api/daily-geometry-challenge`, { timeout: 60000 })
       .then(res => {
         const data = res.data.challenges || [];
         setAllChallenges(data);

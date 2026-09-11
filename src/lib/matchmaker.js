@@ -121,6 +121,12 @@ export const joinMatchmakingQueue = async (
     const roomData = docSnap.data();
     console.log("👉 [3] Kiểm tra phòng:", docSnap.id, roomData);
 
+    // Tầng 4: Lazy GC - Bỏ qua các phòng đã quá hạn / mồ côi mà không tốn chi phí Cloud Function cron
+    if (roomData.expiresAt && Date.now() > roomData.expiresAt) {
+      console.log("🧹 [Lazy GC] Bỏ qua phòng mồ côi đã quá hạn:", docSnap.id);
+      continue;
+    }
+
     // Bỏ qua phòng do chính mình tạo
     if (roomData.player1?.uid === uid) {
       console.log("⚠️ Bỏ qua phòng do chính mình tạo ra");
@@ -161,7 +167,9 @@ export const joinMatchmakingQueue = async (
 
           transaction.update(roomRef, {
             subject: resolvedSubject,
-            timeRemaining: 300,
+            timeRemaining: 180,
+            matchStartTime: Date.now(),
+            expiresAt: Date.now() + 210000,
             player2: {
               uid: uid,
               name: finalName || 'Người chơi ẩn danh',
@@ -242,7 +250,9 @@ export const joinMatchmakingQueue = async (
     player2Progress: 0,
     player1Logs: ['Đấu thủ 1 đã sẵn sàng!'],
     player2Logs: ['Đấu thủ 2 đã sẵn sàng!'],
-    timeRemaining: timeLimit,
+    timeRemaining: Math.max(180, Number(timeLimit) || 180),
+    matchStartTime: Date.now(),
+    expiresAt: Date.now() + ((Number(timeLimit) || 180) + 30) * 1000,
     winnerId: null,
     createdAt: new Date().toISOString(),
     activeEffects: {

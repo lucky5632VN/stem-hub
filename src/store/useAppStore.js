@@ -48,7 +48,9 @@ export const useAppStore = create((set) => ({
     elo: 0,
     wins: 0,
     losses: 0,
-    subjectStrengths: { math: 50, physics: 50, chemistry: 50, biology: 50 }
+    subjectStrengths: { math: 50, physics: 50, chemistry: 50, biology: 50 },
+    face2FAEnabled: false,
+    faceDescriptor: null
   },
   setPersonalization: (data) => set((state) => ({
     personalization: { ...state.personalization, ...data }
@@ -63,7 +65,7 @@ export const useAppStore = create((set) => ({
     opponentInfo: null,
     matchResult: null,
     logs: [],
-    timeRemaining: 300
+    timeRemaining: 180
   },
 
   startMatching: (subject) => set({
@@ -75,11 +77,11 @@ export const useAppStore = create((set) => ({
       opponentInfo: null,
       matchResult: null,
       logs: [],
-      timeRemaining: 300
+      timeRemaining: 180
     }
   }),
 
-  startChallengeGame: (subject, timeLimit = 300) => set({
+  startChallengeGame: (subject, timeLimit = 180) => set({
     arenaState: {
       status: 'playing',
       subject,
@@ -131,5 +133,28 @@ export const useAppStore = create((set) => ({
   // Active Lab Sandbox State
   activeLab: null,
   setActiveLab: (lab) => set({ activeLab: lab }),
-}));
 
+  // AI Assistant Personalization & Adaptive Memory State
+  subjectFrequency: { hoa: 0, ly: 0, toan: 0, sinh: 0 },
+  conciseMode: false,
+  dislikeCount: 0,
+  incrementSubjectFrequency: (subject) => set((state) => {
+    if (!subject || state.subjectFrequency[subject] === undefined) return state;
+    return {
+      subjectFrequency: {
+        ...state.subjectFrequency,
+        [subject]: state.subjectFrequency[subject] + 1
+      }
+    };
+  }),
+  recordFeedback: (isLike) => set((state) => {
+    if (isLike) {
+      return { dislikeCount: Math.max(0, state.dislikeCount - 1) };
+    }
+    const newDislikes = state.dislikeCount + 1;
+    return {
+      dislikeCount: newDislikes,
+      conciseMode: newDislikes >= 2 ? true : state.conciseMode
+    };
+  }),
+}));

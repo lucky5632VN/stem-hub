@@ -1,8 +1,8 @@
 // API Client với timeout và error handling tốt hơn
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-// Fix W1: Thêm timeout 30s để tránh frontend đợi mãi mãi khi server treo
-const fetchWithTimeout = (url, options = {}, timeoutMs = 30000) => {
+// Fix W1: Thêm timeout 60s để tránh frontend đợi mãi mãi khi server treo
+const fetchWithTimeout = (url, options = {}, timeoutMs = 60000) => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -23,7 +23,7 @@ export const apiClient = {
       }
       return await response.json();
     } catch (err) {
-      if (err.name === 'AbortError') throw new Error('Request timeout sau 30 giây');
+      if (err.name === 'AbortError') throw new Error('Request timeout sau 60 giây');
       throw err;
     }
   },
@@ -45,7 +45,7 @@ export const apiClient = {
       }
       return await response.json();
     } catch (err) {
-      if (err.name === 'AbortError') throw new Error('Request timeout sau 30 giây');
+      if (err.name === 'AbortError') throw new Error('Request timeout sau 60 giây');
       throw err;
     }
   }

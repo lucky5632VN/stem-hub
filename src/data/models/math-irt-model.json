@@ -1,0 +1,66 @@
+{
+  "metadata": {
+    "modelName": "Item Response Theory (IRT) Math Adaptive Difficulty Model",
+    "trainedAt": "2026-08-31T07:45:39.078Z",
+    "datasetSize": 10,
+    "accuracy": "90.0%",
+    "meanLogLoss": "0.4557",
+    "scalingFactorAlpha": 1.7,
+    "targetSuccessProbabilityRange": [
+      0.6,
+      0.75
+    ]
+  },
+  "dataset": [
+    {
+      "studentElo": 1000,
+      "itemDiff": 1000,
+      "isCorrect": 1
+    },
+    {
+      "studentElo": 1000,
+      "itemDiff": 1400,
+      "isCorrect": 0
+    },
+    {
+      "studentElo": 1200,
+      "itemDiff": 1200,
+      "isCorrect": 1
+    },
+    {
+      "studentElo": 1200,
+      "itemDiff": 1600,
+      "isCorrect": 0
+    },
+    {
+      "studentElo": 1500,
+      "itemDiff": 1400,
+      "isCorrect": 1
+    },
+    {
+      "studentElo": 1500,
+      "itemDiff": 1800,
+      "isCorrect": 0
+    },
+    {
+      "studentElo": 1800,
+      "itemDiff": 1600,
+      "isCorrect": 1
+    },
+    {
+      "studentElo": 1800,
+      "itemDiff": 2200,
+      "isCorrect": 0
+    },
+    {
+      "studentElo": 2000,
+      "itemDiff": 1800,
+      "isCorrect": 1
+    },
+    {
+      "studentElo": 2000,
+      "itemDiff": 2200,
+      "isCorrect": 1
+    }
+  ]
+}

@@ -1,0 +1,313 @@
+import { NextResponse } from 'next/server';
+import { callResilientGemini } from '@/lib/geminiResilientPool';
+import { solveGeometryFacts, parseNumericValue } from '@/lib/geometryFactSolver';
+import { toNaturalVietnameseMathText } from '@/lib/mathFormatter';
+
+function cleanAndRepairGeometryJson(raw) {
+  if (!raw || typeof raw !== 'string') return null;
+  let s = raw.replace(/```json/gi, '').replace(/```/gi, '').trim();
+  const firstBrace = s.indexOf('{');
+  const lastBrace = s.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace > firstBrace) {
+    s = s.substring(firstBrace, lastBrace + 1);
+  }
+  try {
+    const parsed = JSON.parse(s);
+    if (parsed && typeof parsed === 'object') return parsed;
+  } catch {}
+  s = s.replace(/\/\/.*$/gm, '');
+  s = s.replace(/\/\*[\s\S]*?\*\//g, '');
+  s = s.replace(/:\s*([0-9]*\.?[0-9]+)\s*\*?\s*a\b/gi, (_, n) => ': ' + (parseFloat(n || 1) * 4).toFixed(2));
+  s = s.replace(/:\s*a\s*\*?\s*sqrt\((\d+)\)/gi, (_, r) => ': ' + (4 * Math.sqrt(parseInt(r, 10))).toFixed(2));
+  s = s.replace(/:\s*a\b(?!\w)/gi, ': 4');
+  s = s.replace(/:\s*\\?sqrt\{?(\d+)\}?/gi, (_, r) => ': ' + Math.sqrt(parseInt(r, 10)).toFixed(2));
+  s = s.replace(/sin\((\d+)(?:°|deg)?\)/gi, (_, deg) => Math.sin((parseInt(deg, 10) * Math.PI) / 180).toFixed(3));
+  s = s.replace(/cos\((\d+)(?:°|deg)?\)/gi, (_, deg) => Math.cos((parseInt(deg, 10) * Math.PI) / 180).toFixed(3));
+  s = s.replace(/tan\((\d+)(?:°|deg)?\)/gi, (_, deg) => Math.tan((parseInt(deg, 10) * Math.PI) / 180).toFixed(3));
+  s = s.replace(/:\s*([0-9\.\+\-\*\/\s\(\)]+?)(?=[,\}\]])/g, (match, expr) => {
+    const trimmed = expr.trim();
+    if (!trimmed) return match;
+    if (/^-?\d+(\.\d+)?$/.test(trimmed)) return ': ' + trimmed;
+    try {
+      if (/^[0-9\.\+\-\*\/\s\(\)]+$/.test(trimmed)) {
+        const val = Function('"use strict"; return (' + trimmed + ')')();
+        if (typeof val === 'number' && !isNaN(val) && isFinite(val)) {
+          return ': ' + Number(val.toFixed(3));
+        }
+      }
+    } catch {}
+    return ': ' + (parseFloat(trimmed) || 4);
+  });
+  s = s.replace(/'([^'\\]*(?:\\.[^'\\]*)*)'/g, '"$1"');
+  s = s.replace(/,(\s*[}\]])/g, '$1');
+  s = s.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
+  try {
+    const parsed = JSON.parse(s);
+    if (parsed && typeof parsed === 'object') return parsed;
+  } catch (e) {}
+  return null;
+}
+
+function extractFallbackGeometry(problemText) {
+  const clean = (problemText || '').toLowerCase();
+  let shapeType = 'hinh_chop_day_hcn';
+  let shapeName = 'Hình chóp S.ABCD (SA ⊥ đáy)';
+  const givenFacts = [];
+
+  let a = 4;
+  const canhMatch = clean.match(/cạnh(?:\s*đáy)?\s*(?:bằng\s*)?(\d+(?:\.\d+)?)/i);
+  if (canhMatch) a = parseFloat(canhMatch[1]) || 4;
+  givenFacts.push({ type: 'length', element: 'canh_day', value: String(a), numericValue: a });
+
+  // Phát hiện góc hoặc cạnh bên nghiêng
+  const scMatch = clean.match(/sc\s*(?:bằng\s*|=\s*)?([0-9a-z\*\.\s√]+?)(?:,|;|\.|\s|$)/i);
+  if (scMatch) {
+    const scVal = parseNumericValue(scMatch[1], 8);
+    givenFacts.push({ type: 'length', element: 'SC', value: scMatch[1].trim(), numericValue: scVal });
+  }
+
+  const angleMatch = clean.match(/(?:góc|tạo với).*?(\d+)(?:°| độ|deg)/i);
+  if (angleMatch) {
+    const deg = parseFloat(angleMatch[1]);
+    givenFacts.push({ type: 'angle', between: ['SC', 'mp_day'], degrees: deg });
+  }
+
+  // Phát hiện cạnh BC hoặc AB nếu có
+  const bcMatch = clean.match(/bc\s*(?:bằng\s*|=\s*)?([0-9a-z\*\.\s√\^]+?)(?:,|;|\.|\s|$)/i);
+  if (bcMatch) {
+    const bcVal = parseNumericValue(bcMatch[1], 4);
+    givenFacts.push({ type: 'length', element: 'BC', value: bcMatch[1].trim(), numericValue: bcVal });
+  }
+
+  // Phát hiện diện tích tam giác mặt bên (ví dụ: diện tích tam giác SBC bằng a^2*sqrt(3))
+  const areaMatch = clean.match(/(?:diện tích|s)\s*(?:tam giác)?\s*([a-z0-9']+)?\s*(?:bằng\s*|=\s*)?([0-9a-z\*\.\s√\^\\{}]+?)(?:,|;|\.|\s|$)/i);
+  if (areaMatch) {
+    const areaVal = parseNumericValue(areaMatch[2], 16 * Math.sqrt(3));
+    givenFacts.push({
+      type: 'area',
+      element: areaMatch[1] ? areaMatch[1].toUpperCase() : 'dien_tich',
+      value: areaMatch[2].trim(),
+      numericValue: areaVal
+    });
+  }
+
+  // Phát hiện góc mặt bên / mặt phẳng nghiêng với đáy
+  const faceAngleMatch = clean.match(/(?:góc giữa|mặt phẳng nghiêng|mặt bên).*?(\d+)(?:°| độ|deg)/i);
+  if (faceAngleMatch) {
+    const deg = parseFloat(faceAngleMatch[1]);
+    const targetFace = clean.includes('sbc') ? '(SBC)' : (clean.includes('scd') ? '(SCD)' : (clean.includes('a\'bc') ? "(A'BC)" : 'mat_ben'));
+    givenFacts.push({ type: 'angle', between: [targetFace, 'mp_day'], degrees: deg });
+  }
+
+  const hMatch = clean.match(/(?:chiều cao|đường cao|sa|sh|so)\s*(?:bằng\s*|=\s*)?(\d+(?:\.\d+)?)/i);
+  if (hMatch) {
+    const hVal = parseFloat(hMatch[1]) || 5;
+    givenFacts.push({ type: 'length', element: 'chieu_cao', value: String(hVal), numericValue: hVal });
+  }
+
+  if (clean.includes('sa vuông góc') || clean.includes('sa ⊥') || clean.includes('đáy là hình vuông') || clean.includes('đáy abcd') || clean.includes('s.abcd') || clean.includes('s.abc')) {
+    if (clean.includes('s.abc') || (clean.includes('chóp') && clean.includes('tam giác') && !clean.includes('tứ giác'))) {
+      shapeType = 'hinh_chop_tam_giac';
+      shapeName = 'Hình chóp S.ABC (SA ⊥ đáy)';
+      givenFacts.push({ type: 'perpendicular', line: 'SA', plane: 'mp_day' });
+    } else if (clean.includes('tứ giác đều') || clean.includes('chóp đều s.abcd')) {
+      shapeType = 'hinh_chop_tu_giac_deu';
+      shapeName = 'Hình chóp tứ giác đều S.ABCD';
+    } else {
+      shapeType = 'hinh_chop_day_hcn';
+      shapeName = 'Hình chóp S.ABCD (SA ⊥ đáy)';
+      givenFacts.push({ type: 'perpendicular', line: 'SA', plane: 'mp_day' });
+    }
+  } else if (clean.includes('tứ giác đều') || clean.includes('chóp đều s.abcd')) {
+    shapeType = 'hinh_chop_tu_giac_deu';
+    shapeName = 'Hình chóp tứ giác đều S.ABCD';
+  } else if (clean.includes('lăng trụ') || clean.includes("a'b'c'") || clean.includes('prism')) {
+    shapeType = 'hinh_lang_tru_tam_giac_deu';
+    shapeName = "Hình lăng trụ ABC.A'B'C'";
+  } else if (clean.includes('lập phương') || clean.includes('hộp chữ nhật')) {
+    shapeType = 'hinh_hop_chu_nhat';
+    shapeName = clean.includes('lập phương') ? "Hình lập phương ABCD.A'B'C'D'" : "Hình hộp chữ nhật ABCD.A'B'C'D'";
+  } else if (clean.includes('tam giác đều') || clean.includes('tứ diện đều') || /\bs\.abc\b/i.test(clean)) {
+    shapeType = 'hinh_chop_tam_giac_deu';
+    shapeName = 'Hình chóp tam giác đều S.ABC';
+  } else if (clean.includes('nón')) {
+    shapeType = 'hinh_non';
+    shapeName = 'Hình nón tròn xoay';
+  } else if (clean.includes('trụ')) {
+    shapeType = 'hinh_tru';
+    shapeName = 'Hình trụ tròn xoay';
+  } else if (clean.includes('cầu')) {
+    shapeType = 'hinh_cau';
+    shapeName = 'Hình cầu';
+  }
+
+  return {
+    shapeType,
+    shapeName,
+    givenFacts,
+    auxiliaryRequests: [],
+    donVi: 'cm',
+    originalProblemText: problemText
+  };
+}
+
+export async function POST(req) {
+  let problemText = '';
+  try {
+    const body = await req.json().catch(() => ({}));
+    problemText = (body.problemText || body.message || body.prompt || body.text || '').trim();
+    const imageBase64 = body.imageBase64;
+    const imageMimeType = body.imageMimeType || 'image/jpeg';
+
+    if (!problemText && !imageBase64) {
+      return NextResponse.json({ error: "Vui lòng cung cấp đề bài toán hình học hoặc tải lên ảnh." }, { status: 400 });
+    }
+
+    const prompt = `
+Bạn là chuyên gia bóc tách dữ liệu Toán học Hình học Không gian THPT.
+Nhiệm vụ của bạn CHỈ LÀ ĐỌC HIỂU ĐỀ BÀI VÀ TRÍCH XUẤT DỮ KIỆN GỐC (Given Facts), KHÔNG ĐƯỢC TỰ LÀM PHÉP TÍNH LƯỢNG GIÁC HAY ĐẠI SỐ ĐỂ ĐOÁN CHIỀU CAO. Toàn bộ tính toán toạ độ và tham số dẫn xuất sẽ do Fact Solver tự động giải.
+
+QUY TẮC BẮT BUỘC:
+1. CHỈ TRẢ VỀ ĐÚNG 1 KHỐI JSON DUY NHẤT. Tuyệt đối không thêm lời chào, không giải thích ngoài JSON.
+2. "shapeType" bắt buộc phải là một trong các giá trị sau:
+   - "hinh_chop_tam_giac" (Chóp có đáy tam giác S.ABC, ví dụ: SA vuông góc đáy, đáy vuông/cân/đều)
+   - "hinh_chop_day_hcn" (Chóp có đáy hình chữ nhật hoặc hình vuông, đường cao vuông góc đáy, ví dụ: SA vuông góc đáy)
+   - "hinh_chop_tu_giac_deu" (Chóp tứ giác đều S.ABCD)
+   - "hinh_chop_tam_giac_deu" (Chóp tam giác đều S.ABC)
+   - "hinh_hop_chu_nhat" (Hình hộp chữ nhật, hình lập phương)
+   - "hinh_lang_tru_tam_giac_deu" (Hình lăng trụ tam giác đều)
+   - "hinh_tru" (Hình trụ tròn xoay)
+   - "hinh_non" (Hình nón tròn xoay)
+   - "hinh_cau" (Hình cầu)
+   - "khac" (Khối hình khác)
+
+3. "givenFacts": Danh sách các dữ kiện đề bài cho NGUYÊN VĂN:
+   - Dữ kiện độ dài (length): { "type": "length", "element": "canh_day" | "BC" | "AB" | "AC" | "SC" | "SA" | "chieu_cao" | "canh_ben" | "duong_cheo" | "bankinh" | "duongsinh", "value": "2a", "numericValue": 8 }
+     * Quy ước chuẩn hóa nếu có ẩn a: a = 4. (ví dụ: "a" -> 4, "2a" -> 8, "a√2" -> 5.66, "a√3" -> 6.93, "a√5" -> 8.94).
+   - Dữ kiện góc (angle): { "type": "angle", "between": ["SC", "mp_day"] | ["(SBC)", "mp_day"] | ["(SCD)", "mp_day"] | ["canh_ben", "mp_day"], "degrees": 45 }
+   - Dữ kiện vuông góc (perpendicular): { "type": "perpendicular", "line": "SA", "plane": "mp_day" }
+   - Dữ kiện hình dạng đáy (shape_feature): { "type": "shape_feature", "feature": "day_la_hinh_vuong" | "day_la_hcn" | "day_la_tam_giac_vuong_can_tai_a" | "day_la_tam_giac_deu" }
+
+4. TUYỆT ĐỐI KHÔNG TỰ TÍNH RA "chieuCao" NẾU ĐỀ BÀI CHƯA CHO TRỰC TIẾP. Nếu đề bài chỉ cho cạnh bên và góc (như SC=2a và góc 45°), chỉ trích xuất đúng 2 dữ kiện đó vào givenFacts.
+
+5. Cấu trúc JSON bắt buộc:
+{
+  "problemText": "Toàn bộ chuỗi văn bản đề bài bằng tiếng Việt tự nhiên dễ đọc (ví dụ: 'góc ABC = 120°', 'a√2', 'tam giác ABC', tuyệt đối KHÔNG dùng mã LaTeX như \\widehat, \\circ, \\sqrt trong problemText)",
+  "shapeType": "hinh_chop_tam_giac",
+  "shapeName": "Tên khối hình học (ví dụ: S.ABC hoặc S.ABCD)",
+  "givenFacts": [
+    { "type": "length", "element": "BC", "value": "a√2", "numericValue": 5.66 },
+    { "type": "angle", "between": ["(SBC)", "mp_day"], "degrees": 45 },
+    { "type": "perpendicular", "line": "SA", "plane": "mp_day" }
+  ],
+  "auxiliaryRequests": [],
+  "donVi": "cm"
+}
+
+${problemText ? `Đề bài văn bản: "${problemText}"` : 'Đề bài được cung cấp qua hình ảnh đính kèm, vui lòng đọc kỹ ảnh để trích xuất!'}
+`;
+
+    let responseText = '';
+    try {
+      let callOptions = {
+        prompt,
+        temperature: 0.1,
+        maxOutputTokens: 2048,
+        responseMimeType: 'application/json'
+      };
+
+      if (imageBase64) {
+        const cleanBase64 = imageBase64.includes('base64,') ? imageBase64.split('base64,')[1] : imageBase64;
+        callOptions = {
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                { text: prompt },
+                {
+                  inlineData: {
+                    mimeType: imageMimeType,
+                    data: cleanBase64
+                  }
+                }
+              ]
+            }
+          ],
+          temperature: 0.1,
+          maxOutputTokens: 2048,
+          responseMimeType: 'application/json'
+        };
+      }
+
+      const result = await callResilientGemini(callOptions);
+      responseText = result.text;
+    } catch (apiErr) {
+      console.error("[generate-3d] Resilient Gemini call failed:", apiErr);
+    }
+
+    let parsedData = cleanAndRepairGeometryJson(responseText);
+    if (!parsedData || !parsedData.shapeType) {
+      parsedData = extractFallbackGeometry(problemText);
+    }
+    parsedData.originalProblemText = toNaturalVietnameseMathText(parsedData.problemText || problemText || '');
+
+    const factResult = solveGeometryFacts(parsedData);
+    if (!factResult.success && factResult.unsupported) {
+      const hasImage = !!imageBase64;
+      const isGeneral = (!problemText && !hasImage) || (problemText && /^(xin\s*)?(chào|chao|hello|hi|test|giới thiệu|huong dan)$/i.test(problemText.trim())) || (!hasImage && (!parsedData.givenFacts || parsedData.givenFacts.length === 0));
+      if (isGeneral) {
+        return NextResponse.json({
+          success: true,
+          shapeType: 'hinh_chop_day_hcn',
+          shapeName: 'Hình chóp S.ABCD (Mô hình 3D mẫu)',
+          parameters: { canhDay: 4, chieuCao: 5, chieuDai: 4, chieuRong: 4, banKinh: 2 },
+          appliedRule: 'default_preview_model',
+          explanation: 'Chào bạn! Đây là mô hình hình chóp S.ABCD trực quan 3D. Bạn có thể nhập đề bài cụ thể để tôi dựng hình và giải chi tiết nhé!',
+          sanityCheck: { passed: true, maxDiscrepancy: 0, details: [] },
+          needsReview: false,
+          donVi: 'cm',
+          givenFacts: []
+        }, { status: 200 });
+      }
+
+      return NextResponse.json({
+        success: false,
+        unsupported: true,
+        shapeType: parsedData.shapeType || 'khac',
+        shapeName: parsedData.shapeName || 'Khối hình học',
+        givenFacts: parsedData.givenFacts || [],
+        message: factResult.message || 'Đề bài có dạng dữ kiện phức tạp, hệ thống hiện chưa tự động dựng hình chính xác — vui lòng thử diễn đạt lại đề bài với dữ kiện chiều cao trực tiếp, hoặc liên hệ để bổ sung công thức hỗ trợ.'
+      }, { status: 200 });
+    }
+
+    const finalResponse = {
+      success: true,
+      shapeType: factResult.shapeType || parsedData.shapeType,
+      shapeName: factResult.shapeName || parsedData.shapeName,
+      parameters: factResult.parameters,
+      appliedRule: factResult.appliedRule,
+      ruleId: factResult.ruleId,
+      explanation: factResult.explanation,
+      sanityCheck: factResult.sanityCheck,
+      needsReview: factResult.needsReview || false,
+      givenFacts: factResult.givenFacts || parsedData.givenFacts || [],
+      auxiliaryRequests: parsedData.auxiliaryRequests || [],
+      donVi: factResult.donVi || parsedData.donVi || 'cm',
+      originalProblemText: parsedData.originalProblemText || problemText
+    };
+
+    return NextResponse.json(finalResponse, { status: 200 });
+  } catch (error) {
+    console.error("Lỗi Tầng 1 (LLM Extraction):", error);
+    const fallback = extractFallbackGeometry(problemText || "");
+    const solvedFallback = solveGeometryFacts(fallback);
+    return NextResponse.json({
+      success: true,
+      ...fallback,
+      parameters: solvedFallback.parameters || { canhDay: 4, chieuCao: 5, chieuDai: 4, chieuRong: 4, banKinh: 2 },
+      sanityCheck: solvedFallback.sanityCheck || { passed: true, maxDiscrepancy: 0, details: [] }
+    }, { status: 200 });
+  }
+}
+
+
