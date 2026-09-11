@@ -5,6 +5,39 @@ import { collection, doc, setDoc, getDocs, query, orderBy, limit, serverTimestam
 const { idfWeights, corpus } = ragData;
 const DYNAMIC_KNOWLEDGE_KEY = 'stem_hub_dynamic_rag_knowledge';
 
+// Danh sách từ khóa liên quan đến cá nhân, danh tính, thông số người dùng TUYỆT ĐỐI KHÔNG ĐƯỢC LƯU VÀO RAG
+export const FORBIDDEN_PERSONAL_KEYWORDS = [
+  'nguyễn minh khang', 'nguyen minh khang', 'hồ hoàng anh', 'ho hoang anh',
+  'bạn chính là', 'bạn đang ở', 'apprentice', 'tinh thể', 'elo', 'lv.', 'level', 'danh hiệu',
+  'phiên trò chuyện trước', 'bộ nhớ học hỏi', 'học sinh đã từng hỏi',
+  'tôi là ai', 'nhớ gì về tôi', 'bạn có thể làm gì', 'bạn cs thể làm',
+  'đưa tôi qua lab', 'qua lab', 'chuyển sang phần mô phỏng', 'admin'
+];
+
+/**
+ * Kiểm tra xem văn bản có chứa thông tin cá nhân hoặc câu lệnh hệ thống không
+ */
+export function containsPersonalOrSystemInfo(text) {
+  if (!text) return false;
+  const lower = text.toLowerCase();
+  return FORBIDDEN_PERSONAL_KEYWORDS.some(kw => lower.includes(kw));
+}
+
+/**
+ * Kiểm tra xem câu hỏi có phải là câu chào hỏi xã giao hoặc lệnh điều hướng không
+ */
+export function isGreetingOrChitchat(text) {
+  if (!text) return true;
+  const t = text.trim().toLowerCase();
+  if (t.length <= 2) return true;
+  const greetingRegex = /^(xin\s+)?(chào|chao|hello|hi|hey|alo|halo)(\s+(bạn|ban|thầy|thay|cô|co|nova|bot|ad|admin|ê))?[!.,?~]*$/i;
+  if (greetingRegex.test(t)) return true;
+  if (t.includes('bạn là ai') || t.includes('tôi là ai') || t.includes('nhớ gì về tôi')) return true;
+  if (t.includes('bạn có thể làm') || t.includes('bạn cs thể làm') || t.includes('làm đc cái gì')) return true;
+  if (t.startsWith('đưa tôi qua') || t.startsWith('qua lab') || t.startsWith('mở lab')) return true;
+  return false;
+}
+
 // Danh sách từ dừng (Stop words) tiếng Việt để loại bỏ tạp âm khi so sánh câu hỏi
 const VIETNAMESE_STOP_WORDS = new Set([
   'những', 'các', 'những_cái', 'cho', 'là', 'gì', 'như', 'thế', 'nào', 'sao',
@@ -36,13 +69,18 @@ export function normalizeQuery(text) {
 // Bộ nhớ đệm Client-side lưu các chunk tri thức AI tự học được
 let dynamicCorpusCache = null;
 
-// Lấy danh sách tri thức tự học từ LocalStorage
+// Lấy danh sách tri thức tự học từ LocalStorage (Đã lọc sạch thông tin cá nhân)
 export function getDynamicCorpus() {
   if (typeof window === 'undefined') return [];
   if (dynamicCorpusCache) return dynamicCorpusCache;
   try {
     const raw = localStorage.getItem(DYNAMIC_KNOWLEDGE_KEY);
-    dynamicCorpusCache = raw ? JSON.parse(raw) : [];
+    const parsed = raw ? JSON.parse(raw) : [];
+    // Tự động thanh lọc mọi item có dính thông tin cá nhân
+    dynamicCorpusCache = (Array.isArray(parsed) ? parsed : []).filter(item => {
+      const full = ((item.query || '') + ' ' + (item.answer || '')).toLowerCase();
+      return !containsPersonalOrSystemInfo(full) && !isGreetingOrChitchat(item.query);
+    });
   } catch (_) {
     dynamicCorpusCache = [];
   }
@@ -66,11 +104,15 @@ export async function syncGlobalLearnedKnowledge() {
         snapshot.forEach((docSnap) => {
           const data = docSnap.data();
           if (data && data.query && data.answer) {
-            firestoreDocs.push({
-              id: docSnap.id,
-              ...data,
-              normalizedQuery: data.normalizedQuery || normalizeQuery(data.query)
-            });
+            // Lọc bỏ triệt để các doc chứa thông tin cá nhân
+            const full = (data.query + ' ' + data.answer).toLowerCase();
+            if (!containsPersonalOrSystemInfo(full) && !isGreetingOrChitchat(data.query)) {
+              firestoreDocs.push({
+                id: docSnap.id,
+                ...data,
+                normalizedQuery: data.normalizedQuery || normalizeQuery(data.query)
+              });
+            }
           }
         });
       } catch (fErr) {
@@ -84,7 +126,10 @@ export async function syncGlobalLearnedKnowledge() {
       if (res.ok) {
         const data = await res.json();
         if (data.success && Array.isArray(data.learnedDocs)) {
-          firestoreDocs = data.learnedDocs;
+          firestoreDocs = data.learnedDocs.filter(item => {
+            const full = ((item.query || '') + ' ' + (item.answer || '')).toLowerCase();
+            return !containsPersonalOrSystemInfo(full) && !isGreetingOrChitchat(item.query);
+          });
         }
       }
     }
@@ -92,18 +137,21 @@ export async function syncGlobalLearnedKnowledge() {
     const localList = getDynamicCorpus();
     const map = new Map();
     
-    // Hợp nhất dữ liệu Firestore, Server API và LocalStorage
+    // Hợp nhất dữ liệu Firestore, Server API và LocalStorage (đã được lọc sạch)
     [...firestoreDocs, ...localList].forEach(item => {
-      if (item && item.query) {
-        const key = (item.normalizedQuery || normalizeQuery(item.query)).trim();
-        if (!map.has(key)) map.set(key, item);
+      if (item && item.query && !isGreetingOrChitchat(item.query)) {
+        const full = (item.query + ' ' + (item.answer || '')).toLowerCase();
+        if (!containsPersonalOrSystemInfo(full)) {
+          const key = (item.normalizedQuery || normalizeQuery(item.query)).trim();
+          if (!map.has(key)) map.set(key, item);
+        }
       }
     });
 
     const merged = Array.from(map.values());
     dynamicCorpusCache = merged;
     
-    // Lưu bản siêu nhẹ vào LocalStorage
+    // Ghi đè bản sạch vào LocalStorage
     try {
       const lightweightList = merged.slice(0, 100).map(item => ({
         id: item.id,
@@ -191,34 +239,69 @@ export function cosineSimilarity(vecA, vecB) {
 }
 
 /**
- * Chuẩn hóa & Loại bỏ lời chào chứa tên riêng học sinh trước khi nạp vào Ngân hàng Tri thức RAG
- * Giúp tri thức tự học hoàn toàn trung tính và tái sử dụng chính xác tên cho mọi học sinh
+ * Chuẩn hóa & Loại bỏ triệt để lời chào, xưng hô cá nhân trước khi nạp vào Ngân hàng Tri thức RAG
+ * Chỉ giữ lại phần kiến thức, định nghĩa, công thức khoa học trung tính 100%
  */
 export function sanitizeAnswerForStorage(answerText) {
   if (!answerText) return '';
   let cleaned = answerText.trim();
-  // Loại bỏ các mẫu lời chào đầu câu chứa tên riêng
-  cleaned = cleaned.replace(/^(Chào\s+bạn\s+([^!\n,]+)[!.,]\s*)/i, '');
-  cleaned = cleaned.replace(/^(Chào\s+học\s+sinh\s+([^!\n,]+)[!.,]\s*)/i, '');
-  cleaned = cleaned.replace(/^(Xin\s+chào\s+bạn\s+([^!\n,]+)[!.,]\s*)/i, '');
-  cleaned = cleaned.replace(/^(Xin\s+chào\s+([^!\n,]+)[!.,]\s*)/i, '');
-  cleaned = cleaned.replace(/^(Chào\s+([^!\n,]+)[!.,]\s*)/i, '');
+
+  // 1. Loại bỏ các mẫu lời chào đầu câu chứa tên riêng hoặc xưng hô
+  cleaned = cleaned.replace(/^(?:(?:xin\s+)?chào(?:\s+[^!.,:;\n]{1,35})?[!.,:;~-]?\s*)+/gi, '');
+  cleaned = cleaned.replace(/^(?:(?:thầy|cô|nova|tôi)\s+rất\s+vui(?:\s+[^!.,:;\n]{1,40})?[!.,:;~-]?\s*)+/gi, '');
+  cleaned = cleaned.replace(/^dựa\s+trên\s+bộ\s+nhớ\s+học\s+hỏi[^.\n]+[.\n]\s*/gi, '');
+  cleaned = cleaned.replace(/^hôm\s+nay,?\s*chúng\s+ta\s+sẽ\s+đi\s+sâu\s+hơn\s+vào/gi, '');
+
+  // 2. Loại bỏ các lời kết sáo rỗng cuối câu
+  cleaned = cleaned.replace(/(?:chúc\s+(?:em|bạn|học\s+sinh)[^.!\n]*[.!\n]?\s*)+$/gi, '');
+  cleaned = cleaned.replace(/(?:nếu\s+(?:em|bạn)\s+còn\s+thắc\s+mắc[^.!\n]*[.!\n]?\s*)+$/gi, '');
+  cleaned = cleaned.replace(/(?:em\s+có\s+câu\s+hỏi\s+nào\s+khác[^.!\n]*[.!\n]?\s*)+$/gi, '');
+  cleaned = cleaned.replace(/(?:bạn\s+có\s+câu\s+hỏi\s+nào\s+khác[^.!\n]*[.!\n]?\s*)+$/gi, '');
+
   return cleaned.trim();
 }
 
 /**
  * Ghi nhận & Lưu trực tiếp câu trả lời mới từ AI lên FIREBASE FIRESTORE (Collection: learned_knowledge)
+ * CHỈ LƯU KIẾN THỨC HỌC THUẬT CHUẨN - TUYỆT ĐỐI KHÔNG LƯU THÔNG TIN CÁ NHÂN HOẶC CÂU CHÀO HỎI
  */
 export async function saveLearnedAnswerToRAG(query, answer, subject = 'stem', topic = 'Tri thức tự học AI toàn hệ thống') {
   if (!query || !answer || typeof window === 'undefined') return null;
   const cleanQ = query.trim();
+
+  // 1. CHẶN TRIỆT ĐỂ CÁC CÂU HỎI CHÀO HỎI, XÃ GIAO, DANH TÍNH, ĐIỀU HƯỚNG
+  if (isGreetingOrChitchat(cleanQ)) {
+    console.log(`[RAG Ingestion Guard] Bỏ qua câu chào hỏi / chitchat: "${cleanQ}"`);
+    return null;
+  }
+
+  // 2. CHẶN NẾU CHỨA BẤT KỲ TỪ KHÓA CÁ NHÂN NÀO TRONG CÂU HỎI HOẶC CÂU TRẢ LỜI
+  if (containsPersonalOrSystemInfo(cleanQ) || containsPersonalOrSystemInfo(answer)) {
+    console.warn(`[RAG Ingestion Guard] Bỏ qua vì chứa thông tin cá nhân/hệ thống: "${cleanQ}"`);
+    return null;
+  }
+
+  // 3. XÁC THỰC MÔN HỌC HỢP LỆ (CHỈ LƯU KIẾN THỨC KHOA HỌC THPT)
+  const detectedSubj = detectQuerySubject(cleanQ);
+  const normSubject = (detectedSubj || subject || 'stem').toLowerCase();
+  const validAcademicSubjects = ['toan', 'ly', 'hoa', 'sinh', 'tin', 'stem'];
+  if (!validAcademicSubjects.includes(normSubject)) {
+    console.log(`[RAG Ingestion Guard] Bỏ qua câu hỏi ngoài chương trình STEM: "${cleanQ}"`);
+    return null;
+  }
+
   const cleanA = sanitizeAnswerForStorage(answer);
 
-  // Bỏ qua câu hỏi quá ngắn hoặc lệnh hệ thống rác
-  if (cleanQ.length < 3 || cleanA.length < 10) return null;
+  // Bỏ qua nếu sau khi làm sạch độ dài không đủ đạt chuẩn kiến thức
+  if (cleanQ.length < 4 || cleanA.length < 15) return null;
+
+  // Kiểm tra lại sau khi sanitize xem có còn sót từ khóa cấm không
+  if (containsPersonalOrSystemInfo(cleanA)) {
+    console.warn(`[RAG Ingestion Guard] Bỏ qua câu trả lời sau sanitize vẫn chứa dữ liệu cá nhân: "${cleanQ}"`);
+    return null;
+  }
 
   const normQ = normalizeQuery(cleanQ);
-  const normSubject = (subject || 'stem').toLowerCase();
   const currentDynamic = getDynamicCorpus();
   
   // Kiểm tra nếu câu hỏi trùng lặp đã tồn tại
@@ -242,7 +325,7 @@ export async function saveLearnedAnswerToRAG(query, answer, subject = 'stem', to
     normalizedQuery: normQ,
     answer: cleanA,
     subject: normSubject,
-    topic: topic,
+    topic: topic || 'Tri thức tự học AI toàn hệ thống',
     content: `[Tự học AI toàn hệ thống] ${cleanQ}: ${cleanA}`,
     queryTFIDF: queryTFIDF,
     tfidfVector: contentTFIDF,
@@ -271,11 +354,11 @@ export async function saveLearnedAnswerToRAG(query, answer, subject = 'stem', to
         normalizedQuery: normQ,
         answer: cleanA,
         subject: normSubject,
-        topic: topic,
+        topic: topic || 'Tri thức tự học AI toàn hệ thống',
         isLearned: true,
         createdAt: serverTimestamp()
       });
-      console.log(`🔥 [RAG FIRESTORE REALTIME] Đã ghi nạp tri thức mới lên Firebase Firestore: "${cleanQ}"`);
+      console.log(`🔥 [RAG FIRESTORE REALTIME] Đã ghi nạp tri thức học thuật chuẩn: "${cleanQ}"`);
     }
   } catch (err) {
     console.warn('[RAG FIRESTORE] Lỗi ghi trực tiếp Firestore:', err.message);
@@ -290,7 +373,7 @@ export async function saveLearnedAnswerToRAG(query, answer, subject = 'stem', to
     }).catch(() => {});
   } catch (_) {}
 
-  // 3. Lưu LocalStorage đệm
+  // 3. Lưu LocalStorage đệm (bản sạch)
   try {
     const lightweightList = currentDynamic.slice(0, 50).map(item => ({
       id: item.id,
@@ -329,12 +412,20 @@ export function checkRAGCacheHit(query, minScoreThreshold = 0.65) {
   if (!query || typeof query !== 'string') return { hit: false };
 
   const rawQ = query.trim();
+
+  // 1. TUYỆT ĐỐI KHÔNG DÙNG CACHE CHO CÂU CHÀO HỎI HOẶC CÂU LỆNH HỆ THỐNG
+  if (isGreetingOrChitchat(rawQ) || containsPersonalOrSystemInfo(rawQ)) {
+    return { hit: false };
+  }
+
   const userNormQ = normalizeQuery(rawQ);
-  if (!userNormQ) return { hit: false };
+  if (!userNormQ || userNormQ.length < 3) return { hit: false };
 
   const userTokens = userNormQ.split(' ').filter(Boolean);
-  const userQueryTFIDF = buildQueryTFIDFVector(tokenize(userNormQ));
+  // Cần ít nhất 2 từ khóa có nghĩa để tránh trùng lặp 1 từ đơn giản
+  if (userTokens.length < 2 && rawQ.length < 8) return { hit: false };
 
+  const userQueryTFIDF = buildQueryTFIDFVector(tokenize(userNormQ));
   const dynamicDocs = getDynamicCorpus();
   if (dynamicDocs.length === 0) return { hit: false };
 
@@ -345,6 +436,13 @@ export function checkRAGCacheHit(query, minScoreThreshold = 0.65) {
 
   for (const doc of dynamicDocs) {
     const docRawQ = (doc.query || '').trim();
+    const docAnswer = (doc.answer || '').trim();
+
+    // BỎ QUA NGAY NẾU DOC CHỨA DỮ LIỆU CÁ NHÂN HOẶC CÂU CHÀO HỎI
+    if (containsPersonalOrSystemInfo(docRawQ) || containsPersonalOrSystemInfo(docAnswer) || isGreetingOrChitchat(docRawQ)) {
+      continue;
+    }
+
     const rawDocSubj = (doc.subject || '').toLowerCase();
     const docSubj = (rawDocSubj && rawDocSubj !== 'stem' && rawDocSubj !== 'general') 
       ? rawDocSubj 
@@ -363,7 +461,7 @@ export function checkRAGCacheHit(query, minScoreThreshold = 0.65) {
     // 1. Khớp chuỗi chính xác tuyệt đối hoặc chuỗi con (Substrings)
     if (userNormQ === docNormQ || docRawQ.toLowerCase().trim() === rawQ.toLowerCase().trim()) {
       score = 1.0; // Khớp 100% tuyệt đối!
-    } else if (userNormQ.length >= 5 && docNormQ.length >= 5 && (userNormQ.includes(docNormQ) || docNormQ.includes(userNormQ))) {
+    } else if (userNormQ.length >= 8 && docNormQ.length >= 8 && (userNormQ.includes(docNormQ) || docNormQ.includes(userNormQ))) {
       score = 0.95; // Khớp chuỗi con chính!
     } else {
       // 2. Tính tỷ lệ bao phủ Token Overlap Ratio (Jaccard similarity trên từ khóa cốt lõi)
@@ -373,7 +471,7 @@ export function checkRAGCacheHit(query, minScoreThreshold = 0.65) {
       }
       const tokenCoverage = userTokens.length > 0 ? (matchCount / userTokens.length) : 0;
 
-      if (tokenCoverage >= 0.75) {
+      if (tokenCoverage >= 0.8 && userTokens.length >= 3) {
         score = 0.85 + (0.12 * tokenCoverage);
       } else {
         // 3. Tính Cosine Similarity trên Vector TF-IDF của CÂU HỎI

@@ -54,6 +54,27 @@ export async function GET() {
   }
 }
 
+const FORBIDDEN_PERSONAL_KEYWORDS = [
+  'nguyễn minh khang', 'nguyen minh khang', 'hồ hoàng anh', 'ho hoang anh',
+  'bạn chính là', 'bạn đang ở', 'apprentice', 'tinh thể', 'elo', 'lv.', 'level', 'danh hiệu',
+  'phiên trò chuyện trước', 'bộ nhớ học hỏi', 'học sinh đã từng hỏi',
+  'tôi là ai', 'nhớ gì về tôi', 'bạn có thể làm gì', 'bạn cs thể làm',
+  'đưa tôi qua lab', 'qua lab', 'chuyển sang phần mô phỏng', 'admin'
+];
+
+function isPersonalOrGreeting(query, answer) {
+  const text = ((query || '') + ' ' + (answer || '')).toLowerCase();
+  if (FORBIDDEN_PERSONAL_KEYWORDS.some(kw => text.includes(kw))) return true;
+  const q = (query || '').trim().toLowerCase();
+  if (q.length <= 2) return true;
+  const greetingRegex = /^(xin\s+)?(chào|chao|hello|hi|hey|alo|halo)(\s+(bạn|ban|thầy|thay|cô|co|nova|bot|ad|admin|ê))?[!.,?~]*$/i;
+  if (greetingRegex.test(q)) return true;
+  if (q.includes('bạn là ai') || q.includes('tôi là ai') || q.includes('nhớ gì về tôi')) return true;
+  if (q.includes('bạn có thể làm') || q.includes('bạn cs thể làm') || q.includes('làm đc cái gì')) return true;
+  if (q.startsWith('đưa tôi qua') || q.startsWith('qua lab') || q.startsWith('mở lab')) return true;
+  return false;
+}
+
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -66,6 +87,13 @@ export async function POST(request) {
 
     const cleanQ = effectiveQuery.trim();
     const cleanA = answer.trim();
+
+    // ⚡ CHẶN LƯU THÔNG TIN CÁ NHÂN HOẶC CÂU CHÀO HỎI
+    if (isPersonalOrGreeting(cleanQ, cleanA)) {
+      console.log(`[API learned-knowledge] Từ chối lưu nội dung cá nhân/chào hỏi: "${cleanQ}"`);
+      return NextResponse.json({ success: false, ignored: true, message: 'Nội dung cá nhân hoặc chào hỏi không được lưu trữ' });
+    }
+
     const list = readGlobalKnowledge();
 
     const existingIdx = list.findIndex(
@@ -100,7 +128,7 @@ export async function POST(request) {
 
     writeGlobalKnowledge(list);
 
-    console.log(`🧠 [GLOBAL LEARNING DB SERVER] Đã ghi nạp tri thức mới từ người dùng: "${cleanQ}" (Tổng số tri thức đã học: ${list.length})`);
+    console.log(`🧠 [GLOBAL LEARNING DB SERVER] Đã ghi nạp tri thức học thuật mới: "${cleanQ}" (Tổng số: ${list.length})`);
 
     return NextResponse.json({ success: true, item: newItem, totalCount: list.length });
   } catch (err) {

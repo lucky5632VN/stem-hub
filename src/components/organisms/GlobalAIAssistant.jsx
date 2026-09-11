@@ -15,7 +15,16 @@ import { db } from '@/lib/firebase';
 import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { playSound } from '@/lib/sound';
 import { motion, AnimatePresence } from 'framer-motion';
-import { retrieveTopK, checkRAGCacheHit, saveLearnedAnswerToRAG, syncGlobalLearnedKnowledge, detectQuerySubject, sanitizeAnswerForStorage } from '@/lib/ragService';
+import { 
+  retrieveTopK, 
+  checkRAGCacheHit, 
+  saveLearnedAnswerToRAG, 
+  syncGlobalLearnedKnowledge, 
+  detectQuerySubject, 
+  sanitizeAnswerForStorage,
+  containsPersonalOrSystemInfo,
+  isGreetingOrChitchat
+} from '@/lib/ragService';
 import { predictUserIntent } from '@/lib/intentClassifier';
 import { retrieveTopKMemories } from '@/lib/memoryService';
 import { getAdaptiveDifficultyRecommendation, processInteractionFeedback } from '@/lib/continuousLearningPipeline';
@@ -776,18 +785,18 @@ export default function GlobalAIAssistant() {
     }
   };
 
-  // Khai phá tri thức từ các phiên chat cũ để nạp vào bộ nhớ học hỏi AI
+  // Khai phá tri thức từ các phiên chat cũ để nạp vào bộ nhớ học hỏi AI (Chỉ tham khảo ngầm, không lặp lại)
   const getCrossSessionMemoryContext = useCallback(() => {
     if (!sessions || sessions.length === 0) return '';
     const userTopics = sessions
       .flatMap(s => s.messages || [])
       .filter(m => m.sender === 'user')
-      .map(m => (m.text || '').substring(0, 35))
-      .filter(Boolean)
-      .slice(0, 8);
+      .map(m => (m.text || '').substring(0, 35).trim())
+      .filter(t => t && !isGreetingOrChitchat(t) && !containsPersonalOrSystemInfo(t))
+      .slice(0, 5);
 
     if (userTopics.length === 0) return '';
-    return `\n[BỘ NHỚ HỌC HỎI CỦA NOVA TỪ CÁC PHIÊN CHAT TRƯỚC: Học sinh đã từng hỏi về các chủ đề: ${userTopics.join('; ')}. NOVA hãy ghi nhớ tiến trình học tập này để cá nhân hóa câu trả lời tốt nhất.]`;
+    return `\n[BỐI CẢNH CHỦ ĐỀ HỌC SINH ĐANG QUAN TÂM (CHỈ THAM KHẢO NGẦM ĐỂ ĐIỀU CHỈNH BÀI HỌC, TUYỆT ĐỐI KHÔNG ĐỌC LẠI RA CÂU TRẢ LỜI)]: ${userTopics.join('; ')}`;
   }, [sessions]);
 
   // Human-readable page name generator for AI Context
@@ -1534,9 +1543,7 @@ Bạn là NOVA - Trợ lý AI Chỉ huy Agentic của Hệ sinh thái Giáo dụ
 - TẦNG 2 (Continuous Memory RAG Tự Phát Triển): Bộ nhớ dài hạn Vector Embeddings.
 - TẦNG 3 (Online Learning Tự Huấn Luyện): TensorFlow.js Neural Net cập nhật client-side.
 
-[THÔNG TIN HỌC SINH HIỆN TẠI]:
-- Họ tên: ${userDisplayName}
-- Cấp độ: Lv.${userLevel} | Điểm Elo: ${userElo} | Danh hiệu: ${userTitle} | Tinh thể: ${userCrystals}
+[NGỮ CẢNH HỌC TẬP THỰC TẾ (CHỈ DÙNG ĐỂ ĐIỀU CHỈNH ĐỘ SÂU BÀI GIẢNG, TUYỆT ĐỐI KHÔNG ĐỌC RA CÂU TRẢ LỜI)]:
 - Vị trí hiện tại trên trang web: ${currentPage}
 - Tần suất tương tác các môn: Hóa (${subjectFrequency?.hoa || 0}), Lý (${subjectFrequency?.ly || 0}), Toán (${subjectFrequency?.toan || 0}), Sinh (${subjectFrequency?.sinh || 0})
 ${memoryContext}
@@ -1547,7 +1554,7 @@ ${conciseInstruction}
 
 [QUY TẮC PHẢN HỒI BẮT BUỘC - TUYỆT ĐỐI TUÂN THỦ]:
 1. TRẢ LỜI TÓM TẮT, SÚC TÍCH (DƯỚI 80 TỪ): Đi thẳng vào trọng tâm cốt lõi. Tuyệt đối KHÔNG giải thích dài dòng lan man.
-2. TUYỆT ĐỐI KHÔNG CHÀO HỎI, KHÔNG XƯNG DANH AI: Không nói "Chào bạn...", "Tôi là NOVA...", không có lời kết sáo rỗng ("Chúc bạn học tốt...", "Nếu còn thắc mắc..."). Xóa bỏ hoàn toàn mọi dấu vết robot, trả lời trực diện như một chuyên gia bách khoa.
+2. TUYỆT ĐỐI KHÔNG ĐỌC THÔNG TIN CÁ NHÂN: Không được nói kiểu "Bạn chính là [Tên], hiện đang ở cấp độ Lv.X, Elo Y, danh hiệu Z...". Người dùng không yêu cầu tra cứu thông tin cá nhân thì tuyệt đối không được đọc profile ra màn hình. Khi người dùng chào hỏi xã giao ("chào bạn", "hello"), chỉ chào ngắn gọn 1 câu và sẵn sàng giải đáp kiến thức khoa học STEM.
 3. BẮT BUỘC ĐƯA CÔNG THỨC CHUẨN LATEX: Nếu câu hỏi có liên quan đến công thức (Toán, Lý, Hóa, Sinh), BẮT BUỘC PHẢI ĐƯA CÔNG THỨC VÀO và viết CHUẨN LATEX bằng $...$ (nội dòng) hoặc $$...$$ (khối độc lập). Ví dụ: $V = \\frac{1}{3}Bh$, $T = 2\\pi\\sqrt{\\frac{l}{g}}$, $2\\text{Na} + 2\\text{H}_2\\text{O} \\rightarrow 2\\text{NaOH} + \\text{H}_2\\uparrow$, $L = \\frac{N}{2} \\times 3{,}4\\text{ \\AA}$. Tuyệt đối không để sót công thức hay hiển thị sai ký hiệu.
 4. KHI LIỆT KÊ CÁC MỤC KIẾN THỨC/CHUYÊN ĐỀ:
    Trình bày dạng danh sách gạch đầu dòng rõ ràng, đặt tên chuyên đề trong cặp dấu sao kép **Tên chuyên đề**: ...
@@ -1653,7 +1660,7 @@ ${conciseInstruction}
       });
     }
 
-    // ⚡ BƯỚC 2: TỰ ĐỘNG LƯU VÀO DỮ LIỆU TỰ HỌC - CHỈ LƯU KHI AI ONLINE PHẢN HỒI THÀNH CÔNG VÀ KHÔNG CHỨA LỖI
+    // ⚡ BƯỚC 2: TỰ ĐỘNG LƯU VÀO DỮ LIỆU TỰ HỌC - CHỈ LƯU KIẾN THỨC HỌC THUẬT CHUẨN, TUYỆT ĐỐI KHÔNG LƯU DỮ LIỆU CÁ NHÂN HOẶC CÂU CHÀO HỎI
     const isErrorOrOffline = (str) => {
       if (!str) return true;
       const lower = str.toLowerCase();
@@ -1669,18 +1676,24 @@ ${conciseInstruction}
       );
     };
 
-    if (aiSuccess && finalText && textToSend.length >= 3 && !isErrorOrOffline(finalText)) {
+    const isGreeting = isGreetingOrChitchat(textToSend);
+    const hasPersonalInfo = containsPersonalOrSystemInfo(textToSend) || containsPersonalOrSystemInfo(finalText);
+
+    if (aiSuccess && finalText && textToSend.length >= 4 && !isErrorOrOffline(finalText) && !isGreeting && !hasPersonalInfo) {
       try {
         const detectedSubj = (intentResult?.subject && intentResult.subject !== 'general')
           ? intentResult.subject.toLowerCase()
           : (detectQuerySubject(textToSend) || 'stem');
 
-        await saveLearnedAnswerToRAG(
-          textToSend,
-          finalText,
-          detectedSubj,
-          'Tri thức tự học AI từ tương tác học sinh'
-        );
+        const validAcademic = ['toan', 'ly', 'hoa', 'sinh', 'tin', 'stem'];
+        if (detectedSubj && validAcademic.includes(detectedSubj)) {
+          await saveLearnedAnswerToRAG(
+            textToSend,
+            finalText,
+            detectedSubj,
+            'Tri thức tự học AI từ tương tác học sinh'
+          );
+        }
       } catch (err) {
         console.warn('[RAG Self-Learning] Lỗi lưu câu trả lời tự học:', err);
       }
