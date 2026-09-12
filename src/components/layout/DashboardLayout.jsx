@@ -852,7 +852,7 @@ export default function DashboardLayout({ children }) {
       </AnimatePresence>
 
       {/* Global Fullscreen Interactive Virtual Lab Sandbox Portal */}
-      {activeLab && activeLab.link && (
+      {activeLab && activeLab.link && !pathname?.startsWith('/phong-lab') && (
         <div className="fixed inset-0 z-[99990] bg-[#0c0d14] flex flex-col">
           <div className="flex-1 flex relative overflow-hidden bg-[#0c0d14]">
             <iframe 

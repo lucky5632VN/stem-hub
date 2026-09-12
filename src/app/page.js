@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAppStore } from '@/store/useAppStore';
 import { playSound } from '@/lib/sound';
 import { auth, db, functions, httpsCallable } from '@/lib/firebase';
@@ -28,6 +29,7 @@ const labs = [
     name: 'Lab Toán',
     code: 'MATH-3D',
     status: 'active',
+    href: '/phong-lab/toan',
     link: '/labs/toan/frontend/dist/index.html',
     image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=600&auto=format&fit=crop',
     desc: 'Khám phá hình học không gian 3D trực quan bằng công cụ giải toán thông minh.',
@@ -44,6 +46,7 @@ const labs = [
     name: 'Lab Lý',
     code: 'PHYS-V3',
     status: 'active',
+    href: '/phong-lab/ly',
     link: '/labs/PhysicsLab/index.html',
     image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop',
     desc: 'Mô phỏng dao động điều hòa, giao thoa sóng cơ, đặc tuyến linh kiện và lắp ráp mạch điện DC tương tác.',
@@ -60,6 +63,7 @@ const labs = [
     name: 'Lab Hóa',
     code: 'CHEM-V4',
     status: 'active',
+    href: '/phong-lab/hoa',
     link: '/labs/lab-ktra15p/dist/index.html?v=4.1.5',
     image: 'https://images.unsplash.com/photo-1532187643603-ba119ca4109e?q=80&w=600&auto=format&fit=crop',
     desc: 'Thiết lập phản ứng axit-bazơ ảo, theo dõi nồng độ pH thời gian thực.',
@@ -76,6 +80,7 @@ const labs = [
     name: 'Lab Sinh',
     code: 'BIO-GENE',
     status: 'active',
+    href: '/phong-lab/sinh',
     link: '/labs/lab_sinh/dist/index.html?v=4.0.6',
     image: '/bio_stem_cover.png',
     desc: 'Giải mã bản đồ gene di truyền, trắc nghiệm sinh học chuẩn THPT Quốc gia.',
@@ -309,7 +314,11 @@ export default function Home() {
                   
                   <div>
                     {/* Card Image Banner */}
-                    <div className="h-28 overflow-hidden relative">
+                    <Link 
+                      href={lab.href} 
+                      onClick={() => playSound.click?.()} 
+                      className="block h-28 overflow-hidden relative cursor-pointer"
+                    >
                       <div className="absolute inset-0 bg-gradient-to-t from-bg-secondary via-bg-secondary/30 to-transparent z-10 group-hover:via-bg-secondary/10 transition-colors duration-300" />
                       <img 
                         src={lab.image} 
@@ -325,14 +334,16 @@ export default function Home() {
                           <span>{lab.title}</span>
                         </div>
                       </div>
-                    </div>
+                    </Link>
 
                     {/* Card Body Content */}
                     <div className="p-3.5 pt-2 relative z-20">
                       <div className="flex items-center justify-between mb-1">
-                        <h3 className={`text-base font-black text-text-primary group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r ${lab.gradientText} transition-all duration-300 tracking-wide font-mono`}>
-                          {lab.name}
-                        </h3>
+                        <Link href={lab.href} onClick={() => playSound.click?.()} className="cursor-pointer">
+                          <h3 className={`text-base font-black text-text-primary group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r ${lab.gradientText} transition-all duration-300 tracking-wide font-mono hover:opacity-90`}>
+                            {lab.name}
+                          </h3>
+                        </Link>
                         <span className="text-[8.5px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded font-bold">
                           ● Sẵn sàng
                         </span>
@@ -365,14 +376,15 @@ export default function Home() {
                       </span>
                     </div>
 
-                    <button 
-                      onClick={() => handleLaunchLab(lab)}
+                    <Link 
+                      href={lab.href}
+                      onClick={() => playSound.click?.()}
                       onMouseEnter={playSound.hover}
                       className={`px-4 py-1.5 rounded-xl text-[10.5px] font-bold transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] flex items-center gap-1.5 cursor-pointer shadow-md ${lab.btnGradient}`}
                     >
                       <span>Vào Học</span>
                       <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-                    </button>
+                    </Link>
                   </div>
                 </div>
               );
