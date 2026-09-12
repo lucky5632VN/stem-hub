@@ -677,6 +677,44 @@
     setTimeout(() => {
       fetchLearnedDocs().catch(() => {});
     }, 1000);
+    // Tự động chuyển hướng toàn trang khi học sinh bấm các nút "Về Hub" bên trong bất kỳ phòng lab nào
+    const handleHubNavigation = (e) => {
+      const target = e.target;
+      const el = target.closest ? target.closest('a, button') : null;
+      if (el) {
+        const href = el.getAttribute('href');
+        const text = (el.innerText || el.textContent || '').toLowerCase().trim();
+        if (href === '/' || href === '/#' || text === 'về hub' || text.startsWith('về hub') || text.includes('ve hub')) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (window.top && window.top !== window) {
+            window.top.location.href = '/';
+          } else {
+            window.location.href = '/';
+          }
+        }
+      }
+    };
+    window.addEventListener('click', handleHubNavigation, true);
+
+    // Đồng bộ phím tắt Ctrl+K / Alt+A từ bên trong iframe phòng lab lên cửa sổ cha để bật NOVA AI
+    const handleGlobalShortcutForwarding = (e) => {
+      if (((e.ctrlKey || e.metaKey) && e.key && e.key.toLowerCase() === 'k') || (e.altKey && e.key && e.key.toLowerCase() === 'a')) {
+        try {
+          if (window.top && window.top !== window) {
+            window.top.dispatchEvent(new KeyboardEvent('keydown', {
+              key: e.key,
+              code: e.code,
+              ctrlKey: e.ctrlKey,
+              metaKey: e.metaKey,
+              altKey: e.altKey,
+              bubbles: true
+            }));
+          }
+        } catch (_) {}
+      }
+    };
+    window.addEventListener('keydown', handleGlobalShortcutForwarding, true);
   }
 
   return {
