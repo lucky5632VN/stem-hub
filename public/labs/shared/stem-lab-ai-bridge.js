@@ -715,6 +715,26 @@
     setTimeout(() => {
       fetchLearnedDocs().catch(() => {});
     }, 1000);
+
+    // Tự động chuyển hướng toàn trang khi học sinh bấm các nút "Về Hub" bên trong bất kỳ phòng lab nào
+    const handleHubNavigation = (e) => {
+      const target = e.target;
+      const el = target.closest ? target.closest('a, button') : null;
+      if (el) {
+        const href = el.getAttribute('href');
+        const text = (el.innerText || el.textContent || '').toLowerCase().trim();
+        if (href === '/' || href === '/#' || text === 'về hub' || text.startsWith('về hub') || text.includes('ve hub')) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (window.top && window.top !== window) {
+            window.top.location.href = '/';
+          } else {
+            window.location.href = '/';
+          }
+        }
+      }
+    };
+    window.addEventListener('click', handleHubNavigation, true);
   }
 
   return {

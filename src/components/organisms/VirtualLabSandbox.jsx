@@ -207,88 +207,12 @@ export default function VirtualLabSandbox({
   return (
     <div 
       ref={containerRef}
-      className={`relative flex flex-col w-full bg-[#0d0f18] text-slate-100 overflow-hidden ${
-        isFullscreen ? 'fixed inset-0 z-[99999] h-screen' : 'h-[calc(100vh-84px)] rounded-2xl border border-slate-800/80 shadow-2xl my-2'
-      }`}
+      className="relative flex flex-col w-full h-screen bg-[#0a0b12] text-slate-100 overflow-hidden m-0 p-0 border-none"
     >
-      {/* 🚀 TOP CONTROL BAR */}
-      <div className="h-14 bg-[#131724]/95 backdrop-blur-xl border-b border-slate-800/80 px-4 flex items-center justify-between z-30 shrink-0 select-none">
-        {/* Left: Breadcrumbs & Lab Name */}
-        <div className="flex items-center gap-3">
-          <Link
-            href="/"
-            onClick={() => playSound.click?.()}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white bg-slate-800/50 hover:bg-slate-700/60 border border-slate-700/50 transition-all active:scale-95"
-            title="Quay lại danh mục trang chủ"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Về Hub</span>
-          </Link>
-
-          <div className="h-4 w-px bg-slate-800 hidden sm:block" />
-
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-black text-white tracking-wide flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              {title}
-            </span>
-            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-slate-800/80 text-cyan-400 border border-cyan-500/20 hidden md:inline-block">
-              {code}
-            </span>
-          </div>
-        </div>
-
-        {/* Right: Actions */}
-        <div className="flex items-center gap-2">
-          {/* Nút Chụp ảnh báo cáo */}
-          <button
-            onClick={handleTakeScreenshot}
-            className="p-2 rounded-xl text-slate-400 hover:text-pink-400 bg-slate-800/40 hover:bg-slate-800/80 border border-slate-700/50 transition-all cursor-pointer"
-            title="Chụp ảnh báo cáo thí nghiệm"
-          >
-            <Camera className="w-4 h-4" />
-          </button>
-
-          {/* Nút Tải lại */}
-          <button
-            onClick={handleReload}
-            className="p-2 rounded-xl text-slate-400 hover:text-cyan-400 bg-slate-800/40 hover:bg-slate-800/80 border border-slate-700/50 transition-all cursor-pointer"
-            title="Tải lại phòng thí nghiệm"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </button>
-
-          {/* Nút Toàn màn hình */}
-          <button
-            onClick={handleToggleFullscreen}
-            className="p-2 rounded-xl text-slate-400 hover:text-white bg-slate-800/40 hover:bg-slate-800/80 border border-slate-700/50 transition-all cursor-pointer"
-            title={isFullscreen ? "Thu nhỏ" : "Toàn màn hình"}
-          >
-            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-          </button>
-
-          {/* Nút Trợ lý AI Companion */}
-          <button
-            onClick={() => {
-              playSound.click?.();
-              setShowAiCompanion(!showAiCompanion);
-            }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              showAiCompanion 
-                ? 'bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-lg shadow-pink-500/25' 
-                : 'bg-slate-800/60 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/50'
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5 text-pink-300 animate-pulse" />
-            <span>AI Cố Vấn</span>
-          </button>
-        </div>
-      </div>
-
-      {/* 🚀 MAIN CONTENT: IFRAME SANDBOX + AI COMPANION SIDEBAR */}
-      <div className="flex-1 flex relative overflow-hidden bg-[#0a0b12]">
+      {/* 🚀 MAIN CONTENT: FULLSCREEN IFRAME SANDBOX (EDGE-TO-EDGE) */}
+      <div className="flex-1 w-full h-full relative overflow-hidden bg-[#0a0b12]">
         {/* Lab Iframe */}
-        <div className="flex-1 h-full relative">
+        <div className="flex-1 h-full w-full relative">
           <iframe 
             key={iframeKey}
             ref={iframeRef}
