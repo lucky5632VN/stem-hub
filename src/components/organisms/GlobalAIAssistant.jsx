@@ -503,8 +503,9 @@ export default function GlobalAIAssistant() {
   const chatEndRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const pathname = usePathname();
-  // Nút nổi NOVA AI chỉ hiển thị ở Trang danh mục phòng lab (/phong-lab). Các trang khác dùng phím tắt Ctrl+K/Cmd+K để bật.
-  const isLabDirectory = pathname === '/phong-lab' || pathname === '/phong-lab/';
+  // Nút nổi NOVA AI hiển thị ở Trang chủ (Trang 'Danh mục phòng lab' chính trong Sidebar href: '/') và trang /phong-lab.
+  // Khi học sinh vào bên trong các phòng lab cụ thể (/phong-lab/toan, /phong-lab/ly...) hoặc các màn khác, nút nổi ẩn đi để tránh vướng, dùng phím tắt Ctrl+K/Cmd+K để bật.
+  const isHomeOrLabDirectory = !pathname || pathname === '/' || pathname === '/phong-lab' || pathname === '/phong-lab/';
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const isDark = theme === 'dark'; // Tự động đồng bộ chuẩn 100% với màu nền website (Sáng / Tối)
@@ -1787,7 +1788,7 @@ ${conciseInstruction}
         )}
       </AnimatePresence>
 
-      {!isOpen && !isMatchOrPracticeActive().active && isLabDirectory && (
+      {!isOpen && !isMatchOrPracticeActive().active && isHomeOrLabDirectory && (
         <div className="fixed bottom-6 right-24 z-[999] screenshot-hide">
           <button
             onClick={handleOpenHUD}
