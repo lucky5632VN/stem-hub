@@ -1,0 +1,46 @@
+{
+  "cleanUrls": false,
+  "rewrites": [
+    {
+      "source": "/labs/toan/frontend/dist",
+      "destination": "/labs/toan/frontend/dist/index.html"
+    },
+    {
+      "source": "/labs/toan/frontend/dist/",
+      "destination": "/labs/toan/frontend/dist/index.html"
+    },
+    {
+      "source": "/labs/PhysicsLab",
+      "destination": "/labs/PhysicsLab/index.html"
+    },
+    {
+      "source": "/labs/PhysicsLab/",
+      "destination": "/labs/PhysicsLab/index.html"
+    },
+    {
+      "source": "/labs/lab-ktra15p/dist",
+      "destination": "/labs/lab-ktra15p/dist/index.html"
+    },
+    {
+      "source": "/labs/lab-ktra15p/dist/",
+      "destination": "/labs/lab-ktra15p/dist/index.html"
+    },
+    {
+      "source": "/labs/lab_sinh/dist",
+      "destination": "/labs/lab_sinh/dist/index.html"
+    },
+    {
+      "source": "/labs/lab_sinh/dist/",
+      "destination": "/labs/lab_sinh/dist/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/labs/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" }
+      ]
+    }
+  ]
+}

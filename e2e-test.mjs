@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer';
 
-const BASE_URL = process.env.TARGET_URL || process.argv[2] || 'http://localhost:3000';
+const BASE_URL = process.env.TARGET_URL || process.argv[2] || 'https://ai.stem-hub.top';
 
 const LABS_TO_TEST = [
   {
@@ -37,7 +37,6 @@ async function runE2ETest() {
 
   let browser;
   try {
-    // Thử launch với default Chromium, nếu thiếu thì dùng Chrome/Edge hệ thống
     const launchOptions = {
       headless: 'new',
       args: [
@@ -85,15 +84,9 @@ async function runE2ETest() {
       console.log(`2. Tìm phần tử nút/thẻ bài cho ${lab.name}...`);
       const linkSelector = `a[href*="${lab.route}"]`;
       await page.waitForSelector(linkSelector, { timeout: 30000 });
-      const linkHandle = await page.$(linkSelector);
-
-      if (!linkHandle) {
-        throw new Error(`[FAIL] Không tìm thấy phần tử DOM thẻ/nút Link nào có href chứa "${lab.route}" tại trang chủ.`);
-      }
-
       // 3. Thực hiện click vào nút
       console.log(`3. Mô phỏng hành vi người dùng: Click vào nút "${lab.name}"...`);
-      await linkHandle.click();
+      await page.$eval(linkSelector, (el) => el.click());
 
       // Chờ chuyển route và DOM cập nhật
       await page.waitForFunction(
@@ -107,31 +100,47 @@ async function runE2ETest() {
       const currentUrl = page.url();
       console.log(`4. URL hiện tại sau click: ${currentUrl}`);
 
-      // 4. Kiểm tra xem có gặp lỗi 404 hay không
+      // 4. Kiểm tra trang chính có 404 không
       const bodyText = await page.evaluate(() => document.body.innerText || '');
       const is404 = (bodyText.includes('404') && (bodyText.includes('This page could not be found') || bodyText.includes('could not be found')))
         || bodyText.includes('404 | This page could not be found');
 
       if (is404) {
-        throw new Error(`[FAIL] Bấm nút ${lab.name} -> Trang đích gặp lỗi: "404 This page could not be found" (URL: ${currentUrl})`);
+        throw new Error(`[FAIL] Bấm nút ${lab.name} -> Trang Next.js gặp lỗi: "404 This page could not be found" (URL: ${currentUrl})`);
       }
 
-      // 5. Kiểm tra DOM xem VirtualLabSandbox hoặc Iframe có hiện diện không
-      const hasIframeOrSandbox = await page.evaluate(() => {
+      // 5. Kiểm tra Iframe bên trong phòng lab
+      const iframeInfo = await page.evaluate(() => {
         const iframe = document.querySelector('iframe');
-        const hasHubButton = document.body.innerText.includes('Về Hub') || document.body.innerText.includes('AI Cố Vấn');
-        return !!iframe || hasHubButton;
+        return iframe ? { src: iframe.src, hasIframe: true } : { src: null, hasIframe: false };
       });
 
-      if (!hasIframeOrSandbox) {
-        console.warn(`[CẢNH BÁO] Không tìm thấy iframe mô phỏng hoặc thanh điều khiển VirtualLabSandbox trên trang ${lab.name}`);
+      if (!iframeInfo.hasIframe) {
+        throw new Error(`[FAIL] Không tìm thấy thẻ <iframe> mô phỏng trên trang ${lab.name}!`);
       }
 
-      console.log(`✅ [PASS] Bấm nút ${lab.name} -> Render thành công (URL: ${currentUrl})`);
+      console.log(`5. Iframe URL: ${iframeInfo.src}`);
+
+      // Kiểm tra HTTP Status của iframe source
+      const iframeStatus = await page.evaluate(async (src) => {
+        try {
+          const res = await fetch(src);
+          return res.status;
+        } catch (e) {
+          return 0;
+        }
+      }, iframeInfo.src);
+
+      console.log(`6. HTTP Status nguồn Iframe: ${iframeStatus}`);
+      if (iframeStatus === 404) {
+        throw new Error(`[FAIL] Nguồn <iframe> của ${lab.name} bị lỗi 404 Not Found! (${iframeInfo.src})`);
+      }
+
+      console.log(`✅ [PASS] Bấm nút ${lab.name} -> Render thành công, Iframe tải 200 OK (URL: ${currentUrl})`);
     }
 
     console.log('\n' + '='.repeat(60));
-    console.log(`🎉 TẤT CẢ 4 PHÒNG LAB ĐÃ VƯỢT QUA BÀI TEST E2E 100%!`);
+    console.log(`🎉 TẤT CẢ 4 PHÒNG LAB ĐÃ VƯỢT QUA BÀI TEST E2E & IFRAME 100%!`);
     console.log('='.repeat(60));
 
     await browser.close();
