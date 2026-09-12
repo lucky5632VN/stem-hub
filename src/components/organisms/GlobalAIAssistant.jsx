@@ -503,6 +503,8 @@ export default function GlobalAIAssistant() {
   const chatEndRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const pathname = usePathname();
+  // Nút nổi NOVA AI chỉ hiển thị ở Trang danh mục phòng lab (/phong-lab). Các trang khác dùng phím tắt Ctrl+K/Cmd+K để bật.
+  const isLabDirectory = pathname === '/phong-lab' || pathname === '/phong-lab/';
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const isDark = theme === 'dark'; // Tự động đồng bộ chuẩn 100% với màu nền website (Sáng / Tối)
@@ -678,10 +680,10 @@ export default function GlobalAIAssistant() {
     setMessages([welcomeMsg]);
   }, [user, personalization?.name]);
 
-  // Global hotkey Ctrl+K or Alt+A to toggle AI Assistant
+  // Global hotkey Ctrl+K (hoặc Cmd+K trên macOS) hoặc Alt+A để bật/tắt AI Assistant ở mọi trang
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if ((e.ctrlKey && e.key.toLowerCase() === 'k') || (e.altKey && e.key.toLowerCase() === 'a')) {
+      if (((e.ctrlKey || e.metaKey) && e.key?.toLowerCase() === 'k') || (e.altKey && e.key?.toLowerCase() === 'a')) {
         e.preventDefault();
         if (isOpen) {
           try { window.speechSynthesis?.cancel(); } catch (_) {}
@@ -690,6 +692,11 @@ export default function GlobalAIAssistant() {
         } else {
           handleOpenHUD();
         }
+      } else if (e.key === 'Escape' && isOpen) {
+        e.preventDefault();
+        try { window.speechSynthesis?.cancel(); } catch (_) {}
+        setIsOpen(false);
+        try { playSound.click(); } catch (_) {}
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -1780,7 +1787,7 @@ ${conciseInstruction}
         )}
       </AnimatePresence>
 
-      {!isOpen && !isMatchOrPracticeActive().active && (
+      {!isOpen && !isMatchOrPracticeActive().active && isLabDirectory && (
         <div className="fixed bottom-6 right-24 z-[999] screenshot-hide">
           <button
             onClick={handleOpenHUD}
