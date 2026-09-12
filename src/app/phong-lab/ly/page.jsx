@@ -11,7 +11,7 @@ export default function PhysicsLabPage() {
       subject="ly"
       title="Phòng Thí Nghiệm Vật Lý Lượng Tử"
       code="PHYS-V3"
-      labUrl="/labs/PhysicsLab/index.html"
+      labUrl="/labs/PhysicsLab/"
       desc="Mô phỏng dao động điều hòa, giao thoa sóng cơ, đặc tuyến linh kiện và lắp ráp mạch điện DC tương tác."
       badgeColor="from-purple-600 to-indigo-600"
     />

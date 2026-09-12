@@ -11,7 +11,7 @@ export default function MathLabPage() {
       subject="toan"
       title="Phòng Thí Nghiệm Hình Học Không Gian 3D"
       code="MATH-3D"
-      labUrl="/labs/toan/frontend/dist/index.html"
+      labUrl="/labs/toan/frontend/dist/"
       desc="Khám phá hình học không gian 3D trực quan bằng công cụ giải toán thông minh."
       badgeColor="from-cyan-500 to-blue-600"
     />
