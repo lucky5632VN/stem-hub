@@ -680,7 +680,8 @@ export default function DashboardLayout({ children }) {
 
   const isAdminRoute = pathname?.startsWith('/admin');
   const isHome = pathname === '/';
-  const isPlaying = arenaState.status === 'playing' || arenaState.status === 'matching' || !!activeLab || isAdminRoute;
+  const isLabRoute = pathname?.startsWith('/phong-lab');
+  const isPlaying = arenaState.status === 'playing' || arenaState.status === 'matching' || !!activeLab || isAdminRoute || isLabRoute;
   const showFloatingShutter = !isPlaying && pathname !== '/story' && pathname !== '/auth';
 
   const bgImage = personalization?.bgImage || '';
@@ -796,13 +797,13 @@ export default function DashboardLayout({ children }) {
             </div>
           </div>
         )}
-        <main className="flex-1 overflow-x-clip relative z-10">
+        <main className={`flex-1 overflow-x-clip relative z-10 ${isLabRoute ? 'h-screen overflow-hidden p-0 m-0' : ''}`}>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={pathname}
-              initial={{ opacity: 0, y: 14, scale: 0.992 }}
+              initial={isLabRoute ? false : { opacity: 0, y: 14, scale: 0.992 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.995 }}
+              exit={isLabRoute ? false : { opacity: 0, y: -10, scale: 0.995 }}
               transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
               className="w-full h-full"
             >
