@@ -99,6 +99,14 @@ export default function VirtualLabSandbox({
 
   const compData = AI_COMPANION_DATA[subjectKey] || AI_COMPANION_DATA.math;
 
+  // Tự động phân giải URL phù hợp giữa Local (cần /index.html) và Vercel (cleanUrls /)
+  const resolvedLabUrl = React.useMemo(() => {
+    if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      return labUrl.replace(/\/index\.html(\?.*)?$/, '/$1');
+    }
+    return labUrl;
+  }, [labUrl]);
+
   useEffect(() => {
     // Đăng ký phòng lab hiện tại vào store
     setActiveLab({
@@ -279,7 +287,7 @@ export default function VirtualLabSandbox({
           <iframe 
             key={iframeKey}
             ref={iframeRef}
-            src={labUrl}
+            src={resolvedLabUrl}
             className="w-full h-full border-none bg-[#0a0b12]"
             title={title}
             allow="accelerometer; autoplay; camera; microphone; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
