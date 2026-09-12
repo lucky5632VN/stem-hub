@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { collection, doc, setDoc, serverTimestamp, getDocs, query, orderBy, limit } from 'firebase/firestore';
 
-export const dynamic = 'force-static';
+export const dynamic = 'force-dynamic';
 
 // In-memory buffer fallback for ultra-fast response
 if (!globalThis.__AI_REASONING_LOGS__) {
