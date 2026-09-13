@@ -1,7 +1,7 @@
 # 📑 NHẬT KÝ HUẤN LUYỆN & AUDIT TÁI LẬP SỐ LIỆU AI (TRAINING LOG)
 > **Trạng thái**: Tái lập tự động 100% khi thực thi `node src/ai-training/scripts/run-all-audits.js`  
-> **Git Commit Hash**: `0131e40`  
-> **Thời điểm xuất log**: `2026-09-10T13:48:40.661Z`  
+> **Git Commit Hash**: `d5a8c24`  
+> **Thời điểm xuất log**: `2026-09-13T12:36:26.933Z`  
 > **Nguyên tắc**: Mọi con số trong nhật ký này được ghi **tự động** từ output thực tế của script train/eval. Không hard-code, không sửa số tay.
 
 ---
