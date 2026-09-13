@@ -226,6 +226,20 @@ export default function VirtualLabSandbox({
           {screenshotFlash && (
             <div className="absolute inset-0 bg-white z-[99999] animate-[ping_0.3s_ease-in-out_infinite]" />
           )}
+
+          {/* Nút quay lại Hub góc dưới bên trái */}
+          <div className="absolute bottom-6 left-6 z-30 flex items-center gap-2.5 screenshot-hide">
+            <button 
+              onClick={() => {
+                playSound.click?.();
+                router.push('/');
+              }}
+              className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 border border-rose-500/30 text-white rounded-2xl transition-all active:scale-95 flex items-center gap-1.5 shadow-lg shadow-rose-600/30 backdrop-blur-md group cursor-pointer font-sans"
+            >
+              <X className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
+              <span className="text-[11px] font-black uppercase tracking-wider">Về Hub</span>
+            </button>
+          </div>
         </div>
 
         {/* AI Companion Drawer */}

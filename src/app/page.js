@@ -314,9 +314,8 @@ export default function Home() {
                   
                   <div>
                     {/* Card Image Banner */}
-                    <Link 
-                      href={lab.href} 
-                      onClick={() => playSound.click?.()} 
+                    <div 
+                      onClick={() => handleLaunchLab(lab)} 
                       className="block h-28 overflow-hidden relative cursor-pointer"
                     >
                       <div className="absolute inset-0 bg-gradient-to-t from-bg-secondary via-bg-secondary/30 to-transparent z-10 group-hover:via-bg-secondary/10 transition-colors duration-300" />
@@ -334,16 +333,16 @@ export default function Home() {
                           <span>{lab.title}</span>
                         </div>
                       </div>
-                    </Link>
+                    </div>
 
                     {/* Card Body Content */}
                     <div className="p-3.5 pt-2 relative z-20">
                       <div className="flex items-center justify-between mb-1">
-                        <Link href={lab.href} onClick={() => playSound.click?.()} className="cursor-pointer">
+                        <div onClick={() => handleLaunchLab(lab)} className="cursor-pointer">
                           <h3 className={`text-base font-black text-text-primary group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r ${lab.gradientText} transition-all duration-300 tracking-wide font-mono hover:opacity-90`}>
                             {lab.name}
                           </h3>
-                        </Link>
+                        </div>
                         <span className="text-[8.5px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded font-bold">
                           ● Sẵn sàng
                         </span>
@@ -376,15 +375,14 @@ export default function Home() {
                       </span>
                     </div>
 
-                    <Link 
-                      href={lab.href}
-                      onClick={() => playSound.click?.()}
+                    <button 
+                      onClick={() => handleLaunchLab(lab)}
                       onMouseEnter={playSound.hover}
                       className={`px-4 py-1.5 rounded-xl text-[10.5px] font-bold transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] flex items-center gap-1.5 cursor-pointer shadow-md ${lab.btnGradient}`}
                     >
                       <span>Vào Học</span>
                       <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-                    </Link>
+                    </button>
                   </div>
                 </div>
               );
@@ -502,158 +500,7 @@ export default function Home() {
 
       </div>
 
-      {/* ================== OVERLAY IFRAME PORTAL (FULLSCREEN SANDBOX LAB) ================== */}
-      {activeLab && (
-        <div className="fixed inset-0 z-[9999] bg-bg-primary flex flex-col">
-          {/* Body chính: Iframe Lab + Sidebar AI */}
-          <div className="flex-1 flex relative overflow-hidden bg-bg-primary">
-            {/* Iframe load trang Lab */}
-            <div className="flex-1 h-full relative">
-              <iframe 
-                src={activeLab.launchUrl || activeLab.link} 
-                className="w-full h-full border-none"
-                title={activeLab.name}
-              />
-              
-              {/* Nhóm nút điều khiển nổi ở góc dưới bên trái */}
-              <div className="absolute bottom-6 left-6 z-30 flex items-center gap-2.5 screenshot-hide">
-                {/* Nút quay lại Hub */}
-                <button 
-                  onClick={() => {
-                    playSound.click();
-                    setActiveLab(null);
-                  }}
-                  className="px-4 py-2.5 bg-danger hover:opacity-90 border border-danger/30 text-white rounded-2xl transition-all active:scale-95 flex items-center gap-1.5 shadow-lg shadow-danger/20 backdrop-blur-md group cursor-pointer"
-                >
-                  <X className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
-                  <span className="text-[11px] font-black uppercase tracking-wider">Về Hub</span>
-                </button>
 
-                {/* Nút bật tắt Trợ lý AI */}
-                <button 
-                  onClick={() => setShowAiCompanion(!showAiCompanion)}
-                  className={`p-2.5 border rounded-2xl transition-all active:scale-95 flex items-center justify-center shadow-lg backdrop-blur-md cursor-pointer ${
-                    showAiCompanion 
-                      ? 'bg-accent-pink border-accent-pink text-white shadow-accent-pink/20' 
-                      : 'bg-bg-secondary/80 border-border-theme text-text-secondary hover:text-text-primary shadow-black/30'
-                  }`}
-                  title="Trợ lý thí nghiệm AI"
-                >
-                  <MessageSquare className="w-4.5 h-4.5" />
-                </button>
-
-                {/* Nút chụp ảnh kết quả */}
-                <button 
-                  onClick={handleTakeScreenshot}
-                  className="p-2.5 bg-bg-secondary/80 border border-border-theme hover:border-accent-pink/35 text-text-secondary hover:text-text-primary rounded-2xl transition-all active:scale-95 flex items-center justify-center shadow-lg backdrop-blur-md cursor-pointer shadow-black/30"
-                  title="Chụp ảnh kết quả"
-                >
-                  <Camera className="w-4.5 h-4.5 text-accent-pink" />
-                </button>
-              </div>
-              
-              {/* Flash screen khi chụp ảnh */}
-              {screenshotFlash && (
-                <div className="absolute inset-0 bg-white z-[99999] animate-[ping_0.3s_ease-in-out_infinite]" />
-              )}
-            </div>
-
-            {/* Sidebar Trợ lý AI */}
-            {showAiCompanion && (
-              <div className="w-80 h-full bg-bg-secondary border-l border-border-theme flex flex-col justify-between z-20 shadow-2xl animate-in slide-in-from-right duration-300">
-                {/* Header Sidebar */}
-                <div className="p-4 border-b border-border-theme flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4.5 h-4.5 text-accent-pink animate-pulse" />
-                    <span className="text-xs font-black text-text-primary">Trợ lý AI Companion</span>
-                  </div>
-                  <button 
-                    onClick={() => setShowAiCompanion(false)}
-                    className="p-1 hover:bg-bg-tertiary rounded-full text-text-secondary hover:text-text-primary transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-
-                {/* Nội dung chat history */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 text-left">
-                  {chatHistory.map((msg, i) => (
-                    <div 
-                      key={i} 
-                      className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
-                    >
-                      <div className={`text-[9px] text-text-secondary mb-1 font-mono`}>
-                        {msg.sender === 'user' ? 'Bạn' : 'Companion AI'}
-                      </div>
-                      <div className={`p-3 rounded-2xl text-xs max-w-[85%] leading-relaxed ${
-                        msg.sender === 'user' 
-                          ? 'bg-accent-pink text-white rounded-tr-none shadow-md shadow-accent-pink/10' 
-                          : 'bg-bg-tertiary border border-border-theme text-text-primary rounded-tl-none whitespace-pre-wrap'
-                      }`}>
-                        {msg.text}
-                      </div>
-                    </div>
-                  ))}
-
-                  {chatLoading && (
-                    <div className="flex flex-col items-start">
-                      <div className="text-[9px] text-text-secondary mb-1 font-mono">Companion AI</div>
-                      <div className="p-3 bg-bg-tertiary border border-border-theme rounded-2xl rounded-tl-none text-xs text-text-secondary flex items-center gap-1.5">
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-accent-pink" />
-                        Đang phân tích dữ liệu...
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Chân Sidebar: gợi ý câu hỏi & ô nhập */}
-                <div className="p-4 border-t border-border-theme space-y-3 bg-bg-tertiary">
-                  {/* Câu hỏi gợi ý */}
-                  {aiCompanionData[activeLab.id] && (
-                    <div className="space-y-1.5">
-                      <p className="text-[9px] font-bold text-text-secondary uppercase tracking-wider text-left">Gợi ý chủ đề nhanh:</p>
-                      <div className="flex flex-col gap-1.5">
-                        {aiCompanionData[activeLab.id].suggestions.map((sug, i) => (
-                          <button
-                            key={i}
-                            onClick={() => handleSendChatMessage(sug)}
-                            className="w-full text-[10px] text-text-secondary hover:text-text-primary bg-bg-primary hover:bg-bg-secondary border border-border-theme p-2 rounded-xl text-left transition-all truncate"
-                          >
-                            💡 {sug}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Input nhập chat */}
-                  <form 
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      handleSendChatMessage();
-                    }}
-                    className="flex gap-1.5 mt-2"
-                  >
-                    <input 
-                      type="text"
-                      value={chatInput}
-                      onChange={(e) => setChatInput(e.target.value)}
-                      placeholder="Hỏi trợ lý công thức, lý thuyết..."
-                      className="flex-1 bg-bg-primary border border-border-theme focus:border-accent-pink focus:outline-none rounded-xl px-3 py-2 text-xs text-text-primary placeholder:text-text-secondary transition-colors"
-                    />
-                    <button
-                      type="submit"
-                      className="p-2 bg-accent-pink hover:opacity-90 text-white rounded-xl transition-colors"
-                    >
-                      <Send className="w-4 h-4" />
-                    </button>
-                  </form>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* ================== MODAL XÁC NHẬN CHIA SỄ STORIES ================== */}
       {showShareConfirm && (

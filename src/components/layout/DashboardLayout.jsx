@@ -853,20 +853,21 @@ export default function DashboardLayout({ children }) {
       </AnimatePresence>
 
       {/* Global Fullscreen Interactive Virtual Lab Sandbox Portal */}
-      {activeLab && activeLab.link && !pathname?.startsWith('/phong-lab') && (
+      {activeLab && activeLab.link && !pathname?.match(/^\/phong-lab\/(toan|ly|hoa|sinh|math|phys|chem|bio)/) && (
         <div className="fixed inset-0 z-[99990] bg-[#0c0d14] flex flex-col">
           <div className="flex-1 flex relative overflow-hidden bg-[#0c0d14]">
             <iframe 
-              src={activeLab.link} 
+              src={activeLab.launchUrl || activeLab.link} 
               className="w-full h-full border-none"
               title={activeLab.name || activeLab.title}
+              allow="accelerometer; autoplay; camera; microphone; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             />
             
             {/* Nút quay lại Hub góc dưới bên trái */}
             <div className="absolute bottom-6 left-6 z-[99995] flex items-center gap-2.5 screenshot-hide">
               <button 
                 onClick={() => {
-                  playSound.click();
+                  playSound.click?.();
                   setActiveLab(null);
                 }}
                 className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 border border-rose-500/30 text-white rounded-2xl transition-all active:scale-95 flex items-center gap-1.5 shadow-lg shadow-rose-600/30 backdrop-blur-md group cursor-pointer font-sans"
