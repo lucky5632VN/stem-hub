@@ -857,12 +857,12 @@ const GeometryGenerator: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     };
   }, [isDragging]);
 
-  // Auto-scroll chat history to bottom
-  useEffect(() => {
-    if (chatScrollRef.current) {
-      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
-    }
-  }, [chatHistory, isChatLoading]);
+  // Tắt tính năng tự động cuộn theo yêu cầu (tham khảo cách làm giống NOVA AI)
+  // useEffect(() => {
+  //   if (chatScrollRef.current) {
+  //     chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+  //   }
+  // }, [chatHistory, isChatLoading]);
 
   const handleClearAll = useCallback(() => {
     setGeoData(null);
@@ -1155,18 +1155,29 @@ const GeometryGenerator: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         vertex_labels: modelContext.labels
       });
 
-      // 💬 KHỞI TẠO LUỒNG HỎI - ĐÁP (Q&A) TƯƠNG TÁC
+      // 💬 KHỞI TẠO LUỒNG HỎI - ĐÁP (Q&A) TƯƠNG TÁC (In từ từ từng từ giống NOVA AI)
       const initialWelcomeText = `Xin chào! Mình đã phân tích đề bài và dựng xong mô hình 3D tương tác: **${modelContext.shapeName}**.\n\nBạn có thể tự do dùng chuột xoay và phóng to để quan sát các góc độ không gian.\n\nBạn cần mình hỗ trợ gì tiếp theo? (Ví dụ: hướng dẫn phương pháp kẻ thêm đường phụ theo định lý chuẩn BGD, chứng minh quan hệ vuông góc, tính góc, khoảng cách, hay tính thể tích theo tham số đề bài?)`;
 
+      const welcomeId = 'welcome_' + Date.now();
       setChatHistory([
         {
-          id: 'welcome_' + Date.now(),
+          id: welcomeId,
           role: 'ai',
-          text: initialWelcomeText,
+          text: '',
           timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
         }
       ]);
       setIsChatExpanded(true);
+
+      // In từ từ từng từ (Word-by-word streaming ~14ms/từ)
+      const welcomeWords = initialWelcomeText.split(' ');
+      let curWelcome = '';
+      for (let i = 0; i < welcomeWords.length; i++) {
+        curWelcome += (i === 0 ? '' : ' ') + welcomeWords[i];
+        const u = curWelcome;
+        setChatHistory(prev => prev.map(m => m.id === welcomeId ? { ...m, text: u } : m));
+        await new Promise(r => setTimeout(r, 14));
+      }
 
     } catch (e: any) {
       console.error("Lỗi tạo mô hình 3D:", e);
@@ -1285,13 +1296,26 @@ const GeometryGenerator: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         }
       }
 
-      const aiMsg: ChatMessage = {
-        id: 'ai_' + Date.now(),
+      // ⚡ HIỆU ỨNG GÕ CHỮ TỪ TỪ GIỐNG NOVA AI (Word-by-Word Streaming Effect ~16ms/từ, không tự động cuộn)
+      const botMsgId = 'ai_' + Date.now();
+      const initialBotMsg: ChatMessage = {
+        id: botMsgId,
         role: 'ai',
-        text: cleanAnswerText,
+        text: '',
         timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
       };
-      setChatHistory(prev => [...prev, aiMsg]);
+      setChatHistory(prev => [...prev, initialBotMsg]);
+
+      const words = cleanAnswerText.split(' ');
+      let currentStreamText = '';
+      const delay = Math.max(12, Math.min(22, Math.floor(1600 / Math.max(1, words.length))));
+
+      for (let i = 0; i < words.length; i++) {
+        currentStreamText += (i === 0 ? '' : ' ') + words[i];
+        const updatedText = currentStreamText;
+        setChatHistory(prev => prev.map(m => m.id === botMsgId ? { ...m, text: updatedText } : m));
+        await new Promise(r => setTimeout(r, delay));
+      }
 
       // 🚀 GIAI ĐOẠN 6: AGENTIC AI - TRIGGER VẼ LẠI NẾU CÓ ACTIONS KẺ ĐƯỜNG PHỤ
       if (allActions.length > 0) {

@@ -994,11 +994,11 @@ class UnifiedChatbot {
       const ragFallback = this.retrieveRAGContext ? this.retrieveRAGContext(text) : '';
       if (ragFallback) {
         const fallbackMsg = `💡 [Trợ lý Ngoại tuyến QuantumLab]:\n${ragFallback.replace('[RAG SEMANTIC KNOWLEDGE CONTEXT]:', '').trim()}`;
-        this.addMessage('ai', fallbackMsg);
+        await this.streamMessage('ai', fallbackMsg);
       } else {
         const errMsg = 'Xin lỗi, tôi đang gặp sự cố khi kết nối với máy chủ AI. Vui lòng kiểm tra lại câu hỏi hoặc thử lại sau giây lát!';
         // CHỈ HIỂN THỊ TẠM THỜI CHO UI, TUYỆT ĐỐI KHÔNG LƯU VÀO CACHE/LOCALSTORAGE
-        this.renderMessage('ai', errMsg);
+        await this.streamMessage('ai', errMsg);
         console.warn('[Quantum AI] Chỉ hiển thị thông báo lỗi tạm thời trên UI, TUYỆT ĐỐI KHÔNG LƯU CACHE.');
       }
     } finally {

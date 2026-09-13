@@ -49,10 +49,10 @@ export default function SocraticChat({ isOpen, onClose, problemStatement, hint }
     }
   }, [isOpen]);
 
-  // Auto scroll to bottom
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isAITyping]);
+  // Auto scroll to bottom (Tắt tính năng tự động cuộn theo yêu cầu, giống NOVA AI)
+  // useEffect(() => {
+  //   bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  // }, [messages, isAITyping]);
 
   const sendMessage = async () => {
     const text = inputText.trim();
@@ -73,12 +73,25 @@ export default function SocraticChat({ isOpen, onClose, problemStatement, hint }
       const { socratic_question, theory_applied } = response.data;
       if (theory_applied) setTheory(theory_applied);
 
+      // ⚡ HIỆU ỨNG GÕ CHỮ TỪ TỪ GIỐNG NOVA AI (Word-by-Word Streaming ~16ms/từ)
+      const botMsgId = Date.now();
       setMessages(prev => [...prev, {
         role: 'ai',
-        content: socratic_question,
+        content: '',
         theory: theory_applied,
-        id: Date.now(),
+        id: botMsgId,
       }]);
+
+      const words = (socratic_question || '').split(' ');
+      let currentText = '';
+      const delay = Math.max(12, Math.min(22, Math.floor(1600 / Math.max(1, words.length))));
+
+      for (let i = 0; i < words.length; i++) {
+        currentText += (i === 0 ? '' : ' ') + words[i];
+        const u = currentText;
+        setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, content: u } : m));
+        await new Promise(r => setTimeout(r, delay));
+      }
     } catch (err) {
       let errorMessage = '⚠️ Không kết nối được với AI. Hãy kiểm tra backend nhé!';
       if (err.response?.data?.detail) {

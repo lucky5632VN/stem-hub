@@ -267,6 +267,41 @@ export default function Chatbot() {
         };
     }, [winPos]);
 
+    // ⚡ HIỆU ỨNG GÕ CHỮ TỪ TỪ GIỐNG NOVA AI (Word-by-Word Streaming Effect ~16ms/từ, không tự động cuộn)
+    const streamBotReply = async (baseMsgs, fullText, isSuccess = true) => {
+        setIsLoading(false);
+        const botMsgId = 'bot_' + Date.now();
+        const initialBotMsg = {
+            sender: 'bot',
+            text: '',
+            id: botMsgId
+        };
+        setMessages([...baseMsgs, initialBotMsg]);
+
+        const words = (fullText || '').split(' ');
+        let currentStreamText = '';
+        const delay = Math.max(12, Math.min(22, Math.floor(1600 / Math.max(1, words.length))));
+
+        for (let i = 0; i < words.length; i++) {
+            currentStreamText += (i === 0 ? '' : ' ') + words[i];
+            const updatedText = currentStreamText;
+            setMessages(prev => {
+                const next = [...prev];
+                if (next.length > 0) {
+                    next[next.length - 1] = { ...next[next.length - 1], text: updatedText };
+                }
+                return next;
+            });
+            await new Promise(r => setTimeout(r, delay));
+        }
+
+        const finalMsgs = [...baseMsgs, { sender: 'bot', text: currentStreamText }];
+        if (isSuccess && !isBioAIError(currentStreamText, 200)) {
+            saveCurrentSession(finalMsgs);
+        }
+        return currentStreamText;
+    };
+
     const handleSend = async () => {
         if (!input.trim() || isLoading) return;
 
@@ -285,10 +320,7 @@ export default function Chatbot() {
             const guard = window.StemLabAIBridge.checkSubjectBoundary(userMessage, 'sinh');
             if (!guard.allowed) {
                 const botReply = guard.refusal;
-                const finalMsgs = [...updatedMsgs, { sender: 'bot', text: botReply }];
-                setMessages(finalMsgs);
-                saveCurrentSession(finalMsgs);
-                setIsLoading(false);
+                await streamBotReply(updatedMsgs, botReply, true);
                 window.StemLabAIBridge.logLabReasoning({
                     query: userMessage,
                     subject: 'SINH',
@@ -307,10 +339,7 @@ export default function Chatbot() {
                 const cacheRes = await window.StemLabAIBridge.checkLabLearnedCache(userMessage, 'sinh', 0.92);
                 if (cacheRes && cacheRes.hit) {
                     const botReply = cacheRes.answer;
-                    const finalMsgs = [...updatedMsgs, { sender: 'bot', text: botReply }];
-                    setMessages(finalMsgs);
-                    saveCurrentSession(finalMsgs);
-                    setIsLoading(false);
+                    await streamBotReply(updatedMsgs, botReply, true);
 
                     window.StemLabAIBridge.logLabReasoning({
                         query: userMessage,
@@ -347,9 +376,7 @@ export default function Chatbot() {
                 const gwData = await gwRes.json();
                 if (gwData.text) {
                     generatedReply = gwData.text.trim();
-                    const finalMsgs = [...updatedMsgs, { sender: 'bot', text: generatedReply }];
-                    setMessages(finalMsgs);
-                    saveCurrentSession(finalMsgs);
+                    await streamBotReply(updatedMsgs, generatedReply, true);
                     success = true;
                 }
             }
@@ -406,9 +433,7 @@ QUY TẮC PHẢN HỒI BẮT BUỘC - TUYỆT ĐỐI TUÂN THỦ:
                 if (data && data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
                     let botReply = data.candidates[0].content.parts[0].text.trim();
                     generatedReply = botReply;
-                    const finalMsgs = [...updatedMsgs, { sender: 'bot', text: botReply }];
-                    setMessages(finalMsgs);
-                    saveCurrentSession(finalMsgs);
+                    await streamBotReply(updatedMsgs, botReply, true);
                     bioKeyIdx = (bioKeyIdx + 1) % BIOLOGY_API_KEYS.length;
                     success = true;
                 } else if (data.error) {
@@ -422,8 +447,7 @@ QUY TẮC PHẢN HỒI BẮT BUỘC - TUYỆT ĐỐI TUÂN THỦ:
         }
 
         if (!success) {
-            const errMsgs = [...updatedMsgs, { sender: 'bot', text: `Rất tiếc, tôi gặp lỗi khi xử lý yêu cầu của bạn: ${errorMsg}` }];
-            setMessages(errMsgs);
+            await streamBotReply(updatedMsgs, `Rất tiếc, tôi gặp lỗi khi xử lý yêu cầu của bạn: ${errorMsg}`, false);
             console.warn('[Bio AI] Chỉ hiển thị thông báo lỗi tạm thời trên UI, TUYỆT ĐỐI KHÔNG LƯU CACHE.');
         }
 
