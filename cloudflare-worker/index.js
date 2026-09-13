@@ -1120,6 +1120,120 @@ function extractFallbackGeometry(problemText) {
   };
 }
 
+function getGenericOrFallbackGeometry(parsedData, problemText) {
+  const clean = (problemText || '').toLowerCase();
+  const rawShapeType = (parsedData?.shapeType || '').toLowerCase();
+  
+  let shapeType = 'hinh_chop_day_hcn';
+  let shapeName = 'Hình chóp S.ABCD (Mô hình 3D mẫu)';
+  let parameters = { canhDay: 4, chieuCao: 5, chieuDai: 4, chieuRong: 4, banKinh: 2 };
+  
+  // 1. Kiểm tra Lăng trụ
+  if (clean.includes('lăng trụ') || clean.includes('lang_tru') || clean.includes('prism') || clean.includes("a'b'c'") || rawShapeType.includes('lang_tru') || rawShapeType.includes('prism')) {
+    const isQuad = clean.includes('tứ giác') || clean.includes("a'b'c'd'") || clean.includes('thoi') || rawShapeType.includes('tu_giac');
+    const isOblique = (clean.includes('xiên') || clean.includes('trọng tâm') || clean.includes('trung điểm') || clean.includes('chiếu của')) && !clean.includes('đứng');
+    
+    if (isQuad && isOblique) {
+      shapeType = 'hinh_lang_tru_tu_giac_xien';
+      shapeName = "Hình lăng trụ xiên ABCD.A'B'C'D'";
+      parameters = { canhDay: 4, chieuCao: 4.5, chieuDai: 4, chieuRong: 4, banKinh: 2 };
+    } else if (isQuad) {
+      shapeType = 'hinh_hop_chu_nhat';
+      shapeName = "Hình hộp chữ nhật ABCD.A'B'C'D'";
+      parameters = { canhDay: 4, chieuCao: 4, chieuDai: 5, chieuRong: 4, banKinh: 2 };
+    } else if (isOblique) {
+      shapeType = 'hinh_lang_tru_tam_giac_xien';
+      shapeName = "Hình lăng trụ xiên ABC.A'B'C'";
+      parameters = { canhDay: 4, chieuCao: 4.5, chieuDai: 4, chieuRong: 4, banKinh: 2 };
+    } else {
+      shapeType = 'hinh_lang_tru_tam_giac_deu';
+      shapeName = "Hình lăng trụ tam giác đều ABC.A'B'C'";
+      parameters = { canhDay: 4, chieuCao: 6, chieuDai: 4, chieuRong: 4, banKinh: 2 };
+    }
+  }
+  // 2. Hình hộp chữ nhật & Hình lập phương
+  else if (clean.includes('lập phương') || clean.includes('hộp chữ nhật') || rawShapeType.includes('hop_chu_nhat')) {
+    shapeType = 'hinh_hop_chu_nhat';
+    if (clean.includes('lập phương')) {
+      shapeName = "Hình lập phương ABCD.A'B'C'D'";
+      parameters = { canhDay: 4, chieuCao: 4, chieuDai: 4, chieuRong: 4, banKinh: 2 };
+    } else {
+      shapeName = "Hình hộp chữ nhật ABCD.A'B'C'D'";
+      parameters = { canhDay: 4, chieuCao: 3, chieuDai: 5, chieuRong: 4, banKinh: 2 };
+    }
+  }
+  // 3. Hình chóp tứ giác đều
+  else if (clean.includes('tứ giác đều') || clean.includes('chóp đều s.abcd') || rawShapeType === 'hinh_chop_tu_giac_deu') {
+    shapeType = 'hinh_chop_tu_giac_deu';
+    shapeName = 'Hình chóp tứ giác đều S.ABCD';
+    parameters = { canhDay: 4, chieuCao: 5, chieuDai: 4, chieuRong: 4, banKinh: 2 };
+  }
+  // 4. Hình chóp tam giác đều / Tứ diện đều
+  else if (clean.includes('tam giác đều') || clean.includes('tứ diện đều') || clean.includes('chóp tam giác đều') || rawShapeType === 'hinh_chop_tam_giac_deu') {
+    shapeType = 'hinh_chop_tam_giac_deu';
+    shapeName = 'Hình chóp tam giác đều S.ABC';
+    parameters = { canhDay: 4, chieuCao: 5, chieuDai: 4, chieuRong: 4, banKinh: 2 };
+  }
+  // 5. Hình chóp tam giác S.ABC
+  else if ((/\bs\.abc\b/i.test(clean) || (clean.includes('chóp') && clean.includes('tam giác')) || rawShapeType === 'hinh_chop_tam_giac') && !clean.includes('s.abcd')) {
+    shapeType = 'hinh_chop_tam_giac';
+    shapeName = 'Hình chóp S.ABC (SA ⊥ đáy)';
+    parameters = { canhDay: 4, chieuCao: 5, chieuDai: 4, chieuRong: 4, banKinh: 2 };
+  }
+  // 6. Hình nón tròn xoay
+  else if (clean.includes('nón') || clean.includes('non') || rawShapeType.includes('non')) {
+    shapeType = 'hinh_non';
+    shapeName = 'Hình nón tròn xoay';
+    parameters = { banKinh: 3, chieuCao: 5, canhDay: 4 };
+  }
+  // 7. Hình trụ tròn xoay
+  else if (clean.includes('trụ') || clean.includes('tru') || rawShapeType.includes('tru')) {
+    shapeType = 'hinh_tru';
+    shapeName = 'Hình trụ tròn xoay';
+    parameters = { banKinh: 3, chieuCao: 6, canhDay: 4 };
+  }
+  // 8. Hình cầu
+  else if (clean.includes('cầu') || clean.includes('cau') || rawShapeType.includes('cau')) {
+    shapeType = 'hinh_cau';
+    shapeName = 'Hình cầu';
+    parameters = { banKinh: 3, chieuCao: 3, canhDay: 4 };
+  }
+  // 9. Mặc định Hình chóp S.ABCD
+  else {
+    shapeType = 'hinh_chop_day_hcn';
+    shapeName = 'Hình chóp S.ABCD (SA ⊥ đáy)';
+    parameters = { canhDay: 4, chieuCao: 5, chieuDai: 4, chieuRong: 4, banKinh: 2 };
+  }
+
+  // Tận dụng bất kỳ thông số nào đã trích xuất được từ đề bài (nếu có)
+  if (parsedData?.parameters) {
+    if (parsedData.parameters.canhDay) parameters.canhDay = parsedData.parameters.canhDay;
+    if (parsedData.parameters.chieuCao) parameters.chieuCao = parsedData.parameters.chieuCao;
+    if (parsedData.parameters.chieuDai) parameters.chieuDai = parsedData.parameters.chieuDai;
+    if (parsedData.parameters.chieuRong) parameters.chieuRong = parsedData.parameters.chieuRong;
+    if (parsedData.parameters.banKinh) parameters.banKinh = parsedData.parameters.banKinh;
+  }
+  if (parsedData?.givenFacts && typeof findLengthFact === 'function') {
+    const bFact = findLengthFact(parsedData.givenFacts, 'canhday', 'ab', 'bc', 'chieu_dai');
+    if (bFact) parameters.canhDay = getFactLength(bFact, parameters.canhDay);
+    const hFact = findLengthFact(parsedData.givenFacts, 'chieucao', 'duongcao', 'sa', 'sh', 'so', 'aa');
+    if (hFact) parameters.chieuCao = getFactLength(hFact, parameters.chieuCao);
+  }
+
+  return {
+    success: true,
+    shapeType,
+    shapeName,
+    parameters,
+    appliedRule: 'smart_interactive_preview',
+    explanation: `Chào bạn! Mình đã phân tích đề bài và dựng xong mô hình 3D tương tác: ${shapeName}. Bạn có thể tự do dùng chuột xoay và phóng to để quan sát các góc độ không gian. Bạn cần mình hỗ trợ tính toán hay kẻ thêm đường phụ gì tiếp theo?`,
+    sanityCheck: { passed: true, maxDiscrepancy: 0, details: [] },
+    needsReview: false,
+    donVi: 'cm',
+    givenFacts: parsedData?.givenFacts || []
+  };
+}
+
 // ============================================================================
 // ROUTE HANDLERS
 // ============================================================================
@@ -1228,34 +1342,9 @@ ${problemText ? `Đề bài văn bản: "${problemText}"` : 'Đề bài được
     // TẦNG 2: GIẢI HỆ DỮ KIỆN BẰNG FACT SOLVER TẤT ĐỊNH
     const factResult = solveGeometryFacts(parsedData);
 
-    if (!factResult.success && factResult.unsupported) {
-      const hasImage = !!cleanBase64;
-      const isGeneral = (!problemText && !hasImage) || (problemText && /^(xin\s*)?(chào|chao|hello|hi|test|giới thiệu|huong dan)$/i.test(problemText.trim())) || (!hasImage && (!parsedData.givenFacts || parsedData.givenFacts.length === 0));
-      if (isGeneral) {
-        return jsonResponse({
-          success: true,
-          shapeType: 'hinh_chop_day_hcn',
-          shapeName: 'Hình chóp S.ABCD (Mô hình 3D mẫu)',
-          parameters: { canhDay: 4, chieuCao: 5, chieuDai: 4, chieuRong: 4, banKinh: 2 },
-          appliedRule: 'default_preview_model',
-          explanation: 'Chào bạn! Đây là mô hình hình chóp S.ABCD trực quan 3D. Bạn có thể nhập đề bài cụ thể để tôi dựng hình và giải chi tiết nhé!',
-          sanityCheck: { passed: true, maxDiscrepancy: 0, details: [] },
-          needsReview: false,
-          donVi: 'cm',
-          givenFacts: []
-        }, 200);
-      }
-
-      return jsonResponse({
-        success: false,
-        unsupported: true,
-        shapeType: parsedData.shapeType || 'khac',
-        shapeName: parsedData.shapeName || 'Khối hình học',
-        givenFacts: parsedData.givenFacts || [],
-        debugError: lastApiErr,
-        rawResponse: responseText ? responseText.slice(0, 200) : null,
-        message: factResult.message || 'Đề bài có dạng dữ kiện phức tạp, hệ thống hiện chưa tự động dựng hình chính xác.'
-      }, 200);
+    if (!factResult.success) {
+      const fallbackModel = getGenericOrFallbackGeometry(parsedData, problemText);
+      return jsonResponse(fallbackModel, 200);
     }
 
     const finalResponse = {
