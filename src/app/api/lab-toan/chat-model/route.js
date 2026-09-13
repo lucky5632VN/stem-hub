@@ -9,44 +9,68 @@ function repairPseudoLatex(text) {
   if (!text || typeof text !== 'string') return '';
   let s = text;
 
+  // 1. Dọn dẹp ký tự Form Feed / Backspace nếu có từ JSON parse
   s = s.replace(/\x0c/g, '\\f').replace(/\x08/g, '\\b');
+
+  // 2. Gộp các dòng bị ngắt vụn công thức đứng một mình (dấu = hoặc \cdot)
   s = s.replace(/\n\s*(\\?cdot|·)\s*\n/g, ' \\cdot ');
   s = s.replace(/\n\s*(\\?cdot|·)\s*/g, ' \\cdot ');
   s = s.replace(/\s*(\\?cdot|·)\s*\n/g, ' \\cdot ');
   s = s.replace(/=\s*\n\s*/g, ' = ');
   s = s.replace(/\n\s*=\s*/g, ' = ');
 
+  // 3. Chuẩn hóa backslash kép/ba thành 1 backslash trước các lệnh LaTeX: \\sqrt -> \sqrt, \\frac -> \frac
+  s = s.replace(/\\{2,}([a-zA-Z]+)/g, '\\$1');
+
+  // 4. Chuẩn hóa Delta
   s = s.replace(/(?<!\\)\bDelta([A-Z]+)/g, '\\Delta $1');
   s = s.replace(/(?<!\\)\bDelta\b/g, '\\Delta');
 
-  s = s.replace(/\b(?:\\?frac)\s+([a-zA-Z0-9^]+(?:\s*(?:\\?sqrt|√)\s*[0-9a-zA-Z^]+)?)\s+(\d+)\b/g, (_match, num, den) => {
-    const cleanNum = num
-      .replace(/(?:\\?sqrt|√)\s*(\d+)/g, '\\sqrt{$1}')
-      .replace(/(?<!\\)sqrt/g, '\\sqrt');
-    return `\\frac{${cleanNum}}{${den}}`;
-  });
+  // 5. Chuẩn hóa tiếng Việt cho căn: "căn bậc hai của X", "căn(X)", "căn X", "a căn X"
+  s = s.replace(/(?:căn\s+bậc\s+(?:hai|2)\s+của)\s*\(([^)]+)\)/gi, '\\sqrt{$1}');
+  s = s.replace(/(?:căn\s+bậc\s+(?:hai|2)\s+của)\s*([a-zA-Z0-9^]+)/gi, '\\sqrt{$1}');
+  s = s.replace(/\bcăn\s*\(([^)]+)\)/gi, '\\sqrt{$1}');
+  s = s.replace(/\bcăn\s*\{([^}]+)\}/gi, '\\sqrt{$1}');
+  s = s.replace(/\bcăn\s*(\d+)/gi, '\\sqrt{$1}');
+  s = s.replace(/\bcăn\s+(?!bậc\b)([a-zA-Z](?:\^[0-9]+)?)\b/gi, '\\sqrt{$1}');
 
-  s = s.replace(/\b(?:\\?frac)\s+([a-zA-Z0-9^]+(?:\s*(?:\\?sqrt|√)\s*[0-9a-zA-Z^]+))\s+(\d+)\b/g, (_match, num, den) => {
-    const cleanNum = num
-      .replace(/(?:\\?sqrt|√)\s*(\d+)/g, '\\sqrt{$1}')
-      .replace(/(?<!\\)sqrt/g, '\\sqrt');
-    return `\\frac{${cleanNum}}{${den}}`;
-  });
+  // 6. Chuẩn hóa ký tự Unicode '√': "√(X)" -> \sqrt{X}, "√X" -> \sqrt{X}
+  s = s.replace(/√\s*\(([^)]+)\)/g, '\\sqrt{$1}');
+  s = s.replace(/√\s*\{([^}]+)\}/g, '\\sqrt{$1}');
+  s = s.replace(/√\s*(\d+)/g, '\\sqrt{$1}');
+  s = s.replace(/√\s*([a-zA-Z](?:\^[0-9]+)?)\b/g, '\\sqrt{$1}');
 
-  s = s.replace(/\b(?:\\?frac)\s+([a-zA-Z0-9^]+)\s+([a-zA-Z0-9^]+)\b/g, (_match, num, den) => {
-    return `\\frac{${num}}{${den}}`;
-  });
-
+  // 7. Chuẩn hóa pseudo-sqrt:
+  s = s.replace(/(?<!\\)\bsqrt\s*\(([^)]+)\)/gi, '\\sqrt{$1}');
   s = s.replace(/(?<!\\)\bsqrt\s+([A-Za-z0-9'^]+(?:\s*[-+]\s*[A-Za-z0-9'^]+)+)\b/g, '\\sqrt{$1}');
   s = s.replace(/(?<!\\)\bsqrt\s+([a-zA-Z0-9^]+(?:\s*[-+]\s*\\frac\{[^}]+\}\{[^}]+\}))/g, '\\sqrt{$1}');
   s = s.replace(/(?<!\\)\bsqrt\s*(\d+)/g, '\\sqrt{$1}');
   s = s.replace(/(?<!\\)\bsqrt\{([^{}]+)\}/g, '\\sqrt{$1}');
 
+  // 8. Nếu \sqrt thiếu ngoặc nhọn: "\sqrt 3" -> "\sqrt{3}", "\sqrt 2" -> "\sqrt{2}"
+  s = s.replace(/\\sqrt\s*(\d+)/g, '\\sqrt{$1}');
+  s = s.replace(/\\sqrt\s*([a-zA-Z])(?![a-zA-Z{])/g, '\\sqrt{$1}');
+
+  // 9. Sửa thiếu gạch chéo \frac{ và \sqrt{ và \cdot
   s = s.replace(/(?<!\\)\bfrac\{/g, '\\frac{');
   s = s.replace(/(?<!\\)\bsqrt\{/g, '\\sqrt{');
   s = s.replace(/(?<!\\)\bcdot\b/g, '\\cdot');
 
-  s = s.replace(/^((?:[A-Za-z0-9'_]+|V|S|A'G)\s*=\s*[\s\S]+?)$/gm, (line) => {
+  // 10. Chuẩn hóa pseudo-fraction: "frac a^2 sqrt 3 4" -> "\frac{a^2\sqrt{3}}{4}"
+  s = s.replace(/\b(?:\\?frac)\s+([a-zA-Z0-9^]+(?:\s*(?:\\?sqrt|√|căn)\s*[0-9a-zA-Z^]+)?)\s+(\d+)\b/gi, (_match, num, den) => {
+    const cleanNum = num
+      .replace(/(?:\\?sqrt|√|căn)\s*(\d+)/gi, '\\sqrt{$1}')
+      .replace(/(?<!\\)sqrt/g, '\\sqrt');
+    return `\\frac{${cleanNum}}{${den}}`;
+  });
+
+  // 11. Chuẩn hóa pseudo-fraction cơ bản: "frac a^2 3" -> "\frac{a^2}{3}"
+  s = s.replace(/\b(?:\\?frac)\s+([a-zA-Z0-9^]+)\s+([a-zA-Z0-9^]+)\b/g, (_match, num, den) => {
+    return `\\frac{${num}}{${den}}`;
+  });
+
+  // 12. Bọc các dòng đẳng thức độc lập thành $$...$$ nếu chưa có bọc
+  s = s.replace(/^((?:[A-Za-z0-9'_]+|V|S|A'G|h|R)\s*=\s*[\s\S]+?)$/gm, (line) => {
     const trimmed = line.trim();
     if (trimmed.startsWith('$') || trimmed.startsWith('$$') || trimmed.startsWith('<') || trimmed.startsWith('#') || trimmed.startsWith('*') || trimmed.startsWith('-')) {
       return line;
@@ -55,6 +79,27 @@ function repairPseudoLatex(text) {
       return `$$${trimmed}$$`;
     }
     return line;
+  });
+
+  // 13. Tự động bọc các biểu thức toán học rời rạc có \sqrt{...} hoặc \frac{...}{...} vào $...$ nếu chưa bọc
+  const protectedMath = [];
+  s = s.replace(/\$\$([\s\S]+?)\$\$/g, (m) => {
+    protectedMath.push(m);
+    return `__MATH_PROT_${protectedMath.length - 1}__`;
+  });
+  s = s.replace(/(?<!\$)\$([^$\n\r]+?)\$(?!\$)/g, (m) => {
+    protectedMath.push(m);
+    return `__MATH_PROT_${protectedMath.length - 1}__`;
+  });
+
+  // Bọc các biểu thức chứa \sqrt{...} hoặc \frac{...}{...} chưa có $
+  s = s.replace(/(?:[a-zA-Z0-9'_^]+\s*=\s*)?(?:[a-zA-Z0-9'_^.]*\\(?:sqrt|frac)\{(?:[^{}]+|\{[^{}]*\})*\}(?:\{[^{}]*\})*[a-zA-Z0-9_{}^\\/.+\-*=()]*)+/g, (match) => {
+    return `$${match.trim()}$`;
+  });
+
+  // Phục hồi lại các khối math đã bảo vệ (dùng callback function để tránh bug $$ của JS)
+  protectedMath.forEach((m, idx) => {
+    s = s.replace(`__MATH_PROT_${idx}__`, () => m);
   });
 
   return s;
@@ -196,10 +241,10 @@ PHONG CÁCH TRÌNH BÀY: CHUẨN MỰC, TỰ NHIÊN, TÓM TẮT SÚC TÍCH THEO 
 - Trình bày diễn giải toán học tự nhiên, mạch lạc, dễ hiểu theo đúng chuẩn sách giáo khoa Việt Nam.
 - CÔNG THỨC TOÁN BẮT BUỘC VIẾT CHUẨN LATEX:
   * Dùng $...$ cho công thức inline hoặc $$...$$ cho công thức trọng tâm.
-  * Luôn viết đầy đủ dấu gạch chéo và ngoặc nhọn: \\\\frac{a}{b}, \\\\sqrt{x}, \\\\cdot, \\\\Delta.
+  * Luôn viết đầy đủ dấu gạch chéo và ngoặc nhọn: \frac{a}{b}, \sqrt{x}, \cdot, \Delta.
   * TUYỆT ĐỐI KHÔNG viết dạng pseudo-code thiếu gạch chéo hay thiếu ngoặc như "frac a^2 sqrt 3 4" hay "sqrt a^2 - frac a^2 3".
-  * TUYỆT ĐỐI KHÔNG ngắt dấu nhân (\\\\cdot) hay dấu bằng (=) thành từng dòng đứng một mình. Hãy viết đẳng thức trên một dòng hoàn chỉnh:
-    Ví dụ: $$V = S_{\\\\Delta ABC} \\\\cdot A'G = \\\\frac{a^2\\\\sqrt{3}}{4} \\\\cdot \\\\frac{a\\\\sqrt{6}}{3} = \\\\frac{a^3\\\\sqrt{2}}{4}$$
+  * TUYỆT ĐỐI KHÔNG ngắt dấu nhân (\cdot) hay dấu bằng (=) thành từng dòng đứng một mình. Hãy viết đẳng thức trên một dòng hoàn chỉnh:
+    Ví dụ: $$V = S_{\Delta ABC} \cdot A'G = \frac{a^2\sqrt{3}}{4} \cdot \frac{a\sqrt{6}}{3} = \frac{a^3\sqrt{2}}{4}$$
   * BẮT BUỘC giữ nguyên tham số ẩn a, căn thức, phân thức tối giản.
 
 VÍ DỤ MẪU CHUẨN MỰC:

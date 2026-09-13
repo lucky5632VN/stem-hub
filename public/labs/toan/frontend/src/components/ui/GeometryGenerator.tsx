@@ -9,7 +9,7 @@ import {
   AlertTriangle, CheckCircle2
 } from 'lucide-react';
 import { calculateGeometry, type ShapeContext } from '../../utils/geometryCalculator';
-import { parseMarkdown, parseChatModelOutput, toNaturalVietnameseMathText } from '../../utils/markdown';
+import { parseMarkdown, parseChatModelOutput, toNaturalVietnameseMathText, splitForStreaming } from '../../utils/markdown';
 import { solveGeometryFacts, extractFallbackGeometry } from '../../utils/geometryFactSolver';
 import { API_ENDPOINTS, CLOUDFLARE_EDGE_PROXY_URL, fetchWithTimeout } from '../../config/api';
 
@@ -1306,12 +1306,19 @@ const GeometryGenerator: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       };
       setChatHistory(prev => [...prev, initialBotMsg]);
 
-      const words = cleanAnswerText.split(' ');
+      const tokens = splitForStreaming(cleanAnswerText);
       let currentStreamText = '';
-      const delay = Math.max(12, Math.min(22, Math.floor(1600 / Math.max(1, words.length))));
+      const delay = Math.max(12, Math.min(22, Math.floor(1600 / Math.max(1, tokens.length))));
 
-      for (let i = 0; i < words.length; i++) {
-        currentStreamText += (i === 0 ? '' : ' ') + words[i];
+      for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i];
+        if (token === '\n') {
+          currentStreamText += '\n';
+        } else if (i === 0 || currentStreamText.endsWith('\n')) {
+          currentStreamText += token;
+        } else {
+          currentStreamText += ' ' + token;
+        }
         const updatedText = currentStreamText;
         setChatHistory(prev => prev.map(m => m.id === botMsgId ? { ...m, text: updatedText } : m));
         await new Promise(r => setTimeout(r, delay));

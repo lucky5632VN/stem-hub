@@ -3,7 +3,7 @@ import type { KeyboardEvent } from 'react';
 import { Send, User, Bot, Loader2, X, Trash2, History, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGeometryStore } from '../../store/useGeometryStore';
-import { parseMarkdown } from '../../utils/markdown';
+import { parseMarkdown, splitForStreaming } from '../../utils/markdown';
 import type { ShapeType } from '../../types/geometry';
 import { API_ENDPOINTS, CLOUDFLARE_EDGE_PROXY_URL, fetchWithTimeout } from '../../config/api';
 
@@ -443,8 +443,36 @@ const AITutorPanel: React.FC = () => {
       aiResponseText = aiResponseText.replace(/```(?:json)?[\s\S]*?```/gi, '').trim();
       aiResponseText = aiResponseText.replace(/\{[\s\S]*?"action"\s*:\s*[\s\S]*?\}/gi, '').trim();
       
+      // ⚡ HIỆU ỨNG GÕ CHỮ TỪ TỪ GIỐNG NOVA AI (Word-by-Word Streaming Effect ~16ms/từ, không tự động cuộn)
+      const botMsgId = crypto.randomUUID();
+      const initialBotMsg: Message = {
+        id: botMsgId,
+        role: 'ai',
+        content: '',
+        timestamp: new Date(),
+      };
+      setMessages([...newMsgs, initialBotMsg]);
+
+      const tokens = splitForStreaming(aiResponseText);
+      let currentStreamText = '';
+      const delay = Math.max(12, Math.min(22, Math.floor(1600 / Math.max(1, tokens.length))));
+
+      for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i];
+        if (token === '\n') {
+          currentStreamText += '\n';
+        } else if (i === 0 || currentStreamText.endsWith('\n')) {
+          currentStreamText += token;
+        } else {
+          currentStreamText += ' ' + token;
+        }
+        const updatedText = currentStreamText;
+        setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, content: updatedText } : m));
+        await new Promise(r => setTimeout(r, delay));
+      }
+
       const finalMsgs: Message[] = [...newMsgs, {
-        id: crypto.randomUUID(),
+        id: botMsgId,
         role: 'ai',
         content: aiResponseText,
         timestamp: new Date(),
@@ -729,7 +757,17 @@ const AITutorPanel: React.FC = () => {
                           {msg.content || (msg as any).text || ''}
                         </span>
                       ) : (
-                        <div dangerouslySetInnerHTML={{ __html: parseMarkdown(msg.content || (msg as any).text || '') }} />
+                        <div
+                          className="chat-math-content"
+                          dangerouslySetInnerHTML={{ __html: parseMarkdown(msg.content || (msg as any).text || '') }}
+                          style={{
+                            fontSize: '0.84rem',
+                            lineHeight: 1.6,
+                            maxWidth: '100%',
+                            overflowWrap: 'anywhere',
+                            wordBreak: 'break-word',
+                          }}
+                        />
                       )}
                     </div>
                   </div>

@@ -6,8 +6,13 @@ import katex from 'katex';
 function renderKaTeXSafe(latex: string, displayMode = false): string {
   try {
     let cleanLatex = latex.trim();
-    // Normalize newlines in environments
+    // 1. Chuẩn hóa backslash kép trong LaTeX: \\sqrt -> \sqrt, \\frac -> \frac
+    cleanLatex = cleanLatex.replace(/\\{2,}([a-zA-Z]+)/g, '\\$1');
+    // 2. Normalize newlines in environments
     cleanLatex = cleanLatex.replace(/\\\\\s*\\n/g, '\\\\ ');
+    // 3. Chuẩn hóa \sqrt thiếu ngoặc nhọn: \sqrt 3 -> \sqrt{3}
+    cleanLatex = cleanLatex.replace(/\\sqrt\s*(\d+)/g, '\\sqrt{$1}');
+    cleanLatex = cleanLatex.replace(/\\sqrt\s*([a-zA-Z])(?![a-zA-Z{])/g, '\\sqrt{$1}');
     
     let rendered = katex.renderToString(cleanLatex, {
       displayMode,
@@ -47,32 +52,30 @@ export function repairPseudoLatex(text: string): string {
   s = s.replace(/=\s*\n\s*/g, ' = ');
   s = s.replace(/\n\s*=\s*/g, ' = ');
 
-  // 3. Chuẩn hóa DeltaABC -> \Delta ABC
+  // 3. Chuẩn hóa backslash kép/ba thành 1 backslash trước các lệnh LaTeX: \\sqrt -> \sqrt, \\frac -> \frac
+  s = s.replace(/\\{2,}([a-zA-Z]+)/g, '\\$1');
+
+  // 4. Chuẩn hóa Delta
   s = s.replace(/(?<!\\)\bDelta([A-Z]+)/g, '\\Delta $1');
   s = s.replace(/(?<!\\)\bDelta\b/g, '\\Delta');
 
-  // 4. Chuẩn hóa pseudo-fraction: "frac a^2 sqrt 3 4" -> "\frac{a^2\sqrt{3}}{4}"
-  s = s.replace(/\b(?:\\?frac)\s+([a-zA-Z0-9^]+(?:\s*(?:\\?sqrt|√)\s*[0-9a-zA-Z^]+)?)\s+(\d+)\b/g, (_match, num, den) => {
-    const cleanNum = num
-      .replace(/(?:\\?sqrt|√)\s*(\d+)/g, '\\sqrt{$1}')
-      .replace(/(?<!\\)sqrt/g, '\\sqrt');
-    return `\\frac{${cleanNum}}{${den}}`;
-  });
+  // 5. Chuẩn hóa tiếng Việt cho căn: "căn bậc hai của X", "căn(X)", "căn X", "a căn X"
+  s = s.replace(/(?:căn\s+bậc\s+(?:hai|2)\s+của)\s*\(([^)]+)\)/gi, '\\sqrt{$1}');
+  s = s.replace(/(?:căn\s+bậc\s+(?:hai|2)\s+của)\s*([a-zA-Z0-9^]+)/gi, '\\sqrt{$1}');
+  s = s.replace(/\bcăn\s*\(([^)]+)\)/gi, '\\sqrt{$1}');
+  s = s.replace(/\bcăn\s*\{([^}]+)\}/gi, '\\sqrt{$1}');
+  s = s.replace(/\bcăn\s*(\d+)/gi, '\\sqrt{$1}');
+  s = s.replace(/\bcăn\s+(?!bậc\b)([a-zA-Z](?:\^[0-9]+)?)\b/gi, '\\sqrt{$1}');
 
-  // 5. Chuẩn hóa pseudo-fraction có tích hoặc căn ở tử: "frac a sqrt 6 3" -> "\frac{a\sqrt{6}}{3}"
-  s = s.replace(/\b(?:\\?frac)\s+([a-zA-Z0-9^]+(?:\s*(?:\\?sqrt|√)\s*[0-9a-zA-Z^]+))\s+(\d+)\b/g, (_match, num, den) => {
-    const cleanNum = num
-      .replace(/(?:\\?sqrt|√)\s*(\d+)/g, '\\sqrt{$1}')
-      .replace(/(?<!\\)sqrt/g, '\\sqrt');
-    return `\\frac{${cleanNum}}{${den}}`;
-  });
-
-  // 6. Chuẩn hóa pseudo-fraction cơ bản: "frac a^2 3" -> "\frac{a^2}{3}"
-  s = s.replace(/\b(?:\\?frac)\s+([a-zA-Z0-9^]+)\s+([a-zA-Z0-9^]+)\b/g, (_match, num, den) => {
-    return `\\frac{${num}}{${den}}`;
-  });
+  // 6. Chuẩn hóa ký tự Unicode '√': "√(X)" -> \sqrt{X}, "√X" -> \sqrt{X}
+  s = s.replace(/√\s*\(([^)]+)\)/g, '\\sqrt{$1}');
+  s = s.replace(/√\s*\{([^}]+)\}/g, '\\sqrt{$1}');
+  s = s.replace(/√\s*(\d+)/g, '\\sqrt{$1}');
+  s = s.replace(/√\s*([a-zA-Z](?:\^[0-9]+)?)\b/g, '\\sqrt{$1}');
 
   // 7. Chuẩn hóa pseudo-sqrt:
+  // "sqrt(X)" -> \sqrt{X}
+  s = s.replace(/(?<!\\)\bsqrt\s*\(([^)]+)\)/gi, '\\sqrt{$1}');
   // "sqrt AA'^2 - AG^2" -> "\sqrt{AA'^2 - AG^2}"
   s = s.replace(/(?<!\\)\bsqrt\s+([A-Za-z0-9'^]+(?:\s*[-+]\s*[A-Za-z0-9'^]+)+)\b/g, '\\sqrt{$1}');
   // "sqrt a^2 - \frac{a^2}{3}" -> "\sqrt{a^2 - \frac{a^2}{3}}"
@@ -80,13 +83,30 @@ export function repairPseudoLatex(text: string): string {
   s = s.replace(/(?<!\\)\bsqrt\s*(\d+)/g, '\\sqrt{$1}');
   s = s.replace(/(?<!\\)\bsqrt\{([^{}]+)\}/g, '\\sqrt{$1}');
 
-  // 8. Sửa thiếu gạch chéo \frac{ và \sqrt{ và \cdot
+  // 8. Nếu \sqrt thiếu ngoặc nhọn: "\sqrt 3" -> "\sqrt{3}", "\sqrt 2" -> "\sqrt{2}"
+  s = s.replace(/\\sqrt\s*(\d+)/g, '\\sqrt{$1}');
+  s = s.replace(/\\sqrt\s*([a-zA-Z])(?![a-zA-Z{])/g, '\\sqrt{$1}');
+
+  // 9. Sửa thiếu gạch chéo \frac{ và \sqrt{ và \cdot
   s = s.replace(/(?<!\\)\bfrac\{/g, '\\frac{');
   s = s.replace(/(?<!\\)\bsqrt\{/g, '\\sqrt{');
   s = s.replace(/(?<!\\)\bcdot\b/g, '\\cdot');
 
-  // 9. Bọc các dòng đẳng thức độc lập thành $$...$$ nếu chưa có bọc
-  s = s.replace(/^((?:[A-Za-z0-9'_]+|V|S|A'G)\s*=\s*[\s\S]+?)$/gm, (line) => {
+  // 10. Chuẩn hóa pseudo-fraction: "frac a^2 sqrt 3 4" -> "\frac{a^2\sqrt{3}}{4}"
+  s = s.replace(/\b(?:\\?frac)\s+([a-zA-Z0-9^]+(?:\s*(?:\\?sqrt|√|căn)\s*[0-9a-zA-Z^]+)?)\s+(\d+)\b/gi, (_match, num, den) => {
+    const cleanNum = num
+      .replace(/(?:\\?sqrt|√|căn)\s*(\d+)/gi, '\\sqrt{$1}')
+      .replace(/(?<!\\)sqrt/g, '\\sqrt');
+    return `\\frac{${cleanNum}}{${den}}`;
+  });
+
+  // 11. Chuẩn hóa pseudo-fraction cơ bản: "frac a^2 3" -> "\frac{a^2}{3}"
+  s = s.replace(/\b(?:\\?frac)\s+([a-zA-Z0-9^]+)\s+([a-zA-Z0-9^]+)\b/g, (_match, num, den) => {
+    return `\\frac{${num}}{${den}}`;
+  });
+
+  // 12. Bọc các dòng đẳng thức độc lập thành $$...$$ nếu chưa có bọc
+  s = s.replace(/^((?:[A-Za-z0-9'_]+|V|S|A'G|h|R)\s*=\s*[\s\S]+?)$/gm, (line) => {
     const trimmed = line.trim();
     if (trimmed.startsWith('$') || trimmed.startsWith('$$') || trimmed.startsWith('<') || trimmed.startsWith('#') || trimmed.startsWith('*') || trimmed.startsWith('-')) {
       return line;
@@ -95,6 +115,27 @@ export function repairPseudoLatex(text: string): string {
       return `$$${trimmed}$$`;
     }
     return line;
+  });
+
+  // 13. Tự động bọc các biểu thức toán học rời rạc có \sqrt{...} hoặc \frac{...}{...} vào $...$ nếu chưa bọc
+  const protectedMath: string[] = [];
+  s = s.replace(/\$\$([\s\S]+?)\$\$/g, (m) => {
+    protectedMath.push(m);
+    return `__MATH_PROT_${protectedMath.length - 1}__`;
+  });
+  s = s.replace(/(?<!\$)\$([^$\n\r]+?)\$(?!\$)/g, (m) => {
+    protectedMath.push(m);
+    return `__MATH_PROT_${protectedMath.length - 1}__`;
+  });
+
+  // Bọc các biểu thức chứa \sqrt{...} hoặc \frac{...}{...} chưa có $
+  s = s.replace(/(?:[a-zA-Z0-9'_^]+\s*=\s*)?(?:[a-zA-Z0-9'_^.]*\\(?:sqrt|frac)\{(?:[^{}]+|\{[^{}]*\})*\}(?:\{[^{}]*\})*[a-zA-Z0-9_{}^\\/.+\-*=()]*)+/g, (match) => {
+    return `$${match.trim()}$`;
+  });
+
+  // Phục hồi lại các khối math đã bảo vệ (dùng callback function để tránh bug $$ của JS)
+  protectedMath.forEach((m, idx) => {
+    s = s.replace(`__MATH_PROT_${idx}__`, () => m);
   });
 
   return s;
@@ -107,6 +148,16 @@ export function extractAndRenderMath(text: string): { textWithTokens: string; re
   if (!text) return { textWithTokens: '', renderedMap: new Map() };
 
   let formatted = repairPseudoLatex(text);
+
+  // Tự động đóng các khối math chưa khép kín (hỗ trợ hiển thị mượt mà trong lúc AI gõ chữ từ từ)
+  const doubleDollarCount = (formatted.match(/\$\$/g) || []).length;
+  if (doubleDollarCount % 2 !== 0) {
+    formatted += '$$';
+  }
+  const singleDollarCount = (formatted.replace(/\$\$[\s\S]*?\$\$/g, '').match(/(?<!\$)\$(?!\$)/g) || []).length;
+  if (singleDollarCount % 2 !== 0) {
+    formatted += '$';
+  }
 
   // Map to store rendered KaTeX HTML strings
   const renderedMap = new Map<string, string>();
@@ -241,6 +292,21 @@ export function parseMarkdown(text: string): string {
   });
 
   return html;
+}
+
+/**
+ * Tách văn bản thành các token cho hiệu ứng gõ chữ mượt mà (Word-by-word streaming)
+ * Giữ nguyên vẹn toàn bộ khối công thức math ($...$, $$...$$) để không bị đứt đoạn hay lỗi KaTeX khi gõ.
+ */
+export function splitForStreaming(text: string): string[] {
+  if (!text || typeof text !== 'string') return [];
+  const tokens: string[] = [];
+  const regex = /(\$\$[\s\S]+?\$\$|(?<!\$)\$[^$\n\r]+?\$(?!\$)|```[\s\S]*?```|\S+|\n)/g;
+  let m: RegExpExecArray | null;
+  while ((m = regex.exec(text)) !== null) {
+    tokens.push(m[0]);
+  }
+  return tokens;
 }
 
 export interface ParsedChatOutput {

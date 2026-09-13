@@ -189,3 +189,36 @@ button:disabled {
   font-size: 0.96em;
   max-width: 100%;
 }
+
+/* Đảm bảo dấu căn (radical symbol), nét móc và đường ngang luôn sắc nét, không bị ngắt quãng */
+.chat-math-content .katex .sqrt {
+  display: inline-block !important;
+}
+
+.chat-math-content .katex .sqrt > .vlist-t {
+  display: inline-table !important;
+}
+
+.chat-math-content .katex .hide-tail {
+  overflow: hidden !important;
+  position: relative !important;
+  width: 100% !important;
+}
+
+.chat-math-content .katex .svg-align {
+  text-align: left !important;
+}
+
+.chat-math-content .katex svg {
+  display: block !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  height: inherit !important;
+  width: 100% !important;
+}
+
+.chat-math-content .katex svg path {
+  stroke: none !important;
+  fill: currentColor !important;
+}
+
