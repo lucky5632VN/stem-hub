@@ -8,18 +8,23 @@
 ### I. CÁC CÔNG CỤ TRÍ TUỆ NHÂN TẠO SỬ DỤNG TRONG DỰ ÁN
 
 #### 1. Công cụ AI hỗ trợ tra cứu kỹ thuật
-- **Mục đích sử dụng**: Nhóm sử dụng công cụ AI để hỗ trợ tra cứu cú pháp lập trình, tìm hiểu tài liệu kỹ thuật và gợi ý sửa các lỗi chính tả trong mã nguồn. Toàn bộ ý tưởng bài toán, cấu trúc dữ liệu và việc lập trình giao diện đều do nhóm chúng em cùng thầy giáo hướng dẫn tự tay thực hiện.
+**Mục đích sử dụng:** Nhóm sử dụng công cụ AI để hỗ trợ tra cứu cú pháp lập trình, tìm hiểu tài liệu kỹ thuật và gợi ý sửa các lỗi chính tả trong mã nguồn. Toàn bộ ý tưởng bài toán, cấu trúc dữ liệu và việc lập trình giao diện đều do nhóm chúng em cùng thầy giáo hướng dẫn tự tay thực hiện.
 
 #### 2. Mô hình ngôn ngữ Google Gemini API
-- **Mục đích ứng dụng**: Nhóm tích hợp mô hình Gemini phiên bản Flash 1.5 và Flash 2.5 miễn phí để hỗ trợ học sinh học tập trong trang web:
-  - **Trợ lý học tập Nova**: Hỗ trợ giải đáp thắc mắc lý thuyết và bài tập 4 môn Toán, Vật lý, Hóa học, Sinh học theo sách giáo khoa mới, đồng thời gợi ý phòng thí nghiệm ảo phù hợp.
-  - **Trợ lý phân tích hình học 3D**: Đọc hiểu đề bài toán hình học không gian, hướng dẫn học sinh các bước tính thể tích, diện tích xung quanh, góc và khoảng cách.
-  - **Gia sư môn Toán**: Trao đổi với học sinh về các bài toán khó, hiển thị công thức rõ ràng và gõ chữ từng từ mượt mà để học sinh dễ theo dõi.
-  - **Nhận dạng đề thi từ ảnh chụp**: Cho phép học sinh chụp ảnh đề bài trên giấy tải lên để hệ thống nhận dạng chữ và số liệu, sau đó dựng hình không gian 3D tương ứng.
-  - **Cơ chế xoay vòng khóa dự phòng**: Nhóm tự lập trình cơ chế tự động chuyển sang khóa API dự phòng khi một khóa bị đầy lượt dùng, giúp trang web hoạt động liên tục cho nhiều bạn học sinh cùng sử dụng miễn phí.
+**Mục đích ứng dụng:** Nhóm tích hợp mô hình Gemini phiên bản Flash 1.5 và Flash 2.5 miễn phí để hỗ trợ học sinh học tập trong trang web:
+
+**Trợ lý học tập Nova:** Hỗ trợ giải đáp thắc mắc lý thuyết và bài tập 4 môn Toán, Vật lý, Hóa học, Sinh học theo sách giáo khoa mới, đồng thời gợi ý phòng thí nghiệm ảo phù hợp.
+
+**Trợ lý phân tích hình học 3D:** Đọc hiểu đề bài toán hình học không gian, hướng dẫn học sinh các bước tính thể tích, diện tích xung quanh, góc và khoảng cách.
+
+**Gia sư môn Toán:** Trao đổi với học sinh về các bài toán khó, hiển thị công thức rõ ràng và gõ chữ từng từ mượt mà để học sinh dễ theo dõi.
+
+**Nhận dạng đề thi từ ảnh chụp:** Cho phép học sinh chụp ảnh đề bài trên giấy tải lên để hệ thống nhận dạng chữ và số liệu, sau đó dựng hình không gian 3D tương ứng.
+
+**Cơ chế xoay vòng khóa dự phòng:** Nhóm tự lập trình cơ chế tự động chuyển sang khóa API dự phòng khi một khóa bị đầy lượt dùng, giúp trang web hoạt động liên tục cho nhiều bạn học sinh cùng sử dụng miễn phí.
 
 #### 3. Công cụ âm thanh Meta AudioCraft
-- **Mục đích sử dụng**: Tạo một số đoạn nhạc nền nhẹ nhàng giúp học sinh tập trung học bài và các âm thanh mô phỏng tiếng bọt khí hóa chất hoặc tiếng va chạm con lắc để thí nghiệm thêm sinh động.
+**Mục đích sử dụng:** Tạo một số đoạn nhạc nền nhẹ nhàng giúp học sinh tập trung học bài và các âm thanh mô phỏng tiếng bọt khí hóa chất hoặc tiếng va chạm con lắc để thí nghiệm thêm sinh động.
 
 ---
 
@@ -37,35 +42,47 @@ Nhóm chúng em đã tự nghiên cứu và lập trình 6 mô hình trí tuệ 
 | 6 | **Mô hình tìm kiếm tri thức bài học** | Tìm kiếm nhanh các đoạn kiến thức sách giáo khoa phù hợp nhất với câu hỏi của học sinh ngay trong bộ nhớ máy tính mà không cần máy chủ dữ liệu bên ngoài. | 303 đoạn tóm tắt kiến thức 4 môn học với hơn 9.000 từ khóa chuyên môn. | Tìm trúng nội dung liên quan nhất ở vị trí đầu tiên đạt 96,88% và nằm trong 3 kết quả gợi ý đầu đạt 100%. |
 
 #### Tính năng nhận diện khuôn mặt điểm danh bảo mật
-- **Cách thức hoạt động**: Nhóm sử dụng thư viện Face-API để nhận diện khuôn mặt học sinh phục vụ điểm danh và bảo vệ tài khoản.
-- **Bảo vệ quyền riêng tư tuyệt đối**: Toàn bộ việc quét khuôn mặt và so khớp dữ liệu được thực hiện trực tiếp trên trình duyệt qua webcam máy tính của học sinh. Hình ảnh chỉ được chuyển thành các con số đặc trưng để so khớp tại máy, tuyệt đối không gửi hoặc lưu trữ bất kỳ hình ảnh nào của học sinh lên mạng Internet.
+**Cách thức hoạt động:** Nhóm sử dụng thư viện Face-API để nhận diện khuôn mặt học sinh phục vụ điểm danh và bảo vệ tài khoản.
+
+**Bảo vệ quyền riêng tư tuyệt đối:** Toàn bộ việc quét khuôn mặt và so khớp dữ liệu được thực hiện trực tiếp trên trình duyệt qua webcam máy tính của học sinh. Hình ảnh chỉ được chuyển thành các con số đặc trưng để so khớp tại máy, tuyệt đối không gửi hoặc lưu trữ bất kỳ hình ảnh nào của học sinh lên mạng Internet.
 
 ---
 
 ### III. NGUỒN DỮ LIỆU NHÓM EM TỰ THU THẬP VÀ BIÊN SOẠN
 
-1. **Cơ sở tri thức 4 môn học lớp 10, 11, 12**: Nhóm em đọc kỹ sách giáo khoa mới của 4 môn Toán, Vật lý, Hóa học, Sinh học theo chương trình giáo dục phổ thông năm 2018 và tài liệu ôn tập của Bộ Giáo dục và Đào tạo, sau đó tự tay tóm tắt thành 303 đoạn kiến thức trọng tâm với hơn 9.000 từ khóa để hệ thống tra cứu bài học nhanh chóng.
-2. **Ngân hàng hơn 500 câu hỏi trắc nghiệm**: Chúng em sưu tầm, chọn lọc và biên soạn lại hơn 500 câu hỏi từ các đề thi tốt nghiệp THPT chính thức và đề thi học sinh giỏi các tỉnh. Nhóm em tự giải chi tiết từng câu và phân loại độ khó từ cơ bản đến nâng cao để đưa vào phần Đấu trường cho các bạn thi đấu kiến thức cùng nhau. Toàn bộ câu hỏi được lưu sẵn trong ứng dụng để mở tức thì mà không lo nghẽn mạng.
-3. **Dữ liệu 144 phản ứng hóa học thực nghiệm**: Nhóm em tra cứu bảng tính tan, sổ tay hóa học và sách giáo khoa để tự tổng hợp 144 trường hợp trộn hóa chất thường gặp. Với mỗi phản ứng, nhóm ghi rõ hiện tượng đổi màu, kết tủa hoặc sủi bọt khí và viết phương trình ion thu gọn để máy tính hiển thị mô phỏng giống hệt như khi làm thí nghiệm thật ở trường học.
-4. **Dữ liệu gần 400 câu giao tiếp của học sinh**: Để Trợ lý Nova hiểu được cách nói chuyện thường ngày của các bạn cùng trường, nhóm em đã thu thập 392 câu nói, câu hỏi thực tế của các bạn khi hỏi bài để dạy cho AI hiểu được ý định và mở đúng trang học sinh cần.
-5. **Quần thể 20 Bot AI luyện tập**: Chúng em tự tạo 20 nhân vật Bot có mức điểm từ thấp đến cao, từ 50 đến 130 điểm, để khi học sinh vào Đấu trường mà chưa có bạn nào ghép cặp thì hệ thống sẽ đưa Bot ra luyện tập cùng, giúp việc học không bao giờ bị ngắt quãng.
-6. **Dữ liệu thông số các hình học không gian 3D**: Nhóm đã hệ thống hóa thông số toán học của hơn 15 dạng hình không gian như hình chóp tam giác đều, chóp tứ giác, lăng trụ đứng, lăng trụ xiên, hộp chữ nhật, lập phương, bát diện đều, chóp cụt, tứ diện vuông để thuật toán máy tính tự động vẽ hình 3D tương tác theo đúng đề bài học sinh đưa vào.
+**1. Cơ sở tri thức 4 môn học lớp 10, 11, 12:** Nhóm em đọc kỹ sách giáo khoa mới của 4 môn Toán, Vật lý, Hóa học, Sinh học theo chương trình giáo dục phổ thông năm 2018 và tài liệu ôn tập của Bộ Giáo dục và Đào tạo, sau đó tự tay tóm tắt thành 303 đoạn kiến thức trọng tâm với hơn 9.000 từ khóa để hệ thống tra cứu bài học nhanh chóng.
+
+**2. Ngân hàng hơn 500 câu hỏi trắc nghiệm:** Chúng em sưu tầm, chọn lọc và biên soạn lại hơn 500 câu hỏi từ các đề thi tốt nghiệp THPT chính thức và đề thi học sinh giỏi các tỉnh. Nhóm em tự giải chi tiết từng câu và phân loại độ khó từ cơ bản đến nâng cao để đưa vào phần Đấu trường cho các bạn thi đấu kiến thức cùng nhau. Toàn bộ câu hỏi được lưu sẵn trong ứng dụng để mở tức thì mà không lo nghẽn mạng.
+
+**3. Dữ liệu 144 phản ứng hóa học thực nghiệm:** Nhóm em tra cứu bảng tính tan, sổ tay hóa học và sách giáo khoa để tự tổng hợp 144 trường hợp trộn hóa chất thường gặp. Với mỗi phản ứng, nhóm ghi rõ hiện tượng đổi màu, kết tủa hoặc sủi bọt khí và viết phương trình ion thu gọn để máy tính hiển thị mô phỏng giống hệt như khi làm thí nghiệm thật ở trường học.
+
+**4. Dữ liệu gần 400 câu giao tiếp của học sinh:** Để Trợ lý Nova hiểu được cách nói chuyện thường ngày của các bạn cùng trường, nhóm em đã thu thập 392 câu nói, câu hỏi thực tế của các bạn khi hỏi bài để dạy cho AI hiểu được ý định và mở đúng trang học sinh cần.
+
+**5. Quần thể 20 Bot AI luyện tập:** Chúng em tự tạo 20 nhân vật Bot có mức điểm từ thấp đến cao, từ 50 đến 130 điểm, để khi học sinh vào Đấu trường mà chưa có bạn nào ghép cặp thì hệ thống sẽ đưa Bot ra luyện tập cùng, giúp việc học không bao giờ bị ngắt quãng.
+
+**6. Dữ liệu thông số các hình học không gian 3D:** Nhóm đã hệ thống hóa thông số toán học của hơn 15 dạng hình không gian như hình chóp tam giác đều, chóp tứ giác, lăng trụ đứng, lăng trụ xiên, hộp chữ nhật, lập phương, bát diện đều, chóp cụt, tứ diện vuông để thuật toán máy tính tự động vẽ hình 3D tương tác theo đúng đề bài học sinh đưa vào.
 
 ---
 
 ### IV. CÁC DỊCH VỤ VÀ CÔNG NGHỆ WEB HỖ TRỢ VẬN HÀNH
 
 #### 1. Các dịch vụ đám mây miễn phí
-- **Dịch vụ Google Firebase**: Dùng gói miễn phí 0 đồng để quản lý tài khoản người dùng, đồng bộ điểm số thi đấu thời gian thực giữa hai bạn học sinh trên Đấu trường và lưu bảng xếp hạng toàn trường.
-- **Cổng bảo vệ Cloudflare Worker**: Đóng vai trò trạm trung gian giúp che giấu mã khóa Gemini API, đồng thời ngăn chặn truy cập quá tải để bảo vệ tài nguyên miễn phí của dự án.
-- **Nền tảng triển khai Vercel**: Dùng để lưu trữ và vận hành trang web chính thức tại địa chỉ `https://ai.stem-hub.top`, giúp học sinh toàn quốc truy cập nhanh và ổn định.
-- **Dịch vụ gửi mã xác thực email**: Tự động gửi mã số xác nhận qua hòm thư điện tử khi học sinh đăng ký tài khoản mới để bảo đảm an toàn thông tin.
+**Dịch vụ Google Firebase:** Dùng gói miễn phí 0 đồng để quản lý tài khoản người dùng, đồng bộ điểm số thi đấu thời gian thực giữa hai bạn học sinh trên Đấu trường và lưu bảng xếp hạng toàn trường.
+
+**Cổng bảo vệ Cloudflare Worker:** Đóng vai trò trạm trung gian giúp che giấu mã khóa Gemini API, đồng thời ngăn chặn truy cập quá tải để bảo vệ tài nguyên miễn phí của dự án.
+
+**Nền tảng triển khai Vercel:** Dùng để lưu trữ và vận hành trang web chính thức tại địa chỉ `https://ai.stem-hub.top`, giúp học sinh toàn quốc truy cập nhanh và ổn định.
+
+**Dịch vụ gửi mã xác thực email:** Tự động gửi mã số xác nhận qua hòm thư điện tử khi học sinh đăng ký tài khoản mới để bảo đảm an toàn thông tin.
 
 #### 2. Các công nghệ tích hợp sẵn trên trình duyệt
-- **Công nghệ xử lý đa luồng Web Worker**: Nhóm tách các phép tính toán học nặng và tìm kiếm dữ liệu sang luồng chạy ngầm riêng. Nhờ đó, màn hình chính của trang web luôn mượt mà đạt tốc độ 60 khung hình trên giây, không bị giật lag kể cả trên máy tính cũ ở phòng tin học của trường.
-- **Công nghệ nhận dạng giọng nói và phát âm tiếng Việt**: Tận dụng tính năng có sẵn của trình duyệt để học sinh nói chuyện trực tiếp bằng giọng nói với Trợ lý Nova và nghe AI đọc câu trả lời bằng tiếng Việt hoàn toàn miễn phí; kết hợp xử lý tự động giảm nhỏ nhạc nền khi AI bắt đầu nói.
-- **Bộ nhớ lưu trữ trình duyệt IndexedDB**: Lưu dữ liệu bài học và mô hình AI ngay trên máy tính của học sinh, giúp trang web mở nhanh hơn ở các lần sau và học sinh vẫn có thể ôn bài khi mạng Internet bị chập chờn.
-- **Đồ họa không gian WebGL và Canvas**: Hiển thị các mô hình 3D tương tác với đầy đủ ánh sáng, bóng đổ, hiệu ứng trong suốt của ống nghiệm và đường đi của tia sáng laser.
+**Công nghệ xử lý đa luồng Web Worker:** Nhóm tách các phép tính toán học nặng và tìm kiếm dữ liệu sang luồng chạy ngầm riêng. Nhờ đó, màn hình chính của trang web luôn mượt mà đạt tốc độ 60 khung hình trên giây, không bị giật lag kể cả trên máy tính cũ ở phòng tin học của trường.
+
+**Công nghệ nhận dạng giọng nói và phát âm tiếng Việt:** Tận dụng tính năng có sẵn của trình duyệt để học sinh nói chuyện trực tiếp bằng giọng nói với Trợ lý Nova và nghe AI đọc câu trả lời bằng tiếng Việt hoàn toàn miễn phí; kết hợp xử lý tự động giảm nhỏ nhạc nền khi AI bắt đầu nói.
+
+**Bộ nhớ lưu trữ trình duyệt IndexedDB:** Lưu dữ liệu bài học và mô hình AI ngay trên máy tính của học sinh, giúp trang web mở nhanh hơn ở các lần sau và học sinh vẫn có thể ôn bài khi mạng Internet bị chập chờn.
+
+**Đồ họa không gian WebGL và Canvas:** Hiển thị các mô hình 3D tương tác với đầy đủ ánh sáng, bóng đổ, hiệu ứng trong suốt của ống nghiệm và đường đi của tia sáng laser.
 
 ---
 
