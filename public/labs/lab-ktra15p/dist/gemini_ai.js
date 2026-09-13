@@ -1024,10 +1024,6 @@ class UnifiedChatbot {
   }
 
   async callGemini(prompt, isGeneral = false) {
-    if (!GEMINI_API_KEY) {
-      throw new Error('Thiếu API Key.');
-    }
-
     let context = "";
     let systemPrompt = "";
     const memoryContext = this.getMemoryContext(this.activeBot);
@@ -1080,110 +1076,111 @@ class UnifiedChatbot {
       `;
     }
 
-    const keyPool = isGeneral ? GENERAL_API_KEYS : COMMANDER_API_KEYS;
-    const modelsToTry = [
-  "gemini-flash-lite-latest",
-  "gemini-3.1-flash-lite-preview",
-  "gemini-2.5-flash-lite",
-  "gemma-4-26b-a4b-it",
-  "gemma-4-31b-it",
-  "gemini-flash-latest"
-];
+    // Build multi-turn conversational contents payload
+    const activeHistory = this.activeBot === 'lab' ? this.labHistory : this.genHistory;
+    const recentHistory = activeHistory.slice(-14);
 
-    let lastError = null;
-    const totalTries = keyPool.length * modelsToTry.length;
+    const formattedContents = [];
+    recentHistory.forEach(msg => {
+      formattedContents.push({
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.text }]
+      });
+    });
 
-    // Multi-Key & Model Failover Loop
-    for (let tryCount = 0; tryCount < totalTries; tryCount++) {
-      const activeKey = keyPool[((isGeneral ? generalKeyIdx : commanderKeyIdx) + tryCount) % keyPool.length];
-      const model = modelsToTry[Math.floor(tryCount / keyPool.length) % modelsToTry.length];
-      const version = 'v1beta';
+    if (formattedContents.length === 0) {
+      formattedContents.push({ role: 'user', parts: [{ text: prompt }] });
+    }
 
-      try {
-        const url = `https://generativelanguage.googleapis.com/${version}/models/${model}:generateContent?key=${activeKey}`;
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4500);
-
-        // Build multi-turn conversational contents payload
-        const activeHistory = this.activeBot === 'lab' ? this.labHistory : this.genHistory;
-        const recentHistory = activeHistory.slice(-14);
-
-        const formattedContents = [];
-        recentHistory.forEach(msg => {
-          formattedContents.push({
-            role: msg.role === 'user' ? 'user' : 'model',
-            parts: [{ text: msg.text }]
-          });
-        });
-
-        if (formattedContents.length === 0) {
-          formattedContents.push({ role: 'user', parts: [{ text: prompt }] });
-        }
-
-        const bodyPayload = {
+    // ⚡ Zero Exposure: Định tuyến qua Next.js Gateway nội bộ (/api/ai/chat)
+    const proxyUrl = '/api/ai/chat';
+    try {
+      const gwRes = await fetch(proxyUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: prompt,
           contents: formattedContents,
-          system_instruction: { parts: [{ text: systemPrompt }] },
-          generationConfig: {
-            maxOutputTokens: 1200,
-            temperature: 0.3
-          }
-        };
+          systemInstruction: systemPrompt,
+          temperature: 0.3,
+          maxOutputTokens: 1200
+        })
+      });
+      if (gwRes.ok) {
+        const gwData = await gwRes.json();
+        if (gwData.text) {
+          console.log('📡 [Quantum AI] Phản hồi an toàn qua Next.js Gateway (Zero Exposure)');
+          return gwData.text;
+        }
+      }
+    } catch (e) {
+      console.warn('[Quantum AI] Gateway fallback triggered:', e.message);
+    }
 
-        
-        // Zero Exposure: Định tuyến qua Next.js Gateway nội bộ (/api/ai/chat)
-        const proxyUrl = '/api/ai/chat';
+    const keyPool = isGeneral ? GENERAL_API_KEYS : COMMANDER_API_KEYS;
+    if (keyPool && keyPool.length > 0) {
+      const modelsToTry = [
+        "gemini-flash-lite-latest",
+        "gemini-3.1-flash-lite-preview",
+        "gemini-2.5-flash-lite",
+        "gemma-4-26b-a4b-it",
+        "gemma-4-31b-it",
+        "gemini-flash-latest"
+      ];
+
+      let lastError = null;
+      const totalTries = keyPool.length * modelsToTry.length;
+
+      const bodyPayload = {
+        contents: formattedContents,
+        system_instruction: { parts: [{ text: systemPrompt }] },
+        generationConfig: {
+          maxOutputTokens: 1200,
+          temperature: 0.3
+        }
+      };
+
+      for (let tryCount = 0; tryCount < totalTries; tryCount++) {
+        const activeKey = keyPool[((isGeneral ? generalKeyIdx : commanderKeyIdx) + tryCount) % keyPool.length];
+        const model = modelsToTry[Math.floor(tryCount / keyPool.length) % modelsToTry.length];
+        const version = 'v1beta';
+
         try {
-          const gwRes = await fetch(proxyUrl, {
+          const url = `https://generativelanguage.googleapis.com/${version}/models/${model}:generateContent?key=${activeKey}`;
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 4500);
+
+          const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: formattedContents,
-              systemInstruction: systemPrompt,
-              temperature: 0.3,
-              maxOutputTokens: 1200
-            })
+            signal: controller.signal,
+            body: JSON.stringify(bodyPayload)
           });
-          if (gwRes.ok) {
-            const gwData = await gwRes.json();
-            if (gwData.text) {
-              console.log('📡 [Quantum AI] Phản hồi an toàn qua Next.js Gateway (Zero Exposure)');
-              return gwData.text;
+
+          clearTimeout(timeoutId);
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
+              console.log(`📡 [Quantum AI] Thành công via model ${model} (Key ${activeKey.substring(0, 8)}...)`);
+              if (isGeneral) generalKeyIdx = (generalKeyIdx + 1) % keyPool.length;
+              else commanderKeyIdx = (commanderKeyIdx + 1) % keyPool.length;
+              this.workingModel = model;
+              return data.candidates[0].content.parts[0].text;
             }
+          } else {
+            const errData = await response.json().catch(() => ({}));
+            lastError = errData.error?.message || `HTTP Error ${response.status}`;
+            console.warn(`⚠️ [Quantum AI] Model ${model} Key ${activeKey.substring(0, 8)}... status ${response.status}:`, lastError);
           }
         } catch (e) {
-          console.warn('[Quantum AI] Gateway fallback triggered:', e.message);
+          lastError = e.message || e;
+          console.warn(`⚠️ [Quantum AI] Ngoại lệ trên ${model}:`, lastError);
         }
-    
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          signal: controller.signal,
-          body: JSON.stringify(bodyPayload)
-        });
-
-        clearTimeout(timeoutId);
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
-            console.log(`📡 [Quantum AI] Thành công via model ${model} (Key ${activeKey.substring(0, 8)}...)`);
-            if (isGeneral) generalKeyIdx = (generalKeyIdx + 1) % keyPool.length;
-            else commanderKeyIdx = (commanderKeyIdx + 1) % keyPool.length;
-            this.workingModel = model;
-            return data.candidates[0].content.parts[0].text;
-          }
-        } else {
-          const errData = await response.json().catch(() => ({}));
-          lastError = errData.error?.message || `HTTP Error ${response.status}`;
-          console.warn(`⚠️ [Quantum AI] Model ${model} Key ${activeKey.substring(0, 8)}... status ${response.status}:`, lastError);
-        }
-      } catch (e) {
-        lastError = e.message || e;
-        console.warn(`⚠️ [Quantum AI] Ngoại lệ trên ${model}:`, lastError);
       }
     }
 
-    throw new Error(lastError || 'Tất cả model và key đều từ chối phản hồi.');
+    throw new Error('Không thể kết nối dịch vụ AI. Vui lòng thử lại sau ít phút.');
   }
 
   async discoverModels() {
@@ -1192,6 +1189,8 @@ class UnifiedChatbot {
       'gemini-2.0-flash',
       'gemini-1.5-pro'
     ];
+
+    if (!GEMINI_API_KEY) return fallbackModels;
 
     try {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}`);
