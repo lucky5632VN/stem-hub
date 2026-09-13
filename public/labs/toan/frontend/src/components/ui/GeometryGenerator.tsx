@@ -974,6 +974,7 @@ const GeometryGenerator: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       let llmData: any = null;
       try {
         const generateEndpoints = [
+          'https://stem-hub-api-proxy.ai-stem-hub.workers.dev/api/lab-toan/generate-3d',
           '/api/lab-toan/generate-3d',
           API_ENDPOINTS.generate3D
         ];
@@ -1206,9 +1207,9 @@ const GeometryGenerator: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
       let data: any = null;
       const chatEndpoints = Array.from(new Set([
+        `${CLOUDFLARE_EDGE_PROXY_URL}/api/lab-toan/chat-model`,
         '/api/lab-toan/chat-model',
-        API_ENDPOINTS.chatModel,
-        `${CLOUDFLARE_EDGE_PROXY_URL}/api/lab-toan/chat-model`
+        API_ENDPOINTS.chatModel
       ])).filter(Boolean);
 
       for (const endpoint of chatEndpoints) {

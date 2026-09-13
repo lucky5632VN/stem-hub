@@ -29,7 +29,7 @@ export function getApiBaseUrl(): string {
 
 export const CLOUDFLARE_EDGE_PROXY_URL = (
   import.meta.env.NEXT_PUBLIC_API_PROXY_URL ||
-  ''
+  'https://stem-hub-api-proxy.ai-stem-hub.workers.dev'
 ).trim().replace(/\/$/, '');
 
 export const API_TIMEOUT_MS = 60000; // 60s cho Agentic AI và Cloudflare Edge Proxy
