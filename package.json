@@ -11,6 +11,8 @@
     "audit:ai": "node src/ai-training/scripts/run-all-audits.js",
     "test": "node tests/bugfix_validation.test.js && node tests/physicsEngine.test.js",
     "test:rules": "firebase emulators:exec --only firestore \"node tests/firestore.rules.test.js\"",
+    "test:security": "firebase emulators:exec --only firestore \"node scripts/test-rules-suite.js\"",
+    "test:security:slow": "firebase emulators:exec --only firestore \"node scripts/test-rules-suite.js --slow\"",
     "lint": "eslint"
   },
   "dependencies": {

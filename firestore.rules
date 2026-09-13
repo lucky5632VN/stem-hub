@@ -264,13 +264,8 @@ service cloud.firestore {
     }
 
     match /ai_reasoning_logs/{docId} {
-      allow read: if true;
-      allow create, write: if true;
-    }
-
-    match /learned_knowledge/{docId} {
-      allow read: if true;
-      allow create, write: if true;
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
     }
   }
 }
