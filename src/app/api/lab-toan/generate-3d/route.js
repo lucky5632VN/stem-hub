@@ -127,6 +127,24 @@ function extractFallbackGeometry(problemText) {
   } else if (clean.includes('lập phương') || clean.includes('hộp chữ nhật')) {
     shapeType = 'hinh_hop_chu_nhat';
     shapeName = clean.includes('lập phương') ? "Hình lập phương ABCD.A'B'C'D'" : "Hình hộp chữ nhật ABCD.A'B'C'D'";
+  } else if (clean.includes('bát diện') || clean.includes('octahedron')) {
+    shapeType = 'hinh_bat_dien_deu';
+    shapeName = 'Khối bát diện đều';
+  } else if (clean.includes('tứ diện vuông') || (clean.includes('vuông góc') && clean.includes('oa') && clean.includes('ob') && clean.includes('oc'))) {
+    shapeType = 'hinh_tu_dien_vuong';
+    shapeName = 'Tứ diện vuông O.ABC';
+  } else if (clean.includes('hình thang') || clean.includes('hinh_thang')) {
+    shapeType = 'hinh_chop_day_hinh_thang';
+    shapeName = 'Hình chóp S.ABCD (đáy hình thang, SA ⊥ đáy)';
+  } else if (clean.includes('chóp cụt')) {
+    shapeType = 'hinh_chop_cut';
+    shapeName = "Hình chóp cụt tứ giác đều ABCD.A'B'C'D'";
+  } else if (clean.includes('nón cụt')) {
+    shapeType = 'hinh_non_cut';
+    shapeName = 'Hình nón cụt tròn xoay';
+  } else if (clean.includes('lục giác') || clean.includes('luc_giac')) {
+    shapeType = 'hinh_lang_tru_luc_giac_deu';
+    shapeName = "Hình lăng trụ lục giác đều ABCDEF.A'B'C'D'E'F'";
   } else if (clean.includes('tam giác đều') || clean.includes('tứ diện đều') || /\bs\.abc\b/i.test(clean)) {
     shapeType = 'hinh_chop_tam_giac_deu';
     shapeName = 'Hình chóp tam giác đều S.ABC';
@@ -154,13 +172,66 @@ function extractFallbackGeometry(problemText) {
 function getGenericOrFallbackGeometry(parsedData, problemText) {
   const clean = (problemText || '').toLowerCase();
   const rawShapeType = (parsedData?.shapeType || '').toLowerCase();
+
+  // 🌟 NẾU CÓ CUSTOM MESH TỪ AI SINH RA TRỰC TIẾP
+  if (parsedData?.customMesh && Array.isArray(parsedData.customMesh.vertices) && parsedData.customMesh.vertices.length >= 4) {
+    return {
+      success: true,
+      shapeType: parsedData.shapeType || 'hinh_da_dien_tuy_bien',
+      shapeName: parsedData.shapeName || 'Khối đa diện 3D tùy biến',
+      parameters: parsedData.parameters || {},
+      customMesh: parsedData.customMesh,
+      appliedRule: 'smart_interactive_custom_polyhedron',
+      explanation: `Chào bạn! Mình đã phân tích đề bài và dựng xong mô hình 3D tùy biến: ${parsedData.shapeName || 'Khối đa diện'}. Bạn có thể tự do dùng chuột xoay và phóng to để quan sát các góc độ không gian. Bạn cần mình hỗ trợ tính toán hay phân tích gì tiếp theo?`,
+      sanityCheck: { passed: true, maxDiscrepancy: 0, details: [] },
+      needsReview: false,
+      donVi: 'cm',
+      givenFacts: parsedData?.givenFacts || []
+    };
+  }
   
   let shapeType = 'hinh_chop_day_hcn';
   let shapeName = 'Hình chóp S.ABCD (Mô hình 3D mẫu)';
   let parameters = { canhDay: 4, chieuCao: 5, chieuDai: 4, chieuRong: 4, banKinh: 2 };
   
+  // 0A. Khối bát diện đều
+  if (clean.includes('bát diện') || rawShapeType.includes('bat_dien') || clean.includes('octahedron')) {
+    shapeType = 'hinh_bat_dien_deu';
+    shapeName = 'Khối bát diện đều';
+    parameters = { canhDay: 4, canh: 4 };
+  }
+  // 0B. Tứ diện vuông
+  else if (clean.includes('tứ diện vuông') || rawShapeType.includes('tu_dien_vuong') || (clean.includes('vuông góc') && clean.includes('oa') && clean.includes('ob') && clean.includes('oc'))) {
+    shapeType = 'hinh_tu_dien_vuong';
+    shapeName = 'Tứ diện vuông O.ABC (OA ⊥ OB ⊥ OC)';
+    parameters = { canhOA: 4, canhOB: 4, canhOC: 5, canhDay: 4, chieuCao: 5 };
+  }
+  // 0C. Chóp đáy hình thang
+  else if (clean.includes('hình thang') || rawShapeType.includes('hinh_thang') || clean.includes('trapezoid')) {
+    shapeType = 'hinh_chop_day_hinh_thang';
+    shapeName = 'Hình chóp S.ABCD (đáy hình thang, SA ⊥ đáy)';
+    parameters = { canhDay: 4, dayLon: 8, chieuCao: 5 };
+  }
+  // 0D. Chóp cụt
+  else if (clean.includes('chóp cụt') || rawShapeType.includes('chop_cut') || clean.includes('frustum')) {
+    shapeType = 'hinh_chop_cut';
+    shapeName = "Hình chóp cụt tứ giác đều ABCD.A'B'C'D'";
+    parameters = { canhDay: 5, dayNho: 2.5, chieuCao: 4 };
+  }
+  // 0E. Nón cụt
+  else if (clean.includes('nón cụt') || rawShapeType.includes('non_cut')) {
+    shapeType = 'hinh_non_cut';
+    shapeName = 'Hình nón cụt tròn xoay';
+    parameters = { banKinhLon: 4, banKinhNho: 2, chieuCao: 5 };
+  }
+  // 0F. Lăng trụ lục giác đều
+  else if (clean.includes('lục giác') || rawShapeType.includes('luc_giac') || clean.includes('hexagonal')) {
+    shapeType = 'hinh_lang_tru_luc_giac_deu';
+    shapeName = "Hình lăng trụ lục giác đều ABCDEF.A'B'C'D'E'F'";
+    parameters = { canhDay: 3, chieuCao: 6 };
+  }
   // 1. Kiểm tra Lăng trụ
-  if (clean.includes('lăng trụ') || clean.includes('lang_tru') || clean.includes('prism') || clean.includes("a'b'c'") || rawShapeType.includes('lang_tru') || rawShapeType.includes('prism')) {
+  else if (clean.includes('lăng trụ') || clean.includes('lang_tru') || clean.includes('prism') || clean.includes("a'b'c'") || rawShapeType.includes('lang_tru') || rawShapeType.includes('prism')) {
     const isQuad = clean.includes('tứ giác') || clean.includes("a'b'c'd'") || clean.includes('thoi') || rawShapeType.includes('tu_giac');
     const isOblique = (clean.includes('xiên') || clean.includes('trọng tâm') || clean.includes('trung điểm') || clean.includes('chiếu của')) && !clean.includes('đứng');
     
@@ -293,13 +364,28 @@ QUY TẮC BẮT BUỘC:
    - "hinh_chop_tam_giac" (Chóp có đáy tam giác S.ABC, ví dụ: SA vuông góc đáy, đáy vuông/cân/đều)
    - "hinh_chop_day_hcn" (Chóp có đáy hình chữ nhật hoặc hình vuông, đường cao vuông góc đáy, ví dụ: SA vuông góc đáy)
    - "hinh_chop_tu_giac_deu" (Chóp tứ giác đều S.ABCD)
-   - "hinh_chop_tam_giac_deu" (Chóp tam giác đều S.ABC)
+   - "hinh_chop_tam_giac_deu" (Chóp tam giác đều S.ABC, tứ diện đều)
+   - "hinh_bat_dien_deu" (Khối bát diện đều, 8 mặt tam giác đều)
+   - "hinh_tu_dien_vuong" (Tứ diện vuông O.ABC có OA, OB, OC đôi một vuông góc)
+   - "hinh_chop_day_hinh_thang" (Chóp S.ABCD có đáy là hình thang vuông hoặc cân)
+   - "hinh_chop_cut" (Hình chóp cụt tứ giác đều hoặc tam giác đều)
+   - "hinh_non_cut" (Hình nón cụt tròn xoay)
+   - "hinh_lang_tru_luc_giac_deu" (Hình lăng trụ lục giác đều)
    - "hinh_hop_chu_nhat" (Hình hộp chữ nhật, hình lập phương)
-   - "hinh_lang_tru_tam_giac_deu" (Hình lăng trụ tam giác đều)
+   - "hinh_lang_tru_tam_giac_deu" (Hình lăng trụ tam giác đều hoặc lăng trụ xiên)
    - "hinh_tru" (Hình trụ tròn xoay)
    - "hinh_non" (Hình nón tròn xoay)
    - "hinh_cau" (Hình cầu)
-   - "khac" (Khối hình khác)
+   - "hinh_da_dien_tuy_bien" (BẤT KỲ khối hình đặc biệt / tùy biến nào khác)
+
+* ĐẶC BIỆT KHI GẶP KHỐI ĐA DIỆN TÙY BIẾN HOẶC HÌNH ĐẶC BIỆT ("hinh_da_dien_tuy_bien"):
+Nếu đề bài là một khối hình đặc biệt/tùy biến không thuộc các mẫu trên, bạn BẮT BUỘC sinh thêm trường "customMesh":
+"customMesh": {
+  "vertices": [[x1, y1, z1], [x2, y2, z2], ...],
+  "edges": [[0, 1], [1, 2], ...],
+  "faces": [[0, 1, 2], ...],
+  "labels": ["A", "B", "C", ...]
+}
 
 3. "givenFacts": Danh sách các dữ kiện đề bài cho NGUYÊN VĂN:
    - Dữ kiện độ dài (length): { "type": "length", "element": "canh_day" | "BC" | "AB" | "AC" | "SC" | "SA" | "chieu_cao" | "canh_ben" | "duong_cheo" | "bankinh" | "duongsinh", "value": "2a", "numericValue": 8 }
@@ -371,6 +457,12 @@ ${problemText ? `Đề bài văn bản: "${problemText}"` : 'Đề bài được
     }
     parsedData.originalProblemText = toNaturalVietnameseMathText(parsedData.problemText || problemText || '');
 
+    // Nếu AI sinh customMesh trực tiếp cho khối đa diện tùy biến
+    if (parsedData.customMesh && Array.isArray(parsedData.customMesh.vertices) && parsedData.customMesh.vertices.length >= 4) {
+      const customModel = getGenericOrFallbackGeometry(parsedData, problemText);
+      return NextResponse.json(customModel, { status: 200 });
+    }
+
     const factResult = solveGeometryFacts(parsedData);
     if (!factResult.success) {
       const fallbackModel = getGenericOrFallbackGeometry(parsedData, problemText);
@@ -382,6 +474,7 @@ ${problemText ? `Đề bài văn bản: "${problemText}"` : 'Đề bài được
       shapeType: factResult.shapeType || parsedData.shapeType,
       shapeName: factResult.shapeName || parsedData.shapeName,
       parameters: factResult.parameters,
+      customMesh: parsedData.customMesh || factResult.customMesh || null,
       appliedRule: factResult.appliedRule,
       ruleId: factResult.ruleId,
       explanation: factResult.explanation,

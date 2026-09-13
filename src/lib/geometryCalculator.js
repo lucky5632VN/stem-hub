@@ -70,6 +70,29 @@ export function normalizeShapeType(rawType = '', text = '', shapeName = '') {
   if (s.includes('cone')) return 'hinh_non';
   if (s.includes('sphere')) return 'hinh_cau';
 
+  // 0A. Ưu tiên các khối hình đặc biệt có tên rõ ràng & Custom Mesh
+  if (s.includes('custom_mesh') || s.includes('hinh_da_dien_tuy_bien') || s.includes('đa diện') || s.includes('da_dien') || s.includes('polyhedron')) {
+    return 'hinh_da_dien_tuy_bien';
+  }
+  if (s.includes('bát diện') || s.includes('bat_dien') || s.includes('octahedron')) {
+    return 'hinh_bat_dien_deu';
+  }
+  if (s.includes('tứ diện vuông') || s.includes('tu_dien_vuong') || s.includes('đôi một vuông góc') || (s.includes('vuông góc') && s.includes('oa') && s.includes('ob') && s.includes('oc'))) {
+    return 'hinh_tu_dien_vuong';
+  }
+  if (s.includes('hình thang') || s.includes('hinh_thang') || s.includes('trapezoid')) {
+    return 'hinh_chop_day_hinh_thang';
+  }
+  if (s.includes('chóp cụt') || s.includes('chop_cut') || s.includes('frustum')) {
+    return 'hinh_chop_cut';
+  }
+  if (s.includes('nón cụt') || s.includes('non_cut')) {
+    return 'hinh_non_cut';
+  }
+  if (s.includes('lục giác') || s.includes('luc_giac') || s.includes('hexagonal')) {
+    return 'hinh_lang_tru_luc_giac_deu';
+  }
+
   // 1. Hình lăng trụ
   if (s.includes('hinh_lang_tru_tu_giac_xien')) {
     return 'hinh_lang_tru_tu_giac_xien';
@@ -160,7 +183,9 @@ export function calculateGeometry(llmData) {
   const rawShapeType = llmData.shapeType || '';
   const originalProblemText = llmData.originalProblemText || llmData.problemText || '';
   let shapeName = llmData.shapeName || '';
-  const shapeType = normalizeShapeType(rawShapeType, originalProblemText, shapeName);
+  const shapeType = (llmData.customMesh && Array.isArray(llmData.customMesh.vertices) && llmData.customMesh.vertices.length >= 4)
+    ? 'hinh_da_dien_tuy_bien'
+    : normalizeShapeType(rawShapeType, originalProblemText, shapeName);
   const params = llmData.parameters || {};
   const donVi = llmData.donVi || 'cm';
   let calculations = { donVi, congThuc: {} };
@@ -173,9 +198,326 @@ export function calculateGeometry(llmData) {
   let highlight_planes = [];
 
   // =========================================================================
+  // 🌟 KHỐI ĐA DIỆN ĐỘNG TỪ AI (DYNAMIC CUSTOM MESH BY AI)
+  // =========================================================================
+  if (llmData.customMesh && Array.isArray(llmData.customMesh.vertices) && llmData.customMesh.vertices.length >= 4) {
+    vertices = llmData.customMesh.vertices;
+    faces = Array.isArray(llmData.customMesh.faces) ? llmData.customMesh.faces : [];
+    edges = Array.isArray(llmData.customMesh.edges) ? llmData.customMesh.edges : [];
+    labels = Array.isArray(llmData.customMesh.labels) ? llmData.customMesh.labels : [];
+    if (!shapeName) shapeName = llmData.shapeName || 'Khối đa diện 3D tùy biến';
+    calculations = {
+      ...llmData.calculations,
+      donVi,
+      congThuc: llmData.calculations?.congThuc || {}
+    };
+  }
+  // =========================================================================
+  // 0A. HÌNH BÁT DIỆN ĐỀU (REGULAR OCTAHEDRON) - 6 đỉnh, 8 mặt tam giác đều, 12 cạnh
+  // =========================================================================
+  else if (shapeType === 'hinh_bat_dien_deu') {
+    const a = Number(params.canhDay || params.canh) || 4;
+    if (!shapeName) shapeName = 'Khối bát diện đều cạnh ' + a;
+
+    const theTich = (Math.sqrt(2) / 3) * Math.pow(a, 3);
+    const dienTichToanPhan = 2 * Math.sqrt(3) * Math.pow(a, 2);
+    const banKinhNgoaiTiep = (a * Math.sqrt(2)) / 2;
+    const banKinhNoiTiep = (a * Math.sqrt(6)) / 6;
+
+    calculations = {
+      canhDay: a,
+      theTich: Number(theTich.toFixed(3)),
+      dienTichToanPhan: Number(dienTichToanPhan.toFixed(3)),
+      banKinh: Number(banKinhNgoaiTiep.toFixed(3)),
+      donVi,
+      congThuc: {
+        theTich: "V = \\frac{a^3\\sqrt{2}}{3}",
+        dienTichToanPhan: "S_{tp} = 2a^2\\sqrt{3}",
+        banKinhNgoaiTiep: "R = \\frac{a\\sqrt{2}}{2}",
+        banKinhNoiTiep: "r = \\frac{a\\sqrt{6}}{6}"
+      }
+    };
+
+    // Đáy vuông ở xích đạo z = 0
+    const R = Number((a / Math.sqrt(2)).toFixed(4));
+    vertices.push([R, 0, 0]);   // 0: A
+    vertices.push([0, R, 0]);   // 1: B
+    vertices.push([-R, 0, 0]);  // 2: C
+    vertices.push([0, -R, 0]);  // 3: D
+    // Đỉnh trên E và đỉnh dưới F
+    vertices.push([0, 0, R]);   // 4: E
+    vertices.push([0, 0, -R]);  // 5: F
+    labels.push("A", "B", "C", "D", "E", "F");
+
+    faces = [
+      [4, 0, 1], [4, 1, 2], [4, 2, 3], [4, 3, 0], // 4 mặt trên
+      [5, 1, 0], [5, 2, 1], [5, 3, 2], [5, 0, 3]  // 4 mặt dưới
+    ];
+    edges = [
+      [0, 1], [1, 2], [2, 3], [3, 0], // 4 cạnh đáy xích đạo
+      [4, 0], [4, 1], [4, 2], [4, 3], // 4 cạnh trên
+      [5, 0], [5, 1], [5, 2], [5, 3]  // 4 cạnh dưới
+    ];
+
+    // Đường phụ toán học: Trục đối xứng EF và 2 đường chéo AC, BD
+    auxiliary_edges.push([4, 5], [0, 2], [1, 3]);
+  }
+  // =========================================================================
+  // 0B. TỨ DIỆN VUÔNG O.ABC (OA, OB, OC ĐÔI MỘT VUÔNG GÓC TẠI O)
+  // =========================================================================
+  else if (shapeType === 'hinh_tu_dien_vuong') {
+    const a = Number(params.canhOA || params.chieuDai || params.canhDay) || 4;
+    const b = Number(params.canhOB || params.chieuRong || params.canhDay) || 4;
+    const c = Number(params.canhOC || params.chieuCao) || 5;
+    if (!shapeName) shapeName = 'Tứ diện vuông O.ABC (OA ⊥ OB ⊥ OC)';
+
+    const sOAB = 0.5 * a * b;
+    const sOBC = 0.5 * b * c;
+    const sOCA = 0.5 * c * a;
+    const sABC = 0.5 * Math.sqrt(Math.pow(a * b, 2) + Math.pow(b * c, 2) + Math.pow(c * a, 2));
+    const theTich = (1 / 6) * a * b * c;
+    const dienTichToanPhan = sOAB + sOBC + sOCA + sABC;
+
+    calculations = {
+      canhDay: a,
+      chieuCao: c,
+      theTich: Number(theTich.toFixed(3)),
+      dienTichToanPhan: Number(dienTichToanPhan.toFixed(3)),
+      dienTichDay: Number(sOAB.toFixed(3)),
+      donVi,
+      congThuc: {
+        theTich: "V = \\frac{1}{6} a b c",
+        duongCao: "\\frac{1}{OH^2} = \\frac{1}{a^2} + \\frac{1}{b^2} + \\frac{1}{c^2}",
+        dienTichToanPhan: "S_{tp} = \\frac{1}{2}(ab + bc + ca) + S_{\\Delta ABC}"
+      }
+    };
+
+    vertices.push([0, 0, 0]); // 0: O
+    vertices.push([a, 0, 0]); // 1: A
+    vertices.push([0, b, 0]); // 2: B
+    vertices.push([0, 0, c]); // 3: C
+    labels.push("O", "A", "B", "C");
+
+    faces = [
+      [0, 2, 1], // OAB
+      [0, 1, 3], // OAC
+      [0, 3, 2], // OBC
+      [1, 2, 3]  // ABC
+    ];
+    edges = [
+      [0, 1], [0, 2], [0, 3], // OA, OB, OC
+      [1, 2], [2, 3], [3, 1]  // AB, BC, CA
+    ];
+
+    // Chân đường cao H hạ từ O xuống mặt phẳng (ABC)
+    const invSq = 1 / (a * a) + 1 / (b * b) + 1 / (c * c);
+    const hSq = 1 / invSq;
+    const hX = Number((hSq / a).toFixed(4));
+    const hY = Number((hSq / b).toFixed(4));
+    const hZ = Number((hSq / c).toFixed(4));
+    const hIdx = vertices.length;
+    vertices.push([hX, hY, hZ]); // 4: H
+    labels.push("H");
+    auxiliary_edges.push([0, hIdx]); // OH vuông góc (ABC)
+    auxiliary_labels.push("H");
+  }
+  // =========================================================================
+  // 0C. HÌNH CHÓP ĐÁY HÌNH THANG (S.ABCD)
+  // =========================================================================
+  else if (shapeType === 'hinh_chop_day_hinh_thang') {
+    const a = Number(params.canhDay || params.chieuRong) || 4;
+    const b = Number(params.dayLon || params.chieuDai) || (a * 2);
+    const h = Number(params.chieuCao) || 5;
+    if (!shapeName) shapeName = 'Hình chóp S.ABCD (đáy hình thang, SA ⊥ đáy)';
+
+    const dienTichDay = ((a + b) * a) / 2;
+    const theTich = (1 / 3) * dienTichDay * h;
+
+    calculations = {
+      canhDay: a,
+      chieuCao: h,
+      dienTichDay: Number(dienTichDay.toFixed(3)),
+      theTich: Number(theTich.toFixed(3)),
+      donVi,
+      congThuc: {
+        dienTichDay: "S_{đáy} = \\frac{(AD + BC) \\cdot AB}{2}",
+        theTich: "V = \\frac{1}{3} S_{đáy} h"
+      }
+    };
+
+    // Đáy hình thang vuông tại A và B: AB=a, BC=a, AD=b (hoặc 2a)
+    vertices.push([0, 0, 0]); // 0: A
+    vertices.push([a, 0, 0]); // 1: B
+    vertices.push([a, a, 0]); // 2: C
+    vertices.push([0, b, 0]); // 3: D
+    vertices.push([0, 0, h]); // 4: S (SA ⊥ đáy)
+    labels.push("A", "B", "C", "D", "S");
+
+    faces = [
+      [0, 3, 2, 1], // Đáy ABCD
+      [4, 0, 1],    // SAB
+      [4, 1, 2],    // SBC
+      [4, 2, 3],    // SCD
+      [4, 3, 0]     // SDA
+    ];
+    edges = [
+      [0, 1], [1, 2], [2, 3], [3, 0], // Cạnh đáy
+      [4, 0], [4, 1], [4, 2], [4, 3]  // Cạnh bên
+    ];
+  }
+  // =========================================================================
+  // 0D. HÌNH CHÓP CỤT TỨ GIÁC ĐỀU (ABCD.A'B'C'D')
+  // =========================================================================
+  else if (shapeType === 'hinh_chop_cut') {
+    const a1 = Number(params.canhDay || params.dayLon) || 5;
+    const a2 = Number(params.dayNho || params.canhDayTren) || 2.5;
+    const h = Number(params.chieuCao) || 4;
+    if (!shapeName) shapeName = "Hình chóp cụt tứ giác đều ABCD.A'B'C'D'";
+
+    const S1 = a1 * a1;
+    const S2 = a2 * a2;
+    const theTich = (1 / 3) * h * (S1 + S2 + Math.sqrt(S1 * S2));
+
+    calculations = {
+      canhDay: a1,
+      chieuCao: h,
+      dienTichDay: Number(S1.toFixed(3)),
+      theTich: Number(theTich.toFixed(3)),
+      donVi,
+      congThuc: {
+        theTich: "V = \\frac{1}{3} h (S_1 + S_2 + \\sqrt{S_1 S_2})"
+      }
+    };
+
+    const hx1 = a1 / 2;
+    const hx2 = a2 / 2;
+    // Đáy dưới (z = 0)
+    vertices.push([-hx1, -hx1, 0]); // 0: A
+    vertices.push([hx1, -hx1, 0]);  // 1: B
+    vertices.push([hx1, hx1, 0]);   // 2: C
+    vertices.push([-hx1, hx1, 0]);  // 3: D
+    // Đáy trên (z = h)
+    vertices.push([-hx2, -hx2, h]); // 4: A'
+    vertices.push([hx2, -hx2, h]);  // 5: B'
+    vertices.push([hx2, hx2, h]);   // 6: C'
+    vertices.push([-hx2, hx2, h]);  // 7: D'
+    labels.push("A", "B", "C", "D", "A'", "B'", "C'", "D'");
+
+    faces = [
+      [0, 3, 2, 1], // Đáy dưới
+      [4, 5, 6, 7], // Đáy trên
+      [0, 1, 5, 4], // ABB'A'
+      [1, 2, 6, 5], // BCC'B'
+      [2, 3, 7, 6], // CDD'C'
+      [3, 0, 4, 7]  // DAA'D'
+    ];
+    edges = [
+      [0, 1], [1, 2], [2, 3], [3, 0], // Cạnh đáy dưới
+      [4, 5], [5, 6], [6, 7], [7, 4], // Cạnh đáy trên
+      [0, 4], [1, 5], [2, 6], [3, 7]  // Cạnh bên nghiêng
+    ];
+  }
+  // =========================================================================
+  // 0E. HÌNH NÓN CỤT
+  // =========================================================================
+  else if (shapeType === 'hinh_non_cut') {
+    const R = Number(params.banKinhLon || params.banKinh) || 4;
+    const r = Number(params.banKinhNho) || 2;
+    const h = Number(params.chieuCao) || 5;
+    if (!shapeName) shapeName = 'Hình nón cụt tròn xoay';
+
+    const l = Math.sqrt(h * h + Math.pow(R - r, 2));
+    const theTich = (1 / 3) * Math.PI * h * (R * R + r * r + R * r);
+    const dienTichXungQuanh = Math.PI * (R + r) * l;
+    const dienTichToanPhan = dienTichXungQuanh + Math.PI * (R * R + r * r);
+
+    calculations = {
+      banKinh: R,
+      chieuCao: h,
+      theTich: Number(theTich.toFixed(3)),
+      dienTichXungQuanh: Number(dienTichXungQuanh.toFixed(3)),
+      dienTichToanPhan: Number(dienTichToanPhan.toFixed(3)),
+      donVi,
+      congThuc: {
+        theTich: "V = \\frac{1}{3}\\pi h (R^2 + r^2 + Rr)",
+        dienTichXungQuanh: "S_{xq} = \\pi (R + r) l",
+        duongSinh: "l = \\sqrt{h^2 + (R - r)^2}"
+      }
+    };
+
+    const SEGMENTS = 16;
+    for (let i = 0; i < SEGMENTS; i++) {
+      const angle = (i / SEGMENTS) * 2 * Math.PI;
+      vertices.push([Number((R * Math.cos(angle)).toFixed(4)), Number((R * Math.sin(angle)).toFixed(4)), 0]);
+    }
+    for (let i = 0; i < SEGMENTS; i++) {
+      const angle = (i / SEGMENTS) * 2 * Math.PI;
+      vertices.push([Number((r * Math.cos(angle)).toFixed(4)), Number((r * Math.sin(angle)).toFixed(4)), h]);
+    }
+    labels.push("O", "O'");
+
+    for (let i = 0; i < SEGMENTS; i++) {
+      const next = (i + 1) % SEGMENTS;
+      edges.push([i, next]); // Đáy dưới
+      edges.push([i + SEGMENTS, next + SEGMENTS]); // Đáy trên
+      if (i % 4 === 0) edges.push([i, i + SEGMENTS]); // Đường sinh
+      faces.push([i, next, next + SEGMENTS, i + SEGMENTS]);
+    }
+  }
+  // =========================================================================
+  // 0F. HÌNH LĂNG TRỤ LỤC GIÁC ĐỀU (ABCDEF.A'B'C'D'E'F')
+  // =========================================================================
+  else if (shapeType === 'hinh_lang_tru_luc_giac_deu') {
+    const a = Number(params.canhDay) || 3;
+    const h = Number(params.chieuCao) || 6;
+    if (!shapeName) shapeName = "Hình lăng trụ lục giác đều ABCDEF.A'B'C'D'E'F'";
+
+    const dienTichDay = ((3 * Math.sqrt(3)) / 2) * a * a;
+    const theTich = dienTichDay * h;
+    const dienTichXungQuanh = 6 * a * h;
+    const dienTichToanPhan = dienTichXungQuanh + 2 * dienTichDay;
+
+    calculations = {
+      canhDay: a,
+      chieuCao: h,
+      dienTichDay: Number(dienTichDay.toFixed(3)),
+      theTich: Number(theTich.toFixed(3)),
+      dienTichXungQuanh: Number(dienTichXungQuanh.toFixed(3)),
+      dienTichToanPhan: Number(dienTichToanPhan.toFixed(3)),
+      donVi,
+      congThuc: {
+        dienTichDay: "S_{đáy} = \\frac{3a^2\\sqrt{3}}{2}",
+        theTich: "V = S_{đáy} \\cdot h",
+        dienTichXungQuanh: "S_{xq} = 6 a h"
+      }
+    };
+
+    // 6 đỉnh đáy dưới (z = 0)
+    for (let i = 0; i < 6; i++) {
+      const angle = (i * Math.PI) / 3;
+      vertices.push([Number((a * Math.cos(angle)).toFixed(4)), Number((a * Math.sin(angle)).toFixed(4)), 0]);
+    }
+    // 6 đỉnh đáy trên (z = h)
+    for (let i = 0; i < 6; i++) {
+      const angle = (i * Math.PI) / 3;
+      vertices.push([Number((a * Math.cos(angle)).toFixed(4)), Number((a * Math.sin(angle)).toFixed(4)), h]);
+    }
+    labels.push("A", "B", "C", "D", "E", "F", "A'", "B'", "C'", "D'", "E'", "F'");
+
+    // Đáy dưới & Đáy trên
+    faces.push([0, 5, 4, 3, 2, 1], [6, 7, 8, 9, 10, 11]);
+    for (let i = 0; i < 6; i++) {
+      const next = (i + 1) % 6;
+      edges.push([i, next]); // Cạnh đáy dưới
+      edges.push([i + 6, next + 6]); // Cạnh đáy trên
+      edges.push([i, i + 6]); // Cạnh bên đứng
+      faces.push([i, next, next + 6, i + 6]); // Mặt bên
+    }
+  }
+  // =========================================================================
   // 1. HÌNH CHÓP TAM GIÁC ĐỀU (S.ABC)
   // =========================================================================
-  if (shapeType === 'hinh_chop_tam_giac_deu') {
+  else if (shapeType === 'hinh_chop_tam_giac_deu') {
     const a = Number(params.canhDay) || 4;
     const h = Number(params.chieuCao) || 5;
     if (!shapeName) shapeName = 'Hình chóp tam giác đều S.ABC';
