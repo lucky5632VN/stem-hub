@@ -426,7 +426,7 @@
       const payload = {
         query: logData.query || '',
         userDisplayName: logData.userDisplayName || 'Học sinh',
-        userEmail: logData.userEmail || 'student@stemhub.edu.vn',
+        userEmail: logData.userEmail || '',
         currentPage: logData.labTitle || 'Phòng Thí Nghiệm Ảo',
         intent: logData.intent || 'lab_assistant',
         subject: (logData.subject || 'stem').toUpperCase(),

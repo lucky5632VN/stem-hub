@@ -1303,7 +1303,7 @@ CuO (đen) + H₂ -t°→ Cu (đỏ) + H₂O
 
       const terminalLines = [
         `🤖 [STEM HUB AI REASONING ENGINE — LOG REALTIME — ${timeStr}]`,
-        `👤 Học sinh: ${logData.userDisplayName || 'Học sinh'} (${logData.userEmail || 'guest@stemhub.edu.vn'}) | Vị trí: ${logData.currentPage || 'Trang chủ'}`,
+        `👤 Học sinh: ${logData.userDisplayName || 'Học sinh'} | Vị trí: ${logData.currentPage || 'Trang chủ'}`,
         `📥 Câu hỏi: "${logData.query || ''}"`,
         `🎯 1/3 Intent & Môn học: Intent '${logData.intent || 'stem_query'}' -> Môn: ${subjectName}`,
         logData.isCacheHit
@@ -1322,7 +1322,7 @@ CuO (đen) + H₂ -t°→ Cu (đỏ) + H₂O
           timestamp,
           timeStr,
           userDisplayName: logData.userDisplayName || 'Học sinh',
-          userEmail: logData.userEmail || 'guest@stemhub.edu.vn',
+          userEmail: logData.userEmail || '',
           currentPage: logData.currentPage || 'Trang chủ',
           query: logData.query || '',
           intent: logData.intent || 'stem_query',
@@ -1428,7 +1428,7 @@ CuO (đen) + H₂ -t°→ Cu (đỏ) + H₂O
       const cacheLogPayload = {
         query: textToSend,
         userDisplayName,
-        userEmail: user?.email || 'guest@stemhub.edu.vn',
+        userEmail: user?.email || '',
         currentPage,
         intent: intentResult?.intent || 'stem_query',
         subject: intentResult?.subject || 'general',
@@ -1519,7 +1519,7 @@ CuO (đen) + H₂ -t°→ Cu (đỏ) + H₂O
       logId: sessionLogId,
       query: textToSend,
       userDisplayName,
-      userEmail: user?.email || 'guest@stemhub.edu.vn',
+      userEmail: user?.email || '',
       currentPage,
       intent: intentResult?.intent || 'stem_query',
       subject: intentResult?.subject || 'general',

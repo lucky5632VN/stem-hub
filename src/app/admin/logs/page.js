@@ -213,7 +213,13 @@ export default function AdminLogsDashboard() {
   };
 
   const handleCopyLog = (log) => {
-    const textToCopy = (log.terminalLines || []).join('\n') || JSON.stringify(log, null, 2);
+    const cleanTerminalLines = (log.terminalLines || []).map(line =>
+      line
+        .replace(/\s*\([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\)/g, '')
+        .replace(/\s*\(guest\)/gi, '')
+        .replace(/\s*\(\s*\)/g, '')
+    );
+    const textToCopy = cleanTerminalLines.join('\n') || JSON.stringify(log, null, 2);
     navigator.clipboard.writeText(textToCopy);
     setCopiedId(log.id);
     try { playSound.click(); } catch (_) {}
@@ -475,7 +481,7 @@ export default function AdminLogsDashboard() {
                         ⏱️ {log.timeStr || formatDateTime(log.dateObject)}
                       </span>
                       <span className="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/30 text-[10px] font-bold">
-                        👤 {log.userDisplayName || 'Học sinh'} ({log.userEmail || 'guest'})
+                        👤 {log.userDisplayName || 'Học sinh'}
                       </span>
                       <span className="px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-500/30 text-[10px] font-bold">
                         📍 {log.currentPage || 'Trang chủ'}
@@ -503,7 +509,11 @@ export default function AdminLogsDashboard() {
 
                   <div className="space-y-1 text-[11px] leading-relaxed">
                     {log.terminalLines && log.terminalLines.length > 0 ? (
-                      log.terminalLines.map((line, idx) => {
+                      log.terminalLines.map((rawLine, idx) => {
+                        const line = rawLine
+                          .replace(/\s*\([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\)/g, '')
+                          .replace(/\s*\(guest\)/gi, '')
+                          .replace(/\s*\(\s*\)/g, '');
                         let textColor = 'text-zinc-300';
                         if (line.includes('🤖')) textColor = 'text-emerald-400 font-bold';
                         else if (line.includes('👤')) textColor = 'text-cyan-300';

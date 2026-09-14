@@ -64,7 +64,7 @@ export async function POST(request) {
     // Console output mimicking local CMD terminal
     console.log('\n' + '─'.repeat(75));
     console.log(`🤖 [STEM HUB AI REASONING ENGINE — LOG REALTIME SERVER — ${timeStr}]`);
-    console.log(`👤 Học sinh: ${userDisplayName || 'Học sinh'} (${userEmail || 'guest'}) | Vị trí: ${currentPage || 'Trang chủ'}`);
+    console.log(`👤 Học sinh: ${userDisplayName || 'Học sinh'} | Vị trí: ${currentPage || 'Trang chủ'}`);
     console.log(`📥 Câu hỏi: "${userQuery || ''}"`);
     console.log(`🎯 1/3 Intent & Môn học: Intent '${intent || 'stem_query'}' -> Môn: ${subjectName}`);
 
@@ -94,7 +94,7 @@ export async function POST(request) {
 
     const terminalLines = [
       `🤖 [STEM HUB AI REASONING ENGINE — LOG REALTIME — ${timeStr}]`,
-      `👤 Học sinh: ${userDisplayName || 'Học sinh'} (${userEmail || 'guest@stemhub.edu.vn'}) | Vị trí: ${currentPage || 'Trang chủ'}`,
+      `👤 Học sinh: ${userDisplayName || 'Học sinh'} | Vị trí: ${currentPage || 'Trang chủ'}`,
       `📥 Câu hỏi: "${userQuery || ''}"`,
       `🎯 1/3 Intent & Môn học: Intent '${intent || 'stem_query'}' -> Môn: ${subjectName}`,
       isCacheHit
@@ -111,7 +111,7 @@ export async function POST(request) {
       timestamp,
       timeStr,
       userDisplayName: userDisplayName || 'Học sinh',
-      userEmail: userEmail || 'guest@stemhub.edu.vn',
+      userEmail: userEmail || '',
       currentPage: currentPage || 'Trang chủ',
       query: userQuery || '',
       intent: intent || 'stem_query',
