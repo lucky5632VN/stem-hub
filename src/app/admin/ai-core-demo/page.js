@@ -35,7 +35,19 @@ export default function AICoreDemoPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [auditResult, setAuditResult] = useState(null);
   const [isSimulatingLearning, setIsSimulatingLearning] = useState(false);
-  const [pvpBots, setPvpBots] = useState([]);
+  const [showBotTable, setShowBotTable] = useState(true);
+  const [pvpBots, setPvpBots] = useState(() => {
+    return Array.from({ length: 20 }, (_, idx) => ({
+      id: `bot_evo_${idx + 1}`,
+      name: `PvP Bot Alpha-${idx + 1}`,
+      elo: 800 + idx * 75,
+      accuracyRate: Math.min(0.96, Math.max(0.42, 0.45 + idx * 0.026)),
+      responseTimeSec: Math.max(3.8, Number((14.5 - idx * 0.52).toFixed(1))),
+      fitness: Number((0.45 + (idx % 5) * 0.11).toFixed(2)),
+      matchesPlayed: 12 + (idx % 7) * 4,
+      generation: 1
+    }));
+  });
   const [dwellPercentiles, setDwellPercentiles] = useState({ dwellTimeMin: 15, dwellTimeMax: 45, median: 25, count: 0 });
   const [liveMetricHistory, setLiveMetricHistory] = useState([
     { step: 1, loss: 0.42, reward: 0.65, dwellTime: 18, isSimulated: true, timestamp: Date.now() - 10000 },
@@ -399,13 +411,20 @@ export default function AICoreDemoPage() {
           <div className="pt-3 border-t border-zinc-800/80 flex flex-col md:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-xs text-zinc-300 font-mono">
               <ShieldCheck className="w-4 h-4 text-purple-400" />
-              <span>GIAI ĐOẠN 5 ENGINE: PvP Evolution Population (20 Bots) & Dwell-Time Calibrator</span>
+              <span>GIAI ĐOẠN 5 ENGINE: Quần thể 20 PvP Bots tự điều chỉnh ELO & Tốc độ phản xạ</span>
             </div>
 
             <div className="flex items-center gap-2">
               <button
+                onClick={() => setShowBotTable(!showBotTable)}
+                className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[11px] font-mono font-bold transition-all cursor-pointer border border-zinc-700"
+              >
+                {showBotTable ? 'Ẩn bảng 20 Bot' : '👁️ Xem bảng 20 Bot'}
+              </button>
+
+              <button
                 onClick={handleEvolvePvPBots}
-                className="px-3.5 py-2 rounded-lg bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/40 text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                className="px-3.5 py-2 rounded-lg bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/40 text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md shadow-purple-500/10 active:scale-95"
               >
                 <Zap className="w-3.5 h-3.5" />
                 <span>🧬 TIẾN HÓA 20 PVP BOTS</span>
@@ -413,13 +432,74 @@ export default function AICoreDemoPage() {
 
               <button
                 onClick={handleRecalibrateDwellTime}
-                className="px-3.5 py-2 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/40 text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                className="px-3.5 py-2 rounded-lg bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/40 text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md shadow-amber-500/10 active:scale-95"
               >
                 <BarChart3 className="w-3.5 h-3.5" />
                 <span>📊 HIỆU CHỈNH P25-P75 DWELL</span>
               </button>
             </div>
           </div>
+
+          {/* BẢNG DANH SÁCH 20 BOT TỰ ĐỘNG ĐIỀU CHỈNH CHỈ SỐ */}
+          {showBotTable && (
+            <div className="mt-3 pt-3 border-t border-zinc-800/60 space-y-2">
+              <div className="flex items-center justify-between text-xs text-zinc-400 font-mono">
+                <span className="font-bold text-purple-300 flex items-center gap-1.5">
+                  <Cpu className="w-3.5 h-3.5 text-purple-400" /> BẢNG 20 BOT AI ĐẤU TRƯỜNG THÍCH ỨNG NĂNG LỰC NGƯỜI CHƠI
+                </span>
+                <span className="text-[10px] text-zinc-500 font-mono">
+                  Tự động điều chỉnh ELO & Tốc độ phản xạ sau mỗi trận đấu
+                </span>
+              </div>
+
+              <div className="overflow-x-auto max-h-60 custom-scrollbar rounded-xl border border-zinc-800/80 bg-[#090b10]">
+                <table className="w-full text-left text-[11px] font-mono">
+                  <thead className="bg-[#141724] text-zinc-400 uppercase text-[10px] sticky top-0 border-b border-zinc-800">
+                    <tr>
+                      <th className="px-3 py-2">STT & Tên Bot</th>
+                      <th className="px-3 py-2">Chỉ số ELO</th>
+                      <th className="px-3 py-2">Tốc độ phản xạ</th>
+                      <th className="px-3 py-2">Độ chính xác</th>
+                      <th className="px-3 py-2">Độ thích nghi (Fitness)</th>
+                      <th className="px-3 py-2 text-right">Trạng thái</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800/60 text-zinc-300">
+                    {pvpBots.map((bot, i) => (
+                      <tr key={bot.id} className="hover:bg-zinc-800/30 transition-colors">
+                        <td className="px-3 py-1.5 font-bold text-white flex items-center gap-2">
+                          <span className="w-5 h-5 rounded-md bg-purple-500/10 text-purple-300 text-[10px] flex items-center justify-center border border-purple-500/30 font-bold">
+                            #{i + 1}
+                          </span>
+                          <span>{bot.name}</span>
+                        </td>
+                        <td className="px-3 py-1.5 text-emerald-400 font-bold">
+                          {bot.elo} ELO
+                        </td>
+                        <td className="px-3 py-1.5 text-amber-300">
+                          ⚡ {bot.responseTimeSec}s
+                        </td>
+                        <td className="px-3 py-1.5 text-cyan-300">
+                          🎯 {(bot.accuracyRate * 100).toFixed(1)}%
+                        </td>
+                        <td className="px-3 py-1.5">
+                          <span className="px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/30 text-[10px]">
+                            {bot.fitness || '0.50'}
+                          </span>
+                        </td>
+                        <td className="px-3 py-1.5 text-right">
+                          <span className="text-[10px] text-emerald-400 flex items-center justify-end gap-1 font-sans">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
+                            Sẵn sàng 1v1
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
 
 
