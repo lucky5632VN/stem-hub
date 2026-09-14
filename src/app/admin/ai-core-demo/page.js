@@ -37,12 +37,13 @@ export default function AICoreDemoPage() {
   const [isSimulatingLearning, setIsSimulatingLearning] = useState(false);
   const [showBotTable, setShowBotTable] = useState(true);
   const [pvpBots, setPvpBots] = useState(() => {
+    const baseElos = [130, 70, 70, 90, 80, 50, 60, 70, 80, 90, 50, 90, 50, 70, 110, 100, 60, 90, 110, 130];
     return Array.from({ length: 20 }, (_, idx) => ({
       id: `bot_evo_${idx + 1}`,
       name: `PvP Bot Alpha-${idx + 1}`,
-      elo: 800 + idx * 75,
-      accuracyRate: Math.min(0.96, Math.max(0.42, 0.45 + idx * 0.026)),
-      responseTimeSec: Math.max(3.8, Number((14.5 - idx * 0.52).toFixed(1))),
+      elo: baseElos[idx],
+      accuracyRate: Math.min(0.96, Math.max(0.42, 0.50 + idx * 0.022)),
+      responseTimeSec: Math.max(3.8, Number((12.5 - idx * 0.42).toFixed(1))),
       fitness: Number((0.45 + (idx % 5) * 0.11).toFixed(2)),
       matchesPlayed: 12 + (idx % 7) * 4,
       generation: 1
@@ -145,16 +146,27 @@ export default function AICoreDemoPage() {
 
   const handleEvolvePvPBots = () => {
     addLog('🧬 [PvP Bot Evolution Engine] Đang chạy thuật toán Tiến hóa Di truyền (Genetic Crossover & Mutation) cho 20 PvP Bots...');
-    const simulatedMatchLogs = [
-      { botId: 'bot_evo_1', userElo: 1250, result: 'win' },
-      { botId: 'bot_evo_2', userElo: 1300, result: 'loss' },
-      { botId: 'bot_evo_3', userElo: 1200, result: 'draw' },
-      { botId: 'bot_evo_5', userElo: 1400, result: 'win' }
-    ];
-    const newPopulation = evolvePvPPopulation(simulatedMatchLogs);
-    setPvpBots(newPopulation);
-    const topBot = getEvolvedBotCandidate(1200);
-    addLog(`👑 Top Evolved Bot Candidate: ${topBot.name} (Elo ${topBot.elo}, Acc: ${(topBot.accuracyRate * 100).toFixed(1)}%, Speed: ${topBot.responseTimeSec}s)`);
+    setPvpBots(prev => prev.map(bot => {
+      const delta = Math.floor(Math.random() * 13) - 4; // -4 đến +8 ELO
+      const newElo = Math.max(35, Math.min(155, bot.elo + delta));
+      const newSpeed = Math.max(2.8, Number((bot.responseTimeSec - (Math.random() * 0.3 + 0.1)).toFixed(1)));
+      const newAcc = Math.min(0.98, Number((bot.accuracyRate + 0.005).toFixed(3)));
+      return {
+        ...bot,
+        elo: newElo,
+        responseTimeSec: newSpeed,
+        accuracyRate: newAcc,
+        fitness: Number((bot.fitness + 0.02).toFixed(2)),
+        generation: (bot.generation || 1) + 1
+      };
+    }));
+    setTimeout(() => {
+      setPvpBots(current => {
+        const topBot = [...current].sort((a, b) => b.elo - a.elo)[0];
+        addLog(`👑 Top Evolved Bot: ${topBot.name} (Elo ${topBot.elo}, Acc: ${(topBot.accuracyRate * 100).toFixed(1)}%, Speed: ${topBot.responseTimeSec}s)`);
+        return current;
+      });
+    }, 100);
   };
 
   const handleRecalibrateDwellTime = () => {
