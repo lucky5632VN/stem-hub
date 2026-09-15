@@ -37,8 +37,6 @@ const getSessionHistory = (key) => {
 export default function Header() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [authView, setAuthView] = useState('login');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
   const [incomingChallenge, setIncomingChallenge] = useState(null);
@@ -51,6 +49,10 @@ export default function Header() {
   const personalization = useAppStore((state) => state.personalization);
   const isSidebarOpen = useAppStore((state) => state.isSidebarOpen);
   const toggleSidebar = useAppStore((state) => state.toggleSidebar);
+  const isAuthOpen = useAppStore((state) => state.isAuthOpen);
+  const authView = useAppStore((state) => state.authView);
+  const openAuth = useAppStore((state) => state.openAuth);
+  const closeAuth = useAppStore((state) => state.closeAuth);
   const lastIncomingUidsRef = useRef(null);
   const [newFriendRequest, setNewFriendRequest] = useState(null);
 
@@ -440,10 +442,6 @@ export default function Header() {
     }
   };
 
-  const openAuth = (view) => {
-    setAuthView(view);
-    setIsAuthOpen(true);
-  };
 
   const handleLogout = async () => {
     try { playSound.click(); } catch (_) {}
@@ -633,7 +631,7 @@ export default function Header() {
       {/* Login & Register Modal */}
       <AuthModal 
         isOpen={isAuthOpen} 
-        onClose={() => setIsAuthOpen(false)} 
+        onClose={closeAuth} 
         initialView={authView} 
       />
 

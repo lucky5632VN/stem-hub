@@ -1839,7 +1839,7 @@ ${conciseInstruction}
             <button
               onClick={() => {
                 setAuthBlockedToast(false);
-                router.push('/login?next=' + encodeURIComponent(pathname || '/'));
+                useAppStore.getState().openAuth('login');
               }}
               className="ml-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-mono font-bold text-xs shadow-md transition-all cursor-pointer active:scale-95 shrink-0"
             >

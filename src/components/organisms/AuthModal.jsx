@@ -213,6 +213,25 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
         console.warn("Lỗi kiểm tra trạng thái Face 2FA:", err2fa);
       }
 
+      // Đồng bộ cookie session cho Next.js Middleware
+      try {
+        const token = await user.getIdToken();
+        document.cookie = `session=${token}; path=/; max-age=604800; SameSite=Lax`;
+      } catch (_) {}
+
+      // Nếu có tham số ?next=, tự động chuyển tiếp tới đúng trang được yêu cầu
+      if (typeof window !== 'undefined') {
+        const nextDest = new URLSearchParams(window.location.search).get('next');
+        if (nextDest && nextDest !== '/login' && nextDest !== '/register') {
+          window.location.href = nextDest;
+          return;
+        }
+        if (window.location.pathname === '/login' || window.location.pathname === '/register') {
+          window.location.href = '/';
+          return;
+        }
+      }
+
       onClose();
     } catch (err) {
       console.warn("Lỗi đăng nhập:", err?.message || err);
@@ -303,6 +322,23 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
         return;
       }
 
+      try {
+        const token = await user.getIdToken();
+        document.cookie = `session=${token}; path=/; max-age=604800; SameSite=Lax`;
+      } catch (_) {}
+
+      if (typeof window !== 'undefined') {
+        const nextDest = new URLSearchParams(window.location.search).get('next');
+        if (nextDest && nextDest !== '/login' && nextDest !== '/register') {
+          window.location.href = nextDest;
+          return;
+        }
+        if (window.location.pathname === '/login' || window.location.pathname === '/register') {
+          window.location.href = '/';
+          return;
+        }
+      }
+
       onClose();
     } catch (err) {
       console.warn("Lỗi đăng ký:", err.code || err.message);
@@ -366,6 +402,19 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
     }
   };
 
+  const handleModalClose = () => {
+    if (typeof window !== 'undefined' && (window.location.pathname === '/login' || window.location.pathname === '/register')) {
+      const nextDest = new URLSearchParams(window.location.search).get('next');
+      if (nextDest && nextDest !== '/login' && nextDest !== '/register') {
+        window.location.href = nextDest;
+        return;
+      }
+      window.location.href = '/';
+      return;
+    }
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   if (face2faPending) {
@@ -383,7 +432,7 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
           }
           useAppStore.getState().setUser(null);
           setFace2faPending(null);
-          onClose();
+          handleModalClose();
         }}
         mode="VERIFY"
         userEmail={face2faPending.email}
@@ -413,8 +462,20 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
             });
           }
 
+          if (typeof window !== 'undefined') {
+            const nextDest = new URLSearchParams(window.location.search).get('next');
+            if (nextDest && nextDest !== '/login' && nextDest !== '/register') {
+              window.location.href = nextDest;
+              return;
+            }
+            if (window.location.pathname === '/login' || window.location.pathname === '/register') {
+              window.location.href = '/';
+              return;
+            }
+          }
+
           setFace2faPending(null);
-          onClose();
+          handleModalClose();
         }}
       />
     );
@@ -427,7 +488,7 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={onClose}
+          onClick={handleModalClose}
           className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         />
 
@@ -438,7 +499,7 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
           className="relative w-full max-w-2xl bg-bg-secondary rounded-2xl shadow-2xl p-8 border border-border-theme z-10 text-text-primary transition-all duration-300"
         >
           <button 
-            onClick={onClose}
+            onClick={handleModalClose}
             className="absolute -top-4 -right-4 w-10 h-10 bg-bg-tertiary hover:opacity-90 rounded-full flex items-center justify-center text-text-primary transition-colors shadow-lg border border-border-theme"
           >
             <X className="w-5 h-5 text-text-primary" />
@@ -515,6 +576,36 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
                 <button type="button" onClick={() => {setView('register'); setError(''); setSuccessMessage('');}} className="text-sky-500 hover:underline transition-colors font-medium">
                   Đăng ký ngay
                 </button>
+              </div>
+
+              {/* Quick fill testing accounts (Tiện ích kiểm thử nhanh 1-Click) */}
+              <div className="pt-4 border-t border-border-theme/60 text-center">
+                <span className="text-[11px] text-text-secondary block mb-2 font-medium">
+                  ⚡ Tài khoản kiểm thử nhanh (1-Click):
+                </span>
+                <div className="flex items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { setEmail('test1@gmail.com'); setPassword('test1123'); setError(''); }}
+                    className="px-2.5 py-1 text-xs rounded-lg bg-bg-tertiary hover:bg-border-theme border border-border-theme text-text-primary transition-all active:scale-95 cursor-pointer"
+                  >
+                    test1
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setEmail('test2@gmail.com'); setPassword('test2123'); setError(''); }}
+                    className="px-2.5 py-1 text-xs rounded-lg bg-bg-tertiary hover:bg-border-theme border border-border-theme text-text-primary transition-all active:scale-95 cursor-pointer"
+                  >
+                    test2
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setEmail('admin123@gmail.com'); setPassword('admin123456'); setError(''); }}
+                    className="px-2.5 py-1 text-xs rounded-lg bg-bg-tertiary hover:bg-border-theme border border-border-theme text-amber-400 transition-all active:scale-95 cursor-pointer font-medium"
+                  >
+                    Admin
+                  </button>
+                </div>
               </div>
             </form>
           )}

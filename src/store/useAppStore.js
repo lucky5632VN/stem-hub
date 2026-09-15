@@ -21,6 +21,12 @@ export const useAppStore = create((set) => ({
   user: null,
   setUser: (user) => set({ user }),
 
+  // Auth Modal State (Giao diện đăng nhập & đăng ký duy nhất toàn hệ thống)
+  isAuthOpen: false,
+  authView: 'login', // 'login' | 'register' | 'forgot-password'
+  openAuth: (view = 'login') => set({ isAuthOpen: true, authView: view }),
+  closeAuth: () => set({ isAuthOpen: false }),
+
   // Personalization & Stats State
   personalization: {
     avatarFrame: 'default',
