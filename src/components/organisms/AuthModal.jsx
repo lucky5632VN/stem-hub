@@ -577,36 +577,6 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
                   Đăng ký ngay
                 </button>
               </div>
-
-              {/* Quick fill testing accounts (Tiện ích kiểm thử nhanh 1-Click) */}
-              <div className="pt-4 border-t border-border-theme/60 text-center">
-                <span className="text-[11px] text-text-secondary block mb-2 font-medium">
-                  ⚡ Tài khoản kiểm thử nhanh (1-Click):
-                </span>
-                <div className="flex items-center justify-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => { setEmail('test1@gmail.com'); setPassword('test1123'); setError(''); }}
-                    className="px-2.5 py-1 text-xs rounded-lg bg-bg-tertiary hover:bg-border-theme border border-border-theme text-text-primary transition-all active:scale-95 cursor-pointer"
-                  >
-                    test1
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setEmail('test2@gmail.com'); setPassword('test2123'); setError(''); }}
-                    className="px-2.5 py-1 text-xs rounded-lg bg-bg-tertiary hover:bg-border-theme border border-border-theme text-text-primary transition-all active:scale-95 cursor-pointer"
-                  >
-                    test2
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setEmail('admin123@gmail.com'); setPassword('admin123456'); setError(''); }}
-                    className="px-2.5 py-1 text-xs rounded-lg bg-bg-tertiary hover:bg-border-theme border border-border-theme text-amber-400 transition-all active:scale-95 cursor-pointer font-medium"
-                  >
-                    Admin
-                  </button>
-                </div>
-              </div>
             </form>
           )}
 

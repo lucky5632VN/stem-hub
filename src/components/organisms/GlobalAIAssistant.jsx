@@ -8,7 +8,6 @@ import {
   ShieldAlert, AlertTriangle, Lock
 } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
-import { useAuth } from '@/hooks/useAuth';
 import { useAudioStore } from '@/store/useAudioStore';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
@@ -512,8 +511,6 @@ export default function GlobalAIAssistant() {
   const isDark = theme === 'dark'; // Tự động đồng bộ chuẩn 100% với màu nền website (Sáng / Tối)
 
   const user = useAppStore((state) => state.user);
-  const { currentUser, loading: authLoading } = useAuth();
-  const [authBlockedToast, setAuthBlockedToast] = useState(false);
   const personalization = useAppStore((state) => state.personalization);
   const activeLab = useAppStore((state) => state.activeLab);
   const setActiveLab = useAppStore((state) => state.setActiveLab);
@@ -603,26 +600,8 @@ export default function GlobalAIAssistant() {
     return { active: false, reason: '' };
   }, [pathname, arenaState?.status]);
 
-  // Hàm mở HUD có kiểm tra xác thực người dùng (Layer 2 Client-Side Gating) và tính công bằng
+  // Hàm mở HUD có kiểm tra tính công bằng khi thi đấu
   const handleOpenHUD = useCallback(() => {
-    // 1. Kiểm tra trạng thái Auth
-    if (authLoading) {
-      // Đang trong quá trình nạp thông tin Auth ban đầu, không chặn nhầm
-      return;
-    }
-
-    if (!currentUser) {
-      try { playSound.hover?.() || playSound.click?.(); } catch (_) {}
-      setAuthBlockedToast(true);
-      console.log('[Client-Side Gating] 🔒 Chặn mở Chatbot AI: Chưa đăng nhập (!currentUser).');
-      if (isOpen) setIsOpen(false);
-      setTimeout(() => setAuthBlockedToast(false), 4000);
-      return; // Chặn tuyệt đối không cho mở cửa sổ, không nạp Gemini
-    }
-
-    console.log('[Client-Side Gating] ✅ Xác thực người dùng thành công! Trợ lý AI NOVA đã sẵn sàng.');
-
-    // 2. Kiểm tra tính công bằng học thuật khi thi đấu / luyện tập
     const check = isMatchOrPracticeActive();
     if (check.active) {
       try { playSound.hover?.() || playSound.click?.(); } catch (_) {}
@@ -634,7 +613,7 @@ export default function GlobalAIAssistant() {
 
     try { playSound.click(); } catch (_) {}
     setIsOpen(true);
-  }, [authLoading, currentUser, isMatchOrPracticeActive, isOpen]);
+  }, [isMatchOrPracticeActive, isOpen]);
 
   // Tự động đóng HUD nếu người dùng bắt đầu trận đấu hoặc luyện tập khi HUD đang mở
   useEffect(() => {
@@ -1365,12 +1344,6 @@ CuO (đen) + H₂ -t°→ Cu (đỏ) + H₂O
 
   // Main Bulletproof Multi-API-Key Failover Generator
   const handleSend = async (customPrompt = null) => {
-    if (!currentUser) {
-      setAuthBlockedToast(true);
-      console.warn('[GlobalAIAssistant] 🔒 Chặn gọi Gemini API: Người dùng chưa đăng nhập.');
-      return;
-    }
-
     const textToSend = customPrompt || input.trim();
     if (!textToSend || isLoading) return;
 
@@ -1815,46 +1788,6 @@ ${conciseInstruction}
         )}
       </AnimatePresence>
 
-      {/* Toast Cảnh báo Auth Wall (Client-side Gating Layer 2) */}
-      <AnimatePresence>
-        {authBlockedToast && (
-          <motion.div
-            initial={{ opacity: 0, y: -40, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed top-6 left-1/2 -translate-x-1/2 z-[99999999] px-5 py-3.5 rounded-2xl bg-[#0d101c]/95 border border-amber-500/70 shadow-[0_10px_45px_rgba(245,158,11,0.35)] text-white flex items-center gap-3.5 backdrop-blur-2xl font-sans select-none pointer-events-auto"
-          >
-            <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-400/50 flex items-center justify-center shrink-0 text-base shadow-inner">
-              🔒
-            </div>
-            <div className="text-xs">
-              <span className="font-black text-amber-300 font-mono block tracking-wider uppercase text-[10px]">
-                TRỢ LÝ AI ĐANG BỊ KHÓA
-              </span>
-              <span className="text-zinc-200 text-[12px] font-medium">
-                🔒 Trợ lý AI đang bị khóa. Vui lòng đăng nhập để sử dụng tính năng này!
-              </span>
-            </div>
-            <button
-              onClick={() => {
-                setAuthBlockedToast(false);
-                useAppStore.getState().openAuth('login');
-              }}
-              className="ml-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-mono font-bold text-xs shadow-md transition-all cursor-pointer active:scale-95 shrink-0"
-            >
-              Đăng nhập ngay
-            </button>
-            <button
-              onClick={() => setAuthBlockedToast(false)}
-              className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-all cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {!isOpen && !isMatchOrPracticeActive().active && isHomeOrLabDirectory && (
         <div className="fixed bottom-6 right-24 z-[999] screenshot-hide">
           <button
@@ -1864,7 +1797,7 @@ ${conciseInstruction}
                 ? 'bg-[#0d1117]/90 hover:bg-[#161b22] border-cyan-500/40 hover:border-cyan-400 text-white shadow-[0_0_20px_rgba(34,211,238,0.25)] hover:shadow-[0_0_30px_rgba(34,211,238,0.45)]'
                 : 'bg-white/95 hover:bg-[#F0EBFA] border-pink-200/80 hover:border-pink-300 text-slate-800 shadow-[0_4px_20px_rgba(124,58,237,0.08)]'
             }`}
-            title={!currentUser && !authLoading ? "🔒 Trợ lý AI đang bị khóa. Vui lòng đăng nhập để sử dụng tính năng này!" : "Mở Trợ lý AI NOVA (Ctrl+K)"}
+            title="Mở Trợ lý AI NOVA (Ctrl+K)"
           >
             <span className={`absolute -inset-0.5 rounded-full blur-sm transition duration-300 animate-pulse ${
               isDark ? 'bg-gradient-to-r from-cyan-500 via-pink-500 to-indigo-500 opacity-30 group-hover:opacity-75' : 'bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 opacity-40 group-hover:opacity-70'
@@ -1874,27 +1807,15 @@ ${conciseInstruction}
               isDark ? 'bg-cyan-500/20 border border-cyan-400 text-cyan-300' : 'bg-[#F0EBFA] border border-pink-200 text-pink-600'
             }`}>
               <Bot className="w-4 h-4 animate-bounce" />
-              {!currentUser && !authLoading && (
-                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-amber-500 text-black flex items-center justify-center shadow-md border border-amber-300 text-[8px] font-bold select-none">
-                  🔒
-                </span>
-              )}
             </div>
 
             <div className="relative hidden md:flex flex-col text-left">
               <span className={`text-[11px] font-black uppercase tracking-widest leading-none flex items-center gap-1 ${
                 isDark ? 'text-cyan-400' : 'text-slate-800'
               }`}>
-                NOVA AI 
-                {!currentUser && !authLoading ? (
-                  <span className="text-[10px] text-amber-400 font-mono ml-0.5 font-bold">🔒</span>
-                ) : (
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block" />
-                )}
+                NOVA AI <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block" />
               </span>
-              <span className={`text-[9px] font-mono ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
-                {!currentUser && !authLoading ? 'Bị khóa • Đăng nhập' : 'Chỉ huy STEM • Ctrl+K'}
-              </span>
+              <span className={`text-[9px] font-mono ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>Chỉ huy STEM • Ctrl+K</span>
             </div>
           </button>
         </div>
