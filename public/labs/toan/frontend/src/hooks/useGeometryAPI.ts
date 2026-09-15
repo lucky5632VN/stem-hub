@@ -25,40 +25,47 @@ export const useGeometryAPI = () => {
       if (selectedShape === 'custom') return;
       setLoading(true);
       setError(null);
-      console.log('Fetching shape:', selectedShape, shapeParams);
+
+      // 1. Ưu tiên tính toán hình học cục bộ bằng Self-Built Geometry Engine (Zero Latency, Offline, Không lỗi mạng)
       try {
-        const response = await api.post('/api/geometry/generate', {
-          shape_type: selectedShape,
-          params: shapeParams
+        const rawParams = (shapeParams || {}) as any;
+        const params = {
+          canhDay: rawParams.base_size || rawParams.canhDay || rawParams.width || rawParams.radius || 4,
+          chieuDai: rawParams.width || rawParams.base_size || rawParams.canhDay || 4,
+          chieuRong: rawParams.depth || rawParams.base_size || rawParams.canhDay || 4,
+          chieuCao: rawParams.height || rawParams.chieuCao || 5,
+          banKinh: rawParams.radius || rawParams.base_radius || 3,
+          ...rawParams
+        };
+        const localData = calculateGeometry({
+          shapeType: selectedShape,
+          shapeName: '',
+          parameters: params
         });
-        console.log('Shape data received:', response.data);
-        setShapeData(response.data);
-      } catch (err: any) {
-        console.warn('Backend API unavailable, falling back to local geometry calculator:', err);
-        try {
-          const rawParams = (shapeParams || {}) as any;
-          const params = {
-            canhDay: rawParams.base_size || rawParams.canhDay || rawParams.width || rawParams.radius || 4,
-            chieuDai: rawParams.width || rawParams.base_size || rawParams.canhDay || 4,
-            chieuRong: rawParams.depth || rawParams.base_size || rawParams.canhDay || 4,
-            chieuCao: rawParams.height || rawParams.chieuCao || 5,
-            banKinh: rawParams.radius || rawParams.base_radius || 3,
-            ...rawParams
-          };
-          const fallbackData = calculateGeometry({
-            shapeType: selectedShape,
-            shapeName: '',
-            parameters: params
-          });
-          if (fallbackData && fallbackData.vertices && fallbackData.vertices.length > 0) {
-            setShapeData(fallbackData as any);
-            return;
-          }
-        } catch (calcErr) {
-          console.error('Local calculation failed:', calcErr);
+        if (localData && localData.vertices && localData.vertices.length > 0) {
+          setShapeData(localData as any);
+          setLoading(false);
+          return;
         }
-        setError(err.response?.data?.detail || 'Lỗi khi tạo hình khối');
-      } finally {
+      } catch (calcErr) {
+        console.warn('Local geometry calculation warning, attempting remote backend:', calcErr);
+      }
+
+      // 2. Chỉ gửi request API nếu có cấu hình VITE_API_BASE_URL hợp lệ (Tránh gọi 127.0.0.1 gây ERR_CONNECTION_REFUSED)
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+      if (apiBaseUrl && !apiBaseUrl.includes('127.0.0.1') && !apiBaseUrl.includes('localhost')) {
+        try {
+          const response = await api.post('/api/geometry/generate', {
+            shape_type: selectedShape,
+            params: shapeParams
+          });
+          setShapeData(response.data);
+        } catch (err: any) {
+          setError(err.response?.data?.detail || 'Lỗi khi tạo hình khối');
+        } finally {
+          setLoading(false);
+        }
+      } else {
         setLoading(false);
       }
     };
@@ -71,6 +78,11 @@ export const useGeometryAPI = () => {
     const { shapeData } = useGeometryStore.getState();
     if (!shapeData) return;
 
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+    if (!apiBaseUrl || apiBaseUrl.includes('127.0.0.1') || apiBaseUrl.includes('localhost')) {
+      return;
+    }
+
     setComputingSection(true);
     try {
       const response = await api.post('/api/cross-section/compute', {
@@ -80,7 +92,7 @@ export const useGeometryAPI = () => {
       });
       setCrossSection(response.data);
     } catch (err: any) {
-      console.error('Error computing cross section:', err);
+      console.warn('Could not compute cross section via remote backend:', err?.message || err);
     } finally {
       setComputingSection(false);
     }

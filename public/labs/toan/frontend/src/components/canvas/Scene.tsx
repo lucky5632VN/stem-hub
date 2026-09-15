@@ -1,4 +1,5 @@
 import React, { Suspense } from 'react';
+import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, ContactShadows } from '@react-three/drei';
 import OxyzAxes from './OxyzAxes';
@@ -24,7 +25,7 @@ const Scene: React.FC = () => {
         </div>
       )}
       
-      <Canvas shadows>
+      <Canvas shadows={{ type: THREE.PCFShadowMap }}>
         <Suspense fallback={null}>
           <PerspectiveCamera makeDefault position={[10, -15, 12]} up={[0, 0, 1]} fov={50} />
           <OrbitControls makeDefault minPolarAngle={0} maxPolarAngle={Math.PI / 1.1} />
