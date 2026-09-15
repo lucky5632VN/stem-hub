@@ -337,6 +337,11 @@ export default function DashboardLayout({ children }) {
         presenceInterval = null;
       }
       if (user) {
+        try {
+          const token = await user.getIdToken();
+          document.cookie = `session=${token}; path=/; max-age=604800; SameSite=Lax`;
+        } catch (_) {}
+
         await loadUserProfile(user);
 
         // Thiết lập heartbeat cập nhật trạng thái hoạt động mỗi 15 giây khi tab đang mở
@@ -350,6 +355,7 @@ export default function DashboardLayout({ children }) {
           }
         }, 15000);
       } else {
+        document.cookie = `session=; path=/; max-age=0; SameSite=Lax`;
         setUser(null);
         // Reset trạng thái cá nhân hóa
         setPersonalization({
