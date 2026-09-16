@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { callResilientGemini } from '@/lib/geminiResilientPool';
-import { solveGeometryFacts, parseNumericValue } from '@/lib/geometryFactSolver';
+import { solveGeometryFacts, parseNumericValue, extractFallbackGeometry } from '@/lib/geometryFactSolver';
 import { toNaturalVietnameseMathText } from '@/lib/mathFormatter';
 
 function cleanAndRepairGeometryJson(raw) {
@@ -46,127 +46,6 @@ function cleanAndRepairGeometryJson(raw) {
     if (parsed && typeof parsed === 'object') return parsed;
   } catch (e) {}
   return null;
-}
-
-function extractFallbackGeometry(problemText) {
-  const clean = (problemText || '').toLowerCase();
-  let shapeType = 'hinh_chop_day_hcn';
-  let shapeName = 'Hình chóp S.ABCD (SA ⊥ đáy)';
-  const givenFacts = [];
-
-  let a = 4;
-  const canhMatch = clean.match(/cạnh(?:\s*đáy)?\s*(?:bằng\s*)?(\d+(?:\.\d+)?)/i);
-  if (canhMatch) a = parseFloat(canhMatch[1]) || 4;
-  givenFacts.push({ type: 'length', element: 'canh_day', value: String(a), numericValue: a });
-
-  // Phát hiện góc hoặc cạnh bên nghiêng
-  const scMatch = clean.match(/sc\s*(?:bằng\s*|=\s*)?([0-9a-z\*\.\s√]+?)(?:,|;|\.|\s|$)/i);
-  if (scMatch) {
-    const scVal = parseNumericValue(scMatch[1], 8);
-    givenFacts.push({ type: 'length', element: 'SC', value: scMatch[1].trim(), numericValue: scVal });
-  }
-
-  const angleMatch = clean.match(/(?:góc|tạo với).*?(\d+)(?:°| độ|deg)/i);
-  if (angleMatch) {
-    const deg = parseFloat(angleMatch[1]);
-    givenFacts.push({ type: 'angle', between: ['SC', 'mp_day'], degrees: deg });
-  }
-
-  // Phát hiện cạnh BC hoặc AB nếu có
-  const bcMatch = clean.match(/bc\s*(?:bằng\s*|=\s*)?([0-9a-z\*\.\s√\^]+?)(?:,|;|\.|\s|$)/i);
-  if (bcMatch) {
-    const bcVal = parseNumericValue(bcMatch[1], 4);
-    givenFacts.push({ type: 'length', element: 'BC', value: bcMatch[1].trim(), numericValue: bcVal });
-  }
-
-  // Phát hiện diện tích tam giác mặt bên (ví dụ: diện tích tam giác SBC bằng a^2*sqrt(3))
-  const areaMatch = clean.match(/(?:diện tích|s)\s*(?:tam giác)?\s*([a-z0-9']+)?\s*(?:bằng\s*|=\s*)?([0-9a-z\*\.\s√\^\\{}]+?)(?:,|;|\.|\s|$)/i);
-  if (areaMatch) {
-    const areaVal = parseNumericValue(areaMatch[2], 16 * Math.sqrt(3));
-    givenFacts.push({
-      type: 'area',
-      element: areaMatch[1] ? areaMatch[1].toUpperCase() : 'dien_tich',
-      value: areaMatch[2].trim(),
-      numericValue: areaVal
-    });
-  }
-
-  // Phát hiện góc mặt bên / mặt phẳng nghiêng với đáy
-  const faceAngleMatch = clean.match(/(?:góc giữa|mặt phẳng nghiêng|mặt bên).*?(\d+)(?:°| độ|deg)/i);
-  if (faceAngleMatch) {
-    const deg = parseFloat(faceAngleMatch[1]);
-    const targetFace = clean.includes('sbc') ? '(SBC)' : (clean.includes('scd') ? '(SCD)' : (clean.includes('a\'bc') ? "(A'BC)" : 'mat_ben'));
-    givenFacts.push({ type: 'angle', between: [targetFace, 'mp_day'], degrees: deg });
-  }
-
-  const hMatch = clean.match(/(?:chiều cao|đường cao|sa|sh|so)\s*(?:bằng\s*|=\s*)?(\d+(?:\.\d+)?)/i);
-  if (hMatch) {
-    const hVal = parseFloat(hMatch[1]) || 5;
-    givenFacts.push({ type: 'length', element: 'chieu_cao', value: String(hVal), numericValue: hVal });
-  }
-
-  if (clean.includes('sa vuông góc') || clean.includes('sa ⊥') || clean.includes('đáy là hình vuông') || clean.includes('đáy abcd') || clean.includes('s.abcd') || clean.includes('s.abc')) {
-    if (clean.includes('s.abc') || (clean.includes('chóp') && clean.includes('tam giác') && !clean.includes('tứ giác'))) {
-      shapeType = 'hinh_chop_tam_giac';
-      shapeName = 'Hình chóp S.ABC (SA ⊥ đáy)';
-      givenFacts.push({ type: 'perpendicular', line: 'SA', plane: 'mp_day' });
-    } else if (clean.includes('tứ giác đều') || clean.includes('chóp đều s.abcd')) {
-      shapeType = 'hinh_chop_tu_giac_deu';
-      shapeName = 'Hình chóp tứ giác đều S.ABCD';
-    } else {
-      shapeType = 'hinh_chop_day_hcn';
-      shapeName = 'Hình chóp S.ABCD (SA ⊥ đáy)';
-      givenFacts.push({ type: 'perpendicular', line: 'SA', plane: 'mp_day' });
-    }
-  } else if (clean.includes('tứ giác đều') || clean.includes('chóp đều s.abcd')) {
-    shapeType = 'hinh_chop_tu_giac_deu';
-    shapeName = 'Hình chóp tứ giác đều S.ABCD';
-  } else if (clean.includes('lăng trụ') || clean.includes("a'b'c'") || clean.includes('prism')) {
-    shapeType = 'hinh_lang_tru_tam_giac_deu';
-    shapeName = "Hình lăng trụ ABC.A'B'C'";
-  } else if (clean.includes('lập phương') || clean.includes('hộp chữ nhật')) {
-    shapeType = 'hinh_hop_chu_nhat';
-    shapeName = clean.includes('lập phương') ? "Hình lập phương ABCD.A'B'C'D'" : "Hình hộp chữ nhật ABCD.A'B'C'D'";
-  } else if (clean.includes('bát diện') || clean.includes('octahedron')) {
-    shapeType = 'hinh_bat_dien_deu';
-    shapeName = 'Khối bát diện đều';
-  } else if (clean.includes('tứ diện vuông') || (clean.includes('vuông góc') && clean.includes('oa') && clean.includes('ob') && clean.includes('oc'))) {
-    shapeType = 'hinh_tu_dien_vuong';
-    shapeName = 'Tứ diện vuông O.ABC';
-  } else if (clean.includes('hình thang') || clean.includes('hinh_thang')) {
-    shapeType = 'hinh_chop_day_hinh_thang';
-    shapeName = 'Hình chóp S.ABCD (đáy hình thang, SA ⊥ đáy)';
-  } else if (clean.includes('chóp cụt')) {
-    shapeType = 'hinh_chop_cut';
-    shapeName = "Hình chóp cụt tứ giác đều ABCD.A'B'C'D'";
-  } else if (clean.includes('nón cụt')) {
-    shapeType = 'hinh_non_cut';
-    shapeName = 'Hình nón cụt tròn xoay';
-  } else if (clean.includes('lục giác') || clean.includes('luc_giac')) {
-    shapeType = 'hinh_lang_tru_luc_giac_deu';
-    shapeName = "Hình lăng trụ lục giác đều ABCDEF.A'B'C'D'E'F'";
-  } else if (clean.includes('tam giác đều') || clean.includes('tứ diện đều') || /\bs\.abc\b/i.test(clean)) {
-    shapeType = 'hinh_chop_tam_giac_deu';
-    shapeName = 'Hình chóp tam giác đều S.ABC';
-  } else if (clean.includes('nón')) {
-    shapeType = 'hinh_non';
-    shapeName = 'Hình nón tròn xoay';
-  } else if (clean.includes('trụ')) {
-    shapeType = 'hinh_tru';
-    shapeName = 'Hình trụ tròn xoay';
-  } else if (clean.includes('cầu')) {
-    shapeType = 'hinh_cau';
-    shapeName = 'Hình cầu';
-  }
-
-  return {
-    shapeType,
-    shapeName,
-    givenFacts,
-    auxiliaryRequests: [],
-    donVi: 'cm',
-    originalProblemText: problemText
-  };
 }
 
 function getGenericOrFallbackGeometry(parsedData, problemText) {
@@ -247,6 +126,10 @@ function getGenericOrFallbackGeometry(parsedData, problemText) {
       shapeType = 'hinh_lang_tru_tam_giac_xien';
       shapeName = "Hình lăng trụ xiên ABC.A'B'C'";
       parameters = { canhDay: 4, chieuCao: 4.5, chieuDai: 4, chieuRong: 4, banKinh: 2 };
+    } else if (clean.includes('vuông') || rawShapeType.includes('dung') || clean.includes('đứng')) {
+      shapeType = 'hinh_lang_tru_dung_tam_giac';
+      shapeName = "Hình lăng trụ đứng ABC.A'B'C' (đáy vuông)";
+      parameters = { canhDay: 4, chieuCao: 6, chieuDai: 4, chieuRong: 4, banKinh: 2 };
     } else {
       shapeType = 'hinh_lang_tru_tam_giac_deu';
       shapeName = "Hình lăng trụ tam giác đều ABC.A'B'C'";
@@ -373,6 +256,7 @@ QUY TẮC BẮT BUỘC:
    - "hinh_lang_tru_luc_giac_deu" (Hình lăng trụ lục giác đều)
    - "hinh_hop_chu_nhat" (Hình hộp chữ nhật, hình lập phương)
    - "hinh_lang_tru_tam_giac_deu" (Hình lăng trụ tam giác đều hoặc lăng trụ xiên)
+   - "hinh_lang_tru_dung_tam_giac" (Hình lăng trụ đứng tam giác ABC.A'B'C', ví dụ đáy vuông tại B)
    - "hinh_tru" (Hình trụ tròn xoay)
    - "hinh_non" (Hình nón tròn xoay)
    - "hinh_cau" (Hình cầu)
@@ -390,9 +274,10 @@ Nếu đề bài là một khối hình đặc biệt/tùy biến không thuộc
 3. "givenFacts": Danh sách các dữ kiện đề bài cho NGUYÊN VĂN:
    - Dữ kiện độ dài (length): { "type": "length", "element": "canh_day" | "BC" | "AB" | "AC" | "SC" | "SA" | "chieu_cao" | "canh_ben" | "duong_cheo" | "bankinh" | "duongsinh", "value": "2a", "numericValue": 8 }
      * Quy ước chuẩn hóa nếu có ẩn a: a = 4. (ví dụ: "a" -> 4, "2a" -> 8, "a√2" -> 5.66, "a√3" -> 6.93, "a√5" -> 8.94).
-   - Dữ kiện góc (angle): { "type": "angle", "between": ["SC", "mp_day"] | ["(SBC)", "mp_day"] | ["(SCD)", "mp_day"] | ["canh_ben", "mp_day"], "degrees": 45 }
+   - Dữ kiện diện tích (area): { "type": "area", "element": "A'BC" | "SBC" | "mat_ben" | "day", "value": "a²√3", "numericValue": 27.71 }
+   - Dữ kiện góc (angle): { "type": "angle", "between": ["SC", "mp_day"] | ["(SBC)", "mp_day"] | ["(A'BC)", "mp_day"] | ["(SCD)", "mp_day"] | ["canh_ben", "mp_day"], "degrees": 45 }
    - Dữ kiện vuông góc (perpendicular): { "type": "perpendicular", "line": "SA", "plane": "mp_day" }
-   - Dữ kiện hình dạng đáy (shape_feature): { "type": "shape_feature", "feature": "day_la_hinh_vuong" | "day_la_hcn" | "day_la_tam_giac_vuong_can_tai_a" | "day_la_tam_giac_deu" }
+   - Dữ kiện hình dạng đáy (shape_feature): { "type": "shape_feature", "feature": "day_la_hinh_vuong" | "day_la_hcn" | "day_la_tam_giac_vuong_tai_b" | "day_la_tam_giac_vuong_can_tai_a" | "day_la_tam_giac_deu" }
 
 4. TUYỆT ĐỐI KHÔNG TỰ TÍNH RA "chieuCao" NẾU ĐỀ BÀI CHƯA CHO TRỰC TIẾP. Nếu đề bài chỉ cho cạnh bên và góc (như SC=2a và góc 45°), chỉ trích xuất đúng 2 dữ kiện đó vào givenFacts.
 
@@ -463,7 +348,15 @@ ${problemText ? `Đề bài văn bản: "${problemText}"` : 'Đề bài được
       return NextResponse.json(customModel, { status: 200 });
     }
 
-    const factResult = solveGeometryFacts(parsedData);
+    let factResult = solveGeometryFacts(parsedData);
+    if (!factResult.success && problemText) {
+      const fbData = extractFallbackGeometry(problemText);
+      const fbSolved = solveGeometryFacts(fbData);
+      if (fbSolved.success) {
+        factResult = fbSolved;
+        parsedData = { ...parsedData, ...fbData };
+      }
+    }
     if (!factResult.success) {
       const fallbackModel = getGenericOrFallbackGeometry(parsedData, problemText);
       return NextResponse.json(fallbackModel, { status: 200 });

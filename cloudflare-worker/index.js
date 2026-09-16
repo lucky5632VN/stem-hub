@@ -174,6 +174,7 @@ function parseNumericValue(val, defaultVal = 4) {
   if (!val) return defaultVal;
 
   let s = String(val).trim().toLowerCase();
+  s = s.replace(/²/g, '^2').replace(/³/g, '^3');
 
   // 1. Phân số \frac{A}{B}
   s = s.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, '($1)/($2)');
@@ -182,6 +183,7 @@ function parseNumericValue(val, defaultVal = 4) {
   s = s
     .replace(/\\sqrt\{(\d+(?:\.\d+)?)\}/g, '__SQRT__($1)')
     .replace(/√(\d+(?:\.\d+)?)/g, '__SQRT__($1)')
+    .replace(/căn\s*(\d+(?:\.\d+)?)/g, '__SQRT__($1)')
     .replace(/sqrt\((\d+(?:\.\d+)?)\)/g, '__SQRT__($1)')
     .replace(/sqrt(\d+(?:\.\d+)?)/g, '__SQRT__($1)');
 
@@ -198,6 +200,22 @@ function parseNumericValue(val, defaultVal = 4) {
   // 6. Chuyển __SQRT__(x) sang Math.sqrt(x) và ^ sang **
   s = s.replace(/__SQRT__\((\d+(?:\.\d+)?)\)/g, 'Math.sqrt($1)');
   s = s.replace(/\^/g, '**');
+
+  // Safe evaluation without eval/new Function (crucial for Cloudflare Worker V8 isolate where eval is blocked)
+  if (s.includes('Math.sqrt')) {
+    const sqrtMatch = s.match(/([0-9.]+)?\s*\*?\s*Math\.sqrt\((\d+(?:\.\d+)?)\)/);
+    if (sqrtMatch) {
+      const mult = sqrtMatch[1] ? parseFloat(sqrtMatch[1]) : 1;
+      const val = parseFloat(sqrtMatch[2]);
+      return Number((mult * Math.sqrt(val)).toFixed(4));
+    }
+  }
+
+  const divMatch = s.match(/^([0-9.]+)\s*\/\s*([0-9.]+)$/);
+  if (divMatch) return Number((parseFloat(divMatch[1]) / parseFloat(divMatch[2])).toFixed(4));
+
+  const mulMatch = s.match(/^([0-9.]+)\s*\*\s*([0-9.]+)$/);
+  if (mulMatch) return Number((parseFloat(mulMatch[1]) * parseFloat(mulMatch[2])).toFixed(4));
 
   try {
     const fn = new Function('Math', `"use strict"; return (${s});`);
@@ -1043,15 +1061,18 @@ function extractFallbackGeometry(problemText) {
     givenFacts.push({ type: 'length', element: 'BC', value: bcMatch[1].trim(), numericValue: bcVal });
   }
 
-  const areaMatch = clean.match(/(?:diện tích|s_[a-z0-9']+|\bs\s*=|s\s*\([a-z0-9']+\))\s*(?:tam giác)?\s*([a-z0-9']+)?\s*(?:bằng|=)?\s*([0-9a-z\*\.\s√\^\\{}_/()]+?)(?:$|[\n,;.])/i);
+  // 4. Phát hiện diện tích tam giác mặt bên
+  const areaRegex = /(?:(?:tam\s*giác\s*([a-z0-9']+)\s*có\s*diện\s*tích)|(?:diện\s*tích\s*(?:của\s*)?(?:tam\s*giác|mặt\s*phẳng|mặt\s*bên)?\s*([a-z0-9']+)?)|(?:s_[a-z0-9']+)|(?:\bs\s*=)|(?:s\s*\([a-z0-9']+\)))\s*(?:bằng|là|=)?\s*([0-9a-z\u00C0-\u1EF9\u00B0-\u00BE\*\.\s√\^\\{}_/()]+?)(?:$|[\n,;.])/i;
+  const areaMatch = clean.match(areaRegex);
   if (areaMatch) {
-    const rawVal = areaMatch[2].trim();
+    const elemName = (areaMatch[1] || areaMatch[2] || (clean.includes("a'bc") ? "a'bc" : (clean.includes('sbc') ? 'sbc' : 'dien_tich'))).toUpperCase();
+    const rawVal = (areaMatch[3] || areaMatch[2] || '').trim();
     const areaVal = parseNumericValue(rawVal, 16 * Math.sqrt(3));
-    const elemName = clean.includes('sbc') ? 'SBC' : (clean.includes("a'bc") ? "A'BC" : 'dien_tich');
     givenFacts.push({ type: 'area', element: elemName, value: rawVal, numericValue: areaVal });
   }
 
-  const faceAngleMatch = clean.match(/(?:góc giữa|mặt phẳng nghiêng|mặt bên|tạo với|mặt phẳng).*?(\d+)(?:°| độ|deg)/i);
+  // 5. Phát hiện góc mặt bên / mặt phẳng nghiêng với đáy
+  const faceAngleMatch = clean.match(/(?:góc\s*(?:giữa)?|mặt phẳng nghiêng|mặt bên|tạo với|mặt phẳng).*?(\d+)(?:°| độ|deg)/i);
   if (faceAngleMatch) {
     const deg = parseFloat(faceAngleMatch[1]);
     const targetFace = clean.includes("a'bc") ? "(A'BC)" : (clean.includes('sbc') ? '(SBC)' : (clean.includes('scd') ? '(SCD)' : 'mat_ben'));

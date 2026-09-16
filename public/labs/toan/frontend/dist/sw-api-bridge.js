@@ -18,7 +18,8 @@ function parseNumericValue(val, defaultVal = 4) {
   if (typeof val === 'number') return val;
   if (!val) return defaultVal;
 
-  const s = String(val).trim().toLowerCase();
+  let s = String(val).trim().toLowerCase();
+  s = s.replace(/²/g, '^2').replace(/³/g, '^3');
   if (/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
 
   let expr = s
@@ -747,21 +748,26 @@ function extractFallbackGeometry(problemText) {
     givenFacts.push({ type: 'length', element: 'BC', value: bcMatch[1].trim(), numericValue: bcVal });
   }
 
-  const areaMatch = clean.match(/(?:diện tích|s)\s*(?:tam giác)?\s*([a-z0-9']+)?\s*(?:bằng\s*|=\s*)?([0-9a-z\*\.\s√\^\\{}]+?)(?:,|;|\.|\s|$)/i);
+  // 4. Phát hiện diện tích tam giác mặt bên
+  const areaRegex = /(?:(?:tam\s*giác\s*([a-z0-9']+)\s*có\s*diện\s*tích)|(?:diện\s*tích\s*(?:của\s*)?(?:tam\s*giác|mặt\s*phẳng|mặt\s*bên)?\s*([a-z0-9']+)?)|(?:s_[a-z0-9']+)|(?:\bs\s*=)|(?:s\s*\([a-z0-9']+\)))\s*(?:bằng|là|=)?\s*([0-9a-z\u00C0-\u1EF9\u00B0-\u00BE\*\.\s√\^\\{}_/()]+?)(?:$|[\n,;.])/i;
+  const areaMatch = clean.match(areaRegex);
   if (areaMatch) {
-    const areaVal = parseNumericValue(areaMatch[2], 16 * Math.sqrt(3));
+    const elemName = (areaMatch[1] || areaMatch[2] || (clean.includes("a'bc") ? "a'bc" : (clean.includes('sbc') ? 'sbc' : 'dien_tich'))).toUpperCase();
+    const rawVal = (areaMatch[3] || areaMatch[2] || '').trim();
+    const areaVal = parseNumericValue(rawVal, 16 * Math.sqrt(3));
     givenFacts.push({
       type: 'area',
-      element: areaMatch[1] ? areaMatch[1].toUpperCase() : 'dien_tich',
-      value: areaMatch[2].trim(),
+      element: elemName,
+      value: rawVal,
       numericValue: areaVal
     });
   }
 
-  const faceAngleMatch = clean.match(/(?:góc giữa|mặt phẳng nghiêng|mặt bên).*?(\d+)(?:°| độ|deg)/i);
+  // 5. Phát hiện góc mặt bên / mặt phẳng nghiêng với đáy
+  const faceAngleMatch = clean.match(/(?:góc\s*(?:giữa)?|mặt phẳng nghiêng|mặt bên|tạo với|mặt phẳng).*?(\d+)(?:°| độ|deg)/i);
   if (faceAngleMatch) {
     const deg = parseFloat(faceAngleMatch[1]);
-    const targetFace = clean.includes('sbc') ? '(SBC)' : (clean.includes('scd') ? '(SCD)' : (clean.includes('a\'bc') ? "(A'BC)" : 'mat_ben'));
+    const targetFace = clean.includes("a'bc") ? "(A'BC)" : (clean.includes('sbc') ? '(SBC)' : (clean.includes('scd') ? '(SCD)' : 'mat_ben'));
     givenFacts.push({ type: 'angle', between: [targetFace, 'mp_day'], degrees: deg });
   }
 
