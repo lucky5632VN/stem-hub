@@ -45,6 +45,30 @@ async function loadFaceApiAIEngine() {
       const faceapi = window.faceapi;
       if (!faceapi) return false;
 
+      // Đảm bảo TensorFlow.js backend sẵn sàng trước khi nạp model
+      if (faceapi.tf) {
+        try {
+          if (typeof faceapi.tf.ready === 'function') {
+            await faceapi.tf.ready();
+          }
+          const curBackend = typeof faceapi.tf.getBackend === 'function' ? faceapi.tf.getBackend() : null;
+          if (!curBackend) {
+            try {
+              await faceapi.tf.setBackend('webgl');
+            } catch (_) {
+              try {
+                await faceapi.tf.setBackend('cpu');
+              } catch (_) {}
+            }
+            if (typeof faceapi.tf.ready === 'function') {
+              await faceapi.tf.ready();
+            }
+          }
+        } catch (tfReadyErr) {
+          console.warn('TF backend initialization warning:', tfReadyErr);
+        }
+      }
+
       // Bước 2: Nạp các Mô hình Mạng Nơ-ron Sâu (Convolutional Neural Networks & ResNet-34)
       try {
         await Promise.all([
@@ -208,6 +232,7 @@ export default function FaceAuthModal({
   const canvasRef = useRef(null);
   const animFrameRef = useRef(null);
   const isLiveConfirmedRef = useRef(false);
+  const isDetectingAiRef = useRef(false);
 
   // States:
   // scanStatus: 'idle' | 'preparing' | 'aligning' | 'scanning' | 'success' | 'fallback_options' | 'otp_screen'
@@ -344,7 +369,7 @@ export default function FaceAuthModal({
     };
   }, [scanStatus, targetEmail, onSuccess, onClose]);
 
-  // 1. Tắt tất cả phần cứng Camera & Dọn dẹp WebGL Memory
+  // 1. Tắt phần cứng Camera & Dọn dẹp Animation Frames an toàn (giữ nguyên model weights)
   const stopCamera = () => {
     if (animFrameRef.current) {
       cancelAnimationFrame(animFrameRef.current);
@@ -362,18 +387,7 @@ export default function FaceAuthModal({
       videoRef.current.srcObject = null;
     }
 
-    // ⚡ WEBGL MEMORY HYGIENE: Giải phóng toàn bộ tensor rác và purge WebGL VRAM
-    if (typeof window !== 'undefined' && window.faceapi && window.faceapi.tf) {
-      try {
-        window.faceapi.tf.disposeVariables();
-        if (typeof window.faceapi.tf.engine === 'function') {
-          window.faceapi.tf.engine().reset();
-        }
-      } catch (tfErr) {
-        console.warn('⚠️ [Face 2FA] WebGL Memory Purge warning:', tfErr);
-      }
-    }
-
+    isDetectingAiRef.current = false;
     setCameraState('idle');
   };
 
@@ -454,8 +468,9 @@ export default function FaceAuthModal({
         // Nhận diện 68 điểm mốc Mạng Nơ-ron AI thời gian thực (Real-time AI Landmarks)
         if (typeof window !== 'undefined' && window.faceapi && isFaceApiModelsLoaded) {
           const now = Date.now();
-          if (now - lastAiDetectTime > 120) {
+          if (now - lastAiDetectTime > 120 && !isDetectingAiRef.current) {
             lastAiDetectTime = now;
+            isDetectingAiRef.current = true;
             try {
               window.faceapi.detectSingleFace(video, new window.faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.25 }))
                 .withFaceLandmarks()
@@ -464,13 +479,22 @@ export default function FaceAuthModal({
                     cachedLandmarks = det.landmarks.positions;
                     // Kiểm tra Liveness Detection (Tỷ lệ mở mắt EAR)
                     const ear = calculateEAR(cachedLandmarks);
-                    if (ear < 0.23) {
+                    if (ear < 0.28) {
+                      isLiveConfirmedRef.current = true;
                       setIsLiveConfirmed(true);
                       setLivenessMessage('✅ ĐÃ XÁC THỰC NGƯỜI THẬT (LIVENESS CONFIRMED)');
                     }
                   }
-                }).catch(() => {});
-            } catch (_) {}
+                })
+                .catch((detErr) => {
+                  console.warn('⚠️ Face detection preview warning:', detErr);
+                })
+                .finally(() => {
+                  isDetectingAiRef.current = false;
+                });
+            } catch (_) {
+              isDetectingAiRef.current = false;
+            }
           }
 
           // Vẽ 68 điểm mốc sinh học Cyan Neon từ Mạng Nơ-ron Sâu
@@ -493,10 +517,10 @@ export default function FaceAuthModal({
     animFrameRef.current = requestAnimationFrame(renderPreview);
   };
 
-  // Đếm ngược Căn chỉnh 1 giây trước khi Quét Laser AI (Tối ưu siêu nhanh)
+  // Đếm ngược Căn chỉnh 2 giây trước khi Quét Laser AI (Đủ thời gian chớp mắt Liveness)
   const startAlignCountdown = () => {
-    let current = 1;
-    setAlignCountdown(1);
+    let current = 2;
+    setAlignCountdown(2);
 
     const timer = setInterval(() => {
       current -= 1;
@@ -533,11 +557,12 @@ export default function FaceAuthModal({
         // Xóa canvas trong suốt siêu nhanh, để video hiển thị trực tiếp từ phần cứng
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Throttling AI Landmark Detection (mỗi 200ms) để không gây quá tải CPU/GPU
+        // Throttling AI Landmark Detection (mỗi 150ms) để không gây quá tải CPU/GPU
         if (typeof window !== 'undefined' && window.faceapi && isFaceApiModelsLoaded) {
           const now = Date.now();
-          if (now - lastAiDetectTime > 150) {
+          if (now - lastAiDetectTime > 150 && !isDetectingAiRef.current) {
             lastAiDetectTime = now;
+            isDetectingAiRef.current = true;
             try {
               window.faceapi.detectSingleFace(video, new window.faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.25 }))
                 .withFaceLandmarks()
@@ -551,8 +576,16 @@ export default function FaceAuthModal({
                       setLivenessMessage('✅ ĐÃ XÁC THỰC NGƯỜI THẬT (LIVENESS CONFIRMED)');
                     }
                   }
-                }).catch(() => {});
-            } catch (_) {}
+                })
+                .catch((scanDetErr) => {
+                  console.warn('⚠️ Face detection scan warning:', scanDetErr);
+                })
+                .finally(() => {
+                  isDetectingAiRef.current = false;
+                });
+            } catch (_) {
+              isDetectingAiRef.current = false;
+            }
           }
 
           // Vẽ các điểm mốc Cyan mượt mà (Bỏ shadowBlur gây giật lag)
