@@ -123,26 +123,53 @@ exports.submitAnswer = functions.https.onCall(async (data, context) => {
     const scoreKey = isBotP1 ? 'player1Score' : 'player2Score';
     const progKey = isBotP1 ? 'player1Progress' : 'player2Progress';
     const logsKey = isBotP1 ? 'player1Logs' : 'player2Logs';
+    const botRole = isBotP1 ? 'p1' : 'p2';
+
+    // 1. KIỂM TRA ĐÓNG BĂNG: NẾU BOT ĐANG BỊ ĐÓNG BĂNG THÌ KHÔNG THỂ NỘP CÂU TRẢ LỜI
+    const botEffects = roomData.activeEffects?.[botRole] || {};
+    const now = Date.now();
+    if (botEffects.frozenUntil && botEffects.frozenUntil > now) {
+      console.log(`❄️ [Server Bot submitAnswer] Bot đang bị đóng băng đến ${botEffects.frozenUntil} -> Chặn trả lời.`);
+      return { success: false, reason: 'Bot is currently frozen by player card.' };
+    }
+
+    // 2. KIỂM TRA MÙ SƯƠNG: NẾU BOT ĐANG BỊ MÙ SƯƠNG THÌ TĂNG TỶ LỆ TRẢ LỜI SAI (40%)
+    let isStepCorrect = step.isCorrect;
+    if (botEffects.fogUntil && botEffects.fogUntil > now) {
+      if (Math.random() < 0.40) {
+        isStepCorrect = false;
+      }
+    }
 
     const currentScore = roomData[scoreKey] || 0;
-    const newScore = step.isCorrect ? currentScore + (step.scoreDelta || 1) : currentScore;
-    const newProgress = Math.min(100, Math.max(roomData[progKey] || 0, step.progress || 0));
+    const newScore = isStepCorrect ? currentScore + (step.scoreDelta || 1) : currentScore;
+
+    // 3. TÍNH TIẾN ĐỘ THỰC TẾ (CỘNG TÍCH LŨY, BẢO LƯU TIẾN ĐỘ ĐÃ BỊ NGƯỜI CHƠI CƯỚP)
+    const currentProgress = roomData[progKey] || 0;
+    const totalSteps = roomData.subject === 'chemistry' ? 5 : Math.max(30, schedule.length || 30);
+    const stepProgDelta = 100 / totalSteps;
+    const newProgress = Math.min(100, Math.max(0, currentProgress + (isStepCorrect ? stepProgDelta : 0)));
 
     const botName = isBotP1 ? roomData.player1.name : (roomData.player2?.name || 'Đối thủ');
-    const logMsg = step.isCorrect
-      ? `✅ [Server] ${botName} trả lời đúng (Tiến độ: ${newProgress}%)`
-      : `❌ [Server] ${botName} trả lời sai (Tiến độ: ${newProgress}%)`;
+    const logMsg = isStepCorrect
+      ? `✅ [Server] ${botName} trả lời đúng (Tiến độ: ${Math.round(newProgress)}%)`
+      : `❌ [Server] ${botName} trả lời sai (Tiến độ: ${Math.round(newProgress)}%)`;
 
     const currentLogs = roomData[logsKey] || [];
     const updatedLogs = [logMsg, ...currentLogs].slice(0, 10);
 
+    const cpKey = isBotP1 ? 'player1Checkpoint' : 'player2Checkpoint';
+    const botProgKey = isBotP1 ? 'botProgress1' : 'botProgress';
+
     await matchRef.update({
       [scoreKey]: newScore,
       [progKey]: newProgress,
-      [logsKey]: updatedLogs
+      [logsKey]: updatedLogs,
+      [cpKey]: { progress: newProgress, score: newScore, timestamp: Date.now() },
+      [botProgKey]: newProgress
     });
 
-    return { success: true, correct: step.isCorrect, currentProgress: newProgress };
+    return { success: true, correct: isStepCorrect, currentProgress: newProgress };
   }
 
   const subject = roomData.subject;
@@ -223,7 +250,10 @@ exports.submitAnswer = functions.https.onCall(async (data, context) => {
     const currentScore = roomData[scoreKey] || 0;
     const newScore = currentScore + scoreAdded;
 
-    currentProgress = Math.min(100, Math.round((newScore / Math.max(1, questionPool.length)) * 100));
+    const progKey = isPlayer1 ? 'player1Progress' : 'player2Progress';
+    const currentProg = roomData[progKey] || 0;
+    const stepDelta = Math.round(100 / Math.max(1, questionPool.length));
+    currentProgress = Math.min(100, Math.max(0, currentProg + (scoreAdded > 0 ? stepDelta : 0)));
 
     const updateData = {
       [scoreKey]: newScore,
@@ -317,7 +347,10 @@ exports.submitAnswer = functions.https.onCall(async (data, context) => {
     const currentScore = roomData[scoreKey] || 0;
     const newScore = currentScore + scoreAdded;
 
-    currentProgress = Math.round((newScore / Math.max(1, questionPool.length)) * 100);
+    const progKey = isPlayer1 ? 'player1Progress' : 'player2Progress';
+    const currentProg = roomData[progKey] || 0;
+    const stepDelta = Math.round(100 / Math.max(1, questionPool.length));
+    currentProgress = Math.min(100, Math.max(0, currentProg + (scoreAdded > 0 ? stepDelta : 0)));
     if (qIndex === questionPool.length - 1 && newScore / questionPool.length >= 0.6) {
       currentProgress = Math.min(100, currentProgress + 10);
     }
@@ -392,7 +425,10 @@ exports.submitAnswer = functions.https.onCall(async (data, context) => {
     const currentScore = roomData[scoreKey] || 0;
     const newScore = currentScore + scoreAdded;
 
-    currentProgress = Math.round((newScore / Math.max(1, questionPool.length)) * 100);
+    const progKey = isPlayer1 ? 'player1Progress' : 'player2Progress';
+    const currentProg = roomData[progKey] || 0;
+    const stepDelta = Math.round(100 / Math.max(1, questionPool.length));
+    currentProgress = Math.min(100, Math.max(0, currentProg + (scoreAdded > 0 ? stepDelta : 0)));
     if (qIndex === questionPool.length - 1 && newScore / questionPool.length >= 0.6) {
       currentProgress = Math.min(100, currentProgress + 10);
     }
@@ -579,6 +615,9 @@ exports.assignBotOpponent = functions.https.onCall(async (data, context) => {
   let baseAccuracy = 0.55 + (eloDiff / 800);
   baseAccuracy = Math.max(0.35, Math.min(0.80, baseAccuracy));
 
+  // Bot ELO thấp sẽ suy nghĩ kỹ và trả lời thong thả hơn (nhịp học sinh thật 15-28s/câu)
+  const eloSpeedFactor = Math.max(0.9, Math.min(1.3, 1.0 + (100 - botElo) / 250));
+
   let totalSteps = 30;
   if (subject === 'chemistry') totalSteps = 5;
 
@@ -588,20 +627,24 @@ exports.assignBotOpponent = functions.https.onCall(async (data, context) => {
   for (let i = 0; i < totalSteps; i++) {
     const isCorrect = Math.random() < baseAccuracy;
 
-    // Mô phỏng trễ nhận thức phi tuyến tính của học sinh
-    let baseDelay = 3200 + Math.floor(Math.pow(Math.random(), 2) * 5500);
-
-    if (subject === 'math' || subject === 'physics') {
-      baseDelay += 1500;
-    } else if (subject === 'chemistry') {
-      baseDelay = 8000 + Math.floor(Math.random() * 6000);
+    let stepDelay = 0;
+    if (subject === 'chemistry') {
+      // Hóa học (5 bước): Thao tác mô phỏng thí nghiệm & phản ứng tốn 18-32 giây mỗi giai đoạn
+      stepDelay = Math.floor((18000 + Math.random() * 14000) * eloSpeedFactor);
+    } else if (subject === 'math' || subject === 'physics') {
+      // Toán / Lý (30 câu): Học sinh THPT đọc đề, nháp công thức, tính toán 15-28 giây mỗi câu
+      stepDelay = Math.floor((15000 + Math.pow(Math.random(), 1.5) * 13000) * eloSpeedFactor);
+    } else {
+      // Sinh học: Đọc câu hỏi trắc nghiệm & phân tích quy luật 12-22 giây mỗi câu
+      stepDelay = Math.floor((12000 + Math.random() * 10000) * eloSpeedFactor);
     }
 
-    if (i > 0 && i % 6 === 0) {
-      baseDelay += 3000 + Math.floor(Math.random() * 4000);
+    // Thỉnh thoảng gặp câu phân hóa khó: dừng thêm 8-14 giây để tính toán cẩn thận
+    if (i > 0 && (i % 3 === 0 || i % 7 === 0)) {
+      stepDelay += Math.floor((8000 + Math.random() * 6000) * eloSpeedFactor);
     }
 
-    cumulativeTimeMs += baseDelay;
+    cumulativeTimeMs += stepDelay;
 
     let progress = 0;
     if (subject === 'chemistry') {
@@ -616,7 +659,7 @@ exports.assignBotOpponent = functions.https.onCall(async (data, context) => {
       isCorrect,
       scoreDelta: isCorrect ? 1 : 0,
       progress,
-      delayMs: baseDelay,
+      delayMs: stepDelay,
       cumulativeTimeMs
     });
   }

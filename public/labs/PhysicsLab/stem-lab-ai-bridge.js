@@ -521,10 +521,10 @@
 
   /**
    * Định dạng tin nhắn người dùng:
-   * - Bảo toàn 100% câu chữ, lời chào, thắc mắc của học sinh
+   * - Bảo toàn 100% câu chữ, lời chào, thắc mắc của học sinh (tuyệt đối KHÔNG xóa dấu vết hay lời chào)
    * - Chống XSS an toàn
    * - Hỗ trợ KaTeX nội dòng $...$ nếu học sinh nhập công thức toán/lý/hóa
-   * - Đảm bảo khung chat luôn đầy đủ nội dung, không bao giờ bị co nhỏ
+   * - Đảm bảo khung chat luôn đầy đủ nội dung, không bị co nhỏ thành chấm xanh rỗng
    */
   function formatUserMessage(rawText) {
     if (!rawText || typeof rawText !== 'string') return '';
@@ -579,6 +579,72 @@
   function formatAIFormulaText(rawText) {
     if (!rawText) return '';
     let text = cleanAIMarkers(rawText);
+
+    // Auto-repair pseudo-LaTeX before KaTeX parsing
+    text = text.replace(/\x0c/g, '\\f').replace(/\x08/g, '\\b');
+    text = text.replace(/\n\s*(\\cdot|·)\s*\n/g, ' \\cdot ');
+    text = text.replace(/=\s*\n\s*/g, ' = ');
+    text = text.replace(/\n\s*(\\cdot|·)\s*/g, ' \\cdot ');
+
+    // Sửa các dạng căn thức lỗi gõ từ AI: \sqrt((l / g)) hoặc \sqrt(l / g)
+    text = text.replace(/\\sqrt\s*\(\s*\(\s*([^/]+?)\s*\/\s*([^)]+?)\s*\)\s*\)/g, '\\sqrt{\\frac{$1}{$2}}');
+    text = text.replace(/\\sqrt\s*\(\s*([^/]+?)\s*\/\s*([^)]+?)\s*\)/g, '\\sqrt{\\frac{$1}{$2}}');
+    text = text.replace(/\\sqrt\s*\(\s*\(\s*([^)]+?)\s*\)\s*\)/g, '\\sqrt{$1}');
+    text = text.replace(/\\sqrt\s*\(\s*([^)]+?)\s*\)/g, '\\sqrt{$1}');
+
+    text = text.replace(/\b(?:\\?frac)\s+([a-zA-Z0-9^]+(?:\s*(?:\\?sqrt|√)\s*[0-9a-zA-Z^]+)?)\s+(\d+)\b/g, (_match, num, den) => {
+      const cleanNum = num
+        .replace(/(?:\\?sqrt|√)\s*(\d+)/g, '\\sqrt{$1}')
+        .replace(/(?<!\\)sqrt/g, '\\sqrt');
+      return `\\frac{${cleanNum}}{${den}}`;
+    });
+
+    text = text.replace(/\b(?:\\?frac)\s+([a-zA-Z0-9^]+)\s+([a-zA-Z0-9^]+)\b/g, (_match, num, den) => {
+      return `\\frac{${num}}{${den}}`;
+    });
+
+    text = text.replace(/(?<!\\)\bsqrt\s+([A-Za-z0-9'^]+(?:\s*[-+]\s*[A-Za-z0-9'^]+)+)\b/g, '\\sqrt{$1}');
+    text = text.replace(/(?<!\\)\bsqrt\s+([a-zA-Z0-9^]+(?:\s*[-+]\s*\\frac\{[^}]+\}\{[^}]+\}))/g, '\\sqrt{$1}');
+    text = text.replace(/(?<!\\)\bsqrt\s*(\d+)/g, '\\sqrt{$1}');
+    text = text.replace(/(?<!\\)\bsqrt\{([^{}]+)\}/g, '\\sqrt{$1}');
+
+    text = text.replace(/(?<!\\)\bfrac\{/g, '\\frac{');
+    text = text.replace(/(?<!\\)\bsqrt\{/g, '\\sqrt{');
+    text = text.replace(/(?<!\\)\bcdot\b/g, '\\cdot');
+    text = text.replace(/(?<!\\)\bDelta\b/g, '\\Delta');
+
+    // Chuyển đổi các dòng công thức độc lập chưa bọc dấu $ thành $$...$$
+    const lines = text.split('\n');
+    const processedLines = lines.map(line => {
+      const trimmed = line.trim();
+      if (!trimmed) return line;
+
+      // Bỏ qua nếu đã bọc $ hoặc $$, hoặc là markdown heading/code/quote
+      if (trimmed.startsWith('$') || trimmed.startsWith('$$') || trimmed.startsWith('```') || trimmed.startsWith('<') || trimmed.startsWith('#')) {
+        return line;
+      }
+
+      // Nhận diện công thức Vật lý / Toán học độc lập (chứa macro LaTeX hoặc phương trình toán)
+      const hasLatexMacro = /\\(vec|perp|parallel|lambda|frac|sqrt|quad|qquad|text|mathbb|mathbf|left|right|omega|Omega|pi|Delta|alpha|beta|theta|mu|rho|times|cdot|to|approx|neq|leq|geq|in|infty|cos|sin|tan|cot)\b/.test(trimmed);
+      const hasMathEquality = /^([a-zA-Z0-9_'\s\-\+\*\/\(\)]+)\s*=\s*([a-zA-Z0-9_'\s\-\+\*\/\(\)\\]+)$/.test(trimmed) && /[\\_^{}]/.test(trimmed);
+
+      // Đếm số từ tiếng Việt có dấu để tránh nhận nhầm câu thuyết minh
+      const vietnameseWordMatches = trimmed.match(/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/gi);
+      const vietnameseWordCount = vietnameseWordMatches ? vietnameseWordMatches.length : 0;
+
+      if ((hasLatexMacro || hasMathEquality) && vietnameseWordCount < 5 && !trimmed.startsWith('•') && !trimmed.startsWith('-')) {
+        return `$$${trimmed}$$`;
+      }
+
+      // Dòng văn bản bình thường: Tự động bọc các ký hiệu macro LaTeX đơn lẻ thành $...$
+      let inlineProcessed = line;
+      inlineProcessed = inlineProcessed.replace(/(?<!\$)\\vec\{[^{}]+\}(?!\$)/g, (m) => `$${m}$`);
+      inlineProcessed = inlineProcessed.replace(/(?<!\$)\\(lambda|pi|omega|Omega|Delta|varphi|phi|alpha|beta|theta|mu|rho|sigma|tau|varepsilon|perp|parallel|approx|neq|leq|geq)(?![a-zA-Z\$])/g, (m) => `$${m}$`);
+
+      return inlineProcessed;
+    });
+
+    text = processedLines.join('\n');
 
     // Mảng bảo vệ các khối KaTeX đã render
     const katexTokens = [];
@@ -677,6 +743,7 @@
     setTimeout(() => {
       fetchLearnedDocs().catch(() => {});
     }, 1000);
+
     // Tự động chuyển hướng toàn trang khi học sinh bấm các nút "Về Hub" bên trong bất kỳ phòng lab nào
     const handleHubNavigation = (e) => {
       const target = e.target;

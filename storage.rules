@@ -1,0 +1,46 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // =========================================================================
+    // HÀM KIỂM TRA BẢO MẬT STORAGE (SECURITY VALIDATION HELPERS)
+    // =========================================================================
+
+    // 1. Kiểm tra người dùng đã đăng nhập hợp lệ
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // 2. Chỉ cho phép các định dạng tệp hình ảnh an toàn (Chống tải mã độc .exe, .html, .js, .sh)
+    function isSafeImage() {
+      return request.resource.contentType.matches('image/(jpeg|png|webp|gif|svg\\+xml)');
+    }
+
+    // 3. Giới hạn dung lượng tệp tải lên tối đa < 5MB (5 * 1024 * 1024 = 5,242,880 bytes)
+    function isUnder5MB() {
+      return request.resource.size < 5 * 1024 * 1024;
+    }
+
+    // =========================================================================
+    // PHÂN QUYỀN ĐƯỜNG DẪN STORAGE (LEAST PRIVILEGE RULES)
+    // =========================================================================
+
+    // 1. Thư mục ảnh đại diện (avatar) & ảnh nền (background) cá nhân
+    match /users/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuthenticated() && request.auth.uid == userId && isSafeImage() && isUnder5MB();
+    }
+
+    // 2. Thư mục ảnh Moments / Stories mạng xã hội học tập
+    match /moments/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuthenticated() && request.auth.uid == userId && isSafeImage() && isUnder5MB();
+    }
+
+    // 3. Khóa hoàn toàn quyền ghi đối với mọi đường dẫn khác để ngăn chặn tấn công lưu trữ
+    match /{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+  }
+}

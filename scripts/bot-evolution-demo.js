@@ -86,7 +86,7 @@ function runEpoch() {
   const avgElo = Math.round(bots.reduce((acc, b) => acc + b.elo, 0) / bots.length);
   const avgReaction = Math.round(bots.reduce((acc, b) => acc + b.reactionMs, 0) / bots.length);
   const evolvedCount = bots.filter(b => b.eloDelta >= 0).length;
-  console.log(`   \x1b[32m✔ Tiến độ: ${evolvedCount}/20 Bot tiến hóa\x1b[0m │ \x1b[36mELO trung bình: ${avgElo} (Chuẩn 50-150)\x1b[0m │ \x1b[33mPhản xạ TB: ${avgReaction}ms\x1b[0m\n`);
+  console.log(`   \x1b[32m✔ Tiến độ: ${evolvedCount}/20 Bot tiến hóa\x1b[0m │ \x1b[36mELO trung bình: ${avgElo}\x1b[0m │ \x1b[33mPhản xạ TB: ${avgReaction}ms\x1b[0m\n`);
 
   // Sau vòng lặp thứ 5, dừng lại và xuất tổng kết
   if (currentEpoch >= MAX_EPOCHS) {

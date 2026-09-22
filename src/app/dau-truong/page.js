@@ -720,7 +720,7 @@ const EquipmentSelectionView = ({
       const timer = setTimeout(async () => {
         try {
           const roomRef = doc(db, 'match_rooms', activeRoomId);
-          const allInMatchCards = ['card_time_freeze', 'card_smoke_fog', 'card_progress_steal', 'card_counter', 'card_magic_hand', 'card_dispel'];
+          const allInMatchCards = ['card_time_freeze', 'card_smoke_fog', 'card_progress_steal', 'card_magic_hand'];
           const botPicks = [...allInMatchCards].sort(() => 0.5 - Math.random()).slice(0, 3);
           await updateDoc(roomRef, {
             player2Equipment: botPicks,
@@ -1157,8 +1157,18 @@ function DauTruongContent() {
   const latestRoomDataRef = useRef(null);
   const botPlaybackInfoRef = useRef(null);
   const isFinalizingRef = useRef(false);
+  const isCardActionPendingRef = useRef(false);
+  const isBotEngineStartedRef = useRef(false);
   const [currentRoomData, setCurrentRoomData] = useState(null);
   const [nowTick, setNowTick] = useState(Date.now());
+  const [cardAnnouncement, setCardAnnouncement] = useState(null);
+
+  const showCardAnnouncement = (icon, title, desc, color = 'from-amber-500 to-yellow-600') => {
+    setCardAnnouncement({ icon, title, desc, color, timestamp: Date.now() });
+    setTimeout(() => {
+      setCardAnnouncement(prev => (prev && Date.now() - prev.timestamp >= 3400 ? null : prev));
+    }, 3500);
+  };
 
   useEffect(() => {
     if (arenaState.status !== 'playing') return;
@@ -1431,9 +1441,11 @@ function DauTruongContent() {
     }
   };
 
-  // KÍCH HOẠT THẺ BÀI STRATEGY TRONG TRẬN THI ĐẤU
+  // KÍCH HOẠT THẺ BÀI STRATEGY TRONG TRẬN THI ĐẤU (CHỐNG DÙNG 2 LẦN & GIỚI HẠN 1 LẦN/THẺ)
   const handleUseCard = async (cardId) => {
     if (!activeRoomId || !user || isPlayer1Role === null) return;
+    if (isCardActionPendingRef.current) return;
+    isCardActionPendingRef.current = true;
     playSound.click();
 
     try {
@@ -1457,6 +1469,13 @@ function DauTruongContent() {
       const myEquip = [...(roomDocData[myEquipKey] || [])];
       const oppEquip = [...(roomDocData[oppEquipKey] || [])];
 
+      // 1. KIỂM TRA BẮT BUỘC: THẺ PHẢI CÒN TRONG TÚI TRANG BỊ MỚI ĐƯỢC PHÉP DÙNG (CHỐNG DÙNG 2 LẦN)
+      if (!myEquip.includes(cardId)) {
+        addArenaLogStore('⚠️ Thẻ này đã được dùng hoặc không còn trong khay trang bị!');
+        playSound.hover?.();
+        return;
+      }
+
       let payloadUpdates = {};
       let updatedEffects = { ...currentActiveEffects };
 
@@ -1466,6 +1485,7 @@ function DauTruongContent() {
         const cardIdx = myEquip.indexOf('card_counter');
 
         if (myFreezeDiff > 0 || myFogDiff > 0) {
+          // TRƯỜNG HỢP 1: BỊ ĐÓNG BĂNG HOẶC MÙ SƯƠNG -> HÓA GIẢI NGAY VÀ PHẢN NGƯỢC SANG ĐỐI THỦ
           if (cardIdx !== -1) myEquip.splice(cardIdx, 1);
 
           updatedEffects[myRoleKey] = {
@@ -1496,17 +1516,35 @@ function DauTruongContent() {
 
           addArenaLogStore('🛡️ Kích hoạt Thẻ Phản Đòn! Đã hóa giải hiệu ứng tiêu cực và phản ngược sang đối thủ!');
           playSound.success?.();
+          showCardAnnouncement('🛡️', 'PHẢN ĐÒN THÀNH CÔNG!', 'Đã hóa giải hiệu ứng và phản ngược sang đối thủ!', 'from-orange-500 to-amber-600');
         } else {
-          addArenaLogStore('🛡️ Thẻ Phản Đòn là Thẻ Thụ Động! Sẽ tự động kích hoạt khi đối thủ tấn công, hoặc bạn có thể bấm kích hoạt khi bị dính hiệu ứng.');
-          playSound.hover?.();
-          return;
+          // TRƯỜNG HỢP 2: CHỦ ĐỘNG BẬT KHIÊN PHẢN ĐÒN TRƯỚC (BẢO HỘ 45 GIÂY)
+          if (cardIdx !== -1) myEquip.splice(cardIdx, 1);
+
+          updatedEffects[myRoleKey] = {
+            ...(updatedEffects[myRoleKey] || {}),
+            reflectActive: true,
+            reflectUntil: Date.now() + 45000
+          };
+
+          payloadUpdates = {
+            activeEffects: updatedEffects,
+            [myEquipKey]: myEquip,
+            [myLogsKey]: arrayUnion('🛡️ ĐÃ BẬT KHIÊN PHẢN ĐÒN (45s)! Sẵn sàng tự động phản ngược đòn tấn công tiếp theo!'),
+            [oppLogsKey]: arrayUnion('⚠️ ĐỐI THỦ ĐÃ BẬT KHIÊN PHẢN ĐÒN (45s)! Cẩn thận khi tung chiêu!')
+          };
+
+          addArenaLogStore('🛡️ Đã bật Khiên Phản Đòn (45s)! Sẵn sàng tự động phản ngược chiêu thức của đối thủ!');
+          playSound.success?.();
+          showCardAnnouncement('🛡️', 'KHIÊN PHẢN ĐÒN ĐÃ BẬT!', 'Tự động phản ngược chiêu thức tiếp theo của đối thủ (45s)!', 'from-orange-500 to-amber-600');
         }
       } else if (cardId === 'card_magic_hand') {
         const stolenCountMap = roomDocData.stolenCount || { p1: 0, p2: 0 };
         const myStolenCount = stolenCountMap[myRoleKey] || 0;
 
-        if (myStolenCount >= 2) {
-          addArenaLogStore('⚠️ Bạn đã dùng tối đa 2 lần Bàn Tay Ma Thuật trong trận đấu này!');
+        // GIỚI HẠN NGHIÊM NGẶT: CHỈ DÙNG ĐÚNG 1 LẦN TRONG TRẬN ĐẤU
+        if (myStolenCount >= 1) {
+          addArenaLogStore('⚠️ Mỗi trận chỉ được dùng Bàn Tay Ma Thuật 1 lần duy nhất!');
           playSound.hover?.();
           return;
         }
@@ -1539,14 +1577,22 @@ function DauTruongContent() {
 
         addArenaLogStore(`🖐️ Bàn Tay Ma Thuật thành công! Bạn đã cướp thẻ [${stolenCardDef?.name || stolenCardId}] của đối thủ!`);
         playSound.success?.();
+        showCardAnnouncement('🖐️', 'BÀN TAY MA THUẬT!', `Đã cướp thành công thẻ [${stolenCardDef?.name || stolenCardId}] của đối thủ!`, 'from-fuchsia-500 to-purple-800');
 
       } else if (cardId === 'card_time_freeze') {
         const cardIdx = myEquip.indexOf(cardId);
         if (cardIdx !== -1) myEquip.splice(cardIdx, 1);
 
-        const oppHasCounterIdx = oppEquip.indexOf('card_counter');
-        if (oppHasCounterIdx !== -1) {
-          oppEquip.splice(oppHasCounterIdx, 1);
+        const isBot = !!roomDocData.isBotMatch;
+        const oppHasShield = !isBot && updatedEffects[oppRoleKey]?.reflectActive;
+        const oppHasCounterIdx = !isBot ? oppEquip.indexOf('card_counter') : -1;
+
+        if (oppHasShield || oppHasCounterIdx !== -1) {
+          if (oppHasCounterIdx !== -1) oppEquip.splice(oppHasCounterIdx, 1);
+          updatedEffects[oppRoleKey] = {
+            ...(updatedEffects[oppRoleKey] || {}),
+            reflectActive: false
+          };
           updatedEffects[myRoleKey] = {
             ...(updatedEffects[myRoleKey] || {}),
             frozenUntil: Date.now() + 3000
@@ -1561,6 +1607,7 @@ function DauTruongContent() {
           };
           addArenaLogStore('⚠️ ĐỐI THỦ KÍCH HOẠT THẺ PHẢN ĐÒN! Bạn bị đóng băng 3s!');
           playSound.warning?.() || playSound.click?.();
+          showCardAnnouncement('⚠️', 'BỊ PHẢN ĐÒN!', 'Đối thủ đã phản đòn đóng băng ngược lại bạn (3s)!', 'from-rose-500 to-red-600');
         } else {
           updatedEffects[oppRoleKey] = {
             ...(updatedEffects[oppRoleKey] || {}),
@@ -1572,15 +1619,24 @@ function DauTruongContent() {
             [myLogsKey]: arrayUnion('❄️ ĐÃ SỬ DỤNG THẺ ĐÔNG BĂNG THỜI GIAN 3S VÀO ĐỐI THỦ!')
           };
           addArenaLogStore('❄️ Kích hoạt Thẻ Đông Băng! Màn hình đối thủ bị khóa trong 3 giây!');
+          playSound.success?.();
+          showCardAnnouncement('❄️', 'ĐÔNG BĂNG THỜI GIAN!', 'Đã khóa toàn bộ thao tác màn hình đối thủ trong 3 giây!', 'from-cyan-500 to-blue-600');
         }
 
       } else if (cardId === 'card_smoke_fog') {
         const cardIdx = myEquip.indexOf(cardId);
         if (cardIdx !== -1) myEquip.splice(cardIdx, 1);
 
-        const oppHasCounterIdx = oppEquip.indexOf('card_counter');
-        if (oppHasCounterIdx !== -1) {
-          oppEquip.splice(oppHasCounterIdx, 1);
+        const isBot = !!roomDocData.isBotMatch;
+        const oppHasShield = !isBot && updatedEffects[oppRoleKey]?.reflectActive;
+        const oppHasCounterIdx = !isBot ? oppEquip.indexOf('card_counter') : -1;
+
+        if (oppHasShield || oppHasCounterIdx !== -1) {
+          if (oppHasCounterIdx !== -1) oppEquip.splice(oppHasCounterIdx, 1);
+          updatedEffects[oppRoleKey] = {
+            ...(updatedEffects[oppRoleKey] || {}),
+            reflectActive: false
+          };
           updatedEffects[myRoleKey] = {
             ...(updatedEffects[myRoleKey] || {}),
             fogUntil: Date.now() + 30000
@@ -1595,6 +1651,7 @@ function DauTruongContent() {
           };
           addArenaLogStore('⚠️ ĐỐI THỦ KÍCH HOẠT THẺ PHẢN ĐÒN! Bạn bị che phủ bởi Mù Sương 30s!');
           playSound.warning?.() || playSound.click?.();
+          showCardAnnouncement('⚠️', 'BỊ PHẢN ĐÒN!', 'Đối thủ đã phản đòn mù sương ngược lại bạn (30s)!', 'from-purple-600 to-rose-600');
         } else {
           updatedEffects[oppRoleKey] = {
             ...(updatedEffects[oppRoleKey] || {}),
@@ -1606,6 +1663,8 @@ function DauTruongContent() {
             [myLogsKey]: arrayUnion('🌫️ ĐÃ SỬ DỤNG THẺ MÙ SƯƠNG 30S VÀO ĐỐI THỦ!')
           };
           addArenaLogStore('🌫️ Kích hoạt Thẻ Mù Sương! Màn hình đối thủ bị che phủ trong 30 giây!');
+          playSound.success?.();
+          showCardAnnouncement('🌫️', 'MÙ SƯƠNG CHIẾN THUẬT!', 'Đã che phủ màn hình đối thủ trong 30 giây!', 'from-purple-500 to-indigo-700');
         }
 
       } else if (cardId === 'card_progress_steal') {
@@ -1615,14 +1674,23 @@ function DauTruongContent() {
         const currentOppProg = isP1 ? (roomDocData.player2Progress || 0) : (roomDocData.player1Progress || 0);
         const currentMyProg = isP1 ? (roomDocData.player1Progress || 0) : (roomDocData.player2Progress || 0);
         const stolen = 10;
-        const oppHasCounterIdx = oppEquip.indexOf('card_counter');
+        
+        // Không để Bot phản ngược lại đòn cướp điểm của người chơi
+        const isBot = !!roomDocData.isBotMatch;
+        const oppHasShield = !isBot && updatedEffects[oppRoleKey]?.reflectActive;
+        const oppHasCounterIdx = !isBot ? oppEquip.indexOf('card_counter') : -1;
 
-        if (oppHasCounterIdx !== -1) {
-          oppEquip.splice(oppHasCounterIdx, 1);
+        if (oppHasShield || oppHasCounterIdx !== -1) {
+          if (oppHasCounterIdx !== -1) oppEquip.splice(oppHasCounterIdx, 1);
+          updatedEffects[oppRoleKey] = {
+            ...(updatedEffects[oppRoleKey] || {}),
+            reflectActive: false
+          };
           const newMyProg = Math.max(0, currentMyProg - stolen);
           const newOppProg = Math.min(100, currentOppProg + stolen);
 
           payloadUpdates = {
+            activeEffects: updatedEffects,
             [isP1 ? 'player1Progress' : 'player2Progress']: newMyProg,
             [isP1 ? 'player2Progress' : 'player1Progress']: newOppProg,
             [myEquipKey]: myEquip,
@@ -1631,31 +1699,77 @@ function DauTruongContent() {
             [oppLogsKey]: arrayUnion(`🛡️ THẺ PHẢN ĐÒN TỰ ĐỘNG KÍCH HOẠT! +${stolen}% tiến độ phản ngược từ đối thủ!`)
           };
           updatePlayerProgress(newMyProg);
+          updateOpponentProgress(newOppProg);
           addArenaLogStore(`⚠️ ĐỐI THỦ KÍCH HOẠT THẺ PHẢN ĐÒN! Bạn bị cướp ngược ${stolen}% tiến độ!`);
           playSound.warning?.() || playSound.click?.();
+          showCardAnnouncement('⚠️', 'BỊ PHẢN ĐÒN!', `Đối thủ đã phản đòn! Bạn bị cướp ngược ${stolen}% tiến độ!`, 'from-rose-500 to-red-600');
         } else {
           const newOppProg = Math.max(0, currentOppProg - stolen);
           const newMyProg = Math.min(100, currentMyProg + stolen);
 
+          // Cập nhật cả điểm số tương ứng để bảo toàn vĩnh viễn tiến độ
+          const myScoreKey = isP1 ? 'player1Score' : 'player2Score';
+          const oppScoreKey = isP1 ? 'player2Score' : 'player1Score';
+          const curMyScore = roomDocData[myScoreKey] || 0;
+          const curOppScore = roomDocData[oppScoreKey] || 0;
+          const newMyScore = curMyScore + 2;
+          const newOppScore = Math.max(0, curOppScore - 2);
+
           payloadUpdates = {
             [isP1 ? 'player2Progress' : 'player1Progress']: newOppProg,
             [isP1 ? 'player1Progress' : 'player2Progress']: newMyProg,
+            [myScoreKey]: newMyScore,
+            [oppScoreKey]: newOppScore,
             [myEquipKey]: myEquip,
             [myLogsKey]: arrayUnion(`🥷 ĐÃ ĐÁNH CẮP ${stolen}% TIẾN ĐỘ CỦA ĐỐI THỦ!`)
           };
+
           updatePlayerProgress(newMyProg);
+          updateOpponentProgress(newOppProg);
+
+          // Đồng bộ điểm cho các bộ môn cục bộ
+          if (arenaState.subject === 'chemistry') setChemGame(p => ({ ...p, score: p.score + 2 }));
+          else if (arenaState.subject === 'physics') setPhysGame(p => ({ ...p, score: p.score + 2 }));
+          else if (arenaState.subject === 'math') setMathGame(p => ({ ...p, score: p.score + 2 }));
+          else if (arenaState.subject === 'biology') setBioGame(p => ({ ...p, score: p.score + 2 }));
+
           addArenaLogStore(`🥷 Kích hoạt Thẻ Đánh Cắp! +10% tiến độ cho bạn, -10% của đối thủ!`);
+          playSound.success?.();
+          showCardAnnouncement('🥷', 'CƯỚP TIẾN ĐỘ THÀNH CÔNG!', `+10% Tiến độ cho bạn, -10% Tiến độ của đối thủ!`, 'from-emerald-500 to-teal-600');
         }
 
       } else if (cardId === 'card_ai_assist') {
         const cardIdx = myEquip.indexOf(cardId);
         if (cardIdx !== -1) myEquip.splice(cardIdx, 1);
         payloadUpdates = { [myEquipKey]: myEquip };
+
+        // Tìm đáp án chính xác của câu hỏi hiện tại để chỉ loại các phương án thực sự sai
+        let currQ = null;
+        if (arenaState.subject === 'chemistry') {
+          currQ = chemGame.questions[chemGame.currentQ % (chemGame.questions.length || 1)];
+        } else if (arenaState.subject === 'physics') {
+          currQ = physGame.questions[physGame.currentQ % (physGame.questions.length || 1)];
+        } else if (arenaState.subject === 'math') {
+          currQ = mathGame.questions[mathGame.currentQ % (mathGame.questions.length || 1)];
+        } else if (arenaState.subject === 'biology') {
+          currQ = bioGame.questions[bioGame.currentQ % (bioGame.questions.length || 1)];
+        }
+
+        let correctIdx = 0;
+        if (typeof currQ?.correct === 'number') {
+          correctIdx = currQ.correct;
+        } else if (typeof currQ?.correct === 'string') {
+          const map = { 'A': 0, 'B': 1, 'C': 2, 'D': 3, '0': 0, '1': 1, '2': 2, '3': 3 };
+          correctIdx = map[currQ.correct.trim().toUpperCase()] ?? 0;
+        }
+
+        const wrongOpts = [0, 1, 2, 3].filter(idx => idx !== correctIdx);
+        const toEliminate = wrongOpts.sort(() => 0.5 - Math.random()).slice(0, 2);
+        setAiEliminatedOptions(toEliminate);
+
         addArenaLogStore('🤖 AI Copilot: Đã loại bỏ 2 phương án sai! Hãy chọn đáp án chính xác còn lại.');
-        
-        // Dynamically find 2 wrong choices to eliminate
-        const wrongOpts = [0, 1, 2, 3].filter(idx => idx !== 0); // Eliminates 2 wrong choices
-        setAiEliminatedOptions(wrongOpts.slice(0, 2));
+        playSound.success?.();
+        showCardAnnouncement('🤖', 'AI COPILOT HỖ TRỢ!', 'Đã loại bỏ 2 phương án sai! Hãy chọn đáp án chính xác.', 'from-violet-500 to-fuchsia-600');
 
       } else if (cardId === 'card_dispel') {
         const cardIdx = myEquip.indexOf(cardId);
@@ -1673,13 +1787,21 @@ function DauTruongContent() {
           [myLogsKey]: arrayUnion('✨ ĐÃ GIẢI TRỪ TẤT CẢ HIỆU ỨNG TIÊU CỰC!')
         };
         addArenaLogStore('✨ Kích hoạt Thẻ Giải Trừ! Mọi hiệu ứng Đông băng / Mù sương đã được xóa bỏ!');
+        playSound.success?.();
+        showCardAnnouncement('✨', 'GIẢI TRỪ TOÀN DIỆN!', 'Đã xóa sạch mọi hiệu ứng tiêu cực Đông Băng & Mù Sương!', 'from-teal-500 to-emerald-600');
       }
 
       if (Object.keys(payloadUpdates).length > 0) {
         await updateDoc(roomRef, payloadUpdates);
+        // Cập nhật ngay lập tức cho state local để thẻ biến mất mượt mà trên UI
+        setCurrentRoomData(prev => prev ? { ...prev, ...payloadUpdates } : prev);
       }
     } catch (err) {
       console.error("Lỗi sử dụng thẻ:", err);
+    } finally {
+      setTimeout(() => {
+        isCardActionPendingRef.current = false;
+      }, 350);
     }
   };
 
@@ -2065,6 +2187,10 @@ function DauTruongContent() {
     arenaStatusRef.current = arenaState.status;
     if (arenaState.status !== 'playing') {
       clearBotPlaybackTimers();
+      if (botCardsUsedRef.current) {
+        botCardsUsedRef.current.clear();
+      }
+      isBotEngineStartedRef.current = false;
     }
   }, [arenaState.status]);
 
@@ -2073,27 +2199,74 @@ function DauTruongContent() {
       botPlaybackTimersRef.current.forEach(t => clearTimeout(t));
       botPlaybackTimersRef.current = [];
     }
-    if (botCardsUsedRef.current) {
-      botCardsUsedRef.current.clear();
-    }
   };
 
   const startBotPlaybackEngine = (roomId, botUid, playbackSchedule) => {
     clearBotPlaybackTimers();
-    if (!playbackSchedule || !Array.isArray(playbackSchedule)) return;
+    if (!playbackSchedule || !Array.isArray(playbackSchedule) || playbackSchedule.length === 0) return;
 
-    console.log(`🤖 [Bot Playback Engine] Kích hoạt kịch bản playback cho Bot (${botUid}) với ${playbackSchedule.length} bước!`);
+    console.log(`🤖 [Bot Playback Engine] Kích hoạt kịch bản playback tuần tự cho Bot (${botUid}) với ${playbackSchedule.length} bước!`);
 
-    // 1. Kịch bản làm bài của Bot
-    playbackSchedule.forEach((step) => {
-      const delay = step.cumulativeTimeMs !== undefined ? step.cumulativeTimeMs : (step.delayMs || 5000);
+    // 1. KỊCH BẢN LÀM BÀI TUẦN TỰ CỦA BOT (MÔ PHỎNG HỌC SINH THẬT: SUY NGHĨ, NHÁP BÀI, TẠM DỪNG KHI BỊ KHỐNG CHẾ)
+    const runBotStep = (stepIdx) => {
+      if (stepIdx >= playbackSchedule.length) {
+        console.log(`🤖 [Bot Playback Engine] Bot đã hoàn thành toàn bộ ${playbackSchedule.length} bước.`);
+        return;
+      }
+      if (arenaStatusRef.current !== 'playing') {
+        return;
+      }
+
+      const step = playbackSchedule[stepIdx];
+      // Tính độ trễ suy nghĩ của học sinh (15s-28s/câu cho Toán/Lý, 18s-32s cho Hóa, 12s-22s cho Sinh)
+      let stepDelay = Number(step.delayMs);
+      if (!stepDelay || isNaN(stepDelay) || stepDelay < 8000) {
+        // Fallback nhịp học sinh thật tính toán cẩn thận nếu kịch bản cũ thiếu delayMs
+        stepDelay = 16000 + Math.floor(Math.random() * 9000);
+      }
+
+      // Kiểm tra trạng thái hiệu ứng khống chế của Bot từ dữ liệu phòng mới nhất
+      const currentRoom = latestRoomDataRef.current || {};
+      const botRole = (currentRoom.player1?.uid === botUid) ? 'p1' : 'p2';
+      const botEffects = currentRoom.activeEffects?.[botRole] || {};
+      const now = Date.now();
+
+      // NẾU BOT ĐANG BỊ MÙ SƯƠNG: Tăng thêm 6s thời gian đọc đề vì màn hình bị che mờ
+      if (botEffects.fogUntil && botEffects.fogUntil > now) {
+        console.log(`🌫️ [Bot Action Runner] Bot đang bị Mù Sương -> Cộng thêm 6 giây đọc đề/nháp bài!`);
+        stepDelay += 6000;
+      }
+
+      // NẾU BOT ĐANG BỊ ĐÓNG BĂNG: Tạm dừng hoàn toàn việc suy nghĩ cho đến khi hết đông băng
+      let freezeWait = 0;
+      if (botEffects.frozenUntil && botEffects.frozenUntil > now) {
+        freezeWait = Math.max(1000, botEffects.frozenUntil - now + 400);
+        console.log(`❄️ [Bot Action Runner] Bot đang bị Đóng Băng -> Tạm dừng ${Math.round(freezeWait/1000)}s trước khi suy nghĩ tiếp...`);
+      }
+
+      const totalWaitMs = stepDelay + freezeWait;
+      console.log(`🤖 [Bot Action Runner] Chuẩn bị câu ${stepIdx + 1}/${playbackSchedule.length} (Thời gian tính toán: ${Math.round(totalWaitMs/1000)}s)...`);
+
       const timerId = setTimeout(async () => {
         try {
-          if (arenaStatusRef.current === 'idle' || arenaStatusRef.current === 'result') {
+          if (arenaStatusRef.current !== 'playing') return;
+
+          // Kiểm tra lại trạng thái đóng băng tại chính thời điểm nộp bài
+          const freshData = latestRoomDataRef.current || {};
+          const freshEffects = freshData.activeEffects?.[botRole] || {};
+          const rightNow = Date.now();
+
+          if (freshEffects.frozenUntil && freshEffects.frozenUntil > rightNow) {
+            const remainingFreeze = Math.max(1000, freshEffects.frozenUntil - rightNow + 500);
+            console.log(`❄️ [Bot Action Runner] Bot vẫn còn bị Đóng Băng (${Math.round(remainingFreeze/1000)}s)! Hoãn nộp bài câu ${stepIdx + 1}...`);
+            const retryTimer = setTimeout(() => {
+              runBotStep(stepIdx); // Thử lại chính câu này sau khi rã đông
+            }, remainingFreeze);
+            botPlaybackTimersRef.current.push(retryTimer);
             return;
           }
-          console.log(`🤖 [Bot Action Trigger] Bot thực hiện bước ${step.stepIndex} (Offset: ${delay}ms)...`);
-          
+
+          console.log(`🤖 [Bot Action Trigger] Bot nộp bài câu ${step.stepIndex}...`);
           if (clientFunctions && clientFunctions.submitAnswer) {
             await clientFunctions.submitAnswer(db, { currentUser: { uid: botUid } })({
               matchId: roomId,
@@ -2110,15 +2283,23 @@ function DauTruongContent() {
           }
         } catch (err) {
           console.warn(`⚠️ [Bot Action Trigger] Lỗi khi kích hoạt bước ${step.stepIndex}:`, err);
+        } finally {
+          // Kích hoạt tuần tự câu tiếp theo nếu trận đấu vẫn đang diễn ra
+          if (arenaStatusRef.current === 'playing') {
+            runBotStep(stepIdx + 1);
+          }
         }
-      }, delay);
+      }, totalWaitMs);
 
       botPlaybackTimersRef.current.push(timerId);
-    });
+    };
 
-    // 2. Kịch bản Bot dùng thẻ chiêu trong trận: TỐI ĐA ĐÚNG 3 THẺ, MỖI THẺ DÙNG ĐÚNG 1 LẦN
-    const botCardSkillDelays = [20000, 55000, 95000];
-    const botCardTypes = ['card_time_freeze', 'card_smoke_fog', 'card_progress_steal'];
+    // Bắt đầu chuỗi bước tuần tự
+    runBotStep(0);
+
+    // 2. KỊCH BẢN BOT DÙNG THẺ CHIÊU TRONG TRẬN: TỐI ĐA ĐÚNG 3 THẺ, MỖI THẺ DÙNG ĐÚNG 1 LẦN VÀ KIỂM TRA TÚI ĐỒ
+    const botCardSkillDelays = [35000, 85000, 150000];
+    const botCandidateCardTypes = ['card_time_freeze', 'card_smoke_fog', 'card_progress_steal', 'card_magic_hand'];
 
     botCardSkillDelays.forEach((delayMs, idx) => {
       const cardTimerId = setTimeout(async () => {
@@ -2126,84 +2307,142 @@ function DauTruongContent() {
           if (arenaStatusRef.current !== 'playing') return;
           if (botCardsUsedRef.current.size >= 3) return; // Không dùng quá 3 thẻ
 
-          const cardId = botCardTypes[idx];
-          if (!cardId || botCardsUsedRef.current.has(cardId)) return; // Mỗi thẻ chỉ dùng duy nhất 1 lần
-
-          botCardsUsedRef.current.add(cardId);
-
           const roomRef = doc(db, 'match_rooms', roomId);
           const rSnap = await getDoc(roomRef);
           if (!rSnap.exists() || rSnap.data().status !== 'playing') return;
 
           const rData = rSnap.data();
           const now = Date.now();
+          const botRole = (rData.player1?.uid === botUid) ? 'p1' : 'p2';
+          const oppRole = botRole === 'p1' ? 'p2' : 'p1';
 
-          const p1Effects = rData.activeEffects?.p1 || {};
-          const p1Equip = rData.player1Equipment || [];
-          const counterIdx = p1Equip.indexOf('card_counter');
-          const isP1Countering = p1Effects.reflectActive || counterIdx !== -1;
+          // 1. KIỂM TRA BOT CÓ ĐANG BỊ ĐÓNG BĂNG KHÔNG (Nếu bị đóng băng thì không thể tung chiêu)
+          const botEffects = rData.activeEffects?.[botRole] || {};
+          if (botEffects.frozenUntil && botEffects.frozenUntil > now) {
+            console.log(`❄️ [Bot Skill] Bot đang bị Đóng Băng -> Không thể tung chiêu lúc này!`);
+            return;
+          }
 
-          // Cập nhật trang bị còn lại của Bot (loại bỏ thẻ vừa dùng)
-          const currentP2Equip = rData.player2Equipment || [...botCardTypes];
-          const nextP2Equip = currentP2Equip.filter(c => c !== cardId);
+          // 2. KIỂM TRA TÚI TRANG BỊ CỦA BOT: CHỈ ĐƯỢC PHÉP DÙNG THẺ CÒN TỒN TẠI TRONG TÚI
+          const currentBotEquip = [...(rData[botRole === 'p1' ? 'player1Equipment' : 'player2Equipment'] || [])];
+          if (currentBotEquip.length === 0) {
+            console.log(`🤖 [Bot Skill] Bot không còn thẻ nào trong túi trang bị!`);
+            return;
+          }
 
-          if (cardId === 'card_time_freeze') {
-            if (isP1Countering) {
-              let p1Updates = {
-                'activeEffects.p1.reflectActive': false,
-                'activeEffects.p2.frozenUntil': now + 3000,
-                player2Equipment: nextP2Equip,
-                player2Logs: arrayUnion(`🛡️ Đóng băng bị phản đòn lại Bot trong 3s!`)
-              };
-              if (counterIdx !== -1) {
-                const nextP1Equip = [...p1Equip];
-                nextP1Equip.splice(counterIdx, 1);
-                p1Updates.player1Equipment = nextP1Equip;
-              }
-              await updateDoc(roomRef, p1Updates);
-              addArenaLogStore('🛡️ [Thẻ Phản Đòn] Đã tự động phản ngược Đông Băng 3s về Bot!');
+          // Chọn 1 thẻ từ trang bị của Bot mà chưa từng dùng
+          const availableCardId = currentBotEquip.find(c => !botCardsUsedRef.current.has(c) && botCandidateCardTypes.includes(c)) || currentBotEquip[0];
+          if (!availableCardId || botCardsUsedRef.current.has(availableCardId)) {
+            return;
+          }
+
+          botCardsUsedRef.current.add(availableCardId);
+
+          const oppEffects = rData.activeEffects?.[oppRole] || {};
+          const oppEquipKey = oppRole === 'p1' ? 'player1Equipment' : 'player2Equipment';
+          const botEquipKey = botRole === 'p1' ? 'player1Equipment' : 'player2Equipment';
+          const oppEquip = [...(rData[oppEquipKey] || [])];
+          const isShieldActive = oppEffects.reflectActive && (oppEffects.reflectUntil ? oppEffects.reflectUntil > now : true);
+
+          // Loại bỏ thẻ vừa dùng khỏi trang bị của Bot trong Firestore (Đảm bảo mỗi thẻ dùng duy nhất 1 lần)
+          const cardIdxInBot = currentBotEquip.indexOf(availableCardId);
+          if (cardIdxInBot !== -1) {
+            currentBotEquip.splice(cardIdxInBot, 1);
+          }
+
+          if (availableCardId === 'card_time_freeze') {
+            if (isShieldActive) {
+              await updateDoc(roomRef, {
+                [`activeEffects.${oppRole}.reflectActive`]: false,
+                [`activeEffects.${botRole}.frozenUntil`]: now + 3000,
+                [botEquipKey]: currentBotEquip,
+                [botRole === 'p1' ? 'player1Logs' : 'player2Logs']: arrayUnion(`🛡️ Đóng băng bị phản đòn lại Bot trong 3s!`)
+              });
+              addArenaLogStore('🛡️ [Khiên Phản Đòn] Đã tự động phản ngược Đông Băng 3s về Bot!');
+              playSound.success?.();
+              showCardAnnouncement('🛡️', 'KHIÊN ĐÃ PHẢN ĐÒN!', 'Chiêu Đông Băng của Bot đã bị phản ngược lại Bot (3s)!', 'from-orange-500 to-amber-600');
             } else {
               await updateDoc(roomRef, {
-                'activeEffects.p1.frozenUntil': now + 3000,
-                player2Equipment: nextP2Equip,
-                player1Logs: arrayUnion(`🧊 Bot tung Đóng Băng làm bạn khựng 3s!`)
+                [`activeEffects.${oppRole}.frozenUntil`]: now + 3000,
+                [botEquipKey]: currentBotEquip,
+                [oppRole === 'p1' ? 'player1Logs' : 'player2Logs']: arrayUnion(`🧊 Bot tung Đóng Băng làm bạn khựng 3s!`)
               });
               addArenaLogStore('❄️ [Bot] Đối thủ Bot đã dùng Thẻ Đông Băng lên bạn (3s)!');
+              playSound.warning?.() || playSound.click?.();
+              showCardAnnouncement('❄️', 'BẠN BỊ ĐÓNG BĂNG (3s)!', 'Dùng Thẻ Giải Trừ hoặc Thẻ Phản Đòn để thoát ngay!', 'from-cyan-600 to-blue-700');
             }
-          } else if (cardId === 'card_smoke_fog') {
-            if (isP1Countering) {
-              let p1Updates = {
-                'activeEffects.p1.reflectActive': false,
-                'activeEffects.p2.fogUntil': now + 30000,
-                player2Equipment: nextP2Equip,
-                player2Logs: arrayUnion(`🛡️ Sương mù bị phản đòn lại Bot trong 30s!`)
-              };
-              if (counterIdx !== -1) {
-                const nextP1Equip = [...p1Equip];
-                nextP1Equip.splice(counterIdx, 1);
-                p1Updates.player1Equipment = nextP1Equip;
-              }
-              await updateDoc(roomRef, p1Updates);
-              addArenaLogStore('🛡️ [Thẻ Phản Đòn] Đã tự động phản ngược Mù Sương 30s về Bot!');
+          } else if (availableCardId === 'card_smoke_fog') {
+            if (isShieldActive) {
+              await updateDoc(roomRef, {
+                [`activeEffects.${oppRole}.reflectActive`]: false,
+                [`activeEffects.${botRole}.fogUntil`]: now + 30000,
+                [botEquipKey]: currentBotEquip,
+                [botRole === 'p1' ? 'player1Logs' : 'player2Logs']: arrayUnion(`🛡️ Sương mù bị phản đòn lại Bot trong 30s!`)
+              });
+              addArenaLogStore('🛡️ [Khiên Phản Đòn] Đã tự động phản ngược Mù Sương 30s về Bot!');
+              playSound.success?.();
+              showCardAnnouncement('🛡️', 'KHIÊN ĐÃ PHẢN ĐÒN!', 'Chiêu Mù Sương của Bot đã bị phản ngược lại Bot (30s)!', 'from-orange-500 to-amber-600');
             } else {
               await updateDoc(roomRef, {
-                'activeEffects.p1.fogUntil': now + 30000,
-                player2Equipment: nextP2Equip,
-                player1Logs: arrayUnion(`🌫️ Bot tung Sương Mù che mắt bạn trong 30s!`)
+                [`activeEffects.${oppRole}.fogUntil`]: now + 30000,
+                [botEquipKey]: currentBotEquip,
+                [oppRole === 'p1' ? 'player1Logs' : 'player2Logs']: arrayUnion(`🌫️ Bot tung Sương Mù che mắt bạn trong 30s!`)
               });
               addArenaLogStore('🌫️ [Bot] Đối thủ Bot đã dùng Thẻ Mù Sương lên bạn (30s)!');
+              playSound.warning?.() || playSound.click?.();
+              showCardAnnouncement('🌫️', 'BẠN BỊ MÙ SƯƠNG (30s)!', 'Dùng Thẻ Giải Trừ hoặc Thẻ Phản Đòn để thoát ngay!', 'from-purple-600 to-indigo-800');
             }
-          } else if (cardId === 'card_progress_steal') {
+          } else if (availableCardId === 'card_progress_steal') {
             const p1Prog = rData.player1Progress || 0;
             const p2Prog = rData.player2Progress || 0;
-            const stealAmount = Math.min(10, p1Prog);
-            await updateDoc(roomRef, {
-              player1Progress: Math.max(0, p1Prog - stealAmount),
-              player2Progress: Math.min(100, p2Prog + stealAmount),
-              player2Equipment: nextP2Equip,
-              player1Logs: arrayUnion(`💥 Bot đã cướp ${stealAmount}% tiến độ của bạn!`)
-            });
-            addArenaLogStore(`🥷 [Bot] Đối thủ Bot đã đánh cắp ${stealAmount}% tiến độ của bạn!`);
+            const myProg = botRole === 'p1' ? p1Prog : p2Prog;
+            const oppProg = botRole === 'p1' ? p2Prog : p1Prog;
+            const stealAmount = Math.min(10, oppProg);
+
+            if (isShieldActive) {
+              const newBotProg = Math.max(0, myProg - stealAmount);
+              const newOppProg = Math.min(100, oppProg + stealAmount);
+              await updateDoc(roomRef, {
+                [`activeEffects.${oppRole}.reflectActive`]: false,
+                [botRole === 'p1' ? 'player1Progress' : 'player2Progress']: newBotProg,
+                [oppRole === 'p1' ? 'player1Progress' : 'player2Progress']: newOppProg,
+                [botEquipKey]: currentBotEquip,
+                [oppRole === 'p1' ? 'player1Logs' : 'player2Logs']: arrayUnion(`🛡️ Khiên Phản Đòn phản ngược +${stealAmount}% tiến độ từ Bot sang bạn!`)
+              });
+              addArenaLogStore(`🛡️ [Khiên Phản Đòn] Đã phản ngược cú cướp tiến độ của Bot (+${stealAmount}%)!`);
+              playSound.success?.();
+              showCardAnnouncement('🛡️', 'KHIÊN ĐÃ PHẢN ĐÒN!', `Đã phản ngược cú cướp điểm của Bot! (+${stealAmount}% cho bạn)`, 'from-orange-500 to-amber-600');
+            } else {
+              const newOppProg = Math.max(0, oppProg - stealAmount);
+              const newBotProg = Math.min(100, myProg + stealAmount);
+
+              await updateDoc(roomRef, {
+                [botRole === 'p1' ? 'player1Progress' : 'player2Progress']: newBotProg,
+                [oppRole === 'p1' ? 'player1Progress' : 'player2Progress']: newOppProg,
+                [botEquipKey]: currentBotEquip,
+                [oppRole === 'p1' ? 'player1Logs' : 'player2Logs']: arrayUnion(`💥 Bot đã cướp ${stealAmount}% tiến độ của bạn!`)
+              });
+              addArenaLogStore(`🥷 [Bot] Đối thủ Bot đã đánh cắp ${stealAmount}% tiến độ của bạn!`);
+              playSound.warning?.() || playSound.click?.();
+              showCardAnnouncement('🥷', 'BOT ĐÁNH CẮP TIẾN ĐỘ!', `Bot đã đánh cắp ${stealAmount}% tiến độ của bạn!`, 'from-rose-600 to-red-700');
+            }
+          } else if (availableCardId === 'card_magic_hand') {
+            if (oppEquip.length > 0) {
+              const randIdx = Math.floor(Math.random() * oppEquip.length);
+              const stolenCardId = oppEquip[randIdx];
+              oppEquip.splice(randIdx, 1);
+              currentBotEquip.push(stolenCardId);
+              const stolenDef = getEquipmentById(stolenCardId);
+
+              await updateDoc(roomRef, {
+                [botEquipKey]: currentBotEquip,
+                [oppEquipKey]: oppEquip,
+                [oppRole === 'p1' ? 'player1Logs' : 'player2Logs']: arrayUnion(`⚠️ Bot đã dùng Bàn Tay Ma Thuật cướp thẻ [${stolenDef?.name || stolenCardId}] của bạn!`)
+              });
+              addArenaLogStore(`⚠️ [Bot] Bot đã dùng Bàn Tay Ma Thuật cướp thẻ [${stolenDef?.name || stolenCardId}] của bạn!`);
+              playSound.warning?.() || playSound.click?.();
+              showCardAnnouncement('🖐️', 'BOT DÙNG BÀN TAY MA THUẬT!', `Bot đã cướp thẻ [${stolenDef?.name || stolenCardId}] của bạn!`, 'from-purple-600 to-fuchsia-800');
+            }
           }
         } catch (botSkillErr) {
           console.warn("Lỗi bot tung chiêu:", botSkillErr);
@@ -2217,11 +2456,13 @@ function DauTruongContent() {
   // KÍCH HOẠT BOT PLAYBACK VÀ SKILLS NẾU LÀ TRẬN ĐẤU VỚI BOT KHI BẮT ĐẦU VÀO TRẬN (PLAYING)
   useEffect(() => {
     if (arenaState.status === 'playing' && activeRoomId && latestRoomDataRef.current?.isBotMatch) {
+      if (isBotEngineStartedRef.current) return;
       const roomData = latestRoomDataRef.current;
       const botUid = botPlaybackInfoRef.current?.botUid || roomData?.botUid || roomData?.player2?.uid;
       const schedule = botPlaybackInfoRef.current?.schedule || 
-                       (roomData?.botSchedule ? roomData.botSchedule.map(s => ({ stepIndex: s.stepIndex, delayMs: s.cumulativeTimeMs })) : null);
+                       (roomData?.botSchedule ? roomData.botSchedule.map(s => ({ stepIndex: s.stepIndex, delayMs: s.delayMs || 18000 })) : null);
       if (schedule && schedule.length > 0 && botUid) {
+        isBotEngineStartedRef.current = true;
         startBotPlaybackEngine(
           activeRoomId,
           botUid,
@@ -2756,6 +2997,12 @@ function DauTruongContent() {
             // Đồng bộ hóa tiến độ của đối thủ từ Firestore
             if (oppProgress !== arenaState.opponentProgress) {
               updateOpponentProgress(oppProgress);
+            }
+
+            // Đồng bộ hóa tiến độ của bản thân từ Firestore (bảo toàn khi cướp hoặc bị cướp điểm)
+            const myProgress = isPlayer1 ? roomData.player1Progress : roomData.player2Progress;
+            if (typeof myProgress === 'number' && myProgress !== arenaState.playerProgress) {
+              updatePlayerProgress(myProgress);
             }
           }
 
@@ -3662,8 +3909,9 @@ function DauTruongContent() {
   // ----------------------------------------------------
 
   const calculateAndSyncProgress = async (subject, gameData, selectedAnswerPayload) => {
-    const newScore = gameData.score;
-    const currentProgress = Math.min(100, Math.round((newScore / 20) * 100));
+    const isCorrect = gameData.answered?.[gameData.answered?.length - 1]?.correct;
+    const prevProg = arenaState.playerProgress || 0;
+    const currentProgress = isCorrect ? Math.min(100, prevProg + 5) : prevProg;
 
     if (activeRoomId === 'local_sandbox') {
       updatePlayerProgress(currentProgress);
@@ -4655,6 +4903,21 @@ function DauTruongContent() {
             </div>
           )}
 
+          {/* TOAST THÔNG BÁO THẺ CHIÊU TRONG TRẬN (CARD ANNOUNCEMENT) */}
+          {cardAnnouncement && (
+            <div className={`fixed top-8 left-1/2 -translate-x-1/2 z-[9999999] bg-gradient-to-r ${cardAnnouncement.color || 'from-amber-500 to-yellow-600'} text-white px-6 py-3.5 rounded-2xl border-2 border-white/50 shadow-[0_0_40px_rgba(0,0,0,0.8)] flex items-center gap-3.5 font-mono animate-in slide-in-from-top duration-300 pointer-events-none backdrop-blur-md`}>
+              <span className="text-2xl shrink-0">{cardAnnouncement.icon}</span>
+              <div>
+                <div className="font-black text-sm uppercase tracking-wider text-white drop-shadow-md">
+                  {cardAnnouncement.title}
+                </div>
+                <div className="text-xs text-white/95 font-semibold mt-0.5 drop-shadow">
+                  {cardAnnouncement.desc}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* CỘT TRÁI (COL-SPAN-8): THÍ NGHIỆM TƯƠNG TÁC CỦA NGƯỜI CHƠI */}
           <div className="flex-1 flex flex-col bg-bg-secondary/95 backdrop-blur-xl border border-border-theme rounded-3xl p-4 lg:p-5 pb-3 lg:pb-4 shadow-2xl overflow-hidden relative h-full">
             
@@ -5544,13 +5807,24 @@ function DauTruongContent() {
               const isP1 = isPlayer1Role;
               const activeData = currentRoomData || latestRoomDataRef.current;
               const myEquippedCardIds = isP1 ? (activeData?.player1Equipment || []) : (activeData?.player2Equipment || []);
-              if (!myEquippedCardIds || myEquippedCardIds.length === 0) return null;
+              const myRoleKey = isP1 ? 'p1' : 'p2';
+              const myEffects = activeData?.activeEffects?.[myRoleKey] || {};
+              const isShieldActive = myEffects.reflectActive && (myEffects.reflectUntil ? myEffects.reflectUntil > Date.now() : true);
+              const shieldSecLeft = myEffects.reflectUntil ? Math.max(0, Math.ceil((myEffects.reflectUntil - Date.now()) / 1000)) : 0;
+
+              if ((!myEquippedCardIds || myEquippedCardIds.length === 0) && !isShieldActive) return null;
 
               return (
                 <div className="mt-3 pt-2.5 border-t border-border-theme flex items-center justify-between gap-3 bg-bg-primary/80 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-amber-500/30 shrink-0">
-                  <div className="flex items-center gap-1.5 text-amber-400 font-mono text-xs font-bold shrink-0">
+                  <div className="flex items-center gap-2 text-amber-400 font-mono text-xs font-bold shrink-0">
                     <Zap className="w-3.5 h-3.5 animate-pulse text-amber-400" />
-                    <span>THẺ BÀI STRATEGY:</span>
+                    <span>CHIẾN THUẬT:</span>
+                    {isShieldActive && (
+                      <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-400/50 animate-pulse">
+                        <ShieldAlert className="w-3 h-3 text-orange-400" />
+                        KHIÊN PHẢN ĐÒN ({shieldSecLeft}s)
+                      </span>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar py-0.5">
@@ -5558,16 +5832,41 @@ function DauTruongContent() {
                       const card = getEquipmentById(cardId);
                       if (!card) return null;
 
+                      let actionTag = 'DÙNG ⚡';
+                      let btnBg = 'from-amber-500/20 to-yellow-500/20 border-amber-500/40 text-amber-300';
+                      if (cardId === 'card_counter') {
+                        actionTag = 'PHẢN ĐÒN 🛡️';
+                        btnBg = 'from-orange-500/20 to-amber-500/20 border-orange-500/50 text-orange-300';
+                      } else if (cardId === 'card_progress_steal') {
+                        actionTag = 'CƯỚP ĐIỂM 🥷';
+                        btnBg = 'from-emerald-500/20 to-teal-500/20 border-emerald-500/40 text-emerald-300';
+                      } else if (cardId === 'card_time_freeze') {
+                        actionTag = 'ĐÔNG BĂNG ❄️';
+                        btnBg = 'from-cyan-500/20 to-blue-500/20 border-cyan-500/40 text-cyan-300';
+                      } else if (cardId === 'card_smoke_fog') {
+                        actionTag = 'MÙ SƯƠNG 🌫️';
+                        btnBg = 'from-purple-500/20 to-indigo-500/20 border-purple-500/40 text-purple-300';
+                      } else if (cardId === 'card_dispel') {
+                        actionTag = 'GIẢI TRỪ ✨';
+                        btnBg = 'from-teal-500/20 to-emerald-500/20 border-teal-500/40 text-teal-300';
+                      } else if (cardId === 'card_magic_hand') {
+                        actionTag = 'CƯỚP THẺ 🖐️';
+                        btnBg = 'from-fuchsia-500/20 to-pink-500/20 border-fuchsia-500/40 text-fuchsia-300';
+                      } else if (cardId === 'card_ai_assist') {
+                        actionTag = 'AI HỖ TRỢ 🤖';
+                        btnBg = 'from-violet-500/20 to-purple-500/20 border-violet-500/40 text-violet-300';
+                      }
+
                       return (
                         <button
                           key={`${cardId}_${idx}`}
                           onClick={() => handleUseCard(cardId)}
-                          className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:from-amber-500/30 hover:to-yellow-500/30 border border-amber-500/40 text-amber-300 hover:text-white transition-all text-xs font-mono font-bold active:scale-95 shrink-0 shadow-sm cursor-pointer"
+                          className={`flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r ${btnBg} hover:brightness-125 border transition-all text-xs font-mono font-bold active:scale-95 shrink-0 shadow-sm cursor-pointer`}
                           title={card.description}
                         >
                           <span>{card.name}</span>
-                          <span className="text-[10px] bg-amber-400 text-zinc-950 px-1.5 py-0.2 rounded-full font-black">
-                            DÙNG ⚡
+                          <span className="text-[10px] bg-zinc-950/80 px-1.5 py-0.5 rounded font-black border border-white/20">
+                            {actionTag}
                           </span>
                         </button>
                       );
@@ -5629,11 +5928,38 @@ function DauTruongContent() {
                       {arenaState.opponentInfo?.level || 1}
                     </div>
                   </div>
-                  <div>
-                    <h4 className="text-text-primary font-bold text-sm leading-tight">{arenaState.opponentInfo?.name || 'Đang chờ đối thủ...'}</h4>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-text-primary font-bold text-sm leading-tight truncate">{arenaState.opponentInfo?.name || 'Đang chờ đối thủ...'}</h4>
                     <span className="text-[9px] text-rose-400 font-mono font-bold px-1.5 py-0.5 bg-rose-500/10 rounded mt-1 inline-block uppercase">
                       {arenaState.opponentInfo?.title || 'Tập sự'}
                     </span>
+
+                    {/* HIỂN THỊ TRẠNG THÁI KHỐNG CHẾ ĐỐI THỦ (ĐÔNG BĂNG / MÙ SƯƠNG) */}
+                    {(() => {
+                      const isP1 = isPlayer1Role;
+                      const activeData = currentRoomData || latestRoomDataRef.current;
+                      const oppEffects = isP1 ? activeData?.activeEffects?.p2 : activeData?.activeEffects?.p1;
+                      const freezeRemainingSec = oppEffects?.frozenUntil ? Math.max(0, Math.ceil((oppEffects.frozenUntil - nowTick) / 1000)) : 0;
+                      const fogRemainingSec = oppEffects?.fogUntil ? Math.max(0, Math.ceil((oppEffects.fogUntil - nowTick) / 1000)) : 0;
+
+                      if (freezeRemainingSec === 0 && fogRemainingSec === 0) return null;
+                      return (
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                          {freezeRemainingSec > 0 && (
+                            <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 font-mono text-[9px] font-bold flex items-center gap-1 animate-pulse">
+                              <Snowflake className="w-2.5 h-2.5 text-cyan-400 shrink-0" />
+                              <span>BỊ ĐÓNG BĂNG ({freezeRemainingSec}s)</span>
+                            </span>
+                          )}
+                          {fogRemainingSec > 0 && (
+                            <span className="px-1.5 py-0.5 rounded bg-purple-500/20 border border-purple-400/40 text-purple-300 font-mono text-[9px] font-bold flex items-center gap-1">
+                              <CloudFog className="w-2.5 h-2.5 text-purple-400 shrink-0" />
+                              <span>MÙ SƯƠNG ({fogRemainingSec}s)</span>
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* Bong bóng chat nổi của đối thủ */}

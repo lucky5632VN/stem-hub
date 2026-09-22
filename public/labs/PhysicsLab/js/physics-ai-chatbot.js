@@ -28,7 +28,9 @@ QUY TẮC BIÊN GIỚI MÔN HỌC (TUYỆT ĐỐI BẮT BUỘC):
 QUY TẮC PHẢN HỒI BẮT BUỘC - TUYỆT ĐỐI TUÂN THỦ:
 1. TRẢ LỜI TÓM TẮT, SÚC TÍCH (DƯỚI 80 TỪ): Đi thẳng vào trọng tâm cốt lõi. Tuyệt đối KHÔNG giải thích dài dòng lan man.
 2. TUYỆT ĐỐI KHÔNG CHÀO HỎI, KHÔNG XƯNG DANH AI: Không nói "Chào em...", "Thầy là...", không có câu kết sáo rỗng ("Chúc em học tốt...", "Nếu còn thắc mắc..."). Xóa bỏ hoàn toàn mọi dấu vết robot, trả lời trực diện như một chuyên gia bách khoa.
-3. BẮT BUỘC ĐƯA CÔNG THỨC CHUẨN LATEX: Mọi công thức Vật lý (dao động, sóng cơ, sóng điện từ, điện xoay chiều, quang hình, hạt nhân, lực, năng lượng, định luật ôm) BẮT BUỘC PHẢI ĐƯA CÔNG THỨC VÀO và viết CHUẨN LATEX bằng $...$ (nội dòng) hoặc $$...$$ (khối độc lập).
+3. BẮT BUỘC ĐƯA CÔNG THỨC CHUẨN LATEX & BỌC DẤU ĐÔ LA: Mọi công thức và ký hiệu Vật lý (kể cả ký hiệu đơn lẻ như \\lambda, \\omega, \\vec{v}, \\perp, \\parallel hay khối công thức) BẮT BUỘC PHẢI BỌC TRONG $...$ (nội dòng) hoặc $$...$$ (khối độc lập).
+   TUYỆT ĐỐI KHÔNG VIẾT KÝ HIỆU LATEX TRƠ TRỌI MÀ THIẾU DẤU $.
+   Viết đúng chuẩn LaTeX: dùng \\sqrt{\\frac{l}{g}} (KHÔNG dùng \\sqrt((l/g))), \\vec{v} \\perp \\vec{u} viết là $\\vec{v} \\perp \\vec{u}$, bước sóng $\\lambda$ bọc trong $...$.
    Ví dụ: $T = 2\\pi\\sqrt{\\frac{l}{g}}$, $T = 2\\pi\\sqrt{\\frac{m}{k}}$, $x = A\\cos(\\omega t + \\varphi)$, $\\lambda = \\frac{v}{f}$, $I = \\frac{E}{R + r}$, $Z = \\sqrt{R^2 + (Z_L - Z_C)^2}$, $E = mc^2$.
 4. KHÔNG ĐỂ DẤU SAO THÔ: Không để lại các dấu sao lẻ loi (*) trong câu trả lời.`;
 
@@ -144,56 +146,190 @@ QUY TẮC PHẢN HỒI BẮT BUỘC - TUYỆT ĐỐI TUÂN THỦ:
   let isLoading = false;
   let isDrawerOpen = false;
 
-  // Format các ký hiệu toán/lý sang Unicode & HTML sạch đẹp
-  function formatMathSymbols(str) {
-    if (!str) return '';
-    return str
-      .replace(/\$\$(.+?)\$\$/gs, '$1')
-      .replace(/\$(.+?)\$/g, '$1')
-      .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1 / $2)')
-      .replace(/\\sqrt\{([^}]+)\}/g, '√($1)')
-      .replace(/_\{([^}]+)\}/g, '<sub>$1</sub>')
-      .replace(/\^\{([^}]+)\}/g, '<sup>$1</sup>')
-      .replace(/\^2/g, '²')
-      .replace(/\^3/g, '³')
-      .replace(/\^n/g, 'ⁿ')
-      .replace(/\\pi/g, 'π')
-      .replace(/\\omega/g, 'ω')
-      .replace(/\\Omega/g, 'Ω')
-      .replace(/\\lambda/g, 'λ')
-      .replace(/\\Delta/g, 'Δ')
-      .replace(/\\varphi/g, 'φ')
-      .replace(/\\alpha/g, 'α')
-      .replace(/\\beta/g, 'β')
-      .replace(/\\theta/g, 'θ')
-      .replace(/\\mu/g, 'μ')
-      .replace(/\\rho/g, 'ρ')
-      .replace(/\\infty/g, '∞')
-      .replace(/\\approx/g, '≈')
-      .replace(/\\times/g, '×')
-      .replace(/\\cdot/g, '·')
-      .replace(/\\pm/g, '±')
-      .replace(/\\leq/g, '≤')
-      .replace(/\\geq/g, '≥')
-      .replace(/\\neq/g, '≠');
+  // Tự động nạp KaTeX CSS/JS và Bridge độc lập, không phụ thuộc trang cha
+  function ensureKaTeXLoaded() {
+    if (typeof document === 'undefined') return;
+    const isFile = typeof window !== 'undefined' && window.location.protocol === 'file:';
+    const path = typeof window !== 'undefined' ? window.location.pathname : '';
+    const isJsDir = path.includes('/js/') || path.includes('\\js\\');
+
+    if (!document.getElementById('stem-shared-katex-css')) {
+      const link = document.createElement('link');
+      link.id = 'stem-shared-katex-css';
+      link.rel = 'stylesheet';
+      link.href = isFile ? (isJsDir ? '../../shared/katex/katex.min.css' : '../shared/katex/katex.min.css') : '/labs/shared/katex/katex.min.css';
+      (document.head || document.documentElement).appendChild(link);
+    }
+
+    if (!window.katex && !document.getElementById('stem-shared-katex-js')) {
+      const script = document.createElement('script');
+      script.id = 'stem-shared-katex-js';
+      script.src = isFile ? (isJsDir ? '../../shared/katex/katex.min.js' : '../shared/katex/katex.min.js') : '/labs/shared/katex/katex.min.js';
+      script.async = true;
+      script.onload = () => {
+        console.log('[Physics AI] KaTeX runtime ready');
+        renderMessages();
+      };
+      (document.head || document.documentElement).appendChild(script);
+    }
+
+    if (!window.StemLabAIBridge && !document.getElementById('stem-shared-bridge-js')) {
+      const bScript = document.createElement('script');
+      bScript.id = 'stem-shared-bridge-js';
+      bScript.src = isFile ? (isJsDir ? '../../shared/stem-lab-ai-bridge.js' : '../shared/stem-lab-ai-bridge.js') : '/labs/shared/stem-lab-ai-bridge.js';
+      bScript.async = true;
+      (document.head || document.documentElement).appendChild(bScript);
+    }
   }
 
-  // Đơn giản hóa markdown parser cho văn bản và công thức
+  ensureKaTeXLoaded();
+
+  // Bộ phân tích & render công thức KaTeX và Markdown toàn diện
   function parseSimpleMarkdown(text) {
     if (!text) return '';
     if (window.StemLabAIBridge && typeof window.StemLabAIBridge.formatAIFormulaText === 'function') {
       return window.StemLabAIBridge.formatAIFormulaText(text);
     }
-    let formatted = formatMathSymbols(text);
-    let html = formatted
+    return formatAIFormulaWithKaTeX(text);
+  }
+
+  function formatAIFormulaWithKaTeX(rawText) {
+    if (!rawText || typeof rawText !== 'string') return '';
+    let text = rawText.trim();
+
+    // 1. Tự động sửa các lỗi gõ công thức thường gặp
+    text = text.replace(/\x0c/g, '\\f').replace(/\x08/g, '\\b');
+    text = text.replace(/\n\s*(\\cdot|·)\s*\n/g, ' \\cdot ');
+    text = text.replace(/=\s*\n\s*/g, ' = ');
+    text = text.replace(/\n\s*(\\cdot|·)\s*/g, ' \\cdot ');
+
+    // Sửa \sqrt((l / g)) hoặc \sqrt(l / g) thành \sqrt{\frac{l}{g}}
+    text = text.replace(/\\sqrt\s*\(\s*\(\s*([^/]+?)\s*\/\s*([^)]+?)\s*\)\s*\)/g, '\\sqrt{\\frac{$1}{$2}}');
+    text = text.replace(/\\sqrt\s*\(\s*([^/]+?)\s*\/\s*([^)]+?)\s*\)/g, '\\sqrt{\\frac{$1}{$2}}');
+    text = text.replace(/\\sqrt\s*\(\s*\(\s*([^)]+?)\s*\)\s*\)/g, '\\sqrt{$1}');
+    text = text.replace(/\\sqrt\s*\(\s*([^)]+?)\s*\)/g, '\\sqrt{$1}');
+
+    // Sửa \frac a b thiếu ngoặc
+    text = text.replace(/\b(?:\\?frac)\s+([a-zA-Z0-9^]+)\s+([a-zA-Z0-9^]+)\b/g, '\\frac{$1}{$2}');
+
+    // 2. Chuyển đổi các dòng công thức độc lập chưa có dấu $ thành $$...$$
+    const lines = text.split('\n');
+    const processedLines = lines.map(line => {
+      const trimmed = line.trim();
+      if (!trimmed) return line;
+
+      // Đã có dấu bọc toán học hoặc cấu trúc block
+      if (trimmed.startsWith('$') || trimmed.startsWith('$$') || trimmed.startsWith('```') || trimmed.startsWith('<') || trimmed.startsWith('#')) {
+        return line;
+      }
+
+      // Nhận diện công thức Vật lý / Toán học độc lập (chứa macro LaTeX hoặc dấu bằng toán học)
+      const hasLatexMacro = /\\(vec|perp|parallel|lambda|frac|sqrt|quad|qquad|text|mathbb|mathbf|left|right|omega|Omega|pi|Delta|alpha|beta|theta|mu|rho|times|cdot|to|approx|neq|leq|geq|in|infty|cos|sin|tan|cot)\b/.test(trimmed);
+      const hasMathEquality = /^([a-zA-Z0-9_'\s\-\+\*\/\(\)]+)\s*=\s*([a-zA-Z0-9_'\s\-\+\*\/\(\)\\]+)$/.test(trimmed) && /[\\_^{}]/.test(trimmed);
+
+      // Đếm số từ tiếng Việt có dấu để phân biệt câu thuyết minh
+      const vietnameseWordMatches = trimmed.match(/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/gi);
+      const vietnameseWordCount = vietnameseWordMatches ? vietnameseWordMatches.length : 0;
+
+      if ((hasLatexMacro || hasMathEquality) && vietnameseWordCount < 5 && !trimmed.startsWith('•') && !trimmed.startsWith('-')) {
+        return `$$${trimmed}$$`;
+      }
+
+      // Dòng văn bản: Bọc macro LaTeX đơn lẻ thành $...$
+      let inlineProcessed = line;
+      inlineProcessed = inlineProcessed.replace(/(?<!\$)\\vec\{[^{}]+\}(?!\$)/g, (m) => `$${m}$`);
+      inlineProcessed = inlineProcessed.replace(/(?<!\$)\\(lambda|pi|omega|Omega|Delta|varphi|phi|alpha|beta|theta|mu|rho|sigma|tau|varepsilon|perp|parallel|approx|neq|leq|geq)(?![a-zA-Z\$])/g, (m) => `$${m}$`);
+
+      return inlineProcessed;
+    });
+
+    text = processedLines.join('\n');
+
+    // 3. Render KaTeX tokens
+    const katexTokens = [];
+    const pushKaTeX = (latex, isDisplay = false) => {
+      let formula = (latex || '').trim();
+      if (!formula) return '';
+
+      let renderedHtml = '';
+      if (typeof window !== 'undefined' && window.katex && typeof window.katex.renderToString === 'function') {
+        try {
+          renderedHtml = window.katex.renderToString(formula, {
+            displayMode: isDisplay,
+            throwOnError: false,
+            strict: 'ignore'
+          });
+        } catch (e) {
+          renderedHtml = isDisplay ? `<div class="katex-fallback" style="margin:6px 0;text-align:center;font-weight:600;">${formula}</div>` : `<span class="katex-fallback" style="font-weight:600;">${formula}</span>`;
+        }
+      } else {
+        // Fallback Unicode khi KaTeX đang tải
+        const cleanUni = formula
+          .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1 / $2)')
+          .replace(/\\sqrt\{([^}]+)\}/g, '√($1)')
+          .replace(/_\{([^}]+)\}/g, '<sub>$1</sub>')
+          .replace(/\^\{([^}]+)\}/g, '<sup>$1</sup>')
+          .replace(/\\pi/g, 'π')
+          .replace(/\\omega/g, 'ω')
+          .replace(/\\lambda/g, 'λ')
+          .replace(/\\Delta/g, 'Δ')
+          .replace(/\\times/g, '×')
+          .replace(/\\cdot/g, '·')
+          .replace(/\\to/g, '→');
+        renderedHtml = isDisplay ? `<div style="margin:4px 0;text-align:center;color:#38bdf8;">${cleanUni}</div>` : `<span style="color:#38bdf8;font-weight:600;">${cleanUni}</span>`;
+      }
+
+      const token = `###STEM_KATEX_${katexTokens.length}###`;
+      katexTokens.push(renderedHtml);
+      return token;
+    };
+
+    // Render Display Math: $$...$$ và \[...\]
+    text = text.replace(/\$\$([\s\S]+?)\$\$/g, (_, p1) => pushKaTeX(p1, true));
+    text = text.replace(/\\\[([\s\S]+?)\\\]/g, (_, p1) => pushKaTeX(p1, true));
+
+    // Render Inline Math: $...$ và \(...\)
+    text = text.replace(/\\\(([\s\S]+?)\\\)/g, (_, p1) => pushKaTeX(p1, false));
+    text = text.replace(/\$([^\$\n]+?)\$/g, (_, p1) => pushKaTeX(p1, false));
+
+    // Xử lý các phân số & căn thức còn sót
+    text = text.replace(/\\d?frac\{([^}]+)\}\{([^}]+)\}/g, (match, n, d) => pushKaTeX(`\\frac{${n}}{${d}}`, false));
+    text = text.replace(/\\sqrt\{([^}]+)\}/g, (match, r) => pushKaTeX(`\\sqrt{${r}}`, false));
+
+    // Ký hiệu phổ biến
+    text = text
+      .replace(/-->|->/g, ' → ')
+      .replace(/<=>|<==>/g, ' ⇌ ')
+      .replace(/\\Delta/g, 'Δ')
+      .replace(/\\pi/g, 'π')
+      .replace(/\\times/g, '×')
+      .replace(/\\cdot/g, '·');
+
+    // Markdown headers, bold, code
+    text = text
+      .replace(/^###\s+(.+)$/gm, '<h4 style="font-size:0.9rem;font-weight:700;color:#38bdf8;margin:6px 0 2px;">$1</h4>')
+      .replace(/^##\s+(.+)$/gm, '<h3 style="font-size:0.95rem;font-weight:700;color:#38bdf8;margin:8px 0 3px;">$1</h3>')
+      .replace(/^#\s+(.+)$/gm, '<h2 style="font-size:1rem;font-weight:700;color:#38bdf8;margin:10px 0 4px;">$1</h2>')
       .replace(/```([\s\S]*?)```/g, '<pre style="background:rgba(0,0,0,0.4);padding:8px 12px;border-radius:8px;overflow-x:auto;font-family:monospace;font-size:0.8rem;margin:6px 0;"><code>$1</code></pre>')
-      .replace(/`([^`]+)`/g, '<code style="background:rgba(0,0,0,0.3);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:0.85em;">$1</code>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*/g, '')
-      .replace(/^[\-\*•]\s+(.+)$/gm, '<li style="margin:2px 0;">$1</li>')
-      .replace(/\n\n/g, '<br/><br/>')
-      .replace(/\n/g, '<br/>');
-    return html;
+      .replace(/`([^`]+)`/g, '<code style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:4px;font-size:0.88em;color:#38bdf8;">$1</code>')
+      .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+    // Bullet items
+    text = text.replace(/^[\-\*•]\s+(.+)$/gm, '<li style="margin:2px 0;list-style-type:disc;list-style-position:inside;">$1</li>');
+
+    // Xóa các dấu sao lẻ thừa
+    text = text.replace(/\*/g, '');
+
+    // Ngắt dòng
+    text = text.replace(/\n\n+/g, '<br/><br/>').replace(/\n/g, '<br/>');
+
+    // Khôi phục KaTeX tokens
+    katexTokens.forEach((tokenHtml, idx) => {
+      text = text.replace(`###STEM_KATEX_${idx}###`, tokenHtml);
+    });
+
+    return text;
   }
 
   function injectStyles() {
@@ -339,6 +475,19 @@ QUY TẮC PHẢN HỒI BẮT BUỘC - TUYỆT ĐỐI TUÂN THỦ:
         background: rgba(30, 41, 59, 0.9);
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-bottom-left-radius: 4px;
+      }
+      .pai-msg .katex-display {
+        margin: 8px 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 4px 0;
+      }
+      .pai-msg .katex {
+        font-size: 1.05em;
+        color: #38bdf8;
+      }
+      .pai-msg .katex .mord.text {
+        color: #e2e8f0;
       }
       .pai-input-area {
         padding: 12px;
@@ -827,7 +976,7 @@ QUY TẮC PHẢN HỒI BẮT BUỘC - TUYỆT ĐỐI TUÂN THỦ:
         if (window.StemLabAIBridge && typeof window.StemLabAIBridge.formatUserMessage === 'function') {
           div.innerHTML = window.StemLabAIBridge.formatUserMessage(textContent);
         } else {
-          div.textContent = textContent;
+          div.innerHTML = formatAIFormulaWithKaTeX(textContent);
         }
       } else {
         div.innerHTML = parseSimpleMarkdown(textContent);
@@ -850,10 +999,8 @@ QUY TẮC PHẢN HỒI BẮT BUỘC - TUYỆT ĐỐI TUÂN THỦ:
 
     // container.scrollTop = container.scrollHeight; // Auto-scroll disabled
 
-    if (window.MathJax && window.MathJax.typesetPromise) {
-      try {
-        window.MathJax.typesetPromise([container]).catch(function(e) { console.warn(e); });
-      } catch (e) {}
+    if (typeof window !== 'undefined' && !window.katex) {
+      ensureKaTeXLoaded();
     }
   }
 
@@ -894,10 +1041,8 @@ QUY TẮC PHẢN HỒI BẮT BUỘC - TUYỆT ĐỐI TUÂN THỦ:
       console.warn('[Physics AI] Chỉ hiển thị lỗi tạm thời trên UI, TUYỆT ĐỐI KHÔNG LƯU CACHE.');
     }
 
-    if (window.MathJax && window.MathJax.typesetPromise && targetDiv) {
-      try {
-        window.MathJax.typesetPromise([targetDiv]).catch(function(e) {});
-      } catch (e) {}
+    if (typeof window !== 'undefined' && !window.katex) {
+      ensureKaTeXLoaded();
     }
   }
 

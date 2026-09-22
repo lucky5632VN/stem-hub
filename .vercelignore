@@ -1,0 +1,8 @@
+*.mp4
+*.m4v
+*.mov
+*.docx
+*.zip
+*.bin
+scratch/
+tests/

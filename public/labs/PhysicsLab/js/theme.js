@@ -193,17 +193,39 @@ function injectPhysicsAIChatbot() {
     const isFile = typeof window !== 'undefined' && window.location.protocol === 'file:';
     const path = typeof window !== 'undefined' ? window.location.pathname : '';
     const isJsDir = path.includes('/js/') || path.includes('\\js\\');
+
+    // Nạp KaTeX CSS & JS nếu trang chưa có
+    if (!document.getElementById('stem-shared-katex-css')) {
+        const link = document.createElement('link');
+        link.id = 'stem-shared-katex-css';
+        link.rel = 'stylesheet';
+        link.href = isFile ? (isJsDir ? '../../shared/katex/katex.min.css' : '../shared/katex/katex.min.css') : '/labs/shared/katex/katex.min.css';
+        (document.head || document.documentElement).appendChild(link);
+    }
+    if (!window.katex && !document.getElementById('stem-shared-katex-js')) {
+        const kScript = document.createElement('script');
+        kScript.id = 'stem-shared-katex-js';
+        kScript.src = isFile ? (isJsDir ? '../../shared/katex/katex.min.js' : '../shared/katex/katex.min.js') : '/labs/shared/katex/katex.min.js';
+        (document.head || document.documentElement).appendChild(kScript);
+    }
+    if (!window.StemLabAIBridge && !document.getElementById('stem-shared-bridge-js')) {
+        const bScript = document.createElement('script');
+        bScript.id = 'stem-shared-bridge-js';
+        bScript.src = isFile ? (isJsDir ? '../../shared/stem-lab-ai-bridge.js' : '../shared/stem-lab-ai-bridge.js') : '/labs/shared/stem-lab-ai-bridge.js';
+        (document.head || document.documentElement).appendChild(bScript);
+    }
+
     let scriptPath;
     if (isFile) {
-        scriptPath = isJsDir ? './physics-ai-chatbot.js?v=1.0.1' : 'js/physics-ai-chatbot.js?v=1.0.1';
+        scriptPath = isJsDir ? './physics-ai-chatbot.js?v=2.0.1' : 'js/physics-ai-chatbot.js?v=2.0.1';
     } else {
-        scriptPath = '/labs/PhysicsLab/js/physics-ai-chatbot.js?v=1.0.1';
+        scriptPath = '/labs/PhysicsLab/js/physics-ai-chatbot.js?v=2.0.1';
     }
     const aiScript = document.createElement('script');
     aiScript.src = scriptPath;
     aiScript.async = true;
     (document.head || document.documentElement).appendChild(aiScript);
-    console.log('[Theme System] Injected Physics AI Chatbot via:', scriptPath);
+    console.log('[Theme System] Injected Physics AI Chatbot & KaTeX via:', scriptPath);
 }
 
 // Tự kích hoạt ngay khi theme.js tải

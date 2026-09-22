@@ -711,19 +711,19 @@ export const clientFunctions = {
       
       let stepDelay = 0;
       if (subject === 'chemistry') {
-        // Hóa học (5 bước): Học sinh thật thao tác & đọc phản ứng tốn 14-25 giây mỗi giai đoạn
-        stepDelay = Math.floor((14000 + Math.random() * 12000) * eloSpeedFactor);
+        // Hóa học (5 bước): Thao tác mô phỏng thí nghiệm & phản ứng tốn 18-32 giây mỗi giai đoạn
+        stepDelay = Math.floor((18000 + Math.random() * 14000) * eloSpeedFactor);
       } else if (subject === 'math' || subject === 'physics') {
-        // Toán / Lý (30 câu): Học sinh suy nghĩ 8-16 giây mỗi câu
-        stepDelay = Math.floor((7500 + Math.pow(Math.random(), 2) * 9000) * eloSpeedFactor);
+        // Toán / Lý (30 câu): Học sinh THPT đọc đề, nháp công thức, tính toán 15-28 giây mỗi câu
+        stepDelay = Math.floor((15000 + Math.pow(Math.random(), 1.5) * 13000) * eloSpeedFactor);
       } else {
-        // Sinh học: 5-10 giây mỗi câu MCQ
-        stepDelay = Math.floor((5500 + Math.random() * 6000) * eloSpeedFactor);
+        // Sinh học: Đọc câu hỏi trắc nghiệm & phân tích quy luật 12-22 giây mỗi câu
+        stepDelay = Math.floor((12000 + Math.random() * 10000) * eloSpeedFactor);
       }
 
-      // Thỉnh thoảng tạm dừng 4-5 giây để suy nghĩ tự nhiên
-      if (i > 0 && i % 4 === 0) {
-        stepDelay += Math.floor(5000 * eloSpeedFactor);
+      // Thỉnh thoảng gặp câu phân hóa khó: dừng thêm 8-14 giây để tính toán cẩn thận
+      if (i > 0 && (i % 3 === 0 || i % 7 === 0)) {
+        stepDelay += Math.floor((8000 + Math.random() * 6000) * eloSpeedFactor);
       }
 
       cumulativeTimeMs += stepDelay;
@@ -894,18 +894,40 @@ export const clientFunctions = {
       const scoreKey = isBotP1 ? 'player1Score' : 'player2Score';
       const progKey = isBotP1 ? 'player1Progress' : 'player2Progress';
       const logsKey = isBotP1 ? 'player1Logs' : 'player2Logs';
+      const botRole = isBotP1 ? 'p1' : 'p2';
 
       const freshSnap = await getDoc(matchRef);
       const freshData = freshSnap.exists() ? freshSnap.data() : matchDoc;
 
+      // 1. KIỂM TRA ĐÓNG BĂNG: NẾU BOT ĐANG BỊ ĐÓNG BĂNG THÌ KHÔNG THỂ NỘP CÂU TRẢ LỜI
+      const botEffects = freshData.activeEffects?.[botRole] || {};
+      const now = Date.now();
+      if (botEffects.frozenUntil && botEffects.frozenUntil > now) {
+        console.log(`❄️ [Bot submitAnswer] Bot đang bị đóng băng đến ${botEffects.frozenUntil} -> Chặn trả lời.`);
+        return { success: false, reason: 'Bot is currently frozen by player card.' };
+      }
+
+      // 2. KIỂM TRA MÙ SƯƠNG: NẾU BOT ĐANG BỊ MÙ SƯƠNG THÌ TĂNG TỶ LỆ TRẢ LỜI SAI
+      let isStepCorrect = step.isCorrect;
+      if (botEffects.fogUntil && botEffects.fogUntil > now) {
+        if (Math.random() < 0.40) {
+          isStepCorrect = false;
+        }
+      }
+
       const currentScore = freshData[scoreKey] || 0;
-      const newScore = step.isCorrect ? currentScore + (step.scoreDelta || 1) : currentScore;
-      const newProgress = Math.min(100, Math.max(freshData[progKey] || 0, step.progress || 0));
+      const newScore = isStepCorrect ? currentScore + (step.scoreDelta || 1) : currentScore;
+
+      // 3. TÍNH TIẾN ĐỘ THỰC TẾ (CỘNG TÍCH LŨY TỪ TIẾN ĐỘ HIỆN TẠI, BẢO LƯU KẾT QUẢ CƯỚP TIẾN ĐỘ)
+      const currentProgress = freshData[progKey] || 0;
+      const totalSteps = matchDoc.subject === 'chemistry' ? 5 : Math.max(30, schedule.length || 30);
+      const stepProgDelta = 100 / totalSteps;
+      const newProgress = Math.min(100, Math.max(0, currentProgress + (isStepCorrect ? stepProgDelta : 0)));
 
       const botName = isBotP1 ? freshData.player1.name : (freshData.player2?.name || 'Đối thủ');
-      const logMsg = step.isCorrect
-        ? `✅ [Server] ${botName} trả lời đúng (Tiến độ: ${newProgress}%)`
-        : `❌ [Server] ${botName} trả lời sai (Tiến độ: ${newProgress}%)`;
+      const logMsg = isStepCorrect
+        ? `✅ [Server] ${botName} trả lời đúng (Tiến độ: ${Math.round(newProgress)}%)`
+        : `❌ [Server] ${botName} trả lời sai (Tiến độ: ${Math.round(newProgress)}%)`;
 
       const currentLogs = freshData[logsKey] || [];
       const updatedLogs = [logMsg, ...currentLogs].slice(0, 10);
@@ -955,6 +977,9 @@ export const clientFunctions = {
     const scoreKey = isPlayer1 ? 'player1Score' : 'player2Score';
     const progKey = isPlayer1 ? 'player1Progress' : 'player2Progress';
     const logsKey = isPlayer1 ? 'player1Logs' : 'player2Logs';
+
+    const freshSnap = await getDoc(matchRef);
+    const freshData = freshSnap.exists() ? freshSnap.data() : matchDoc;
 
     if (subject === 'biology') {
       const qIndex = Number(questionId);
@@ -1009,9 +1034,10 @@ export const clientFunctions = {
         explanation = q.note || q.explanation || '';
       }
 
-      const currentScore = matchDoc[scoreKey] || 0;
+      const currentScore = freshData[scoreKey] || 0;
       newScore = currentScore + scoreAdded;
-      currentProgress = Math.min(100, Math.round((newScore / 20) * 100));
+      const currentProg = freshData[progKey] || 0;
+      currentProgress = Math.min(100, Math.max(0, currentProg + (scoreAdded > 0 ? 5 : 0)));
     } else if (subject === 'math') {
       const qIndex = Number(questionId);
       if (isNaN(qIndex) || qIndex < 0 || qIndex >= questionPool.length) {
@@ -1075,9 +1101,10 @@ export const clientFunctions = {
         explanation = q.note || q.explanation || '';
       }
 
-      const currentScore = matchDoc[scoreKey] || 0;
+      const currentScore = freshData[scoreKey] || 0;
       newScore = currentScore + scoreAdded;
-      currentProgress = Math.min(100, Math.round((newScore / 20) * 100));
+      const currentProg = freshData[progKey] || 0;
+      currentProgress = Math.min(100, Math.max(0, currentProg + (scoreAdded > 0 ? 5 : 0)));
     } else if (subject === 'physics') {
       const qIndex = Number(questionId);
       const q = (!isNaN(qIndex) && qIndex >= 0 && qIndex < questionPool.length) ? questionPool[qIndex] : null;
@@ -1189,17 +1216,18 @@ export const clientFunctions = {
         explanation = '';
       }
 
-      const currentScore = matchDoc[scoreKey] || 0;
+      const currentScore = freshData[scoreKey] || 0;
       newScore = currentScore + scoreAdded;
+      const currentProg = freshData[progKey] || 0;
 
       if (selectedAnswer && selectedAnswer.physMirrors) {
         currentProgress = correct ? 100 : 0;
       } else {
-        currentProgress = Math.min(100, Math.round((newScore / 20) * 100));
+        currentProgress = Math.min(100, Math.max(0, currentProg + (scoreAdded > 0 ? 5 : 0)));
       }
     } else if (subject === 'chemistry') {
       const { type, equation, reactants, chemTemp, chemHCl, chemNaOH, chemEvap } = selectedAnswer;
-      const currentProg = isPlayer1 ? (matchDoc.player1Progress || 0) : (matchDoc.player2Progress || 0);
+      const currentProg = isPlayer1 ? (freshData.player1Progress || 0) : (freshData.player2Progress || 0);
 
       if (type === 'chemistry_reaction_complete') {
         const isMatch = checkChemistryMatch(questionId, equation, reactants);
@@ -1261,10 +1289,7 @@ export const clientFunctions = {
       }
     }
 
-    // Đọc snapshot mới nhất để lấy logs hiện tại và ghi lại bằng 1 lệnh updateDoc duy nhất
-    const freshSnap = await getDoc(matchRef);
-    const freshData = freshSnap.exists() ? freshSnap.data() : matchDoc;
-
+    // Lấy nhãn người chơi và cập nhật log
     const playerLabel = uid === freshData.player1.uid ? 'Player 1' : 'Player 2';
     const logMsg = correct 
       ? `✅ [Client] ${playerLabel} trả lời đúng (Tiến độ: ${currentProgress}%)`

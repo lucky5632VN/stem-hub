@@ -42,7 +42,18 @@ firestore-debug.log
 *.tsbuildinfo
 next-env.d.ts
 
-# credentials
+# credentials & sensitive dumps
 *-firebase-adminsdk-*.json
+temp_auth_users.json
+test_*_storage.json
+test_*.json
+preview_chunk.js
+scripts/recovered_keys.txt
+
+# large media & video files
+*.mp4
+video/
+*.zip
+*.rar
 
 .vercel
