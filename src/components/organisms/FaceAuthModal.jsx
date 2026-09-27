@@ -10,6 +10,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { db, auth } from '@/lib/firebase';
 import { sendSignInLinkToEmail, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, updateDoc, setDoc } from 'firebase/firestore';
+import { setFace2FASession } from '@/lib/faceAuthSecurity';
 
 // Cấu hình CDN Engine AI Deep Learning chuẩn Quốc tế (TensorFlow.js + ResNet-34 FaceNet)
 const FACE_API_SCRIPT_CDN = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.js';
@@ -316,8 +317,7 @@ export default function FaceAuthModal({
 
     const handleSuccess = () => {
       if (typeof window !== 'undefined' && auth.currentUser) {
-        sessionStorage.setItem('face2FA_verified_' + auth.currentUser.uid, 'true');
-        localStorage.setItem('face2FA_verified_' + auth.currentUser.uid, 'true');
+        setFace2FASession(auth.currentUser.uid);
         window.dispatchEvent(new CustomEvent('face2fa-verified'));
       }
       playBeep(1800, 'sine', 0.4);
@@ -673,8 +673,7 @@ export default function FaceAuthModal({
       if (auth.currentUser) {
         try {
           if (typeof window !== 'undefined') {
-            sessionStorage.setItem('face2FA_verified_' + auth.currentUser.uid, 'true');
-            localStorage.setItem('face2FA_verified_' + auth.currentUser.uid, 'true');
+            setFace2FASession(auth.currentUser.uid);
             window.dispatchEvent(new CustomEvent('face2fa-verified'));
           }
           const userRef = doc(db, 'users', auth.currentUser.uid);
@@ -733,8 +732,7 @@ export default function FaceAuthModal({
         setScanStatus('success');
 
         if (typeof window !== 'undefined' && auth.currentUser) {
-          sessionStorage.setItem('face2FA_verified_' + auth.currentUser.uid, 'true');
-          localStorage.setItem('face2FA_verified_' + auth.currentUser.uid, 'true');
+          setFace2FASession(auth.currentUser.uid);
           window.dispatchEvent(new CustomEvent('face2fa-verified'));
         }
 
@@ -847,6 +845,11 @@ export default function FaceAuthModal({
     if (otpInput.trim() === generatedOtp.trim() || (isDev && otpInput.trim() === '999999')) {
       playBeep(1800, 'sine', 0.3);
       setScanStatus('success');
+
+      if (typeof window !== 'undefined' && auth.currentUser) {
+        setFace2FASession(auth.currentUser.uid);
+        window.dispatchEvent(new CustomEvent('face2fa-verified'));
+      }
 
       setTimeout(() => {
         if (onSuccess) {

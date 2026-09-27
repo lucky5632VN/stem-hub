@@ -103,7 +103,9 @@ export default function AdminLogsDashboard() {
     // Polling API backup
     const fetchApiAiLogs = async () => {
       try {
-        const res = await fetch(`/api/ai-reasoning-log?t=${Date.now()}`);
+        const res = await fetch(`/api/ai-reasoning-log?t=${Date.now()}`, {
+          headers: { 'x-admin-secret-key': 'stemhub_admin_secret_key_2026' }
+        });
         const data = await res.json();
         if (data.success && Array.isArray(data.logs) && data.logs.length > 0) {
           const parsed = data.logs.map(l => ({ ...l, dateObject: new Date(l.timestamp) }));

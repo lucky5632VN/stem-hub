@@ -18,6 +18,7 @@ import { EQUIPMENT_CATALOG } from '@/data/equipmentCatalog';
 import dynamic from 'next/dynamic';
 const FaceAuthModal = dynamic(() => import('@/components/organisms/FaceAuthModal'), { ssr: false });
 import { useAppStore } from '@/store/useAppStore';
+import { setFace2FASession, clearFace2FASession } from '@/lib/faceAuthSecurity';
 
 // Hàm kiểm tra các tài khoản Admin & TK Test (cho phép đăng nhập tức thì không bị chặn xác thực)
 const isBypassVerificationAccount = (email) => {
@@ -428,7 +429,7 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
             await signOut(auth);
           } catch (_) {}
           if (typeof window !== 'undefined' && face2faPending.user) {
-            sessionStorage.removeItem('face2FA_verified_' + face2faPending.user.uid);
+            clearFace2FASession(face2faPending.user.uid);
           }
           useAppStore.getState().setUser(null);
           setFace2faPending(null);
@@ -440,8 +441,7 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
         onSuccess={async () => {
           // Xác thực 2FA thành công -> Đánh dấu phiên làm việc đã xác minh và chính thức cấp quyền Đăng nhập!
           if (typeof window !== 'undefined' && face2faPending.user) {
-            sessionStorage.setItem('face2FA_verified_' + face2faPending.user.uid, 'true');
-            localStorage.setItem('face2FA_verified_' + face2faPending.user.uid, 'true');
+            setFace2FASession(face2faPending.user.uid);
             window.dispatchEvent(new CustomEvent('face2fa-verified'));
           }
           try {

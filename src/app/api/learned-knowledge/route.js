@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
+import { ALLOWED_HOSTS, getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
 
 export async function OPTIONS(request) {
   return new NextResponse(null, { status: 204, headers: getCorsHeaders(request) });
@@ -85,6 +85,8 @@ function isPersonalOrGreeting(query, answer) {
   return false;
 }
 
+const INTERNAL_AI_SECRET = process.env.INTERNAL_AI_SECRET || process.env.ADMIN_SECRET_KEY || 'stemhub_rag_internal_sig_2026';
+
 export async function POST(request) {
   const corsHeaders = getCorsHeaders(request);
   try {
@@ -95,6 +97,18 @@ export async function POST(request) {
       return NextResponse.json(
         { error: `Bạn gửi dữ liệu quá nhanh. Vui lòng đợi ${rateCheck.resetInSec} giây trước khi gửi tiếp.` },
         { status: 429, headers: corsHeaders }
+      );
+    }
+
+    // 🛡️ CHẶN ĐẦU ĐỘC RAG (OWASP LLM03): Yêu cầu chữ ký xác thực nội bộ AI hoặc token Admin
+    const reqSecret = request.headers.get('x-internal-secret') || request.headers.get('x-admin-secret-key') || '';
+    const authHeader = request.headers.get('authorization') || '';
+    const isAuthBearer = authHeader.startsWith('Bearer ') && authHeader.substring(7) === INTERNAL_AI_SECRET;
+
+    if (reqSecret !== INTERNAL_AI_SECRET && !isAuthBearer) {
+      return NextResponse.json(
+        { success: false, error: 'Từ chối quyền truy cập: Cần chữ ký nội bộ AI hoặc token xác thực của Quản trị viên.' },
+        { status: 401, headers: corsHeaders }
       );
     }
 
@@ -115,6 +129,34 @@ export async function POST(request) {
 
     if (cleanA.length > 5000) {
       return NextResponse.json({ success: false, error: 'Câu trả lời quá dài (tối đa 5000 ký tự)' }, { status: 400, headers: corsHeaders });
+    }
+
+    // 🛡️ SANITIZATION: Chống XSS & chèn thẻ mã HTML độc hại
+    const dangerousHtmlRegex = /<(script|iframe|object|embed|form|input|button|svg|link|style|meta)[^>]*>/i;
+    if (dangerousHtmlRegex.test(cleanA) || dangerousHtmlRegex.test(cleanQ) || /javascript:/i.test(cleanA) || /onerror\s*=/i.test(cleanA) || /onload\s*=/i.test(cleanA)) {
+      return NextResponse.json(
+        { success: false, error: 'Dữ liệu bị từ chối: Phát hiện thẻ HTML hoặc mã thực thi script không an toàn.' },
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    // 🛡️ SANITIZATION: Chống lừa đảo qua link URL ngoài danh sách cho phép
+    const foundUrls = (cleanA + ' ' + cleanQ).match(/https?:\/\/[^\s"'<>]+/gi) || [];
+    for (const rawUrl of foundUrls) {
+      try {
+        const parsed = new URL(rawUrl);
+        if (!ALLOWED_HOSTS.includes(parsed.host)) {
+          return NextResponse.json(
+            { success: false, error: 'Dữ liệu bị từ chối: Phát hiện đường link ngoài danh sách tên miền cho phép.' },
+            { status: 400, headers: corsHeaders }
+          );
+        }
+      } catch {
+        return NextResponse.json(
+          { success: false, error: 'Dữ liệu bị từ chối: URL không đúng định dạng.' },
+          { status: 400, headers: corsHeaders }
+        );
+      }
     }
 
     // ⚡ CHẶN LƯU THÔNG TIN CÁ NHÂN HOẶC CÂU CHÀO HỎI

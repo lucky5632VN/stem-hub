@@ -5,6 +5,7 @@ import { isSignInWithEmailLink, signInWithEmailLink } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { CheckCircle2, Sparkles, ExternalLink, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { setFace2FASession } from '@/lib/faceAuthSecurity';
 
 export default function EmailLinkAuthHandler() {
   const [verifiedSuccess, setVerifiedSuccess] = useState(false);
@@ -54,8 +55,7 @@ export default function EmailLinkAuthHandler() {
             .then((result) => {
               const uid = result.user?.uid;
               if (uid) {
-                window.localStorage.setItem('face2FA_verified_' + uid, 'true');
-                window.sessionStorage.setItem('face2FA_verified_' + uid, 'true');
+                setFace2FASession(uid);
               }
               completeVerification(emailToSignIn);
             })

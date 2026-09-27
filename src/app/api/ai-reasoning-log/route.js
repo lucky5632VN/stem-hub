@@ -14,7 +14,35 @@ if (!globalThis.__AI_REASONING_LOGS__) {
   globalThis.__AI_REASONING_LOGS__ = [];
 }
 
+const ADMIN_SECRET = process.env.ADMIN_SECRET_KEY || process.env.INTERNAL_API_SECRET || 'stemhub_admin_secret_key_2026';
+
+function maskEmail(email) {
+  if (!email || typeof email !== 'string') return '';
+  const parts = email.split('@');
+  if (parts.length !== 2) return '***';
+  const name = parts[0];
+  const domain = parts[1];
+  if (name.length <= 2) {
+    return `${name[0] || '*'}***@${domain}`;
+  }
+  return `${name[0]}***${name[name.length - 1]}@${domain}`;
+}
+
 export async function GET(request) {
+  const corsHeaders = getCorsHeaders(request);
+  
+  // 🛡️ BẢO VỆ NHẬT KÝ HỆ THỐNG: Yêu cầu Header x-admin-secret-key hoặc Token Admin
+  const reqSecret = request.headers.get('x-admin-secret-key') || '';
+  const authHeader = request.headers.get('authorization') || '';
+  const isAuthBearer = authHeader.startsWith('Bearer ') && authHeader.substring(7) === ADMIN_SECRET;
+
+  if (reqSecret !== ADMIN_SECRET && !isAuthBearer) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized: Bạn không có quyền truy cập nhật ký trò chuyện hệ thống.' },
+      { status: 401, headers: corsHeaders }
+    );
+  }
+
   try {
     // If memory buffer has logs, return them
     let logs = globalThis.__AI_REASONING_LOGS__ || [];
@@ -37,13 +65,18 @@ export async function GET(request) {
       }
     }
 
-    const corsHeaders = getCorsHeaders(request);
+    // 🛡️ DATA MASKING (Ẩn danh PII): Che giấu email và số điện thoại trước khi trả về
+    const maskedLogs = logs.map(log => ({
+      ...log,
+      userEmail: maskEmail(log.userEmail),
+      userDisplayName: log.userDisplayName ? String(log.userDisplayName).replace(/\b\d{9,11}\b/g, '***') : 'Học sinh'
+    }));
+
     return NextResponse.json(
-      { success: true, logs },
+      { success: true, logs: maskedLogs },
       { headers: { ...corsHeaders, 'Cache-Control': 'no-store, max-age=0' } }
     );
   } catch (error) {
-    const corsHeaders = getCorsHeaders(request);
     return NextResponse.json(
       { success: false, error: maskErrorMessage(error, 'Lỗi tải danh sách logs.') },
       { status: 500, headers: corsHeaders }

@@ -364,11 +364,14 @@ export async function saveLearnedAnswerToRAG(query, answer, subject = 'stem', to
     console.warn('[RAG FIRESTORE] Lỗi ghi trực tiếp Firestore:', err.message);
   }
 
-  // 2. GHI NẠP DỰ PHÒNG QUA SERVER API
+  // 2. GHI NẠP DỰ PHÒNG QUA SERVER API (KÈM CHỮ KÝ NỘI BỘ HỢP LỆ)
   try {
     fetch('/api/learned-knowledge', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-internal-secret': 'stemhub_rag_internal_sig_2026'
+      },
       body: JSON.stringify(newItem)
     }).catch(() => {});
   } catch (_) {}

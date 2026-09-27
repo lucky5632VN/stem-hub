@@ -21,6 +21,7 @@ import { savePendingShare } from '@/lib/indexedDB';
 import { getPresetForEmail } from '@/data/testAccounts';
 import { EQUIPMENT_CATALOG } from '@/data/equipmentCatalog';
 import EmailLinkAuthHandler from '@/components/atoms/EmailLinkAuthHandler';
+import { isFace2FAValid, setFace2FASession } from '@/lib/faceAuthSecurity';
 
 export default function DashboardLayout({ children }) {
   const user = useAppStore((state) => state.user);
@@ -76,8 +77,7 @@ export default function DashboardLayout({ children }) {
         signInWithEmailLink(auth, email, window.location.href)
           .then(async (result) => {
             const loggedInUser = result.user;
-            sessionStorage.setItem('face2FA_verified_' + loggedInUser.uid, 'true');
-            localStorage.setItem('face2FA_verified_' + loggedInUser.uid, 'true');
+            setFace2FASession(loggedInUser.uid);
             window.localStorage.removeItem('emailFor2FA');
             window.history.replaceState({}, document.title, window.location.pathname);
             try { playSound.success(); } catch (_) {}
@@ -115,12 +115,9 @@ export default function DashboardLayout({ children }) {
         if (docSnap && docSnap.exists()) {
           let data = docSnap.data();
 
-          // KIỂM TRA BẢO MẬT 2 BƯỚC FACE 2FA
+          // KIỂM TRA BẢO MẬT 2 BƯỚC FACE 2FA (ĐÃ NÂNG CẤP CHỮ KÝ SESSION SIGNATURE & HẠN 12H)
           const isFace2FAEnabled = data?.personalization?.face2FAEnabled || data?.face2FAEnabled;
-          const isFaceVerified = typeof window !== 'undefined' && (
-            sessionStorage.getItem('face2FA_verified_' + user.uid) === 'true' ||
-            localStorage.getItem('face2FA_verified_' + user.uid) === 'true'
-          );
+          const isFaceVerified = isFace2FAValid(user.uid);
 
           if (isFace2FAEnabled && !isFaceVerified) {
             // Tài khoản bật Face 2FA nhưng chưa hoàn tất xác thực 2FA trong phiên làm việc này -> Giữ trạng thái chưa đăng nhập!

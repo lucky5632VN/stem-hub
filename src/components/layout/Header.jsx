@@ -7,6 +7,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import AuthModal from '@/components/organisms/AuthModal';
 import SettingsDropdown from '@/components/organisms/SettingsDropdown';
 import { useAppStore } from '@/store/useAppStore';
+import { clearFace2FASession } from '@/lib/faceAuthSecurity';
 import { auth, db, functions, httpsCallable } from '@/lib/firebase';
 import { doc, onSnapshot, collection, query, where, updateDoc, deleteDoc, setDoc, getDocs } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
@@ -448,8 +449,7 @@ export default function Header() {
     try {
       if (typeof window !== 'undefined') {
         if (user?.uid) {
-          sessionStorage.removeItem('face2FA_verified_' + user.uid);
-          localStorage.removeItem('face2FA_verified_' + user.uid);
+          clearFace2FASession(user.uid);
         }
         localStorage.removeItem('emailFor2FA');
         sessionStorage.clear();

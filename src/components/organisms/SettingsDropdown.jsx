@@ -3,6 +3,7 @@
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/store/useAppStore';
+import { clearFace2FASession } from '@/lib/faceAuthSecurity';
 import { playSound } from '@/lib/sound';
 import { auth, db } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -59,8 +60,7 @@ export default function SettingsDropdown({ onClose }) {
     try {
       if (typeof window !== 'undefined') {
         if (user?.uid) {
-          sessionStorage.removeItem('face2FA_verified_' + user.uid);
-          localStorage.removeItem('face2FA_verified_' + user.uid);
+          clearFace2FASession(user.uid);
         }
         localStorage.removeItem('emailFor2FA');
         sessionStorage.clear();
