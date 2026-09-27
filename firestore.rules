@@ -17,20 +17,23 @@ service cloud.firestore {
     }
     
     // 3. Phân quyền Quản trị viên (Admin RBAC):
-    // Kết hợp xác thực Email trực tiếp từ Auth Token (nhanh, 0ms, không tốn read, không lỗi get)
-    // VÀ kiểm tra an toàn field 'role' trong database nếu dùng tài khoản admin khác
+    // Xác thực an toàn tuyệt đối từ Auth Token (nhanh 0ms, không tốn quota read, chống đệ quy và triệt tiêu lỗi crash simulator)
     function isAdmin() {
       return isAuthenticated() && (
-        (request.auth.token.email != null && 
-         request.auth.token.email_verified == true && (
-          request.auth.token.email.lower() == 'admin123@gmail.com' ||
-          request.auth.token.email.lower() == 'admin@stemhub.edu.vn'
-        )) ||
-        (request.auth.token.keys().hasAny(['role']) && request.auth.token.role == 'admin') ||
+        // 1. Kiểm tra Email Admin chính thức (Bắt buộc có email, email_verified == true và thuộc whitelist)
         (
-          exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'admin'
-        )
+          'email' in request.auth.token &&
+          'email_verified' in request.auth.token &&
+          request.auth.token.email_verified == true &&
+          request.auth.token.email is string && (
+            request.auth.token.email.lower() == 'admin123@gmail.com' ||
+            request.auth.token.email.lower() == 'admin@stemhub.edu.vn'
+          )
+        ) ||
+        // 2. Kiểm tra Custom Claim 'role' từ Auth Token (chuẩn Firebase Authentication)
+        ('role' in request.auth.token && request.auth.token.role == 'admin') ||
+        // 3. Kiểm tra Custom Claim 'admin' boolean
+        ('admin' in request.auth.token && request.auth.token.admin == true)
       );
     }
 
