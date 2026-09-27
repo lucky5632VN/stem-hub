@@ -843,7 +843,8 @@ export default function FaceAuthModal({
     e.preventDefault();
     setOtpError('');
 
-    if (otpInput.trim() === generatedOtp.trim() || otpInput.trim() === '999999') {
+    const isDev = process.env.NODE_ENV === 'development';
+    if (otpInput.trim() === generatedOtp.trim() || (isDev && otpInput.trim() === '999999')) {
       playBeep(1800, 'sine', 0.3);
       setScanStatus('success');
 

@@ -21,7 +21,8 @@ service cloud.firestore {
     // VÀ kiểm tra an toàn field 'role' trong database nếu dùng tài khoản admin khác
     function isAdmin() {
       return isAuthenticated() && (
-        (request.auth.token.email != null && (
+        (request.auth.token.email != null && 
+         request.auth.token.email_verified == true && (
           request.auth.token.email.lower() == 'admin123@gmail.com' ||
           request.auth.token.email.lower() == 'admin@stemhub.edu.vn'
         )) ||
@@ -93,7 +94,8 @@ service cloud.firestore {
     // - Học sinh mới tạo tài khoản chỉ được gán role là student/user (cấm tự phong admin).
     // - Khóa quyền xóa cứng của Admin/Hacker bị lộ tài khoản trên người khác: Chỉ chủ tài khoản hoặc Soft Delete
     match /users/{userId} {
-      allow read: if isAuthenticated();
+      // 🛡️ BẢO VỆ PII & DỮ LIỆU SINH TRẮC HỌC: Chỉ chủ tài khoản hoặc Admin mới có quyền đọc hồ sơ đầy đủ (chứa Số điện thoại, Face ID)
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
       allow create: if isAuthenticated() && request.auth.uid == userId && 
                     (!('role' in request.resource.data) || request.resource.data.role == 'student' || request.resource.data.role == 'user');
       allow update: if isAdmin() || (isOwner(userId) && isAllowedUserUpdate());
@@ -103,6 +105,22 @@ service cloud.firestore {
       match /memories/{memId} {
         allow read, write: if isOwner(userId) || isAdmin();
       }
+
+      // Subcollection hồ sơ công khai (cho bạn bè & xếp hạng, không chứa PII)
+      match /public_profile/{docId} {
+        allow read: if isAuthenticated();
+        allow write: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    // =========================================================================
+    // BẢNG HỒ SƠ CÔNG KHAI (public_profiles)
+    // Phục vụ Bảng xếp hạng và Tìm kiếm bạn bè an toàn (chỉ chứa displayName, elo, level, avatar, không chứa PII)
+    // =========================================================================
+    match /public_profiles/{profileId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && (request.auth.uid == profileId || isAdmin());
+      allow delete: if isAdmin() || (isAuthenticated() && request.auth.uid == profileId);
     }
 
     // =========================================================================

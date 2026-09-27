@@ -2773,6 +2773,11 @@ function DauTruongContent() {
   // LẮNG NGHE TIN NHẮN TỪ IFRAME QUANTUMLAB VÀ CẬP NHẬT TIẾN TRÌNH
   useEffect(() => {
     const handleIframeMessage = (event) => {
+      // 🛡️ CHỐNG CROSS-ORIGIN POSTMESSAGE SPOOFING: Chỉ chấp nhận tin nhắn từ cùng origin
+      if (typeof window !== 'undefined' && event.origin !== window.location.origin) {
+        console.warn('Blocked unauthorized postMessage from:', event.origin);
+        return;
+      }
       if (!event.data || typeof event.data !== 'object') return;
 
       const { type, equation, reactants, chemicalId, volume, energy, waste, violations } = event.data;

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-import { getCorsHeaders, getClientIp, checkRateLimit, isAllowedUrl, maskErrorMessage } from '@/lib/serverSecurity';
+import { ALLOWED_ORIGINS, getCorsHeaders, getClientIp, checkRateLimit, isAllowedUrl, maskErrorMessage } from '@/lib/serverSecurity';
 
 export async function OPTIONS(req) {
   return new NextResponse(null, { status: 204, headers: getCorsHeaders(req) });
@@ -58,7 +58,8 @@ export async function POST(req) {
       });
     }
 
-    const hostOrigin = req.headers.get('origin') || 'https://ai.stem-hub.top';
+    const rawOrigin = req.headers.get('origin') || '';
+    const hostOrigin = (rawOrigin && ALLOWED_ORIGINS.includes(rawOrigin)) ? rawOrigin : 'https://ai.stem-hub.top';
     
     // 🛡️ CHỐNG OPEN REDIRECT / PHISHING: Chỉ cho phép magicLink dẫn về domain chính thức của hệ thống
     let finalVerifyUrl = `${hostOrigin}/?verify2FA=true&email=${encodeURIComponent(cleanEmail)}`;
