@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server';
 import { callResilientGemini } from '@/lib/geminiResilientPool';
 import { solveGeometryFacts, parseNumericValue, extractFallbackGeometry } from '@/lib/geometryFactSolver';
 import { toNaturalVietnameseMathText } from '@/lib/mathFormatter';
+import { getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
+
+export async function OPTIONS(req) {
+  return new NextResponse(null, { status: 204, headers: getCorsHeaders(req) });
+}
 
 function cleanAndRepairGeometryJson(raw) {
   if (!raw || typeof raw !== 'string') return null;
@@ -226,15 +231,34 @@ function getGenericOrFallbackGeometry(parsedData, problemText) {
 }
 
 export async function POST(req) {
+  const corsHeaders = getCorsHeaders(req);
   let problemText = '';
   try {
+    const ip = getClientIp(req);
+    // Rate limit: Tối đa 20 lượt tạo mô hình 3D / phút trên mỗi IP
+    const rateCheck = checkRateLimit(`generate-3d:${ip}`, 20, 60 * 1000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: `Bạn gửi yêu cầu quá nhanh. Vui lòng đợi ${rateCheck.resetInSec} giây trước khi gửi tiếp.` },
+        { status: 429, headers: corsHeaders }
+      );
+    }
+
     const body = await req.json().catch(() => ({}));
     problemText = (body.problemText || body.message || body.prompt || body.text || '').trim();
     const imageBase64 = body.imageBase64;
     const imageMimeType = body.imageMimeType || 'image/jpeg';
 
     if (!problemText && !imageBase64) {
-      return NextResponse.json({ error: "Vui lòng cung cấp đề bài toán hình học hoặc tải lên ảnh." }, { status: 400 });
+      return NextResponse.json({ error: "Vui lòng cung cấp đề bài toán hình học hoặc tải lên ảnh." }, { status: 400, headers: corsHeaders });
+    }
+
+    if (problemText.length > 8000) {
+      return NextResponse.json({ error: "Đề bài quá dài (tối đa 8.000 ký tự)." }, { status: 400, headers: corsHeaders });
+    }
+
+    if (imageBase64 && typeof imageBase64 === 'string' && imageBase64.length > 7 * 1024 * 1024) {
+      return NextResponse.json({ error: "Dung lượng hình ảnh vượt quá 5MB." }, { status: 400, headers: corsHeaders });
     }
 
     const prompt = `
@@ -359,7 +383,7 @@ ${problemText ? `Đề bài văn bản: "${problemText}"` : 'Đề bài được
     }
     if (!factResult.success) {
       const fallbackModel = getGenericOrFallbackGeometry(parsedData, problemText);
-      return NextResponse.json(fallbackModel, { status: 200 });
+      return NextResponse.json(fallbackModel, { status: 200, headers: corsHeaders });
     }
 
     const finalResponse = {
@@ -379,7 +403,7 @@ ${problemText ? `Đề bài văn bản: "${problemText}"` : 'Đề bài được
       originalProblemText: parsedData.originalProblemText || problemText
     };
 
-    return NextResponse.json(finalResponse, { status: 200 });
+    return NextResponse.json(finalResponse, { status: 200, headers: corsHeaders });
   } catch (error) {
     console.error("Lỗi Tầng 1 (LLM Extraction):", error);
     const fallback = extractFallbackGeometry(problemText || "");
@@ -389,7 +413,7 @@ ${problemText ? `Đề bài văn bản: "${problemText}"` : 'Đề bài được
       ...fallback,
       parameters: solvedFallback.parameters || { canhDay: 4, chieuCao: 5, chieuDai: 4, chieuRong: 4, banKinh: 2 },
       sanityCheck: solvedFallback.sanityCheck || { passed: true, maxDiscrepancy: 0, details: [] }
-    }, { status: 200 });
+    }, { status: 200, headers: corsHeaders });
   }
 }
 

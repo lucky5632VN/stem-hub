@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
+
+export async function OPTIONS(request) {
+  return new NextResponse(null, { status: 204, headers: getCorsHeaders(request) });
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -38,19 +43,24 @@ function writeGlobalKnowledge(data) {
   }
 }
 
-export async function GET() {
+export async function GET(request) {
+  const corsHeaders = getCorsHeaders(request);
   try {
     const list = readGlobalKnowledge();
     return NextResponse.json(
       { success: true, count: list.length, learnedDocs: list },
       {
         headers: {
+          ...corsHeaders,
           'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate'
         }
       }
     );
   } catch (err) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: maskErrorMessage(err, 'Lỗi đọc dữ liệu tri thức.') },
+      { status: 500, headers: corsHeaders }
+    );
   }
 }
 
@@ -76,22 +86,41 @@ function isPersonalOrGreeting(query, answer) {
 }
 
 export async function POST(request) {
+  const corsHeaders = getCorsHeaders(request);
   try {
-    const body = await request.json();
+    const ip = getClientIp(request);
+    // Rate limit: Tối đa 20 lượt gửi tri thức / phút trên mỗi IP
+    const rateCheck = checkRateLimit(`learned-knowledge:${ip}`, 20, 60 * 1000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: `Bạn gửi dữ liệu quá nhanh. Vui lòng đợi ${rateCheck.resetInSec} giây trước khi gửi tiếp.` },
+        { status: 429, headers: corsHeaders }
+      );
+    }
+
+    const body = await request.json().catch(() => ({}));
     const { id, query, normalizedQuery, answer, subject, topic, queryTFIDF, tfidfVector, createdAt } = body;
     const effectiveQuery = query || body.question;
 
     if (!effectiveQuery || !answer) {
-      return NextResponse.json({ success: false, error: 'Thiếu query hoặc answer' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'Thiếu query hoặc answer' }, { status: 400, headers: corsHeaders });
     }
 
-    const cleanQ = effectiveQuery.trim();
-    const cleanA = answer.trim();
+    const cleanQ = String(effectiveQuery).trim();
+    const cleanA = String(answer).trim();
+
+    if (cleanQ.length > 500) {
+      return NextResponse.json({ success: false, error: 'Câu hỏi quá dài (tối đa 500 ký tự)' }, { status: 400, headers: corsHeaders });
+    }
+
+    if (cleanA.length > 5000) {
+      return NextResponse.json({ success: false, error: 'Câu trả lời quá dài (tối đa 5000 ký tự)' }, { status: 400, headers: corsHeaders });
+    }
 
     // ⚡ CHẶN LƯU THÔNG TIN CÁ NHÂN HOẶC CÂU CHÀO HỎI
     if (isPersonalOrGreeting(cleanQ, cleanA)) {
       console.log(`[API learned-knowledge] Từ chối lưu nội dung cá nhân/chào hỏi: "${cleanQ}"`);
-      return NextResponse.json({ success: false, ignored: true, message: 'Nội dung cá nhân hoặc chào hỏi không được lưu trữ' });
+      return NextResponse.json({ success: false, ignored: true, message: 'Nội dung cá nhân hoặc chào hỏi không được lưu trữ' }, { status: 200, headers: corsHeaders });
     }
 
     const list = readGlobalKnowledge();
@@ -130,9 +159,9 @@ export async function POST(request) {
 
     console.log(`🧠 [GLOBAL LEARNING DB SERVER] Đã ghi nạp tri thức học thuật mới: "${cleanQ}" (Tổng số: ${list.length})`);
 
-    return NextResponse.json({ success: true, item: newItem, totalCount: list.length });
+    return NextResponse.json({ success: true, item: newItem, totalCount: list.length }, { status: 200, headers: corsHeaders });
   } catch (err) {
     console.error('[API learned-knowledge] Lỗi POST:', err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: maskErrorMessage(err, 'Lỗi ghi nhận tri thức.') }, { status: 500, headers: corsHeaders });
   }
 }

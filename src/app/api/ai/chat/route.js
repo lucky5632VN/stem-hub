@@ -1,21 +1,35 @@
 import { NextResponse } from 'next/server';
 import { callResilientGemini } from '@/lib/geminiCaller';
+import { getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
-
-export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: corsHeaders });
+export async function OPTIONS(req) {
+  return new NextResponse(null, { status: 204, headers: getCorsHeaders(req) });
 }
 
 export async function POST(req) {
+  const corsHeaders = getCorsHeaders(req);
   try {
+    const ip = getClientIp(req);
+    // Rate limit: Tối đa 30 requests / phút trên mỗi IP cho AI Chatbot
+    const rateCheck = checkRateLimit(`ai-chat:${ip}`, 30, 60 * 1000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: `Bạn gửi yêu cầu quá nhanh. Vui lòng đợi ${rateCheck.resetInSec} giây trước khi gửi tiếp.` },
+        { status: 429, headers: corsHeaders }
+      );
+    }
+
     const body = await req.json().catch(() => ({}));
     const prompt = (body.prompt || body.message || body.userText || body.text || body.query || '').trim();
     const { systemInstruction, contents, temperature = 0.3, maxOutputTokens = 1500, responseMimeType } = body;
+
+    // Giới hạn độ dài prompt tối đa 8000 ký tự để chống DoS tràn bộ nhớ / quota
+    if (prompt.length > 8000) {
+      return NextResponse.json(
+        { error: 'Câu hỏi quá dài (tối đa 8.000 ký tự). Vui lòng rút gọn nội dung.' },
+        { status: 400, headers: corsHeaders }
+      );
+    }
 
     if (!prompt && (!contents || contents.length === 0)) {
       return NextResponse.json(
@@ -53,8 +67,8 @@ export async function POST(req) {
     return NextResponse.json(
       {
         error: isLocationBlocked
-          ? 'Google AI chặn IP máy chủ theo khu vực (User location is not supported). Đã ngắt retry để bảo toàn quota.'
-          : (error.message || 'Lỗi xử lý AI Gateway'),
+          ? 'Dịch vụ AI tạm thời gián đoạn khu vực. Đang tự động điều phối dự phòng.'
+          : maskErrorMessage(error, 'Lỗi xử lý AI Gateway. Vui lòng thử lại sau.'),
         locationBlocked: isLocationBlocked
       },
       { status: 500, headers: corsHeaders }

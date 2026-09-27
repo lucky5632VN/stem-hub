@@ -22,12 +22,17 @@ export function useAuth() {
       return;
     }
 
+    const getCookieFlags = () => {
+      const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
+      return `; path=/; max-age=604800; SameSite=Lax${isHttps ? '; Secure' : ''}`;
+    };
+
     // Nếu đã có sẵn currentUser từ auth instance
     if (auth.currentUser) {
       setCurrentUser(auth.currentUser);
       setLoading(false);
       auth.currentUser.getIdToken().then((token) => {
-        document.cookie = `session=${token}; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `session=${token}${getCookieFlags()}`;
       }).catch(() => {});
     }
 
@@ -38,11 +43,12 @@ export function useAuth() {
       if (user) {
         try {
           const token = await user.getIdToken();
-          document.cookie = `session=${token}; path=/; max-age=604800; SameSite=Lax`;
+          document.cookie = `session=${token}${getCookieFlags()}`;
           console.log('[Auth Hook] ✅ Xác thực phiên người dùng thành công:', user.email || user.displayName || user.uid);
         } catch (_) {}
       } else {
-        document.cookie = `session=; path=/; max-age=0; SameSite=Lax`;
+        const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
+        document.cookie = `session=; path=/; max-age=0; SameSite=Lax${isHttps ? '; Secure' : ''}`;
         console.log('[Auth Hook] ℹ️ Người dùng chưa đăng nhập (Khách vãng lai).');
       }
     });

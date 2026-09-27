@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { collection, doc, setDoc, serverTimestamp, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
 
 export const dynamic = 'force-dynamic';
+
+export async function OPTIONS(request) {
+  return new NextResponse(null, { status: 204, headers: getCorsHeaders(request) });
+}
 
 // In-memory buffer fallback for ultra-fast response
 if (!globalThis.__AI_REASONING_LOGS__) {
@@ -32,15 +37,34 @@ export async function GET(request) {
       }
     }
 
-    return NextResponse.json({ success: true, logs }, { headers: { 'Cache-Control': 'no-store, max-age=0' } });
+    const corsHeaders = getCorsHeaders(request);
+    return NextResponse.json(
+      { success: true, logs },
+      { headers: { ...corsHeaders, 'Cache-Control': 'no-store, max-age=0' } }
+    );
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    const corsHeaders = getCorsHeaders(request);
+    return NextResponse.json(
+      { success: false, error: maskErrorMessage(error, 'Lỗi tải danh sách logs.') },
+      { status: 500, headers: corsHeaders }
+    );
   }
 }
 
 export async function POST(request) {
+  const corsHeaders = getCorsHeaders(request);
   try {
-    const body = await request.json();
+    const ip = getClientIp(request);
+    // Rate limit: Tối đa 60 logs / phút trên mỗi IP
+    const rateCheck = checkRateLimit(`ai-log:${ip}`, 60, 60 * 1000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: `Tần suất log quá cao. Vui lòng đợi ${rateCheck.resetInSec} giây.` },
+        { status: 429, headers: corsHeaders }
+      );
+    }
+
+    const body = await request.json().catch(() => ({}));
     const {
       query: userQuery,
       userDisplayName,
@@ -144,9 +168,12 @@ export async function POST(request) {
       }
     }
 
-    return NextResponse.json({ success: true, log: logRecord });
+    return NextResponse.json({ success: true, log: logRecord }, { status: 200, headers: corsHeaders });
   } catch (error) {
     console.error('Lỗi Server AI Reasoning Log Route:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: maskErrorMessage(error, 'Lỗi ghi nhận log suy luận AI.') },
+      { status: 500, headers: corsHeaders }
+    );
   }
 }

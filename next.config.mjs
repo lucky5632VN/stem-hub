@@ -11,6 +11,9 @@ const nextConfig = {
   experimental: {
     cpus: 2, // Giới hạn 2 worker threads để tránh lỗi spawn UNKNOWN trên Windows
   },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
+  },
   turbopack: {}, // Cấu hình turbopack rỗng cho Next.js 16
   async headers() {
     return [

@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import { callResilientGemini } from '@/lib/geminiResilientPool';
 import { toNaturalVietnameseMathText } from '@/lib/mathFormatter';
+import { getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
+
+export async function OPTIONS(req) {
+  return new NextResponse(null, { status: 204, headers: getCorsHeaders(req) });
+}
 
 function cleanAndRepairGeometryJson(raw) {
   if (!raw || typeof raw !== 'string') return null;
@@ -18,15 +23,37 @@ function cleanAndRepairGeometryJson(raw) {
 }
 
 export async function POST(req) {
+  const corsHeaders = getCorsHeaders(req);
   try {
+    const ip = getClientIp(req);
+    // Rate limit: Tối đa 15 lượt OCR ảnh / phút trên mỗi IP
+    const rateCheck = checkRateLimit(`vision-ocr:${ip}`, 15, 60 * 1000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: `Bạn gửi ảnh quá nhanh. Vui lòng đợi ${rateCheck.resetInSec} giây trước khi gửi tiếp.` },
+        { status: 429, headers: corsHeaders }
+      );
+    }
+
     const body = await req.json().catch(() => ({}));
     const { imageBase64, mimeType = 'image/jpeg', extraPromptText = '' } = body;
 
-    if (!imageBase64) {
-      return NextResponse.json({ error: 'Vui lòng cung cấp hình ảnh Base64' }, { status: 400 });
+    if (!imageBase64 || typeof imageBase64 !== 'string') {
+      return NextResponse.json({ error: 'Vui lòng cung cấp hình ảnh Base64' }, { status: 400, headers: corsHeaders });
+    }
+
+    // 🛡️ TIÊU CHÍ 7: Chỉ cho phép định dạng ảnh an toàn
+    const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!ALLOWED_MIME_TYPES.includes(mimeType.toLowerCase())) {
+      return NextResponse.json({ error: 'Định dạng ảnh không được hỗ trợ (chỉ nhận JPEG, PNG, WEBP)' }, { status: 400, headers: corsHeaders });
     }
 
     const cleanBase64 = imageBase64.includes('base64,') ? imageBase64.split('base64,')[1] : imageBase64;
+
+    // 🛡️ TIÊU CHÍ 8: Giới hạn dung lượng ảnh < 5MB (~7,000,000 ký tự base64)
+    if (cleanBase64.length > 7 * 1024 * 1024) {
+      return NextResponse.json({ error: 'Dung lượng hình ảnh quá lớn (vượt quá giới hạn 5MB)' }, { status: 400, headers: corsHeaders });
+    }
 
     const prompt = `
 Bạn là chuyên gia OCR và bóc tách đề thi Toán học THPT (đặc biệt là Hình học Không gian).
@@ -92,13 +119,13 @@ ${extraPromptText ? `Gợi ý thêm: ${extraPromptText}` : ''}
       shapeName: parsed.shapeName || 'Khối hình học',
       givenFacts: parsed.givenFacts || [],
       rawText: result.text
-    }, { status: 200 });
+    }, { status: 200, headers: corsHeaders });
 
   } catch (error) {
     console.error('[Vision OCR Route Error]:', error);
     return NextResponse.json({
-      error: error.message || 'Lỗi nhận diện hình ảnh',
+      error: maskErrorMessage(error, 'Lỗi nhận diện hình ảnh. Vui lòng thử lại với ảnh rõ nét hơn.'),
       success: false
-    }, { status: 500 });
+    }, { status: 500, headers: corsHeaders });
   }
 }

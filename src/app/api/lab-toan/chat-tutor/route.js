@@ -1,14 +1,9 @@
 import { NextResponse } from 'next/server';
 import { callResilientGemini } from '@/lib/geminiCaller';
+import { getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
-
-export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: corsHeaders });
+export async function OPTIONS(req) {
+  return new NextResponse(null, { status: 204, headers: getCorsHeaders(req) });
 }
 
 /**
@@ -116,7 +111,18 @@ function repairPseudoLatex(text) {
 }
 
 export async function POST(req) {
+  const corsHeaders = getCorsHeaders(req);
   try {
+    const ip = getClientIp(req);
+    // Rate limit: Tối đa 30 requests / phút trên mỗi IP
+    const rateCheck = checkRateLimit(`chat-tutor:${ip}`, 30, 60 * 1000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: `Bạn gửi câu hỏi quá nhanh. Vui lòng đợi ${rateCheck.resetInSec} giây trước khi gửi tiếp.` },
+        { status: 429, headers: corsHeaders }
+      );
+    }
+
     const body = await req.json().catch(() => ({}));
     const userText = (body.userText || body.message || body.prompt || body.text || body.userMessage || body.query || '').trim();
     const chatHistory = Array.isArray(body.chatHistory) ? body.chatHistory : [];
@@ -125,6 +131,13 @@ export async function POST(req) {
     if (!userText) {
       return NextResponse.json(
         { error: "Nội dung câu hỏi không được để trống" },
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    if (userText.length > 8000) {
+      return NextResponse.json(
+        { error: "Câu hỏi quá dài (tối đa 8.000 ký tự). Vui lòng rút gọn nội dung." },
         { status: 400, headers: corsHeaders }
       );
     }
@@ -166,7 +179,7 @@ CÔNG THỨC TOÁN BẮT BUỘC VIẾT CHUẨN LATEX:
   } catch (error) {
     console.error("Lỗi API Chat Gia sư Toán:", error);
     return NextResponse.json(
-      { error: error.message || "Không nhận được phản hồi từ AI" },
+      { error: maskErrorMessage(error, "Không nhận được phản hồi từ AI lúc này. Vui lòng thử lại sau.") },
       { status: 500, headers: corsHeaders }
     );
   }
