@@ -45,12 +45,11 @@ const targetMdFiles = [
   'TRAINING_LOG.md',
   'BENCHMARK_150_REPORT.md',
   'EXTENDED_ROBUST_EVALUATION_REPORT.md',
-  'AUDIT_DIAGNOSIS_REPORT.md',
   'README.md',
-  'docs/technical_specs/PRODUCT.md',
-  'docs/technical_specs/DESIGN.md',
-  'docs/technical_specs/FINAL_READINESS_CERTIFICATION.md',
-  'docs/technical_specs/STEM_HUB_WEB_ARCHITECTURE_AI_DOCUMENTATION.md'
+  'PRODUCT.md',
+  'DESIGN.md',
+  'FINAL_READINESS_CERTIFICATION.md',
+  'STEM_HUB_WEB_ARCHITECTURE_AI_DOCUMENTATION.md'
 ];
 
 targetMdFiles.forEach(relPath => {

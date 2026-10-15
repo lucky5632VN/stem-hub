@@ -1,9 +1,6 @@
-# =============================================================================
-# STEM HUB - PRODUCTION CLEAN .GITIGNORE
-# Loại bỏ hoàn toàn dependencies, build artifacts, logs, cache và scratch files
-# =============================================================================
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# 1. Dependencies & Package Managers
+# Dependencies & build
 node_modules/
 /.pnp
 .pnp.*
@@ -12,57 +9,64 @@ node_modules/
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-
-# 2. Next.js & Build Outputs
-.next/
-out/
-build/
-dist/
+/coverage
+/.next/
+/out/
+/build
 *.tsbuildinfo
 next-env.d.ts
-
-# 3. Cloud & Hosting Caches
-.vercel/
 .firebase/
+.vercel/
+.wrangler/
 
-# 4. Environment Variables & Secret Credentials
-.env*
+# Secrets & environment
+.env
+.env.*
 !.env.example
-*-firebase-adminsdk-*.json
-scripts/recovered_keys.txt
-temp_auth_users.json
+*.pem
+*.key
+serviceAccount*.json
+*-adminsdk-*.json
+credentials*.json
 
-# 5. Logs & Debug Traces
+# Logs, cache, temp
 *.log
+firebase-debug.log
+firestore-debug.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
-firestore-debug.log
-
-# 6. Scratch, Temporary Test Dumps & Test Profiles
-scratch/
-test_*.json
-test_*_storage.json
-preview_chunk.js
-preview_curl.txt
-lab_toan_dist.html
-.chrome_cdp_test_profile/
-
-# 7. IDE, OS & System Metadata
 .DS_Store
 Thumbs.db
-*.pem
+.cache/
+.turbo/
+
+# IDE, Personal Tools & AI agent local state
 .vscode/
+.idea/
+.gemini/
+.antigravity/
 .cursor/
 .impeccable/
-
-# 8. Knowledge Graph Caches
+brain/
 graphify-out/
 graphify-repo/
+.chrome_cdp_test_profile/
 
-# 9. Large Media, Screen Recordings & Archives
-*.mp4
-video/
+# Scratch, test dumps & backups
+scratch/
+tmp/
+*-BACKUP*/
+*.bak
 *.zip
 *.rar
+test_*.mjs
+test_*.json
+temp_*.json
+scripts/recovered_keys.txt
+preview_chunk.js
+video/
+*.mp4
+*.mov
+*.mkv
