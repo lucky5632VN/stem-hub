@@ -87,11 +87,6 @@ npm run audit:ai
 | 5 | **Genetics Bayesian Reasoner** | Suy luận xác suất Bayes & Định luật Mendel | $n=150$ bài toán di truyền tương tác gen | **98.00%** | $[94.3\%, 99.3\%]$ |
 | 6 | **RAG Knowledge Service** | Vector TF-IDF N-Gram (4,862 tokens) + Cosine | $n=80$ câu đối chứng (50 khó + 30 OOS) | **92.00%** | $[81.2\%, 96.8\%]$ (Ảo giác chỉ 4%) |
 
-Chi tiết toàn bộ nhật ký huấn luyện, ma trận nhầm lẫn (Confusion Matrix), và công thức toán học được lưu trữ minh bạch tại:
-- [TRAINING_LOG.md](TRAINING_LOG.md)
-- [HO_SO_MINH_CHUNG_CAI_TIEN_AI26B0012.md](HO_SO_MINH_CHUNG_CAI_TIEN_AI26B0012.md)
-- [BENCHMARK_150_REPORT.md](BENCHMARK_150_REPORT.md)
-
 ---
 
 ## 🧪 5. Cấu Trúc Các Phòng Thí Nghiệm Nhúng (Sub-Labs)
