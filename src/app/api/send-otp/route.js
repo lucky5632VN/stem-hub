@@ -74,7 +74,7 @@ export async function POST(req) {
       to: cleanEmail,
       subject: `[STEM HUB 2FA] 🔗 Liên kết xác minh đăng nhập 1-Click cho ${cleanEmail}`,
       html: `
-        <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px; background: linear-gradient(135deg, #0f172a 0%, #020617 100%); border-radius: 24px; color: #f8fafc; border: 1px solid rgba(6,182,212,0.4);">
+        <div style="font-family: 'Be Vietnam Pro', Inter, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px; background: linear-gradient(135deg, #0f172a 0%, #020617 100%); border-radius: 24px; color: #f8fafc; border: 1px solid rgba(6,182,212,0.4);">
           <div style="text-align: center; margin-bottom: 24px;">
             <h1 style="color: #22d3ee; font-size: 22px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin: 0;">STEM HUB AI SECURITY</h1>
             <p style="color: #94a3b8; font-size: 13px; margin-top: 6px;">Xác thực bảo mật 2 lớp qua Email (1-Click Magic Link)</p>

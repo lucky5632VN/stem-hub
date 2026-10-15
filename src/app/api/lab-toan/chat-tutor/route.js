@@ -124,13 +124,18 @@ export async function POST(req) {
     }
 
     const body = await req.json().catch(() => ({}));
-    const userText = (body.userText || body.message || body.prompt || body.text || body.userMessage || body.query || '').trim();
+    let userText = (body.userText || body.message || body.prompt || body.text || body.userMessage || body.query || '').trim();
     const chatHistory = Array.isArray(body.chatHistory) ? body.chatHistory : [];
     const shapeContext = body.shapeContext || '';
+    const imageBase64 = body.imageBase64;
 
-    if (!userText) {
+    if (!userText && imageBase64) {
+      userText = 'Hãy phân tích hình ảnh đề bài toán học này và giải chi tiết từng bước, kèm gợi ý dựng hình học không gian (nếu có).';
+    }
+
+    if (!userText && !imageBase64) {
       return NextResponse.json(
-        { error: "Nội dung câu hỏi không được để trống" },
+        { error: "Nội dung câu hỏi hoặc ảnh bài tập không được để trống" },
         { status: 400, headers: corsHeaders }
       );
     }
@@ -150,12 +155,27 @@ CÔNG THỨC TOÁN BẮT BUỘC VIẾT CHUẨN LATEX:
 - Luôn viết đầy đủ dấu gạch chéo và ngoặc nhọn: \\frac{a}{b}, \\sqrt{x}, \\cdot, \\Delta, \\alpha, \\beta, \\pi.
 - Giữ nguyên tham số ẩn a, căn thức, phân thức tối giản (ví dụ a\\sqrt{3}, \\frac{a\\sqrt{6}}{3}).`;
 
+    const userParts = [{ text: `${userText} ${shapeContext}`.trim() }];
+    if (imageBase64) {
+      const mimeMatch = typeof imageBase64 === 'string' ? imageBase64.match(/data:([^;]+);/) : null;
+      const mimeType = body.mimeType || (mimeMatch ? mimeMatch[1] : 'image/jpeg');
+      const cleanBase64 = typeof imageBase64 === 'string' && imageBase64.includes(',')
+        ? imageBase64.split(',')[1]
+        : imageBase64;
+      userParts.push({
+        inlineData: {
+          mimeType,
+          data: cleanBase64
+        }
+      });
+    }
+
     const contents = [
       ...chatHistory.slice(-6).map(msg => ({
         role: msg.role === 'ai' ? 'model' : 'user',
         parts: [{ text: msg.content || msg.text || '' }]
       })),
-      { role: 'user', parts: [{ text: `${userText} ${shapeContext}`.trim() }] }
+      { role: 'user', parts: userParts }
     ];
 
     const result = await callResilientGemini({

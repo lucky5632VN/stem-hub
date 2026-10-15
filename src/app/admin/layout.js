@@ -36,8 +36,7 @@ export default function AdminLayout({ children }) {
         const docSnap = await getDoc(userDocRef);
         const role = docSnap.exists() ? docSnap.data().role : null;
         const emailLower = firebaseUser.email?.toLowerCase() || '';
-        
-        if (role === 'admin' || emailLower === 'admin123@gmail.com') {
+        if (role === 'admin' || emailLower === 'admin123@gmail.com' || emailLower === 'hohoanganh20092021@gmail.com') {
           playSound.success();
           setIsAdmin(true);
         } else {

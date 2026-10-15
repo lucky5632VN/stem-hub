@@ -1,0 +1,1082 @@
+[
+  {
+    "id": "phys_eval_1",
+    "angleDiff": 8,
+    "posOffset": 0.2,
+    "indexDiff": 0.02,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_2",
+    "angleDiff": 9.94,
+    "posOffset": 0.46,
+    "indexDiff": 0.015,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_3",
+    "angleDiff": 8.52,
+    "posOffset": 0.15,
+    "indexDiff": 0.006,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_4",
+    "angleDiff": 1.2,
+    "posOffset": 3.6,
+    "indexDiff": 0,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_5",
+    "angleDiff": 10.54,
+    "posOffset": 0.28,
+    "indexDiff": 0.003,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_6",
+    "angleDiff": 11.45,
+    "posOffset": 0.11,
+    "indexDiff": 0.013,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_7",
+    "angleDiff": 9.65,
+    "posOffset": 0.53,
+    "indexDiff": 0.02,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_8",
+    "angleDiff": 3.8,
+    "posOffset": 2.4,
+    "indexDiff": 0.018,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_9",
+    "angleDiff": 12.89,
+    "posOffset": 0.05,
+    "indexDiff": 0.009,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_10",
+    "angleDiff": 12.65,
+    "posOffset": 0.54,
+    "indexDiff": 0.001,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_11",
+    "angleDiff": 11.06,
+    "posOffset": 0.1,
+    "indexDiff": 0.002,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_12",
+    "angleDiff": 12.73,
+    "posOffset": 0.26,
+    "indexDiff": 0.01,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_13",
+    "angleDiff": 14.9,
+    "posOffset": 0.42,
+    "indexDiff": 0.018,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_14",
+    "angleDiff": 13.69,
+    "posOffset": 0.15,
+    "indexDiff": 0.019,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_15",
+    "angleDiff": 12.84,
+    "posOffset": 0.45,
+    "indexDiff": 0.011,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_16",
+    "angleDiff": 15.29,
+    "posOffset": 0.22,
+    "indexDiff": 0.002,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_17",
+    "angleDiff": 16.52,
+    "posOffset": 0.07,
+    "indexDiff": 0,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_18",
+    "angleDiff": 14.77,
+    "posOffset": 0.54,
+    "indexDiff": 0.007,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_19",
+    "angleDiff": 4.2,
+    "posOffset": 2.2,
+    "indexDiff": 0.017,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_20",
+    "angleDiff": 17.71,
+    "posOffset": 0.1,
+    "indexDiff": 0.02,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_21",
+    "angleDiff": 17.79,
+    "posOffset": 0.52,
+    "indexDiff": 0.014,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_22",
+    "angleDiff": 16.09,
+    "posOffset": 0.12,
+    "indexDiff": 0.005,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_23",
+    "angleDiff": 17.46,
+    "posOffset": 0.31,
+    "indexDiff": 0,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_24",
+    "angleDiff": 19.83,
+    "posOffset": 0.37,
+    "indexDiff": 0.005,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_25",
+    "angleDiff": 18.86,
+    "posOffset": 0.14,
+    "indexDiff": 0.014,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_26",
+    "angleDiff": 17.76,
+    "posOffset": 0.48,
+    "indexDiff": 0.02,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_27",
+    "angleDiff": 20.02,
+    "posOffset": 0.16,
+    "indexDiff": 0.016,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_28",
+    "angleDiff": 21.56,
+    "posOffset": 0.03,
+    "indexDiff": 0.007,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_29",
+    "angleDiff": 19.91,
+    "posOffset": 0.55,
+    "indexDiff": 0,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_30",
+    "angleDiff": 3.5,
+    "posOffset": 2.5,
+    "indexDiff": 0.003,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_31",
+    "angleDiff": 22.51,
+    "posOffset": 0.16,
+    "indexDiff": 0.012,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_32",
+    "angleDiff": 22.92,
+    "posOffset": 0.49,
+    "indexDiff": 0.019,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_33",
+    "angleDiff": 21.14,
+    "posOffset": 0.14,
+    "indexDiff": 0.018,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_34",
+    "angleDiff": 22.2,
+    "posOffset": 0.37,
+    "indexDiff": 0.01,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_35",
+    "angleDiff": 24.72,
+    "posOffset": 0.32,
+    "indexDiff": 0.002,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_36",
+    "angleDiff": 24.03,
+    "posOffset": 0.12,
+    "indexDiff": 0.001,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_37",
+    "angleDiff": 22.7,
+    "posOffset": 0.51,
+    "indexDiff": 0.009,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_38",
+    "angleDiff": 24.75,
+    "posOffset": 0.1,
+    "indexDiff": 0.018,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_39",
+    "angleDiff": 26.57,
+    "posOffset": 0.01,
+    "indexDiff": 0.02,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_40",
+    "angleDiff": 25.07,
+    "posOffset": 0.55,
+    "indexDiff": 0.013,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_41",
+    "angleDiff": 24.65,
+    "posOffset": 0.07,
+    "indexDiff": 0.003,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_42",
+    "angleDiff": 4,
+    "posOffset": 2.3,
+    "indexDiff": 0,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_43",
+    "angleDiff": 28.03,
+    "posOffset": 0.45,
+    "indexDiff": 0.006,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_44",
+    "angleDiff": 26.23,
+    "posOffset": 0.15,
+    "indexDiff": 0.016,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_45",
+    "angleDiff": 26.96,
+    "posOffset": 0.42,
+    "indexDiff": 0.02,
+    "label": 0,
+    "errorType": "Sai góc tới (Incidence Angle Error)"
+  },
+  {
+    "id": "phys_eval_46",
+    "angleDiff": 0.8,
+    "posOffset": 3.4,
+    "indexDiff": 0.01,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_47",
+    "angleDiff": 1.29,
+    "posOffset": 2.86,
+    "indexDiff": 0.018,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_48",
+    "angleDiff": 0.97,
+    "posOffset": 2.74,
+    "indexDiff": 0.019,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_49",
+    "angleDiff": 0.36,
+    "posOffset": 3.68,
+    "indexDiff": 0.011,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_50",
+    "angleDiff": 0.48,
+    "posOffset": 3.51,
+    "indexDiff": 0.002,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_51",
+    "angleDiff": 8.5,
+    "posOffset": 0.4,
+    "indexDiff": 0,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_52",
+    "angleDiff": 1.23,
+    "posOffset": 3.82,
+    "indexDiff": 0.007,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_53",
+    "angleDiff": 0.62,
+    "posOffset": 4.11,
+    "indexDiff": 0.017,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_54",
+    "angleDiff": 0.31,
+    "posOffset": 3.42,
+    "indexDiff": 0.02,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_55",
+    "angleDiff": 0.82,
+    "posOffset": 3.89,
+    "indexDiff": 0.014,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_56",
+    "angleDiff": 1.3,
+    "posOffset": 4.59,
+    "indexDiff": 0.005,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_57",
+    "angleDiff": 5.2,
+    "posOffset": 1.6,
+    "indexDiff": 0,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_58",
+    "angleDiff": 0.36,
+    "posOffset": 3.99,
+    "indexDiff": 0.005,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_59",
+    "angleDiff": 0.5,
+    "posOffset": 4.91,
+    "indexDiff": 0.014,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_60",
+    "angleDiff": 1.14,
+    "posOffset": 4.63,
+    "indexDiff": 0.02,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_61",
+    "angleDiff": 1.22,
+    "posOffset": 4.21,
+    "indexDiff": 0.017,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_62",
+    "angleDiff": 0.6,
+    "posOffset": 5.08,
+    "indexDiff": 0.007,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_63",
+    "angleDiff": 0.31,
+    "posOffset": 5.26,
+    "indexDiff": 0,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_64",
+    "angleDiff": 0.83,
+    "posOffset": 4.59,
+    "indexDiff": 0.002,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_65",
+    "angleDiff": 1.3,
+    "posOffset": 5.17,
+    "indexDiff": 0.011,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_66",
+    "angleDiff": 0.94,
+    "posOffset": 5.78,
+    "indexDiff": 0.019,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_67",
+    "angleDiff": 0.35,
+    "posOffset": 5.13,
+    "indexDiff": 0.018,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_68",
+    "angleDiff": 4.8,
+    "posOffset": 1.7,
+    "indexDiff": 0.01,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_69",
+    "angleDiff": 1.15,
+    "posOffset": 6.14,
+    "indexDiff": 0.002,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_70",
+    "angleDiff": 1.21,
+    "posOffset": 5.76,
+    "indexDiff": 0.001,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_71",
+    "angleDiff": 0.59,
+    "posOffset": 5.43,
+    "indexDiff": 0.009,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_72",
+    "angleDiff": 0.32,
+    "posOffset": 6.34,
+    "indexDiff": 0.018,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_73",
+    "angleDiff": 0.85,
+    "posOffset": 6.4,
+    "indexDiff": 0.02,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_74",
+    "angleDiff": 1.3,
+    "posOffset": 5.77,
+    "indexDiff": 0.013,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_75",
+    "angleDiff": 0.92,
+    "posOffset": 6.44,
+    "indexDiff": 0.003,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_76",
+    "angleDiff": 0.34,
+    "posOffset": 6.95,
+    "indexDiff": 0,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_77",
+    "angleDiff": 0.53,
+    "posOffset": 6.27,
+    "indexDiff": 0.006,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_78",
+    "angleDiff": 1.16,
+    "posOffset": 6.52,
+    "indexDiff": 0.016,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_79",
+    "angleDiff": 1.2,
+    "posOffset": 7.36,
+    "indexDiff": 0.02,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_80",
+    "angleDiff": 5,
+    "posOffset": 1.5,
+    "indexDiff": 0.015,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_81",
+    "angleDiff": 0.32,
+    "posOffset": 6.67,
+    "indexDiff": 0.006,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_82",
+    "angleDiff": 0.87,
+    "posOffset": 7.6,
+    "indexDiff": 0,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_83",
+    "angleDiff": 1.3,
+    "posOffset": 7.53,
+    "indexDiff": 0.004,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_84",
+    "angleDiff": 0.9,
+    "posOffset": 6.96,
+    "indexDiff": 0.013,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_85",
+    "angleDiff": 0.34,
+    "posOffset": 7.71,
+    "indexDiff": 0.02,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_86",
+    "angleDiff": 0.54,
+    "posOffset": 8.11,
+    "indexDiff": 0.017,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_87",
+    "angleDiff": 1.18,
+    "posOffset": 7.42,
+    "indexDiff": 0.008,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_88",
+    "angleDiff": 1.19,
+    "posOffset": 7.79,
+    "indexDiff": 0.001,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_89",
+    "angleDiff": 4.9,
+    "posOffset": 1.8,
+    "indexDiff": 0.002,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_90",
+    "angleDiff": 0.33,
+    "posOffset": 8.01,
+    "indexDiff": 0.01,
+    "label": 1,
+    "errorType": "Sai vị trí thấu kính/gương (Element Alignment Error)"
+  },
+  {
+    "id": "phys_eval_91",
+    "angleDiff": 1.6,
+    "posOffset": 0.3,
+    "indexDiff": 0.14,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_92",
+    "angleDiff": 0.98,
+    "posOffset": 0.56,
+    "indexDiff": 0.158,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_93",
+    "angleDiff": 0.4,
+    "posOffset": 0.04,
+    "indexDiff": 0.133,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_94",
+    "angleDiff": 1.05,
+    "posOffset": 0.31,
+    "indexDiff": 0.177,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_95",
+    "angleDiff": 1.6,
+    "posOffset": 0.56,
+    "indexDiff": 0.153,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_96",
+    "angleDiff": 0.91,
+    "posOffset": 0.04,
+    "indexDiff": 0.169,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_97",
+    "angleDiff": 0.41,
+    "posOffset": 3.5,
+    "indexDiff": 0.01,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_98",
+    "angleDiff": 1.12,
+    "posOffset": 0.55,
+    "indexDiff": 0.162,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_99",
+    "angleDiff": 1.58,
+    "posOffset": 0.03,
+    "indexDiff": 0.206,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_100",
+    "angleDiff": 0.84,
+    "posOffset": 0.32,
+    "indexDiff": 0.184,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_101",
+    "angleDiff": 0.43,
+    "posOffset": 0.55,
+    "indexDiff": 0.197,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_102",
+    "angleDiff": 1.19,
+    "posOffset": 0.03,
+    "indexDiff": 0.22,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_103",
+    "angleDiff": 1.56,
+    "posOffset": 0.32,
+    "indexDiff": 0.192,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_104",
+    "angleDiff": 0.78,
+    "posOffset": 0.55,
+    "indexDiff": 0.236,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_105",
+    "angleDiff": 4.5,
+    "posOffset": 0.03,
+    "indexDiff": 0.07,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_106",
+    "angleDiff": 1.25,
+    "posOffset": 0.33,
+    "indexDiff": 0.226,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_107",
+    "angleDiff": 1.54,
+    "posOffset": 0.55,
+    "indexDiff": 0.251,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_108",
+    "angleDiff": 0.71,
+    "posOffset": 0.03,
+    "indexDiff": 0.222,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_109",
+    "angleDiff": 0.48,
+    "posOffset": 0.33,
+    "indexDiff": 0.265,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_110",
+    "angleDiff": 1.32,
+    "posOffset": 0.54,
+    "indexDiff": 0.247,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_111",
+    "angleDiff": 1.5,
+    "posOffset": 0.03,
+    "indexDiff": 0.255,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_112",
+    "angleDiff": 0.65,
+    "posOffset": 0.34,
+    "indexDiff": 0.282,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_113",
+    "angleDiff": 0.52,
+    "posOffset": 0.54,
+    "indexDiff": 0.252,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_114",
+    "angleDiff": 1.37,
+    "posOffset": 0.02,
+    "indexDiff": 0.294,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_115",
+    "angleDiff": 1.46,
+    "posOffset": 0.34,
+    "indexDiff": 0.278,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_116",
+    "angleDiff": 0.6,
+    "posOffset": 0.54,
+    "indexDiff": 0.283,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_117",
+    "angleDiff": 0.56,
+    "posOffset": 0.02,
+    "indexDiff": 0.313,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_118",
+    "angleDiff": 1.43,
+    "posOffset": 0.35,
+    "indexDiff": 0.282,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_119",
+    "angleDiff": 1.41,
+    "posOffset": 2.2,
+    "indexDiff": 0.08,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_120",
+    "angleDiff": 0.55,
+    "posOffset": 0.02,
+    "indexDiff": 0.309,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_121",
+    "angleDiff": 0.62,
+    "posOffset": 0.35,
+    "indexDiff": 0.312,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_122",
+    "angleDiff": 1.47,
+    "posOffset": 0.53,
+    "indexDiff": 0.343,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_123",
+    "angleDiff": 1.36,
+    "posOffset": 0.02,
+    "indexDiff": 0.312,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_124",
+    "angleDiff": 0.51,
+    "posOffset": 0.36,
+    "indexDiff": 0.353,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_125",
+    "angleDiff": 0.67,
+    "posOffset": 0.53,
+    "indexDiff": 0.34,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_126",
+    "angleDiff": 1.51,
+    "posOffset": 0.02,
+    "indexDiff": 0.341,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_127",
+    "angleDiff": 1.3,
+    "posOffset": 0.36,
+    "indexDiff": 0.374,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_128",
+    "angleDiff": 0.47,
+    "posOffset": 0.52,
+    "indexDiff": 0.342,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_129",
+    "angleDiff": 0.73,
+    "posOffset": 0.01,
+    "indexDiff": 0.382,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_130",
+    "angleDiff": 4.1,
+    "posOffset": 0.37,
+    "indexDiff": 0.075,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_131",
+    "angleDiff": 1.24,
+    "posOffset": 0.52,
+    "indexDiff": 0.37,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_132",
+    "angleDiff": 0.44,
+    "posOffset": 0.01,
+    "indexDiff": 0.404,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_133",
+    "angleDiff": 0.8,
+    "posOffset": 0.37,
+    "indexDiff": 0.373,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_134",
+    "angleDiff": 1.57,
+    "posOffset": 0.52,
+    "indexDiff": 0.411,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  },
+  {
+    "id": "phys_eval_135",
+    "angleDiff": 1.17,
+    "posOffset": 0.01,
+    "indexDiff": 0.403,
+    "label": 2,
+    "errorType": "Sai chiết suất môi trường (Refractive Index Error)"
+  }
+]

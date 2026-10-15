@@ -222,3 +222,64 @@ button:disabled {
   fill: currentColor !important;
 }
 
+/* Global Box Sizing Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Floating Graphing Toolbar Icons - Prevent flex shrink & padding squish */
+.graphing-toolbar-btn {
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  border-radius: 8px !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.graphing-toolbar-btn svg,
+.graphing-toolbar-btn svg.lucide {
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  display: block !important;
+  flex-shrink: 0 !important;
+}
+
+/* Ensure all Lucide icons and AI tutor icon buttons are sharp and never squished */
+svg.lucide {
+  flex-shrink: 0;
+}
+
+.ai-tutor-btn {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+}
+
+.ai-tutor-btn svg,
+.ai-tutor-btn svg.lucide {
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
+  display: block !important;
+  flex-shrink: 0 !important;
+}
+
+

@@ -11,7 +11,7 @@ export default function BiologyLabPage() {
       subject="sinh"
       title="Phòng Thí Nghiệm Sinh Học Di Truyền"
       code="BIO-GENE"
-      labUrl="/labs/lab_sinh/dist/"
+      labUrl="/labs/lab_sinh/dist/index.html?v=4.0.6"
       desc="Giải mã bản đồ gene di truyền, trắc nghiệm sinh học chuẩn THPT Quốc gia."
       badgeColor="from-emerald-500 to-teal-600"
     />

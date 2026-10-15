@@ -716,12 +716,12 @@ export default function DashboardLayout({ children }) {
           <div className="flex justify-center">
             <div className="w-20 h-20 rounded-full bg-rose-500/10 border border-rose-500/25 flex items-center justify-center text-rose-500 relative group">
               <div className="absolute inset-0 rounded-full bg-rose-500/20 blur-md animate-pulse" />
-              <ShieldAlert className="w-10 h-10 animate-[bounce_2s_infinite]" />
+              <ShieldAlert className="w-10 h-10 animate-pulse" />
             </div>
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-xl font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-pink-500 to-purple-500 font-mono">
+            <h1 className="text-xl font-black uppercase tracking-widest text-rose-400 font-mono">
               Hệ thống bảo trì
             </h1>
             <p className="text-xs text-zinc-400 font-medium leading-relaxed">
@@ -860,7 +860,12 @@ export default function DashboardLayout({ children }) {
         <div className="fixed inset-0 z-[99990] bg-[#0c0d14] flex flex-col">
           <div className="flex-1 flex relative overflow-hidden bg-[#0c0d14]">
             <iframe 
-              src={activeLab.launchUrl || activeLab.link} 
+              src={(() => {
+                const url = activeLab.launchUrl || activeLab.link || '';
+                const [path, query] = url.split('?');
+                const normalizedPath = path.endsWith('/') ? `${path}index.html` : (path.endsWith('.html') ? path : `${path}/index.html`);
+                return query ? `${normalizedPath}?${query}` : normalizedPath;
+              })()} 
               className="w-full h-full border-none"
               title={activeLab.name || activeLab.title}
               allow="accelerometer; autoplay; camera; microphone; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

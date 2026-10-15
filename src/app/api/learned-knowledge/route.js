@@ -47,8 +47,21 @@ export async function GET(request) {
   const corsHeaders = getCorsHeaders(request);
   try {
     const list = readGlobalKnowledge();
+    const { searchParams } = new URL(request.url);
+    const includeAll = searchParams.get('all') === 'true' || searchParams.get('includePending') === 'true';
+
+    // 🛡️ CHỈ TRẢ VỀ CÁC TRI THỨC ĐÃ ĐƯỢC GIÁO VIÊN PHÊ DUYỆT CHO CLIENT HỌC SINH (YÊU CẦU 1)
+    const filteredDocs = includeAll
+      ? list
+      : list.filter(item => item.status === 'verified_by_teacher' || item.teacherVerified === true);
+
     return NextResponse.json(
-      { success: true, count: list.length, learnedDocs: list },
+      { 
+        success: true, 
+        count: filteredDocs.length, 
+        totalInStorage: list.length,
+        learnedDocs: filteredDocs 
+      },
       {
         headers: {
           ...corsHeaders,
@@ -185,10 +198,24 @@ export async function POST(request) {
       queryTFIDF: queryTFIDF || {},
       tfidfVector: tfidfVector || {},
       isLearned: true,
+      // 🛡️ YÊU CẦU 1 (KIỂM DUYỆT CỦA GIÁO VIÊN TRƯỚC KHI TÁI SỬ DỤNG CACHE):
+      // Mọi câu trả lời mới mặc định gán 'pending_review' và teacherVerified: false
+      // Tuyệt đối không cho phép trả về làm Cache Hit cho học sinh khác khi chưa có phê duyệt
+      status: 'pending_review',
+      teacherVerified: false,
+      verifiedAt: null,
+      verifiedBy: null,
       createdAt: createdAt || new Date().toISOString()
     };
 
     if (existingIdx >= 0) {
+      // Giữ nguyên trạng thái thẩm định nếu đã từng duyệt
+      if (list[existingIdx].status === 'verified_by_teacher') {
+        newItem.status = 'verified_by_teacher';
+        newItem.teacherVerified = true;
+        newItem.verifiedAt = list[existingIdx].verifiedAt;
+        newItem.verifiedBy = list[existingIdx].verifiedBy;
+      }
       list[existingIdx] = newItem;
     } else {
       list.unshift(newItem);
@@ -199,7 +226,7 @@ export async function POST(request) {
 
     writeGlobalKnowledge(list);
 
-    console.log(`🧠 [GLOBAL LEARNING DB SERVER] Đã ghi nạp tri thức học thuật mới: "${cleanQ}" (Tổng số: ${list.length})`);
+    console.log(`🧠 [GLOBAL LEARNING DB SERVER] Đã ghi nạp tri thức học thuật mới (Trạng thái: pending_review): "${cleanQ}" (Tổng số: ${list.length})`);
 
     return NextResponse.json({ success: true, item: newItem, totalCount: list.length }, { status: 200, headers: corsHeaders });
   } catch (err) {
@@ -207,3 +234,82 @@ export async function POST(request) {
     return NextResponse.json({ success: false, error: maskErrorMessage(err, 'Lỗi ghi nhận tri thức.') }, { status: 500, headers: corsHeaders });
   }
 }
+
+// 🛡️ API PHÊ DUYỆT / TỪ CHỐI TRI THỨC DÀNH CHO GIÁO VIÊN & QUẢN TRỊ VIÊN
+export async function PATCH(request) {
+  const corsHeaders = getCorsHeaders(request);
+  try {
+    const body = await request.json().catch(() => ({}));
+    const { id, action, teacherName, updatedAnswer } = body;
+
+    if (!id || !action) {
+      return NextResponse.json({ success: false, error: 'Thiếu id hoặc action' }, { status: 400, headers: corsHeaders });
+    }
+
+    const list = readGlobalKnowledge();
+    const itemIdx = list.findIndex(item => item.id === id);
+
+    if (itemIdx === -1) {
+      return NextResponse.json({ success: false, error: 'Không tìm thấy bản ghi tri thức' }, { status: 404, headers: corsHeaders });
+    }
+
+    const targetItem = list[itemIdx];
+
+    if (action === 'verify') {
+      targetItem.status = 'verified_by_teacher';
+      targetItem.teacherVerified = true;
+      targetItem.verifiedAt = new Date().toISOString();
+      targetItem.verifiedBy = teacherName || 'Thầy/Cô Giáo viên Bộ môn';
+      console.log(`✅ [TEACHER AUDIT] Giáo viên đã PHÊ DUYỆT tri thức: "${targetItem.query}" (Kích hoạt Cache Hit)`);
+    } else if (action === 'reject') {
+      targetItem.status = 'rejected';
+      targetItem.teacherVerified = false;
+      targetItem.rejectedAt = new Date().toISOString();
+      targetItem.rejectedBy = teacherName || 'Thầy/Cô Giáo viên Bộ môn';
+      console.log(`❌ [TEACHER AUDIT] Giáo viên đã TỪ CHỐI tri thức: "${targetItem.query}"`);
+    } else if (action === 'edit') {
+      if (updatedAnswer) {
+        targetItem.answer = String(updatedAnswer).trim();
+        targetItem.content = `[Tự học AI - Đã hiệu đính] ${targetItem.query}: ${targetItem.answer}`;
+      }
+      targetItem.status = 'verified_by_teacher';
+      targetItem.teacherVerified = true;
+      targetItem.verifiedAt = new Date().toISOString();
+      targetItem.verifiedBy = teacherName || 'Thầy/Cô Giáo viên Bộ môn';
+      console.log(`✏️ [TEACHER AUDIT] Giáo viên đã HIỆU ĐÍNH & PHÊ DUYỆT tri thức: "${targetItem.query}"`);
+    }
+
+    list[itemIdx] = targetItem;
+    writeGlobalKnowledge(list);
+
+    return NextResponse.json({ success: true, item: targetItem }, { status: 200, headers: corsHeaders });
+  } catch (err) {
+    console.error('[API learned-knowledge] Lỗi PATCH:', err);
+    return NextResponse.json({ success: false, error: maskErrorMessage(err, 'Lỗi cập nhật trạng thái tri thức.') }, { status: 500, headers: corsHeaders });
+  }
+}
+
+export async function DELETE(request) {
+  const corsHeaders = getCorsHeaders(request);
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Thiếu id' }, { status: 400, headers: corsHeaders });
+    }
+
+    let list = readGlobalKnowledge();
+    const prevLen = list.length;
+    list = list.filter(item => item.id !== id);
+
+    if (list.length === prevLen) {
+      return NextResponse.json({ success: false, error: 'Không tìm thấy bản ghi' }, { status: 404, headers: corsHeaders });
+    }
+
+    writeGlobalKnowledge(list);
+    return NextResponse.json({ success: true, deletedId: id, totalCount: list.length }, { status: 200, headers: corsHeaders });
+  } catch (err) {
+    return NextResponse.json({ success: false, error: maskErrorMessage(err, 'Lỗi xóa bản ghi.') }, { status: 500, headers: corsHeaders });
+  }
+}
+

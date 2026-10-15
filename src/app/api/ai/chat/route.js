@@ -21,7 +21,54 @@ export async function POST(req) {
 
     const body = await req.json().catch(() => ({}));
     const prompt = (body.prompt || body.message || body.userText || body.text || body.query || '').trim();
-    const { systemInstruction, contents, temperature = 0.3, maxOutputTokens = 1500, responseMimeType } = body;
+    let { systemInstruction, contents, temperature = 0.3, maxOutputTokens = 1500, responseMimeType } = body;
+
+    // Hỗ trợ ảnh từ client gửi lên (Gemini Vision OCR & Multimodal Problem Solver)
+    if (body.imageBase64) {
+      const mimeMatch = typeof body.imageBase64 === 'string' ? body.imageBase64.match(/data:([^;]+);/) : null;
+      const mimeType = body.mimeType || (mimeMatch ? mimeMatch[1] : 'image/jpeg');
+      const cleanBase64 = typeof body.imageBase64 === 'string' && body.imageBase64.includes(',') 
+        ? body.imageBase64.split(',')[1] 
+        : body.imageBase64;
+      const imagePart = {
+        inlineData: {
+          mimeType,
+          data: cleanBase64
+        }
+      };
+
+      if (Array.isArray(contents) && contents.length > 0) {
+        // Tìm message user cuối cùng trong contents để gắn ảnh vào
+        let lastUserMsg = null;
+        for (let i = contents.length - 1; i >= 0; i--) {
+          if (contents[i].role === 'user') {
+            lastUserMsg = contents[i];
+            break;
+          }
+        }
+        if (lastUserMsg && Array.isArray(lastUserMsg.parts)) {
+          lastUserMsg.parts.push(imagePart);
+        } else {
+          contents.push({
+            role: 'user',
+            parts: [
+              { text: prompt || 'Hãy phân tích hình ảnh này và đưa ra câu trả lời chi tiết, chính xác theo chương trình học STEM.' },
+              imagePart
+            ]
+          });
+        }
+      } else {
+        contents = [
+          {
+            role: 'user',
+            parts: [
+              { text: prompt || 'Hãy phân tích hình ảnh này và đưa ra câu trả lời chi tiết, chính xác theo chương trình học STEM.' },
+              imagePart
+            ]
+          }
+        ];
+      }
+    }
 
     // Giới hạn độ dài prompt tối đa 8000 ký tự để chống DoS tràn bộ nhớ / quota
     if (prompt.length > 8000) {
@@ -31,16 +78,32 @@ export async function POST(req) {
       );
     }
 
-    if (!prompt && (!contents || contents.length === 0)) {
+    if (!prompt && (!contents || contents.length === 0) && !body.imageBase64) {
       return NextResponse.json(
-        { error: 'Cần cung cấp ít nhất prompt hoặc contents.' },
+        { error: 'Cần cung cấp ít nhất prompt, contents hoặc ảnh bài tập.' },
         { status: 400, headers: corsHeaders }
       );
     }
 
+    const latexSystemGuide = `
+[QUY TẮC BẮT BUỘC VỀ ĐỊNH DẠNG CÔNG THỨC TOÁN, LÝ, HÓA, SINH (LATEX / KATEX)]:
+- Mọi công thức Toán, Lý, Hóa, Sinh, phương trình hóa học, đại lượng, chỉ số phân tử, hằng số BẮT BUỘC viết bằng chuẩn LaTeX bọc trong dấu đô la:
+  + Nội dòng (inline): bọc trong 1 cặp $, ví dụ: $\\text{H}_2\\text{SO}_4$, $\\text{Ca}(\\text{OH})_2$, $x^2 + 2x = 0$, $v = \\frac{s}{t}$, $\\lambda = \\frac{v}{f}$, $K_C = 3{,}4$.
+  + Phương trình/công thức chính (block): bọc trong 2 cặp $$, ví dụ:
+    $$\\text{RCOOH} + \\text{R'OH} \\stackrel{\\text{H}_2\\text{SO}_4\\text{ đ},\\, t^\\circ}{\\rightleftharpoons} \\text{RCOOR'} + \\text{H}_2\\text{O}$$
+    $$2\\text{Na} + 2\\text{H}_2\\text{O} \\rightarrow 2\\text{NaOH} + \\text{H}_2\\uparrow$$
+    $$\\begin{cases} 2x + y = 5 \\\\ x - y = 1 \\end{cases}$$
+- LUÔN LUÔN ĐÓNG ĐẦY ĐỦ CẶP DẤU $ hoặc $$ ngay trên cùng dòng công thức. Tuyệt đối không mở $ mà quên đóng.
+- TUYỆT ĐỐI KHÔNG dùng Unicode nửa vời như H₂SO_4 hay kí hiệu thô như ->, <=>. Phải dùng \\rightarrow, \\rightleftharpoons, \\uparrow, \\downarrow.
+- Nếu có từ tiếng Việt trong công thức, phải bọc trong \\text{...}, ví dụ: \\text{đặc}, \\text{kết tủa}, \\text{khí}.
+`;
+
+    const baseInstruction = (typeof systemInstruction === 'string' ? systemInstruction : (systemInstruction?.parts?.[0]?.text || ''));
+    const finalSystemInstruction = `${baseInstruction}\nQuy tắc: bạn là thầy giáo STEM HUB vui tính, luôn bắt đầu câu trả lời bằng lời khen ngợi hoặc động viên học sinh.\n${latexSystemGuide}`;
+
     const result = await callResilientGemini({
       prompt,
-      systemInstruction: typeof systemInstruction === 'string' ? systemInstruction : systemInstruction?.parts?.[0]?.text,
+      systemInstruction: finalSystemInstruction,
       contents,
       temperature,
       maxOutputTokens,

@@ -276,7 +276,7 @@ NGUYÊN TẮC PHẢN HỒI TUYỆT ĐỐI BẮT BUỘC:
     }
     div.Section1 { page: Section1; }
     body {
-      font-family: 'Times New Roman', 'Arial', sans-serif;
+      font-family: 'Be Vietnam Pro', 'Inter', sans-serif;
       font-size: 11pt;
       line-height: 1.5;
       color: #000000;
@@ -353,7 +353,7 @@ NGUYÊN TẮC PHẢN HỒI TUYỆT ĐỐI BẮT BUỘC:
       color: #000000;
       padding: 12px 14px;
       margin: 8px 0 16px 0;
-      font-family: 'Arial', 'Segoe UI', sans-serif;
+      font-family: 'Be Vietnam Pro', 'Inter', sans-serif;
       font-size: 10pt;
       white-space: pre-wrap;
       word-wrap: break-word;

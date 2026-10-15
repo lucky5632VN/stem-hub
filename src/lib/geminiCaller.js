@@ -156,4 +156,3 @@ export async function callResilientGemini({
   throw new Error(`Tất cả mô hình Gemini đều bận: ${lastError?.message || 'Không rõ nguyên nhân'}`);
 }
 
-export default callResilientGemini;

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import api from '../api/axios';
 import { useGeometryStore } from '../store/useGeometryStore';
 import { calculateGeometry } from '../utils/geometryCalculator';
+import { calculateLocalCrossSection } from '../utils/crossSectionEngine';
 
 export const useGeometryAPI = () => {
   const { 
@@ -10,7 +11,6 @@ export const useGeometryAPI = () => {
     setShapeData, 
     setLoading, 
     setError,
-    plane,
     setCrossSection,
     setComputingSection
   } = useGeometryStore();
@@ -73,26 +73,35 @@ export const useGeometryAPI = () => {
     fetchShape();
   }, [selectedShape, shapeParams, setShapeData, setLoading, setError]);
 
-  // Function to compute cross section
+  // Function to compute cross section locally with 0ms latency
   const computeSection = async () => {
-    const { shapeData } = useGeometryStore.getState();
-    if (!shapeData) return;
-
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-    if (!apiBaseUrl || apiBaseUrl.includes('127.0.0.1') || apiBaseUrl.includes('localhost')) {
-      return;
-    }
+    const { shapeData, plane } = useGeometryStore.getState();
+    if (!shapeData || !shapeData.vertices || !shapeData.edges) return;
 
     setComputingSection(true);
     try {
-      const response = await api.post('/api/cross-section/compute', {
-        vertices: shapeData.vertices,
-        edges: shapeData.edges,
-        plane: plane
-      });
-      setCrossSection(response.data);
+      // 1. Tính toán cực nhanh trên client bằng engine thuần JS
+      const localResult = calculateLocalCrossSection(shapeData.vertices, shapeData.edges, plane);
+      setCrossSection(localResult);
+
+      // 2. Tùy chọn gửi backend nếu có API URL từ xa
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+      if (apiBaseUrl && !apiBaseUrl.includes('127.0.0.1') && !apiBaseUrl.includes('localhost')) {
+        try {
+          const response = await api.post('/api/cross-section/compute', {
+            vertices: shapeData.vertices,
+            edges: shapeData.edges,
+            plane: plane
+          });
+          if (response?.data?.polygon_vertices?.length) {
+            setCrossSection(response.data);
+          }
+        } catch {
+          // Keep localResult
+        }
+      }
     } catch (err: any) {
-      console.warn('Could not compute cross section via remote backend:', err?.message || err);
+      console.warn('Could not compute cross section:', err?.message || err);
     } finally {
       setComputingSection(false);
     }

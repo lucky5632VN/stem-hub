@@ -583,11 +583,63 @@
     if (!rawText) return '';
     let text = cleanAIMarkers(rawText);
 
+    // 1. Tự động cân bằng và cô lập dấu $ theo từng đoạn văn (tránh $ nuốt chữ tiếng Việt)
+    text = text.split(/\n{2,}/).map(paragraph => {
+      const trimmed = paragraph.trim();
+      if (trimmed.startsWith('```') || trimmed.includes('###HTML')) return paragraph;
+      const dollars = paragraph.match(/(?<!\\)\$/g);
+      if (!dollars || dollars.length % 2 === 0) return paragraph;
+
+      // Trailing $ gắn liền sau công thức: "Lưu ý: H_2SO_4$ đặc"
+      const fixedLeading = paragraph.replace(/(^|[\s:;.,(~])(\S+)\$/g, (m, g1, g2) => {
+        if (g2.includes('_') || g2.includes('^') || g2.includes('\\') || /[A-Z][0-9]/.test(g2)) {
+          return g1 + '$' + g2 + '$';
+        }
+        return m;
+      });
+      if (fixedLeading !== paragraph) {
+        const fixedDollars = fixedLeading.match(/(?<!\\)\$/g);
+        if (!fixedDollars || fixedDollars.length % 2 === 0) {
+          return fixedLeading;
+        }
+      }
+
+      // Unclosed formula $ at start of line
+      const lines = paragraph.split('\n');
+      const balancedLines = lines.map(line => {
+        const lTrim = line.trim();
+        const lDollars = line.match(/(?<!\\)\$/g);
+        if (lDollars && lDollars.length % 2 !== 0) {
+          if (lTrim.startsWith('$') || /[:=]\s*\$/.test(line)) {
+            return line + '$';
+          }
+        }
+        return line;
+      });
+
+      const res = balancedLines.join('\n');
+      const remDollars = res.match(/(?<!\\)\$/g);
+      if (remDollars && remDollars.length % 2 !== 0) {
+        return res + '$';
+      }
+      return res;
+    }).join('\n\n');
+
     // Auto-repair pseudo-LaTeX before KaTeX parsing
     text = text.replace(/\x0c/g, '\\f').replace(/\x08/g, '\\b');
     text = text.replace(/\n\s*(\\cdot|·)\s*\n/g, ' \\cdot ');
     text = text.replace(/=\s*\n\s*/g, ' = ');
     text = text.replace(/\n\s*(\\cdot|·)\s*/g, ' \\cdot ');
+
+    // Sửa lỗi gõ lefteharpoons & mũi tên thuận nghịch
+    text = text
+      .replace(/\{leftharpoons\}/g, '{\\rightleftharpoons}')
+      .replace(/\\stackrel\{([^{}]+)\}\{leftharpoons\}/g, '\\stackrel{$1}{\\rightleftharpoons}')
+      .replace(/\\stackrel\{([^{}]+)\}\s*\{=\}/g, '\\stackrel{$1}{=}')
+      .replace(/t°/g, 't^\\circ')
+      .replace(/\^\\circ\s*C\b/g, '^\\circ\\text{C}')
+      .replace(/°C\b/g, '^\\circ\\text{C}')
+      .replace(/°\b/g, '^\\circ');
 
     // Sửa các dạng căn thức lỗi gõ từ AI: \sqrt((l / g)) hoặc \sqrt(l / g)
     text = text.replace(/\\sqrt\s*\(\s*\(\s*([^/]+?)\s*\/\s*([^)]+?)\s*\)\s*\)/g, '\\sqrt{\\frac{$1}{$2}}');
@@ -628,7 +680,7 @@
       }
 
       // Nhận diện công thức Vật lý / Toán học độc lập (chứa macro LaTeX hoặc phương trình toán)
-      const hasLatexMacro = /\\(vec|perp|parallel|lambda|frac|sqrt|quad|qquad|text|mathbb|mathbf|left|right|omega|Omega|pi|Delta|alpha|beta|theta|mu|rho|times|cdot|to|approx|neq|leq|geq|in|infty|cos|sin|tan|cot)\b/.test(trimmed);
+      const hasLatexMacro = /\\(vec|perp|parallel|lambda|frac|sqrt|quad|qquad|text|mathbb|mathbf|omega|Omega|pi|Delta|alpha|beta|theta|mu|rho|times|cdot|to|approx|neq|leq|geq|in|infty|cos|sin|tan|cot)\b/.test(trimmed);
       const hasMathEquality = /^([a-zA-Z0-9_'\s\-\+\*\/\(\)]+)\s*=\s*([a-zA-Z0-9_'\s\-\+\*\/\(\)\\]+)$/.test(trimmed) && /[\\_^{}]/.test(trimmed);
 
       // Đếm số từ tiếng Việt có dấu để tránh nhận nhầm câu thuyết minh
@@ -657,10 +709,27 @@
 
       // Tiền xử lý công thức: làm sạch ký hiệu LaTeX tiếng Việt hoặc lỗi gõ
       formula = formula
+        .replace(/\{leftharpoons\}/g, '{\\rightleftharpoons}')
+        .replace(/\\stackrel\{([^{}]+)\}\{leftharpoons\}/g, '\\stackrel{$1}{\\rightleftharpoons}')
+        .replace(/\\stackrel\{([^{}]+)\}\s*\{=\}/g, '\\stackrel{$1}{=}')
+        .replace(/t°/g, 't^\\circ')
         .replace(/\\rightarrow/g, ' \\to ')
         .replace(/\\rightleftharpoons/g, ' \\rightleftharpoons ')
         .replace(/-->|->/g, ' \\to ')
         .replace(/<=>|<==>/g, ' \\rightleftharpoons ');
+
+      // Bảo vệ tiếng Việt trong math mode
+      const textBlocks = [];
+      let s = formula.replace(/\\(text|mathrm|mathbf|textbf|textit)\{([^{}]*)\}/g, (match, cmd, content) => {
+        const idx = textBlocks.length;
+        textBlocks.push(`\\${cmd}{${content}}`);
+        return `⟦SAFE_TEXT_${idx}⟧`;
+      });
+      s = s.replace(/([àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđĐ]+)/g, '\\text{$1}');
+      textBlocks.forEach((tb, idx) => {
+        s = s.split(`⟦SAFE_TEXT_${idx}⟧`).join(tb);
+      });
+      formula = s;
 
       let renderedHtml = '';
       if (typeof window !== 'undefined' && window.katex && typeof window.katex.renderToString === 'function') {
@@ -698,13 +767,17 @@
 
     // b. Render Inline Math: $...$ và \(...\)
     text = text.replace(/\\\(([\s\S]+?)\\\)/g, (_, p1) => pushKaTeX(p1, false));
-    text = text.replace(/\$([^\$\n]+?)\$/g, (_, p1) => pushKaTeX(p1, false));
+    text = text.replace(/\$([^\$]+?)\$/g, (_, p1) => pushKaTeX(p1.replace(/\r?\n/g, ' '), false));
 
-    // c. Xử lý các công thức phân số chưa bọc đô la như \frac{a}{b} hoặc \dfrac{a}{b}
+    // c. Bắt các công thức LaTeX độc lập không bọc $ (như \text{H}_2\text{SO}_4, \stackrel{...}{...})
+    text = text.replace(/\\text\{[^{}]+\}(?:_[0-9a-zA-Z]+|\^[\w\+\-]+|_\{\w+\}|\^\{\w+\}|\\text\{[^{}]+\}|[A-Za-z0-9\(\)])*/g, (formula) => pushKaTeX(formula, false));
+    text = text.replace(/(\\stackrel\{[^{}]+\}\{[^{}]+\})/g, (formula) => pushKaTeX(formula, false));
+
+    // d. Xử lý các công thức phân số chưa bọc đô la như \frac{a}{b} hoặc \dfrac{a}{b}
     text = text.replace(/\\d?frac\{([^}]+)\}\{([^}]+)\}/g, (match, n, d) => pushKaTeX(`\\frac{${n}}{${d}}`, false));
     text = text.replace(/\\sqrt\{([^}]+)\}/g, (match, r) => pushKaTeX(`\\sqrt{${r}}`, false));
 
-    // d. Xử lý các mũi tên phản ứng và ký hiệu phổ biến còn sót
+    // e. Xử lý các mũi tên phản ứng và ký hiệu phổ biến còn sót
     text = text
       .replace(/-->|->/g, ' → ')
       .replace(/<=>|<==>/g, ' ⇌ ')
@@ -714,7 +787,7 @@
       .replace(/\\times/g, '×')
       .replace(/\\cdot/g, '·');
 
-    // e. Markdown headers & bold
+    // f. Markdown headers & bold
     text = text
       .replace(/^###\s+(.+)$/gm, '<h4 style="font-size:0.9rem;font-weight:700;color:#38bdf8;margin:6px 0 2px;">$1</h4>')
       .replace(/^##\s+(.+)$/gm, '<h3 style="font-size:0.95rem;font-weight:700;color:#38bdf8;margin:8px 0 3px;">$1</h3>')
@@ -723,18 +796,18 @@
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/`([^`]+)`/g, '<code style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:4px;font-size:0.88em;color:#38bdf8;">$1</code>');
 
-    // f. Bullet items
+    // g. Bullet items
     text = text.replace(/^[\-\*•]\s+(.+)$/gm, '<li style="margin:2px 0;list-style-type:disc;list-style-position:inside;">$1</li>');
 
-    // g. Xóa triệt để các dấu sao thô thừa do AI tạo ra (* đơn lẻ)
+    // h. Xóa triệt để các dấu sao thô thừa do AI tạo ra (* đơn lẻ)
     text = text.replace(/\*/g, '');
 
-    // h. Ngắt dòng
+    // i. Ngắt dòng
     text = text.replace(/\n\n+/g, '<br/><br/>').replace(/\n/g, '<br/>');
 
-    // i. Phục hồi KaTeX tokens
+    // j. Phục hồi KaTeX tokens bằng split/join an toàn
     katexTokens.forEach((tokenHtml, idx) => {
-      text = text.replace(`###STEM_KATEX_${idx}###`, tokenHtml);
+      text = text.split(`###STEM_KATEX_${idx}###`).join(tokenHtml);
     });
 
     return text;

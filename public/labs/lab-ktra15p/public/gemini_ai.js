@@ -23,7 +23,28 @@ class UnifiedChatbot {
     this.availableModels = [];
     this.workingModel = null;
     this.isDrawerOpen = false;
+    this.attachedImage = null;
     this.init();
+  }
+
+  setAttachedImage(dataUrl) {
+    this.attachedImage = dataUrl;
+    const preview = document.getElementById('chatbot-img-preview');
+    const thumb = document.getElementById('chatbot-preview-thumb');
+    if (preview && thumb) {
+      thumb.src = dataUrl;
+      preview.style.display = 'flex';
+    }
+  }
+
+  clearAttachedImage() {
+    this.attachedImage = null;
+    const preview = document.getElementById('chatbot-img-preview');
+    const thumb = document.getElementById('chatbot-preview-thumb');
+    const fileInput = document.getElementById('chatbot-file-input');
+    if (preview) preview.style.display = 'none';
+    if (thumb) thumb.src = '';
+    if (fileInput) fileInput.value = '';
   }
 
   init() {
@@ -242,8 +263,18 @@ class UnifiedChatbot {
           <div id="chatbot-messages" class="chat-messages"></div>
           <div class="typing-indicator" id="chatbot-typing">AI đang phân tích dữ liệu...</div>
 
-          <div class="chat-input-area">
-            <input type="text" id="chatbot-input" class="chat-input" placeholder="Hỏi về phản ứng hoặc hóa chất..." autocomplete="off">
+          <div id="chatbot-img-preview" style="display:none; padding:6px 12px; background:rgba(30,41,59,0.9); border-top:1px solid rgba(56,189,248,0.2); align-items:center; gap:8px;">
+            <img id="chatbot-preview-thumb" src="" style="width:36px; height:36px; object-fit:cover; border-radius:4px; border:1px solid #38bdf8;" />
+            <span style="font-size:11px; color:#94a3b8; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Ảnh đã đính kèm (sẵn sàng phân tích)</span>
+            <button id="chatbot-remove-img" type="button" style="background:transparent; border:none; color:#ef4444; font-size:14px; cursor:pointer;">✕</button>
+          </div>
+
+          <div class="chat-input-area" style="display:flex; align-items:center; gap:6px; padding:8px 12px; background:rgba(15,23,42,0.8); border-top:1px solid rgba(56,189,248,0.15);">
+            <input type="file" id="chatbot-file-input" accept="image/*" style="display:none;" />
+            <button id="chatbot-upload-btn" type="button" class="chat-upload" title="Tải ảnh lên hoặc Dán ảnh (Ctrl+V)" style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.3); color:#38bdf8; cursor:pointer; width:34px; height:34px; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </button>
+            <input type="text" id="chatbot-input" class="chat-input" placeholder="Hỏi AI hoặc dán ảnh (Ctrl+V)..." autocomplete="off" style="flex:1;">
             <button id="chatbot-send-btn" class="chat-send">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
             </button>
@@ -333,6 +364,46 @@ class UnifiedChatbot {
       input.onkeypress = (e) => {
         if (e.key === 'Enter') this.handleUserInput();
       };
+      // Hỗ trợ dán ảnh trực tiếp từ clipboard (Ctrl+V)
+      input.addEventListener('paste', (e) => {
+        const items = (e.clipboardData || e.originalEvent?.clipboardData)?.items;
+        if (!items) return;
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].type && items[i].type.startsWith('image/')) {
+            e.preventDefault();
+            const file = items[i].getAsFile();
+            if (!file) continue;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              this.setAttachedImage(event.target.result);
+            };
+            reader.readAsDataURL(file);
+            break;
+          }
+        }
+      });
+    }
+
+    const fileInput = document.getElementById('chatbot-file-input');
+    const uploadBtn = document.getElementById('chatbot-upload-btn');
+    if (uploadBtn && fileInput) {
+      uploadBtn.onclick = () => fileInput.click();
+      fileInput.onchange = (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            this.setAttachedImage(event.target.result);
+          };
+          reader.readAsDataURL(file);
+        }
+        fileInput.value = '';
+      };
+    }
+
+    const removeImgBtn = document.getElementById('chatbot-remove-img');
+    if (removeImgBtn) {
+      removeImgBtn.onclick = () => this.clearAttachedImage();
     }
 
     const configBtn = document.getElementById('config-btn');
@@ -653,7 +724,7 @@ class UnifiedChatbot {
         this.loadWelcomeMessage();
       } else {
         historyToLoad.forEach(msg => {
-          this.renderMessage(msg.role, msg.text);
+          this.renderMessage(msg.role, msg.text, msg.image);
         });
       }
     }
@@ -667,28 +738,34 @@ class UnifiedChatbot {
     this.addMessage('ai', msg);
   }
 
-  addMessage(role, text) {
+  addMessage(role, text, image = null) {
+    const item = { role, text, image };
     if (this.activeBot === 'lab') {
-      this.labHistory.push({ role, text });
+      this.labHistory.push(item);
     } else {
-      this.genHistory.push({ role, text });
+      this.genHistory.push(item);
     }
-    this.renderMessage(role, text);
+    this.renderMessage(role, text, image);
     this.saveSessions(this.activeBot);
   }
 
-  renderMessage(role, text) {
+  renderMessage(role, text, image = null) {
     const chatMsgs = document.getElementById('chatbot-messages');
     if (!chatMsgs) return;
 
     const msgDiv = document.createElement('div');
     msgDiv.className = `message ${role}`;
 
+    let imgHtml = '';
+    if (image) {
+      imgHtml = `<img src="${image}" alt="Hình ảnh đính kèm" style="max-width:200px; max-height:200px; object-fit:contain; border-radius:6px; margin-bottom:6px; display:block; border:1px solid rgba(56,189,248,0.4);" />`;
+    }
+
     if (role === 'user') {
       if (window.StemLabAIBridge && typeof window.StemLabAIBridge.formatUserMessage === 'function') {
-        msgDiv.innerHTML = window.StemLabAIBridge.formatUserMessage(text);
+        msgDiv.innerHTML = imgHtml + window.StemLabAIBridge.formatUserMessage(text);
       } else {
-        msgDiv.textContent = text || '';
+        msgDiv.innerHTML = imgHtml + (text ? text.replace(/</g, '&lt;').replace(/>/g, '&gt;') : '');
       }
       chatMsgs.appendChild(msgDiv);
       return;
@@ -825,40 +902,14 @@ class UnifiedChatbot {
   
   formatChemText(text) {
     if (!text) return '';
-    let i = text;
-    i = i.replace(/\\xrightarrow\{[^}]*\}/g, ' → ')
-         .replace(/\\xrightarrow/g, ' → ')
-         .replace(/\\rightarrow/g, ' → ')
-         .replace(/\\rightleftharpoons/g, ' ⇌ ')
-         .replace(/\\text\{([^}]+)\}/g, '$1')
-         .replace(/\\mathrm\{([^}]+)\}/g, '$1')
-         .replace(/\\mathbf\{([^}]+)\}/g, '$1')
-         .replace(/-->/g, ' → ')
-         .replace(/->/g, ' → ')
-         .replace(/<=>/g, ' ⇌ ');
-
-    const subscriptMap = {
-      '₀':'0', '₁':'1', '₂':'2', '₃':'3', '₄':'4',
-      '₅':'5', '₆':'6', '₇':'7', '₈':'8', '₉':'9'
-    };
-    i = i.replace(/[₀₁₂₃₄₅₆₇₈₉]/g, match => `<sub>${subscriptMap[match]}</sub>`);
-    i = i.replace(/\$([^\$]+)\$/g, (match, p1) => {
-      let clean = p1
-        .replace(/([A-Za-z\)])_?\{?(\d+)\}?/g, '$1<sub>$2</sub>')
-        .replace(/\^\{?([^\}]+)\}?/g, '<sup>$1</sup>')
-        .replace(/([A-Za-z0-9])\^\{?(\d*[+-])\}?/g, '$1<sup>$2</sup>');
-      return `<b style="color:#00ffcc">${clean}</b>`;
-    });
-    i = i.replace(/([A-Z][a-z]?|\))(\d+)/g, '$1<sub>$2</sub>');
-    i = i.replace(/([A-Za-z0-9])\^\{?([1-9]?[+-])\}?/g, '$1<sup>$2</sup>');
-    i = i.replace(/^[-*]{3,}\s*$/gm, '<hr style="border: 0; border-top: 1px dashed rgba(255,255,255,0.2); margin: 15px 0;">')
-         .replace(/^#+\s*(.*)$/gm, '<b style="color:#38bdf8">$1</b>')
-         .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-         .replace(/\*(.*?)\*/g, '<i>$1</i>')
-         .replace(/^[\*\-]\s*(.*)$/gm, '• $1')
-         .replace(/^([🎯💡🌍⚠️].*):/gm, '<div style="color:#38bdf8; font-weight:bold; margin-top:10px; font-family:Orbitron, sans-serif;">$1</div>')
-         .replace(/\n/g, '<br>');
-    return i;
+    if (window.StemLabAIBridge && typeof window.StemLabAIBridge.formatAIFormulaText === 'function') {
+      return window.StemLabAIBridge.formatAIFormulaText(text);
+    }
+    if (typeof window !== 'undefined' && window.katex && typeof window.katex.renderToString === 'function') {
+      let f = text.replace(/\\rightleftharpoons/g, ' ⇌ ');
+      return f;
+    }
+    return text;
   }
 
   async streamMessage(role, text) {
@@ -920,68 +971,73 @@ class UnifiedChatbot {
     if (!input || this.isTyping) return;
 
     const text = input.value.trim();
-    if (!text) return;
+    const currentImage = this.attachedImage;
+    if (!text && !currentImage) return;
 
-    this.addMessage('user', text);
+    this.addMessage('user', text, currentImage);
     input.value = '';
+    this.clearAttachedImage();
     this.showTyping(true);
 
     const labTitle = this.activeBot === 'lab' ? 'Lab Hóa QuantumLab (Thao tác)' : 'Lab Hóa Học THPT (Lý thuyết)';
 
-        // ⚡ BƯỚC 0: KIỂM TRA RANH GIỚI MÔN HỌC (SUBJECT BOUNDARY GUARD)
-    if (window.StemLabAIBridge && typeof window.StemLabAIBridge.checkSubjectBoundary === 'function') {
-      try {
-        const guard = window.StemLabAIBridge.checkSubjectBoundary(text, 'hoa');
-        if (!guard.allowed) {
-          await this.streamMessage('ai', guard.refusal);
-          this.showTyping(false);
-          window.StemLabAIBridge.logLabReasoning({
-            query: text,
-            subject: 'HOA',
-            intent: 'subject_boundary_guard',
-            aiResponseText: guard.refusal,
-            isCacheHit: true,
-            labTitle: labTitle
-          });
-          return;
+    // Nếu có ảnh, cho phép AI đọc và phân tích ảnh
+    if (!currentImage) {
+      // ⚡ BƯỚC 0: KIỂM TRA RANH GIỚI MÔN HỌC (SUBJECT BOUNDARY GUARD)
+      if (window.StemLabAIBridge && typeof window.StemLabAIBridge.checkSubjectBoundary === 'function') {
+        try {
+          const guard = window.StemLabAIBridge.checkSubjectBoundary(text, 'hoa');
+          if (!guard.allowed) {
+            await this.streamMessage('ai', guard.refusal);
+            this.showTyping(false);
+            window.StemLabAIBridge.logLabReasoning({
+              query: text,
+              subject: 'HOA',
+              intent: 'subject_boundary_guard',
+              aiResponseText: guard.refusal,
+              isCacheHit: true,
+              labTitle: labTitle
+            });
+            return;
+          }
+        } catch (gErr) {
+          console.warn('[Lab Hóa AI] Subject guard error:', gErr);
         }
-      } catch (gErr) {
-        console.warn('[Lab Hóa AI] Subject guard error:', gErr);
       }
-    }
 
-    // ⚡ BƯỚC 1: KIỂM TRA BỘ NHỚ AI TỰ HỌC (CACHE HIT) GIỐNG TRỢ LÝ NOVA
-    if (window.StemLabAIBridge && typeof window.StemLabAIBridge.checkLabLearnedCache === 'function') {
-      try {
-        const cacheRes = await window.StemLabAIBridge.checkLabLearnedCache(text, 'hoa', 0.92);
-        if (cacheRes && cacheRes.hit) {
-          await this.streamMessage('ai', cacheRes.answer);
-          this.showTyping(false);
+      // ⚡ BƯỚC 1: KIỂM TRA BỘ NHỚ AI TỰ HỌC (CACHE HIT) GIỐNG TRỢ LÝ NOVA
+      if (window.StemLabAIBridge && typeof window.StemLabAIBridge.checkLabLearnedCache === 'function') {
+        try {
+          const cacheRes = await window.StemLabAIBridge.checkLabLearnedCache(text, 'hoa', 0.92);
+          if (cacheRes && cacheRes.hit) {
+            await this.streamMessage('ai', cacheRes.answer);
+            this.showTyping(false);
 
-          window.StemLabAIBridge.logLabReasoning({
-            query: text,
-            subject: 'HOA',
-            aiResponseText: cacheRes.answer,
-            isCacheHit: true,
-            labTitle: labTitle,
-            score: cacheRes.score
-          });
-          return;
+            window.StemLabAIBridge.logLabReasoning({
+              query: text,
+              subject: 'HOA',
+              aiResponseText: cacheRes.answer,
+              isCacheHit: true,
+              labTitle: labTitle,
+              score: cacheRes.score
+            });
+            return;
+          }
+        } catch (cErr) {
+          console.warn('[Lab Hóa AI] Cache check warning:', cErr);
         }
-      } catch (cErr) {
-        console.warn('[Lab Hóa AI] Cache check warning:', cErr);
       }
     }
 
     try {
-      const response = await this.callGemini(text, this.activeBot === 'gen');
+      const response = await this.callGemini(text, this.activeBot === 'gen', currentImage);
       await this.streamMessage('ai', response);
 
       // ⚡ BƯỚC 2: TỰ ĐỘNG GHI NẠP CÂU TRẢ LỜI MỚI VÀO TRI THỨC TOÀN HỆ THỐNG & AUDIT LOG (CHỈ KHI THÀNH CÔNG VÀ KHÔNG LỖI)
       if (!this.isAIError(response, 200) && window.StemLabAIBridge && typeof window.StemLabAIBridge.saveLabLearnedAnswer === 'function') {
-        window.StemLabAIBridge.saveLabLearnedAnswer(text, response, 'hoa', labTitle);
+        window.StemLabAIBridge.saveLabLearnedAnswer(text || 'Phân tích hình ảnh', response, 'hoa', labTitle);
         window.StemLabAIBridge.logLabReasoning({
-          query: text,
+          query: text || 'Phân tích hình ảnh',
           subject: 'HOA',
           aiResponseText: response,
           isCacheHit: false,
@@ -1023,7 +1079,7 @@ class UnifiedChatbot {
     return '';
   }
 
-  async callGemini(prompt, isGeneral = false) {
+  async callGemini(prompt, isGeneral = false, imageBase64 = null) {
     let context = "";
     let systemPrompt = "";
     const memoryContext = this.getMemoryContext(this.activeBot);
@@ -1084,12 +1140,12 @@ class UnifiedChatbot {
     recentHistory.forEach(msg => {
       formattedContents.push({
         role: msg.role === 'user' ? 'user' : 'model',
-        parts: [{ text: msg.text }]
+        parts: [{ text: msg.text || '' }]
       });
     });
 
     if (formattedContents.length === 0) {
-      formattedContents.push({ role: 'user', parts: [{ text: prompt }] });
+      formattedContents.push({ role: 'user', parts: [{ text: prompt || (imageBase64 ? 'Phân tích hình ảnh này' : '') }] });
     }
 
     // ⚡ Zero Exposure: Định tuyến qua Next.js Gateway nội bộ (/api/ai/chat)
@@ -1099,9 +1155,10 @@ class UnifiedChatbot {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: prompt,
+          prompt: prompt || (imageBase64 ? 'Phân tích và giải thích chi tiết hiện tượng / thí nghiệm hóa học trong hình ảnh này' : ''),
           contents: formattedContents,
           systemInstruction: systemPrompt,
+          imageBase64: imageBase64,
           temperature: 0.3,
           maxOutputTokens: 1200
         })
@@ -1139,6 +1196,21 @@ class UnifiedChatbot {
           temperature: 0.3
         }
       };
+
+      if (imageBase64) {
+        const cleanBase64 = imageBase64.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, '');
+        const mimeMatch = imageBase64.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,/);
+        const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+        const lastPart = bodyPayload.contents[bodyPayload.contents.length - 1];
+        if (lastPart && lastPart.parts) {
+          lastPart.parts.push({
+            inlineData: {
+              mimeType: mimeType,
+              data: cleanBase64
+            }
+          });
+        }
+      }
 
       for (let tryCount = 0; tryCount < totalTries; tryCount++) {
         const activeKey = keyPool[((isGeneral ? generalKeyIdx : commanderKeyIdx) + tryCount) % keyPool.length];

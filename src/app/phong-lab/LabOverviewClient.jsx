@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/store/useAppStore';
 import { playSound } from '@/lib/sound';
 import { Calculator, Zap, FlaskConical, Dna, ArrowRight } from 'lucide-react';
@@ -9,6 +11,7 @@ const labList = [
     id: 'math',
     name: 'Toán học 3D',
     title: 'Lab Toán',
+    href: '/phong-lab/toan',
     link: '/labs/toan/frontend/dist/index.html',
     code: 'MATH-3D',
     desc: 'Khám phá hình học không gian 3D trực quan bằng công cụ giải toán thông minh.',
@@ -20,6 +23,7 @@ const labList = [
     id: 'phys',
     name: 'Vật lý Lượng tử',
     title: 'Lab Lý',
+    href: '/phong-lab/ly',
     link: '/labs/PhysicsLab/index.html',
     code: 'PHYS-V3',
     desc: 'Mô phỏng dao động điều hòa, giao thoa sóng cơ và lắp ráp mạch điện DC tương tác.',
@@ -31,6 +35,7 @@ const labList = [
     id: 'chem',
     name: 'Hóa học Ảo',
     title: 'Lab Hóa',
+    href: '/phong-lab/hoa',
     link: '/labs/lab-ktra15p/dist/index.html?v=4.1.5',
     code: 'CHEM-V4',
     desc: 'Thiết lập chuỗi phản ứng axit-bazơ ảo, theo dõi nồng độ pH thời gian thực.',
@@ -42,6 +47,7 @@ const labList = [
     id: 'bio',
     name: 'Sinh học Di truyền',
     title: 'Lab Sinh',
+    href: '/phong-lab/sinh',
     link: '/labs/lab_sinh/dist/index.html?v=4.0.6',
     code: 'BIO-GENE',
     desc: 'Giải mã bản đồ gene di truyền, trắc nghiệm sinh học chuẩn THPT Quốc gia.',
@@ -52,14 +58,11 @@ const labList = [
 ];
 
 export default function LabOverviewClient() {
-  const setActiveLab = useAppStore((state) => state.setActiveLab);
+  const router = useRouter();
 
   const handleLaunch = (lab) => {
     playSound.click?.();
-    setActiveLab({
-      ...lab,
-      launchUrl: `${lab.link}${lab.link.includes('?') ? '&' : '?'}_t=${Date.now()}`
-    });
+    router.push(lab.href);
   };
 
   return (
@@ -67,8 +70,9 @@ export default function LabOverviewClient() {
       {labList.map((lab) => {
         const Icon = lab.icon;
         return (
-          <div
+          <Link
             key={lab.id}
+            href={lab.href}
             onClick={() => handleLaunch(lab)}
             className={`p-6 rounded-2xl bg-slate-900/80 border ${lab.border} hover:bg-slate-800/80 transition-all duration-300 group flex flex-col justify-between shadow-xl cursor-pointer`}
           >
@@ -93,7 +97,7 @@ export default function LabOverviewClient() {
               <span>Vào phòng thực hành</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
-          </div>
+          </Link>
         );
       })}
     </div>

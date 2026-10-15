@@ -2181,7 +2181,7 @@ export default function ProfilePage() {
           
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border-b border-white/5 pb-6 mb-8">
             <div>
-              <h2 className="text-2xl font-black tracking-wider uppercase bg-clip-text bg-gradient-to-r from-pink-400 via-purple-300 to-cyan-400 font-sans">
+              <h2 className="text-2xl font-black tracking-wider uppercase text-pink-400 font-sans">
                 ĐỒNG BỘ NĂNG LƯỢNG LƯỢNG TỬ
               </h2>
               <p className="text-zinc-400 text-xs mt-1 font-mono uppercase tracking-wider">
@@ -4564,7 +4564,7 @@ export default function ProfilePage() {
             <div className="absolute -top-48 -left-48 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute -bottom-48 -right-48 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
 
-            <h3 className="text-xl font-black bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 uppercase tracking-widest mb-2 font-sans">
+            <h3 className="text-xl font-black text-purple-400 uppercase tracking-widest mb-2 font-sans">
               GIẢI MÃ LIÊN KẾT LƯỢNG TỬ
             </h3>
             <p className="text-text-secondary text-xs font-mono uppercase tracking-wider mb-6">
@@ -4731,7 +4731,7 @@ export default function ProfilePage() {
                     ? 'Điểm Danh Hàng Ngày'
                     : 'Phần Thưởng Đột Phá'}
                 </h4>
-                <h3 className="text-xl font-black bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-500 uppercase tracking-wider mb-6 font-sans">
+                <h3 className="text-xl font-black text-amber-400 uppercase tracking-wider mb-6 font-sans">
                   {levelRewardModal.type === 'avatar'
                     ? 'ĐỒNG BỘ GIAO DIỆN'
                     : levelRewardModal.type === 'checkin'

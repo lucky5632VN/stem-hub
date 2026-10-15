@@ -271,7 +271,7 @@ export default function LeaderboardPage() {
               <Trophy className="w-8 h-8 animate-pulse" />
             </div>
             <div>
-              <h1 className="text-3xl font-black uppercase tracking-wider bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-200 to-rose-400">
+              <h1 className="text-3xl font-black uppercase tracking-wider text-amber-400">
                 BẢNG XẾP HẠNG STEM TOÀN CẦU
               </h1>
               <p className="text-text-secondary text-xs font-mono uppercase tracking-widest mt-0.5">

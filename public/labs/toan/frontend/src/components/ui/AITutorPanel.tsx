@@ -1,11 +1,15 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import type { KeyboardEvent } from 'react';
-import { Send, User, Bot, Loader2, X, Trash2, History, Plus } from 'lucide-react';
+import { 
+  Send, User, Bot, Loader2, X, Trash2, History, Plus, 
+  Calculator, ImagePlus, Sparkles
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGeometryStore } from '../../store/useGeometryStore';
 import { parseMarkdown, splitForStreaming } from '../../utils/markdown';
 import type { ShapeType } from '../../types/geometry';
 import { API_ENDPOINTS, CLOUDFLARE_EDGE_PROXY_URL, fetchWithTimeout } from '../../config/api';
+import CasioMathKeyboard from './CasioMathKeyboard';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -14,6 +18,7 @@ interface Message {
   role: 'user' | 'ai';
   content: string;
   timestamp: Date;
+  imageUrl?: string | null;
 }
 
 interface Session {
@@ -43,7 +48,12 @@ function TypingDots() {
 }
 
 // Direct Client-Side Gemini Tutor Fallback
-async function callDirectGeminiTutor(userText: string, chatHistory: Message[], shapeContext: string): Promise<string> {
+async function callDirectGeminiTutor(
+  userText: string, 
+  chatHistory: Message[], 
+  shapeContext: string,
+  imageBase64?: string | null
+): Promise<string> {
   const geminiKey = (
     (import.meta as any).env?.VITE_GEMINI_API_KEY ||
     (import.meta as any).env?.NEXT_PUBLIC_GEMINI_API_KEY ||
@@ -55,7 +65,20 @@ async function callDirectGeminiTutor(userText: string, chatHistory: Message[], s
 Hãy giải đáp súc tích, chính xác theo phương pháp chuẩn sách giáo khoa Việt Nam. Dùng LaTeX $...$ cho công thức toán.
 Ngữ cảnh hình học hiện tại: ${shapeContext}`;
 
-  const prompt = `${historyContext ? `Lịch sử hội thoại gần đây:\n${historyContext}\n\n` : ''}Câu hỏi hiện tại của học sinh: ${userText}`;
+  const prompt = `${historyContext ? `Lịch sử hội thoại gần đây:\n${historyContext}\n\n` : ''}Câu hỏi hiện tại của học sinh: ${userText || 'Hãy phân tích hình ảnh đề bài toán này và giải chi tiết từng bước.'}`;
+
+  const userParts: any[] = [{ text: prompt }];
+  if (imageBase64) {
+    const mimeMatch = imageBase64.match(/data:([^;]+);/);
+    const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+    const cleanBase64 = imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;
+    userParts.push({
+      inlineData: {
+        mimeType,
+        data: cleanBase64
+      }
+    });
+  }
 
   const models = ['gemini-flash-lite-latest', 'gemini-3.1-flash-lite-preview', 'gemini-2.5-flash-lite', 'gemini-flash-latest'];
   for (const model of models) {
@@ -65,7 +88,7 @@ Ngữ cảnh hình học hiện tại: ${shapeContext}`;
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          contents: [{ role: 'user', parts: userParts }],
           system_instruction: { parts: [{ text: systemInstruction }] },
           generationConfig: { temperature: 0.2, maxOutputTokens: 2048 }
         })
@@ -81,7 +104,12 @@ Ngữ cảnh hình học hiện tại: ${shapeContext}`;
 }
 
 // Gọi thông qua Edge Proxy với Client Fallback tự động
-async function callGeminiDirectly(userText: string, chatHistory: Message[], shapeContext: string): Promise<string> {
+async function callGeminiDirectly(
+  userText: string, 
+  chatHistory: Message[], 
+  shapeContext: string,
+  imageBase64?: string | null
+): Promise<string> {
   const endpointsToTry = Array.from(new Set([
     '/api/lab-toan/chat-tutor',
     API_ENDPOINTS.chatTutor,
@@ -96,7 +124,15 @@ async function callGeminiDirectly(userText: string, chatHistory: Message[], shap
       const response = await fetchWithTimeout(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userText, message: userText, prompt: userText, chatHistory, shapeContext })
+        body: JSON.stringify({ 
+          userText, 
+          message: userText, 
+          prompt: userText, 
+          chatHistory, 
+          shapeContext,
+          imageBase64: imageBase64 ? imageBase64.replace(/^data:[^;]+;base64,/, '') : undefined,
+          mimeType: imageBase64 ? (imageBase64.match(/data:([^;]+);/)?.[1] || 'image/jpeg') : undefined
+        })
       }, 15000);
 
       const contentType = response.headers.get('content-type') || '';
@@ -120,7 +156,7 @@ async function callGeminiDirectly(userText: string, chatHistory: Message[], shap
   // Fallback cuối cùng nếu cả proxy lẫn local đều không phản hồi
   console.warn('[AITutorPanel] Trying direct Gemini fallback as last resort...');
   try {
-    return await callDirectGeminiTutor(userText, chatHistory, shapeContext);
+    return await callDirectGeminiTutor(userText, chatHistory, shapeContext, imageBase64);
   } catch (fallbackErr: any) {
     console.error('[AITutorPanel] Direct fallback failed:', fallbackErr?.message);
     throw new Error(lastError?.message || 'Có lỗi kết nối hệ thống, vui lòng thử lại sau ít phút.');
@@ -180,6 +216,29 @@ const AITutorPanel: React.FC = () => {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [showKeyboard, setShowKeyboard] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith('image/')) {
+        const file = items[i].getAsFile();
+        if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setUploadedImage(reader.result as string);
+          };
+          reader.readAsDataURL(file);
+          e.preventDefault();
+          return;
+        }
+      }
+    }
+  };
 
   const { 
     selectedShape, shapeParams,
@@ -328,13 +387,16 @@ const AITutorPanel: React.FC = () => {
   }, [input]);
 
   const sendMessage = useCallback(async (text: string) => {
-    if (!text.trim() || isLoading) return;
+    const trimmed = text.trim();
+    if ((!trimmed && !uploadedImage) || isLoading) return;
 
+    const currentImg = uploadedImage;
     const userMsg: Message = {
       id: crypto.randomUUID(),
       role: 'user',
-      content: text.trim(),
+      content: trimmed || 'Đã gửi ảnh bài tập hình học không gian. Thầy giải chi tiết và dựng hình giúp em nhé!',
       timestamp: new Date(),
+      imageUrl: currentImg,
     };
 
     const newMsgs = [...messages, userMsg];
@@ -342,6 +404,7 @@ const AITutorPanel: React.FC = () => {
     saveCurrentSession(newMsgs);
 
     setInput('');
+    setUploadedImage(null);
     setIsLoading(true);
     setError(null);
 
@@ -387,7 +450,7 @@ const AITutorPanel: React.FC = () => {
 
       if (!isCacheHit) {
         try {
-          aiResponseText = await callGeminiDirectly(userPrompt, messages, shapeContext);
+          aiResponseText = await callGeminiDirectly(userPrompt, messages, shapeContext, currentImg);
           aiSucceeded = true;
         } catch (directErr) {
           console.error("Lỗi Gia sư STEM AI Toán 3D:", directErr);
@@ -490,6 +553,19 @@ const AITutorPanel: React.FC = () => {
     }
   }, [isLoading, messages, selectedShape, shapeParams, setSelectedShape, updateParams, setPlane, setCrossSectionColor, setShapeData, sessions, saveCurrentSession]);
 
+  useEffect(() => {
+    const handleOpenTutor = (e: any) => {
+      setIsOpen(true);
+      if (e.detail?.prompt) {
+        setTimeout(() => {
+          sendMessage(e.detail.prompt);
+        }, 100);
+      }
+    };
+    window.addEventListener('open-math-ai-tutor', handleOpenTutor);
+    return () => window.removeEventListener('open-math-ai-tutor', handleOpenTutor);
+  }, [sendMessage]);
+
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -503,11 +579,11 @@ const AITutorPanel: React.FC = () => {
 
   // Compute positions
   const btnStyle = btnPos
-    ? { position: 'fixed' as const, left: btnPos.x, top: btnPos.y, right: 'auto', bottom: 'auto' }
-    : { position: 'fixed' as const, right: '2rem', bottom: '2rem' };
+    ? { position: 'fixed' as const, left: btnPos.x, top: btnPos.y, right: 'auto', bottom: 'auto', zIndex: 100000 }
+    : { position: 'fixed' as const, right: '2rem', bottom: '2rem', zIndex: 100000 };
   const winStyle = winPos
-    ? { position: 'fixed' as const, left: winPos.x, top: winPos.y, right: 'auto', bottom: 'auto' }
-    : { position: 'fixed' as const, right: '2rem', bottom: '5.5rem' };
+    ? { position: 'fixed' as const, left: winPos.x, top: winPos.y, right: 'auto', bottom: 'auto', zIndex: 99999 }
+    : { position: 'fixed' as const, right: '2rem', bottom: '5.5rem', zIndex: 99999 };
 
   return (
     <>
@@ -520,7 +596,7 @@ const AITutorPanel: React.FC = () => {
 
       {/* Draggable toggle button - hidden when window is open */}
       {!isOpen && (
-        <div ref={btnRef} style={{ ...btnStyle, zIndex: 2000 }}>
+        <div ref={btnRef} style={{ ...btnStyle, zIndex: 100000 }}>
           <motion.button
             onMouseDown={startBtnDrag}
             onClick={() => { if (!isDragMove.current) setIsOpen(!isOpen); }}
@@ -560,14 +636,13 @@ const AITutorPanel: React.FC = () => {
             transition={{ type: 'spring', stiffness: 340, damping: 28 }}
             style={{
               ...winStyle,
-              zIndex: 1999,
+              zIndex: 99999,
               width: 400, height: 540,
               borderRadius: 18,
               display: 'flex', flexDirection: 'column',
-              background: 'rgba(13,17,23,0.96)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(88,166,255,0.2)',
-              boxShadow: '0 16px 56px rgba(0,0,0,0.6)',
+              background: '#0d1117',
+              border: '1px solid rgba(88,166,255,0.25)',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.85)',
               overflow: 'hidden',
             }}
           >
@@ -711,6 +786,7 @@ const AITutorPanel: React.FC = () => {
                 style={{
                   flex: 1, overflowY: 'auto', padding: '1rem',
                   display: 'flex', flexDirection: 'column', gap: '1rem',
+                  background: '#0d1117',
                 }}
               >
                 {messages.map(msg => (
@@ -752,6 +828,15 @@ const AITutorPanel: React.FC = () => {
                       wordBreak: 'break-word',
                       overflowWrap: 'anywhere',
                     }}>
+                      {msg.imageUrl && (
+                        <div style={{ marginBottom: '0.5rem', borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.15)' }}>
+                          <img 
+                            src={msg.imageUrl} 
+                            alt="Ảnh bài toán đính kèm" 
+                            style={{ maxWidth: '100%', maxHeight: 180, objectFit: 'contain', display: 'block', background: '#000' }} 
+                          />
+                        </div>
+                      )}
                       {msg.role === 'user' ? (
                         <span style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                           {msg.content || (msg as any).text || ''}
@@ -807,18 +892,130 @@ const AITutorPanel: React.FC = () => {
                 )}
               </div>
 
+              {/* Uploaded Image Preview Strip */}
+              {uploadedImage && (
+                <div style={{
+                  padding: '0.45rem 0.85rem',
+                  background: 'rgba(30, 41, 59, 0.9)',
+                  borderTop: '1px solid rgba(255,255,255,0.08)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.65rem'
+                }}>
+                  <div style={{ position: 'relative', width: 42, height: 42, borderRadius: 6, overflow: 'hidden', border: '1.5px solid #58a6ff', flexShrink: 0 }}>
+                    <img src={uploadedImage} alt="Preview bài toán" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0, fontSize: '0.75rem', color: '#94a3b8' }}>
+                    <div style={{ color: '#58a6ff', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Sparkles size={12} /> Đã nhận diện ảnh đề bài
+                    </div>
+                    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>AI sẽ trích xuất văn bản & dựng mô hình 3D</div>
+                  </div>
+                  <button
+                    onClick={() => setUploadedImage(null)}
+                    title="Bỏ chọn ảnh"
+                    style={{ background: 'transparent', border: 'none', color: '#f85149', cursor: 'pointer', padding: 4, borderRadius: 4 }}
+                  >
+                    <X size={15} />
+                  </button>
+                </div>
+              )}
+
+              {/* Casio Math Keyboard Drawer */}
+              {showKeyboard && (
+                <div style={{
+                  borderTop: '1px solid rgba(255,255,255,0.08)',
+                  background: 'rgba(13, 17, 23, 0.98)',
+                  maxHeight: 280,
+                  overflowY: 'auto'
+                }}>
+                  <CasioMathKeyboard
+                    onInsert={(latex) => {
+                      setInput(prev => prev + latex);
+                      inputRef.current?.focus();
+                    }}
+                    onClose={() => setShowKeyboard(false)}
+                  />
+                </div>
+              )}
+
+              {/* Hidden file input for image upload */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setUploadedImage(reader.result as string);
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                  e.target.value = '';
+                }}
+              />
+
+              {/* Chat Input Bar */}
               <div style={{
-                padding: '0.75rem 1rem',
+                padding: '0.65rem 0.85rem',
                 borderTop: '1px solid rgba(255,255,255,0.07)',
-                display: 'flex', gap: '0.5rem', alignItems: 'flex-end',
-                flexShrink: 0,
+                display: 'flex', gap: '0.45rem', alignItems: 'flex-end',
+                flexShrink: 0, background: '#0d1117'
               }}>
+                <button
+                  type="button"
+                  className="ai-tutor-btn"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Chụp / Tải ảnh bài tập hình học (hỗ trợ Ctrl+V)"
+                  disabled={isLoading}
+                  style={{
+                    width: 36, height: 36, borderRadius: 10,
+                    border: uploadedImage ? '1px solid #58a6ff' : '1px solid rgba(255,255,255,0.1)',
+                    background: uploadedImage ? 'rgba(88,166,255,0.2)' : 'rgba(255,255,255,0.05)',
+                    color: uploadedImage ? '#58a6ff' : '#8b949e',
+                    cursor: isLoading ? 'not-allowed' : 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0, transition: 'all 0.15s',
+                    padding: 0, boxSizing: 'border-box'
+                  }}
+                  onMouseEnter={e => { if (!isLoading) e.currentTarget.style.color = '#58a6ff'; }}
+                  onMouseLeave={e => { if (!isLoading && !uploadedImage) e.currentTarget.style.color = '#8b949e'; }}
+                >
+                  <ImagePlus size={16} />
+                </button>
+
+                <button
+                  type="button"
+                  className="ai-tutor-btn"
+                  onClick={() => setShowKeyboard(prev => !prev)}
+                  title="Bàn phím toán học ảo Casio fx-580VN X"
+                  disabled={isLoading}
+                  style={{
+                    width: 36, height: 36, borderRadius: 10,
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    background: showKeyboard ? 'rgba(163,113,247,0.2)' : 'rgba(255,255,255,0.05)',
+                    color: showKeyboard ? '#a371f7' : '#8b949e',
+                    cursor: isLoading ? 'not-allowed' : 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0, transition: 'all 0.15s',
+                    padding: 0, boxSizing: 'border-box'
+                  }}
+                  onMouseEnter={e => { if (!isLoading) e.currentTarget.style.color = '#a371f7'; }}
+                  onMouseLeave={e => { if (!isLoading && !showKeyboard) e.currentTarget.style.color = '#8b949e'; }}
+                >
+                  <Calculator size={16} />
+                </button>
+
                 <textarea
                   ref={inputRef}
-                  placeholder="Hỏi gia sư... (Enter gửi, Shift+Enter xuống dòng)"
+                  placeholder={uploadedImage ? "Thêm ghi chú cho ảnh bài tập hoặc nhấn Gửi..." : "Hỏi gia sư, dán ảnh Ctrl+V... (Enter gửi)"}
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
+                  onPaste={handlePaste}
                   disabled={isLoading}
                   rows={1}
                   style={{
@@ -836,17 +1033,21 @@ const AITutorPanel: React.FC = () => {
                   onBlur={e => (e.target.style.borderColor = '#30363d')}
                 />
                 <button
+                  type="button"
+                  className="ai-tutor-btn"
                   onClick={() => sendMessage(input)}
-                  disabled={!input.trim() || isLoading}
+                  disabled={(!input.trim() && !uploadedImage) || isLoading}
+                  title="Gửi câu hỏi"
                   style={{
                     width: 36, height: 36, borderRadius: 10, border: 'none',
-                    background: (input.trim() && !isLoading)
+                    background: ((input.trim() || uploadedImage) && !isLoading)
                       ? 'linear-gradient(135deg,#58a6ff,#a371f7)'
                       : '#30363d',
-                    color: '#fff', cursor: (input.trim() && !isLoading) ? 'pointer' : 'not-allowed',
+                    color: '#fff', cursor: ((input.trim() || uploadedImage) && !isLoading) ? 'pointer' : 'not-allowed',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     flexShrink: 0, transition: 'all 0.2s',
-                    boxShadow: (input.trim() && !isLoading) ? '0 4px 12px rgba(88,166,255,0.25)' : 'none',
+                    boxShadow: ((input.trim() || uploadedImage) && !isLoading) ? '0 4px 12px rgba(88,166,255,0.25)' : 'none',
+                    padding: 0, boxSizing: 'border-box'
                   }}
                 >
                   {isLoading ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={16} />}

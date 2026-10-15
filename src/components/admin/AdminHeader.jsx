@@ -38,12 +38,16 @@ export default function AdminHeader() {
 
   const getModuleTitle = () => {
     if (pathname === '/admin') return 'Bảng điều khiển';
+    if (pathname?.includes('/knowledge-review')) return 'Kiểm duyệt Tri thức AI';
+    if (pathname?.includes('/contact')) return 'Hòm thư góp ý';
     if (pathname?.includes('/students')) return 'Quản lý học sinh';
     if (pathname?.includes('/questions')) return 'Ngân hàng câu hỏi';
+    if (pathname?.includes('/exams')) return 'Quản lý đề thi';
     if (pathname?.includes('/matches')) return 'Giám sát trận đấu';
     if (pathname?.includes('/stories')) return 'Kiểm duyệt Stories';
     if (pathname?.includes('/settings')) return 'Cấu hình hệ thống';
     if (pathname?.includes('/leaderboard')) return 'Giải đấu & Xếp hạng';
+    if (pathname?.includes('/logs')) return 'Nhật ký hoạt động';
     return 'Admin';
   };
 

@@ -130,8 +130,28 @@ export default function Chatbot() {
     });
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [attachedImage, setAttachedImage] = useState(null);
+    const fileInputRef = useRef(null);
     const messagesEndRef = useRef(null);
     const isDragMove = useRef(false);
+
+    // Xử lý dán ảnh từ Clipboard (Ctrl+V) vào Trợ lý Sinh Học
+    const handlePaste = (e) => {
+        const items = e.clipboardData?.items;
+        if (!items) return;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.startsWith('image/')) {
+                const file = items[i].getAsFile();
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => setAttachedImage(reader.result);
+                    reader.readAsDataURL(file);
+                    e.preventDefault();
+                    return;
+                }
+            }
+        }
+    };
 
     // Draggable positions – stored in viewport coords (from top-left)
     const [btnPos, setBtnPos] = useState(() => {
@@ -303,10 +323,12 @@ export default function Chatbot() {
     };
 
     const handleSend = async () => {
-        if (!input.trim() || isLoading) return;
+        if ((!input.trim() && !attachedImage) || isLoading) return;
 
-        const userMessage = input.trim();
-        const updatedMsgs = [...messages, { sender: 'user', text: userMessage }];
+        const currentImg = attachedImage;
+        setAttachedImage(null);
+        const userMessage = input.trim() || 'Hãy phân tích hình ảnh này và giải đáp chi tiết kiến thức Sinh học giúp em.';
+        const updatedMsgs = [...messages, { sender: 'user', text: userMessage, image: currentImg }];
         setInput('');
         setMessages(updatedMsgs);
         saveCurrentSession(updatedMsgs);
@@ -315,8 +337,8 @@ export default function Chatbot() {
         const pastTopics = sessions.flatMap(s => s.messages).filter(m => m.sender === 'user').map(m => m.text.substring(0, 30)).slice(0, 6);
         const memoryContext = pastTopics.length > 0 ? `\n\n[BỘ NHỚ HỌC HỎI CỦA AI TỪ CÁC PHIÊN TRƯỚC: Học sinh đã hỏi các câu hỏi về: ${pastTopics.join('; ')}. Hãy ghi nhớ để hướng dẫn tiếp nối.]` : '';
 
-        // ⚡ BƯỚC 0: KIỂM TRA RANH GIỚI MÔN HỌC (SUBJECT BOUNDARY GUARD)
-        if (window.StemLabAIBridge && typeof window.StemLabAIBridge.checkSubjectBoundary === 'function') {
+        // ⚡ BƯỚC 0: KIỂM TRA RANH GIỚI MÔN HỌC (SUBJECT BOUNDARY GUARD - CHỈ KHI KHÔNG CÓ ẢNH)
+        if (!currentImg && window.StemLabAIBridge && typeof window.StemLabAIBridge.checkSubjectBoundary === 'function') {
             const guard = window.StemLabAIBridge.checkSubjectBoundary(userMessage, 'sinh');
             if (!guard.allowed) {
                 const botReply = guard.refusal;
@@ -333,8 +355,8 @@ export default function Chatbot() {
             }
         }
 
-        // ⚡ BƯỚC 1: KIỂM TRA BỘ NHỚ AI TỰ HỌC (CACHE HIT) GIỐNG TRỢ LÝ NOVA
-        if (window.StemLabAIBridge && typeof window.StemLabAIBridge.checkLabLearnedCache === 'function') {
+        // ⚡ BƯỚC 1: KIỂM TRA BỘ NHỚ AI TỰ HỌC (CACHE HIT) GIỐNG TRỢ LÝ NOVA (CHỈ KHI KHÔNG CÓ ẢNH)
+        if (!currentImg && window.StemLabAIBridge && typeof window.StemLabAIBridge.checkLabLearnedCache === 'function') {
             try {
                 const cacheRes = await window.StemLabAIBridge.checkLabLearnedCache(userMessage, 'sinh', 0.92);
                 if (cacheRes && cacheRes.hit) {
@@ -369,7 +391,8 @@ export default function Chatbot() {
                     message: userMessage,
                     systemInstruction: `Bạn là Chuyên gia Sinh Học THPT của hệ thống STEM HUB.\n\nNHIỆM VỤ: Chuyên sâu vào môn SINH HỌC THPT. Trả lời tóm tắt, súc tích dưới 80 từ, công thức chuẩn LaTeX $...$ hoặc $$...$$.`,
                     temperature: 0.3,
-                    maxOutputTokens: 1200
+                    maxOutputTokens: 1200,
+                    imageBase64: currentImg || undefined
                 })
             });
             if (gwRes.ok) {
@@ -616,16 +639,22 @@ QUY TẮC PHẢN HỒI BẮT BUỘC - TUYỆT ĐỐI TUÂN THỦ:
                     <div className="chatbot-messages">
                         {messages.map((msg, index) => (
                             <div key={index} className={`chatbot-message ${msg.sender}`}>
-                                <div
-                                    className="message-bubble"
-                                    dangerouslySetInnerHTML={{
-                                        __html: msg.sender === 'user'
-                                            ? (window.StemLabAIBridge && typeof window.StemLabAIBridge.formatUserMessage === 'function'
-                                                ? window.StemLabAIBridge.formatUserMessage(msg.text || msg.content || '')
-                                                : (msg.text || msg.content || ''))
-                                            : formatBioText(msg.text || msg.content || '')
-                                    }}
-                                />
+                                <div className="message-bubble">
+                                    {msg.image && (
+                                        <div style={{ marginBottom: 6, borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.2)', maxWidth: 200, background: '#000' }}>
+                                            <img src={msg.image} alt="Ảnh đính kèm" style={{ maxWidth: '100%', height: 'auto', display: 'block' }} />
+                                        </div>
+                                    )}
+                                    <div
+                                        dangerouslySetInnerHTML={{
+                                            __html: msg.sender === 'user'
+                                                ? (window.StemLabAIBridge && typeof window.StemLabAIBridge.formatUserMessage === 'function'
+                                                    ? window.StemLabAIBridge.formatUserMessage(msg.text || msg.content || '')
+                                                    : (msg.text || msg.content || ''))
+                                                : formatBioText(msg.text || msg.content || '')
+                                        }}
+                                    />
+                                </div>
                             </div>
                         ))}
                         {isLoading && (
@@ -638,16 +667,55 @@ QUY TẮC PHẢN HỒI BẮT BUỘC - TUYỆT ĐỐI TUÂN THỦ:
                         <div ref={messagesEndRef} />
                     </div>
 
-                    <div className="chatbot-input-area">
+                    {/* Preview ảnh đính kèm (Paste qua Ctrl+V hoặc Tải lên) */}
+                    {attachedImage && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px', background: 'rgba(15,23,42,0.9)', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                            <img src={attachedImage} alt="Preview" style={{ width: 34, height: 34, objectFit: 'cover', borderRadius: 6, border: '1px solid #818cf8', background: '#000' }} />
+                            <span style={{ flex: 1, fontSize: 11, color: '#818cf8', fontWeight: 600 }}>Đã nhận diện ảnh (Ctrl+V)</span>
+                            <button type="button" onClick={() => setAttachedImage(null)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: 14 }}>✕</button>
+                        </div>
+                    )}
+
+                    <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        accept="image/*" 
+                        style={{ display: 'none' }} 
+                        onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => setAttachedImage(reader.result);
+                                reader.readAsDataURL(file);
+                            }
+                            e.target.value = '';
+                        }} 
+                    />
+
+                    <div className="chatbot-input-area" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <button 
+                            type="button" 
+                            onClick={() => fileInputRef.current?.click()} 
+                            title="Tải ảnh lên (Ctrl+V)" 
+                            style={{ 
+                                background: attachedImage ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.08)', 
+                                border: `1px solid ${attachedImage ? '#818cf8' : 'rgba(255,255,255,0.15)'}`, 
+                                borderRadius: 8, padding: '6px 10px', color: '#818cf8', cursor: 'pointer', display: 'flex', alignItems: 'center' 
+                            }}
+                        >
+                            📷
+                        </button>
                         <input
                             type="text"
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                            placeholder="Hỏi đáp về sinh học..."
+                            onPaste={handlePaste}
+                            placeholder={attachedImage ? "Thêm câu hỏi hoặc Enter gửi ảnh..." : "Hỏi đáp về sinh học, dán ảnh Ctrl+V..."}
                             disabled={isLoading}
+                            style={{ flex: 1 }}
                         />
-                        <button onClick={handleSend} disabled={isLoading || !input.trim()}>
+                        <button onClick={handleSend} disabled={isLoading || (!input.trim() && !attachedImage)}>
                             Gửi
                         </button>
                     </div>

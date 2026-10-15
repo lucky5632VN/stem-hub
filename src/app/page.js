@@ -11,7 +11,7 @@ import {
   BookOpen, Trophy, Sparkles, Shield, Award, Star, 
   Flame, CheckCircle, Zap, User, Activity, Gem, Clock,
   X, Camera, Send, RefreshCw, MessageSquare, ChevronRight,
-  Calculator, FlaskConical, Dna, ArrowRight
+  Calculator, FlaskConical, Dna, ArrowRight, Server
 } from 'lucide-react';
 import { AvatarFrame } from '@/components/atoms/AvatarFrame';
 import STEMAvatarSVG from '@/components/atoms/STEMAvatarSVG';
@@ -30,11 +30,11 @@ const labs = [
     code: 'MATH-3D',
     status: 'active',
     href: '/phong-lab/toan',
-    link: '/labs/toan/frontend/dist/',
+    link: '/labs/toan/frontend/dist/index.html',
     image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=600&auto=format&fit=crop',
     desc: 'Khám phá hình học không gian 3D trực quan bằng công cụ giải toán thông minh.',
     tags: ['Hình học 3D', 'Giải toán AI', 'Tương tác không gian'],
-    gradientText: 'from-cyan-400 via-sky-300 to-blue-500',
+    hoverText: 'group-hover:text-cyan-400',
     borderHover: 'hover:border-cyan-500/60 hover:shadow-[0_12px_40px_rgba(6,182,212,0.25)]',
     badgeStyle: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/40',
     btnGradient: 'bg-gradient-to-r from-cyan-500 via-sky-600 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-cyan-500/25',
@@ -47,11 +47,11 @@ const labs = [
     code: 'PHYS-V3',
     status: 'active',
     href: '/phong-lab/ly',
-    link: '/labs/PhysicsLab/',
+    link: '/labs/PhysicsLab/index.html',
     image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop',
     desc: 'Mô phỏng dao động điều hòa, giao thoa sóng cơ, đặc tuyến linh kiện và lắp ráp mạch điện DC tương tác.',
     tags: ['Dao động điều hòa', 'Giao thoa sóng', 'Mạch điện DC'],
-    gradientText: 'from-purple-400 via-fuchsia-300 to-indigo-500',
+    hoverText: 'group-hover:text-purple-400',
     borderHover: 'hover:border-purple-500/60 hover:shadow-[0_12px_40px_rgba(168,85,247,0.25)]',
     badgeStyle: 'bg-purple-500/15 text-purple-300 border-purple-500/40',
     btnGradient: 'bg-gradient-to-r from-purple-600 via-fuchsia-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-purple-500/25',
@@ -64,11 +64,11 @@ const labs = [
     code: 'CHEM-V4',
     status: 'active',
     href: '/phong-lab/hoa',
-    link: '/labs/lab-ktra15p/dist/',
+    link: '/labs/lab-ktra15p/dist/index.html?v=4.1.5',
     image: 'https://images.unsplash.com/photo-1532187643603-ba119ca4109e?q=80&w=600&auto=format&fit=crop',
     desc: 'Thiết lập phản ứng axit-bazơ ảo, theo dõi nồng độ pH thời gian thực.',
     tags: ['Phản ứng Axit-Bazơ', 'Chuẩn độ pH', 'Thí nghiệm ảo'],
-    gradientText: 'from-amber-400 via-yellow-300 to-emerald-400',
+    hoverText: 'group-hover:text-amber-400',
     borderHover: 'hover:border-amber-500/60 hover:shadow-[0_12px_40px_rgba(245,158,11,0.25)]',
     badgeStyle: 'bg-amber-500/15 text-amber-300 border-amber-500/40',
     btnGradient: 'bg-gradient-to-r from-amber-500 via-orange-500 to-emerald-600 hover:from-amber-400 hover:to-emerald-500 text-white shadow-amber-500/25',
@@ -81,11 +81,11 @@ const labs = [
     code: 'BIO-GENE',
     status: 'active',
     href: '/phong-lab/sinh',
-    link: '/labs/lab_sinh/dist/',
+    link: '/labs/lab_sinh/dist/index.html?v=4.0.6',
     image: '/bio_stem_cover.png',
     desc: 'Giải mã bản đồ gene di truyền, trắc nghiệm sinh học chuẩn THPT Quốc gia.',
     tags: ['Bản đồ Gene', 'Di truyền học', 'Ôn thi THPT'],
-    gradientText: 'from-emerald-400 via-teal-300 to-cyan-400',
+    hoverText: 'group-hover:text-emerald-400',
     borderHover: 'hover:border-emerald-500/60 hover:shadow-[0_12px_40px_rgba(16,185,129,0.25)]',
     badgeStyle: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40',
     btnGradient: 'bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-emerald-500/25',
@@ -97,6 +97,7 @@ export default function Home() {
   const user = useAppStore((state) => state.user);
   const personalization = useAppStore((state) => state.personalization);
   const setPersonalization = useAppStore((state) => state.setPersonalization);
+  const openAuth = useAppStore((state) => state.openAuth);
 
   const router = useRouter();
   const activeLab = useAppStore((state) => state.activeLab);
@@ -108,12 +109,24 @@ export default function Home() {
       setActiveLab(null);
     };
   }, [setActiveLab]);
+
   const [showAiCompanion, setShowAiCompanion] = useState(false);
   const [chatInput, setChatInput] = useState('');
   const [chatHistory, setChatHistory] = useState([]);
   const [chatLoading, setChatLoading] = useState(false);
   const [screenshotFlash, setScreenshotFlash] = useState(false);
   const [showShareConfirm, setShowShareConfirm] = useState(false);
+
+  // Đóng modal bằng phím Escape
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && showShareConfirm) {
+        setShowShareConfirm(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showShareConfirm]);
 
   const aiCompanionData = {
     chem: {
@@ -180,24 +193,8 @@ export default function Home() {
   };
 
   const handleLaunchLab = (lab) => {
-    playSound.click();
-    setActiveLab({
-      ...lab,
-      launchUrl: `${lab.link}${lab.link.includes('?') ? '&' : '?'}_t=${Date.now()}`
-    });
-    setShowAiCompanion(false);
-    
-    // Nạp tin nhắn welcome tương ứng môn học
-    const compData = aiCompanionData[lab.id];
-    if (compData) {
-      setChatHistory([
-        { sender: 'ai', text: compData.welcome, timestamp: new Date() }
-      ]);
-    } else {
-      setChatHistory([
-        { sender: 'ai', text: "🔬 Chào mừng bạn đến với phòng thí nghiệm ảo STEM! Tôi có thể hỗ trợ gì cho bạn?", timestamp: new Date() }
-      ]);
-    }
+    playSound.click?.();
+    router.push(lab.href);
   };
 
   const handleTakeScreenshot = () => {
@@ -296,9 +293,9 @@ export default function Home() {
         <div className="lg:col-span-8 flex flex-col gap-3.5 screenshot-full-width">
           <div className="flex flex-col mb-1">
             <h2 className="text-lg font-bold text-text-primary tracking-tight uppercase flex items-center gap-2">
-              <Zap className="w-4.5 h-4.5 text-accent-pink animate-pulse" /> HỆ THỐNG PHÒNG THÍ NGHIỆM ẢO STEM
+              <Zap className="w-4.5 h-4.5 text-accent-pink animate-pulse motion-reduce:animate-none" /> HỆ THỐNG PHÒNG THÍ NGHIỆM ẢO STEM
             </h2>
-            <p className="text-text-secondary text-[11px] mt-0.5 tracking-wide">CHỌN PHÒNG THÍ NGHIỆM ĐỂ KHỞI CHẠY MÔ PHỎNG LƯỢNG TỬ</p>
+            <p className="text-text-secondary text-xs mt-1 tracking-wider uppercase font-mono">CHỌN PHÒNG THÍ NGHIỆM ĐỂ KHỞI CHẠY MÔ PHỎNG LƯỢNG TỬ</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
@@ -314,50 +311,62 @@ export default function Home() {
                   
                   <div>
                     {/* Card Image Banner */}
-                    <div 
-                      onClick={() => handleLaunchLab(lab)} 
-                      className="block h-28 overflow-hidden relative cursor-pointer"
+                    <Link 
+                      href={lab.href}
+                      onClick={() => playSound.click?.()} 
+                      aria-label={`Khởi chạy phòng thí nghiệm ${lab.name}`}
+                      className="block h-28 overflow-hidden relative cursor-pointer focus-visible:ring-2 focus-visible:ring-accent-pink focus-visible:outline-none rounded-t-2xl"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-t from-bg-secondary via-bg-secondary/30 to-transparent z-10 group-hover:via-bg-secondary/10 transition-colors duration-300" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-bg-secondary via-bg-secondary/30 to-transparent z-10 group-hover:via-bg-secondary/10 transition-colors duration-300 pointer-events-none" />
                       <img 
                         src={lab.image} 
                         alt={lab.title} 
+                        loading="lazy"
+                        decoding="async"
+                        onError={(e) => {
+                          e.currentTarget.style.opacity = '0.35';
+                        }}
                         className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out" 
                       />
                       
                       {/* Top Bar inside Image */}
                       <div className="absolute top-2.5 left-2.5 z-20 flex items-center gap-2">
                         {/* Subject Badge */}
-                        <div className={`px-2.5 py-0.5 bg-bg-primary/85 backdrop-blur-md border rounded-lg text-[9px] font-bold uppercase tracking-wider shadow-md flex items-center gap-1 ${lab.badgeStyle}`}>
-                          <IconComponent className="w-3 h-3" />
+                        <div className={`px-2.5 py-1 bg-bg-primary/90 backdrop-blur-md border rounded-lg text-xs font-mono font-bold uppercase tracking-wider shadow-md flex items-center gap-1.5 ${lab.badgeStyle}`}>
+                          <IconComponent className="w-3.5 h-3.5" />
                           <span>{lab.title}</span>
                         </div>
                       </div>
-                    </div>
+                    </Link>
 
                     {/* Card Body Content */}
-                    <div className="p-3.5 pt-2 relative z-20">
-                      <div className="flex items-center justify-between mb-1">
-                        <div onClick={() => handleLaunchLab(lab)} className="cursor-pointer">
-                          <h3 className={`text-base font-black text-text-primary group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r ${lab.gradientText} transition-all duration-300 tracking-wide font-mono hover:opacity-90`}>
+                    <div className="p-4 pt-2.5 relative z-20">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <Link 
+                          href={lab.href}
+                          onClick={() => playSound.click?.()} 
+                          aria-label={`Mở phòng thí nghiệm ${lab.name}`}
+                          className="cursor-pointer focus-visible:ring-2 focus-visible:ring-accent-pink focus-visible:outline-none rounded-md"
+                        >
+                          <h3 className={`text-base font-bold text-text-primary ${lab.hoverText || 'group-hover:text-accent-pink'} transition-colors duration-300 tracking-wide font-mono`}>
                             {lab.name}
                           </h3>
-                        </div>
-                        <span className="text-[8.5px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded font-bold">
+                        </Link>
+                        <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full font-medium">
                           ● Sẵn sàng
                         </span>
                       </div>
 
-                      <p className="text-[11px] text-text-secondary leading-snug line-clamp-2 min-h-[30px] mb-2">
+                      <p className="text-sm text-text-secondary leading-relaxed line-clamp-2 min-h-[42px] mb-2.5">
                         {lab.desc}
                       </p>
 
                       {/* Feature Tag Chips */}
-                      <div className="flex flex-wrap gap-1">
+                      <div className="flex flex-wrap gap-1.5">
                         {lab.tags.map((tag, idx) => (
                           <span 
                             key={idx} 
-                            className="text-[8.5px] font-mono text-text-secondary bg-bg-tertiary/90 border border-border-theme/70 px-2 py-0.5 rounded-md transition-colors group-hover:border-border-theme"
+                            className="text-xs font-mono text-text-secondary bg-bg-tertiary/90 border border-border-theme/70 px-2.5 py-0.5 rounded-md transition-colors group-hover:border-border-theme"
                           >
                             #{tag}
                           </span>
@@ -367,22 +376,25 @@ export default function Home() {
                   </div>
 
                   {/* Card Footer Actions */}
-                  <div className="p-3 px-3.5 border-t border-border-theme/60 mt-auto flex items-center justify-between relative z-20 bg-bg-secondary/40">
+                  <div className="p-3 px-4 border-t border-border-theme/60 mt-auto flex items-center justify-between relative z-20 bg-bg-secondary/40">
                     <div className="flex flex-col">
-                      <span className="text-[8px] font-mono text-text-secondary uppercase tracking-wider">MÁY CHỦ</span>
-                      <span className="text-[9.5px] font-mono font-bold text-text-primary flex items-center gap-1">
-                        <span className="text-accent-pink">🇻🇳</span> VN (HN-1)
+                      <span className="text-xs font-mono text-text-secondary uppercase tracking-wider">MÁY CHỦ</span>
+                      <span className="text-xs font-mono font-bold text-text-primary flex items-center gap-1.5">
+                        <Server className="w-3.5 h-3.5 text-accent-pink shrink-0" aria-hidden="true" />
+                        <span>VN (HN-1)</span>
                       </span>
                     </div>
 
-                    <button 
-                      onClick={() => handleLaunchLab(lab)}
+                    <Link 
+                      href={lab.href}
+                      onClick={() => playSound.click?.()}
                       onMouseEnter={playSound.hover}
-                      className={`px-4 py-1.5 rounded-xl text-[10.5px] font-bold transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] flex items-center gap-1.5 cursor-pointer shadow-md ${lab.btnGradient}`}
+                      aria-label={`Vào học phòng lab ${lab.name}`}
+                      className={`px-4 py-2 min-h-[40px] rounded-xl text-xs font-bold transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] flex items-center gap-1.5 cursor-pointer shadow-md focus-visible:ring-2 focus-visible:ring-accent-pink focus-visible:outline-none ${lab.btnGradient}`}
                     >
                       <span>Vào Học</span>
-                      <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-                    </button>
+                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                    </Link>
                   </div>
                 </div>
               );
@@ -392,39 +404,25 @@ export default function Home() {
 
         {/* CỘT PHẢI (COL-SPAN-4): Spaceship Cockpit HUD */}
         <div className="lg:col-span-4 flex flex-col gap-6 screenshot-hide">
-          
-          {/* STYLE NHÚNG CHO HIỆU ỨNG RA-ĐA VÀ GIAO DIỆN HOÀNG GIA */}
-          <style dangerouslySetInnerHTML={{__html: `
-            @keyframes radar-sweep {
-              from { transform: rotate(0deg); }
-              to { transform: rotate(360deg); }
-            }
-            .neon-border-glow {
-              box-shadow: 0 0 15px rgba(240, 57, 140, 0.12), inset 0 0 15px rgba(240, 57, 140, 0.03);
-            }
-            .cyber-glitch-text {
-              text-shadow: 0 0 5px rgba(240, 57, 140, 0.4), 0 0 10px rgba(240, 57, 140, 0.2);
-            }
-          `}} />
 
           {/* USER CONSOLE HUD: BẢNG ĐIỀU KHIỂN BẰNG KÍNH */}
           <div className="bg-bg-secondary/95 border border-border-theme rounded-3xl p-6 shadow-2xl relative overflow-hidden neon-border-glow">
-            {/* Họa tiết trang trí góc điều khiển */}
-            <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-accent-pink/30 rounded-tl-xl pointer-events-none" />
-            <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-accent-pink/30 rounded-tr-xl pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-accent-pink/30 rounded-bl-xl pointer-events-none" />
-            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-accent-pink/30 rounded-br-xl pointer-events-none" />
+            {/* Họa tiết trang trí góc điều khiển Sci-Fi HUD */}
+            <div className="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-accent-pink/40 pointer-events-none" />
+            <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-accent-pink/40 pointer-events-none" />
+            <div className="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-accent-pink/40 pointer-events-none" />
+            <div className="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-accent-pink/40 pointer-events-none" />
             <div className="absolute top-0 right-0 w-32 h-32 bg-accent-pink/5 rounded-full blur-3xl pointer-events-none" />
 
             <div className="flex items-center justify-between mb-5 border-b border-border-theme pb-3 gap-2">
               <div className="flex items-center gap-2 min-w-0">
-                <Activity className="w-4 h-4 text-accent-pink animate-pulse shrink-0" />
+                <Activity className="w-4 h-4 text-accent-pink animate-pulse motion-reduce:animate-none shrink-0" />
                 <span className="text-xs font-black text-text-primary uppercase tracking-wider cyber-glitch-text font-mono truncate">
                   TRẠM CHỈ HUY STEM
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[9px] font-mono text-emerald-400 font-bold shrink-0 shadow-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-xs font-mono text-emerald-400 font-bold shrink-0 shadow-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse motion-reduce:animate-none" />
                 <span>ONLINE</span>
               </div>
             </div>
@@ -437,7 +435,7 @@ export default function Home() {
                     <AvatarFrame frame={personalization.avatarFrame || 'default'} className="w-16 h-16">
                       <STEMAvatarSVG parts={personalization.avatarParts} className="w-11 h-11" />
                     </AvatarFrame>
-                    <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-accent-pink border-2 border-bg-primary flex items-center justify-center text-[9px] font-black text-white font-mono shadow-md">
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-accent-pink border-2 border-bg-primary flex items-center justify-center text-xs font-black text-white font-mono shadow-md">
                       {personalization.level || 1}
                     </div>
                   </div>
@@ -446,10 +444,10 @@ export default function Home() {
                     <h4 className="text-sm font-black text-text-primary truncate font-mono uppercase tracking-wide">
                       {personalization.name || user.displayName || 'Người chơi ẩn danh'}
                     </h4>
-                    <span className="text-[9px] font-bold text-accent-pink bg-accent-pink/10 border border-accent-pink/20 px-2.5 py-0.5 rounded-full inline-block mt-1 font-mono uppercase tracking-wider">
+                    <span className="text-xs font-bold text-accent-pink bg-accent-pink/10 border border-accent-pink/20 px-2.5 py-0.5 rounded-full inline-block mt-1 font-mono uppercase tracking-wider">
                       {getTitleLabel(personalization.activeTitle || 'apprentice')}
                     </span>
-                    <p className="text-[9px] text-text-secondary font-mono mt-1 uppercase">
+                    <p className="text-xs text-text-secondary font-mono mt-1 uppercase">
                       HẠNG: <span className="text-amber-400 font-bold">{getRankTitle(personalization.elo)}</span>
                     </p>
                   </div>
@@ -462,7 +460,7 @@ export default function Home() {
                       <Trophy className="w-5 h-5 text-accent-pink" />
                     </div>
                     <div className="text-left">
-                      <span className="text-[9px] text-text-secondary font-mono block">ĐIỂM ELO</span>
+                      <span className="text-xs text-text-secondary font-mono block">ĐIỂM ELO</span>
                       <strong className="text-sm font-black text-text-primary font-mono">{personalization.elo || 1000}</strong>
                     </div>
                   </div>
@@ -472,7 +470,7 @@ export default function Home() {
                       <CrystalIcon className="w-5.5 h-5.5" />
                     </div>
                     <div className="text-left">
-                      <span className="text-[9px] text-text-secondary font-mono block">TINH THỂ</span>
+                      <span className="text-xs text-text-secondary font-mono block">TINH THỂ</span>
                       <strong className="text-sm font-black text-amber-400 font-mono">+{personalization.crystals || 0}</strong>
                     </div>
                   </div>
@@ -489,9 +487,26 @@ export default function Home() {
                 </button>
               </div>
             ) : (
-              <div className="p-6 bg-bg-tertiary/80 border border-border-theme rounded-2xl text-center">
-                <User className="w-8 h-8 text-text-secondary mx-auto mb-2" />
-                <p className="text-xs text-text-secondary font-mono">Đăng nhập để khởi tạo bảng điều khiển của bạn</p>
+              <div className="p-6 bg-bg-tertiary/80 border border-border-theme rounded-2xl text-center flex flex-col items-center">
+                <div className="w-12 h-12 rounded-full bg-accent-pink/10 border border-accent-pink/20 flex items-center justify-center mb-3">
+                  <User className="w-6 h-6 text-accent-pink" />
+                </div>
+                <h4 className="text-sm font-bold text-text-primary mb-1 font-mono uppercase tracking-wide">
+                  CHƯA KÍCH HOẠT ĐIỀU KHIỂN
+                </h4>
+                <p className="text-xs text-text-secondary font-mono mb-4 leading-relaxed max-w-[240px]">
+                  Đăng nhập để đồng bộ ELO, cấp bậc và trang bị phòng thí nghiệm
+                </p>
+                <button
+                  onClick={() => {
+                    playSound.click();
+                    openAuth('login');
+                  }}
+                  className="px-5 py-2.5 bg-gradient-to-r from-accent-pink to-purple-600 hover:opacity-90 text-white rounded-xl text-xs font-bold font-mono tracking-wide shadow-md transition-all active:scale-95 cursor-pointer flex items-center gap-2 focus-visible:ring-2 focus-visible:ring-accent-pink focus-visible:outline-none"
+                >
+                  <Zap className="w-3.5 h-3.5" />
+                  <span>ĐĂNG NHẬP NGAY</span>
+                </button>
               </div>
             )}
           </div>
@@ -502,10 +517,19 @@ export default function Home() {
 
 
 
-      {/* ================== MODAL XÁC NHẬN CHIA SỄ STORIES ================== */}
+      {/* ================== MODAL XÁC NHẬN CHIA SẺ STORIES ================== */}
       {showShareConfirm && (
-        <div className="fixed inset-0 z-[100000] bg-bg-primary/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-bg-secondary border border-border-theme rounded-3xl w-full max-w-md p-8 shadow-2xl relative overflow-hidden text-center">
+        <div 
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="share-confirm-title"
+          onClick={() => setShowShareConfirm(false)}
+          className="fixed inset-0 z-[100000] bg-bg-primary/85 backdrop-blur-md flex items-center justify-center p-4"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-bg-secondary border border-border-theme rounded-3xl w-full max-w-md p-8 shadow-2xl relative overflow-hidden text-center"
+          >
             {/* Light effect */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-accent-pink/5 rounded-full blur-2xl pointer-events-none" />
             
@@ -513,7 +537,7 @@ export default function Home() {
               <Camera className="w-8 h-8 text-accent-pink" />
             </div>
 
-            <h3 className="text-lg font-black text-text-primary tracking-wide">ĐÃ CHỤP ẢNH BÁO CÁO THÍ NGHIỆM!</h3>
+            <h3 id="share-confirm-title" className="text-lg font-black text-text-primary tracking-wide">ĐÃ CHỤP ẢNH BÁO CÁO THÍ NGHIỆM!</h3>
             <p className="text-xs text-text-secondary leading-relaxed mt-2.5 px-2">
               Kết quả thí nghiệm của bạn đã được ghi nhận. Bạn có muốn chia sẻ khoảnh khắc học tập xuất sắc này lên bảng tin <strong className="text-accent-pink">Stories Cộng đồng</strong> không?
             </p>
@@ -521,16 +545,17 @@ export default function Home() {
             <div className="flex gap-3 mt-8">
               <button
                 onClick={handleConfirmShareToStories}
-                className="flex-1 py-3 bg-accent-pink hover:opacity-90 text-white text-xs font-bold rounded-2xl transition-all active:scale-95 shadow-lg shadow-accent-pink/20 cursor-pointer"
+                className="flex-1 py-3 bg-accent-pink hover:opacity-90 text-white text-xs font-bold rounded-2xl transition-all active:scale-95 shadow-lg shadow-accent-pink/20 cursor-pointer focus-visible:ring-2 focus-visible:ring-accent-pink focus-visible:outline-none flex items-center justify-center gap-1.5"
               >
-                Chia sẻ ngay 🚀
+                <span>Chia sẻ ngay</span>
+                <Send className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={() => {
                   playSound.click();
                   setShowShareConfirm(false);
                 }}
-                className="px-5 py-3 bg-bg-tertiary hover:bg-border-theme border border-border-theme text-text-secondary hover:text-text-primary text-xs font-bold rounded-2xl transition-all active:scale-95 cursor-pointer"
+                className="px-5 py-3 bg-bg-tertiary hover:bg-border-theme border border-border-theme text-text-secondary hover:text-text-primary text-xs font-bold rounded-2xl transition-all active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-accent-pink focus-visible:outline-none"
               >
                 Để sau
               </button>

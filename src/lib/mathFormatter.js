@@ -6,10 +6,40 @@ import katex from 'katex';
  * into beautifully styled DOM elements using KaTeX with inline-block fallbacks & Unicode symbol mappings.
  */
 
-// Safe KaTeX renderer wrapper
+// Helper bảo vệ ký tự tiếng Việt trong math mode không bị KaTeX báo lỗi
+const protectKaTeXVietnamese = (latex) => {
+  if (!latex) return '';
+  const textBlocks = [];
+  let s = latex.replace(/\\(text|mathrm|mathbf|textbf|textit)\{([^{}]*)\}/g, (match, cmd, content) => {
+    const idx = textBlocks.length;
+    textBlocks.push(`\\${cmd}{${content}}`);
+    return `⟦SAFE_TEXT_${idx}⟧`;
+  });
+  s = s.replace(/([àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđĐ]+)/g, '\\text{$1}');
+  textBlocks.forEach((tb, idx) => {
+    s = s.split(`⟦SAFE_TEXT_${idx}⟧`).join(tb);
+  });
+  return s;
+};
+
+// Safe KaTeX renderer wrapper with auto-sanitization for Vietnamese letters in math mode
 const renderKaTeXSafe = (latex, displayMode = false) => {
+  if (!latex || !latex.trim()) return '';
   try {
-    return katex.renderToString(latex, {
+    let clean = latex.trim();
+    // Tự động sửa các lỗi gõ macro phổ biến của AI
+    clean = clean
+      .replace(/\{leftharpoons\}/g, '{\\rightleftharpoons}')
+      .replace(/\\stackrel\{([^{}]+)\}\{leftharpoons\}/g, '\\stackrel{$1}{\\rightleftharpoons}')
+      .replace(/\\stackrel\{([^{}]+)\}\s*\{=\}/g, '\\stackrel{$1}{=}')
+      .replace(/t°/g, 't^\\circ')
+      .replace(/\^\\circ\s*C\b/g, '^\\circ\\text{C}')
+      .replace(/°C\b/g, '^\\circ\\text{C}')
+      .replace(/°\b/g, '^\\circ');
+
+    clean = protectKaTeXVietnamese(clean);
+
+    return katex.renderToString(clean, {
       displayMode,
       throwOnError: false,
       strict: 'ignore',
@@ -44,8 +74,13 @@ export const superscriptMap = {
 // Map LaTeX symbols to Unicode for text outside KaTeX
 const latexTranslations = [
   { regex: /\\text\{\s*(.*?)\s*\}/g, replacement: '$1' },
-  { regex: /\\left/g, replacement: '' },
-  { regex: /\\right/g, replacement: '' },
+  { regex: /<=>|<==>|\\rightleftharpoons|\\leftrightharpoons|leftharpoons/g, replacement: ' ⇌ ' },
+  { regex: /-->|->|\\rightarrow|\\to/g, replacement: ' → ' },
+  { regex: /=>|\\Rightarrow/g, replacement: ' ⇒ ' },
+  { regex: /<=|\\Leftarrow/g, replacement: ' ⇐ ' },
+  { regex: /<=>|\\Leftrightarrow/g, replacement: ' ⇔ ' },
+  { regex: /\\left(?=[\(\[\{\|.\\]|\s)/g, replacement: '' },
+  { regex: /\\right(?=[\)\]\}\|.\\]|\s)/g, replacement: '' },
   { regex: /\\pi/g, replacement: 'π' },
   { regex: /\\lambda/g, replacement: 'λ' },
   { regex: /\\mu/g, replacement: 'μ' },
@@ -68,11 +103,6 @@ const latexTranslations = [
   { regex: /\^\\circ/g, replacement: '°' },
   { regex: /\\circ/g, replacement: '°' },
   { regex: /\\degree/g, replacement: '°' },
-  { regex: /<=>|<==>|\\rightleftharpoons/g, replacement: ' ⇌ ' },
-  { regex: /-->|->|\\rightarrow|\\to/g, replacement: ' → ' },
-  { regex: /=>|\\Rightarrow/g, replacement: ' ⇒ ' },
-  { regex: /<=|\\Leftarrow/g, replacement: ' ⇐ ' },
-  { regex: /<=>|\\Leftrightarrow/g, replacement: ' ⇔ ' },
   { regex: /\\times/g, replacement: ' × ' },
   { regex: /\\approx/g, replacement: ' ≈ ' },
   { regex: /\\cdot/g, replacement: ' · ' },
@@ -126,11 +156,63 @@ export const formatMathText = (text) => {
   // 1. Dọn dẹp thẻ rác cũ & ký tự thừa
   formatted = formatted.replace(/#colorend/g, '');
 
-  // 1.2 Tự động chuẩn hóa pseudo-LaTeX (thiếu backslash hoặc thiếu ngoặc nhọn)
+  // 1.1 Tự động cân bằng và cô lập dấu $ theo từng đoạn văn (tránh $ nuốt văn bản tiếng Việt sang đoạn sau)
+  formatted = formatted.split(/\n{2,}/).map(paragraph => {
+    const trimmed = paragraph.trim();
+    if (trimmed.startsWith('```') || trimmed.includes('###HTML')) return paragraph;
+    const dollars = paragraph.match(/(?<!\\)\$/g);
+    if (!dollars || dollars.length % 2 === 0) return paragraph;
+
+    // Trường hợp A: Có $ gắn liền sau công thức/biến nhưng thiếu $ ở đầu (ví dụ: "Lưu ý an toàn: H_2SO_4$ đặc" hoặc "như \text{H}_2\text{SO}_4$ đặc")
+    const fixedLeading = paragraph.replace(/(^|[\s:;.,(~])(\S+)\$/g, (m, g1, g2) => {
+      if (g2.includes('_') || g2.includes('^') || g2.includes('\\') || /[A-Z][0-9]/.test(g2)) {
+        return g1 + '$' + g2 + '$';
+      }
+      return m;
+    });
+    if (fixedLeading !== paragraph) {
+      const fixedDollars = fixedLeading.match(/(?<!\\)\$/g);
+      if (!fixedDollars || fixedDollars.length % 2 === 0) {
+        return fixedLeading;
+      }
+    }
+
+    // Trường hợp B: Có $ ở trước công thức nhưng quên đóng trước khi hết dòng/hết đoạn (ví dụ: "Phương trình tổng quát:\n$RCOOH + R'OH \stackrel... H_2O")
+    const lines = paragraph.split('\n');
+    const balancedLines = lines.map(line => {
+      const lTrim = line.trim();
+      const lDollars = line.match(/(?<!\\)\$/g);
+      if (lDollars && lDollars.length % 2 !== 0) {
+        if (lTrim.startsWith('$') || /[:=]\s*\$/.test(line)) {
+          return line + '$';
+        }
+      }
+      return line;
+    });
+
+    const res = balancedLines.join('\n');
+    const remDollars = res.match(/(?<!\\)\$/g);
+    if (remDollars && remDollars.length % 2 !== 0) {
+      return res + '$';
+    }
+    return res;
+  }).join('\n\n');
+
+  // 1.2 Tự động chuẩn hóa pseudo-LaTeX và sửa các lỗi gõ thường gặp từ AI
   formatted = formatted.replace(/\x0c/g, '\\f').replace(/\x08/g, '\\b');
   formatted = formatted.replace(/\n\s*(\\cdot|·)\s*\n/g, ' \\cdot ');
   formatted = formatted.replace(/=\s*\n\s*/g, ' = ');
   formatted = formatted.replace(/\n\s*(\\cdot|·)\s*/g, ' \\cdot ');
+
+  // Sửa lỗi gõ lefteharpoons & mũi tên thuận nghịch
+  formatted = formatted
+    .replace(/\{leftharpoons\}/g, '{\\rightleftharpoons}')
+    .replace(/\\stackrel\{([^{}]+)\}\{leftharpoons\}/g, '\\stackrel{$1}{\\rightleftharpoons}')
+    .replace(/\\stackrel\{([^{}]+)\}\s*\{=\}/g, '\\stackrel{$1}{=}')
+    .replace(/t°/g, 't^\\circ')
+    .replace(/\^\\circ\s*C\b/g, '^\\circ\\text{C}')
+    .replace(/°C\b/g, '^\\circ\\text{C}')
+    .replace(/°\b/g, '^\\circ');
 
   formatted = formatted.replace(/\b(?:\\?frac)\s+([a-zA-Z0-9^]+(?:\s*(?:\\?sqrt|√)\s*[0-9a-zA-Z^]+)?)\s+(\d+)\b/g, (_match, num, den) => {
     const cleanNum = num
@@ -177,14 +259,14 @@ export const formatMathText = (text) => {
     const idx = htmlPlaceholders.length;
     const cleanImg = `<img referrerpolicy="no-referrer" ${before}src="${encodeURI(src.trim())}"${after}>`;
     htmlPlaceholders.push(cleanImg);
-    return `###HTMLPH${idx}HTMLPH###`;
+    return `⟦HTML:${idx}⟧`;
   });
 
   // b. Bảo vệ tất cả các thẻ HTML đơn lẻ độc lập (<tag...>, </tag>)
   formatted = formatted.replace(/<[^>]+>/g, (match) => {
     const idx = htmlPlaceholders.length;
     htmlPlaceholders.push(match);
-    return `###HTMLPH${idx}HTMLPH###`;
+    return `⟦HTML:${idx}⟧`;
   });
 
   // 3. Mảng lưu trữ KaTeX đã render để bảo vệ khỏi các regex xử lý tiếp theo
@@ -194,7 +276,7 @@ export const formatMathText = (text) => {
     const html = renderKaTeXSafe(latex.trim(), displayMode);
     const idx = katexPlaceholders.length;
     katexPlaceholders.push(html);
-    return `###KATEXPH${idx}KATEXPH###`;
+    return `⟦MATH:${idx}⟧`;
   };
 
   // a. Render các khối KaTeX Display (Block math $$...$$ và \[...\])
@@ -219,12 +301,16 @@ export const formatMathText = (text) => {
   });
 
   // c. Render Inline math \(...\)
-  formatted = formatted.replace(/\\\(([\s\S]+?)\\\)/g, (match, p1) => protectKaTeX(p1, false));
+  formatted = formatted.replace(/\\\(([\s\S]+?)\\\)/g, (match, p1) => protectKaTeX(p1.replace(/\r?\n/g, ' '), false));
 
-  // d. Render Inline math $...$
-  formatted = formatted.replace(/\$([^$]+?)\$/g, (match, p1) => protectKaTeX(p1, false));
+  // d. Render Inline math $...$ (hỗ trợ cả công thức ngắt dòng nhẹ)
+  formatted = formatted.replace(/\$([^\$]+?)\$/g, (match, p1) => protectKaTeX(p1.replace(/\r?\n/g, ' '), false));
 
-  // e. Pre-process cho công thức THÔ KHÔNG BỌC $: Chuyển \int_a^b, ∫_ab, |_ab sang khối KaTeX
+  // e. Bắt các công thức LaTeX độc lập không bọc $ (ví dụ \text{H}_2\text{SO}_4 hoặc \stackrel{...}{...})
+  formatted = formatted.replace(/\\text\{[^{}]+\}(?:_[0-9a-zA-Z]+|\^[\w\+\-]+|_\{\w+\}|\^\{\w+\}|\\text\{[^{}]+\}|[A-Za-z0-9\(\)])*/g, (formula) => protectKaTeX(formula, false));
+  formatted = formatted.replace(/(\\stackrel\{[^{}]+\}\{[^{}]+\})/g, (match, formula) => protectKaTeX(formula, false));
+
+  // f. Pre-process cho công thức THÔ KHÔNG BỌC $: Chuyển \int_a^b, ∫_ab, |_ab sang khối KaTeX
   formatted = formatted.replace(/(\\int|∫)_\{?([a-zA-Z0-9]+)\}?\^?\{?([a-zA-Z0-9]+)\}?/g, (match, intSym, lower, upper) => {
     return protectKaTeX(`\\int_{${lower}}^{${upper}}`, false);
   });
@@ -333,14 +419,14 @@ export const formatMathText = (text) => {
     return `${ion}${chargeSup}`;
   });
 
-  // j. Chuyển đổi công thức hóa học tự nhiên (H2O, CO2, H2SO4, CaCO3, Al2O3, Fe2O3, KMnO4, C6H12O6, CH3COOH, CuSO4, HNO3)
-  formatted = formatted.replace(/\b(H|He|Li|Be|B|C|N|O|F|Ne|Na|Mg|Al|Si|P|S|Cl|Ar|K|Ca|Sc|Ti|V|Cr|Mn|Fe|Co|Ni|Cu|Zn|Ga|Ge|As|Se|Br|Kr|Rb|Sr|Y|Zr|Nb|Mo|Tc|Ru|Rh|Pd|Ag|Cd|In|Sn|Sb|Te|I|Xe|Ba|Au|Hg|Pb|Bi|U)([2-9]|[1-9][0-9])\b/g, (match, elem, num) => {
+  // j. Chuyển đổi công thức hóa học tự nhiên (H2SO4, Ca(OH)2, Al2O3, Fe2(SO4)3, C6H12O6, KMnO4, CuSO4, H2O, CO2, v.v.)
+  formatted = formatted.replace(/([A-Z][a-z]?|\))([0-9]+)/g, (match, elem, num) => {
     const numSub = num.split('').map(c => subscriptMap[c] || c).join('');
     return `${elem}${numSub}`;
   });
 
   // k. Chuyển đổi chỉ số gạch dưới & lũy thừa còn lại (C_M, N_A, x_1, 10^23, x^2)
-  formatted = formatted.replace(/([A-Za-z0-9\)])_([0-9a-zA-Z]{1,4})/g, (_, base, sub) => {
+  formatted = formatted.replace(/([A-Za-z0-9\)])_([0-9]{1,4}|[a-z]{1,2})\b/g, (_, base, sub) => {
     const subConverted = sub.split('').map(char => subscriptMap[char] || char).join('');
     return `${base}${subConverted}`;
   });
@@ -359,12 +445,12 @@ export const formatMathText = (text) => {
 
   // 5. Khôi phục các khối KaTeX đã render
   katexPlaceholders.forEach((katexHtml, idx) => {
-    formatted = formatted.split(`###KATEXPH${idx}KATEXPH###`).join(katexHtml);
+    formatted = formatted.split(`⟦MATH:${idx}⟧`).join(katexHtml);
   });
 
   // 6. Khôi phục các thẻ HTML đã bảo vệ
   htmlPlaceholders.forEach((htmlTag, idx) => {
-    formatted = formatted.split(`###HTMLPH${idx}HTMLPH###`).join(htmlTag);
+    formatted = formatted.split(`⟦HTML:${idx}⟧`).join(htmlTag);
   });
 
   return formatted;

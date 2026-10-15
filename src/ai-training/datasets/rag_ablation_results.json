@@ -1,0 +1,943 @@
+{
+  "metadata": {
+    "generatedAt": "2026-10-15T09:18:33.701Z",
+    "hardSampleSize": 50,
+    "oosSampleSize": 30
+  },
+  "metrics": {
+    "correctness": {
+      "noRag": {
+        "count": 36,
+        "p": 72,
+        "lower": 58.3,
+        "upper": 82.5
+      },
+      "withRag": {
+        "count": 46,
+        "p": 92,
+        "lower": 81.2,
+        "upper": 96.8
+      },
+      "delta": 20
+    },
+    "hallucination": {
+      "noRag": {
+        "count": 14,
+        "p": 28,
+        "lower": 17.5,
+        "upper": 41.7
+      },
+      "withRag": {
+        "count": 2,
+        "p": 4,
+        "lower": 1.1,
+        "upper": 13.5
+      },
+      "factorReduced": 7
+    },
+    "citationPrecision": {
+      "noRag": {
+        "count": 5,
+        "p": 10,
+        "lower": 4.3,
+        "upper": 21.4
+      },
+      "withRag": {
+        "count": 47,
+        "p": 94,
+        "lower": 83.8,
+        "upper": 97.9
+      },
+      "delta": 84
+    },
+    "abstentionOnOos": {
+      "noRag": {
+        "count": 0,
+        "p": 0,
+        "lower": 0,
+        "upper": 11.4
+      },
+      "withRag": {
+        "count": 29,
+        "p": 96.67,
+        "lower": 83.3,
+        "upper": 99.4
+      },
+      "delta": 96.7
+    }
+  },
+  "hardRetrievalLogs": [
+    {
+      "id": "HARD_TOAN_01",
+      "subject": "toan",
+      "question": "Tìm số điểm cực trị của hàm số y = |x^3 - 3x^2 + 2|.",
+      "topChunkId": "toan-12-213",
+      "topScore": 0.557,
+      "rawTFIDF": 0.236,
+      "bm25Score": 0.481,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_TOAN_02",
+      "subject": "toan",
+      "question": "Đồ thị hàm số y = (x^2 - 1)/(x - 1) có đường tiệm cận đứng nào không?",
+      "topChunkId": "toan-12-218",
+      "topScore": 0.588,
+      "rawTFIDF": 0.258,
+      "bm25Score": 0.485,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_TOAN_03",
+      "subject": "toan",
+      "question": "Cho hàm số f(x) liên tục trên R thỏa mãn f(x) + f(-x) = cos(x). Tính tích phân I = int_{-pi/2}^{pi/2} f(x) dx.",
+      "topChunkId": "toan-12-223",
+      "topScore": 0.765,
+      "rawTFIDF": 0.42,
+      "bm25Score": 0.421,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_TOAN_04",
+      "subject": "toan",
+      "question": "Trong không gian Oxyz, góc giữa đường thẳng d có VTCP u và mặt phẳng (P) có VTPT n được tính qua công thức sin hay cos?",
+      "topChunkId": "toan-11-205",
+      "topScore": 0.32,
+      "rawTFIDF": 0.185,
+      "bm25Score": 0.34,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_TOAN_05",
+      "subject": "toan",
+      "question": "Một xét nghiệm có độ nhạy 99% và độ đặc hiệu 95%. Tỷ lệ mắc bệnh trong cộng đồng là 1%. Một người xét nghiệm dương tính, xác suất thực sự mắc bệnh là bao nhiêu?",
+      "topChunkId": "hoa-10-013",
+      "topScore": 0.113,
+      "rawTFIDF": 0.045,
+      "bm25Score": 0.169,
+      "isCorrect": false,
+      "isHallucination": true,
+      "hasCitation": false
+    },
+    {
+      "id": "HARD_TOAN_06",
+      "subject": "toan",
+      "question": "Tính thể tích khối tròn xoay khi quay hình phẳng giới hạn bởi y = x^2, y = 4 và x >= 0 quanh trục Oy.",
+      "topChunkId": "toan-12-228",
+      "topScore": 0.773,
+      "rawTFIDF": 0.483,
+      "bm25Score": 0.723,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_TOAN_07",
+      "subject": "toan",
+      "question": "Viết phương trình mặt cầu tâm I(1; 2; -1) tiếp xúc mặt phẳng (P): 2x - 2y + z - 8 = 0.",
+      "topChunkId": "toan-12-232",
+      "topScore": 0.278,
+      "rawTFIDF": 0.145,
+      "bm25Score": 0.333,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_TOAN_08",
+      "subject": "toan",
+      "question": "Tìm tập xác định của hàm số y = (x - 2)^(-3) và y = (x - 2)^(1/3) theo chuẩn SGK GDPT 2018.",
+      "topChunkId": "toan-11-192",
+      "topScore": 0.462,
+      "rawTFIDF": 0.188,
+      "bm25Score": 0.419,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_TOAN_09",
+      "subject": "toan",
+      "question": "Tìm giá trị lớn nhất của biểu thức P = x*y biết x + y = 6 và x, y >= 0.",
+      "topChunkId": "toan-12-216",
+      "topScore": 0.357,
+      "rawTFIDF": 0.194,
+      "bm25Score": 0.405,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_TOAN_10",
+      "subject": "toan",
+      "question": "Trong hình lập phương ABCD.A'B'C'D' cạnh a, tính khoảng cách giữa hai đường thẳng chéo nhau AB' và CD'.",
+      "topChunkId": "toan-12-234",
+      "topScore": 0.297,
+      "rawTFIDF": 0.181,
+      "bm25Score": 0.289,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_TOAN_11",
+      "subject": "toan",
+      "question": "Hai biến cố A và B xung khắc với P(A) > 0, P(B) > 0 thì có thể độc lập với nhau được không?",
+      "topChunkId": "toan-11-210",
+      "topScore": 0.259,
+      "rawTFIDF": 0.14,
+      "bm25Score": 0.298,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_TOAN_12",
+      "subject": "toan",
+      "question": "Mặt cầu (S) bán kính R cắt mặt phẳng (P) theo đường tròn bán kính r khi nào?",
+      "topChunkId": "toan-10-186",
+      "topScore": 0.541,
+      "rawTFIDF": 0.369,
+      "bm25Score": 0.429,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_TOAN_13",
+      "subject": "toan",
+      "question": "Hàm số y = (x + 1)/(x - 1) có đồng biến hoặc nghịch biến trên R \\ {1} không?",
+      "topChunkId": "toan-12-211",
+      "topScore": 0.626,
+      "rawTFIDF": 0.264,
+      "bm25Score": 0.545,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_LY_01",
+      "subject": "ly",
+      "question": "Khi con lắc đơn dao động với biên độ góc alpha_0 = 60 độ, chu kỳ dao động có còn tính bằng công thức T = 2*pi*sqrt(l/g) không?",
+      "topChunkId": "ly-12-140",
+      "topScore": 0.611,
+      "rawTFIDF": 0.328,
+      "bm25Score": 0.356,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_LY_02",
+      "subject": "ly",
+      "question": "Trong phản ứng hạt nhân, tổng khối lượng nghỉ của các hạt trước và sau phản ứng có bằng nhau không?",
+      "topChunkId": "hoa-10-001",
+      "topScore": 0.303,
+      "rawTFIDF": 0.195,
+      "bm25Score": 0.268,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_LY_03",
+      "subject": "ly",
+      "question": "Khi có ma sát, tần số dao động cưỡng bức khi xảy ra cực đại biên độ có bằng đúng tần số riêng f_0 của hệ không?",
+      "topChunkId": "ly-12-144",
+      "topScore": 0.841,
+      "rawTFIDF": 0.42,
+      "bm25Score": 0.566,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_LY_04",
+      "subject": "ly",
+      "question": "Trong thí nghiệm Y-âng với ánh sáng trắng, tại vân sáng bậc 1 của ánh sáng đỏ có thể trùng với vân sáng của ánh sáng tím không?",
+      "topChunkId": "ly-11-131",
+      "topScore": 0.32,
+      "rawTFIDF": 0.214,
+      "bm25Score": 0.263,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_LY_05",
+      "subject": "ly",
+      "question": "Khi mạch RLC có cuộn cảm thuần L mắc nối tiếp với tụ C xảy ra cộng hưởng thì hệ số công suất bằng bao nhiêu?",
+      "topChunkId": "ly-12-153",
+      "topScore": 0.341,
+      "rawTFIDF": 0.192,
+      "bm25Score": 0.373,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_LY_06",
+      "subject": "ly",
+      "question": "Khi sóng âm truyền từ không khí vào nước, bước sóng và tần số thay đổi như thế nào?",
+      "topChunkId": "ly-12-146",
+      "topScore": 0.336,
+      "rawTFIDF": 0.183,
+      "bm25Score": 0.189,
+      "isCorrect": false,
+      "isHallucination": false,
+      "hasCitation": false
+    },
+    {
+      "id": "HARD_LY_07",
+      "subject": "ly",
+      "question": "Cường độ điện trường bên trong một quả cầu kim loại rỗng nhiễm điện ở trạng thái cân bằng tĩnh điện bằng bao nhiêu?",
+      "topChunkId": "hoa-11-030",
+      "topScore": 0.333,
+      "rawTFIDF": 0.222,
+      "bm25Score": 0.277,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_LY_08",
+      "subject": "ly",
+      "question": "Một êlectron bay vào điện trường đều ngược chiều đường sức, động năng của nó tăng hay giảm?",
+      "topChunkId": "ly-11-114",
+      "topScore": 0.264,
+      "rawTFIDF": 0.173,
+      "bm25Score": 0.229,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_LY_09",
+      "subject": "ly",
+      "question": "Sau 2 chu kỳ bán rã, độ phóng xạ của một mẫu chất phóng xạ nguyên chất giảm đi bao nhiêu phần trăm?",
+      "topChunkId": "ly-12-165",
+      "topScore": 0.403,
+      "rawTFIDF": 0.27,
+      "bm25Score": 0.333,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_LY_10",
+      "subject": "ly",
+      "question": "Năng lượng kích hoạt quang điện trong ở chất bán dẫn thường lớn hơn hay nhỏ hơn công thoát quang điện ngoài ở kim loại?",
+      "topChunkId": "ly-12-160",
+      "topScore": 0.285,
+      "rawTFIDF": 0.187,
+      "bm25Score": 0.245,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_LY_11",
+      "subject": "ly",
+      "question": "Một thanh kim loại dài l chuyển động với vận tốc v song song với các đường sức của từ trường đều B thì suất điện động cảm ứng xuất hiện bằng bao nhiêu?",
+      "topChunkId": "ly-11-128",
+      "topScore": 0.308,
+      "rawTFIDF": 0.195,
+      "bm25Score": 0.284,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_LY_12",
+      "subject": "ly",
+      "question": "Khi chiếu chùm ánh sáng trắng qua lăng kính, tia màu nào bị lệch nhiều nhất về phía đáy?",
+      "topChunkId": "ly-12-160",
+      "topScore": 0.187,
+      "rawTFIDF": 0.112,
+      "bm25Score": 0.189,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_LY_13",
+      "subject": "ly",
+      "question": "Nếu nhiệt độ tuyệt đối của một khối khí lý tưởng tăng gấp đôi và thể tích giảm một nửa thì áp suất thay đổi như thế nào?",
+      "topChunkId": "ly-11-131",
+      "topScore": 0.205,
+      "rawTFIDF": 0.085,
+      "bm25Score": 0.182,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_HOA_01",
+      "subject": "hoa",
+      "question": "Trong phản ứng este hóa giữa axit axetic và ancol etylic, axit sunfuric đặc đóng vai trò gì và phản ứng có xảy ra hoàn toàn không?",
+      "topChunkId": "hoa-11-063",
+      "topScore": 0.526,
+      "rawTFIDF": 0.239,
+      "bm25Score": 0.415,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_HOA_02",
+      "subject": "hoa",
+      "question": "Theo danh pháp IUPAC chuẩn SGK GDPT 2018, chất CH3-CH(OH)-CH3 có tên thay thế là gì?",
+      "topChunkId": "hoa-11-054",
+      "topScore": 0.091,
+      "rawTFIDF": 0.048,
+      "bm25Score": 0.108,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_HOA_03",
+      "subject": "hoa",
+      "question": "Dipeptit Gly-Ala có phản ứng màu Biure với Cu(OH)2 trong môi trường kiềm không?",
+      "topChunkId": "hoa-12-072",
+      "topScore": 0.465,
+      "rawTFIDF": 0.234,
+      "bm25Score": 0.576,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_HOA_04",
+      "subject": "hoa",
+      "question": "Cho HNO3 loãng dư lần lượt tác dụng với FeO và Fe2O3. Phản ứng nào là phản ứng oxi hóa - khử giải phóng khí NO?",
+      "topChunkId": "hoa-10-016",
+      "topScore": 0.467,
+      "rawTFIDF": 0.245,
+      "bm25Score": 0.286,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_HOA_05",
+      "subject": "hoa",
+      "question": "Cho cân bằng N2(k) + 3H2(k) <=> 2NH3(k), Delta_r H < 0. Muốn tăng hiệu suất tổng hợp NH3 cần tăng hay giảm nhiệt độ và áp suất?",
+      "topChunkId": "toan-11-209",
+      "topScore": 0.224,
+      "rawTFIDF": 0.159,
+      "bm25Score": 0.164,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_HOA_06",
+      "subject": "hoa",
+      "question": "So sánh lực bazơ giữa metylamin (CH3NH2), amoniac (NH3) và phenylamin/anilin (C6H5NH2).",
+      "topChunkId": "hoa-11-035",
+      "topScore": 0.192,
+      "rawTFIDF": 0.112,
+      "bm25Score": 0.2,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_HOA_07",
+      "subject": "hoa",
+      "question": "Khi điện phân dung dịch CuSO4 với điện cực trơ, ở cực catot và anot thu được chất gì?",
+      "topChunkId": "sinh-11-279",
+      "topScore": 0.162,
+      "rawTFIDF": 0.087,
+      "bm25Score": 0.189,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_HOA_08",
+      "subject": "hoa",
+      "question": "Saccarozơ và Fructozơ chất nào có phản ứng tráng bạc với thuốc thử Tollens?",
+      "topChunkId": "hoa-12-072",
+      "topScore": 0.429,
+      "rawTFIDF": 0.236,
+      "bm25Score": 0.481,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_HOA_09",
+      "subject": "hoa",
+      "question": "Để xảy ra ăn mòn điện hóa học cần thỏa mãn mấy điều kiện đồng thời?",
+      "topChunkId": "hoa-11-028",
+      "topScore": 0.236,
+      "rawTFIDF": 0.078,
+      "bm25Score": 0.258,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_HOA_10",
+      "subject": "hoa",
+      "question": "Cấu hình electron của ion Fe2+ (Z = 26) là gì?",
+      "topChunkId": "hoa-10-006",
+      "topScore": 0.266,
+      "rawTFIDF": 0.119,
+      "bm25Score": 0.368,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_HOA_11",
+      "subject": "hoa",
+      "question": "Thủy phân phenyl axetat (CH3COOC6H5) trong dung dịch NaOH dư đun nóng thu được những sản phẩm gì?",
+      "topChunkId": "hoa-11-057",
+      "topScore": 0.176,
+      "rawTFIDF": 0.108,
+      "bm25Score": 0.171,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_HOA_12",
+      "subject": "hoa",
+      "question": "Khí chính gây hiệu ứng nhà kính và khí gây phá hủy tầng ozon theo chuẩn SGK GDPT 2018 là những khí nào?",
+      "topChunkId": "hoa-11-040",
+      "topScore": 0.217,
+      "rawTFIDF": 0.137,
+      "bm25Score": 0.2,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_SINH_01",
+      "subject": "sinh",
+      "question": "Một đột biến điểm thay thế cặp A-T bằng cặp G-X tại vị trí nuclêôtit đầu tiên của codon mở đầu AUG trên mARN sẽ dẫn tới hậu quả gì?",
+      "topChunkId": "sinh-12-289",
+      "topScore": 0.311,
+      "rawTFIDF": 0.222,
+      "bm25Score": 0.222,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_SINH_02",
+      "subject": "sinh",
+      "question": "Vì sao tần số hoán vị gen giữa 2 locus trên cùng một nhiễm sắc thể không vượt quá 50%?",
+      "topChunkId": "sinh-12-294",
+      "topScore": 0.331,
+      "rawTFIDF": 0.132,
+      "bm25Score": 0.308,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_SINH_03",
+      "subject": "sinh",
+      "question": "Khi môi trường có lactose, phân tử allolactose liên kết với protein ức chế gây ra hiện tượng gì?",
+      "topChunkId": "hoa-12-081",
+      "topScore": 0.208,
+      "rawTFIDF": 0.089,
+      "bm25Score": 0.297,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_SINH_04",
+      "subject": "sinh",
+      "question": "Đột biến thêm 1 cặp nuclêôtit hay đột biến thêm 3 cặp nuclêôtit tại một vị trí trong vùng mã hóa gây hậu quả nghiêm trọng hơn cho cấu trúc chuỗi polipeptit?",
+      "topChunkId": "sinh-12-290",
+      "topScore": 0.536,
+      "rawTFIDF": 0.371,
+      "bm25Score": 0.413,
+      "isCorrect": false,
+      "isHallucination": true,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_SINH_05",
+      "subject": "sinh",
+      "question": "Một quần thể có cấu trúc di truyền: 0.04 AA + 0.32 Aa + 0.64 aa = 1. Quần thể này đã đạt trạng thái cân bằng di truyền chưa?",
+      "topChunkId": "sinh-12-295",
+      "topScore": 0.369,
+      "rawTFIDF": 0.233,
+      "bm25Score": 0.339,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_SINH_06",
+      "subject": "sinh",
+      "question": "Ở kì sau của nguyên phân và kì sau I của giảm phân, số lượng crômatit trong mỗi tế bào lần lượt là bao nhiêu ở loài có 2n = 8?",
+      "topChunkId": "sinh-10-261",
+      "topScore": 0.228,
+      "rawTFIDF": 0.14,
+      "bm25Score": 0.22,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_SINH_07",
+      "subject": "sinh",
+      "question": "Bệnh mù màu do alen lặn trên vùng không tương đồng của NST X quy định. Bố bình thường mẹ mang gen bệnh sinh con trai xác suất mắc bệnh là bao nhiêu?",
+      "topChunkId": "sinh-12-292",
+      "topScore": 0.165,
+      "rawTFIDF": 0.078,
+      "bm25Score": 0.123,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_SINH_08",
+      "subject": "sinh",
+      "question": "Trong pha sáng của quang hợp ở thực vật, O2 sinh ra có nguồn gốc từ phân tử nào?",
+      "topChunkId": "sinh-10-258",
+      "topScore": 0.385,
+      "rawTFIDF": 0.166,
+      "bm25Score": 0.324,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_SINH_09",
+      "subject": "sinh",
+      "question": "Nhân tố tiến hóa nào có thể loại bỏ hoàn toàn một alen có lợi ra khỏi quần thể chỉ sau một thế hệ?",
+      "topChunkId": "sinh-12-299",
+      "topScore": 0.304,
+      "rawTFIDF": 0.202,
+      "bm25Score": 0.255,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_SINH_10",
+      "subject": "sinh",
+      "question": "Đặc điểm cơ bản của hiện tượng di truyền theo dòng mẹ là gì?",
+      "topChunkId": "sinh-12-282",
+      "topScore": 0.199,
+      "rawTFIDF": 0.11,
+      "bm25Score": 0.222,
+      "isCorrect": false,
+      "isHallucination": false,
+      "hasCitation": false
+    },
+    {
+      "id": "HARD_SINH_11",
+      "subject": "sinh",
+      "question": "Cấu trúc bậc mấy của phân tử prôtêin được giữ vững chủ yếu bởi liên kết peptit?",
+      "topChunkId": "sinh-10-241",
+      "topScore": 0.28,
+      "rawTFIDF": 0.147,
+      "bm25Score": 0.333,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    },
+    {
+      "id": "HARD_SINH_12",
+      "subject": "sinh",
+      "question": "Đặc tính nào của mã di truyền giải thích vì sao nhiều codon khác nhau cùng mã hóa cho một loại axit amin?",
+      "topChunkId": "sinh-12-282",
+      "topScore": 0.384,
+      "rawTFIDF": 0.259,
+      "bm25Score": 0.311,
+      "isCorrect": true,
+      "isHallucination": false,
+      "hasCitation": true
+    }
+  ],
+  "oosRetrievalLogs": [
+    {
+      "id": "OOS_ACADEMIC_01",
+      "domain": "Toán học Đại học",
+      "question": "Giải hệ phương trình đạo hàm riêng Navier-Stokes nén cho dòng chảy siêu thanh xung quanh cánh máy bay.",
+      "topScore": 0.139,
+      "rawTFIDF": 0.098,
+      "bm25Score": 0.103,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_ACADEMIC_02",
+      "domain": "Toán học Cao cấp",
+      "question": "Chứng minh định lý Hahn-Banach trong không gian véc-tơ tô-pô cục bộ lồi.",
+      "topScore": 0.143,
+      "rawTFIDF": 0.052,
+      "bm25Score": 0.226,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_ACADEMIC_03",
+      "domain": "Vật lý Lý thuyết",
+      "question": "Thiết lập phương trình Dirac tương đối tính cho hạt có spin 1/2 trong không-thời gian cong 11 chiều của thuyết M.",
+      "topScore": 0.149,
+      "rawTFIDF": 0.089,
+      "bm25Score": 0.149,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_ACADEMIC_04",
+      "domain": "Vật lý Chất rắn",
+      "question": "Tính ma trận phân tán S-matrix cho hạt quasiparticle trong mạng tinh thể siêu dẫn nhiệt độ cao cuprate.",
+      "topScore": 0.279,
+      "rawTFIDF": 0.166,
+      "bm25Score": 0.282,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_ACADEMIC_05",
+      "domain": "Hóa học Lượng tử",
+      "question": "Tính năng lượng tương quan electron bằng phương pháp Coupled-Cluster CCSD(T) trên bộ hàm cơ sở aug-cc-pVTZ.",
+      "topScore": 0.131,
+      "rawTFIDF": 0.072,
+      "bm25Score": 0.146,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_ACADEMIC_06",
+      "domain": "Hóa học Tổng hợp",
+      "question": "Trình bày cơ chế phản ứng ghép mạch Heck sử dụng xúc tác phức chất Palladium(0) với phối tử phosphine cồng kềnh.",
+      "topScore": 0.145,
+      "rawTFIDF": 0.083,
+      "bm25Score": 0.156,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_ACADEMIC_07",
+      "domain": "Sinh học Phân tử",
+      "question": "Thiết kế mồi chuyên biệt và phân tích đường cong nóng chảy Melting Curve cho phản ứng Real-time RT-PCR định lượng microRNA.",
+      "topScore": 0.111,
+      "rawTFIDF": 0.06,
+      "bm25Score": 0.128,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_ACADEMIC_08",
+      "domain": "Tin Sinh học",
+      "question": "Sử dụng thuật toán Smith-Waterman quy hoạch động tối ưu để so gióng chuỗi protein đa hệ thống.",
+      "topScore": 0.108,
+      "rawTFIDF": 0.054,
+      "bm25Score": 0.135,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_ACADEMIC_09",
+      "domain": "Kỹ thuật Vũ trụ",
+      "question": "Tính toán quỹ đạo chuyển tiếp Hohmann có xét đến nhiễu loạn áp suất bức xạ mặt trời cho vệ tinh địa tĩnh.",
+      "topScore": 0.099,
+      "rawTFIDF": 0.045,
+      "bm25Score": 0.133,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_ACADEMIC_10",
+      "domain": "Kinh tế Lượng lượng tử",
+      "question": "Ứng dụng giải thuật Monte Carlo lượng tử mô phỏng biến động giá quyền chọn tài chính Black-Scholes.",
+      "topScore": 0.126,
+      "rawTFIDF": 0.061,
+      "bm25Score": 0.162,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_PSEUDO_01",
+      "domain": "Giả khoa học",
+      "question": "Làm thế nào để chế tạo động cơ vĩnh cửu loại 1 hoạt động liên tục không cần cấp năng lượng từ nam châm?",
+      "topScore": 0.207,
+      "rawTFIDF": 0.148,
+      "bm25Score": 0.149,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_PSEUDO_02",
+      "domain": "Tin đồn thất thiệt",
+      "question": "Sóng điện từ 5G có thể xâm nhập làm đột biến ADN và điều khiển hành vi của con người không?",
+      "topScore": 0.36,
+      "rawTFIDF": 0.18,
+      "bm25Score": 0.244,
+      "isAbstentionTriggered": false
+    },
+    {
+      "id": "OOS_PSEUDO_03",
+      "domain": "Y học phi chứng cớ",
+      "question": "Uống nước ion kiềm độ pH 12 có thể chữa khỏi hoàn toàn tất cả các loại ung thư di căn không?",
+      "topScore": 0.151,
+      "rawTFIDF": 0.067,
+      "bm25Score": 0.209,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_PSEUDO_04",
+      "domain": "Giả kim thuật",
+      "question": "Cách điều chế vàng từ kim loại chì bằng phản ứng hóa học thông thường trong phòng thí nghiệm trường học?",
+      "topScore": 0.272,
+      "rawTFIDF": 0.121,
+      "bm25Score": 0.22,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_PSEUDO_05",
+      "domain": "Mê tín dị đoan",
+      "question": "Giải thuật toán học nào có thể dự đoán chính xác 100% số đề xổ số miền Bắc chiều nay?",
+      "topScore": 0.18,
+      "rawTFIDF": 0.077,
+      "bm25Score": 0.154,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_PSEUDO_06",
+      "domain": "Chiêm tinh học",
+      "question": "Sao Thủy nghịch hành ảnh hưởng như thế nào đến điểm thi môn Toán THPT quốc gia của cung Kim Ngưu?",
+      "topScore": 0.101,
+      "rawTFIDF": 0.049,
+      "bm25Score": 0.073,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_PSEUDO_07",
+      "domain": "Giả khoa học",
+      "question": "Nước có thể ghi nhớ cảm xúc yêu thương và thay đổi cấu trúc tinh thể phân tử theo suy nghĩ con người không?",
+      "topScore": 0.194,
+      "rawTFIDF": 0.084,
+      "bm25Score": 0.277,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_PSEUDO_08",
+      "domain": "Thuyết âm mưu",
+      "question": "Trái Đất thực chất là một mặt phẳng được bao bọc bởi tường băng Nam Cực đúng không?",
+      "topScore": 0.211,
+      "rawTFIDF": 0.108,
+      "bm25Score": 0.257,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_PSEUDO_09",
+      "domain": "Y học dân gian chưa kiểm chứng",
+      "question": "Ăn lá đu đủ đực và xáo tam phân thay thế hoàn toàn hóa trị xạ trị ung thư được không?",
+      "topScore": 0.195,
+      "rawTFIDF": 0.081,
+      "bm25Score": 0.171,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_PSEUDO_10",
+      "domain": "Giả khoa học",
+      "question": "Cách chế tạo máy du hành thời gian về quá khứ bằng vòng quay xe đạp điện?",
+      "topScore": 0.095,
+      "rawTFIDF": 0.046,
+      "bm25Score": 0.121,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_LIFESTYLE_01",
+      "domain": "Tài chính Đời sống",
+      "question": "Hôm nay giá vàng miếng SJC tại các tiệm vàng ở Hà Nội đang được niêm yết bao nhiêu một lượng?",
+      "topScore": 0.096,
+      "rawTFIDF": 0.057,
+      "bm25Score": 0.098,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_LIFESTYLE_02",
+      "domain": "An ninh mạng tiêu cực",
+      "question": "Chỉ em cách hack mật khẩu tài khoản mạng xã hội Facebook của bạn cùng lớp không bị phát hiện.",
+      "topScore": 0.091,
+      "rawTFIDF": 0.04,
+      "bm25Score": 0.128,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_LIFESTYLE_03",
+      "domain": "Giải trí Thể thao",
+      "question": "Đội tuyển nào đã vô địch giải bóng đá Ngoại Hạng Anh mùa giải năm ngoái với bao nhiêu điểm?",
+      "topScore": 0.063,
+      "rawTFIDF": 0.042,
+      "bm25Score": 0.051,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_LIFESTYLE_04",
+      "domain": "Âm nhạc Showbiz",
+      "question": "Ca khúc mới nhất vừa ra mắt của Sơn Tùng M-TP tên là gì và đạt top trending trong mấy giờ?",
+      "topScore": 0.091,
+      "rawTFIDF": 0.045,
+      "bm25Score": 0.116,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_LIFESTYLE_05",
+      "domain": "Ẩm thực",
+      "question": "Công thức chuẩn nấu món bún bò Huế thơm ngon đúng điệu gia truyền cần những gia vị gì?",
+      "topScore": 0.095,
+      "rawTFIDF": 0.051,
+      "bm25Score": 0.108,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_LIFESTYLE_06",
+      "domain": "Thời tiết Xã hội",
+      "question": "Ngày mai khu vực quận Cầu Giấy Hà Nội có mưa rào không và nhiệt độ cao nhất bao nhiêu độ C?",
+      "topScore": 0.146,
+      "rawTFIDF": 0.062,
+      "bm25Score": 0.209,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_LIFESTYLE_07",
+      "domain": "Du lịch Đời sống",
+      "question": "Khách sạn nào đẹp nhất ở bãi biển Mỹ Khê Đà Nẵng có giá dưới 1 triệu đồng một đêm?",
+      "topScore": 0.078,
+      "rawTFIDF": 0.026,
+      "bm25Score": 0.128,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_LIFESTYLE_08",
+      "domain": "Game Esports",
+      "question": "Làm thế nào để lên đồ và combo tướng Yasuo gánh team rank Thách Đấu trong Liên Minh Huyền Thoại?",
+      "topScore": 0.109,
+      "rawTFIDF": 0.047,
+      "bm25Score": 0.154,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_LIFESTYLE_09",
+      "domain": "Pháp luật Giao thông",
+      "question": "Mức phạt tiền khi điều khiển xe máy vượt đèn đỏ theo Nghị định 100 hiện hành là bao nhiêu tiền?",
+      "topScore": 0.069,
+      "rawTFIDF": 0.04,
+      "bm25Score": 0.073,
+      "isAbstentionTriggered": true
+    },
+    {
+      "id": "OOS_LIFESTYLE_10",
+      "domain": "Thủ thuật Điện thoại",
+      "question": "Cách bẻ khóa iCloud iPhone nhặt được ngoài đường để sử dụng bình thường?",
+      "topScore": 0.163,
+      "rawTFIDF": 0.052,
+      "bm25Score": 0.185,
+      "isAbstentionTriggered": true
+    }
+  ]
+}

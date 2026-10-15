@@ -5,7 +5,7 @@ import {
   Bot, Sparkles, Send, X, Trash2, 
   Compass, Zap, RefreshCw, Cpu, CheckCircle2, MessageSquare, History, ChevronRight,
   Plus, MessageSquarePlus, Clock, ArrowLeft, BookOpen, ExternalLink, Mic, MicOff,
-  ShieldAlert, AlertTriangle, Lock
+  ShieldAlert, AlertTriangle, Lock, ImagePlus
 } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { useAuth } from '@/hooks/useAuth';
@@ -53,7 +53,7 @@ const LOCAL_STORAGE_KEY = 'stem_hub_global_ai_history';
 const LOCAL_STORAGE_SESSIONS = 'stem_hub_global_ai_sessions';
 
 // Component định dạng văn bản câu trả lời AI đẹp mắt, sạch ký tự thô & tạo nút link tổng kiến thức + link tra cứu web
-function FormattedAIMessage({ text, onNavigate, isDark = true }) {
+function FormattedAIMessage({ text, onNavigate, onTriggerExpandedAI, isDark = true }) {
   if (!text) return null;
 
   // Helper render các phần tử vectơ chuẩn JSX & KaTeX HTML với mũi tên → ĐẶT CHÍNH XÁC TRÊN ĐẦU CHỮ (Chuẩn Toán Học 100%)
@@ -94,6 +94,24 @@ function FormattedAIMessage({ text, onNavigate, isDark = true }) {
     });
   };
 
+  // 🛡️ YÊU CẦU 2 (CẢNH BÁO THAY VÌ CỐ TRẢ LỜI): Trích xuất Nút Tham Khảo Mở Rộng
+  let expandedQuery = null;
+  const expandedMatch = text.match(/\[\[BTN_EXPANDED_AI_REPLY:(.*?)\]\]/);
+  if (expandedMatch) {
+    try {
+      expandedQuery = decodeURIComponent(expandedMatch[1]);
+    } catch (_) {
+      expandedQuery = expandedMatch[1];
+    }
+  }
+
+  // 🛡️ YÊU CẦU 2 (KHỐI TRÍCH DẪN RÕ RÀNG): Trích xuất thẻ [Nguồn dẫn chứng: ...]
+  let citationText = null;
+  const citationMatch = text.match(/\[Nguồn dẫn chứng:\s*([^\]]+)\]/i);
+  if (citationMatch) {
+    citationText = citationMatch[0];
+  }
+
   // Extract explicit [[LINK:Title:URL]]
   const linkMatches = [];
   const linkRegex = /\[\[LINK:(.*?):(.*?)\]\]/g;
@@ -105,6 +123,10 @@ function FormattedAIMessage({ text, onNavigate, isDark = true }) {
   }
   cleanContent = cleanContent.replace(/\[\[LINK:.*?:.*?\]\]/g, '').trim();
   cleanContent = cleanContent.replace(/\[\[NAV:.*?\]\]/g, '').replace(/\[\[TOGGLE_THEME\]\]/g, '').trim();
+  cleanContent = cleanContent.replace(/\[\[BTN_EXPANDED_AI_REPLY:.*?\]\]/g, '').trim();
+  if (citationText) {
+    cleanContent = cleanContent.replace(/\[Nguồn dẫn chứng:\s*[^\]]+\]/gi, '').trim();
+  }
 
   // Lọc bỏ triệt để các chuỗi markdown link google rác/lỗi do AI sinh ra (như 📖 Tra cứu...](https://google...))
   cleanContent = cleanContent.replace(/\[?📖?\s*Tra cứu[^\]]*\]\(https?:\/\/[^\)]*google\.com\/search[^\)]*\)/gi, '');
@@ -129,7 +151,10 @@ function FormattedAIMessage({ text, onNavigate, isDark = true }) {
     }
   }
 
-  const lines = cleanContent.split('\n');
+  // ĐỊNH DẠNG TOÀN BỘ CÔNG THỨC TOÁN / LÝ / HÓA / SINH (KATEX) TRƯỚC KHI TÁCH DÒNG
+  // Giúp các công thức nhiều dòng (\begin{cases}, \stackrel, $$...$$) không bị đứt đoạn hay lỗi cú pháp
+  const preformattedContent = formatMathText(cleanContent);
+  const lines = preformattedContent.split('\n');
 
   // Helper để render các đoạn văn bản có chứa [Text](URL), **Bold** hoặc `Code/Math`
   const renderInlineContent = (contentStr, itemKey) => {
@@ -200,13 +225,12 @@ function FormattedAIMessage({ text, onNavigate, isDark = true }) {
           const boldText = part.slice(2, -2);
           return (
             <strong key={itemSubKey} className={`font-bold ${isDark ? 'text-cyan-300' : 'text-pink-950'}`}>
-              {renderTextWithVectorElements(formatMathText(boldText), itemSubKey)}
+              {renderTextWithVectorElements(boldText, itemSubKey)}
             </strong>
           );
         }
         if (part.startsWith('`') && part.endsWith('`')) {
           const codeContent = part.slice(1, -1);
-          const formattedCode = formatMathText(codeContent);
           return (
             <code
               key={itemSubKey}
@@ -216,13 +240,13 @@ function FormattedAIMessage({ text, onNavigate, isDark = true }) {
                   : 'bg-pink-100/80 text-pink-900 border-pink-300/60'
               }`}
             >
-              {renderTextWithVectorElements(formattedCode, itemSubKey)}
+              {renderTextWithVectorElements(codeContent, itemSubKey)}
             </code>
           );
         }
         return (
           <span key={itemSubKey} className={isDark ? 'text-[#e4e4e7]' : 'text-pink-900 font-medium'}>
-            {renderTextWithVectorElements(formatMathText(part), itemSubKey)}
+            {renderTextWithVectorElements(part, itemSubKey)}
           </span>
         );
       });
@@ -333,6 +357,50 @@ function FormattedAIMessage({ text, onNavigate, isDark = true }) {
           </div>
         </button>
       ))}
+
+      {/* 🛡️ YÊU CẦU 2 (KHỐI TRÍCH DẪN RÕ RÀNG SGK CHUẨN) */}
+      {citationText && (
+        <div className={`mt-3.5 p-3 rounded-2xl border text-xs font-mono flex items-start gap-2.5 shadow-sm ${
+          isDark
+            ? 'bg-emerald-500/10 border-emerald-400/40 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.15)]'
+            : 'bg-emerald-50 border-emerald-300 text-emerald-900'
+        }`}>
+          <BookOpen className="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" />
+          <div className="leading-relaxed">
+            <span className="font-bold block tracking-wider uppercase text-[10px] text-emerald-400">
+              CĂN CỨ HỌC LIỆU BẮT BUỘC
+            </span>
+            <span className="font-semibold">{citationText}</span>
+          </div>
+        </div>
+      )}
+
+      {/* 🛡️ YÊU CẦU 2 (CẢNH BÁO THAY VÌ CỐ TRẢ LỜI & STRICT GROUNDING ABSTENTION) */}
+      {expandedQuery && (
+        <div className={`mt-3.5 p-4 rounded-2xl border space-y-3 shadow-md ${
+          isDark
+            ? 'bg-amber-500/10 border-amber-500/40 text-amber-200 shadow-[0_0_20px_rgba(245,158,11,0.15)]'
+            : 'bg-amber-50 border-amber-300 text-amber-950'
+        }`}>
+          <div className="flex items-start gap-2.5">
+            <span className="text-xl shrink-0">⚠️</span>
+            <div className="text-xs leading-relaxed font-sans">
+              <strong className="text-amber-300 font-bold block mb-1">
+                ⚠️ CẢNH BÁO THIẾU CĂN CỨ (STRICT GROUNDING ABSTENTION):
+              </strong>
+              Câu hỏi nằm ngoài phạm vi kho ngữ liệu Sách giáo khoa chuẩn hiện có. Hệ thống tạm dừng trả lời tự động để tránh sai lệch kiến thức.
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => onTriggerExpandedAI && onTriggerExpandedAI(expandedQuery)}
+            className="w-full sm:w-auto px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-mono font-bold text-xs shadow-md transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-2"
+          >
+            <span>[Vẫn xem gợi ý tham khảo mở rộng từ AI]</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -344,6 +412,28 @@ export default function GlobalAIAssistant() {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('✨ NOVA đang kết nối ma trận dữ liệu lượng tử...');
   const [lastInteractionTime, setLastInteractionTime] = useState(() => Date.now());
+  const [attachedImage, setAttachedImage] = useState(null);
+  const fileInputRef = useRef(null);
+
+  // Xử lý dán ảnh từ Clipboard (Ctrl+V) vào ô chat NOVA AI
+  const handlePaste = useCallback((e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith('image/')) {
+        const file = items[i].getAsFile();
+        if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setAttachedImage(reader.result);
+          };
+          reader.readAsDataURL(file);
+          e.preventDefault();
+          return;
+        }
+      }
+    }
+  }, []);
 
   // Trạng thái suy nghĩ thông minh linh hoạt theo chủ đề người dùng đang hỏi cho NOVA
   const getContextualLoadingText = (userQuery) => {
@@ -1337,35 +1427,15 @@ CuO (đen) + H₂ -t°→ Cu (đỏ) + H₂O
         logData.actionTriggered ? `⚡ Lệnh kích hoạt: ${logData.actionTriggered}` : ''
       ].filter(Boolean);
 
-      if (db) {
-        const docRef = doc(collection(db, 'ai_reasoning_logs'), logId);
-        await setDoc(docRef, {
-          id: logId,
-          timestamp,
-          timeStr,
-          userDisplayName: logData.userDisplayName || 'Học sinh',
-          userEmail: logData.userEmail || '',
-          currentPage: logData.currentPage || 'Trang chủ',
-          query: logData.query || '',
-          intent: logData.intent || 'stem_query',
-          subject: subjectName,
-          ragTopTopic: logData.ragTopTopic || null,
-          ragScore: logData.ragScore || 0,
-          tfjsProb: logData.tfjsProb !== undefined ? logData.tfjsProb : null,
-          isCacheHit: !!logData.isCacheHit,
-          aiResponseText: logData.aiResponseText || '',
-          actionTriggered: logData.actionTriggered || null,
-          terminalLines,
-          createdAt: serverTimestamp()
-        });
-      }
-    } catch (err) {
-      console.warn('Lỗi ghi logDirectToFirestore:', err.message);
+      // Nhật ký suy luận đã được gửi và lưu trữ an toàn qua Server API /api/ai-reasoning-log
+      // Tuân thủ quy tắc bảo mật TC27: Chặn Client người dùng ghi trực tiếp vào collection ai_reasoning_logs
+    } catch (_) {
+      // Ignored: Server API /api/ai-reasoning-log handles persistence securely
     }
   };
 
   // Main Bulletproof Multi-API-Key Failover Generator
-  const handleSend = async (customPrompt = null) => {
+  const handleSend = async (customPrompt = null, isExpandedOverride = false) => {
     if (!currentUser) {
       setAuthBlockedToast(true);
       console.warn('[GlobalAIAssistant] 🔒 Chặn gọi Gemini API: Người dùng chưa đăng nhập.');
@@ -1373,7 +1443,10 @@ CuO (đen) + H₂ -t°→ Cu (đỏ) + H₂O
     }
 
     const textToSend = customPrompt || input.trim();
-    if (!textToSend || isLoading) return;
+    if ((!textToSend && !attachedImage) || isLoading) return;
+
+    const currentImage = attachedImage;
+    setAttachedImage(null);
 
     try { playSound.click(); } catch (_) {}
     setInput('');
@@ -1381,7 +1454,8 @@ CuO (đen) + H₂ -t°→ Cu (đỏ) + H₂O
     const userMsg = {
       id: 'usr_' + Date.now(),
       sender: 'user',
-      text: textToSend,
+      text: textToSend || 'Phân tích hình ảnh này và giải đáp chi tiết giúp mình nhé!',
+      image: currentImage,
       timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
     };
 
@@ -1389,7 +1463,7 @@ CuO (đen) + H₂ -t°→ Cu (đỏ) + H₂O
     setMessages(newMessages);
     setTimeout(() => scrollToBottom('smooth'), 10);
     setIsLoading(true);
-    setLoadingText(getContextualLoadingText(textToSend));
+    setLoadingText(currentImage ? '🔍 NOVA đang phân tích thị giác hình ảnh...' : getContextualLoadingText(textToSend));
 
     const userDisplayName = personalization?.name || user?.displayName || 'Học sinh';
     const userLevel = personalization?.level || 1;
@@ -1433,8 +1507,8 @@ CuO (đen) + H₂ -t°→ Cu (đỏ) + H₂O
       isReaskOrQuickClose: isReask
     }).catch(err => console.warn('[ContinuousLearning] Feedback warning:', err.message));
 
-    // ⚡ BƯỚC 1: KIỂM TRA BỘ NHỚ AI TỰ HỌC (CACHE HIT) TRƯỚC KHI GỌI GEMINI API KEY
-    const cacheResult = checkRAGCacheHit(textToSend, 0.70);
+    // ⚡ BƯỚC 1: KIỂM TRA BỘ NHỚ AI TỰ HỌC (CACHE HIT) TRƯỚC KHI GỌI GEMINI API KEY (CHỈ KHI KHÔNG CÓ ẢNH ĐÍNH KÈM)
+    const cacheResult = !currentImage ? checkRAGCacheHit(textToSend, 0.70) : null;
     if (cacheResult && cacheResult.hit) {
       // 1. Giả lập khoảng thời gian suy luận (Thinking State ~ 650ms) để không bị phản hồi đường đột
       setLoadingText("⚡ Nova đang truy xuất & suy luận từ bộ nhớ tri thức...");
@@ -1505,13 +1579,43 @@ CuO (đen) + H₂ -t°→ Cu (đỏ) + H₂O
       return; // 🎯 HOÀN TOÀN BỎ QUA GEMINI API KEY!
     }
 
-    // RAG Semantic Vector Search Context Injection
+    // 🛡️ YÊU CẦU 2 (CẢNH BÁO THAY VÌ CỐ TRẢ LỜI & STRICT GROUNDING ABSTENTION):
     const ragResults = retrieveTopK(textToSend, 3);
+    const topScore = (ragResults && ragResults.length > 0) ? (ragResults[0].score || 0) : 0;
+    const isGreeting = isGreetingOrChitchat(textToSend);
+    const isNav = intentResult?.intent && intentResult.intent.startsWith('nav_');
+    const isToggle = intentResult?.intent === 'toggle_theme';
+    const isChitchat = intentResult?.intent === 'chitchat' || isGreeting;
+    const isPureCommand = textToSend.startsWith('[[') || isNav || isToggle || isChitchat;
+
+    // Khi RAG Cosine Similarity < 0.30 (hoặc không tìm thấy SGK), kích hoạt Strict Grounding Abstention
+    if (!isExpandedOverride && !isPureCommand && !currentImage && topScore < 0.30) {
+      setIsLoading(false);
+      const abstentionText = `⚠️ **Cảnh báo thiếu căn cứ**: Câu hỏi nằm ngoài phạm vi kho ngữ liệu Sách giáo khoa chuẩn hiện có. Hệ thống tạm dừng trả lời tự động để tránh sai lệch kiến thức.\n\n[[BTN_EXPANDED_AI_REPLY:${encodeURIComponent(textToSend)}]]`;
+
+      const botMsgId = 'bot_' + Date.now();
+      const initialBotMsg = {
+        id: botMsgId,
+        sender: 'bot',
+        text: abstentionText,
+        timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+      };
+      const finalMsgList = [...newMessages, initialBotMsg];
+      setMessages(finalMsgList);
+      saveCurrentSession(finalMsgList, currentSessionId);
+      return;
+    }
+
     let ragContextText = '';
-    if (ragResults && ragResults.length > 0 && ragResults[0].score >= 0.1) {
-      ragContextText = `\n[TRI THỨC TRUY XUẤT TỪ CƠ SỞ DỮ LIỆU RAG VECTOR NỘI BỘ]:\n` +
-        ragResults.map((r, idx) => `${idx + 1}. [Chủ đề: ${r.topic} (${r.subject.toUpperCase()})] (Độ tương quan: ${Math.round(r.score * 100)}%):\n${r.content}`).join('\n\n') +
-        `\nHãy sử dụng nội dung tri thức RAG trên để giải thích chính xác câu hỏi của học sinh.`;
+    let mandatoryCitation = '';
+    if (ragResults && ragResults.length > 0 && ragResults[0].score >= 0.30) {
+      const topChunk = ragResults[0];
+      mandatoryCitation = `[Nguồn dẫn chứng: SGK ${topChunk.subject.toUpperCase()} - ${topChunk.topic} - Đoạn mã ${topChunk.id}]`;
+      ragContextText = `\n[TRI THỨC TRUY XUẤT TỪ SÁCH GIÁO KHOA CHUẨN GDPT 2018 (Độ tương quan: ${Math.round(topChunk.score * 100)}% >= 30%)]:\n` +
+        ragResults.map((r, idx) => `${idx + 1}. [Chủ đề: ${r.topic} (${r.subject.toUpperCase()})] (Mã ID: ${r.id}, Độ tương quan: ${Math.round(r.score * 100)}%):\n${r.content}`).join('\n\n') +
+        `\n\n[QUY TẮC BẮT BUỘC VỀ DẪN CHỨNG (STRICT CITATION)]: Cuối câu trả lời, BẮT BUỘC PHẢI ĐÍNH KÈM CHÍNH XÁC KHỐI DẪN CHỨNG: ${mandatoryCitation}`;
+    } else if (isExpandedOverride) {
+      ragContextText = `\n[LƯU Ý: Học sinh đã chủ động bấm nút "Vẫn xem gợi ý tham khảo mở rộng từ AI". Hãy cung cấp câu trả lời khoa học nhưng mở đầu bằng lời nhắc: "💡 *Nội dung tham khảo mở rộng từ AI, chưa đối sánh trực tiếp với SGK chuẩn*."]\n`;
     }
 
     // Tầng 2 Continuous Vector Memory Retrieval
@@ -1591,7 +1695,16 @@ ${conciseInstruction}
 [QUY TẮC PHẢN HỒI BẮT BUỘC - TUYỆT ĐỐI TUÂN THỦ]:
 1. TRẢ LỜI TÓM TẮT, SÚC TÍCH (DƯỚI 80 TỪ): Đi thẳng vào trọng tâm cốt lõi. Tuyệt đối KHÔNG giải thích dài dòng lan man.
 2. TUYỆT ĐỐI KHÔNG ĐỌC THÔNG TIN CÁ NHÂN: Không được nói kiểu "Bạn chính là [Tên], hiện đang ở cấp độ Lv.X, Elo Y, danh hiệu Z...". Người dùng không yêu cầu tra cứu thông tin cá nhân thì tuyệt đối không được đọc profile ra màn hình. Khi người dùng chào hỏi xã giao ("chào bạn", "hello"), chỉ chào ngắn gọn 1 câu và sẵn sàng giải đáp kiến thức khoa học STEM.
-3. BẮT BUỘC ĐƯA CÔNG THỨC CHUẨN LATEX: Nếu câu hỏi có liên quan đến công thức (Toán, Lý, Hóa, Sinh), BẮT BUỘC PHẢI ĐƯA CÔNG THỨC VÀO và viết CHUẨN LATEX bằng $...$ (nội dòng) hoặc $$...$$ (khối độc lập). Ví dụ: $V = \\frac{1}{3}Bh$, $T = 2\\pi\\sqrt{\\frac{l}{g}}$, $2\\text{Na} + 2\\text{H}_2\\text{O} \\rightarrow 2\\text{NaOH} + \\text{H}_2\\uparrow$, $L = \\frac{N}{2} \\times 3{,}4\\text{ \\AA}$. Tuyệt đối không để sót công thức hay hiển thị sai ký hiệu.
+3. BẮT BUỘC ĐƯA CÔNG THỨC CHUẨN LATEX (ÁP DỤNG 100% TOÀN BỘ CÔNG THỨC & PHƯƠNG TRÌNH):
+   - Mọi công thức Toán, Lý, Hóa, Sinh, phương trình hóa học, đại lượng, chỉ số phân tử, hằng số BẮT BUỘC viết bằng KaTeX/LaTeX bọc trong dấu đô la:
+     + Nội dòng: bọc trong 1 cặp $, ví dụ: $\\text{H}_2\\text{SO}_4$, $\\text{Ca}(\\text{OH})_2$, $x^2 + 2x = 0$, $v = \\frac{s}{t}$, $\\lambda = \\frac{v}{f}$, $K_C = 3{,}4$.
+     + Phương trình/công thức chính: bọc trong 2 cặp $$, ví dụ:
+       $$\\text{RCOOH} + \\text{R'OH} \\stackrel{\\text{H}_2\\text{SO}_4\\text{ đ},\\, t^\\circ}{\\rightleftharpoons} \\text{RCOOR'} + \\text{H}_2\\text{O}$$
+       $$2\\text{Na} + 2\\text{H}_2\\text{O} \\rightarrow 2\\text{NaOH} + \\text{H}_2\\uparrow$$
+       $$\\begin{cases} 2x + y = 5 \\\\ x - y = 1 \\end{cases}$$
+   - LUÔN LUÔN ĐÓNG ĐẦY ĐỦ CẶP DẤU $ hoặc $$ ngay trên cùng dòng công thức. Tuyệt đối không mở $ mà quên đóng.
+   - TUYỆT ĐỐI KHÔNG dùng Unicode nửa vời như H₂SO_4 hay kí hiệu thô như ->, <=>. Phải dùng \\rightarrow, \\rightleftharpoons, \\uparrow, \\downarrow.
+   - Nếu có từ tiếng Việt trong công thức, phải bọc trong \\text{...}, ví dụ: \\text{đặc}, \\text{kết tủa}, \\text{khí}.
 4. KHI LIỆT KÊ CÁC MỤC KIẾN THỨC/CHUYÊN ĐỀ:
    Trình bày dạng danh sách gạch đầu dòng rõ ràng, đặt tên chuyên đề trong cặp dấu sao kép **Tên chuyên đề**: ...
 5. BẮT BUỘC ĐÍNH KÈM NÚT LINK TỔNG KIẾN THỨC VÀO CUỐI CÂU TRẢ LỜI khi giải đáp kiến thức:
@@ -1633,7 +1746,9 @@ ${conciseInstruction}
       contents: conversationHistory,
       systemInstruction: systemInstructionText,
       temperature: 0.3,
-      maxOutputTokens: 1500
+      maxOutputTokens: 1500,
+      imageBase64: currentImage || undefined,
+      mimeType: currentImage ? (currentImage.match(/data:([^;]+);/)?.[1] || 'image/jpeg') : undefined
     };
 
     for (const endpoint of endpointsToTry) {
@@ -1688,6 +1803,11 @@ ${conciseInstruction}
       finalText = processAgentCommands(fallbackText);
     }
 
+    // 🛡️ BẮT BUỘC ĐÍNH KÈM KHỐI TRÍCH DẪN SGK NẾU CÓ TRUY XUẤT RAG HỢP LỆ
+    if (mandatoryCitation && finalText && !finalText.includes('[Nguồn dẫn chứng:')) {
+      finalText = `${finalText}\n\n${mandatoryCitation}`;
+    }
+
     // Ghi log kết quả phản hồi cuối cùng vào Firestore DB
     if (finalText) {
       logDirectToFirestore({
@@ -1712,7 +1832,6 @@ ${conciseInstruction}
       );
     };
 
-    const isGreeting = isGreetingOrChitchat(textToSend);
     const hasPersonalInfo = containsPersonalOrSystemInfo(textToSend) || containsPersonalOrSystemInfo(finalText);
 
     if (aiSuccess && finalText && textToSend.length >= 4 && !isErrorOrOffline(finalText) && !isGreeting && !hasPersonalInfo) {
@@ -2102,17 +2221,22 @@ ${conciseInstruction}
                       }`}>
                         {isBot ? (
                           <>
-                            <FormattedAIMessage text={m.text} onNavigate={(url) => {
-                              if (url.includes('/labs/')) {
-                                setActiveLab({ link: url, name: 'Phòng lab ảo' });
-                                if (pathname !== '/') {
-                                  router.push('/');
+                            <FormattedAIMessage
+                              text={m.text}
+                              onNavigate={(url) => {
+                                if (url.includes('/labs/')) {
+                                  setActiveLab({ link: url, name: 'Phòng lab ảo' });
+                                  if (pathname !== '/') {
+                                    router.push('/');
+                                  }
+                                } else {
+                                  setActiveLab(null);
+                                  router.push(url);
                                 }
-                              } else {
-                                setActiveLab(null);
-                                router.push(url);
-                              }
-                            }} isDark={isDark} />
+                              }}
+                              onTriggerExpandedAI={(q) => handleSend(q, true)}
+                              isDark={isDark}
+                            />
                             
                             {/* Feedback Adaptive Loop Controls */}
                             <div className="flex items-center gap-3 mt-2 pt-1 border-t border-cyan-500/15 text-[10px]">
@@ -2135,7 +2259,14 @@ ${conciseInstruction}
                             </div>
                           </>
                         ) : (
-                          <p className="whitespace-pre-wrap">{m.text}</p>
+                          <>
+                            {m.image && (
+                              <div className="mb-2 rounded-xl overflow-hidden border border-white/20 max-w-[260px] bg-black/40 shadow-md">
+                                <img src={m.image} alt="Ảnh đính kèm" className="w-full h-auto max-h-48 object-contain" />
+                              </div>
+                            )}
+                            <p className="whitespace-pre-wrap">{m.text}</p>
+                          </>
                         )}
                         <span className={`text-[8px] font-mono block text-right mt-1.5 opacity-60 ${isBot ? (isDark ? 'text-cyan-300' : 'text-pink-600') : 'text-white'}`}>
                           {m.timestamp}
@@ -2190,10 +2321,70 @@ ${conciseInstruction}
                 ))}
               </div>
 
+              {/* Preview ảnh đính kèm (Paste qua Ctrl+V hoặc Tải lên) */}
+              {attachedImage && (
+                <div className={`px-3 py-2 border-t flex items-center gap-2.5 ${
+                  isDark ? 'bg-zinc-950/90 border-cyan-500/20' : 'bg-pink-50 border-pink-200'
+                }`}>
+                  <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-cyan-400 shrink-0 bg-black/40">
+                    <img src={attachedImage} alt="Preview ảnh đính kèm" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1 min-w-0 text-[11px]">
+                    <div className={`font-semibold flex items-center gap-1 ${isDark ? 'text-cyan-300' : 'text-pink-600'}`}>
+                      <Sparkles className="w-3 h-3" /> Đã nhận diện ảnh (Ctrl+V)
+                    </div>
+                    <div className="text-[10px] text-zinc-400 truncate">NOVA AI sẽ đọc và phân tích hình ảnh này</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAttachedImage(null)}
+                    className="p-1 rounded-md text-rose-400 hover:bg-rose-500/10 cursor-pointer"
+                    title="Xóa ảnh đính kèm"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
               {/* Input Control Bar */}
               <div className={`p-3 border-t flex items-center gap-2 shrink-0 ${
                 isDark ? 'bg-[#10121a] border-cyan-500/20' : 'bg-[#F0EBFA]/90 border-[#E2D9F3]'
               }`}>
+                {/* Hidden file input for image upload */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setAttachedImage(reader.result);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                    e.target.value = '';
+                  }}
+                />
+
+                {/* Nút Upload / Paste Ảnh */}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`p-2.5 rounded-2xl border transition-all cursor-pointer ${
+                    attachedImage
+                      ? 'bg-cyan-500/25 border-cyan-400 text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.3)]'
+                      : isDark
+                      ? 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-cyan-300 hover:border-cyan-400/40'
+                      : 'bg-white border-pink-200 text-slate-500 hover:text-pink-600'
+                  }`}
+                  title="Tải lên hoặc dán ảnh bài tập (Ctrl+V) để NOVA AI đọc và giải bài"
+                >
+                  <ImagePlus className="w-4 h-4" />
+                </button>
+
                 {/* Nút Bật Micro Nhận Diện Giọng Nói STT */}
                 <button
                   type="button"
@@ -2216,7 +2407,14 @@ ${conciseInstruction}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                  placeholder={isListening ? '🎙️ Đang nghe giọng nói của bạn...' : 'Nhập văn bản hoặc bấm Mic để nói...'}
+                  onPaste={handlePaste}
+                  placeholder={
+                    attachedImage
+                      ? 'Thêm câu hỏi cho ảnh hoặc nhấn Gửi (Enter)...'
+                      : isListening
+                      ? '🎙️ Đang nghe giọng nói của bạn...'
+                      : 'Hỏi NOVA, dán ảnh Ctrl+V... (Enter gửi)'
+                  }
                   className={`flex-1 px-3.5 py-2.5 rounded-2xl text-xs focus:outline-none transition-all ${
                     isDark
                       ? 'bg-zinc-900/90 border border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-cyan-400'
@@ -2228,7 +2426,7 @@ ${conciseInstruction}
                 <button
                   type="button"
                   onClick={() => handleSend()}
-                  disabled={!input.trim() || isLoading}
+                  disabled={(!input.trim() && !attachedImage) || isLoading}
                   className={`p-2.5 rounded-2xl border transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
                     isDark
                       ? 'bg-cyan-500/20 border-cyan-400/50 text-cyan-300 hover:bg-cyan-500/30'

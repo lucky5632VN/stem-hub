@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/store/useAppStore';
@@ -8,8 +9,13 @@ import { playSound } from '@/lib/sound';
 import { savePendingShare } from '@/lib/indexedDB';
 import { 
   ArrowLeft, Maximize2, Minimize2, RefreshCw, MessageSquare, 
-  Camera, Sparkles, Send, X, Shield, Activity, Share2, CheckCircle2
+  Camera, Sparkles, Send, X, Shield, Activity, Share2, CheckCircle2, Dna, ImagePlus
 } from 'lucide-react';
+
+const MolecularViewerModal = dynamic(() => import('@/components/organisms/MolecularViewerModal'), { 
+  ssr: false,
+  loading: () => null 
+});
 
 const AI_COMPANION_DATA = {
   chem: {
@@ -86,6 +92,7 @@ export default function VirtualLabSandbox({
   const [chatLoading, setChatLoading] = useState(false);
   const [screenshotFlash, setScreenshotFlash] = useState(false);
   const [showShareConfirm, setShowShareConfirm] = useState(false);
+  const [showMolecularViewer, setShowMolecularViewer] = useState(false);
   const [iframeKey, setIframeKey] = useState(() => Date.now());
 
   const containerRef = useRef(null);
@@ -99,17 +106,17 @@ export default function VirtualLabSandbox({
 
   const compData = AI_COMPANION_DATA[subjectKey] || AI_COMPANION_DATA.math;
 
-  const [currentSrc, setCurrentSrc] = useState(labUrl);
+  const normalizeLabUrl = (url) => {
+    if (!url) return '';
+    const [path, query] = url.split('?');
+    const normalizedPath = path.endsWith('/') ? `${path}index.html` : (path.endsWith('.html') ? path : `${path}/index.html`);
+    return query ? `${normalizedPath}?${query}` : normalizedPath;
+  };
+
+  const [currentSrc, setCurrentSrc] = useState(() => normalizeLabUrl(labUrl));
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      if (isLocal && !labUrl.includes('.html')) {
-        setCurrentSrc(labUrl.replace(/\/?$/, '/index.html'));
-      } else {
-        setCurrentSrc(labUrl);
-      }
-    }
+    setCurrentSrc(normalizeLabUrl(labUrl));
   }, [labUrl]);
 
   useEffect(() => {
@@ -174,34 +181,89 @@ export default function VirtualLabSandbox({
     });
   };
 
-  const handleSendChatMessage = (textToSend = '') => {
+  const [attachedImage, setAttachedImage] = useState(null);
+  const fileInputRef = useRef(null);
+
+  // Xử lý dán ảnh từ Clipboard (Ctrl+V) vào Companion AI
+  const handlePaste = (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith('image/')) {
+        const file = items[i].getAsFile();
+        if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setAttachedImage(reader.result);
+          };
+          reader.readAsDataURL(file);
+          e.preventDefault();
+          return;
+        }
+      }
+    }
+  };
+
+  const handleSendChatMessage = async (textToSend = '') => {
     const text = textToSend.trim() || chatInput.trim();
-    if (!text) return;
+    if (!text && !attachedImage) return;
     
     playSound.click?.();
+    const currentImg = attachedImage;
+    setAttachedImage(null);
     if (!textToSend) setChatInput('');
 
-    const userMsg = { sender: 'user', text, timestamp: new Date() };
+    const userMsg = { 
+      sender: 'user', 
+      text: text || 'Phân tích hình ảnh thí nghiệm này và giải đáp chi tiết giúp tôi.', 
+      image: currentImg,
+      timestamp: new Date() 
+    };
     setChatHistory(prev => [...prev, userMsg]);
     setChatLoading(true);
 
-    setTimeout(() => {
-      let aiText = "Tôi đã ghi nhận câu hỏi của bạn. Hãy thử chọn một câu hỏi gợi ý bên dưới nhé!";
-      
-      if (compData.answers && compData.answers[text]) {
-        aiText = compData.answers[text];
-      } else {
-        const keys = Object.keys(compData.answers || {});
-        const matchedKey = keys.find(k => k.toLowerCase().includes(text.toLowerCase()) || text.toLowerCase().includes(k.toLowerCase()));
-        if (matchedKey && compData.answers[matchedKey]) {
-          aiText = compData.answers[matchedKey];
-        }
-      }
+    // Kiểm tra câu trả lời sẵn có nếu không có ảnh
+    if (!currentImg && compData.answers && compData.answers[text]) {
+      setTimeout(() => {
+        setChatHistory(prev => [...prev, { sender: 'ai', text: compData.answers[text], timestamp: new Date() }]);
+        setChatLoading(false);
+        playSound.success?.();
+      }, 500);
+      return;
+    }
 
-      setChatHistory(prev => [...prev, { sender: 'ai', text: aiText, timestamp: new Date() }]);
+    try {
+      const res = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: `${text || 'Phân tích hình ảnh này'} [Phòng Lab: ${title}]`,
+          systemInstruction: `Bạn là Trợ lý AI Chuyên gia Thí nghiệm ${title} của hệ sinh thái STEM HUB. Hãy giải thích hiện tượng, công thức và bản chất thí nghiệm chuẩn xác SGK Việt Nam. Định dạng công thức chuẩn LaTeX $...$.`,
+          imageBase64: currentImg || undefined,
+          mimeType: currentImg ? (currentImg.match(/data:([^;]+);/)?.[1] || 'image/jpeg') : undefined
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const aiText = data.text || data.candidates?.[0]?.content?.parts?.[0]?.text || 'Tôi đã tiếp nhận thông tin từ bạn.';
+        setChatHistory(prev => [...prev, { sender: 'ai', text: aiText, timestamp: new Date() }]);
+      } else {
+        throw new Error('API error');
+      }
+    } catch (e) {
+      // Fallback
+      let fallbackText = "Tôi đã ghi nhận câu hỏi của bạn. Hãy thử hỏi lại hoặc chọn câu hỏi gợi ý nhé!";
+      if (compData.answers) {
+        const keys = Object.keys(compData.answers);
+        const matched = keys.find(k => k.toLowerCase().includes(text.toLowerCase()) || text.toLowerCase().includes(k.toLowerCase()));
+        if (matched) fallbackText = compData.answers[matched];
+      }
+      setChatHistory(prev => [...prev, { sender: 'ai', text: fallbackText, timestamp: new Date() }]);
+    } finally {
       setChatLoading(false);
       playSound.success?.();
-    }, 1200);
+    }
   };
 
   return (
@@ -227,7 +289,7 @@ export default function VirtualLabSandbox({
             <div className="absolute inset-0 bg-white z-[99999] animate-[ping_0.3s_ease-in-out_infinite]" />
           )}
 
-          {/* Nút quay lại Hub góc dưới bên trái */}
+          {/* Nút điều khiển HUD góc dưới bên trái */}
           <div className="absolute bottom-6 left-6 z-30 flex items-center gap-2.5 screenshot-hide">
             <button 
               onClick={() => {
@@ -239,6 +301,20 @@ export default function VirtualLabSandbox({
               <X className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
               <span className="text-[11px] font-black uppercase tracking-wider">Về Hub</span>
             </button>
+
+            {/* Nút mở Kính hiển vi 3D phân tử (Hóa học & Sinh học) */}
+            {(subjectKey === 'chem' || subjectKey === 'bio') && (
+              <button 
+                onClick={() => {
+                  playSound.click?.();
+                  setShowMolecularViewer(true);
+                }}
+                className="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 border border-cyan-400/40 text-white rounded-2xl transition-all active:scale-95 flex items-center gap-2 shadow-lg shadow-cyan-500/25 backdrop-blur-md group cursor-pointer font-sans"
+              >
+                <Dna className="w-4 h-4 text-cyan-200 group-hover:rotate-12 transition-transform duration-300" />
+                <span className="text-[11px] font-black uppercase tracking-wider">Kính Hiển Vi 3D Phân Tử</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -276,6 +352,11 @@ export default function VirtualLabSandbox({
                       ? 'bg-pink-600 text-white rounded-tr-none shadow-md' 
                       : 'bg-slate-800/80 border border-slate-700/60 text-slate-200 rounded-tl-none whitespace-pre-wrap'
                   }`}>
+                    {msg.image && (
+                      <div className="mb-2 rounded-xl overflow-hidden border border-white/20 max-w-[200px] bg-black/40">
+                        <img src={msg.image} alt="Ảnh đính kèm" className="w-full h-auto max-h-36 object-contain" />
+                      </div>
+                    )}
                     {msg.text}
                   </div>
                 </div>
@@ -309,23 +390,75 @@ export default function VirtualLabSandbox({
                 </div>
               </div>
 
+              {/* Preview ảnh đính kèm (Paste qua Ctrl+V hoặc Tải lên) */}
+              {attachedImage && (
+                <div className="flex items-center gap-2 p-1.5 bg-slate-900 border border-pink-500/40 rounded-xl">
+                  <img src={attachedImage} alt="Preview" className="w-9 h-9 rounded-lg object-cover border border-pink-400 shrink-0 bg-black/40" />
+                  <div className="flex-1 min-w-0 text-[10px] text-pink-300 truncate font-semibold">
+                    Đã nhận diện ảnh (Ctrl+V)
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={() => setAttachedImage(null)} 
+                    className="p-1 text-rose-400 hover:text-rose-300"
+                    title="Xóa ảnh"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+
               <form 
                 onSubmit={(e) => {
                   e.preventDefault();
                   handleSendChatMessage();
                 }}
-                className="flex gap-1.5"
+                className="flex items-center gap-1.5"
               >
+                {/* Hidden file input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setAttachedImage(reader.result);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                    e.target.value = '';
+                  }}
+                />
+
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`p-2 rounded-xl border transition-colors cursor-pointer shrink-0 ${
+                    attachedImage
+                      ? 'bg-pink-600/30 border-pink-400 text-pink-300'
+                      : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-pink-300'
+                  }`}
+                  title="Tải lên hoặc dán ảnh (Ctrl+V)"
+                >
+                  <ImagePlus className="w-3.5 h-3.5" />
+                </button>
+
                 <input 
                   type="text"
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
-                  placeholder="Hỏi công thức, nguyên lý..."
+                  onPaste={handlePaste}
+                  placeholder={attachedImage ? "Thêm câu hỏi hoặc Enter để gửi ảnh..." : "Hỏi công thức, dán ảnh Ctrl+V..."}
                   className="flex-1 bg-slate-900/90 border border-slate-700/80 focus:border-pink-500 focus:outline-none rounded-xl px-3 py-1.5 text-xs text-slate-200 placeholder:text-slate-500"
                 />
                 <button 
                   type="submit"
-                  className="p-2 bg-pink-600 hover:bg-pink-500 text-white rounded-xl transition-colors cursor-pointer"
+                  disabled={(!chatInput.trim() && !attachedImage) || chatLoading}
+                  className="p-2 bg-pink-600 hover:bg-pink-500 text-white rounded-xl transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
                 >
                   <Send className="w-3.5 h-3.5" />
                 </button>
@@ -366,6 +499,13 @@ export default function VirtualLabSandbox({
           </div>
         </div>
       )}
+
+      {/* 3D Molecular Viewer Modal */}
+      <MolecularViewerModal
+        isOpen={showMolecularViewer}
+        onClose={() => setShowMolecularViewer(false)}
+        initialCategory={subjectKey === 'bio' ? 'bio' : 'chem'}
+      />
     </div>
   );
 }

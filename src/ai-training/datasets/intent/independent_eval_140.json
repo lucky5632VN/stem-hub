@@ -1,0 +1,702 @@
+[
+  {
+    "id": "intent_eval_1",
+    "text": "cho tui va0 phong thj thu",
+    "intent": "nav_phongthi"
+  },
+  {
+    "id": "intent_eval_2",
+    "text": "mở trang luyen de thpt 2026",
+    "intent": "nav_phongthi"
+  },
+  {
+    "id": "intent_eval_3",
+    "text": "muon thi thu mon toan cap toc",
+    "intent": "nav_phongthi"
+  },
+  {
+    "id": "intent_eval_4",
+    "text": "cho lam bai test 15p hoa",
+    "intent": "nav_phongthi"
+  },
+  {
+    "id": "intent_eval_5",
+    "text": "chuyen den trang thi thu dai hoc",
+    "intent": "nav_phongthi"
+  },
+  {
+    "id": "intent_eval_6",
+    "text": "mở phòng luyện thi đại học quốc gia",
+    "intent": "nav_phongthi"
+  },
+  {
+    "id": "intent_eval_7",
+    "text": "chuyển tôi sang phòng thi thử với",
+    "intent": "nav_phongthi"
+  },
+  {
+    "id": "intent_eval_8",
+    "text": "vào làm đề thi thpt lý 12",
+    "intent": "nav_phongthi"
+  },
+  {
+    "id": "intent_eval_9",
+    "text": "bật phòng thi trắc nghiệm hóa học",
+    "intent": "nav_phongthi"
+  },
+  {
+    "id": "intent_eval_10",
+    "text": "tôi muốn bấm giờ làm đề kiểm tra toán",
+    "intent": "nav_phongthi"
+  },
+  {
+    "id": "intent_eval_11",
+    "text": "mo khu vuc thi thu thptqg",
+    "intent": "nav_phongthi"
+  },
+  {
+    "id": "intent_eval_12",
+    "text": "luyện đề thi thử tốt nghiệp thpt 2025",
+    "intent": "nav_phongthi"
+  },
+  {
+    "id": "intent_eval_13",
+    "text": "vao thi thu ngay lap tuc",
+    "intent": "nav_phongthi"
+  },
+  {
+    "id": "intent_eval_14",
+    "text": "chuyển trang phòng thi",
+    "intent": "nav_phongthi"
+  },
+  {
+    "id": "intent_eval_15",
+    "text": "cho em làm bài kiểm tra 1 tiết sinh học",
+    "intent": "nav_phongthi"
+  },
+  {
+    "id": "intent_eval_16",
+    "text": "mở ngân hàng đề thi thpt",
+    "intent": "nav_phongthi"
+  },
+  {
+    "id": "intent_eval_17",
+    "text": "vao lam bai tap trac nghiem co bam gio",
+    "intent": "nav_phongthi"
+  },
+  {
+    "id": "intent_eval_18",
+    "text": "dẫn tôi tới phòng thi trắc nghiệm",
+    "intent": "nav_phongthi"
+  },
+  {
+    "id": "intent_eval_19",
+    "text": "cho em giải bài tập khảo sát hàm số trong đề thi",
+    "intent": "nav_phongthi"
+  },
+  {
+    "id": "intent_eval_20",
+    "text": "luyện bài tập este trong bộ đề thi thử",
+    "intent": "nav_phongthi"
+  },
+  {
+    "id": "intent_eval_21",
+    "text": "solo 1v1 voi ban hoc pvp",
+    "intent": "nav_dautruong"
+  },
+  {
+    "id": "intent_eval_22",
+    "text": "mở đấu trường thi đấu kiến thức",
+    "intent": "nav_dautruong"
+  },
+  {
+    "id": "intent_eval_23",
+    "text": "thách đấu pvp realtime với người khác",
+    "intent": "nav_dautruong"
+  },
+  {
+    "id": "intent_eval_24",
+    "text": "vao phong dau 1 vs 1 ngay di",
+    "intent": "nav_dautruong"
+  },
+  {
+    "id": "intent_eval_25",
+    "text": "cho toi vao dau truong pvp",
+    "intent": "nav_dautruong"
+  },
+  {
+    "id": "intent_eval_26",
+    "text": "chuyển sang khu vực đấu trường",
+    "intent": "nav_dautruong"
+  },
+  {
+    "id": "intent_eval_27",
+    "text": "tìm đối thủ ghép trận 1v1 leo rank",
+    "intent": "nav_dautruong"
+  },
+  {
+    "id": "intent_eval_28",
+    "text": "mo dau truong solo toan ly",
+    "intent": "nav_dautruong"
+  },
+  {
+    "id": "intent_eval_29",
+    "text": "khiêu chiến đấu trường tri thức",
+    "intent": "nav_dautruong"
+  },
+  {
+    "id": "intent_eval_30",
+    "text": "vào phòng đấu hạng mùa giải mới",
+    "intent": "nav_dautruong"
+  },
+  {
+    "id": "intent_eval_31",
+    "text": "chuyen toi qua san dau pvp",
+    "intent": "nav_dautruong"
+  },
+  {
+    "id": "intent_eval_32",
+    "text": "tạo phòng đấu 1v1 riêng với bạn thân",
+    "intent": "nav_dautruong"
+  },
+  {
+    "id": "intent_eval_33",
+    "text": "mo giao dien thi dau truc tiep",
+    "intent": "nav_dautruong"
+  },
+  {
+    "id": "intent_eval_34",
+    "text": "vao dau truong pvp thpt",
+    "intent": "nav_dautruong"
+  },
+  {
+    "id": "intent_eval_35",
+    "text": "cho em vao solo kien thuc hoa hoc",
+    "intent": "nav_dautruong"
+  },
+  {
+    "id": "intent_eval_36",
+    "text": "gheptrận pvp leo rank elo",
+    "intent": "nav_dautruong"
+  },
+  {
+    "id": "intent_eval_37",
+    "text": "bật sàn thi đấu đối kháng",
+    "intent": "nav_dautruong"
+  },
+  {
+    "id": "intent_eval_38",
+    "text": "vào so tài trắc nghiệm nhanh 1v1",
+    "intent": "nav_dautruong"
+  },
+  {
+    "id": "intent_eval_39",
+    "text": "thi đấu giải đề trực tiếp bấm giờ",
+    "intent": "nav_dautruong"
+  },
+  {
+    "id": "intent_eval_40",
+    "text": "vào thi thố giải toán xem ai nhanh hơn",
+    "intent": "nav_dautruong"
+  },
+  {
+    "id": "intent_eval_41",
+    "text": "xem thong tin ho so cua toi",
+    "intent": "nav_hoso"
+  },
+  {
+    "id": "intent_eval_42",
+    "text": "cho xem diem elo va rank hien tai",
+    "intent": "nav_hoso"
+  },
+  {
+    "id": "intent_eval_43",
+    "text": "mở trang cá nhân học sinh",
+    "intent": "nav_hoso"
+  },
+  {
+    "id": "intent_eval_44",
+    "text": "chuyen den ho so cua toi",
+    "intent": "nav_hoso"
+  },
+  {
+    "id": "intent_eval_45",
+    "text": "xem danh sách huy hiệu đã đạt được",
+    "intent": "nav_hoso"
+  },
+  {
+    "id": "intent_eval_46",
+    "text": "mo ho so nang luc stem cua em",
+    "intent": "nav_hoso"
+  },
+  {
+    "id": "intent_eval_47",
+    "text": "cho toi kiem tra profile",
+    "intent": "nav_hoso"
+  },
+  {
+    "id": "intent_eval_48",
+    "text": "xem thống kê số trận thắng thua elo",
+    "intent": "nav_hoso"
+  },
+  {
+    "id": "intent_eval_49",
+    "text": "vào trang hồ sơ cá nhân",
+    "intent": "nav_hoso"
+  },
+  {
+    "id": "intent_eval_50",
+    "text": "chuyển sang profile học tập",
+    "intent": "nav_hoso"
+  },
+  {
+    "id": "intent_eval_51",
+    "text": "xem lịch sử làm bài và điểm trung bình",
+    "intent": "nav_hoso"
+  },
+  {
+    "id": "intent_eval_52",
+    "text": "mo trang thanh tich ca nhan",
+    "intent": "nav_hoso"
+  },
+  {
+    "id": "intent_eval_53",
+    "text": "xem bang huy hieu vinh danh",
+    "intent": "nav_hoso"
+  },
+  {
+    "id": "intent_eval_54",
+    "text": "cho em xem lai thong tin acc",
+    "intent": "nav_hoso"
+  },
+  {
+    "id": "intent_eval_55",
+    "text": "vào hồ sơ để đổi ảnh đại diện",
+    "intent": "nav_hoso"
+  },
+  {
+    "id": "intent_eval_56",
+    "text": "kiem tra chi so thong minh stem cua toi",
+    "intent": "nav_hoso"
+  },
+  {
+    "id": "intent_eval_57",
+    "text": "xem cấp độ level hiện tại",
+    "intent": "nav_hoso"
+  },
+  {
+    "id": "intent_eval_58",
+    "text": "mở trang hồ sơ",
+    "intent": "nav_hoso"
+  },
+  {
+    "id": "intent_eval_59",
+    "text": "thành tích học toán của tôi dạo này thế nào",
+    "intent": "nav_hoso"
+  },
+  {
+    "id": "intent_eval_60",
+    "text": "tôi được bao nhiêu điểm bài thi vừa rồi",
+    "intent": "nav_hoso"
+  },
+  {
+    "id": "intent_eval_61",
+    "text": "mở cốt truyện thám hiểm vũ trụ",
+    "intent": "nav_story"
+  },
+  {
+    "id": "intent_eval_62",
+    "text": "chuyen toi qua trang story",
+    "intent": "nav_story"
+  },
+  {
+    "id": "intent_eval_63",
+    "text": "doc tiep chuong truyen stem",
+    "intent": "nav_story"
+  },
+  {
+    "id": "intent_eval_64",
+    "text": "vào cuộc hành trình khoa học viễn tưởng",
+    "intent": "nav_story"
+  },
+  {
+    "id": "intent_eval_65",
+    "text": "mở bản đồ cốt truyện thế giới lượng tử",
+    "intent": "nav_story"
+  },
+  {
+    "id": "intent_eval_66",
+    "text": "chuyển sang phần cốt truyện",
+    "intent": "nav_story"
+  },
+  {
+    "id": "intent_eval_67",
+    "text": "kham pha truyen tranh khoa hoc stem",
+    "intent": "nav_story"
+  },
+  {
+    "id": "intent_eval_68",
+    "text": "mo cot truyen giai cuu trai dat",
+    "intent": "nav_story"
+  },
+  {
+    "id": "intent_eval_69",
+    "text": "cho toi xem story khoa hoc",
+    "intent": "nav_story"
+  },
+  {
+    "id": "intent_eval_70",
+    "text": "vào thế giới phiêu lưu tri thức",
+    "intent": "nav_story"
+  },
+  {
+    "id": "intent_eval_71",
+    "text": "mo chuong 2 cua truyen stem",
+    "intent": "nav_story"
+  },
+  {
+    "id": "intent_eval_72",
+    "text": "chuyen den truyen thuyet thanh pho khoa hoc",
+    "intent": "nav_story"
+  },
+  {
+    "id": "intent_eval_73",
+    "text": "xem cốt truyện các nhà bác học",
+    "intent": "nav_story"
+  },
+  {
+    "id": "intent_eval_74",
+    "text": "bật phần story thám hiểm",
+    "intent": "nav_story"
+  },
+  {
+    "id": "intent_eval_75",
+    "text": "vào đọc tiếp chương truyện khám phá tế bào",
+    "intent": "nav_story"
+  },
+  {
+    "id": "intent_eval_76",
+    "text": "mo ban do vu tru stem",
+    "intent": "nav_story"
+  },
+  {
+    "id": "intent_eval_77",
+    "text": "kham pha hanh trinh khoa hoc",
+    "intent": "nav_story"
+  },
+  {
+    "id": "intent_eval_78",
+    "text": "cho em xem cốt truyện vũ trụ lượng tử",
+    "intent": "nav_story"
+  },
+  {
+    "id": "intent_eval_79",
+    "text": "kể cho tôi nghe câu chuyện về newton và quả táo",
+    "intent": "nav_story"
+  },
+  {
+    "id": "intent_eval_80",
+    "text": "cốt truyện stem này có những nhân vật nào",
+    "intent": "nav_story"
+  },
+  {
+    "id": "intent_eval_81",
+    "text": "bật chế độ tối dark mode",
+    "intent": "toggle_theme"
+  },
+  {
+    "id": "intent_eval_82",
+    "text": "doi sang theme toi cho do moi mat",
+    "intent": "toggle_theme"
+  },
+  {
+    "id": "intent_eval_83",
+    "text": "chuyển giao diện sáng light theme",
+    "intent": "toggle_theme"
+  },
+  {
+    "id": "intent_eval_84",
+    "text": "bat nen den cyber",
+    "intent": "toggle_theme"
+  },
+  {
+    "id": "intent_eval_85",
+    "text": "đổi màu giao diện trang web",
+    "intent": "toggle_theme"
+  },
+  {
+    "id": "intent_eval_86",
+    "text": "chuyển sang nền sáng",
+    "intent": "toggle_theme"
+  },
+  {
+    "id": "intent_eval_87",
+    "text": "tat dark mode giup em",
+    "intent": "toggle_theme"
+  },
+  {
+    "id": "intent_eval_88",
+    "text": "bật chế độ ban đêm",
+    "intent": "toggle_theme"
+  },
+  {
+    "id": "intent_eval_89",
+    "text": "doi giao dien sang toi",
+    "intent": "toggle_theme"
+  },
+  {
+    "id": "intent_eval_90",
+    "text": "chuyển màu nền sang màu tối",
+    "intent": "toggle_theme"
+  },
+  {
+    "id": "intent_eval_91",
+    "text": "cho giao diện màu đen đi bot",
+    "intent": "toggle_theme"
+  },
+  {
+    "id": "intent_eval_92",
+    "text": "bật theme trắng",
+    "intent": "toggle_theme"
+  },
+  {
+    "id": "intent_eval_93",
+    "text": "toggle giao diện dark light",
+    "intent": "toggle_theme"
+  },
+  {
+    "id": "intent_eval_94",
+    "text": "đổi theme hiển thị",
+    "intent": "toggle_theme"
+  },
+  {
+    "id": "intent_eval_95",
+    "text": "chế độ ban ngày",
+    "intent": "toggle_theme"
+  },
+  {
+    "id": "intent_eval_96",
+    "text": "bat che do toi ngay lap tuc",
+    "intent": "toggle_theme"
+  },
+  {
+    "id": "intent_eval_97",
+    "text": "màn hình sáng chói quá đổi tối đi",
+    "intent": "toggle_theme"
+  },
+  {
+    "id": "intent_eval_98",
+    "text": "chuyển sang theme ban đêm",
+    "intent": "toggle_theme"
+  },
+  {
+    "id": "intent_eval_99",
+    "text": "làm sao để đổi hình nền trang web cho tối hơn",
+    "intent": "toggle_theme"
+  },
+  {
+    "id": "intent_eval_100",
+    "text": "web này có chế độ bảo vệ mắt ban đêm không",
+    "intent": "toggle_theme"
+  },
+  {
+    "id": "intent_eval_101",
+    "text": "cthuc tinh chu ki con lac don la j",
+    "intent": "stem_query"
+  },
+  {
+    "id": "intent_eval_102",
+    "text": "tính diện tích hình phẳng parabol y = x^2 - 2x",
+    "intent": "stem_query"
+  },
+  {
+    "id": "intent_eval_103",
+    "text": "tại sao este có nhiệt độ sôi thấp hơn ancol",
+    "intent": "stem_query"
+  },
+  {
+    "id": "intent_eval_104",
+    "text": "giải thích quy tắc liên kết hiđro trong phân tử adn",
+    "intent": "stem_query"
+  },
+  {
+    "id": "intent_eval_105",
+    "text": "công thức tính nồng độ mol dung dịch axit hcl",
+    "intent": "stem_query"
+  },
+  {
+    "id": "intent_eval_106",
+    "text": "hướng dẫn em cách giải bài toán mạch điện rlc xoay chiều",
+    "intent": "stem_query"
+  },
+  {
+    "id": "intent_eval_107",
+    "text": "cho em hỏi định luật khúc xạ ánh sáng n1 sini = n2 sinr",
+    "intent": "stem_query"
+  },
+  {
+    "id": "intent_eval_108",
+    "text": "cách tìm nguyên hàm từng phần tích phân đại số",
+    "intent": "stem_query"
+  },
+  {
+    "id": "intent_eval_109",
+    "text": "bản chất của hiện tượng quang điện ngoài là gì",
+    "intent": "stem_query"
+  },
+  {
+    "id": "intent_eval_110",
+    "text": "viết phương trình phản ứng tráng bạc của glucozo",
+    "intent": "stem_query"
+  },
+  {
+    "id": "intent_eval_111",
+    "text": "tính bán kính mặt cầu ngoại tiếp tứ diện đều",
+    "intent": "stem_query"
+  },
+  {
+    "id": "intent_eval_112",
+    "text": "quá trình phiên mã và dịch mã diễn ra ở đâu",
+    "intent": "stem_query"
+  },
+  {
+    "id": "intent_eval_113",
+    "text": "giải phương trình vi phân dao động cơ điều hòa",
+    "intent": "stem_query"
+  },
+  {
+    "id": "intent_eval_114",
+    "text": "công thức tính công suất hao phí đường dây tải điện",
+    "intent": "stem_query"
+  },
+  {
+    "id": "intent_eval_115",
+    "text": "giải thích vì sao axit axetic làm quỳ tím hóa đỏ",
+    "intent": "stem_query"
+  },
+  {
+    "id": "intent_eval_116",
+    "text": "cách dựng thiết diện hình học không gian lớp 11",
+    "intent": "stem_query"
+  },
+  {
+    "id": "intent_eval_117",
+    "text": "tính số kiểu gen khi cho cơ thể dị hợp 2 cặp alen tự thụ",
+    "intent": "stem_query"
+  },
+  {
+    "id": "intent_eval_118",
+    "text": "định lý biến thiên động năng áp dụng thế nào",
+    "intent": "stem_query"
+  },
+  {
+    "id": "intent_eval_119",
+    "text": "thầy ơi em hỏi bài này xíu được không công thức tính f là gì",
+    "intent": "stem_query"
+  },
+  {
+    "id": "intent_eval_120",
+    "text": "bạn giải thích hộ tôi định luật ohm với nhé",
+    "intent": "stem_query"
+  },
+  {
+    "id": "intent_eval_121",
+    "text": "chào bạn nova nhé",
+    "intent": "chitchat"
+  },
+  {
+    "id": "intent_eval_122",
+    "text": "hello bot bạn có khỏe không",
+    "intent": "chitchat"
+  },
+  {
+    "id": "intent_eval_123",
+    "text": "bạn tên là gì ai tạo ra bạn",
+    "intent": "chitchat"
+  },
+  {
+    "id": "intent_eval_124",
+    "text": "hôm nay thời tiết đẹp quá nhỉ",
+    "intent": "chitchat"
+  },
+  {
+    "id": "intent_eval_125",
+    "text": "bạn cs thể làm đc những j",
+    "intent": "chitchat"
+  },
+  {
+    "id": "intent_eval_126",
+    "text": "alo có ai ở đó không trả lời mình với",
+    "intent": "chitchat"
+  },
+  {
+    "id": "intent_eval_127",
+    "text": "chúc bạn một ngày học tập vui vẻ nha",
+    "intent": "chitchat"
+  },
+  {
+    "id": "intent_eval_128",
+    "text": "thầy ơi em chán học quá phải làm sao",
+    "intent": "chitchat"
+  },
+  {
+    "id": "intent_eval_129",
+    "text": "bot thông minh ghê cảm ơn bạn nhiều",
+    "intent": "chitchat"
+  },
+  {
+    "id": "intent_eval_130",
+    "text": "ê bạn ơi",
+    "intent": "chitchat"
+  },
+  {
+    "id": "intent_eval_131",
+    "text": "bye bye bạn nha mình đi ngủ đây",
+    "intent": "chitchat"
+  },
+  {
+    "id": "intent_eval_132",
+    "text": "chào thầy giáo stem hub",
+    "intent": "chitchat"
+  },
+  {
+    "id": "intent_eval_133",
+    "text": "hi bot xinh dep",
+    "intent": "chitchat"
+  },
+  {
+    "id": "intent_eval_134",
+    "text": "bạn bao nhiêu tuổi rồi",
+    "intent": "chitchat"
+  },
+  {
+    "id": "intent_eval_135",
+    "text": "minh yeu stem hub lam",
+    "intent": "chitchat"
+  },
+  {
+    "id": "intent_eval_136",
+    "text": "trò chuyện với mình một lát được không",
+    "intent": "chitchat"
+  },
+  {
+    "id": "intent_eval_137",
+    "text": "bạn là người thật hay là robot trí tuệ nhân tạo",
+    "intent": "chitchat"
+  },
+  {
+    "id": "intent_eval_138",
+    "text": "nay hoc met qua bot oi",
+    "intent": "chitchat"
+  },
+  {
+    "id": "intent_eval_139",
+    "text": "chúc ngủ ngon mơ đẹp",
+    "intent": "chitchat"
+  },
+  {
+    "id": "intent_eval_140",
+    "text": "good morning nova buoi sang vui ve",
+    "intent": "chitchat"
+  }
+]

@@ -21,4 +21,3 @@ export function getPoolStats() {
   };
 }
 
-export default callResilientGemini;

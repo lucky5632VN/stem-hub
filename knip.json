@@ -1,0 +1,21 @@
+{
+  "$schema": "https://unpkg.com/knip@5/overview/configuration-schema.json",
+  "project": [
+    "src/**/*.{js,jsx,ts,tsx}",
+    "!src/ai-training/**"
+  ],
+  "ignore": [
+    "src/ai-training/**"
+  ],
+  "ignoreDependencies": [
+    "@google/generative-ai",
+    "@react-three/drei",
+    "@react-three/fiber",
+    "firebase-admin",
+    "xlsx",
+    "tailwindcss",
+    "@firebase/rules-unit-testing",
+    "cheerio",
+    "puppeteer"
+  ]
+}

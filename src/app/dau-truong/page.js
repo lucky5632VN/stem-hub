@@ -4274,7 +4274,7 @@ function DauTruongContent() {
               <div className="absolute inset-0 bg-accent-pink/20 blur-md rounded-full" />
             </div>
             <div>
-              <h1 className="text-4xl font-black text-text-primary tracking-wider uppercase bg-clip-text bg-gradient-to-r from-text-primary via-accent-pink to-accent-cyan">Đấu trường Khoa học 1v1</h1>
+              <h1 className="text-4xl font-black text-text-primary tracking-wider uppercase">Đấu trường Khoa học 1v1</h1>
               <p className="text-text-secondary text-xs mt-1 font-mono tracking-widest">[ COHERENT REAL-TIME SIMULATION PROTOCOL ]</p>
             </div>
           </div>

@@ -2,7 +2,7 @@
 
 import { 
   LayoutDashboard, Users, BookOpen, Swords, 
-  MessageSquare, Settings, Trophy, ArrowLeft, Shield, FileText
+  MessageSquare, Settings, Trophy, ArrowLeft, Shield, FileText, Mail, GraduationCap
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -13,6 +13,8 @@ export default function AdminSidebar() {
 
   const menuItems = [
     { icon: <LayoutDashboard className="w-5 h-5" />, label: 'Bảng tổng quan', href: '/admin' },
+    { icon: <GraduationCap className="w-5 h-5 text-emerald-400" />, label: 'Kiểm duyệt Tri thức AI', href: '/admin/knowledge-review' },
+    { icon: <Mail className="w-5 h-5 text-pink-400" />, label: 'Hòm thư góp ý', href: '/admin/contact' },
     { icon: <Users className="w-5 h-5 text-indigo-400" />, label: 'Quản lý học sinh', href: '/admin/students' },
     { icon: <BookOpen className="w-5 h-5 text-cyan-400" />, label: 'Ngân hàng câu hỏi', href: '/admin/questions' },
     { icon: <FileText className="w-5 h-5 text-purple-400" />, label: 'Quản lý đề thi', href: '/admin/exams' },
@@ -33,7 +35,7 @@ export default function AdminSidebar() {
         <Link href="/" className="flex items-center gap-2 group">
           <Shield className="w-6 h-6 text-pink-500 filter drop-shadow-[0_0_8px_rgba(244,63,94,0.4)] animate-pulse shrink-0" />
           <div className="hidden lg:flex flex-col">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-rose-500 to-purple-500 font-black uppercase tracking-widest text-base font-mono">
+            <span className="text-pink-400 font-black uppercase tracking-widest text-base font-mono">
               STEM ADMIN
             </span>
             <span className="text-[8px] text-pink-400/80 uppercase tracking-widest font-mono font-black mt-0.5">

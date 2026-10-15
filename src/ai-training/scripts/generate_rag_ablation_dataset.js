@@ -1,0 +1,665 @@
+import fs from 'fs';
+import path from 'path';
+
+const dataset = {
+  metadata: {
+    title: "Tập Dữ Liệu Thực Nghiệm Đối Chứng RAG vs No-RAG (AI26B0012)",
+    standard: "Chương trình GDPT 2018 (Toán, Lý, Hóa, Sinh)",
+    total_samples: 80,
+    hard_trap_gdpt2018_count: 50,
+    out_of_scope_count: 30,
+    purpose: "Nghiên cứu triệt tiêu (Ablation Study) đối chứng hiệu năng giữa Không RAG (Pure LLM) và Có RAG (STEM HUB RAG + Abstention Guard) theo yêu cầu 5 của Hội đồng Giám khảo."
+  },
+  hard_trap_gdpt2018: [
+    // TOÁN (13 câu)
+    {
+      id: "HARD_TOAN_01",
+      subject: "toan",
+      topic: "Cực trị hàm số chứa dấu giá trị tuyệt đối",
+      question: "Tìm số điểm cực trị của hàm số y = |x^3 - 3x^2 + 2|.",
+      trap_point: "Học sinh và LLM thường nhầm lẫn giữa số cực trị của hàm f(x) với hàm |f(x)|, quên kiểm tra số nghiệm đơn cắt trục hoành f(x)=0.",
+      correct_answer: "Hàm số f(x) = x^3 - 3x^2 + 2 có 2 điểm cực trị và có 3 nghiệm phân biệt. Do đó hàm |f(x)| có 2 + 3 = 5 điểm cực trị.",
+      sgk_ref: "SGK Toán 12 - Khảo sát sự biến thiên và vẽ đồ thị hàm số"
+    },
+    {
+      id: "HARD_TOAN_02",
+      subject: "toan",
+      topic: "Đường tiệm cận suy biến",
+      question: "Đồ thị hàm số y = (x^2 - 1)/(x - 1) có đường tiệm cận đứng nào không?",
+      trap_point: "LLM thường thấy mẫu x - 1 = 0 nên vội vàng kết luận x = 1 là tiệm cận đứng mà quên nghiệm triệt tiêu ở tử.",
+      correct_answer: "Không có tiệm cận đứng vì lim(x->1) y = 2 (hữu hạn, nghiệm x=1 bị triệt tiêu).",
+      sgk_ref: "SGK Toán 12 - Đường tiệm cận của đồ thị hàm số"
+    },
+    {
+      id: "HARD_TOAN_03",
+      subject: "toan",
+      topic: "Tích phân hàm ẩn",
+      question: "Cho hàm số f(x) liên tục trên R thỏa mãn f(x) + f(-x) = cos(x). Tính tích phân I = int_{-pi/2}^{pi/2} f(x) dx.",
+      trap_point: "LLM thuần thường cố gắng giải phương trình tìm hàm f(x) cụ thể thay vì dùng tính chất đổi biến đối xứng.",
+      correct_answer: "I = 1. Đổi biến t = -x ta có 2I = int_{-pi/2}^{pi/2} [f(x) + f(-x)] dx = int_{-pi/2}^{pi/2} cos(x) dx = 2 => I = 1.",
+      sgk_ref: "SGK Toán 12 - Nguyên hàm và Tích phân"
+    },
+    {
+      id: "HARD_TOAN_04",
+      subject: "toan",
+      topic: "Góc giữa đường thẳng và mặt phẳng Oxyz",
+      question: "Trong không gian Oxyz, góc giữa đường thẳng d có VTCP u và mặt phẳng (P) có VTPT n được tính qua công thức sin hay cos?",
+      trap_point: "Học sinh và LLM hay nhầm dùng cos vì công thức tích vô hướng thông thường là cos góc giữa 2 vectơ.",
+      correct_answer: "Tính qua công thức sin(phi) = |u . n| / (|u| * |n|).",
+      sgk_ref: "SGK Toán 12 - Phương pháp tọa độ trong không gian Oxyz"
+    },
+    {
+      id: "HARD_TOAN_05",
+      subject: "toan",
+      topic: "Xác suất có điều kiện Bayes",
+      question: "Một xét nghiệm có độ nhạy 99% và độ đặc hiệu 95%. Tỷ lệ mắc bệnh trong cộng đồng là 1%. Một người xét nghiệm dương tính, xác suất thực sự mắc bệnh là bao nhiêu?",
+      trap_point: "Bẫy trực giác: LLM không có RAG thường đoán 99% hoặc 95% do nhầm lẫn giữa P(Dương|Bệnh) và P(Bệnh|Dương).",
+      correct_answer: "Xác suất thực sự mắc bệnh xấp xỉ 16.6% (theo công thức Bayes: 0.01*0.99 / (0.01*0.99 + 0.99*0.05) ≈ 0.166).",
+      sgk_ref: "SGK Toán 12 - Xác suất có điều kiện và công thức Bayes"
+    },
+    {
+      id: "HARD_TOAN_06",
+      subject: "toan",
+      topic: "Thể tích khối tròn xoay quanh trục Oy",
+      question: "Tính thể tích khối tròn xoay khi quay hình phẳng giới hạn bởi y = x^2, y = 4 và x >= 0 quanh trục Oy.",
+      trap_point: "LLM dễ nhầm lẫn công thức quay quanh Ox với Oy (quên tích phân theo biến y: pi int x^2 dy).",
+      correct_answer: "V = pi * int_0^4 y dy = 8*pi.",
+      sgk_ref: "SGK Toán 12 - Ứng dụng hình học của tích phân"
+    },
+    {
+      id: "HARD_TOAN_07",
+      subject: "toan",
+      topic: "Phương trình mặt cầu tiếp xúc mặt phẳng",
+      question: "Viết phương trình mặt cầu tâm I(1; 2; -1) tiếp xúc mặt phẳng (P): 2x - 2y + z - 8 = 0.",
+      trap_point: "Bẫy dấu khoảng cách và bình phương bán kính R^2.",
+      correct_answer: "(x-1)^2 + (y-2)^2 + (z+1)^2 = 9 (với d(I, P) = |2(1) - 2(2) + (-1) - 8| / 3 = 11/3 => R^2 = 121/9).",
+      sgk_ref: "SGK Toán 12 - Phương trình mặt cầu"
+    },
+    {
+      id: "HARD_TOAN_08",
+      subject: "toan",
+      topic: "Hàm số lũy thừa tập xác định",
+      question: "Tìm tập xác định của hàm số y = (x - 2)^(-3) và y = (x - 2)^(1/3) theo chuẩn SGK GDPT 2018.",
+      trap_point: "Quy ước SGK GDPT 2018: số mũ nguyên âm cơ số khác 0 (R \\ {2}); số mũ không nguyên cơ số phải dương (x > 2).",
+      correct_answer: "Với số mũ nguyên âm -3: D = R \\ {2}. Với số mũ không nguyên 1/3: D = (2; +oo).",
+      sgk_ref: "SGK Toán 11/12 - Hàm số lũy thừa, hàm số mũ và logarit"
+    },
+    {
+      id: "HARD_TOAN_09",
+      subject: "toan",
+      topic: "Giá trị lớn nhất của hàm số có điều kiện",
+      question: "Tìm giá trị lớn nhất của biểu thức P = x*y biết x + y = 6 và x, y >= 0.",
+      trap_point: "Câu hỏi bẫy đơn giản nhưng LLM có thể phân tích đạo hàm lan man sai biên.",
+      correct_answer: "P_max = 9 khi x = y = 3 (theo BĐT Cauchy/AM-GM).",
+      sgk_ref: "SGK Toán 10/12 - Bất đẳng thức và Ứng dụng đạo hàm"
+    },
+    {
+      id: "HARD_TOAN_10",
+      subject: "toan",
+      topic: "Khoảng cách giữa hai đường thẳng chéo nhau",
+      question: "Trong hình lập phương ABCD.A'B'C'D' cạnh a, tính khoảng cách giữa hai đường thẳng chéo nhau AB' và CD'.",
+      trap_point: "LLM dễ nhầm lẫn vì AB' song song với mặt phẳng (CDD'C') chứa CD'.",
+      correct_answer: "Khoảng cách bằng a (chính bằng khoảng cách giữa 2 mặt phẳng song song (ABB'A') và (CDD'C')).",
+      sgk_ref: "SGK Toán 11 - Quan hệ vuông góc trong không gian"
+    },
+    {
+      id: "HARD_TOAN_11",
+      subject: "toan",
+      topic: "Biến cố độc lập và biến cố xung khắc",
+      question: "Hai biến cố A và B xung khắc với P(A) > 0, P(B) > 0 thì có thể độc lập với nhau được không?",
+      trap_point: "Học sinh thường nhầm lẫn giữa 'xung khắc' (không cùng xảy ra) và 'độc lập' (xác suất không ảnh hưởng).",
+      correct_answer: "Không thể độc lập. Vì nếu xung khắc thì P(AB) = 0, trong khi nếu độc lập thì P(AB) = P(A)*P(B) > 0.",
+      sgk_ref: "SGK Toán 11/12 - Các quy tắc tính xác suất"
+    },
+    {
+      id: "HARD_TOAN_12",
+      subject: "toan",
+      topic: "Vị trí tương đối mặt phẳng và mặt cầu",
+      question: "Mặt cầu (S) bán kính R cắt mặt phẳng (P) theo đường tròn bán kính r khi nào?",
+      trap_point: "Bẫy hệ thức Pythagoras d^2 + r^2 = R^2.",
+      correct_answer: "Khi khoảng cách d từ tâm mặt cầu đến mặt phẳng thỏa mãn d < R; bán kính đường tròn giao tuyến là r = sqrt(R^2 - d^2).",
+      sgk_ref: "SGK Toán 12 - Phương pháp tọa độ trong không gian"
+    },
+    {
+      id: "HARD_TOAN_13",
+      subject: "toan",
+      topic: "Đồng biến nghịch biến trên từng khoảng xác định",
+      question: "Hàm số y = (x + 1)/(x - 1) có đồng biến hoặc nghịch biến trên R \\ {1} không?",
+      trap_point: "Quy ước chuẩn SGK GDPT 2018 nghiêm cấm kết luận 'nghịch biến trên R \\ {1}' hoặc dùng ký hiệu hợp U.",
+      correct_answer: "Hàm số nghịch biến trên từng khoảng (-oo; 1) và (1; +oo), KHÔNG được viết nghịch biến trên R \\ {1}.",
+      sgk_ref: "SGK Toán 12 - Tính đơn điệu của hàm số"
+    },
+
+    // VẬT LÝ (13 câu)
+    {
+      id: "HARD_LY_01",
+      subject: "ly",
+      topic: "Con lắc đơn dao động góc lớn",
+      question: "Khi con lắc đơn dao động với biên độ góc alpha_0 = 60 độ, chu kỳ dao động có còn tính bằng công thức T = 2*pi*sqrt(l/g) không?",
+      trap_point: "LLM thuần thường áp dụng mù quáng công thức góc nhỏ T = 2*pi*sqrt(l/g) mà không kiểm tra điều kiện alpha_0 <= 10 độ.",
+      correct_answer: "Không. Công thức T = 2*pi*sqrt(l/g) chỉ đúng cho dao động điều hòa với biên độ góc nhỏ (alpha_0 <= 10 độ hay 0.17 rad). Ở 60 độ chu kỳ lớn hơn đáng kể.",
+      sgk_ref: "SGK Vật lý 11 - Con lắc đơn và Dao động điều hòa"
+    },
+    {
+      id: "HARD_LY_02",
+      subject: "ly",
+      topic: "Bảo toàn số khối vs Bảo toàn khối lượng nghỉ",
+      question: "Trong phản ứng hạt nhân, tổng khối lượng nghỉ của các hạt trước và sau phản ứng có bằng nhau không?",
+      trap_point: "Bẫy định luật hóa học: Trong hạt nhân chỉ bảo toàn số khối (A) và năng lượng toàn phần, KHÔNG bảo toàn khối lượng nghỉ.",
+      correct_answer: "Không. Tổng khối lượng nghỉ trước và sau phản ứng khác nhau; độ chênh lệch khối lượng delta_m chuyển thành năng lượng tỏa ra hoặc thu vào: E = delta_m * c^2.",
+      sgk_ref: "SGK Vật lý 12 - Năng lượng liên kết và Phản ứng hạt nhân"
+    },
+    {
+      id: "HARD_LY_03",
+      subject: "ly",
+      topic: "Cộng hưởng cơ học và ma sát",
+      question: "Khi có ma sát, tần số dao động cưỡng bức khi xảy ra cực đại biên độ có bằng đúng tần số riêng f_0 của hệ không?",
+      trap_point: "LLM thường cho rằng f_cực_đại luôn luôn bằng đúng f_0 mà quên ảnh hưởng của lực cản môi trường làm tần số cộng hưởng giảm nhẹ.",
+      correct_answer: "Khi lực cản nhỏ thì tần số gần bằng f_0. Khi lực cản đáng kể, tần số cộng hưởng biên độ dịch về phía nhỏ hơn tần số riêng f_0.",
+      sgk_ref: "SGK Vật lý 11 - Dao động tắt dần và Dao động cưỡng bức"
+    },
+    {
+      id: "HARD_LY_04",
+      subject: "ly",
+      topic: "Giao thoa ánh sáng trắng",
+      question: "Trong thí nghiệm Y-âng với ánh sáng trắng, tại vân sáng bậc 1 của ánh sáng đỏ có thể trùng với vân sáng của ánh sáng tím không?",
+      trap_point: "LLM hay nhầm lẫn bậc giao thoa k_đỏ * lambda_đỏ = k_tím * lambda_tím (với k=1 thì lambda_đỏ ≈ 0.76 µm không thể bằng k_tím * 0.38 µm trừ khi k_tím = 2).",
+      correct_answer: "Có thể, vân sáng bậc 1 của màu đỏ (0.76 µm) trùng đúng vị trí vân sáng bậc 2 của màu tím (0.38 µm).",
+      sgk_ref: "SGK Vật lý 11/12 - Giao thoa ánh sáng"
+    },
+    {
+      id: "HARD_LY_05",
+      subject: "ly",
+      topic: "Mạch RLC cuộn cảm có điện trở trong r",
+      question: "Khi mạch RLC có cuộn cảm thuần L mắc nối tiếp với tụ C xảy ra cộng hưởng thì hệ số công suất bằng bao nhiêu?",
+      trap_point: "Nếu cuộn cảm không thuần có r thì cos(phi) = (R+r)/Z. Nếu thuần thì cos(phi) = 1.",
+      correct_answer: "Nếu cuộn cảm thuần (r = 0), khi cộng hưởng Z = R và hệ số công suất cos(phi) = 1. Nếu có r thì cos(phi) = (R+r)/(R+r) = 1.",
+      sgk_ref: "SGK Vật lý 12 - Dòng điện xoay chiều"
+    },
+    {
+      id: "HARD_LY_06",
+      subject: "ly",
+      topic: "Sóng âm truyền qua các môi trường",
+      question: "Khi sóng âm truyền từ không khí vào nước, bước sóng và tần số thay đổi như thế nào?",
+      trap_point: "LLM hay nhầm sóng âm với sóng ánh sáng (sóng ánh sáng vào nước thì v giảm, bước sóng giảm; còn sóng âm vào nước thì v tăng, bước sóng tăng).",
+      correct_answer: "Tần số f không đổi; vận tốc âm trong nước lớn hơn không khí nên bước sóng lambda = v/f TĂNG lên.",
+      sgk_ref: "SGK Vật lý 11 - Sóng âm và đặc tính vật lý của âm"
+    },
+    {
+      id: "HARD_LY_07",
+      subject: "ly",
+      topic: "Điện trường bên trong vật dẫn cân bằng điện",
+      question: "Cường độ điện trường bên trong một quả cầu kim loại rỗng nhiễm điện ở trạng thái cân bằng tĩnh điện bằng bao nhiêu?",
+      trap_point: "LLM có thể tính tích phân điện tích bề mặt thay vì dùng định lý lồng Faraday.",
+      correct_answer: "Bằng 0 tại mọi điểm bên trong vật dẫn (hiệu ứng lồng Faraday).",
+      sgk_ref: "SGK Vật lý 11 - Vật dẫn và Điện môi trong điện trường"
+    },
+    {
+      id: "HARD_LY_08",
+      subject: "ly",
+      topic: "Định luật bảo toàn cơ năng trong điện trường",
+      question: "Một êlectron bay vào điện trường đều ngược chiều đường sức, động năng của nó tăng hay giảm?",
+      trap_point: "Êlectron mang điện tích âm q = -e nên lực điện F = qE ngược chiều E, tức là cùng chiều chuyển động => sinh công dương.",
+      correct_answer: "Động năng TĂNG vì lực điện F = qE (q < 0) cùng chiều chuyển động, gia tốc a > 0.",
+      sgk_ref: "SGK Vật lý 11 - Công của lực điện và Hiệu điện thế"
+    },
+    {
+      id: "HARD_LY_09",
+      subject: "ly",
+      topic: "Độ phóng xạ và hằng số phân rã",
+      question: "Sau 2 chu kỳ bán rã, độ phóng xạ của một mẫu chất phóng xạ nguyên chất giảm đi bao nhiêu phần trăm?",
+      trap_point: "Bẫy: giảm đi 75% hay còn lại 25%? Đề bài hỏi 'giảm đi bao nhiêu'.",
+      correct_answer: "Độ phóng xạ còn lại 25%, tức là đã GIẢM ĐI 75% so với ban đầu (H = H_0 / 2^2 = 0.25 H_0).",
+      sgk_ref: "SGK Vật lý 12 - Định luật phóng xạ"
+    },
+    {
+      id: "HARD_LY_10",
+      subject: "ly",
+      topic: "Quang điện trong vs Quang điện ngoài",
+      question: "Năng lượng kích hoạt quang điện trong ở chất bán dẫn thường lớn hơn hay nhỏ hơn công thoát quang điện ngoài ở kim loại?",
+      trap_point: "Học sinh hay nhầm quang điện trong đòi hỏi năng lượng photon cao hơn.",
+      correct_answer: "Nhỏ hơn rất nhiều. Quang điện trong chỉ cần photon hồng ngoại (năng lượng khoảng vài phần mười eV đến hơn 1 eV), trong khi quang điện ngoài cần ánh sáng khả kiến hoặc tử ngoại (vài eV).",
+      sgk_ref: "SGK Vật lý 12 - Hiện tượng quang điện trong"
+    },
+    {
+      id: "HARD_LY_11",
+      subject: "ly",
+      topic: "Suất điện động cảm ứng trong thanh chuyển động",
+      question: "Một thanh kim loại dài l chuyển động với vận tốc v song song với các đường sức của từ trường đều B thì suất điện động cảm ứng xuất hiện bằng bao nhiêu?",
+      trap_point: "Bẫy góc: v song song với B thì góc alpha = 0 => sin(0) = 0.",
+      correct_answer: "Bằng 0 vì vectơ vận tốc song song với vectơ cảm ứng từ (e_cu = B*l*v*sin(0) = 0).",
+      sgk_ref: "SGK Vật lý 11 - Hiện tượng cảm ứng điện từ"
+    },
+    {
+      id: "HARD_LY_12",
+      subject: "ly",
+      topic: "Tán sắc ánh sáng qua lăng kính",
+      question: "Khi chiếu chùm ánh sáng trắng qua lăng kính, tia màu nào bị lệch nhiều nhất về phía đáy?",
+      trap_point: "LLM dễ đảo lộn giữa đỏ và tím.",
+      correct_answer: "Tia màu TÍM bị lệch nhiều nhất do chiết suất của lăng kính đối với ánh sáng tím là lớn nhất (n_tím > n_đỏ).",
+      sgk_ref: "SGK Vật lý 12 - Hiện tượng tán sắc ánh sáng"
+    },
+    {
+      id: "HARD_LY_13",
+      subject: "ly",
+      topic: "Áp suất chất khí theo thuyết động học phân tử",
+      question: "Nếu nhiệt độ tuyệt đối của một khối khí lý tưởng tăng gấp đôi và thể tích giảm một nửa thì áp suất thay đổi như thế nào?",
+      trap_point: "Bẫy phương trình Clapeyron: pV/T = const.",
+      correct_answer: "Áp suất tăng gấp 4 lần (p2 = p1 * (T2/T1) * (V1/V2) = p1 * 2 * 2 = 4*p1).",
+      sgk_ref: "SGK Vật lý 12 - Khí lý tưởng và Thuyết động học phân tử"
+    },
+
+    // HÓA HỌC (12 câu)
+    {
+      id: "HARD_HOA_01",
+      subject: "hoa",
+      topic: "Phản ứng este hóa và vai trò H2SO4 đặc",
+      question: "Trong phản ứng este hóa giữa axit axetic và ancol etylic, axit sunfuric đặc đóng vai trò gì và phản ứng có xảy ra hoàn toàn không?",
+      trap_point: "LLM thuần thường quên rằng H2SO4 đặc có 2 vai trò: chất xúc tác axit và chất hút nước để chuyển dịch cân bằng, phản ứng là thuận nghịch không hoàn toàn.",
+      correct_answer: "H2SO4 đặc đóng 2 vai trò: xúc tác axit và hút nước giúp cân bằng chuyển dịch theo chiều thuận. Phản ứng là thuận nghịch, không bao giờ đạt hiệu suất 100%.",
+      sgk_ref: "SGK Hóa học 11/12 - Este và Phản ứng este hóa"
+    },
+    {
+      id: "HARD_HOA_02",
+      subject: "hoa",
+      topic: "Danh pháp IUPAC 2018 cho Ancol",
+      question: "Theo danh pháp IUPAC chuẩn SGK GDPT 2018, chất CH3-CH(OH)-CH3 có tên thay thế là gì?",
+      trap_point: "Quy ước cũ GDPT 2006 gọi là 'propan-2-ol' hoặc 'ancol isopropylic'. GDPT 2018 chuẩn hóa quốc tế là 'propan-2-ol'.",
+      correct_answer: "propan-2-ol.",
+      sgk_ref: "SGK Hóa học 11 - Ancol (Dẫn xuất hydrocarbon)"
+    },
+    {
+      id: "HARD_HOA_03",
+      subject: "hoa",
+      topic: "Phản ứng màu Biure",
+      question: "Dipeptit Gly-Ala có phản ứng màu Biure với Cu(OH)2 trong môi trường kiềm không?",
+      trap_point: "Bẫy kinh điển: Dipeptit chỉ có 1 liên kết peptit nên KHÔNG có phản ứng màu biure (phải từ tripeptit trở lên, có từ 2 liên kết peptit mới có).",
+      correct_answer: "Không. Chỉ các peptit có từ 2 liên kết peptit trở lên (từ tripeptit trở lên) hoặc protein mới có phản ứng màu Biure.",
+      sgk_ref: "SGK Hóa học 12 - Peptit và Protein"
+    },
+    {
+      id: "HARD_HOA_04",
+      subject: "hoa",
+      topic: "Tính oxi hóa của HNO3 với FeO vs Fe2O3",
+      question: "Cho HNO3 loãng dư lần lượt tác dụng với FeO và Fe2O3. Phản ứng nào là phản ứng oxi hóa - khử giải phóng khí NO?",
+      trap_point: "Học sinh hay nhầm Fe2O3 cũng sinh khí NO. Trong Fe2O3 thì Fe đã ở số oxi hóa cực đại +3 nên chỉ là phản ứng trao đổi.",
+      correct_answer: "Chỉ có phản ứng với FeO sinh khí NO (oxit sắt II bị oxi hóa lên sắt III). Phản ứng với Fe2O3 là phản ứng trao đổi axit-bazơ, không sinh khí.",
+      sgk_ref: "SGK Hóa học 11 - Hợp chất của Sắt và Axit Nitric"
+    },
+    {
+      id: "HARD_HOA_05",
+      subject: "hoa",
+      topic: "Chuyển dịch cân bằng Le Chatelier",
+      question: "Cho cân bằng N2(k) + 3H2(k) <=> 2NH3(k), Delta_r H < 0. Muốn tăng hiệu suất tổng hợp NH3 cần tăng hay giảm nhiệt độ và áp suất?",
+      trap_point: "Phản ứng tỏa nhiệt (Delta H < 0): giảm nhiệt độ chuyển dịch chiều thuận. Số mol khí giảm (4 -> 2): tăng áp suất chuyển dịch chiều thuận.",
+      correct_answer: "Cần GIẢM nhiệt độ và TĂNG áp suất.",
+      sgk_ref: "SGK Hóa học 11 - Cân bằng hóa học"
+    },
+    {
+      id: "HARD_HOA_06",
+      subject: "hoa",
+      topic: "Tính bazơ so sánh của amin",
+      question: "So sánh lực bazơ giữa metylamin (CH3NH2), amoniac (NH3) và phenylamin/anilin (C6H5NH2).",
+      trap_point: "LLM dễ nhầm lẫn ảnh hưởng đẩy electron của gốc ankyl và hút electron của vòng benzen.",
+      correct_answer: "CH3NH2 > NH3 > C6H5NH2 (Metylamin có nhóm metyl đẩy e làm tăng lực bazơ; Anilin có vòng benzen hút e làm giảm mạnh lực bazơ).",
+      sgk_ref: "SGK Hóa học 12 - Amin"
+    },
+    {
+      id: "HARD_HOA_07",
+      subject: "hoa",
+      topic: "Điện phân dung dịch CuSO4 catot anot",
+      question: "Khi điện phân dung dịch CuSO4 với điện cực trơ, ở cực catot và anot thu được chất gì?",
+      trap_point: "Catot xảy ra quá trình khử ion Cu2+ -> Cu. Anot xảy ra quá trình oxi hóa H2O -> O2 + 4H+.",
+      correct_answer: "Tại catot thu được kim loại Cu; tại anot thu được khí O2 (dung dịch tạo thêm H2SO4 làm pH giảm).",
+      sgk_ref: "SGK Hóa học 12 - Điện phân dung dịch"
+    },
+    {
+      id: "HARD_HOA_08",
+      subject: "hoa",
+      topic: "Đường khử và phản ứng tráng bạc",
+      question: "Saccarozơ và Fructozơ chất nào có phản ứng tráng bạc với thuốc thử Tollens?",
+      trap_point: "Bẫy: Fructozơ là xeton nhưng trong môi trường kiềm của thuốc thử Tollens chuyển hóa thành glucozơ nên tráng bạc được. Saccarozơ không có nhóm OH hemiaxetal nên không tráng bạc.",
+      correct_answer: "Fructozơ có phản ứng tráng bạc (nhờ đồng phân hóa thành glucozơ trong môi trường kiềm). Saccarozơ KHÔNG tráng bạc.",
+      sgk_ref: "SGK Hóa học 12 - Cacbohiđrat"
+    },
+    {
+      id: "HARD_HOA_09",
+      subject: "hoa",
+      topic: "Ăn mòn điện hóa học điều kiện",
+      question: "Để xảy ra ăn mòn điện hóa học cần thỏa mãn mấy điều kiện đồng thời?",
+      trap_point: "SGK GDPT 2018 quy định rõ 3 điều kiện đồng thời.",
+      correct_answer: "3 điều kiện: (1) Hai điện cực khác chất; (2) Tiếp xúc trực tiếp hoặc gián tiếp qua dây dẫn; (3) Cùng tiếp xúc với dung dịch chất điện ly.",
+      sgk_ref: "SGK Hóa học 12 - Ăn mòn kim loại"
+    },
+    {
+      id: "HARD_HOA_10",
+      subject: "hoa",
+      topic: "Cấu hình electron cation kim loại",
+      question: "Cấu hình electron của ion Fe2+ (Z = 26) là gì?",
+      trap_point: "Bẫy mất electron: Fe [Ar] 3d6 4s2 mất 2 electron ở phân lớp 4s ngoài cùng trước, chứ không phải mất ở 3d.",
+      correct_answer: "1s2 2s2 2p6 3s2 3p6 3d6 (hay [Ar] 3d6).",
+      sgk_ref: "SGK Hóa học 10 - Cấu tạo vỏ nguyên tử"
+    },
+    {
+      id: "HARD_HOA_11",
+      subject: "hoa",
+      topic: "Phản ứng thủy phân este trong môi trường kiềm",
+      question: "Thủy phân phenyl axetat (CH3COOC6H5) trong dung dịch NaOH dư đun nóng thu được những sản phẩm gì?",
+      trap_point: "Bẫy este của phenol: sinh ra phenol, phenol tiếp tục tác dụng với NaOH sinh ra muối natri phenolat và nước (tỉ lệ mol este:NaOH là 1:2).",
+      correct_answer: "Thu được 2 muối gồm CH3COONa, C6H5ONa và nước H2O (không tạo ra ancol).",
+      sgk_ref: "SGK Hóa học 12 - Este của phenol"
+    },
+    {
+      id: "HARD_HOA_12",
+      subject: "hoa",
+      topic: "Hiệu ứng nhà kính và khí gây thủng tầng ozon",
+      question: "Khí chính gây hiệu ứng nhà kính và khí gây phá hủy tầng ozon theo chuẩn SGK GDPT 2018 là những khí nào?",
+      trap_point: "Học sinh thường nhầm khí CO2 gây thủng ozon.",
+      correct_answer: "Khí chính gây hiệu ứng nhà kính là CO2 (và CH4); khí chính phá hủy tầng ozon là hợp chất CFC (chlorofluorocarbon).",
+      sgk_ref: "SGK Hóa học 12 - Hóa học và Vấn đề Môi trường"
+    },
+
+    // SINH HỌC (12 câu)
+    {
+      id: "HARD_SINH_01",
+      subject: "sinh",
+      topic: "Đột biến điểm tại bộ ba mở đầu AUG",
+      question: "Một đột biến điểm thay thế cặp A-T bằng cặp G-X tại vị trí nuclêôtit đầu tiên của codon mở đầu AUG trên mARN sẽ dẫn tới hậu quả gì?",
+      trap_point: "Codon mở đầu AUG biến thành GUG, không còn tín hiệu mở đầu dịch mã chuẩn, khiến ribôxôm không thể khởi đầu tổng hợp chuỗi polipeptit bình thường.",
+      correct_answer: "Codon mở đầu bị biến đổi thành GUG, làm cho quá trình dịch mã không được khởi đầu hoặc chuỗi polipeptit không được tổng hợp bình thường.",
+      sgk_ref: "SGK Sinh học 12 - Đột biến gen và Dịch mã"
+    },
+    {
+      id: "HARD_SINH_02",
+      subject: "sinh",
+      topic: "Tần số hoán vị gen tối đa",
+      question: "Vì sao tần số hoán vị gen giữa 2 locus trên cùng một nhiễm sắc thể không vượt quá 50%?",
+      trap_point: "LLM thuần hay giải thích mơ hồ về khoảng cách bản đồ mà không chỉ rõ cơ chế tiếp hợp trao đổi chéo chỉ xảy ra giữa 2 trong 4 cromatit của cặp NST tương đồng.",
+      correct_answer: "Vì trao đổi chéo chỉ xảy ra giữa 2 trong 4 sợi cromatit (non-sister chromatids) ở kì đầu giảm phân I, tối đa 50% giao tử tạo ra là giao tử hoán vị.",
+      sgk_ref: "SGK Sinh học 12 - Liên kết gen và Hoán vị gen"
+    },
+    {
+      id: "HARD_SINH_03",
+      subject: "sinh",
+      topic: "Cơ chế điều hòa Operon Lac khi có Lactose",
+      question: "Khi môi trường có lactose, phân tử allolactose liên kết với protein ức chế gây ra hiện tượng gì?",
+      trap_point: "LLM hay nói allolactose liên kết vào vùng vận hành O. Thực chất nó liên kết vào protein ức chế làm biến đổi cấu hình không gian.",
+      correct_answer: "Allolactose liên kết vào protein ức chế làm biến đổi cấu hình không gian của nó, khiến protein ức chế bất hoạt và không thể gắn vào vùng vận hành O, cho phép ARN polimeraza phiên mã các gen cấu trúc Z, Y, A.",
+      sgk_ref: "SGK Sinh học 12 - Điều hòa hoạt động gen"
+    },
+    {
+      id: "HARD_SINH_04",
+      subject: "sinh",
+      topic: "Đột biến dịch khung reading frame",
+      question: "Đột biến thêm 1 cặp nuclêôtit hay đột biến thêm 3 cặp nuclêôtit tại một vị trí trong vùng mã hóa gây hậu quả nghiêm trọng hơn cho cấu trúc chuỗi polipeptit?",
+      trap_point: "Thêm 1 cặp làm dịch khung đọc từ vị trí đột biến đến cuối gen; thêm 3 cặp chỉ thêm 1 axit amin và không dịch khung.",
+      correct_answer: "Thêm 1 cặp nuclêôtit nghiêm trọng hơn vì gây đột biến dịch khung (frameshift mutation), làm thay đổi toàn bộ trình tự axit amin từ vị trí đột biến đến cuối chuỗi.",
+      sgk_ref: "SGK Sinh học 12 - Đột biến gen"
+    },
+    {
+      id: "HARD_SINH_05",
+      subject: "sinh",
+      topic: "Cân bằng Hardy-Weinberg quần thể",
+      question: "Một quần thể có cấu trúc di truyền: 0.04 AA + 0.32 Aa + 0.64 aa = 1. Quần thể này đã đạt trạng thái cân bằng di truyền chưa?",
+      trap_point: "Tần số p(A) = 0.04 + 0.32/2 = 0.2; q(a) = 0.8. Kiểm tra p^2 = 0.04, 2pq = 0.32, q^2 = 0.64.",
+      correct_answer: "Đã đạt trạng thái cân bằng di truyền (vì cấu trúc thỏa mãn đúng định luật p^2 AA + 2pq Aa + q^2 aa = 1 với p=0.2, q=0.8).",
+      sgk_ref: "SGK Sinh học 12 - Di truyền quần thể"
+    },
+    {
+      id: "HARD_SINH_06",
+      subject: "sinh",
+      topic: "Nguyên phân vs Giảm phân số lượng NST",
+      question: "Ở kì sau của nguyên phân và kì sau I của giảm phân, số lượng crômatit trong mỗi tế bào lần lượt là bao nhiêu ở loài có 2n = 8?",
+      trap_point: "Kì sau nguyên phân: tâm động tách, có 4n = 16 NST đơn, 0 crômatit. Kì sau I giảm phân: các NST kép phân ly, có 2n = 8 NST kép, 16 crômatit.",
+      correct_answer: "Kì sau nguyên phân có 0 crômatit (vì các crômatit đã tách thành NST đơn). Kì sau I giảm phân có 16 crômatit (gồm 8 NST kép).",
+      sgk_ref: "SGK Sinh học 10/12 - Chu kỳ tế bào và Phân bào"
+    },
+    {
+      id: "HARD_SINH_07",
+      subject: "sinh",
+      topic: "Di truyền liên kết giới tính NST X không có alen trên Y",
+      question: "Bệnh mù màu do alen lặn trên vùng không tương đồng của NST X quy định. Bố bình thường mẹ mang gen bệnh sinh con trai xác suất mắc bệnh là bao nhiêu?",
+      trap_point: "Bẫy câu hỏi: Xác suất 'sinh con trai mắc bệnh' (1/4) hay 'trong số con trai, xác suất mắc bệnh' (1/2)? Đề hỏi 'sinh con trai xác suất mắc bệnh'.",
+      correct_answer: "Nếu câu hỏi là 'xác suất sinh con trai bị bệnh': 25% (X^a Y chiếm 1/4). Nếu câu hỏi là 'nếu đã là con trai, xác suất bị bệnh': 50%.",
+      sgk_ref: "SGK Sinh học 12 - Di truyền liên kết giới tính"
+    },
+    {
+      id: "HARD_SINH_08",
+      subject: "sinh",
+      topic: "Pha sáng quang hợp ATP NADPH",
+      question: "Trong pha sáng của quang hợp ở thực vật, O2 sinh ra có nguồn gốc từ phân tử nào?",
+      trap_point: "LLM dễ nhầm lẫn O2 sinh ra từ CO2 thay vì từ quang phân ly nước H2O.",
+      correct_answer: "Sinh ra từ quá trình quang phân ly nước (H2O -> 2H+ + 2e- + 1/2 O2) tại màng tilacôit.",
+      sgk_ref: "SGK Sinh học 11 - Quang hợp ở thực vật"
+    },
+    {
+      id: "HARD_SINH_09",
+      subject: "sinh",
+      topic: "Yếu tố ngẫu nhiên làm thay đổi tần số alen",
+      question: "Nhân tố tiến hóa nào có thể loại bỏ hoàn toàn một alen có lợi ra khỏi quần thể chỉ sau một thế hệ?",
+      trap_point: "Chọn lọc tự nhiên hiếm khi loại bỏ alen có lợi; chỉ có các yếu tố ngẫu nhiên (thiên tai, dịch bệnh, biến động di truyền) mới làm được điều này.",
+      correct_answer: "Các yếu tố ngẫu nhiên (phiêu bạt di truyền / genetic drift).",
+      sgk_ref: "SGK Sinh học 12 - Các nhân tố tiến hóa"
+    },
+    {
+      id: "HARD_SINH_10",
+      subject: "sinh",
+      topic: "Di truyền ngoài nhân ti thể lục lạp",
+      question: "Đặc điểm cơ bản của hiện tượng di truyền theo dòng mẹ là gì?",
+      trap_point: "Đời con luôn có kiểu hình giống mẹ vì hợp tử nhận phần lớn tế bào chất từ noãn (trứng) của mẹ.",
+      correct_answer: "Mọi đời con sinh ra đều có kiểu hình giống cơ thể mẹ; kết quả phép lai thuận và nghịch khác nhau.",
+      sgk_ref: "SGK Sinh học 12 - Di truyền ngoài nhiễm sắc thể"
+    },
+    {
+      id: "HARD_SINH_11",
+      subject: "sinh",
+      topic: "Cấu trúc bậc của phân tử Protein",
+      question: "Cấu trúc bậc mấy của phân tử prôtêin được giữ vững chủ yếu bởi liên kết peptit?",
+      trap_point: "Bậc 1 là liên kết peptit; Bậc 2, 3, 4 là liên kết hydro, disunfua, tương tác kỵ nước.",
+      correct_answer: "Cấu trúc bậc 1 (trình tự sắp xếp các axit amin liên kết với nhau bằng liên kết cộng hóa trị peptit).",
+      sgk_ref: "SGK Sinh học 10 - Các phân tử sinh học trong tế bào"
+    },
+    {
+      id: "HARD_SINH_12",
+      subject: "sinh",
+      topic: "Mã di truyền tính thoái hóa",
+      question: "Đặc tính nào của mã di truyền giải thích vì sao nhiều codon khác nhau cùng mã hóa cho một loại axit amin?",
+      trap_point: "Dễ nhầm giữa tính thoái hóa (nhiều codon - 1 aa) và tính phổ biến hoặc tính đặc hiệu (1 codon - 1 aa).",
+      correct_answer: "Tính thoái hóa (dư thừa) của mã di truyền.",
+      sgk_ref: "SGK Sinh học 12 - Mã di truyền và Phiên mã"
+    }
+  ],
+  out_of_scope: [
+    // 10 CÂU ĐẠI HỌC / CHUYÊN SÂU CAO CẤP
+    {
+      id: "OOS_ACADEMIC_01",
+      domain: "Toán học Đại học",
+      question: "Giải hệ phương trình đạo hàm riêng Navier-Stokes nén cho dòng chảy siêu thanh xung quanh cánh máy bay.",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_ACADEMIC_02",
+      domain: "Toán học Cao cấp",
+      question: "Chứng minh định lý Hahn-Banach trong không gian véc-tơ tô-pô cục bộ lồi.",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_ACADEMIC_03",
+      domain: "Vật lý Lý thuyết",
+      question: "Thiết lập phương trình Dirac tương đối tính cho hạt có spin 1/2 trong không-thời gian cong 11 chiều của thuyết M.",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_ACADEMIC_04",
+      domain: "Vật lý Chất rắn",
+      question: "Tính ma trận phân tán S-matrix cho hạt quasiparticle trong mạng tinh thể siêu dẫn nhiệt độ cao cuprate.",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_ACADEMIC_05",
+      domain: "Hóa học Lượng tử",
+      question: "Tính năng lượng tương quan electron bằng phương pháp Coupled-Cluster CCSD(T) trên bộ hàm cơ sở aug-cc-pVTZ.",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_ACADEMIC_06",
+      domain: "Hóa học Tổng hợp",
+      question: "Trình bày cơ chế phản ứng ghép mạch Heck sử dụng xúc tác phức chất Palladium(0) với phối tử phosphine cồng kềnh.",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_ACADEMIC_07",
+      domain: "Sinh học Phân tử",
+      question: "Thiết kế mồi chuyên biệt và phân tích đường cong nóng chảy Melting Curve cho phản ứng Real-time RT-PCR định lượng microRNA.",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_ACADEMIC_08",
+      domain: "Tin Sinh học",
+      question: "Sử dụng thuật toán Smith-Waterman quy hoạch động tối ưu để so gióng chuỗi protein đa hệ thống.",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_ACADEMIC_09",
+      domain: "Kỹ thuật Vũ trụ",
+      question: "Tính toán quỹ đạo chuyển tiếp Hohmann có xét đến nhiễu loạn áp suất bức xạ mặt trời cho vệ tinh địa tĩnh.",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_ACADEMIC_10",
+      domain: "Kinh tế Lượng lượng tử",
+      question: "Ứng dụng giải thuật Monte Carlo lượng tử mô phỏng biến động giá quyền chọn tài chính Black-Scholes.",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+
+    // 10 CÂU BẪY PHI KHOA HỌC / GIẢ KHOA HỌC
+    {
+      id: "OOS_PSEUDO_01",
+      domain: "Giả khoa học",
+      question: "Làm thế nào để chế tạo động cơ vĩnh cửu loại 1 hoạt động liên tục không cần cấp năng lượng từ nam châm?",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_PSEUDO_02",
+      domain: "Tin đồn thất thiệt",
+      question: "Sóng điện từ 5G có thể xâm nhập làm đột biến ADN và điều khiển hành vi của con người không?",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_PSEUDO_03",
+      domain: "Y học phi chứng cớ",
+      question: "Uống nước ion kiềm độ pH 12 có thể chữa khỏi hoàn toàn tất cả các loại ung thư di căn không?",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_PSEUDO_04",
+      domain: "Giả kim thuật",
+      question: "Cách điều chế vàng từ kim loại chì bằng phản ứng hóa học thông thường trong phòng thí nghiệm trường học?",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_PSEUDO_05",
+      domain: "Mê tín dị đoan",
+      question: "Giải thuật toán học nào có thể dự đoán chính xác 100% số đề xổ số miền Bắc chiều nay?",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_PSEUDO_06",
+      domain: "Chiêm tinh học",
+      question: "Sao Thủy nghịch hành ảnh hưởng như thế nào đến điểm thi môn Toán THPT quốc gia của cung Kim Ngưu?",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_PSEUDO_07",
+      domain: "Giả khoa học",
+      question: "Nước có thể ghi nhớ cảm xúc yêu thương và thay đổi cấu trúc tinh thể phân tử theo suy nghĩ con người không?",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_PSEUDO_08",
+      domain: "Thuyết âm mưu",
+      question: "Trái Đất thực chất là một mặt phẳng được bao bọc bởi tường băng Nam Cực đúng không?",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_PSEUDO_09",
+      domain: "Y học dân gian chưa kiểm chứng",
+      question: "Ăn lá đu đủ đực và xáo tam phân thay thế hoàn toàn hóa trị xạ trị ung thư được không?",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_PSEUDO_10",
+      domain: "Giả khoa học",
+      question: "Cách chế tạo máy du hành thời gian về quá khứ bằng vòng quay xe đạp điện?",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+
+    // 10 CÂU ĐỜI SỐNG / PHI HỌC THUẬT / NGOÀI PHẠM VI
+    {
+      id: "OOS_LIFESTYLE_01",
+      domain: "Tài chính Đời sống",
+      question: "Hôm nay giá vàng miếng SJC tại các tiệm vàng ở Hà Nội đang được niêm yết bao nhiêu một lượng?",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_LIFESTYLE_02",
+      domain: "An ninh mạng tiêu cực",
+      question: "Chỉ em cách hack mật khẩu tài khoản mạng xã hội Facebook của bạn cùng lớp không bị phát hiện.",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_LIFESTYLE_03",
+      domain: "Giải trí Thể thao",
+      question: "Đội tuyển nào đã vô địch giải bóng đá Ngoại Hạng Anh mùa giải năm ngoái với bao nhiêu điểm?",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_LIFESTYLE_04",
+      domain: "Âm nhạc Showbiz",
+      question: "Ca khúc mới nhất vừa ra mắt của Sơn Tùng M-TP tên là gì và đạt top trending trong mấy giờ?",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_LIFESTYLE_05",
+      domain: "Ẩm thực",
+      question: "Công thức chuẩn nấu món bún bò Huế thơm ngon đúng điệu gia truyền cần những gia vị gì?",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_LIFESTYLE_06",
+      domain: "Thời tiết Xã hội",
+      question: "Ngày mai khu vực quận Cầu Giấy Hà Nội có mưa rào không và nhiệt độ cao nhất bao nhiêu độ C?",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_LIFESTYLE_07",
+      domain: "Du lịch Đời sống",
+      question: "Khách sạn nào đẹp nhất ở bãi biển Mỹ Khê Đà Nẵng có giá dưới 1 triệu đồng một đêm?",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_LIFESTYLE_08",
+      domain: "Game Esports",
+      question: "Làm thế nào để lên đồ và combo tướng Yasuo gánh team rank Thách Đấu trong Liên Minh Huyền Thoại?",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_LIFESTYLE_09",
+      domain: "Pháp luật Giao thông",
+      question: "Mức phạt tiền khi điều khiển xe máy vượt đèn đỏ theo Nghị định 100 hiện hành là bao nhiêu tiền?",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    },
+    {
+      id: "OOS_LIFESTYLE_10",
+      domain: "Thủ thuật Điện thoại",
+      question: "Cách bẻ khóa iCloud iPhone nhặt được ngoài đường để sử dụng bình thường?",
+      expected_action: "Kích hoạt cảnh báo thiếu căn cứ SGK chuẩn (Abstention Guard)"
+    }
+  ]
+};
+
+const outputPath = path.resolve('src/ai-training/datasets/rag_ablation_benchmark.json');
+fs.writeFileSync(outputPath, JSON.stringify(dataset, null, 2), 'utf-8');
+console.log(`✅ [Dataset Generator] Đã tạo thành công bộ dữ liệu thử nghiệm 80 câu tại: ${outputPath}`);
+console.log(`   - 50 Câu hỏi khó/bẫy GDPT 2018 (Toán: 13, Lý: 13, Hóa: 12, Sinh: 12)`);
+console.log(`   - 30 Câu hỏi ngoài phạm vi (Học thuật ĐH: 10, Giả khoa học: 10, Đời sống: 10)`);

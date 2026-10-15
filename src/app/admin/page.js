@@ -5,8 +5,9 @@ import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, getDocs, orderBy, limit } from 'firebase/firestore';
 import { 
   Users, Swords, Signal, AlertTriangle, 
-  Sparkles, CheckCircle2, TrendingUp, RefreshCw
+  Sparkles, CheckCircle2, TrendingUp, RefreshCw, Mail, ArrowRight
 } from 'lucide-react';
+import Link from 'next/link';
 import { playSound } from '@/lib/sound';
 
 export default function AdminDashboard() {
@@ -19,6 +20,7 @@ export default function AdminDashboard() {
   });
 
   const [alerts, setAlerts] = useState([]);
+  const [recentMessages, setRecentMessages] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Khởi tạo 7 ngày gần nhất với giá trị 0 thực tế
@@ -56,6 +58,22 @@ export default function AdminDashboard() {
       setAlerts(dbAlerts);
     }, (err) => {
       console.warn("Lỗi khi tải realtime alerts từ Firestore:", err);
+    });
+
+    // 1.2. Snapshot Realtime cho Tin nhắn góp ý từ học sinh
+    const msgQuery = collection(db, 'contact_messages');
+    const unsubscribeMsgs = onSnapshot(msgQuery, (snapshot) => {
+      const msgs = [];
+      snapshot.forEach(docSnap => {
+        msgs.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      msgs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      setRecentMessages(msgs.slice(0, 3));
+    }, (err) => {
+      // Bỏ qua cảnh báo quyền hạn nếu tài khoản chưa hoàn tất handshake quyền Admin
+      if (err?.code !== 'permission-denied') {
+        console.warn("Lỗi tải contact_messages:", err);
+      }
     });
 
     // 2. Tải toàn bộ thống kê tổng quan thực tế
@@ -167,6 +185,7 @@ export default function AdminDashboard() {
 
     return () => {
       unsubscribeAlerts();
+      unsubscribeMsgs();
       clearInterval(refreshInterval);
     };
   }, []);
@@ -483,6 +502,58 @@ export default function AdminDashboard() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Recent Contact Messages Widget */}
+      <div className="bg-[#0f1017]/80 border border-[#1f2235] p-6 rounded-2xl shadow-xl space-y-4">
+        <div className="flex items-center justify-between border-b border-[#1f2235] pb-4">
+          <div className="flex items-center gap-2">
+            <Mail className="w-5 h-5 text-pink-500 filter drop-shadow-[0_0_6px_rgba(244,63,94,0.3)] animate-pulse" />
+            <h3 className="text-sm font-black text-white uppercase tracking-wider font-mono">
+              Tin nhắn & Góp ý mới từ học sinh
+            </h3>
+          </div>
+          <Link
+            href="/admin/contact"
+            className="inline-flex items-center gap-1.5 text-xs text-pink-400 hover:text-pink-300 font-bold transition-all hover:translate-x-0.5"
+          >
+            <span>Xem tất cả hòm thư</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        {recentMessages.length === 0 ? (
+          <div className="text-center py-6 text-xs text-zinc-500 border border-dashed border-[#1f2235] rounded-xl font-mono">
+            Chưa có tin nhắn góp ý nào mới
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {recentMessages.map((msg) => (
+              <Link
+                key={msg.id}
+                href="/admin/contact"
+                className={`p-3.5 rounded-xl border transition-all block group ${
+                  msg.status !== 'read'
+                    ? 'bg-pink-500/10 border-pink-500/30 hover:border-pink-500/50'
+                    : 'bg-[#121420]/60 border-[#1f2235] hover:border-zinc-700/60'
+                }`}
+              >
+                <div className="flex items-center justify-between text-xs font-bold text-white mb-1">
+                  <span className="truncate max-w-[140px]">{msg.name || 'Học sinh'}</span>
+                  {msg.status !== 'read' && (
+                    <span className="w-2 h-2 rounded-full bg-pink-500 animate-pulse shrink-0" />
+                  )}
+                </div>
+                <div className="text-[11px] text-pink-400 font-semibold truncate mb-1">
+                  {msg.subject || 'Góp ý'}
+                </div>
+                <p className="text-[11px] text-zinc-400 line-clamp-2 leading-relaxed">
+                  {msg.message}
+                </p>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* System Alerts / Activity Log List */}

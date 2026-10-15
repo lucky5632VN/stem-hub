@@ -307,11 +307,24 @@ html:not(.dark) .recharts-tooltip-wrapper .recharts-default-tooltip {
 }
 
 /* ========================================================
-   ANIMATIONS
+   ANIMATIONS & HUD EFFECTS
    ======================================================== */
 @keyframes cybergrid-scroll {
   from { background-position: 0 0; }
   to   { background-position: 0 900px; }
+}
+
+@keyframes radar-sweep {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.neon-border-glow {
+  box-shadow: 0 0 15px rgba(240, 57, 140, 0.12), inset 0 0 15px rgba(240, 57, 140, 0.03);
+}
+
+.cyber-glitch-text {
+  text-shadow: 0 0 5px rgba(240, 57, 140, 0.4), 0 0 10px rgba(240, 57, 140, 0.2);
 }
 
 /* ========================================================
@@ -392,3 +405,20 @@ span[dangerouslySetInnerHTML] img {
   border-radius: 0.5rem;
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* ========================================================
+   CYBER COMMAND HUD EFFECTS
+   ======================================================== */
+@keyframes radar-sweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.neon-border-glow {
+  box-shadow: 0 0 15px rgba(240, 57, 140, 0.12), inset 0 0 15px rgba(240, 57, 140, 0.03);
+}
+
+.cyber-glitch-text {
+  text-shadow: 0 0 5px rgba(240, 57, 140, 0.4), 0 0 10px rgba(240, 57, 140, 0.2);
+}
+

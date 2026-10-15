@@ -1719,7 +1719,7 @@ export default function RealCombatExamPage() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ type: 'spring', damping: 10, delay: 0.5 }}
-                className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 mb-2 uppercase tracking-wide"
+                className="text-2xl font-black text-amber-400 mb-2 uppercase tracking-wide"
               >
                 {rankUpDetails.newRank.title}
               </motion.h1>

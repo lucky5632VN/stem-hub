@@ -771,8 +771,19 @@ QUY TẮC PHẢN HỒI BẮT BUỘC - TUYỆT ĐỐI TUÂN THỦ:
 
         <div class="pai-messages" id="pai-msg-container"></div>
 
-        <div class="pai-input-area">
-          <textarea id="pai-input" class="pai-textarea" placeholder="Hỏi AI về lý thuyết, bài tập Vật lý..." rows="1"></textarea>
+        <!-- Image Attachment Preview Strip -->
+        <div id="pai-img-preview" style="display:none;padding:6px 12px;background:rgba(15,23,42,0.85);border-top:1px solid rgba(255,255,255,0.1);align-items:center;gap:8px;">
+          <img id="pai-img-thumb" src="" style="width:34px;height:34px;object-fit:cover;border-radius:6px;border:1px solid #00f2fe;background:#000;" />
+          <span style="flex:1;font-size:0.75rem;color:#00f2fe;font-weight:600;">Đã nhận diện ảnh (Ctrl+V)</span>
+          <button id="pai-img-del" style="background:transparent;border:none;color:#ef4444;cursor:pointer;font-size:1.1rem;line-height:1;padding:2px 6px;">✕</button>
+        </div>
+
+        <input type="file" id="pai-file-input" accept="image/*" style="display:none;" />
+        <div class="pai-input-area" style="display:flex;align-items:center;gap:6px;">
+          <button id="pai-img-upload-btn" title="Tải ảnh bài tập (hỗ trợ Ctrl+V)" style="background:transparent;border:none;color:#94a3b8;cursor:pointer;padding:6px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:color 0.2s;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </button>
+          <textarea id="pai-input" class="pai-textarea" placeholder="Hỏi lý thuyết, dán ảnh Ctrl+V..." rows="1" style="flex:1;"></textarea>
           <button id="pai-send" class="pai-send-btn" title="Gửi câu hỏi">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
           </button>
@@ -948,6 +959,61 @@ QUY TẮC PHẢN HỒI BẮT BUỘC - TUYỆT ĐỐI TUÂN THỦ:
       renderMessages();
     });
 
+    // ── Image Attachment & Paste (Ctrl+V) Handlers ─────────────────────────
+    let currentAttachedImage = null;
+    const fileInput = document.getElementById('pai-file-input');
+    const uploadBtn = document.getElementById('pai-img-upload-btn');
+    const imgPreview = document.getElementById('pai-img-preview');
+    const imgThumb = document.getElementById('pai-img-thumb');
+    const imgDel = document.getElementById('pai-img-del');
+
+    function setAttachedImg(dataUrl) {
+      currentAttachedImage = dataUrl;
+      if (imgPreview && imgThumb) {
+        if (dataUrl) {
+          imgThumb.src = dataUrl;
+          imgPreview.style.display = 'flex';
+        } else {
+          imgThumb.src = '';
+          imgPreview.style.display = 'none';
+        }
+      }
+    }
+
+    if (uploadBtn && fileInput) {
+      uploadBtn.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => setAttachedImg(reader.result);
+          reader.readAsDataURL(file);
+        }
+        e.target.value = '';
+      });
+    }
+
+    if (imgDel) {
+      imgDel.addEventListener('click', () => setAttachedImg(null));
+    }
+
+    textarea.addEventListener('paste', (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith('image/')) {
+          const file = items[i].getAsFile();
+          if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => setAttachedImg(reader.result);
+            reader.readAsDataURL(file);
+            e.preventDefault();
+            return;
+          }
+        }
+      }
+    });
+
     textarea.addEventListener('input', () => {
       textarea.style.height = 'auto';
       textarea.style.height = Math.min(textarea.scrollHeight, 100) + 'px';
@@ -972,12 +1038,19 @@ QUY TẮC PHẢN HỒI BẮT BUỘC - TUYỆT ĐỐI TUÂN THỦ:
       const div = document.createElement('div');
       div.className = `pai-msg ${msg.role}`;
       const textContent = (msg.content !== undefined ? msg.content : msg.text) || '';
+      let imgHtml = '';
+      if (msg.image) {
+        imgHtml = `<div style="margin-bottom:8px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.2);max-width:220px;background:#000;"><img src="${msg.image}" style="max-width:100%;height:auto;display:block;" /></div>`;
+      }
+
       if (msg.role === 'user') {
+        let userFormatted = '';
         if (window.StemLabAIBridge && typeof window.StemLabAIBridge.formatUserMessage === 'function') {
-          div.innerHTML = window.StemLabAIBridge.formatUserMessage(textContent);
+          userFormatted = window.StemLabAIBridge.formatUserMessage(textContent);
         } else {
-          div.innerHTML = formatAIFormulaWithKaTeX(textContent);
+          userFormatted = formatAIFormulaWithKaTeX(textContent);
         }
+        div.innerHTML = imgHtml + userFormatted;
       } else {
         div.innerHTML = parseSimpleMarkdown(textContent);
       }
@@ -1049,9 +1122,16 @@ QUY TẮC PHẢN HỒI BẮT BUỘC - TUYỆT ĐỐI TUÂN THỦ:
   async function handleSend() {
     const textarea = document.getElementById('pai-input');
     const userText = textarea.value.trim();
-    if (!userText || isLoading) return;
+    if ((!userText && !currentAttachedImage) || isLoading) return;
 
-    messages.push({ role: 'user', content: userText });
+    const imgToSend = currentAttachedImage;
+    setAttachedImg(null);
+
+    messages.push({ 
+      role: 'user', 
+      content: userText || 'Hãy phân tích hình ảnh bài tập Vật lý này và hướng dẫn giải chi tiết giúp em.',
+      image: imgToSend
+    });
     textarea.value = '';
     textarea.style.height = 'auto';
     isLoading = true;
@@ -1064,8 +1144,8 @@ QUY TẮC PHẢN HỒI BẮT BUỘC - TUYỆT ĐỐI TUÂN THỦ:
     const pageContext = `\n\n[Context: Học sinh đang thực hành ở tệp: ${window.location.pathname} (${pageTitle})]${memoryContext}`;
     const labTitle = `Lab Vật Lý (${pageTitle})`;
 
-    // ⚡ BƯỚC 0: KIỂM TRA RANH GIỚI MÔN HỌC (SUBJECT BOUNDARY GUARD)
-    if (window.StemLabAIBridge && typeof window.StemLabAIBridge.checkSubjectBoundary === 'function') {
+    // ⚡ BƯỚC 0: KIỂM TRA RANH GIỚI MÔN HỌC (SUBJECT BOUNDARY GUARD - CHỈ KHI KHÔNG CÓ ẢNH)
+    if (!imgToSend && window.StemLabAIBridge && typeof window.StemLabAIBridge.checkSubjectBoundary === 'function') {
       try {
         const guard = window.StemLabAIBridge.checkSubjectBoundary(userText, 'ly');
         if (!guard.allowed) {
@@ -1086,8 +1166,8 @@ QUY TẮC PHẢN HỒI BẮT BUỘC - TUYỆT ĐỐI TUÂN THỦ:
       }
     }
 
-    // ⚡ BƯỚC 1: KIỂM TRA BỘ NHỚ AI TỰ HỌC (CACHE HIT) GIỐNG TRỢ LÝ NOVA
-    if (window.StemLabAIBridge && typeof window.StemLabAIBridge.checkLabLearnedCache === 'function') {
+    // ⚡ BƯỚC 1: KIỂM TRA BỘ NHỚ AI TỰ HỌC (CACHE HIT) GIỐNG TRỢ LÝ NOVA (CHỈ KHI KHÔNG CÓ ẢNH)
+    if (!imgToSend && window.StemLabAIBridge && typeof window.StemLabAIBridge.checkLabLearnedCache === 'function') {
       try {
         const cacheResult = await window.StemLabAIBridge.checkLabLearnedCache(userText, 'ly', 0.92);
         if (cacheResult && cacheResult.hit) {
@@ -1148,7 +1228,8 @@ QUY TẮC PHẢN HỒI BẮT BUỘC - TUYỆT ĐỐI TUÂN THỦ:
           contents: payload.contents,
           systemInstruction: SYSTEM_INSTRUCTION,
           temperature: 0.2,
-          maxOutputTokens: 1200
+          maxOutputTokens: 1200,
+          imageBase64: imgToSend || undefined
         })
       });
       if (gwRes.ok) {
