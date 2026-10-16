@@ -27,7 +27,7 @@ export default function Sidebar() {
         <Link href="/" className="group flex flex-col">
           <div className="flex items-center gap-2.5">
             <img 
-              src="/icon.png" 
+              src="/icon.png?v=2" 
               alt="STEM HUB Logo" 
               className="w-7 h-7 rounded-full object-cover border border-cyan-400/40 drop-shadow-[0_0_8px_rgba(6,182,212,0.6)] group-hover:scale-110 transition-transform duration-300"
             />
