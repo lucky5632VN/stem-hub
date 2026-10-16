@@ -261,6 +261,55 @@ export const playSound = {
     } catch (e) {
       console.warn("Sound play failed", e);
     }
+  },
+
+  chime: () => {
+    if (!useAppStore.getState().soundEnabled) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    try {
+      const now = ctx.currentTime;
+      const playTone = (freq, offset, decay) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + offset);
+        gain.gain.setValueAtTime(0.035, now + offset);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + offset + decay);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + offset);
+        osc.stop(now + offset + decay);
+      };
+      playTone(587.33, 0, 0.35);     // D5
+      playTone(880.00, 0.08, 0.45);   // A5
+      playTone(1174.66, 0.16, 0.55);  // D6 (high crystal chime)
+    } catch (e) {
+      console.warn("Sound play failed", e);
+    }
+  },
+
+  pulse: () => {
+    if (!useAppStore.getState().soundEnabled) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(320, now);
+      osc.frequency.exponentialRampToValueAtTime(640, now + 0.08);
+      gain.gain.setValueAtTime(0.04, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.08);
+    } catch (e) {
+      console.warn("Sound play failed", e);
+    }
   }
 };
+
 

@@ -16,8 +16,18 @@ const nextConfig = {
   },
   poweredByHeader: false, // 🛡️ OWASP: Tắt X-Powered-By chống nhận diện máy chủ (Server Fingerprinting)
   turbopack: {}, // Cấu hình turbopack rỗng cho Next.js 16
+  compress: true, // ⚡ Nén Gzip/Brotli tối đa băng thông và tăng tốc FCP
   async headers() {
     return [
+      {
+        source: '/(images|audio|favicon.ico|icon.png|apple-icon.png|robots.txt|sitemap.xml)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, stale-while-revalidate=604800',
+          },
+        ],
+      },
       {
         source: '/(.*)',
         headers: [
@@ -53,6 +63,7 @@ const nextConfig = {
       },
     ];
   },
+
   webpack: (config, { dev }) => {
     if (dev) {
       config.devtool = false; // Tắt source maps dung lượng lớn khi dev

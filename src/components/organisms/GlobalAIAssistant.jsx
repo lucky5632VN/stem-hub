@@ -1855,8 +1855,10 @@ ${conciseInstruction}
     }
 
     setIsLoading(false);
+    try { playSound.chime?.(); } catch (_) {}
 
     const botMsgId = 'bot_' + Date.now();
+
     const initialBotMsg = {
       id: botMsgId,
       sender: 'bot',

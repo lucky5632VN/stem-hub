@@ -54,8 +54,13 @@ function PhysicsBackground({ isDark }) {
     let time = 0;
 
     const render = () => {
+      if (typeof document !== 'undefined' && document.hidden) {
+        animationFrameId = requestAnimationFrame(render);
+        return;
+      }
       time += 0.015;
       ctx.clearRect(0, 0, width, height);
+
 
       const mainColor = isDark ? 'rgba(16, 185, 129, ' : 'rgba(94, 234, 212, ';
       const waveColor = isDark ? 'rgba(6, 182, 212, 0.25)' : 'rgba(13, 148, 136, 0.15)';
@@ -160,8 +165,13 @@ function ChemistryBackground({ isDark }) {
     let time = 0;
 
     const render = () => {
+      if (typeof document !== 'undefined' && document.hidden) {
+        animationFrameId = requestAnimationFrame(render);
+        return;
+      }
       time += 0.02;
       ctx.clearRect(0, 0, width, height);
+
 
       bubbles.forEach((b) => {
         b.y -= b.speed;
