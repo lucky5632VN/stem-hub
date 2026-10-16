@@ -94,3 +94,6 @@ scripts/test_docx_helpers.py
 scripts/security_*.mjs
 scripts/vulnerability_*.mjs
 
+# Standalone extracted projects
+SPATIAL_MIND_3D_LAB_TOAN/
+standalone_lab_toan/
