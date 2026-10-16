@@ -173,7 +173,10 @@ export default function AdminContactMessagesPage() {
       try {
         const res = await fetch('/api/contact/reply', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-internal-secret': 'stemhub_rag_internal_sig_2026'
+          },
           body: JSON.stringify({
             messageId: selectedMessage.id,
             replyText: cleanReply,

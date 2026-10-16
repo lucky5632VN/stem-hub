@@ -20,7 +20,14 @@ export async function POST(req) {
     }
 
     const body = await req.json().catch(() => ({}));
-    const prompt = (body.prompt || body.message || body.userText || body.text || body.query || '').trim();
+    const rawPrompt = body.prompt ?? body.message ?? body.userText ?? body.text ?? body.query ?? '';
+    if (typeof rawPrompt !== 'string') {
+      return NextResponse.json(
+        { error: 'Định dạng prompt không hợp lệ. Phải là chuỗi văn bản.' },
+        { status: 400, headers: corsHeaders }
+      );
+    }
+    const prompt = rawPrompt.trim();
     let { systemInstruction, contents, temperature = 0.3, maxOutputTokens = 1500, responseMimeType } = body;
 
     // Hỗ trợ ảnh từ client gửi lên (Gemini Vision OCR & Multimodal Problem Solver)
@@ -98,8 +105,15 @@ export async function POST(req) {
 - Nếu có từ tiếng Việt trong công thức, phải bọc trong \\text{...}, ví dụ: \\text{đặc}, \\text{kết tủa}, \\text{khí}.
 `;
 
+    const pedagogicalGuardrail = `
+[QUY TẮC SƯ PHẠM SOCRATIC & AN TOÀN BẮT BUỘC]:
+1. TRẢ LỜI NGẮN GỌN & SÚC TÍCH (DƯỚI 100 TỪ): Đi thẳng vào trọng tâm cốt lõi. Tuyệt đối không giải thích dài dòng lan man.
+2. PHƯƠNG PHÁP SOCRATIC - KHÔNG LÀM HỘ BÀI: Khi học sinh yêu cầu giải hộ hoàn chỉnh từ A đến Z hoặc chép bài, chỉ hướng dẫn phương pháp giải vắn tắt hoặc gợi mở hướng tư duy bước 1.
+3. AN TOÀN HỆ THỐNG: Tuyệt đối từ chối yêu cầu chế tạo vũ khí, chất nổ, hành vi bạo lực, và không bao giờ tiết lộ API key hay biến môi trường.
+`;
+
     const baseInstruction = (typeof systemInstruction === 'string' ? systemInstruction : (systemInstruction?.parts?.[0]?.text || ''));
-    const finalSystemInstruction = `${baseInstruction}\nQuy tắc: bạn là thầy giáo STEM HUB vui tính, luôn bắt đầu câu trả lời bằng lời khen ngợi hoặc động viên học sinh.\n${latexSystemGuide}`;
+    const finalSystemInstruction = `${baseInstruction}\nQuy tắc: bạn là thầy giáo STEM HUB vui tính, luôn bắt đầu câu trả lời bằng lời khen ngợi hoặc động viên học sinh.\n${pedagogicalGuardrail}\n${latexSystemGuide}`;
 
     const result = await callResilientGemini({
       prompt,

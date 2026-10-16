@@ -239,6 +239,18 @@ export async function POST(request) {
 export async function PATCH(request) {
   const corsHeaders = getCorsHeaders(request);
   try {
+    // 🛡️ CHẶN SỬA ĐỔI TRI THỨC TRÁI PHÉP (OWASP API1 / LLM03): Yêu cầu chữ ký xác thực nội bộ AI hoặc token Admin
+    const reqSecret = request.headers.get('x-internal-secret') || request.headers.get('x-admin-secret-key') || '';
+    const authHeader = request.headers.get('authorization') || '';
+    const isAuthBearer = authHeader.startsWith('Bearer ') && authHeader.substring(7) === INTERNAL_AI_SECRET;
+
+    if (reqSecret !== INTERNAL_AI_SECRET && !isAuthBearer) {
+      return NextResponse.json(
+        { success: false, error: 'Từ chối quyền truy cập: Cần chữ ký nội bộ AI hoặc token xác thực của Quản trị viên.' },
+        { status: 401, headers: corsHeaders }
+      );
+    }
+
     const body = await request.json().catch(() => ({}));
     const { id, action, teacherName, updatedAnswer } = body;
 
@@ -292,6 +304,18 @@ export async function PATCH(request) {
 export async function DELETE(request) {
   const corsHeaders = getCorsHeaders(request);
   try {
+    // 🛡️ CHẶN XÓA TRI THỨC TRÁI PHÉP (OWASP API1 / LLM03): Yêu cầu chữ ký xác thực nội bộ AI hoặc token Admin
+    const reqSecret = request.headers.get('x-internal-secret') || request.headers.get('x-admin-secret-key') || '';
+    const authHeader = request.headers.get('authorization') || '';
+    const isAuthBearer = authHeader.startsWith('Bearer ') && authHeader.substring(7) === INTERNAL_AI_SECRET;
+
+    if (reqSecret !== INTERNAL_AI_SECRET && !isAuthBearer) {
+      return NextResponse.json(
+        { success: false, error: 'Từ chối quyền truy cập: Cần chữ ký nội bộ AI hoặc token xác thực của Quản trị viên.' },
+        { status: 401, headers: corsHeaders }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     if (!id) {

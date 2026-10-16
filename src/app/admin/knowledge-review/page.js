@@ -104,7 +104,10 @@ export default function KnowledgeReviewAdminPage() {
     try {
       const res = await fetch('/api/learned-knowledge', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-internal-secret': 'stemhub_rag_internal_sig_2026'
+        },
         body: JSON.stringify({
           id,
           action,
@@ -129,7 +132,10 @@ export default function KnowledgeReviewAdminPage() {
     if (!confirm('Bạn có chắc chắn muốn xóa bản ghi tri thức này khỏi cơ sở dữ liệu?')) return;
     try {
       const res = await fetch(`/api/learned-knowledge?id=${encodeURIComponent(id)}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'x-internal-secret': 'stemhub_rag_internal_sig_2026'
+        }
       });
       if (res.ok) {
         playSound.click();

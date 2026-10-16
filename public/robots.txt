@@ -1,0 +1,16 @@
+# Robots.txt for STEM HUB - https://ai.stem-hub.top
+User-agent: *
+Allow: /
+Allow: /phong-lab
+Allow: /phong-lab/*
+Allow: /dau-truong
+Allow: /xep-hang
+Allow: /lien-he
+Allow: /labs/*
+
+# Disallow admin and private API routes from search crawlers
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /api/*
+
+Sitemap: https://ai.stem-hub.top/sitemap.xml

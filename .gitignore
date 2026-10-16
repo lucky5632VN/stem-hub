@@ -70,3 +70,27 @@ video/
 *.mp4
 *.mov
 *.mkv
+
+# Internal reports, benchmarks, dossiers & docs (Do not deploy to GitHub)
+*.docx
+*.doc
+*.csv
+docs/official_submission/
+BENCHMARK_*.md
+TEACHER_EVALUATION_*.csv
+EXTENDED_ROBUST_*.md
+AUDIT_DIAGNOSIS_REPORT.md
+HO_SO_MINH_CHUNG_*.md
+BANG_KIEM_THU_*.md
+SECURITY_*.md
+Hồ sơ minh chứng*.docx
+
+# Local audit, DAST scanner & document helper scripts
+scripts/beautify_docx_report.py
+scripts/generate_official_bgk_dossier.py
+scripts/generate_full_audit_report.py
+scripts/full_codebase_discovery.*
+scripts/test_docx_helpers.py
+scripts/security_*.mjs
+scripts/vulnerability_*.mjs
+

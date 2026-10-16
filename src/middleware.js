@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server.js';
+import { NextResponse } from 'next/server';
 
 /**
  * Middleware: Cho phép người dùng (cả khách và thành viên) truy cập tự do toàn bộ hệ thống:
@@ -11,9 +11,9 @@ export function middleware(request) {
 export const config = {
   matcher: [
     /*
-     * Bỏ qua các tài nguyên tĩnh và API
+     * Cho phép tất cả các route đi qua, chỉ bỏ qua file tĩnh và tài nguyên hệ thống
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|icon.png|labs|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp3|wav|ogg|glb|gltf|css|js|html)).*)',
+    '/((?!_next/static|_next/image|favicon.ico|icon.png|labs|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp3|wav|ogg|glb|gltf|css|js|html)$).*)',
   ],
 };
 

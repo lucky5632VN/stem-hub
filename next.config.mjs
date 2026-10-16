@@ -14,6 +14,7 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
   },
+  poweredByHeader: false, // 🛡️ OWASP: Tắt X-Powered-By chống nhận diện máy chủ (Server Fingerprinting)
   turbopack: {}, // Cấu hình turbopack rỗng cho Next.js 16
   async headers() {
     return [
@@ -27,6 +28,14 @@ const nextConfig = {
           {
             key: 'X-Frame-Options',
             value: 'SAMEORIGIN',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors 'self' http://localhost:3000 http://127.0.0.1:3000 https://ai.stem-hub.top https://cuoc-thi-ai-e2044.web.app;",
           },
           {
             key: 'Referrer-Policy',

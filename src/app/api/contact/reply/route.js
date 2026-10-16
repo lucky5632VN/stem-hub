@@ -24,6 +24,19 @@ export async function POST(req) {
     );
   }
 
+  // 🛡️ BẢO VỆ CỔNG QUẢN TRỊ (OWASP API1 / Broken Object Level Auth): Yêu cầu chữ ký Admin
+  const ADMIN_SECRET = process.env.ADMIN_SECRET_KEY || process.env.INTERNAL_AI_SECRET || 'stemhub_rag_internal_sig_2026';
+  const reqSecret = req.headers.get('x-internal-secret') || req.headers.get('x-admin-secret-key') || '';
+  const authHeader = req.headers.get('authorization') || '';
+  const isAuthBearer = authHeader.startsWith('Bearer ') && authHeader.substring(7) === ADMIN_SECRET;
+
+  if (reqSecret !== ADMIN_SECRET && !isAuthBearer) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized: Bạn không có quyền quản trị để gửi email phản hồi.' },
+      { status: 401, headers: corsHeaders }
+    );
+  }
+
   try {
     const body = await req.json();
     const { messageId, replyText, adminEmail } = body;
