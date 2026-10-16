@@ -6,16 +6,19 @@ const inter = { variable: 'font-sans' };
 
 export const metadata = {
   metadataBase: new URL('https://ai.stem-hub.top'),
-  title: 'STEM HUB — Hệ Sinh Thái Giáo Dục Số Tích Hợp AI & Phòng Thí Nghiệm Ảo 3D',
+  title: 'STEM HUB - Kiến tạo hệ thống AI đa tầng hỗ trợ hệ sinh thái học tập số',
   description: 'Nền tảng thực hành khoa học tương tác cao: Mô phỏng vật lý, hóa học, sinh học, hình học không gian 3D, gia sư AI Socratic và đấu trường học thuật 1v1 thời gian thực.',
   keywords: ['STEM', 'Phòng thí nghiệm ảo', 'Hình học không gian 3D', 'AI gia sư', 'Toán Lý Hóa Sinh', 'STEM HUB', 'THPT Quốc Gia'],
   authors: [{ name: 'STEM HUB Team — THPT Quỳnh Lưu 4' }],
   icons: {
-    icon: '/icon.png',
-    apple: '/icon.png',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon.png', type: 'image/png', sizes: '512x512' },
+    ],
+    apple: '/apple-icon.png',
   },
   openGraph: {
-    title: 'STEM HUB — Hệ Sinh Thái Giáo Dục Số Tích Hợp AI',
+    title: 'STEM HUB - Kiến tạo hệ thống AI đa tầng hỗ trợ hệ sinh thái học tập số',
     description: 'Thực hành phòng thí nghiệm ảo 3D, trợ lý AI đa tầng và đấu trường học thuật đỉnh cao.',
     url: 'https://ai.stem-hub.top',
     siteName: 'STEM HUB',
@@ -32,11 +35,12 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'STEM HUB — Hệ Sinh Thái Giáo Dục Số Tích Hợp AI',
+    title: 'STEM HUB - Kiến tạo hệ thống AI đa tầng hỗ trợ hệ sinh thái học tập số',
     description: 'Thực hành phòng thí nghiệm ảo 3D, trợ lý AI đa tầng và đấu trường học thuật đỉnh cao.',
     images: ['/stem_hub_brand_banner.png'],
   }
 };
+
 
 export const viewport = {
   width: 'device-width',
