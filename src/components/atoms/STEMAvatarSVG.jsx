@@ -31,9 +31,11 @@ export const hairColors = {
 
 function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
   const safeParts = parts || {};
-  const gender = safeParts.gender || 'male'; // 'male' | 'female'
-  const bodyType = safeParts.bodyType || 'chibi'; // 'chibi' | 'tall' | 'muscular'
-  const pose = safeParts.pose || 'standard'; // 'standard' | 'wave' | 'thinker' | 'victory'
+  const gender = safeParts.gender || 'male'; // 'male' | 'female' | 'cyborg'
+  const bodyType = safeParts.bodyType || 'chibi'; // 'chibi' | 'tall' | 'muscular' | 'slender'
+  const pose = safeParts.pose || 'standard'; // 'standard' | 'wave' | 'thinker' | 'victory' | 'walk' | 'heart' | 'super' | 'spark' | 'cross_arms' | 'battle'
+  const expression = safeParts.expression || 'confident'; // 'confident' | 'happy' | 'cool' | 'wink' | 'determined' | 'cyber_glow' | 'shy'
+  const aura = safeParts.aura || 'none'; // 'none' | 'phoenix' | 'lightning' | 'galaxy' | 'matrix_halo'
 
   const body = safeParts.body || 'peach';
   const hair = safeParts.hair || 'default';
@@ -42,8 +44,8 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
   const bottom = safeParts.bottom || 'default';
   const accessory = safeParts.accessory || 'none';
 
-  // Lấy màu da thực tế
-  const skin = skinColors[body] || skinColors.peach;
+  // Lấy màu da thực tế (Cyborg mặc định ánh kim bạc hiện đại)
+  const skin = gender === 'cyborg' ? (body === 'peach' ? '#94a3b8' : (skinColors[body] || '#94a3b8')) : (skinColors[body] || skinColors.peach);
   // Lấy màu tóc thực tế
   const hColor = hairColors[hairColor] || hairColors.black;
 
@@ -62,6 +64,11 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
     scaleXBody = 1.25;  // Vai rộng, vạm vỡ
     scaleYBody = 1.05;
     headScale = 0.95;
+  } else if (bodyType === 'slender') {
+    bodyYOffset = -1;
+    scaleYBody = 1.18;  // Mảnh mai thanh thoát
+    scaleXBody = 0.88;
+    headScale = 0.92;
   }
 
   // Lấy màu của trang phục để dùng cho vẽ tay áo tương thích tư thế
@@ -109,6 +116,16 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
           <stop offset="0%" stopColor="#00ffff" />
           <stop offset="100%" stopColor="#d946ef" />
         </linearGradient>
+        <linearGradient id="phoenixAuraGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+          <stop offset="0%" stopColor="#f97316" stopOpacity="0.8" />
+          <stop offset="50%" stopColor="#ef4444" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="#facc15" stopOpacity="0.9" />
+        </linearGradient>
+        <radialGradient id="galaxyAuraGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#d946ef" stopOpacity="0.7" />
+          <stop offset="60%" stopColor="#3b82f6" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="#06b6d4" stopOpacity="0" />
+        </radialGradient>
         <style>{`
           #legs_section g, #arms_section g {
             transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -119,6 +136,42 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
 
       {/* Nhóm áp dụng tỉ lệ cơ thể và tư thế */}
       <g id="avatar_core_group">
+        
+        {/* ================== AURA & HÀO QUANG VŨ TRỤ ================== */}
+        {aura === 'phoenix' && (
+          <g id="aura_phoenix" className="animate-pulse">
+            <ellipse cx="50" cy="54" rx="42" ry="44" fill="url(#phoenixAuraGrad)" opacity="0.35" />
+            <path d="M15 65 C20 40, 30 25, 50 15 C70 25, 80 40, 85 65 C70 58, 60 70, 50 60 C40 70, 30 58, 15 65 Z" fill="#f97316" opacity="0.3" />
+            <circle cx="28" cy="35" r="1.5" fill="#facc15" className="animate-ping" />
+            <circle cx="72" cy="35" r="1.5" fill="#facc15" className="animate-ping" />
+          </g>
+        )}
+        {aura === 'lightning' && (
+          <g id="aura_lightning">
+            <circle cx="50" cy="50" r="44" stroke="#00ffff" strokeWidth="1" strokeDasharray="3,4" opacity="0.5" className="animate-spin" style={{ animationDuration: '8s', transformOrigin: '50px 50px' }} />
+            <path d="M18 42 L25 48 L22 56 L30 52" stroke="#00ffff" strokeWidth="1.5" fill="none" className="animate-pulse" />
+            <path d="M82 42 L75 48 L78 56 L70 52" stroke="#00ffff" strokeWidth="1.5" fill="none" className="animate-pulse" />
+            <circle cx="22" cy="56" r="2" fill="#ffffff" className="animate-ping" />
+            <circle cx="78" cy="56" r="2" fill="#ffffff" className="animate-ping" />
+          </g>
+        )}
+        {aura === 'galaxy' && (
+          <g id="aura_galaxy" className="animate-spin" style={{ animationDuration: '15s', transformOrigin: '50px 50px' }}>
+            <ellipse cx="50" cy="50" rx="46" ry="46" fill="url(#galaxyAuraGrad)" />
+            <circle cx="16" cy="38" r="1.2" fill="#ffffff" />
+            <circle cx="84" cy="62" r="1.2" fill="#ffffff" />
+            <circle cx="35" cy="85" r="1.5" fill="#f472b6" />
+            <circle cx="65" cy="15" r="1.5" fill="#22d3ee" />
+          </g>
+        )}
+        {aura === 'matrix_halo' && (
+          <g id="aura_matrix_halo" className="animate-pulse">
+            <ellipse cx="50" cy="18" rx="22" ry="5.5" stroke="#22c55e" strokeWidth="1.5" fill="none" strokeDasharray="2,3" />
+            <ellipse cx="50" cy="18" rx="16" ry="3.5" stroke="#4ade80" strokeWidth="1" fill="#22c55e" fillOpacity="0.15" />
+            <text x="33" y="15" fill="#22c55e" fontSize="4" fontFamily="monospace" opacity="0.8">1 0 1</text>
+            <text x="55" y="15" fill="#22c55e" fontSize="4" fontFamily="monospace" opacity="0.8">0 1 0</text>
+          </g>
+        )}
         
         {/* ================== 0. BACK ACCESSORIES (WINGS / KATANA / DRONE) ================== */}
         {accessory === 'quantum_wings' && (
@@ -403,42 +456,123 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
           <circle cx="31.5" cy="47" r="4.5" fill={skin} />
           <circle cx="68.5" cy="47" r="4.5" fill={skin} />
           
-          {/* Má hồng hào dễ thương */}
-          <circle cx="38" cy="51" r="2.5" fill="#f43f5e" opacity="0.35" />
-          <circle cx="62" cy="51" r="2.5" fill="#f43f5e" opacity="0.35" />
-          
-          {/* Mắt thông minh dựa trên Giới tính */}
-          {gender === 'female' ? (
-            // Mắt nữ: Có mi dài rực rỡ và lấp lánh hơn
-            <g id="female_eyes">
-              {/* Lông mi trái */}
-              <path d="M40 43 L37 42" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
-              <path d="M41 42.5 L39 40.5" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
-              <circle cx="43" cy="45" r="3.2" fill="#0f172a" />
-              
-              {/* Lông mi phải */}
-              <path d="M60 43 L63 42" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
-              <path d="M59 42.5 L61 40.5" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
-              <circle cx="57" cy="45" r="3.2" fill="#0f172a" />
-              
-              {/* Ánh sáng lung linh trong mắt */}
-              <circle cx="43.8" cy="44.2" r="1.0" fill="#ffffff" />
-              <circle cx="42.2" cy="46.2" r="0.5" fill="#ffffff" />
-              <circle cx="57.8" cy="44.2" r="1.0" fill="#ffffff" />
-              <circle cx="56.2" cy="46.2" r="0.5" fill="#ffffff" />
-            </g>
-          ) : (
-            // Mắt nam: Đơn giản, tinh anh
-            <g id="male_eyes">
-              <circle cx="43" cy="45" r="2.5" fill="#0f172a" />
-              <circle cx="57" cy="45" r="2.5" fill="#0f172a" />
-              <circle cx="43.8" cy="44.2" r="0.8" fill="#ffffff" />
-              <circle cx="57.8" cy="44.2" r="0.8" fill="#ffffff" />
+          {/* Mạch điện tử & Lõi kết nối nếu là Cyborg */}
+          {gender === 'cyborg' && (
+            <g id="cyborg_temple_circuits">
+              <path d="M33 39 L37 39 L39 42" stroke="#00f2fe" strokeWidth="0.9" fill="none" />
+              <circle cx="39" cy="42" r="0.8" fill="#00f2fe" />
+              <path d="M67 39 L63 39 L61 42" stroke="#00f2fe" strokeWidth="0.9" fill="none" />
+              <circle cx="61" cy="42" r="0.8" fill="#00f2fe" />
+              <rect x="31" y="45" width="2" height="4" fill="#00f2fe" rx="0.5" opacity="0.8" />
+              <rect x="67" y="45" width="2" height="4" fill="#00f2fe" rx="0.5" opacity="0.8" />
             </g>
           )}
 
-          {/* Nụ cười vui tươi */}
-          <path d="M47 50.5 Q50 53.5 53 50.5" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
+          {/* Má hồng hào dễ thương */}
+          <circle cx="38" cy="51" r="2.5" fill="#f43f5e" opacity={expression === 'shy' ? 0.6 : 0.35} />
+          <circle cx="62" cy="51" r="2.5" fill="#f43f5e" opacity={expression === 'shy' ? 0.6 : 0.35} />
+          {expression === 'shy' && (
+            <g id="shy_blush_lines" stroke="#f43f5e" strokeWidth="0.8" strokeLinecap="round">
+              <line x1="36" y1="50" x2="38" y2="52" />
+              <line x1="38" y1="50" x2="40" y2="52" />
+              <line x1="60" y1="50" x2="62" y2="52" />
+              <line x1="62" y1="50" x2="64" y2="52" />
+            </g>
+          )}
+
+          {/* ================== BIỂU CẢM & MẮT (EXPRESSION ENGINE) ================== */}
+          {expression === 'happy' ? (
+            // Biểu cảm Vui tươi: Mắt tít hạt gạo cười rạng rỡ + Miệng cười hé răng/lưỡi hồng
+            <g id="face_happy">
+              <path d="M40 45 Q43 41 46 45" stroke="#0f172a" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+              <path d="M54 45 Q57 41 60 45" stroke="#0f172a" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+              <path d="M46.5 50 Q50 56 53.5 50 Z" fill="#f43f5e" stroke="#0f172a" strokeWidth="1" strokeLinejoin="round" />
+              <path d="M48 52.5 Q50 54 52 52.5" fill="#fda4af" />
+            </g>
+          ) : expression === 'cool' ? (
+            // Biểu cảm Lạnh lùng / Ngầu: Mắt sắc nét điềm tĩnh + Lông mày ngang + Miệng ngang
+            <g id="face_cool">
+              <line x1="39" y1="41" x2="47" y2="42" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
+              <line x1="61" y1="41" x2="53" y2="42" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
+              <path d="M40 44 L46 44 L45 47 L41 47 Z" fill="#0f172a" />
+              <circle cx="44.5" cy="45" r="0.9" fill="#00f2fe" />
+              <path d="M54 44 L60 44 L59 47 L55 47 Z" fill="#0f172a" />
+              <circle cx="55.5" cy="45" r="0.9" fill="#00f2fe" />
+              <line x1="47.5" y1="51" x2="52.5" y2="51" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
+            </g>
+          ) : expression === 'wink' ? (
+            // Biểu cảm Nháy mắt tinh nghịch: Mắt trái to tròn có sao + Mắt phải nháy cong
+            <g id="face_wink">
+              <circle cx="43" cy="45" r="2.8" fill="#0f172a" />
+              <circle cx="43.8" cy="44.2" r="1.1" fill="#ffffff" />
+              <circle cx="42.2" cy="46" r="0.5" fill="#ffffff" />
+              {gender === 'female' && (
+                <path d="M40 43 L37 42" stroke="#0f172a" strokeWidth="1.2" strokeLinecap="round" />
+              )}
+              {/* Mắt phải nháy */}
+              <path d="M54 45.5 Q57 42.5 60 45.5" stroke="#0f172a" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+              {/* Miệng cười mèo chữ W dễ thương */}
+              <path d="M47 50.5 Q48.5 52 50 50.5 Q51.5 52 53 50.5" stroke="#0f172a" strokeWidth="1.4" strokeLinecap="round" fill="none" />
+            </g>
+          ) : expression === 'determined' ? (
+            // Biểu cảm Quyết tâm / Chiến binh: Lông mày dốc chiến đấu + Ánh nhìn bốc lửa
+            <g id="face_determined">
+              <path d="M39 41.5 L46 44" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" />
+              <path d="M61 41.5 L54 44" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" />
+              <circle cx="43" cy="46" r="2.6" fill="#0f172a" />
+              <circle cx="43.5" cy="45.5" r="1.0" fill="#f59e0b" />
+              <circle cx="57" cy="46" r="2.6" fill="#0f172a" />
+              <circle cx="56.5" cy="45.5" r="1.0" fill="#f59e0b" />
+              <path d="M47 51 L53 51" stroke="#0f172a" strokeWidth="1.8" strokeLinecap="round" />
+            </g>
+          ) : expression === 'cyber_glow' ? (
+            // Biểu cảm Laser Cyber / Kính quang học HUD: Dải laser neon phát sáng quét dữ liệu
+            <g id="face_cyber_glow">
+              <rect x="36" y="43" width="28" height="4.5" rx="2" fill="#0f172a" stroke="#00f2fe" strokeWidth="1" />
+              <line x1="38" y1="45.2" x2="62" y2="45.2" stroke="#00f2fe" strokeWidth="1.5" className="animate-pulse" />
+              <circle cx="43" cy="45.2" r="1.5" fill="#f43f5e" />
+              <circle cx="57" cy="45.2" r="1.5" fill="#f43f5e" />
+              <path d="M47.5 51 Q50 52.5 52.5 51" stroke="#00f2fe" strokeWidth="1.3" strokeLinecap="round" fill="none" />
+            </g>
+          ) : expression === 'shy' ? (
+            // Biểu cảm Anime Bẽn lẽn: Mắt to tròn long lanh nhìn xuống + Miệng sóng nhỏ
+            <g id="face_shy">
+              <circle cx="43" cy="45.5" r="2.8" fill="#0f172a" />
+              <circle cx="43.5" cy="45" r="1.2" fill="#ffffff" />
+              <circle cx="57" cy="45.5" r="2.8" fill="#0f172a" />
+              <circle cx="56.5" cy="45" r="1.2" fill="#ffffff" />
+              <path d="M48.5 51.5 Q50 52.5 51.5 51.5" stroke="#0f172a" strokeWidth="1.4" strokeLinecap="round" fill="none" />
+            </g>
+          ) : (
+            // Mặc định: Tự tin (Confident)
+            <g id="face_confident">
+              {gender === 'female' ? (
+                <g id="female_eyes">
+                  <path d="M40 43 L37 42" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
+                  <path d="M41 42.5 L39 40.5" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
+                  <circle cx="43" cy="45" r="3.2" fill="#0f172a" />
+                  <path d="M60 43 L63 42" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
+                  <path d="M59 42.5 L61 40.5" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
+                  <circle cx="57" cy="45" r="3.2" fill="#0f172a" />
+                  <circle cx="43.8" cy="44.2" r="1.0" fill="#ffffff" />
+                  <circle cx="42.2" cy="46.2" r="0.5" fill="#ffffff" />
+                  <circle cx="57.8" cy="44.2" r="1.0" fill="#ffffff" />
+                  <circle cx="56.2" cy="46.2" r="0.5" fill="#ffffff" />
+                </g>
+              ) : (
+                <g id="male_eyes">
+                  <path d="M40 42 L45 42.5" stroke="#0f172a" strokeWidth="1.2" strokeLinecap="round" />
+                  <path d="M60 42 L55 42.5" stroke="#0f172a" strokeWidth="1.2" strokeLinecap="round" />
+                  <circle cx="43" cy="45" r="2.6" fill="#0f172a" />
+                  <circle cx="57" cy="45" r="2.6" fill="#0f172a" />
+                  <circle cx="43.8" cy="44.2" r="0.8" fill="#ffffff" />
+                  <circle cx="57.8" cy="44.2" r="0.8" fill="#ffffff" />
+                </g>
+              )}
+              {/* Nụ cười nhếch mép tự tin */}
+              <path d="M47 50.5 Q50 53.5 53.5 49.5" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+            </g>
+          )}
         </g>
 
         {/* ================== 3. TOP (ÁO & TAY ÁO BÊN TRONG CƠ THỂ) ================== */}
@@ -811,6 +945,42 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
                 <circle cx="94" cy="53" r="1.2" fill="#00ffff" className="animate-ping" />
                 <circle cx="98" cy="59" r="0.8" fill="#ffffff" className="animate-pulse" />
                 <circle cx="89" cy="65" r="1.0" fill="#00ffff" className="animate-pulse" />
+              </g>
+            </g>
+          )}
+
+          {/* TƯ THẾ: KHOANH TAY CHỈ HUY (Cross Arms - Đứng khoanh tay uy nghiêm cực ngầu) */}
+          {pose === 'cross_arms' && (
+            <g id="pose_cross_arms">
+              {/* Cánh tay trái vắt ngang ngực */}
+              <path d="M35 63.5 C36 67, 44 68.5, 54 68.5 C60 68.5, 63 66, 63 63" stroke={topColor} strokeWidth="5.5" strokeLinecap="round" fill="none" />
+              {/* Cánh tay phải vắt đè lên phía trước */}
+              <path d="M65 63.5 C64 67.5, 56 69.5, 46 69.5 C40 69.5, 37 67, 37 64" stroke={topColor} strokeWidth="5.5" strokeLinecap="round" fill="none" />
+              {/* Bóng đổ giữa hai tay */}
+              <path d="M42 67.5 Q50 68.5 58 67.5" stroke="#000000" strokeWidth="0.8" opacity="0.25" fill="none" />
+              {/* Bàn tay trái giấu nhẹ dưới bắp tay phải */}
+              <ellipse cx="61.5" cy="63.5" rx="2.5" ry="2" fill={skin} />
+              {/* Bàn tay phải giấu nhẹ dưới bắp tay trái */}
+              <ellipse cx="38.5" cy="64.5" rx="2.5" ry="2" fill={skin} />
+            </g>
+          )}
+
+          {/* TƯ THẾ: THỦ THẾ CHIẾN ĐẤU (Battle Stance - Một tay trước một tay sau sẵn sàng PvP) */}
+          {pose === 'battle' && (
+            <g id="pose_battle">
+              {/* Tay trái đưa ra phía trước che chắn */}
+              <g id="arm_left_battle">
+                <path d="M35 64 C30 62, 22 59, 23 54 C25 50, 31 54, 36 60 Z" fill={topColor} />
+                <ellipse cx="22" cy="52" rx="3" ry="2.5" fill={skin} />
+                {/* Sóng khí lực */}
+                <path d="M18 48 Q22 44 26 48" stroke="#00ffff" strokeWidth="1" fill="none" className="animate-pulse" />
+              </g>
+              {/* Tay phải thủ cao ngang cằm nắm đấm */}
+              <g id="arm_right_battle">
+                <path d="M65 64 C68 60, 73 54, 69 48 C65 46, 61 52, 63 60 Z" fill={topColor} />
+                <circle cx="69" cy="46" r="3" fill={skin} />
+                {/* Hào quang nắm đấm */}
+                <circle cx="69" cy="46" r="4.5" fill="#f43f5e" opacity="0.2" className="animate-ping" />
               </g>
             </g>
           )}

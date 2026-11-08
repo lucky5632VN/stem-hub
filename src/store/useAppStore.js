@@ -59,7 +59,9 @@ export const useAppStore = create((set) => ({
     faceDescriptor: null
   },
   setPersonalization: (data) => set((state) => ({
-    personalization: { ...state.personalization, ...data }
+    personalization: typeof data === 'function'
+      ? { ...state.personalization, ...data(state.personalization) }
+      : { ...state.personalization, ...data }
   })),
 
   // Arena State

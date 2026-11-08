@@ -217,14 +217,11 @@ const getCosmeticPreviewParts = (item) => {
   let category = item.category;
   let value = item.value;
   
-  if (!category && item.id) {
-    if (item.id === 'crown') {
-      category = 'accessory';
-      value = 'crown';
-    } else if (item.id.includes('_')) {
-      const idx = item.id.indexOf('_');
-      category = item.id.substring(0, idx);
-      value = item.id.substring(idx + 1);
+  if ((!category || !value) && item.id) {
+    const found = ALL_COSMETICS.find(c => c.id === item.id);
+    if (found) {
+      category = found.category;
+      value = found.value;
     }
   }
   
@@ -641,6 +638,11 @@ export default function ProfilePage() {
   // Các state và hàm mới phục vụ Gacha, Shop & Mặc đồ, Nhận quà Level
   const [activePersonalizationSubTab, setActivePersonalizationSubTab] = useState('character');
   const [isRolling, setIsRolling] = useState(false);
+  const [warpProgress, setWarpProgress] = useState(0);
+  const [warpStage, setWarpStage] = useState(1); // 1: Nạp năng lượng, 2: Gia tốc lỗ sâu, 3: Khai mở
+  const [recentWonGachaIds, setRecentWonGachaIds] = useState([]);
+  const [warpBoosted, setWarpBoosted] = useState(false);
+  const skipWarpRef = useRef(false);
   const [gachaResult, setGachaResult] = useState(null);
   const [gachaError, setGachaError] = useState('');
   const [shopSuccessMsg, setShopSuccessMsg] = useState('');
@@ -653,6 +655,8 @@ export default function ProfilePage() {
       gender: parts.gender || 'male',
       bodyType: parts.bodyType || 'chibi',
       pose: parts.pose || 'standard',
+      expression: parts.expression || 'confident',
+      aura: parts.aura || 'none',
       body: parts.body || 'peach',
       hair: parts.hair || 'default',
       hairColor: parts.hairColor || 'black',
@@ -698,7 +702,8 @@ export default function ProfilePage() {
 
       let pool = ALL_COSMETICS.filter(item => item.rarity === selectedRarity);
       if (pool.length === 0) pool = ALL_COSMETICS;
-      const item = pool[Math.floor(Math.random() * pool.length)];
+      const baseItem = pool[Math.floor(Math.random() * pool.length)];
+      const item = { ...baseItem, type: 'cosmetic' };
 
       let isDuplicate = false;
       let compensation = 0;
@@ -716,14 +721,31 @@ export default function ProfilePage() {
     return { newCrystals, results, unlockedParts: newUnlockedParts };
   };
 
-  // Quay Gacha lượng tử nâng cao (Bảo vệ tuyệt đối khỏi lỗi 429 Quota Exceeded)
+  // Nút bỏ qua hoạt ảnh Warp Speed để mở thẻ tức thì
+  const handleSkipWarp = () => {
+    playSound.click();
+    skipWarpRef.current = true;
+    setWarpProgress(100);
+    setWarpStage(3);
+  };
+
+  // Nút kích xung lực tăng tốc độ gia tốc hạt (Interactive Hold/Click Boost)
+  const handleBoostWarp = () => {
+    playSound.click();
+    setWarpBoosted(true);
+    setWarpProgress(prev => Math.min(99, prev + 12));
+    setTimeout(() => setWarpBoosted(false), 250);
+  };
+
+  // Quay Gacha lượng tử nâng cao (Bảo vệ tuyệt đối khỏi lỗi 429 Quota Exceeded & Trừ pha lê 0ms)
   const handleSpinGacha = async (pullCount) => {
     if (isRolling) return;
     playSound.click();
     setGachaError('');
     setGachaResults([]);
     
-    const cost = pullCount === 10 ? 900 : 100; // Quay 10 lần giá 900 (tiết kiệm 100)
+    const count = Number(pullCount) || 1;
+    const cost = count === 10 ? 900 : 100; // Quay 10 lần giá 900 (tiết kiệm 100)
     const currentCrystals = personalization.crystals !== undefined ? Number(personalization.crystals) : 500;
     
     if (currentCrystals < cost) {
@@ -731,75 +753,158 @@ export default function ProfilePage() {
       return;
     }
 
-    setIsRolling(true);
-    setGachaCrystalsSpent(cost);
-    
-    setTimeout(async () => {
+    // 1. Trừ pha lê ngay lập tức trên UI (Optimistic 0ms UI)
+    const optimisticCrystals = Math.max(0, currentCrystals - cost);
+    setPersonalization({ crystals: optimisticCrystals });
+    if (typeof window !== 'undefined' && user?.uid) {
       try {
-        const processTransaction = httpsCallable(functions, 'processCrystalTransaction');
-        const resObj = await processTransaction({
-          actionType: 'GACHA_ROLL',
-          payload: { pullCount }
-        });
+        localStorage.setItem('stem_crystals_' + user.uid, String(optimisticCrystals));
+      } catch {}
+    }
 
-        const txData = resObj?.data || {};
-        let rollResults = Array.isArray(txData.results) ? txData.results : null;
-        let resCrystals = txData.newCrystals;
+    setIsRolling(true);
+    setWarpProgress(0);
+    setWarpStage(1);
+    setGachaCrystalsSpent(cost);
+    skipWarpRef.current = false;
+    setWarpBoosted(false);
 
-        // Nếu máy chủ Firebase chạm trần Quota 429 hoặc không có kết quả, kích hoạt dự phòng ngoại tuyến
-        if (!txData.success || !rollResults || rollResults.length === 0) {
-          console.warn('⚡ Kích hoạt chế độ quay Gacha an toàn cục bộ do Firestore chạm trần Quota:', txData.error);
-          const fallback = generateLocalGachaRoll(pullCount);
-          rollResults = fallback.results;
-          resCrystals = fallback.newCrystals;
+    // 2. Chạy chuỗi hoạt ảnh điện ảnh gia tốc hạt (Warp Speed Sequence)
+    const startTime = Date.now();
+    const duration = 2400; // 2.4 giây hoạt ảnh mượt mà
+    let progressTimer = null;
+
+    const warpAnimationPromise = new Promise((resolve) => {
+      progressTimer = setInterval(() => {
+        if (skipWarpRef.current) {
+          clearInterval(progressTimer);
+          setWarpProgress(100);
+          setWarpStage(3);
+          resolve();
+          return;
         }
 
-        const updatedUnlockedParts = [...(personalization.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default'])];
-        const updatedUnlockedTitles = [...(personalization.unlockedTitles || ['apprentice'])];
+        const elapsed = Date.now() - startTime;
+        let p = Math.min(100, Math.round((elapsed / duration) * 100));
+        setWarpProgress(p);
 
-        if (Array.isArray(rollResults)) {
-          rollResults.forEach(res => {
-            if (!res.isDuplicate && res.item) {
-              if (res.item.type === 'cosmetic' || !res.item.type) {
-                if (!updatedUnlockedParts.includes(res.item.id)) {
-                  updatedUnlockedParts.push(res.item.id);
-                }
-              } else {
-                if (!updatedUnlockedTitles.includes(res.item.id)) {
-                  updatedUnlockedTitles.push(res.item.id);
-                }
-              }
-            }
-          });
+        if (p >= 75) {
+          setWarpStage(3);
+        } else if (p >= 35) {
+          setWarpStage(2);
+        } else {
+          setWarpStage(1);
         }
 
-        setPersonalization(prev => ({
-          ...prev,
-          crystals: resCrystals !== undefined ? resCrystals : Math.max(0, currentCrystals - cost),
-          unlockedParts: updatedUnlockedParts,
-          unlockedTitles: updatedUnlockedTitles
-        }));
+        if (p >= 100) {
+          clearInterval(progressTimer);
+          resolve();
+        }
+      }, 35);
+    });
 
-        setGachaResults(rollResults);
-        setFlippedGachaCards([]);
-        setShowGachaModal(true);
-        playSound.success();
-      } catch (err) {
-        console.error('Lỗi khi quay Gacha nâng cao, chuyển chế độ ngoại tuyến an toàn:', err);
-        const fallback = generateLocalGachaRoll(pullCount);
-        setPersonalization(prev => ({
-          ...prev,
-          crystals: fallback.newCrystals,
-          unlockedParts: fallback.unlockedParts
-        }));
-        setGachaResults(fallback.results);
-        setFlippedGachaCards([]);
-        setShowGachaModal(true);
-        playSound.success();
-      } finally {
-        setIsRolling(false);
+    // 3. Xử lý logic giao dịch Gacha song song
+    let rollResults = null;
+    let resCrystals = optimisticCrystals;
+
+    try {
+      const processTransaction = httpsCallable(functions, 'processCrystalTransaction');
+      const resObj = await processTransaction({
+        actionType: 'GACHA_ROLL',
+        payload: { pullCount: count }
+      });
+
+      const txData = resObj?.data || {};
+      rollResults = Array.isArray(txData.results) ? txData.results : null;
+      if (txData.newCrystals !== undefined) {
+        resCrystals = Number(txData.newCrystals);
       }
-    }, 1200);
+
+      // Dự phòng ngoại tuyến an toàn nếu gặp lỗi mạng hoặc Firestore chạm quota 429
+      if (!txData.success || !rollResults || rollResults.length === 0) {
+        console.warn('⚡ Kích hoạt chế độ quay Gacha ngoại tuyến an toàn:', txData?.error);
+        const fallback = generateLocalGachaRoll(count);
+        rollResults = fallback.results;
+        resCrystals = fallback.newCrystals;
+      }
+    } catch (err) {
+      console.warn('⚡ Lỗi gọi mạng, tự động quay Gacha ngoại tuyến an toàn:', err?.message);
+      const fallback = generateLocalGachaRoll(count);
+      rollResults = fallback.results;
+      resCrystals = fallback.newCrystals;
+    }
+
+    // Đợi hoạt ảnh Warp hoàn thành (hoặc người dùng bấm bỏ qua)
+    await warpAnimationPromise;
+
+    // 4. Đồng bộ danh sách vật phẩm đã mở khóa
+    const localCachedParts = (typeof window !== 'undefined' && user?.uid)
+      ? JSON.parse(localStorage.getItem('stem_unlocked_parts_' + user.uid) || '[]')
+      : [];
+    const localCachedTitles = (typeof window !== 'undefined' && user?.uid)
+      ? JSON.parse(localStorage.getItem('stem_unlocked_titles_' + user.uid) || '[]')
+      : [];
+
+    const existingParts = Array.from(new Set([
+      ...(personalization.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default']),
+      ...localCachedParts
+    ]));
+    const existingTitles = Array.from(new Set([
+      ...(personalization.unlockedTitles || ['apprentice']),
+      ...localCachedTitles
+    ]));
+
+    const newlyWonIds = [];
+    if (Array.isArray(rollResults)) {
+      rollResults.forEach(res => {
+        if (!res.isDuplicate && res.item) {
+          newlyWonIds.push(res.item.id);
+          if (res.item.type === 'cosmetic' || !res.item.type) {
+            if (!existingParts.includes(res.item.id)) {
+              existingParts.push(res.item.id);
+            }
+          } else {
+            if (!existingTitles.includes(res.item.id)) {
+              existingTitles.push(res.item.id);
+            }
+          }
+        }
+      });
+    }
+
+    setRecentWonGachaIds(newlyWonIds);
+
+    // 5. Cập nhật state chính & Lưu bền vững vào localStorage & Firestore
+    setPersonalization({
+      crystals: resCrystals,
+      unlockedParts: existingParts,
+      unlockedTitles: existingTitles
+    });
+
+    if (typeof window !== 'undefined' && user?.uid) {
+      try {
+        localStorage.setItem('stem_unlocked_parts_' + user.uid, JSON.stringify(existingParts));
+        localStorage.setItem('stem_unlocked_titles_' + user.uid, JSON.stringify(existingTitles));
+        localStorage.setItem('stem_crystals_' + user.uid, String(resCrystals));
+      } catch {}
+    }
+
+    if (user?.uid) {
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        updateDoc(userRef, {
+          'personalization.crystals': resCrystals,
+          'personalization.unlockedParts': existingParts,
+          'personalization.unlockedTitles': existingTitles
+        }).catch(() => {});
+      } catch {}
+    }
+
+    setGachaResults(rollResults || []);
+    setFlippedGachaCards([]);
+    setShowGachaModal(true);
+    setIsRolling(false);
+    playSound.success();
   };
 
   // Mua trang phục trực tiếp từ Shop (Optimistic 0ms UI)
@@ -902,6 +1007,58 @@ export default function ProfilePage() {
         error: true
       });
     }
+  };
+
+  // Nút xúc xắc: Phối đồ ngẫu nhiên cực đẹp (Randomize Outfit Studio)
+  const handleRandomizeOutfit = () => {
+    playSound.click();
+    const genders = ['male', 'female', 'cyborg'];
+    const bodyTypes = ['chibi', 'tall', 'muscular', 'slender'];
+    const poses = ['standard', 'wave', 'thinker', 'victory', 'walk', 'heart', 'super', 'spark', 'cross_arms', 'battle'];
+    const expressions = ['confident', 'happy', 'cool', 'wink', 'determined', 'cyber_glow', 'shy'];
+    const auras = ['none', 'phoenix', 'lightning', 'galaxy', 'matrix_halo'];
+    const hairColorsList = HAIR_COLORS.map(c => c.id);
+
+    const localCachedParts = (typeof window !== 'undefined' && user?.uid)
+      ? JSON.parse(localStorage.getItem('stem_unlocked_parts_' + user.uid) || '[]')
+      : [];
+    const currentUnlocked = [...(personalization.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default']), ...localCachedParts];
+
+    const randomGender = genders[Math.floor(Math.random() * genders.length)];
+    const randomBodyType = bodyTypes[Math.floor(Math.random() * bodyTypes.length)];
+    const randomPose = poses[Math.floor(Math.random() * poses.length)];
+    const randomExpression = expressions[Math.floor(Math.random() * expressions.length)];
+    const randomAura = auras[Math.floor(Math.random() * auras.length)];
+    const randomHairColor = hairColorsList[Math.floor(Math.random() * hairColorsList.length)];
+
+    const unlockedSkins = ALL_COSMETICS.filter(c => c.category === 'body' && (currentUnlocked.includes(c.id) || (user && (user.displayName === 'admin' || user.email?.includes('admin')))));
+    const randomSkin = unlockedSkins.length > 0 && Math.random() > 0.3 ? unlockedSkins[Math.floor(Math.random() * unlockedSkins.length)].value : 'peach';
+
+    const unlockedHairs = ALL_COSMETICS.filter(c => c.category === 'hair' && (c.genderTarget === 'unisex' || c.genderTarget === randomGender) && (currentUnlocked.includes(c.id) || (user && (user.displayName === 'admin' || user.email?.includes('admin')))));
+    const randomHair = unlockedHairs.length > 0 && Math.random() > 0.2 ? unlockedHairs[Math.floor(Math.random() * unlockedHairs.length)].value : 'default';
+
+    const unlockedTops = ALL_COSMETICS.filter(c => c.category === 'top' && (c.genderTarget === 'unisex' || c.genderTarget === randomGender) && (currentUnlocked.includes(c.id) || (user && (user.displayName === 'admin' || user.email?.includes('admin')))));
+    const randomTop = unlockedTops.length > 0 && Math.random() > 0.2 ? unlockedTops[Math.floor(Math.random() * unlockedTops.length)].value : 'default';
+
+    const unlockedBottoms = ALL_COSMETICS.filter(c => c.category === 'bottom' && (c.genderTarget === 'unisex' || c.genderTarget === randomGender) && (currentUnlocked.includes(c.id) || (user && (user.displayName === 'admin' || user.email?.includes('admin')))));
+    const randomBottom = unlockedBottoms.length > 0 && Math.random() > 0.2 ? unlockedBottoms[Math.floor(Math.random() * unlockedBottoms.length)].value : 'default';
+
+    const unlockedAccs = ALL_COSMETICS.filter(c => c.category === 'accessory' && (c.genderTarget === 'unisex' || c.genderTarget === randomGender) && (currentUnlocked.includes(c.id) || (user && (user.displayName === 'admin' || user.email?.includes('admin')))));
+    const randomAcc = unlockedAccs.length > 0 && Math.random() > 0.35 ? unlockedAccs[Math.floor(Math.random() * unlockedAccs.length)].value : 'none';
+
+    setTempAvatarParts({
+      gender: randomGender,
+      bodyType: randomBodyType,
+      pose: randomPose,
+      expression: randomExpression,
+      aura: randomAura,
+      body: randomSkin,
+      hair: randomHair,
+      hairColor: randomHairColor,
+      top: randomTop,
+      bottom: randomBottom,
+      accessory: randomAcc
+    });
   };
   // Logic Điểm danh lượng tử 30 ngày (Optimistic 0ms UI)
   const handleDailyCheckIn = async () => {
@@ -3210,17 +3367,17 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Các nút tương tác Chibi lượng tử */}
-                <div className="flex gap-2 w-full mt-4 justify-center">
+                <div className="flex flex-wrap gap-2 w-full mt-4 justify-center">
                   <button
                     onClick={triggerSpeechBubble}
-                    className="px-3.5 py-2 bg-zinc-800/80 hover:bg-zinc-800 text-zinc-300 rounded-xl text-xs font-bold border border-white/5 transition-all active:scale-95 flex items-center gap-1.5"
+                    className="px-3 py-1.5 bg-zinc-800/80 hover:bg-zinc-800 text-zinc-300 rounded-xl text-xs font-bold border border-white/5 transition-all active:scale-95 flex items-center gap-1.5"
                   >
                     <span>💬 Nói chuyện</span>
                   </button>
                   <button
                     onClick={handleDance}
                     disabled={isDancing}
-                    className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-all active:scale-95 flex items-center gap-1.5 ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all active:scale-95 flex items-center gap-1.5 ${
                       isDancing 
                         ? 'bg-pink-500/20 border-pink-500 text-pink-400' 
                         : 'bg-zinc-800/80 hover:bg-zinc-800 border-white/5 text-zinc-300'
@@ -3230,19 +3387,26 @@ export default function ProfilePage() {
                   </button>
                   <button
                     onClick={() => { playSound.click(); setIsFlipped(!isFlipped); }}
-                    className="px-3.5 py-2 bg-zinc-800/80 hover:bg-zinc-800 text-zinc-300 rounded-xl text-xs font-bold border border-white/5 transition-all active:scale-95 flex items-center gap-1.5"
+                    className="px-3 py-1.5 bg-zinc-800/80 hover:bg-zinc-800 text-zinc-300 rounded-xl text-xs font-bold border border-white/5 transition-all active:scale-95 flex items-center gap-1.5"
                   >
                     <span>🔄 Xoay lật</span>
                   </button>
+                  <button
+                    onClick={handleRandomizeOutfit}
+                    title="Ngẫu nhiên tạo một phong cách thời trang cực ngầu!"
+                    className="px-3 py-1.5 bg-gradient-to-r from-purple-600/40 via-pink-600/30 to-amber-500/30 hover:from-purple-600/60 hover:to-amber-500/50 text-amber-300 rounded-xl text-xs font-bold border border-amber-400/40 transition-all active:scale-95 flex items-center gap-1.5 shadow-sm shadow-purple-500/20"
+                  >
+                    <span>🎲 Phối ngẫu nhiên</span>
+                  </button>
                 </div>
 
-                <p className="text-[10px] text-zinc-500 text-center mt-4 leading-snug px-4">
-                  Bạn có thể chọn thử mọi trang phục. Để lưu làm ảnh đại diện chính thức, hãy bấm nút đồng bộ bên dưới.
+                <p className="text-[10px] text-zinc-500 text-center mt-3 leading-snug px-4">
+                  Bạn có thể chọn phối mọi trang phục, biểu cảm & hào quang. Bấm nút dưới để đồng bộ avatar chính!
                 </p>
 
                 <button
                   onClick={handleEquipAvatarParts}
-                  className="w-full mt-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all active:scale-95 shadow-lg shadow-pink-500/20 flex items-center justify-center gap-2"
+                  className="w-full mt-4 py-3 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all active:scale-95 shadow-lg shadow-pink-500/20 flex items-center justify-center gap-2"
                 >
                   <Sparkles className="w-4 h-4" />
                   Đồng bộ Avatar đại diện
@@ -3253,94 +3417,109 @@ export default function ProfilePage() {
               <div className="lg:col-span-7 bg-bg-secondary border border-border-theme rounded-3xl p-6 space-y-6">
                 <h4 className="text-sm font-bold text-text-primary mb-2 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-                  Tự thiết kế từng bộ phận cơ thể & thời trang
+                  Studio thiết kế nhân vật STEM phong cách Game
                 </h4>
 
-                {/* BỘ CHỌN THỂ HÌNH VÀ GIỚI TÍNH */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-bg-tertiary p-4 rounded-2xl border border-border-theme">
-                  {/* GIỚI TÍNH */}
-                  <div>
-                    <h5 className="text-[10px] font-black text-text-secondary uppercase tracking-widest mb-2">Giới tính</h5>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          playSound.click();
-                          setTempAvatarParts(prev => {
-                            const nextParts = { ...prev, gender: 'male' };
-                            // Tự động kiểm tra độ tương thích của tóc và trang phục
-                            const hairItem = ALL_COSMETICS.find(c => c.category === 'hair' && c.value === prev.hair);
-                            const topItem = ALL_COSMETICS.find(c => c.category === 'top' && c.value === prev.top);
-                            const bottomItem = ALL_COSMETICS.find(c => c.category === 'bottom' && c.value === prev.bottom);
-                            if (hairItem && hairItem.genderTarget === 'female') nextParts.hair = 'default';
-                            if (topItem && topItem.genderTarget === 'female') nextParts.top = 'default';
-                            if (bottomItem && bottomItem.genderTarget === 'female') nextParts.bottom = 'default';
-                            return nextParts;
-                          });
-                        }}
-                        className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all active:scale-95 ${
-                          tempAvatarParts.gender === 'male'
-                            ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400'
-                            : 'bg-bg-primary border-border-theme text-text-secondary hover:text-text-primary'
-                        }`}
-                      >
-                        Nam 🧑
-                      </button>
-                      <button
-                        onClick={() => {
-                          playSound.click();
-                          setTempAvatarParts(prev => {
-                            const nextParts = { ...prev, gender: 'female' };
-                            const hairItem = ALL_COSMETICS.find(c => c.category === 'hair' && c.value === prev.hair);
-                            const topItem = ALL_COSMETICS.find(c => c.category === 'top' && c.value === prev.top);
-                            const bottomItem = ALL_COSMETICS.find(c => c.category === 'bottom' && c.value === prev.bottom);
-                            if (hairItem && hairItem.genderTarget === 'male') nextParts.hair = 'default';
-                            if (topItem && topItem.genderTarget === 'male') nextParts.top = 'default';
-                            if (bottomItem && bottomItem.genderTarget === 'male') nextParts.bottom = 'default';
-                            return nextParts;
-                          });
-                        }}
-                        className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all active:scale-95 ${
-                          tempAvatarParts.gender === 'female'
-                            ? 'bg-pink-500/20 border-pink-500 text-pink-400'
-                            : 'bg-bg-primary border-border-theme text-text-secondary hover:text-text-primary'
-                        }`}
-                      >
-                        Nữ 👧
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* THỂ HÌNH */}
-                  <div>
-                    <h5 className="text-[10px] font-black text-text-secondary uppercase tracking-widest mb-2">Kiểu cơ thể</h5>
-                    <div className="flex gap-1.5">
-                      {[
-                        { id: 'chibi', label: 'Chibi 🧸' },
-                        { id: 'tall', label: 'Cao 🕴️' },
-                        { id: 'muscular', label: 'Cơ bắp 💪' }
-                      ].map(bt => (
+                {/* BỘ CHỌN THỂ HÌNH, GIỚI TÍNH, BIỂU CẢM VÀ TẠO DÁNG */}
+                <div className="space-y-4 bg-bg-tertiary p-4 rounded-2xl border border-border-theme">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* GIỚI TÍNH */}
+                    <div>
+                      <h5 className="text-[10px] font-black text-text-secondary uppercase tracking-widest mb-2">Giới tính & Dòng dõi</h5>
+                      <div className="flex gap-1.5">
                         <button
-                          key={bt.id}
                           onClick={() => {
                             playSound.click();
-                            setTempAvatarParts(prev => ({ ...prev, bodyType: bt.id }));
+                            setTempAvatarParts(prev => {
+                              const nextParts = { ...prev, gender: 'male' };
+                              const hairItem = ALL_COSMETICS.find(c => c.category === 'hair' && c.value === prev.hair);
+                              const topItem = ALL_COSMETICS.find(c => c.category === 'top' && c.value === prev.top);
+                              const bottomItem = ALL_COSMETICS.find(c => c.category === 'bottom' && c.value === prev.bottom);
+                              if (hairItem && hairItem.genderTarget === 'female') nextParts.hair = 'default';
+                              if (topItem && topItem.genderTarget === 'female') nextParts.top = 'default';
+                              if (bottomItem && bottomItem.genderTarget === 'female') nextParts.bottom = 'default';
+                              return nextParts;
+                            });
                           }}
-                          className={`flex-1 py-2 rounded-lg text-[10px] font-bold border transition-all active:scale-95 ${
-                            tempAvatarParts.bodyType === bt.id
-                              ? 'bg-purple-500/20 border-purple-500 text-purple-400'
+                          className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all active:scale-95 ${
+                            tempAvatarParts.gender === 'male'
+                              ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400'
                               : 'bg-bg-primary border-border-theme text-text-secondary hover:text-text-primary'
                           }`}
                         >
-                          {bt.label}
+                          Nam 🧑
                         </button>
-                      ))}
+                        <button
+                          onClick={() => {
+                            playSound.click();
+                            setTempAvatarParts(prev => {
+                              const nextParts = { ...prev, gender: 'female' };
+                              const hairItem = ALL_COSMETICS.find(c => c.category === 'hair' && c.value === prev.hair);
+                              const topItem = ALL_COSMETICS.find(c => c.category === 'top' && c.value === prev.top);
+                              const bottomItem = ALL_COSMETICS.find(c => c.category === 'bottom' && c.value === prev.bottom);
+                              if (hairItem && hairItem.genderTarget === 'male') nextParts.hair = 'default';
+                              if (topItem && topItem.genderTarget === 'male') nextParts.top = 'default';
+                              if (bottomItem && bottomItem.genderTarget === 'male') nextParts.bottom = 'default';
+                              return nextParts;
+                            });
+                          }}
+                          className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all active:scale-95 ${
+                            tempAvatarParts.gender === 'female'
+                              ? 'bg-pink-500/20 border-pink-500 text-pink-400'
+                              : 'bg-bg-primary border-border-theme text-text-secondary hover:text-text-primary'
+                          }`}
+                        >
+                          Nữ 👧
+                        </button>
+                        <button
+                          onClick={() => {
+                            playSound.click();
+                            setTempAvatarParts(prev => ({ ...prev, gender: 'cyborg' }));
+                          }}
+                          className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all active:scale-95 ${
+                            tempAvatarParts.gender === 'cyborg'
+                              ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-sm shadow-emerald-500/20'
+                              : 'bg-bg-primary border-border-theme text-text-secondary hover:text-text-primary'
+                          }`}
+                        >
+                          Cyborg 🤖
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* THỂ HÌNH */}
+                    <div>
+                      <h5 className="text-[10px] font-black text-text-secondary uppercase tracking-widest mb-2">Vóc dáng cơ thể</h5>
+                      <div className="flex gap-1.5">
+                        {[
+                          { id: 'chibi', label: 'Chibi 🧸' },
+                          { id: 'tall', label: 'Cao ráo 🕴️' },
+                          { id: 'muscular', label: 'Cơ bắp 💪' },
+                          { id: 'slender', label: 'Mảnh mai 💃' }
+                        ].map(bt => (
+                          <button
+                            key={bt.id}
+                            onClick={() => {
+                              playSound.click();
+                              setTempAvatarParts(prev => ({ ...prev, bodyType: bt.id }));
+                            }}
+                            className={`flex-1 py-2 rounded-lg text-[10px] font-bold border transition-all active:scale-95 ${
+                              tempAvatarParts.bodyType === bt.id
+                                ? 'bg-purple-500/20 border-purple-500 text-purple-400'
+                                : 'bg-bg-primary border-border-theme text-text-secondary hover:text-text-primary'
+                            }`}
+                          >
+                            {bt.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
                   {/* TẠO DÁNG */}
                   <div>
-                    <h5 className="text-[10px] font-black text-text-secondary uppercase tracking-widest mb-2">Tạo dáng</h5>
-                    <div className="grid grid-cols-4 gap-1.5">
+                    <h5 className="text-[10px] font-black text-text-secondary uppercase tracking-widest mb-2">Tư thế & Tạo dáng</h5>
+                    <div className="grid grid-cols-5 gap-1.5">
                       {[
                         { id: 'standard', label: 'Chuẩn 🧍' },
                         { id: 'wave', label: 'Chào 👋' },
@@ -3349,7 +3528,9 @@ export default function ProfilePage() {
                         { id: 'walk', label: 'Đi bộ 🏃' },
                         { id: 'heart', label: 'Bắn tim 💖' },
                         { id: 'super', label: 'Bay cao 🦸' },
-                        { id: 'spark', label: 'Bắn sét ⚡' }
+                        { id: 'spark', label: 'Bắn sét ⚡' },
+                        { id: 'cross_arms', label: 'Khoanh tay 🦾' },
+                        { id: 'battle', label: 'Chiến đấu 🥋' }
                       ].map(ps => (
                         <button
                           key={ps.id}
@@ -3357,13 +3538,73 @@ export default function ProfilePage() {
                             playSound.click();
                             setTempAvatarParts(prev => ({ ...prev, pose: ps.id }));
                           }}
-                          className={`py-1.5 rounded-lg text-[8px] font-bold border transition-all text-center active:scale-95 ${
+                          className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all text-center active:scale-95 ${
                             tempAvatarParts.pose === ps.id
                               ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-sm shadow-amber-500/15'
                               : 'bg-bg-primary border-border-theme text-text-secondary hover:text-text-primary'
                           }`}
                         >
                           {ps.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* BIỂU CẢM GƯƠNG MẶT */}
+                  <div>
+                    <h5 className="text-[10px] font-black text-text-secondary uppercase tracking-widest mb-2">Biểu cảm khuôn mặt</h5>
+                    <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5">
+                      {[
+                        { id: 'confident', label: 'Tự tin 😎' },
+                        { id: 'happy', label: 'Vui tươi 😊' },
+                        { id: 'cool', label: 'Lạnh lùng 🧊' },
+                        { id: 'wink', label: 'Nháy mắt 😉' },
+                        { id: 'determined', label: 'Quyết tâm 🔥' },
+                        { id: 'cyber_glow', label: 'Laser HUD 🤖' },
+                        { id: 'shy', label: 'Bẽn lẽn 😳' }
+                      ].map(expr => (
+                        <button
+                          key={expr.id}
+                          onClick={() => {
+                            playSound.click();
+                            setTempAvatarParts(prev => ({ ...prev, expression: expr.id }));
+                          }}
+                          className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all text-center active:scale-95 ${
+                            tempAvatarParts.expression === expr.id
+                              ? 'bg-rose-500/20 border-rose-500 text-rose-400 shadow-sm shadow-rose-500/15'
+                              : 'bg-bg-primary border-border-theme text-text-secondary hover:text-text-primary'
+                          }`}
+                        >
+                          {expr.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* KHÍ CHẤT & HÀO QUANG */}
+                  <div>
+                    <h5 className="text-[10px] font-black text-text-secondary uppercase tracking-widest mb-2">Khí chất & Hào quang Vũ trụ (Aura)</h5>
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
+                      {[
+                        { id: 'none', label: 'Không có ❌' },
+                        { id: 'phoenix', label: 'Hỏa Phượng 🔥' },
+                        { id: 'lightning', label: 'Lôi Điện ⚡' },
+                        { id: 'galaxy', label: 'Ngân Hà 🌌' },
+                        { id: 'matrix_halo', label: 'Ma Trận Số 💻' }
+                      ].map(aur => (
+                        <button
+                          key={aur.id}
+                          onClick={() => {
+                            playSound.click();
+                            setTempAvatarParts(prev => ({ ...prev, aura: aur.id }));
+                          }}
+                          className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all text-center active:scale-95 ${
+                            (tempAvatarParts.aura || 'none') === aur.id
+                              ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400 shadow-sm shadow-cyan-500/15'
+                              : 'bg-bg-primary border-border-theme text-text-secondary hover:text-text-primary'
+                          }`}
+                        >
+                          {aur.label}
                         </button>
                       ))}
                     </div>
@@ -3388,7 +3629,11 @@ export default function ProfilePage() {
                     </button>
                     {/* Các màu da khác */}
                     {ALL_COSMETICS.filter(c => c.category === 'body' && (c.genderTarget === 'unisex' || c.genderTarget === tempAvatarParts.gender)).map((item) => {
-                      const isUnlocked = (personalization.unlockedParts || []).includes(item.id) || (user && (user.displayName === 'admin' || user.email?.includes('admin')));
+                      const localCachedParts = (typeof window !== 'undefined' && user?.uid)
+                        ? JSON.parse(localStorage.getItem('stem_unlocked_parts_' + user.uid) || '[]')
+                        : [];
+                      const isUnlocked = (personalization.unlockedParts || []).includes(item.id) || localCachedParts.includes(item.id) || (user && (user.displayName === 'admin' || user.email?.includes('admin')));
+                      const isNewlyWon = recentWonGachaIds.includes(item.id);
                       const isSelected = tempAvatarParts.body === item.value;
                       return (
                         <button
@@ -3407,6 +3652,9 @@ export default function ProfilePage() {
                               : 'bg-bg-primary border-border-theme text-text-secondary opacity-55 cursor-not-allowed'
                           }`}
                         >
+                          {isNewlyWon && (
+                            <span className="absolute -top-1.5 -right-1 text-[7px] font-black bg-gradient-to-r from-pink-500 to-amber-400 text-white px-1.5 py-0.5 rounded-full shadow-md animate-bounce z-10">MỚI ✨</span>
+                          )}
                           <span className="w-4 h-4 rounded-full border border-border-theme" style={{ backgroundColor: skinColors[item.value] }} />
                           <span className="truncate w-full">{item.name.replace('Màu da ', '')}</span>
                           {!isUnlocked && (
@@ -3436,7 +3684,11 @@ export default function ProfilePage() {
                       </button>
                       {/* Các kiểu tóc khác */}
                       {ALL_COSMETICS.filter(c => c.category === 'hair' && (c.genderTarget === 'unisex' || c.genderTarget === tempAvatarParts.gender)).map((item) => {
-                        const isUnlocked = (personalization.unlockedParts || []).includes(item.id) || (user && (user.displayName === 'admin' || user.email?.includes('admin')));
+                        const localCachedParts = (typeof window !== 'undefined' && user?.uid)
+                          ? JSON.parse(localStorage.getItem('stem_unlocked_parts_' + user.uid) || '[]')
+                          : [];
+                        const isUnlocked = (personalization.unlockedParts || []).includes(item.id) || localCachedParts.includes(item.id) || (user && (user.displayName === 'admin' || user.email?.includes('admin')));
+                        const isNewlyWon = recentWonGachaIds.includes(item.id);
                         const isSelected = tempAvatarParts.hair === item.value;
                         return (
                           <button
@@ -3455,6 +3707,9 @@ export default function ProfilePage() {
                                 : 'bg-bg-primary border-border-theme text-text-secondary opacity-55 cursor-not-allowed'
                             }`}
                           >
+                            {isNewlyWon && (
+                              <span className="absolute -top-1.5 -right-1 text-[7px] font-black bg-gradient-to-r from-pink-500 to-amber-400 text-white px-1.5 py-0.5 rounded-full shadow-md animate-bounce z-10">MỚI ✨</span>
+                            )}
                             <span className="truncate w-full">{item.name.replace('Tóc ', '')}</span>
                             {!isUnlocked && (
                               <span className="absolute top-1 right-1 text-[8px] bg-bg-primary text-amber-400 p-0.5 rounded">🔒</span>
@@ -3506,7 +3761,11 @@ export default function ProfilePage() {
                       </button>
                       {/* Mở rộng */}
                       {ALL_COSMETICS.filter(c => c.category === 'top' && (c.genderTarget === 'unisex' || c.genderTarget === tempAvatarParts.gender)).map((item) => {
-                        const isUnlocked = (personalization.unlockedParts || []).includes(item.id) || (user && (user.displayName === 'admin' || user.email?.includes('admin')));
+                        const localCachedParts = (typeof window !== 'undefined' && user?.uid)
+                          ? JSON.parse(localStorage.getItem('stem_unlocked_parts_' + user.uid) || '[]')
+                          : [];
+                        const isUnlocked = (personalization.unlockedParts || []).includes(item.id) || localCachedParts.includes(item.id) || (user && (user.displayName === 'admin' || user.email?.includes('admin')));
+                        const isNewlyWon = recentWonGachaIds.includes(item.id);
                         const isSelected = tempAvatarParts.top === item.value;
                         return (
                           <button
@@ -3517,7 +3776,7 @@ export default function ProfilePage() {
                               playSound.click();
                               setTempAvatarParts(prev => ({ ...prev, top: item.value }));
                             }}
-                            className={`w-full px-3 py-2 rounded-xl text-[11px] font-bold border transition-all text-left flex justify-between items-center ${
+                            className={`w-full px-3 py-2 rounded-xl text-[11px] font-bold border transition-all text-left flex justify-between items-center relative ${
                               isSelected
                                 ? 'bg-pink-500/20 border-pink-500 text-pink-400'
                                 : isUnlocked
@@ -3525,7 +3784,12 @@ export default function ProfilePage() {
                                 : 'bg-bg-primary border-border-theme text-text-secondary opacity-55 cursor-not-allowed'
                             }`}
                           >
-                            <span>{item.name}</span>
+                            <span className="flex items-center gap-1.5">
+                              {item.name}
+                              {isNewlyWon && (
+                                <span className="text-[7px] font-black bg-gradient-to-r from-pink-500 to-amber-400 text-white px-1.5 py-0.2 rounded-full shadow-sm animate-bounce">MỚI ✨</span>
+                              )}
+                            </span>
                             {!isUnlocked && (
                               <span className="text-[10px] text-amber-400 flex items-center gap-1">🔒 Khóa</span>
                             )}
@@ -3553,7 +3817,11 @@ export default function ProfilePage() {
                       </button>
                       {/* Mở rộng */}
                       {ALL_COSMETICS.filter(c => c.category === 'bottom' && (c.genderTarget === 'unisex' || c.genderTarget === tempAvatarParts.gender)).map((item) => {
-                        const isUnlocked = (personalization.unlockedParts || []).includes(item.id) || (user && (user.displayName === 'admin' || user.email?.includes('admin')));
+                        const localCachedParts = (typeof window !== 'undefined' && user?.uid)
+                          ? JSON.parse(localStorage.getItem('stem_unlocked_parts_' + user.uid) || '[]')
+                          : [];
+                        const isUnlocked = (personalization.unlockedParts || []).includes(item.id) || localCachedParts.includes(item.id) || (user && (user.displayName === 'admin' || user.email?.includes('admin')));
+                        const isNewlyWon = recentWonGachaIds.includes(item.id);
                         const isSelected = tempAvatarParts.bottom === item.value;
                         return (
                           <button
@@ -3564,7 +3832,7 @@ export default function ProfilePage() {
                               playSound.click();
                               setTempAvatarParts(prev => ({ ...prev, bottom: item.value }));
                             }}
-                            className={`w-full px-3 py-2 rounded-xl text-[11px] font-bold border transition-all text-left flex justify-between items-center ${
+                            className={`w-full px-3 py-2 rounded-xl text-[11px] font-bold border transition-all text-left flex justify-between items-center relative ${
                               isSelected
                                 ? 'bg-pink-500/20 border-pink-500 text-pink-400'
                                 : isUnlocked
@@ -3572,7 +3840,12 @@ export default function ProfilePage() {
                                 : 'bg-bg-primary border-border-theme text-text-secondary opacity-55 cursor-not-allowed'
                             }`}
                           >
-                            <span>{item.name}</span>
+                            <span className="flex items-center gap-1.5">
+                              {item.name}
+                              {isNewlyWon && (
+                                <span className="text-[7px] font-black bg-gradient-to-r from-pink-500 to-amber-400 text-white px-1.5 py-0.2 rounded-full shadow-sm animate-bounce">MỚI ✨</span>
+                              )}
+                            </span>
                             {!isUnlocked && (
                               <span className="text-[10px] text-amber-400 flex items-center gap-1">🔒 Khóa</span>
                             )}
@@ -3600,7 +3873,11 @@ export default function ProfilePage() {
                     </button>
                     {/* Các phụ kiện khác */}
                     {ALL_COSMETICS.filter(c => c.category === 'accessory' && (c.genderTarget === 'unisex' || c.genderTarget === tempAvatarParts.gender)).map((item) => {
-                      const isUnlocked = (personalization.unlockedParts || []).includes(item.id) || (user && (user.displayName === 'admin' || user.email?.includes('admin')));
+                      const localCachedParts = (typeof window !== 'undefined' && user?.uid)
+                        ? JSON.parse(localStorage.getItem('stem_unlocked_parts_' + user.uid) || '[]')
+                        : [];
+                      const isUnlocked = (personalization.unlockedParts || []).includes(item.id) || localCachedParts.includes(item.id) || (user && (user.displayName === 'admin' || user.email?.includes('admin')));
+                      const isNewlyWon = recentWonGachaIds.includes(item.id);
                       const isSelected = tempAvatarParts.accessory === item.value;
                       return (
                         <button
@@ -3619,6 +3896,9 @@ export default function ProfilePage() {
                               : 'bg-bg-primary border-border-theme text-text-secondary opacity-55 cursor-not-allowed'
                           }`}
                         >
+                          {isNewlyWon && (
+                            <span className="absolute -top-1.5 -right-1 text-[7px] font-black bg-gradient-to-r from-pink-500 to-amber-400 text-white px-1.5 py-0.5 rounded-full shadow-md animate-bounce z-10">MỚI ✨</span>
+                          )}
                           <span className="truncate w-full">{item.name.replace('Kính Thực Tế Ảo ', '')}</span>
                           {!isUnlocked && (
                             <span className="absolute top-1 right-1 text-[8px] bg-bg-primary text-amber-400 p-0.5 rounded">🔒</span>
@@ -4769,38 +5049,119 @@ export default function ProfilePage() {
 
       {/* ================== CINEMATIC QUANTUM WARP OVERLAY (KHI ĐANG QUAY GACHA) ================== */}
       {isRolling && (
-        <div className="fixed inset-0 z-[12000] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center select-none overflow-hidden animate-in fade-in duration-300">
-          {/* Nền hiệu ứng lỗ sâu không-thời gian */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.3)_0%,rgba(6,182,212,0.18)_35%,rgba(15,23,42,0.8)_70%,black_100%)] pointer-events-none" />
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none opacity-40" />
+        <div 
+          onClick={handleBoostWarp}
+          title="Nhấp chuột để tăng tốc gia tốc hạt!"
+          className="fixed inset-0 z-[999999] bg-[#030712] flex flex-col items-center justify-between p-6 text-center select-none overflow-hidden animate-in fade-in duration-300 cursor-pointer"
+        >
+          {/* Nền hiệu ứng lỗ sâu không-thời gian & Tia laser tốc độ Warp */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.35)_0%,rgba(6,182,212,0.22)_35%,rgba(15,23,42,0.92)_70%,#030712_100%)] pointer-events-none" />
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.06)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none opacity-40" />
+          
+          {/* Hiệu ứng vệt sáng sao băng Warp Tunnel đa chiều */}
+          <div className={`absolute inset-0 pointer-events-none overflow-hidden transition-all duration-500 ${warpStage >= 2 ? 'opacity-80 scale-110' : 'opacity-40 scale-100'}`}>
+            <div className="absolute inset-0 bg-[repeating-conic-gradient(from_0deg,transparent_0deg_8deg,rgba(6,182,212,0.08)_8deg_10deg,transparent_10deg_20deg)] animate-spin" style={{ animationDuration: warpStage === 3 ? '2s' : warpStage === 2 ? '4s' : '9s' }} />
+            <div className="absolute inset-0 bg-[repeating-conic-gradient(from_45deg,transparent_0deg_12deg,rgba(236,72,153,0.07)_12deg_14deg,transparent_14deg_28deg)] animate-spin" style={{ animationDirection: 'reverse', animationDuration: warpStage === 3 ? '2.5s' : warpStage === 2 ? '5s' : '11s' }} />
+          </div>
 
-          {/* Cụm vòng xoay gia tốc hạt lượng tử */}
-          <div className="relative w-72 h-72 sm:w-88 sm:h-88 flex items-center justify-center mb-8">
-            {/* Vòng ngoài cùng xoay nhanh */}
-            <div className="absolute inset-0 rounded-full border-4 border-dashed border-cyan-400/50 animate-spin" style={{ animationDuration: '6s' }} />
-            {/* Vòng giữa xoay ngược chiều */}
-            <div className="absolute inset-5 rounded-full border-2 border-dashed border-purple-500/70 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '3.5s' }} />
-            {/* Sóng xung kích phát quang */}
-            <div className="absolute inset-12 rounded-full border-2 border-pink-500/60 animate-ping" style={{ animationDuration: '1.8s' }} />
-            {/* Hào quang tâm lỗ sâu */}
-            <div className="absolute w-40 h-40 rounded-full bg-gradient-to-tr from-purple-600 via-pink-500 to-cyan-400 blur-2xl opacity-75 animate-pulse" />
+          {/* Thanh HUD Điều khiển & Trạng thái phía trên */}
+          <div className="relative z-10 w-full max-w-5xl flex items-center justify-between pt-2">
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-[10px] font-mono tracking-widest uppercase shadow-[0_0_15px_rgba(6,182,212,0.2)]">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+              <span>HỆ THỐNG GIA TỐC HẠT LƯỢNG TỬ v4.5</span>
+            </div>
             
-            {/* Lõi Singularity tinh thể */}
-            <div className="relative z-10 w-28 h-28 rounded-full bg-gradient-to-br from-[#0c0d1e] via-[#1c1236] to-black border-2 border-cyan-300 flex items-center justify-center shadow-[0_0_60px_rgba(6,182,212,0.9)] transform hover:scale-105 transition-transform">
-              <CrystalIcon className="w-14 h-14 text-cyan-300 drop-shadow-[0_0_20px_#00ffff] animate-bounce" />
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSkipWarp();
+              }}
+              className="px-4 py-1.5 rounded-full bg-purple-500/20 hover:bg-purple-500/40 border border-purple-400/50 text-purple-200 hover:text-white text-xs font-mono font-bold tracking-wider uppercase transition-all active:scale-95 flex items-center gap-1.5 shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:border-purple-400"
+            >
+              <span>BỎ QUA HOẠT ẢNH</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Cụm vòng xoay gia tốc hạt lượng tử Trung tâm */}
+          <div className="relative z-10 flex flex-col items-center justify-center my-auto">
+            <div className={`relative w-64 h-64 sm:w-80 sm:h-80 flex items-center justify-center transition-transform duration-300 ${warpBoosted ? 'scale-110' : 'scale-100'}`}>
+              {/* Vòng ngoài cùng xoay gia tốc */}
+              <div 
+                className="absolute inset-0 rounded-full border-4 border-dashed border-cyan-400/60 animate-spin" 
+                style={{ animationDuration: warpStage === 3 ? '1.5s' : warpStage === 2 ? '3s' : '6s' }} 
+              />
+              
+              {/* Vòng giữa xoay ngược chiều */}
+              <div 
+                className="absolute inset-4 rounded-full border-2 border-dashed border-purple-500/80 animate-spin" 
+                style={{ animationDirection: 'reverse', animationDuration: warpStage === 3 ? '1s' : warpStage === 2 ? '2s' : '4s' }} 
+              />
+              
+              {/* Sóng xung kích phát quang liên tục */}
+              <div 
+                className={`absolute inset-10 rounded-full border-2 ${warpStage === 3 ? 'border-amber-400/80 animate-ping' : warpStage === 2 ? 'border-pink-500/70 animate-ping' : 'border-cyan-400/50 animate-ping'}`} 
+                style={{ animationDuration: warpStage === 3 ? '0.8s' : '1.4s' }} 
+              />
+              
+              {/* Hào quang tâm lỗ sâu theo giai đoạn */}
+              <div className={`absolute w-36 h-36 rounded-full blur-2xl opacity-80 animate-pulse transition-all duration-700 ${
+                warpStage === 3
+                  ? 'bg-gradient-to-tr from-amber-500 via-rose-500 to-yellow-300'
+                  : warpStage === 2
+                  ? 'bg-gradient-to-tr from-purple-600 via-pink-500 to-cyan-400'
+                  : 'bg-gradient-to-tr from-cyan-500 via-blue-600 to-purple-600'
+              }`} />
+              
+              {/* Lõi Singularity tinh thể */}
+              <div className="relative z-10 w-28 h-28 rounded-full bg-gradient-to-br from-[#0c0d1e] via-[#1c1236] to-black border-2 border-cyan-300 flex items-center justify-center shadow-[0_0_60px_rgba(6,182,212,0.9)] transform hover:scale-105 transition-transform">
+                <CrystalIcon className={`w-14 h-14 drop-shadow-[0_0_25px_#00ffff] animate-bounce transition-colors duration-500 ${
+                  warpStage === 3 ? 'text-amber-300' : warpStage === 2 ? 'text-pink-300' : 'text-cyan-300'
+                }`} />
+              </div>
+            </div>
+
+            {/* Thông báo tương tác gia tốc khi nhấn/giữ */}
+            <div className="mt-4 flex items-center gap-2">
+              <span className={`text-[11px] font-mono tracking-wider transition-all duration-200 ${
+                warpBoosted 
+                  ? 'text-amber-300 font-bold scale-105' 
+                  : 'text-zinc-400 hover:text-cyan-300'
+              }`}>
+                {warpBoosted ? '⚡ XUNG LỰC GIA TỐC: +12% TỐC ĐỘ!' : '💡 Nhấp chuột liên tục để TĂNG TỐC GIA TỐC HẠT!'}
+              </span>
             </div>
           </div>
 
-          {/* Dải thông số HUD Sci-Fi */}
-          <div className="relative z-10 space-y-3 max-w-lg">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/15 border border-cyan-400/40 text-cyan-300 text-xs font-mono font-black tracking-widest uppercase shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+          {/* Dải thông số HUD Sci-Fi & Thanh tiến trình phía dưới */}
+          <div className="relative z-10 w-full max-w-lg space-y-3.5 pb-4">
+            {/* Stage Pill */}
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/60 border border-cyan-400/40 text-xs font-mono font-bold tracking-widest uppercase shadow-[0_0_15px_rgba(6,182,212,0.25)]">
               <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" />
-              CỔNG GIA TỐC HẠT ĐA VŨ TRỤ ĐANG KHAI MỞ
+              {warpStage === 1 && <span className="text-cyan-300">GIAI ĐOẠN 1: NẠP NĂNG LƯỢNG LÕI PHẢN ỨNG (4.2 THz)</span>}
+              {warpStage === 2 && <span className="text-pink-300">GIAI ĐOẠN 2: GIA TỐC XUYÊN LỖ SÂU THỜI KHÔNG</span>}
+              {warpStage === 3 && <span className="text-amber-300">GIAI ĐOẠN 3: GIẢI MÃ THÀNH CÔNG VẬT PHẨM LƯỢNG TỬ!</span>}
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-pink-300 to-amber-300 uppercase tracking-widest drop-shadow-[0_0_25px_rgba(168,85,247,0.5)]">
+
+            {/* High-tech Sci-Fi Progress Bar */}
+            <div className="space-y-1">
+              <div className="w-full h-3 bg-zinc-950/80 rounded-full border border-cyan-500/30 p-0.5 overflow-hidden shadow-[0_0_15px_rgba(6,182,212,0.25)]">
+                <div 
+                  className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-pink-500 to-amber-400 transition-all duration-100"
+                  style={{ width: `${warpProgress}%` }}
+                />
+              </div>
+              <div className="flex justify-between items-center text-[10px] font-mono text-zinc-400 px-1">
+                <span>TIẾN TRÌNH: <strong className="text-cyan-300">{warpProgress}%</strong></span>
+                <span>TẦN SỐ: <strong className="text-pink-300">{(3.2 + (warpProgress * 0.05)).toFixed(2)} THz</strong></span>
+                <span>TIÊU HAO: <strong className="text-amber-300">{gachaCrystalsSpent} 🔮</strong></span>
+              </div>
+            </div>
+
+            <h2 className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-pink-300 to-amber-300 uppercase tracking-widest drop-shadow-[0_0_25px_rgba(168,85,247,0.5)]">
               ĐANG TRÍCH XUẤT VẬT PHẨM LƯỢNG TỬ
             </h2>
-            <p className="text-xs text-zinc-300 font-mono tracking-wide leading-relaxed">
+            <p className="text-[11px] text-zinc-400 font-mono tracking-wide leading-relaxed">
               Giải mã liên kết xác suất lượng tử... Vui lòng giữ vững tần số sóng não!
             </p>
           </div>
@@ -4809,7 +5170,7 @@ export default function ProfilePage() {
 
       {/* ================== MODAL QUAY GACHA LẬT THẺ LƯỢNG TỬ 3D HOLOGRAM ================== */}
       {showGachaModal && (
-        <div className="fixed top-0 bottom-0 right-0 left-0 md:left-[260px] z-[11000] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-[11000] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
           <div className="relative w-full max-w-3xl bg-bg-secondary border border-purple-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl text-center overflow-hidden my-8 ring-1 ring-purple-500/20">
             {/* Lưới tọa độ laser nền */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(168,85,247,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.05)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />

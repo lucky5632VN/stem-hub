@@ -4,16 +4,15 @@ test.describe('E2E Real User - 10: Toàn bộ Tính năng Hồ sơ, Chibi Maker,
 
   const ensureLogin = async (page) => {
     await page.goto('/login', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(1000);
-
     const emailInput = page.locator('input[type="email"], input[name="email"]').first();
     const passwordInput = page.locator('input[type="password"]').first();
     const submitBtn = page.locator('button[type="submit"], form button:has-text("Đăng nhập")').first();
 
-    if (await emailInput.isVisible({ timeout: 2000 }).catch(() => false)) {
+    if (await emailInput.isVisible({ timeout: 6000 }).catch(() => false)) {
       await emailInput.fill('test1@gmail.com');
       await passwordInput.fill('test1123');
       await submitBtn.click();
+      await page.waitForURL(url => !url.pathname.includes('/login'), { timeout: 8000 }).catch(() => {});
       await page.waitForTimeout(2000);
     }
   };
@@ -21,7 +20,8 @@ test.describe('E2E Real User - 10: Toàn bộ Tính năng Hồ sơ, Chibi Maker,
   test('10.1 - Kiểm tra Điểm danh 30 ngày (Attendance) & Nhận quà tức thì không độ trễ', async ({ page }) => {
     await ensureLogin(page);
     await page.goto('/ho-so?tab=daily_checkin', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(1500);
+    await page.locator('text=Hồ sơ Nhà khoa học').waitFor({ timeout: 10000 }).catch(() => {});
+    await page.waitForTimeout(1000);
 
     const bodyText = await page.innerText('body');
     expect(bodyText.includes('ĐIỂM DANH') || bodyText.includes('Điểm danh')).toBeTruthy();
@@ -46,7 +46,8 @@ test.describe('E2E Real User - 10: Toàn bộ Tính năng Hồ sơ, Chibi Maker,
   test('10.2 - Kiểm tra Chibi Maker: Đầy đủ trang phục mới (Nano Suit, Phượng Hoàng, Cánh Lượng Tử, Tóc Saiyan)', async ({ page }) => {
     await ensureLogin(page);
     await page.goto('/ho-so?tab=personalization&subtab=character', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(1500);
+    await page.locator('text=Hồ sơ Nhà khoa học').waitFor({ timeout: 10000 }).catch(() => {});
+    await page.waitForTimeout(1000);
 
     const bodyText = await page.innerText('body');
     expect(bodyText.includes('Chibi Maker') || bodyText.includes('Tạo Nhân Vật') || bodyText.includes('Nhân vật')).toBeTruthy();
@@ -67,7 +68,8 @@ test.describe('E2E Real User - 10: Toàn bộ Tính năng Hồ sơ, Chibi Maker,
   test('10.3 - Kiểm tra Cửa Hàng & Gacha Lượng Tử: Hiệu ứng Warp Vortex & Lật Thẻ 3D', async ({ page }) => {
     await ensureLogin(page);
     await page.goto('/ho-so?tab=personalization&subtab=shop_gacha', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(1500);
+    await page.locator('text=Hồ sơ Nhà khoa học').waitFor({ timeout: 10000 }).catch(() => {});
+    await page.waitForTimeout(1000);
 
     const bodyText = await page.innerText('body');
     expect(bodyText.includes('Gacha') || bodyText.includes('Cửa Hàng')).toBeTruthy();
@@ -82,7 +84,7 @@ test.describe('E2E Real User - 10: Toàn bộ Tính năng Hồ sơ, Chibi Maker,
       await page.waitForTimeout(2500);
 
       const postRollText = await page.innerText('body');
-      const gachaSucceeded = postRollText.includes('GIẢI MÃ') || postRollText.includes('Lật toàn bộ') || postRollText.includes('Pha lê') || postRollText.includes('Đang trích xuất');
+      const gachaSucceeded = postRollText.includes('GIẢI MÃ') || postRollText.includes('Lật toàn bộ') || postRollText.includes('Pha lê') || postRollText.includes('Đang trích xuất') || postRollText.includes('CỔNG GIA TỐC');
       console.log(`[10.3] Trạng thái Gacha: ${gachaSucceeded}`);
       expect(gachaSucceeded).toBeTruthy();
 
@@ -99,7 +101,8 @@ test.describe('E2E Real User - 10: Toàn bộ Tính năng Hồ sơ, Chibi Maker,
   test('10.4 - Kiểm tra Mạng lưới Bạn bè: Tìm kiếm, Gửi lời mời & Chấp nhận không bị lỗi quyền', async ({ page }) => {
     await ensureLogin(page);
     await page.goto('/ho-so?tab=friends', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(1500);
+    await page.locator('text=Hồ sơ Nhà khoa học').waitFor({ timeout: 10000 }).catch(() => {});
+    await page.waitForTimeout(1000);
 
     const bodyText = await page.innerText('body');
     expect(bodyText.includes('Bạn bè') || bodyText.includes('Kết bạn') || bodyText.includes('CHIẾN HỮU')).toBeTruthy();
@@ -119,7 +122,8 @@ test.describe('E2E Real User - 10: Toàn bộ Tính năng Hồ sơ, Chibi Maker,
   test('10.5 - Kiểm tra Nền Cổng & Quà Level: Nhận quà mốc cấp độ với Modal Hologram', async ({ page }) => {
     await ensureLogin(page);
     await page.goto('/ho-so?tab=personalization&subtab=background_rewards', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(1500);
+    await page.locator('text=Hồ sơ Nhà khoa học').waitFor({ timeout: 10000 }).catch(() => {});
+    await page.waitForTimeout(1000);
 
     const bodyText = await page.innerText('body');
     expect(bodyText.includes('Nền Cổng') || bodyText.includes('Mốc Cấp Độ') || bodyText.includes('Level')).toBeTruthy();
