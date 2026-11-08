@@ -3,10 +3,35 @@
 import { useState, useEffect } from 'react';
 import { 
   ShieldCheck, CheckCircle2, XCircle, Edit3, Clock, AlertTriangle, 
-  Search, Filter, RefreshCw, BookOpen, UserCheck, Trash2, ArrowRight
+  Search, Filter, RefreshCw, BookOpen, UserCheck, Trash2, ArrowRight, Zap
 } from 'lucide-react';
 import { playSound } from '@/lib/sound';
 import { formatMathText } from '@/lib/mathFormatter';
+
+function formatDisplayDate(val, id) {
+  if (val) {
+    if (typeof val === 'object') {
+      const sec = val.seconds ?? val._seconds;
+      if (sec) {
+        return new Date(sec * 1000).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      }
+    }
+    const d = new Date(val);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+  }
+  if (id) {
+    const match = String(id).match(/(\d{12,13})/);
+    if (match) {
+      const ts = parseInt(match[1], 10);
+      if (!isNaN(ts) && ts > 1600000000000) {
+        return new Date(ts).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      }
+    }
+  }
+  return 'Gần đây';
+}
 
 export default function KnowledgeReviewAdminPage() {
   const [knowledgeList, setKnowledgeList] = useState([]);
@@ -18,6 +43,7 @@ export default function KnowledgeReviewAdminPage() {
   const [editAnswerText, setEditAnswerText] = useState('');
   const [teacherName, setTeacherName] = useState('Thầy Nguyễn Trọng Nghĩa (Tổ phó Chuyên môn)');
   const [actionLoading, setActionLoading] = useState(null);
+  const [batchLoading, setBatchLoading] = useState(false);
 
   const fetchKnowledge = async () => {
     setLoading(true);
@@ -170,12 +196,62 @@ export default function KnowledgeReviewAdminPage() {
     }
   };
 
+  const handleVerifyAll = async () => {
+    if (pendingCount === 0) {
+      alert('Tất cả các bản ghi tri thức đều đã được phê duyệt!');
+      return;
+    }
+    if (!confirm(`Bạn có chắc chắn muốn tự động phê duyệt toàn bộ ${pendingCount} tri thức đang chờ để hoàn thiện danh mục kiến thức đã kiểm duyệt phục vụ hội đồng chấm thi?`)) return;
+    setBatchLoading(true);
+    try {
+      const res = await fetch('/api/learned-knowledge', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-secret-key': 'stemhub_admin_secret_key_2026'
+        },
+        body: JSON.stringify({
+          action: 'verify_all',
+          teacherName
+        })
+      });
+
+      if (res.ok) {
+        playSound.success();
+        const now = new Date().toISOString();
+        setKnowledgeList(prev => prev.map(item => {
+          if (item.status === 'rejected') return item;
+          return {
+            ...item,
+            status: 'verified_by_teacher',
+            teacherVerified: true,
+            verifiedBy: teacherName,
+            verifiedAt: item.verifiedAt || now
+          };
+        }));
+        setActiveTab('verified');
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        alert(`Không thể phê duyệt hàng loạt: ${errData.error || res.statusText}`);
+      }
+    } catch (err) {
+      console.error('Lỗi phê duyệt hàng loạt:', err);
+      alert('Lỗi kết nối khi gửi yêu cầu phê duyệt hàng loạt: ' + err.message);
+    } finally {
+      setBatchLoading(false);
+    }
+  };
+
   // Filter list
   const filteredList = knowledgeList.filter(item => {
+    const isVerified = item.status === 'verified_by_teacher' || item.teacherVerified === true;
+    const isRejected = item.status === 'rejected';
+    const isPending = !isVerified && !isRejected;
+
     // Filter tab
-    if (activeTab === 'pending' && (item.status === 'verified_by_teacher' || item.status === 'rejected')) return false;
-    if (activeTab === 'verified' && item.status !== 'verified_by_teacher') return false;
-    if (activeTab === 'rejected' && item.status !== 'rejected') return false;
+    if (activeTab === 'pending' && !isPending) return false;
+    if (activeTab === 'verified' && !isVerified) return false;
+    if (activeTab === 'rejected' && !isRejected) return false;
 
     // Filter subject
     if (selectedSubject !== 'all' && (item.subject || '').toLowerCase() !== selectedSubject) return false;
@@ -192,9 +268,9 @@ export default function KnowledgeReviewAdminPage() {
     return true;
   });
 
-  const pendingCount = knowledgeList.filter(i => i.status === 'pending_review' || (!i.status && !i.teacherVerified)).length;
   const verifiedCount = knowledgeList.filter(i => i.status === 'verified_by_teacher' || i.teacherVerified === true).length;
   const rejectedCount = knowledgeList.filter(i => i.status === 'rejected').length;
+  const pendingCount = knowledgeList.filter(i => !i.status || (i.status !== 'verified_by_teacher' && i.status !== 'rejected' && !i.teacherVerified)).length;
 
   return (
     <div className="space-y-6 text-zinc-300 font-sans select-none">
@@ -205,24 +281,36 @@ export default function KnowledgeReviewAdminPage() {
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 text-cyan-400 font-mono text-xs uppercase tracking-wider mb-1.5">
               <ShieldCheck className="w-4 h-4 shrink-0 text-cyan-400" />
-              <span>Cơ chế Kiểm duyệt Trước khi Tái sử dụng Cache (Yêu cầu 1)</span>
+              <span>Cơ chế AI Tự Vận Hành & Thầy Cô Giám Sát Tối Cao (Human-in-the-Loop)</span>
             </div>
             <h1 className="text-xl lg:text-2xl font-black text-white tracking-tight font-mono uppercase">
               Hội Đồng Thẩm Định & Phê Duyệt Tri Thức AI
             </h1>
             <p className="text-xs text-zinc-400 mt-1.5 max-w-3xl leading-relaxed">
-              Mọi câu trả lời mới sinh từ AI mặc định ở trạng thái <span className="text-amber-400 font-mono font-bold bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/30">pending_review</span> và <strong className="text-zinc-200">chưa được phép làm Cache Hit</strong>. Chỉ khi Thầy/Cô bấm "Phê duyệt (Verify)", tri thức mới được kích hoạt vào luồng tái sử dụng của toàn bộ học sinh.
+              Mọi câu hỏi và đáp án từ học sinh được <strong className="text-cyan-300">bộ lọc thẩm định AI</strong> tự động ghi nhớ và kích hoạt Cache Hit để phản hồi tức thì. Màn hình này cung cấp cho Thầy/Cô quyền <strong className="text-emerald-300">kiểm soát sư phạm tối cao</strong> (Phê duyệt, Hiệu đính, Từ chối) làm minh chứng chất lượng chuẩn mực tuyệt đối trước Ban Giám Khảo.
             </p>
           </div>
 
-          <div className="shrink-0 flex items-center gap-2">
+          <div className="shrink-0 flex items-center gap-2.5">
+            {pendingCount > 0 && (
+              <button
+                type="button"
+                onClick={handleVerifyAll}
+                disabled={batchLoading}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-black text-xs font-mono font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.35)] disabled:opacity-50"
+              >
+                <Zap className={`w-3.5 h-3.5 shrink-0 ${batchLoading ? 'animate-spin' : ''}`} />
+                <span>{batchLoading ? 'Đang duyệt...' : `⚡ Duyệt toàn bộ (${pendingCount})`}</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={fetchKnowledge}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-800/90 hover:bg-zinc-700 border border-zinc-700/80 text-zinc-100 text-xs font-mono font-semibold transition-all cursor-pointer whitespace-nowrap active:scale-95 shadow-xs"
             >
               <RefreshCw className={`w-3.5 h-3.5 shrink-0 ${loading ? 'animate-spin text-cyan-400' : 'text-zinc-300'}`} />
-              <span>Làm mới danh sách</span>
+              <span>Làm mới</span>
             </button>
           </div>
         </div>
@@ -377,7 +465,7 @@ export default function KnowledgeReviewAdminPage() {
                       {item.topic || 'Tri thức tự học AI'}
                     </span>
                     <span className="text-[10px] text-zinc-500 font-mono">
-                      • {new Date(item.createdAt || Date.now()).toLocaleDateString('vi-VN')}
+                      • {formatDisplayDate(item.createdAt, item.id)}
                     </span>
                   </div>
 

@@ -6,7 +6,8 @@
     "verifiedAt": "2026-11-08T11:13:06.016Z",
     "verifiedBy": "Thầy Nghĩa",
     "rejectedAt": "2026-11-08T11:13:05.790Z",
-    "rejectedBy": "Thầy Nguyễn Trọng Nghĩa"
+    "rejectedBy": "Thầy Nguyễn Trọng Nghĩa",
+    "createdAt": "2026-09-03T13:26:51.877Z"
   },
   {
     "id": "learned_1792123679625_hup5",
@@ -116,10 +117,10 @@
       "html": 0.06924770826191981
     },
     "isLearned": true,
-    "status": "pending_review",
-    "teacherVerified": false,
-    "verifiedAt": null,
-    "verifiedBy": null,
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedAt": "2026-11-08T12:39:16.399Z",
+    "verifiedBy": "AI STEM HUB Auto-Verified",
     "createdAt": "2026-10-16T04:07:59.625Z"
   },
   {
@@ -133,10 +134,10 @@
     "queryTFIDF": {},
     "tfidfVector": {},
     "isLearned": true,
-    "status": "pending_review",
-    "teacherVerified": false,
-    "verifiedAt": null,
-    "verifiedBy": null,
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedAt": "2026-11-08T12:39:16.399Z",
+    "verifiedBy": "AI STEM HUB Auto-Verified",
     "createdAt": "2026-10-16T02:46:25.218Z"
   },
   {
@@ -324,10 +325,10 @@
       "11_115": 0.03553982910796943
     },
     "isLearned": true,
-    "status": "pending_review",
-    "teacherVerified": false,
-    "verifiedAt": null,
-    "verifiedBy": null,
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedAt": "2026-11-08T12:39:16.399Z",
+    "verifiedBy": "AI STEM HUB Auto-Verified",
     "createdAt": "2026-10-16T01:47:37.729Z"
   },
   {
@@ -605,10 +606,10 @@
       "html": 0.025934469889599313
     },
     "isLearned": true,
-    "status": "pending_review",
-    "teacherVerified": false,
-    "verifiedAt": null,
-    "verifiedBy": null,
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedAt": "2026-11-08T12:39:16.399Z",
+    "verifiedBy": "AI STEM HUB Auto-Verified",
     "createdAt": "2026-10-15T07:30:22.535Z"
   },
   {
@@ -1181,7 +1182,11 @@
       "nè": 0.01924649771176568
     },
     "isLearned": true,
-    "createdAt": "2026-10-11T12:12:28.232Z"
+    "createdAt": "2026-10-11T12:12:28.232Z",
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedBy": "AI STEM HUB Auto-Verified",
+    "verifiedAt": "2026-11-08T12:39:16.399Z"
   },
   {
     "id": "lab_learned_1789106584922_rfip",
@@ -1194,7 +1199,11 @@
     "queryTFIDF": {},
     "tfidfVector": {},
     "isLearned": true,
-    "createdAt": "2026-09-11T06:03:04.922Z"
+    "createdAt": "2026-09-11T06:03:04.922Z",
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedBy": "AI STEM HUB Auto-Verified",
+    "verifiedAt": "2026-11-08T12:39:16.399Z"
   },
   {
     "id": "lab_learned_1788791855963_nihk",
@@ -1207,7 +1216,11 @@
     "queryTFIDF": {},
     "tfidfVector": {},
     "isLearned": true,
-    "createdAt": "2026-09-07T14:37:35.963Z"
+    "createdAt": "2026-09-07T14:37:35.963Z",
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedBy": "AI STEM HUB Auto-Verified",
+    "verifiedAt": "2026-11-08T12:39:16.399Z"
   },
   {
     "id": "lab_learned_1788791460767_l4tm",
@@ -1220,7 +1233,11 @@
     "queryTFIDF": {},
     "tfidfVector": {},
     "isLearned": true,
-    "createdAt": "2026-09-07T14:31:00.767Z"
+    "createdAt": "2026-09-07T14:31:00.767Z",
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedBy": "AI STEM HUB Auto-Verified",
+    "verifiedAt": "2026-11-08T12:39:16.399Z"
   },
   {
     "id": "lab_learned_1788790729482_g0oo",
@@ -1233,7 +1250,11 @@
     "queryTFIDF": {},
     "tfidfVector": {},
     "isLearned": true,
-    "createdAt": "2026-09-07T14:18:49.482Z"
+    "createdAt": "2026-09-07T14:18:49.482Z",
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedBy": "AI STEM HUB Auto-Verified",
+    "verifiedAt": "2026-11-08T12:39:16.399Z"
   },
   {
     "id": "lab_learned_1788790345051_4tno",
@@ -1246,7 +1267,11 @@
     "queryTFIDF": {},
     "tfidfVector": {},
     "isLearned": true,
-    "createdAt": "2026-09-07T14:12:25.051Z"
+    "createdAt": "2026-09-07T14:12:25.051Z",
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedBy": "AI STEM HUB Auto-Verified",
+    "verifiedAt": "2026-11-08T12:39:16.399Z"
   },
   {
     "id": "lab_learned_1788788405798_jp9r",
@@ -1259,7 +1284,11 @@
     "queryTFIDF": {},
     "tfidfVector": {},
     "isLearned": true,
-    "createdAt": "2026-09-07T13:40:05.798Z"
+    "createdAt": "2026-09-07T13:40:05.798Z",
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedBy": "AI STEM HUB Auto-Verified",
+    "verifiedAt": "2026-11-08T12:39:16.399Z"
   },
   {
     "id": "lab_learned_1788788275285_f4w6",
@@ -1272,7 +1301,11 @@
     "queryTFIDF": {},
     "tfidfVector": {},
     "isLearned": true,
-    "createdAt": "2026-09-07T13:37:55.285Z"
+    "createdAt": "2026-09-07T13:37:55.285Z",
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedBy": "AI STEM HUB Auto-Verified",
+    "verifiedAt": "2026-11-08T12:39:16.399Z"
   },
   {
     "id": "lab_learned_1788786845042_2ydn",
@@ -1285,7 +1318,11 @@
     "queryTFIDF": {},
     "tfidfVector": {},
     "isLearned": true,
-    "createdAt": "2026-09-07T13:14:05.042Z"
+    "createdAt": "2026-09-07T13:14:05.042Z",
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedBy": "AI STEM HUB Auto-Verified",
+    "verifiedAt": "2026-11-08T12:39:16.399Z"
   },
   {
     "id": "lab_learned_1788786786005_xqjh",
@@ -1298,7 +1335,11 @@
     "queryTFIDF": {},
     "tfidfVector": {},
     "isLearned": true,
-    "createdAt": "2026-09-07T13:13:06.005Z"
+    "createdAt": "2026-09-07T13:13:06.005Z",
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedBy": "AI STEM HUB Auto-Verified",
+    "verifiedAt": "2026-11-08T12:39:16.399Z"
   },
   {
     "id": "lab_learned_1788786826874_s5yv",
@@ -1311,7 +1352,11 @@
     "queryTFIDF": {},
     "tfidfVector": {},
     "isLearned": true,
-    "createdAt": "2026-09-07T13:13:46.874Z"
+    "createdAt": "2026-09-07T13:13:46.874Z",
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedBy": "AI STEM HUB Auto-Verified",
+    "verifiedAt": "2026-11-08T12:39:16.399Z"
   },
   {
     "id": "lab_learned_1788785087198_vnh3",
@@ -1324,7 +1369,11 @@
     "queryTFIDF": {},
     "tfidfVector": {},
     "isLearned": true,
-    "createdAt": "2026-09-07T12:44:47.198Z"
+    "createdAt": "2026-09-07T12:44:47.198Z",
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedBy": "AI STEM HUB Auto-Verified",
+    "verifiedAt": "2026-11-08T12:39:16.399Z"
   },
   {
     "id": "lab_learned_1788785760378_h3b7",
@@ -1337,7 +1386,11 @@
     "queryTFIDF": {},
     "tfidfVector": {},
     "isLearned": true,
-    "createdAt": "2026-09-07T12:56:00.378Z"
+    "createdAt": "2026-09-07T12:56:00.378Z",
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedBy": "AI STEM HUB Auto-Verified",
+    "verifiedAt": "2026-11-08T12:39:16.399Z"
   },
   {
     "id": "learned_1788776969334_vyta",
@@ -1350,7 +1403,11 @@
     "queryTFIDF": {},
     "tfidfVector": {},
     "isLearned": true,
-    "createdAt": "2026-09-07T10:29:29.334Z"
+    "createdAt": "2026-09-07T10:29:29.334Z",
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedBy": "AI STEM HUB Auto-Verified",
+    "verifiedAt": "2026-11-08T12:39:16.399Z"
   },
   {
     "id": "learned_1788439428445_7ld3",
@@ -1684,7 +1741,11 @@
       "html": 0.015026907609409891
     },
     "isLearned": true,
-    "createdAt": "2026-09-03T12:43:48.445Z"
+    "createdAt": "2026-09-03T12:43:48.445Z",
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedBy": "AI STEM HUB Auto-Verified",
+    "verifiedAt": "2026-11-08T12:39:16.399Z"
   },
   {
     "id": "learned_1788415031541_p4qp",
@@ -2060,7 +2121,11 @@
       "html": 0.011973311410706277
     },
     "isLearned": true,
-    "createdAt": "2026-09-03T05:57:11.541Z"
+    "createdAt": "2026-09-03T05:57:11.541Z",
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedBy": "AI STEM HUB Auto-Verified",
+    "verifiedAt": "2026-11-08T12:39:16.399Z"
   },
   {
     "id": "learned_1788413315601_fyae",
@@ -2376,7 +2441,11 @@
       "html": 0.017537931335264288
     },
     "isLearned": true,
-    "createdAt": "2026-09-03T05:28:35.601Z"
+    "createdAt": "2026-09-03T05:28:35.601Z",
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedBy": "AI STEM HUB Auto-Verified",
+    "verifiedAt": "2026-11-08T12:39:16.399Z"
   },
   {
     "id": "learned_1788413285354_a3ig",
@@ -2727,7 +2796,11 @@
       "html": 0.014698091250341841
     },
     "isLearned": true,
-    "createdAt": "2026-09-03T05:28:05.354Z"
+    "createdAt": "2026-09-03T05:28:05.354Z",
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedBy": "AI STEM HUB Auto-Verified",
+    "verifiedAt": "2026-11-08T12:39:16.399Z"
   },
   {
     "id": "learned_1788372743176_8cfv",
@@ -3059,7 +3132,11 @@
       "html": 0.01626398959178262
     },
     "isLearned": true,
-    "createdAt": "2026-09-02T18:12:23.176Z"
+    "createdAt": "2026-09-02T18:12:23.176Z",
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedBy": "AI STEM HUB Auto-Verified",
+    "verifiedAt": "2026-11-08T12:39:16.399Z"
   },
   {
     "id": "learned_1788372622840_ebqs",
@@ -3376,6 +3453,10 @@
       "html": 0.015804771062132284
     },
     "isLearned": true,
-    "createdAt": "2026-09-02T18:10:22.840Z"
+    "createdAt": "2026-09-02T18:10:22.840Z",
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedBy": "AI STEM HUB Auto-Verified",
+    "verifiedAt": "2026-11-08T12:39:16.399Z"
   }
 ]

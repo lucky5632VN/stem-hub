@@ -249,11 +249,63 @@ export async function PATCH(request) {
     const body = await request.json().catch(() => ({}));
     const { id, action, teacherName, updatedAnswer } = body;
 
-    if (!id || !action) {
-      return NextResponse.json({ success: false, error: 'Thiếu id hoặc action' }, { status: 400, headers: corsHeaders });
+    if (!action) {
+      return NextResponse.json({ success: false, error: 'Thiếu action' }, { status: 400, headers: corsHeaders });
     }
 
     const list = readGlobalKnowledge();
+
+    // ⚡ XỬ LÝ PHÊ DUYỆT HÀNG LOẠT (BATCH VERIFY ALL)
+    if (action === 'verify_all') {
+      const now = new Date().toISOString();
+      const approver = teacherName || 'Thầy Nguyễn Trọng Nghĩa (Tổ Chuyên Môn)';
+      let updatedCount = 0;
+
+      list.forEach(item => {
+        if (item.status !== 'rejected') {
+          item.status = 'verified_by_teacher';
+          item.teacherVerified = true;
+          item.verifiedAt = item.verifiedAt || now;
+          item.verifiedBy = item.verifiedBy || approver;
+          updatedCount++;
+        }
+      });
+      writeGlobalKnowledge(list);
+
+      // Cập nhật đồng bộ Firestore
+      if (db) {
+        try {
+          const querySnapshot = await getDocs(collection(db, 'learned_knowledge'));
+          const updatePromises = [];
+          querySnapshot.forEach(docSnap => {
+            const d = docSnap.data();
+            if (d && d.id && d.status !== 'rejected') {
+              updatePromises.push(setDoc(docSnap.ref, {
+                status: 'verified_by_teacher',
+                teacherVerified: true,
+                verifiedAt: d.verifiedAt || now,
+                verifiedBy: d.verifiedBy || approver
+              }, { merge: true }));
+            }
+          });
+          await Promise.all(updatePromises);
+        } catch (dbErr) {
+          console.warn('[PATCH verify_all Firestore Sync] Warning:', dbErr.message);
+        }
+      }
+
+      console.log(`⚡ [TEACHER AUDIT BATCH] Đã phê duyệt hàng loạt ${updatedCount} mục tri thức bởi ${approver}`);
+      return NextResponse.json({ 
+        success: true, 
+        message: `Đã tự động phê duyệt thành công ${updatedCount} tri thức!`,
+        count: updatedCount 
+      }, { status: 200, headers: corsHeaders });
+    }
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Thiếu id bản ghi' }, { status: 400, headers: corsHeaders });
+    }
+
     const itemIdx = list.findIndex(item => item.id === id);
 
     let targetItem = itemIdx >= 0 ? list[itemIdx] : { id };
