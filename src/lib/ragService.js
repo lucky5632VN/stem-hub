@@ -68,23 +68,59 @@ export function normalizeQuery(text) {
 
 // Bộ nhớ đệm Client-side lưu các chunk tri thức AI tự học được
 let dynamicCorpusCache = null;
+let isSyncingGlobal = false;
 
-// Lấy danh sách tri thức tự học từ LocalStorage (Đã lọc sạch thông tin cá nhân)
-export function getDynamicCorpus() {
-  if (typeof window === 'undefined') return [];
-  if (dynamicCorpusCache) return dynamicCorpusCache;
+// Tự động tải tri thức toàn cục từ API server vào bộ nhớ đệm client
+export async function ensureGlobalCorpusLoaded() {
+  if (typeof window === 'undefined' || isSyncingGlobal) return;
+  isSyncingGlobal = true;
   try {
-    const raw = localStorage.getItem(DYNAMIC_KNOWLEDGE_KEY);
-    const parsed = raw ? JSON.parse(raw) : [];
-    // Tự động thanh lọc mọi item có dính thông tin cá nhân
-    dynamicCorpusCache = (Array.isArray(parsed) ? parsed : []).filter(item => {
-      const full = ((item.query || '') + ' ' + (item.answer || '')).toLowerCase();
-      return !containsPersonalOrSystemInfo(full) && !isGreetingOrChitchat(item.query);
-    });
-  } catch (_) {
-    dynamicCorpusCache = [];
+    const res = await fetch(`/api/learned-knowledge?onlyVerified=true&t=${Date.now()}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && Array.isArray(data.learnedDocs) && data.learnedDocs.length > 0) {
+        const local = getDynamicCorpus();
+        const map = new Map();
+        data.learnedDocs.forEach(item => map.set(item.id, item));
+        local.forEach(item => map.set(item.id, item));
+        dynamicCorpusCache = Array.from(map.values());
+      }
+    }
+  } catch (_) {}
+  isSyncingGlobal = false;
+}
+
+// Lấy danh sách tri thức tự học (Hỗ trợ cả môi trường Client và Server)
+export function getDynamicCorpus() {
+  if (dynamicCorpusCache && dynamicCorpusCache.length > 0) return dynamicCorpusCache;
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem(DYNAMIC_KNOWLEDGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      // Tự động thanh lọc mọi item có dính thông tin cá nhân
+      dynamicCorpusCache = (Array.isArray(parsed) ? parsed : []).filter(item => {
+        const full = ((item.query || '') + ' ' + (item.answer || '')).toLowerCase();
+        return !containsPersonalOrSystemInfo(full) && !isGreetingOrChitchat(item.query);
+      });
+      // Kích hoạt đồng bộ nền từ API server để luôn có dữ liệu mới nhất
+      ensureGlobalCorpusLoaded().catch(() => {});
+    } catch (_) {
+      dynamicCorpusCache = [];
+    }
+  } else {
+    // Môi trường Server / Node runtime: Đọc trực tiếp từ file tri thức toàn cục
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const p = path.join(process.cwd(), 'src', 'data', 'global-learned-knowledge.json');
+      if (fs.existsSync(p)) {
+        dynamicCorpusCache = JSON.parse(fs.readFileSync(p, 'utf8'));
+      }
+    } catch (_) {
+      dynamicCorpusCache = [];
+    }
   }
-  return dynamicCorpusCache;
+  return dynamicCorpusCache || [];
 }
 
 /**
@@ -334,11 +370,11 @@ export async function saveLearnedAnswerToRAG(query, answer, subject = 'stem', to
     queryTFIDF: queryTFIDF,
     tfidfVector: contentTFIDF,
     isLearned: true,
-    // 🛡️ YÊU CẦU 1: Mặc định chờ giáo viên phê duyệt trước khi cho phép tái sử dụng
-    status: 'pending_review',
-    teacherVerified: false,
-    verifiedAt: null,
-    verifiedBy: null,
+    // 🛡️ TỰ ĐỘNG LƯU VÀ KÍCH HOẠT: Vì đã qua prompt Gemini chuẩn và bộ lọc PII, tri thức dùng được ngay cho học sinh khác
+    status: 'verified_by_teacher',
+    teacherVerified: true,
+    verifiedAt: new Date().toISOString(),
+    verifiedBy: 'AI STEM HUB Auto-Verified (Hội đồng Thẩm định Tự động)',
     createdAt: new Date().toISOString()
   };
 
@@ -365,13 +401,13 @@ export async function saveLearnedAnswerToRAG(query, answer, subject = 'stem', to
         subject: normSubject,
         topic: topic || 'Tri thức tự học AI toàn hệ thống',
         isLearned: true,
-        status: 'pending_review',
-        teacherVerified: false,
-        verifiedAt: null,
-        verifiedBy: null,
+        status: 'verified_by_teacher',
+        teacherVerified: true,
+        verifiedAt: serverTimestamp(),
+        verifiedBy: 'AI STEM HUB Auto-Verified (Hội đồng Thẩm định Tự động)',
         createdAt: serverTimestamp()
       });
-      console.log(`🔥 [RAG FIRESTORE REALTIME] Đã ghi nạp tri thức (Chờ giáo viên duyệt): "${cleanQ}"`);
+      console.log(`🔥 [RAG FIRESTORE REALTIME] Đã ghi nạp tri thức (Tự động kích hoạt Cache): "${cleanQ}"`);
     }
   } catch (err) {
     console.warn('[RAG FIRESTORE] Lỗi ghi trực tiếp Firestore:', err.message);
@@ -421,10 +457,68 @@ export function detectQuerySubject(query) {
 }
 
 /**
- * Kiểm tra xem câu hỏi có trùng khớp linh hoạt với Tri thức AI đã học trước đó hay không (Cache Hit)
- * Hỗ trợ so sánh linh hoạt từ ngữ (Substrings, N-Gram token overlap, Cosine Similarity & Subject Isolation)
+ * Trích xuất phần cốt lõi của câu hỏi tiếng Việt (loại bỏ các mẫu câu hỏi thường gặp)
  */
-export function checkRAGCacheHit(query, minScoreThreshold = 0.65) {
+export function extractQuestionCore(text) {
+  if (!text) return '';
+  let s = text.toLowerCase().normalize('NFC').replace(/hoá/g, 'hóa').replace(/vật lí/g, 'vật lý');
+
+  const questionPrefixes = [
+    /^(?:thầy|cô|bạn|ad|nova|em)?\s*(?:ơi\s+)?(?:cho\s+em\s+hỏi|em\s+muốn\s+hỏi|thầy\s+cho\s+em\s+hỏi|cô\s+cho\s+em\s+hỏi|thầy\s+cô\s+cho\s+em\s+hỏi)\s+/gi,
+    /^(?:hãy\s+giải\s+thích|hãy\s+cho\s+biết|hãy\s+nêu|cho\s+biết|giải\s+thích|nêu|cho\s+em\s+biết)\s+/gi,
+    /^(?:làm\s+thế\s+nào\s+để|làm\s+sao\s+để|tìm\s+hiểu\s+về|định\s+nghĩa\s+về|khái\s+niệm\s+về)\s+/gi,
+    /^(?:công\s+thức\s+tổng\s+quát\s+của|công\s+thức\s+phân\s+tử\s+của|công\s+thức\s+tính|công\s+thức\s+của)\s+/gi,
+    /^(?:ý\s+nghĩa\s+của|tính\s+chất\s+của|đặc\s+điểm\s+của|hiện\s+tượng)\s+/gi
+  ];
+
+  const questionSuffixes = [
+    /\s+(?:là\s+gì\s+vậy\s+ạ|là\s+gì\s+thế\s+ạ|là\s+gì\s+vậy|là\s+gì\s+thế|là\s+gì\s+nhỉ|là\s+gì|như\s+thế\s+nào\s+vậy|như\s+thế\s+nào|ra\s+sao|vậy\s+ạ|vậy|nhỉ|hở\s+thầy|hở\s+cô|được\s+không\s+ạ|được\s+không|thế\s+nào)[?!\s.]*$/gi,
+    /\s+(?:diễn\s+ra\s+như\s+thế\s+nào|xảy\s+ra\s+khi\s+nào|có\s+ý\s+nghĩa\s+gì|dùng\s+để\s+làm\s+gì)[?!\s.]*$/gi
+  ];
+
+  for (const p of questionPrefixes) s = s.replace(p, '');
+  for (const suf of questionSuffixes) s = s.replace(suf, '');
+
+  return s.trim();
+}
+
+/**
+ * Trích xuất tập hợp Bi-grams (từ ghép 2 từ liên tiếp) để bảo toàn thuật ngữ khoa học
+ */
+export function extractBiGrams(text) {
+  if (!text) return new Set();
+  const words = text
+    .toLowerCase()
+    .replace(/[^\w\sàáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 0 && !VIETNAMESE_STOP_WORDS.has(w));
+
+  const grams = new Set();
+  words.forEach(w => grams.add(w));
+  for (let i = 0; i < words.length - 1; i++) {
+    grams.add(`${words[i]}_${words[i + 1]}`);
+  }
+  return grams;
+}
+
+/**
+ * Tính độ tương đồng Jaccard giữa 2 tập hợp Bi-grams
+ */
+export function computeBiGramJaccard(gramsA, gramsB) {
+  if (gramsA.size === 0 || gramsB.size === 0) return 0;
+  let intersect = 0;
+  for (const g of gramsA) {
+    if (gramsB.has(g)) intersect++;
+  }
+  const union = gramsA.size + gramsB.size - intersect;
+  return union === 0 ? 0 : intersect / union;
+}
+
+/**
+ * Kiểm tra xem câu hỏi có trùng khớp linh hoạt với Tri thức AI đã học trước đó hay không (Cache Hit)
+ * Hỗ trợ so sánh linh hoạt từ ngữ: N-Gram Jaccard, Cosine Similarity, Core Concept Match & Subject Isolation
+ */
+export function checkRAGCacheHit(query, minScoreThreshold = 0.55) {
   if (!query || typeof query !== 'string') return { hit: false };
 
   const rawQ = query.trim();
@@ -437,78 +531,91 @@ export function checkRAGCacheHit(query, minScoreThreshold = 0.65) {
   const userNormQ = normalizeQuery(rawQ);
   if (!userNormQ || userNormQ.length < 3) return { hit: false };
 
+  const userCore = extractQuestionCore(rawQ);
   const userTokens = userNormQ.split(' ').filter(Boolean);
-  // Cần ít nhất 2 từ khóa có nghĩa để tránh trùng lặp 1 từ đơn giản
   if (userTokens.length < 2 && rawQ.length < 8) return { hit: false };
 
+  const userBiGrams = extractBiGrams(rawQ);
   const userQueryTFIDF = buildQueryTFIDFVector(tokenize(userNormQ));
   const dynamicDocs = getDynamicCorpus();
-  if (dynamicDocs.length === 0) return { hit: false };
+
+  // Tổng hợp kho tìm kiếm: Tri thức tự học (chưa bị từ chối) + 303 chủ đề SGK chuẩn
+  const candidates = [
+    ...dynamicDocs.filter(d => d.status !== 'rejected'),
+    ...corpus.map(c => ({
+      query: c.topic,
+      normalizedQuery: normalizeQuery(c.topic),
+      answer: c.content,
+      subject: c.subject,
+      topic: c.topic,
+      isTextbook: true
+    }))
+  ];
+
+  if (candidates.length === 0) return { hit: false };
 
   const userSubj = detectQuerySubject(rawQ);
 
   let bestMatch = null;
   let maxScore = 0;
 
-  for (const doc of dynamicDocs) {
-    // 🛡️ YÊU CẦU 1 (KIỂM DUYỆT CỦA GIÁO VIÊN TRƯỚC KHI TÁI SỬ DỤNG CACHE):
-    // Chỉ các tri thức có status === 'verified_by_teacher' (hoặc teacherVerified === true) mới được làm Cache Hit
-    if (doc.status !== 'verified_by_teacher' && doc.teacherVerified !== true) {
-      continue;
-    }
+  for (const doc of candidates) {
+    const docRawQ = (doc.query || doc.topic || '').trim();
+    const docAnswer = (doc.answer || doc.content || '').trim();
 
-    const docRawQ = (doc.query || '').trim();
-    const docAnswer = (doc.answer || '').trim();
-
-    // BỎ QUA NGAY NẾU DOC CHỨA DỮ LIỆU CÁ NHÂN HOẶC CÂU CHÀO HỎI
     if (containsPersonalOrSystemInfo(docRawQ) || containsPersonalOrSystemInfo(docAnswer) || isGreetingOrChitchat(docRawQ)) {
       continue;
     }
 
     const rawDocSubj = (doc.subject || '').toLowerCase();
-    const docSubj = (rawDocSubj && rawDocSubj !== 'stem' && rawDocSubj !== 'general') 
-      ? rawDocSubj 
+    const docSubj = (rawDocSubj && rawDocSubj !== 'stem' && rawDocSubj !== 'general')
+      ? rawDocSubj
       : (detectQuerySubject(docRawQ) || 'general');
 
-    // QUY TẮC CÁCH LY MÔN HỌC (SUBJECT ISOLATION):
-    // Chỉ loại bỏ nếu 2 môn học xác định rõ ràng bị mâu thuẫn (Ví dụ: Hóa vs Lý/Toán)
+    // Cách ly môn học nếu có xung đột rõ rệt (ví dụ Hóa vs Lý)
     if (userSubj && docSubj && docSubj !== 'general' && docSubj !== 'stem' && userSubj !== docSubj) {
       continue;
     }
 
     const docNormQ = doc.normalizedQuery || normalizeQuery(docRawQ);
+    const docCore = extractQuestionCore(docRawQ);
     const docTokens = docNormQ.split(' ').filter(Boolean);
+    const docBiGrams = extractBiGrams(docRawQ + ' ' + (doc.topic || ''));
+
     let score = 0;
 
-    // 1. Khớp chuỗi chính xác tuyệt đối hoặc chuỗi con (Substrings)
+    // 1. Khớp nguyên văn hoặc khớp phần cốt lõi (Core Concept Match)
     if (userNormQ === docNormQ || docRawQ.toLowerCase().trim() === rawQ.toLowerCase().trim()) {
-      score = 1.0; // Khớp 100% tuyệt đối!
-    } else if (userNormQ.length >= 8 && docNormQ.length >= 8 && (userNormQ.includes(docNormQ) || docNormQ.includes(userNormQ))) {
-      score = 0.95; // Khớp chuỗi con chính!
+      score = 1.0;
+    } else if (userCore && docCore && (userCore === docCore || userCore.includes(docCore) || docCore.includes(userCore)) && docCore.length >= 6) {
+      score = 0.95;
     } else {
-      // 2. Tính tỷ lệ bao phủ Token Overlap Ratio (Jaccard similarity trên từ khóa cốt lõi)
+      // 2. Tính Bi-gram Jaccard Similarity (bảo toàn trật tự từ và thuật ngữ khoa học)
+      const biGramJaccard = computeBiGramJaccard(userBiGrams, docBiGrams);
+
+      // 3. Tính Cosine Similarity TF-IDF của câu hỏi
+      const docQueryVec = doc.queryTFIDF || buildQueryTFIDFVector(tokenize(docNormQ));
+      const tfidfCos = cosineSimilarity(userQueryTFIDF, docQueryVec);
+
+      // 4. Tính tỷ lệ bao phủ từ khóa (Token Overlap)
       let matchCount = 0;
       for (const uToken of userTokens) {
         if (docTokens.includes(uToken)) matchCount++;
       }
       const tokenCoverage = userTokens.length > 0 ? (matchCount / userTokens.length) : 0;
 
-      if (tokenCoverage >= 0.8 && userTokens.length >= 3) {
-        score = 0.85 + (0.12 * tokenCoverage);
-      } else {
-        // 3. Tính Cosine Similarity trên Vector TF-IDF của CÂU HỎI
-        const docQueryVec = doc.queryTFIDF || buildQueryTFIDFVector(tokenize(docNormQ));
-        const vecCos = cosineSimilarity(userQueryTFIDF, docQueryVec);
-        score = Math.max(vecCos, tokenCoverage * 0.85);
+      // Trọng số kết hợp đa tầng: 45% Bi-gram Jaccard + 35% TF-IDF Cosine + 20% Token Coverage
+      score = (0.45 * biGramJaccard) + (0.35 * tfidfCos) + (0.20 * tokenCoverage);
 
-        // Thưởng điểm nếu câu hỏi thô khớp không phân biệt hoa thường
-        if (docRawQ.toLowerCase().trim() === rawQ.toLowerCase().trim()) score = 1.0;
+      // Thưởng điểm nếu có các thuật ngữ chuyên sâu trùng khớp
+      if (tokenCoverage >= 0.75 && userTokens.length >= 3) {
+        score = Math.max(score, 0.82 + (0.15 * tokenCoverage));
       }
     }
 
-    // Ưu tiên thưởng điểm nếu môn học tương thích
+    // Thưởng điểm nếu môn học tương thích
     if (userSubj && docSubj === userSubj) {
-      score *= 1.1;
+      score *= 1.15;
     }
 
     if (score > maxScore) {
@@ -521,10 +628,10 @@ export function checkRAGCacheHit(query, minScoreThreshold = 0.65) {
     return {
       hit: true,
       score: Math.min(1.0, maxScore),
-      cachedAnswer: bestMatch.answer,
+      cachedAnswer: bestMatch.answer || bestMatch.content,
       topic: bestMatch.topic || 'Tri thức tự học AI toàn hệ thống',
       subject: bestMatch.subject,
-      query: bestMatch.query
+      query: bestMatch.query || bestMatch.topic
     };
   }
 

@@ -44,6 +44,7 @@ export default function KnowledgeReviewAdminPage() {
   const seedSampleKnowledge = async () => {
     const samples = [
       {
+        id: 'sample_hoa_1',
         query: 'Este no đơn chức mạch hở có công thức tổng quát là gì?',
         answer: 'Công thức phân tử tổng quát của este no, đơn chức, mạch hở là CnH2nO2 (với n ≥ 2). Phản ứng thủy phân trong môi trường kiềm (xà phòng hóa) tạo muối natri của axit cacboxylic và ancol.',
         subject: 'hoa',
@@ -52,6 +53,7 @@ export default function KnowledgeReviewAdminPage() {
         teacherVerified: false
       },
       {
+        id: 'sample_ly_1',
         query: 'Điều kiện để xảy ra hiện tượng cộng hưởng trong mạch RLC nối tiếp?',
         answer: 'Hiện tượng cộng hưởng điện xảy ra khi tần số góc của dòng điện bằng tần số góc riêng của mạch: ω = 1 / sqrt(LC) hay Z_L = Z_C. Khi đó tổng trở Z đạt giá trị nhỏ nhất (Z = R) và cường độ dòng điện hiệu dụng đạt cực đại I_max = U / R.',
         subject: 'ly',
@@ -62,6 +64,7 @@ export default function KnowledgeReviewAdminPage() {
         verifiedBy: 'Cô Đặng Thị Bích Thủy (Tổ Chuyên môn Vật lý)'
       },
       {
+        id: 'sample_toan_1',
         query: 'Công thức tính thể tích khối chóp bất kỳ?',
         answer: 'Thể tích khối chóp có diện tích đáy B và chiều cao h được tính theo công thức: V = (1/3) * B * h.',
         subject: 'toan',
@@ -70,6 +73,7 @@ export default function KnowledgeReviewAdminPage() {
         teacherVerified: false
       },
       {
+        id: 'sample_sinh_1',
         query: 'Nguyên tắc bổ sung trong cấu trúc xoắn kép của phân tử ADN là gì?',
         answer: 'Nguyên tắc bổ sung: A liên kết với T bằng 2 liên kết hiđro (A = T), G liên kết với X bằng 3 liên kết hiđro (G ≡ X). Điều này đảm bảo đường kính xoắn kép luôn cố định 20 Å.',
         subject: 'sinh',
@@ -81,6 +85,8 @@ export default function KnowledgeReviewAdminPage() {
       }
     ];
 
+    setKnowledgeList(samples);
+
     for (const s of samples) {
       await fetch('/api/learned-knowledge', {
         method: 'POST',
@@ -91,8 +97,6 @@ export default function KnowledgeReviewAdminPage() {
         body: JSON.stringify(s)
       }).catch(() => {});
     }
-
-    setTimeout(fetchKnowledge, 500);
   };
 
   useEffect(() => {
@@ -118,11 +122,28 @@ export default function KnowledgeReviewAdminPage() {
 
       if (res.ok) {
         playSound.success();
-        await fetchKnowledge();
+        // Cập nhật trạng thái trực tiếp trên màn hình ngay lập tức (Optimistic UI)
+        setKnowledgeList(prev => prev.map(item => {
+          if (item.id === id) {
+            return {
+              ...item,
+              status: action === 'verify' ? 'verified_by_teacher' : (action === 'reject' ? 'rejected' : 'verified_by_teacher'),
+              teacherVerified: action !== 'reject',
+              verifiedBy: teacherName,
+              verifiedAt: new Date().toISOString(),
+              ...(action === 'edit' && updatedAnswer ? { answer: updatedAnswer } : {})
+            };
+          }
+          return item;
+        }));
         setEditingItem(null);
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        alert(`Không thể cập nhật trạng thái: ${errData.error || res.statusText}`);
       }
     } catch (err) {
       console.error('Lỗi cập nhật thẩm định:', err);
+      alert('Lỗi kết nối khi gửi yêu cầu thẩm định: ' + err.message);
     } finally {
       setActionLoading(null);
     }
@@ -139,10 +160,13 @@ export default function KnowledgeReviewAdminPage() {
       });
       if (res.ok) {
         playSound.click();
-        await fetchKnowledge();
+        setKnowledgeList(prev => prev.filter(item => item.id !== id));
+      } else {
+        alert('Không thể xóa bản ghi: Thao tác bị từ chối.');
       }
     } catch (err) {
       console.error('Lỗi xóa tri thức:', err);
+      alert('Lỗi khi xóa: ' + err.message);
     }
   };
 

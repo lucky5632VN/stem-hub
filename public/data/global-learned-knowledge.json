@@ -1,5 +1,14 @@
 [
   {
+    "id": "learned_1788442011877_6jkv",
+    "status": "verified_by_teacher",
+    "teacherVerified": true,
+    "verifiedAt": "2026-11-08T11:13:06.016Z",
+    "verifiedBy": "Thầy Nghĩa",
+    "rejectedAt": "2026-11-08T11:13:05.790Z",
+    "rejectedBy": "Thầy Nguyễn Trọng Nghĩa"
+  },
+  {
     "id": "learned_1792123679625_hup5",
     "query": "6326723 * 6216832 + 832171",
     "normalizedQuery": "6326723 6216832 832171",
