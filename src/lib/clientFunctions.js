@@ -52,7 +52,30 @@ const FALLBACK_SHOP_ITEMS = {
   'cyber_eyepatch': { price: 240, name: 'Bịt Mắt Laser Cyber' },
   'scientific_magnifier': { price: 220, name: 'Kính Vi Phẫu Nhãn Quang' },
   'crown': { price: 500, name: 'Vương Miện Đại Đế' },
-  'butterfly_hairpin': { price: 230, name: 'Kẹp Tóc Bướm Hologram' }
+  'butterfly_hairpin': { price: 230, name: 'Kẹp Tóc Bướm Hologram' },
+  'anime_super_saiyan': { price: 420, name: 'Tóc Siêu Chiến Binh Aura' },
+  'cyber_wolf': { price: 260, name: 'Tóc Sói Hoang Bạc Layer' },
+  'twin_tails_mecha': { price: 390, name: 'Tóc Song Vĩ Mecha Neon' },
+  'samurai_topknot': { price: 240, name: 'Búi Tóc Samurai Điện Tử' },
+  'galaxy_waves': { price: 410, name: 'Tóc Sóng Ngân Hà Gradient' },
+  'nano_suit': { price: 480, name: 'Giáp Nano Lượng Tử LED' },
+  'phoenix_armor': { price: 500, name: 'Chiến Giáp Hỏa Phượng Hoàng' },
+  'shadow_assassin': { price: 290, name: 'Áo Choàng Sát Thủ Hư Không' },
+  'cyber_pilot': { price: 270, name: 'Áo Phi Công Bomber Mecha' },
+  'celestial_robe': { price: 490, name: 'Pháp Phục Tiên Tri Vũ Trụ' },
+  'dark_knight': { price: 320, name: 'Giáp Hắc Hiệp Sĩ Cyber' },
+  'nano_legs': { price: 360, name: 'Quần Giáp Nano LED' },
+  'flame_trousers': { price: 230, name: 'Quần Hỏa Ngục Lôi Điện' },
+  'quantum_techwear': { price: 220, name: 'Quần Techwear Dây Đai Chiến Thuật' },
+  'armored_greaves': { price: 380, name: 'Giáp Chân Hiệp Sĩ Lượng Tử' },
+  'cyber_hakama': { price: 240, name: 'Váy Quần Samurai Cyber' },
+  'quantum_wings': { price: 550, name: 'Đôi Cánh Lượng Tử Photon' },
+  'cyber_drone': { price: 480, name: 'Drone Trợ Thủ AI Mini' },
+  'cyber_katana': { price: 460, name: 'Kiếm Quang Laser Sau Lưng' },
+  'halo_matrix': { price: 310, name: 'Vòng Ma Trận Hào Quang' },
+  'cyber_mask_fox': { price: 290, name: 'Mặt Nạ Hồ Ly Kitsune Cyber' },
+  'hologram_horns': { price: 280, name: 'Sừng Rồng Hologram Tím' },
+  'plasma_shield': { price: 300, name: 'Khiên Năng Lượng Lục Giác' }
 };
 
 const ALL_GACHA_TITLES = [
@@ -105,7 +128,30 @@ const ALL_COSMETICS_LIST = [
   { id: 'cyber_eyepatch', name: 'Bịt Mắt Laser Cyber', rarity: 'Epic', type: 'cosmetic', price: 240 },
   { id: 'scientific_magnifier', name: 'Kính Vi Phẫu Nhãn Quang', rarity: 'Epic', type: 'cosmetic', price: 220 },
   { id: 'crown', name: 'Vương Miện Đại Đế', rarity: 'Legendary', type: 'cosmetic', price: 500 },
-  { id: 'butterfly_hairpin', name: 'Kẹp Tóc Bướm Hologram', rarity: 'Epic', type: 'cosmetic', price: 230 }
+  { id: 'butterfly_hairpin', name: 'Kẹp Tóc Bướm Hologram', rarity: 'Epic', type: 'cosmetic', price: 230 },
+  { id: 'anime_super_saiyan', name: 'Tóc Siêu Chiến Binh Aura', rarity: 'Legendary', type: 'cosmetic', price: 420 },
+  { id: 'cyber_wolf', name: 'Tóc Sói Hoang Bạc Layer', rarity: 'Epic', type: 'cosmetic', price: 260 },
+  { id: 'twin_tails_mecha', name: 'Tóc Song Vĩ Mecha Neon', rarity: 'Legendary', type: 'cosmetic', price: 390 },
+  { id: 'samurai_topknot', name: 'Búi Tóc Samurai Điện Tử', rarity: 'Epic', type: 'cosmetic', price: 240 },
+  { id: 'galaxy_waves', name: 'Tóc Sóng Ngân Hà Gradient', rarity: 'Legendary', type: 'cosmetic', price: 410 },
+  { id: 'nano_suit', name: 'Giáp Nano Lượng Tử LED', rarity: 'Legendary', type: 'cosmetic', price: 480 },
+  { id: 'phoenix_armor', name: 'Chiến Giáp Hỏa Phượng Hoàng', rarity: 'Legendary', type: 'cosmetic', price: 500 },
+  { id: 'shadow_assassin', name: 'Áo Choàng Sát Thủ Hư Không', rarity: 'Epic', type: 'cosmetic', price: 290 },
+  { id: 'cyber_pilot', name: 'Áo Phi Công Bomber Mecha', rarity: 'Epic', type: 'cosmetic', price: 270 },
+  { id: 'celestial_robe', name: 'Pháp Phục Tiên Tri Vũ Trụ', rarity: 'Legendary', type: 'cosmetic', price: 490 },
+  { id: 'dark_knight', name: 'Giáp Hắc Hiệp Sĩ Cyber', rarity: 'Epic', type: 'cosmetic', price: 320 },
+  { id: 'nano_legs', name: 'Quần Giáp Nano LED', rarity: 'Legendary', type: 'cosmetic', price: 360 },
+  { id: 'flame_trousers', name: 'Quần Hỏa Ngục Lôi Điện', rarity: 'Epic', type: 'cosmetic', price: 230 },
+  { id: 'quantum_techwear', name: 'Quần Techwear Dây Đai Chiến Thuật', rarity: 'Epic', type: 'cosmetic', price: 220 },
+  { id: 'armored_greaves', name: 'Giáp Chân Hiệp Sĩ Lượng Tử', rarity: 'Legendary', type: 'cosmetic', price: 380 },
+  { id: 'cyber_hakama', name: 'Váy Quần Samurai Cyber', rarity: 'Epic', type: 'cosmetic', price: 240 },
+  { id: 'quantum_wings', name: 'Đôi Cánh Lượng Tử Photon', rarity: 'Legendary', type: 'cosmetic', price: 550 },
+  { id: 'cyber_drone', name: 'Drone Trợ Thủ AI Mini', rarity: 'Legendary', type: 'cosmetic', price: 480 },
+  { id: 'cyber_katana', name: 'Kiếm Quang Laser Sau Lưng', rarity: 'Legendary', type: 'cosmetic', price: 460 },
+  { id: 'halo_matrix', name: 'Vòng Ma Trận Hào Quang', rarity: 'Epic', type: 'cosmetic', price: 310 },
+  { id: 'cyber_mask_fox', name: 'Mặt Nạ Hồ Ly Kitsune Cyber', rarity: 'Epic', type: 'cosmetic', price: 290 },
+  { id: 'hologram_horns', name: 'Sừng Rồng Hologram Tím', rarity: 'Epic', type: 'cosmetic', price: 280 },
+  { id: 'plasma_shield', name: 'Khiên Năng Lượng Lục Giác', rarity: 'Epic', type: 'cosmetic', price: 300 }
 ];
 
 const ALL_GACHA_POOL = [...ALL_COSMETICS_LIST, ...ALL_GACHA_TITLES];

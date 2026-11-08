@@ -50,6 +50,11 @@ export const ALL_COSMETICS = [
   { id: 'double_bun', category: 'hair', name: 'Búi Đôi Lượng Tử', rarity: 'Rare', price: 180, value: 'double_bun', desc: 'Kiểu tóc búi tròn hai bên cực kỳ đáng yêu cho nữ.', genderTarget: 'female' },
   { id: 'quantum_pixie', category: 'hair', name: 'Tóc tém Pixie Tiên Nữ', rarity: 'Epic', price: 220, value: 'quantum_pixie', desc: 'Mái tém Pixie cá tính với các lọn tóc phát sáng.', genderTarget: 'female' },
   { id: 'crystal_waterfall', category: 'hair', name: 'Tóc Thác Nước Tinh Thể', rarity: 'Legendary', price: 380, value: 'crystal_waterfall', desc: 'Tóc siêu dài gợn sóng đính các hạt tinh thể lấp lánh.', genderTarget: 'female' },
+  { id: 'anime_super_saiyan', category: 'hair', name: 'Tóc Siêu Chiến Binh Aura', rarity: 'Legendary', price: 420, value: 'anime_super_saiyan', desc: 'Mái tóc dựng ngược hoàng kim toả năng lượng cực đại.', genderTarget: 'unisex' },
+  { id: 'cyber_wolf', category: 'hair', name: 'Tóc Sói Hoang Bạc Layer', rarity: 'Epic', price: 260, value: 'cyber_wolf', desc: 'Kiểu tóc tỉa layer sói hoang phong cách Anime ngầu lòi.', genderTarget: 'unisex' },
+  { id: 'twin_tails_mecha', category: 'hair', name: 'Tóc Song Vĩ Mecha Neon', rarity: 'Legendary', price: 390, value: 'twin_tails_mecha', desc: 'Tóc hai đuôi dài kẹp ribbon cơ giới phát sáng viền neon.', genderTarget: 'female' },
+  { id: 'samurai_topknot', category: 'hair', name: 'Búi Tóc Samurai Điện Tử', rarity: 'Epic', price: 240, value: 'samurai_topknot', desc: 'Búi tóc kiếm khách Nhật Bản cạo undercut sắc bén.', genderTarget: 'male' },
+  { id: 'galaxy_waves', category: 'hair', name: 'Tóc Sóng Ngân Hà Gradient', rarity: 'Legendary', price: 410, value: 'galaxy_waves', desc: 'Tóc uốn sóng bồng bềnh chuyển sắc ngân hà tím hồng vi diệu.', genderTarget: 'female' },
 
   // Áo (Thượng y)
   { id: 'lab_coat', category: 'top', name: 'Áo Choàng Phòng Lab', rarity: 'Rare', price: 150, value: 'lab_coat', desc: 'Trang phục chuyên nghiệp cho nhà hóa học.', genderTarget: 'unisex' },
@@ -61,6 +66,12 @@ export const ALL_COSMETICS = [
   { id: 'bio_hazard', category: 'top', name: 'Đồ Bảo Hộ Chống Độc', rarity: 'Rare', price: 180, value: 'bio_hazard', desc: 'Bộ đồ bảo hộ màu vàng có khóa kéo.', genderTarget: 'unisex' },
   { id: 'ninja_suit', category: 'top', name: 'Y Phục Ninja Bóng Đêm', rarity: 'Epic', price: 260, value: 'ninja_suit', desc: 'Bộ đồ đen Ninja quấn đai đỏ bí ẩn.', genderTarget: 'unisex' },
   { id: 'quantum_dress', category: 'top', name: 'Đầm Dạ Hội Lượng Tử', rarity: 'Legendary', price: 460, value: 'quantum_dress', desc: 'Đầm dạ hội trễ vai hồng cánh sen sang trọng quý phái.', genderTarget: 'female' },
+  { id: 'nano_suit', category: 'top', name: 'Giáp Nano Lượng Tử LED', rarity: 'Legendary', price: 480, value: 'nano_suit', desc: 'Chiến giáp sợi carbon siêu nhẹ phủ mạch điện tử Cyan phát sáng.', genderTarget: 'unisex' },
+  { id: 'phoenix_armor', category: 'top', name: 'Chiến Giáp Hỏa Phượng Hoàng', rarity: 'Legendary', price: 500, value: 'phoenix_armor', desc: 'Bộ giáp titan cam đỏ rực cháy với viên ngọc dung nham trước ngực.', genderTarget: 'unisex' },
+  { id: 'shadow_assassin', category: 'top', name: 'Áo Choàng Sát Thủ Hư Không', rarity: 'Epic', price: 290, value: 'shadow_assassin', desc: 'Áo choàng bóng đêm viền tím đậm với ký tự ma thuật phát quang.', genderTarget: 'unisex' },
+  { id: 'cyber_pilot', category: 'top', name: 'Áo Phi Công Bomber Mecha', rarity: 'Epic', price: 270, value: 'cyber_pilot', desc: 'Áo khoác bomber da công nghệ kèm đai chiến thuật vàng dạ quang.', genderTarget: 'unisex' },
+  { id: 'celestial_robe', category: 'top', name: 'Pháp Phục Tiên Tri Vũ Trụ', rarity: 'Legendary', price: 490, value: 'celestial_robe', desc: 'Áo choàng dệt từ bụi sao đêm đính hoa văn chòm sao hoàng đạo dát vàng.', genderTarget: 'unisex' },
+  { id: 'dark_knight', category: 'top', name: 'Giáp Hắc Hiệp Sĩ Cyber', rarity: 'Epic', price: 320, value: 'dark_knight', desc: 'Chiến giáp gai nhọn hầm hố màu thép đen với lõi thạch anh tím.', genderTarget: 'unisex' },
 
   // Quần (Hạ y)
   { id: 'space_shorts', category: 'bottom', name: 'Quần Đùi Vũ Trụ', rarity: 'Rare', price: 120, value: 'space_shorts', desc: 'Quần đùi màu slate phản quang tiện dụng.', genderTarget: 'unisex' },
@@ -70,6 +81,11 @@ export const ALL_COSMETICS = [
   { id: 'ninja_pants', category: 'bottom', name: 'Quần Ninja Quấn Băng', rarity: 'Epic', price: 210, value: 'ninja_pants', desc: 'Quần Ninja đen quấn băng trắng cổ chân.', genderTarget: 'unisex' },
   { id: 'lightweight_joggers', category: 'bottom', name: 'Quần Jogger Thể Thao', rarity: 'Rare', price: 130, value: 'lightweight_joggers', desc: 'Jogger xám sọc trắng kèm giày thể thao cyan.', genderTarget: 'unisex' },
   { id: 'tennis_skirt', category: 'bottom', name: 'Chân Váy Tennis Trắng', rarity: 'Rare', price: 150, value: 'tennis_skirt', desc: 'Chân váy xếp ly trắng thể thao năng động và trẻ trung.', genderTarget: 'female' },
+  { id: 'nano_legs', category: 'bottom', name: 'Quần Giáp Nano LED', rarity: 'Legendary', price: 360, value: 'nano_legs', desc: 'Giáp chân trợ lực sợi carbon viền LED xanh băng giá.', genderTarget: 'unisex' },
+  { id: 'flame_trousers', category: 'bottom', name: 'Quần Hỏa Ngục Lôi Điện', rarity: 'Epic', price: 230, value: 'flame_trousers', desc: 'Quần chiến thuật họa tiết lửa cam đỏ rực rỡ.', genderTarget: 'unisex' },
+  { id: 'quantum_techwear', category: 'bottom', name: 'Quần Techwear Dây Đai Chiến Thuật', rarity: 'Epic', price: 220, value: 'quantum_techwear', desc: 'Quần jogger phong cách Techwear đai chéo và túi hộp.', genderTarget: 'unisex' },
+  { id: 'armored_greaves', category: 'bottom', name: 'Giáp Chân Hiệp Sĩ Lượng Tử', rarity: 'Legendary', price: 380, value: 'armored_greaves', desc: 'Giáp bọc chân kim loại mạ vàng sang trọng với khớp gối phát sáng.', genderTarget: 'unisex' },
+  { id: 'cyber_hakama', category: 'bottom', name: 'Váy Quần Samurai Cyber', rarity: 'Epic', price: 240, value: 'cyber_hakama', desc: 'Quần xếp ly hakama phong cách kiếm sĩ tương lai.', genderTarget: 'unisex' },
 
   // Phụ kiện (Accessory)
   { id: 'sci_glasses', category: 'accessory', name: 'Kính Trí Tuệ Giáo Sư', rarity: 'Rare', price: 100, value: 'sci_glasses', desc: 'Kính gọng vàng trí thức của nhà bác học.', genderTarget: 'unisex' },
@@ -79,7 +95,14 @@ export const ALL_COSMETICS = [
   { id: 'cyber_eyepatch', category: 'accessory', name: 'Bịt Mắt Laser Cyber', rarity: 'Epic', price: 240, value: 'cyber_eyepatch', desc: 'Bịt mắt công nghệ có tia laser đỏ.', genderTarget: 'unisex' },
   { id: 'scientific_magnifier', category: 'accessory', name: 'Kính Vi Phẫu Nhãn Quang', rarity: 'Epic', price: 220, value: 'scientific_magnifier', desc: 'Kính lúp hỗ trợ phẫu thuật vi lượng.', genderTarget: 'unisex' },
   { id: 'crown', category: 'accessory', name: 'Vương Miện Đại Đế', rarity: 'Legendary', price: 500, value: 'crown', desc: 'Vương miện vàng nạm ngọc ruby tối cao của Đại Đế STEM.', genderTarget: 'unisex' },
-  { id: 'butterfly_hairpin', category: 'accessory', name: 'Kẹp Tóc Bướm Hologram', rarity: 'Epic', price: 230, value: 'butterfly_hairpin', desc: 'Kẹp tóc hình cánh bướm hologram phát sáng lung linh.', genderTarget: 'female' }
+  { id: 'butterfly_hairpin', category: 'accessory', name: 'Kẹp Tóc Bướm Hologram', rarity: 'Epic', price: 230, value: 'butterfly_hairpin', desc: 'Kẹp tóc hình cánh bướm hologram phát sáng lung linh.', genderTarget: 'female' },
+  { id: 'quantum_wings', category: 'accessory', name: 'Đôi Cánh Lượng Tử Photon', rarity: 'Legendary', price: 550, value: 'quantum_wings', desc: 'Đôi cánh thiên thần ánh sáng photon phát sáng rực rỡ sau lưng.', genderTarget: 'unisex' },
+  { id: 'cyber_drone', category: 'accessory', name: 'Drone Trợ Thủ AI Mini', rarity: 'Legendary', price: 480, value: 'cyber_drone', desc: 'Drone trợ lý AI bay lơ lửng trên vai với mắt laser và động cơ phản lực.', genderTarget: 'unisex' },
+  { id: 'cyber_katana', category: 'accessory', name: 'Kiếm Quang Laser Sau Lưng', rarity: 'Legendary', price: 460, value: 'cyber_katana', desc: 'Thanh katana năng lượng laser plasma đeo chéo lưng siêu ngầu.', genderTarget: 'unisex' },
+  { id: 'halo_matrix', category: 'accessory', name: 'Vòng Ma Trận Hào Quang', rarity: 'Epic', price: 310, value: 'halo_matrix', desc: 'Vòng hào quang ma trận số nhị phân xoay tròn trên đỉnh đầu.', genderTarget: 'unisex' },
+  { id: 'cyber_mask_fox', category: 'accessory', name: 'Mặt Nạ Hồ Ly Kitsune Cyber', rarity: 'Epic', price: 290, value: 'cyber_mask_fox', desc: 'Mặt nạ cáo kitsune sơn trắng đỏ viền LED công nghệ tương lai.', genderTarget: 'unisex' },
+  { id: 'hologram_horns', category: 'accessory', name: 'Sừng Rồng Hologram Tím', rarity: 'Epic', price: 280, value: 'hologram_horns', desc: 'Cặp sừng rồng quang học phát sáng tím huyền ảo.', genderTarget: 'unisex' },
+  { id: 'plasma_shield', category: 'accessory', name: 'Khiên Năng Lượng Lục Giác', rarity: 'Epic', price: 300, value: 'plasma_shield', desc: 'Lá chắn plasma tổ ong lục giác bao bọc cánh tay.', genderTarget: 'unisex' }
 ];
 
 export const HAIR_COLORS = [
@@ -387,6 +410,23 @@ export default function ProfilePage() {
       return;
     }
 
+    // ⚡ PHẢN HỒI TỨC THÌ (OPTIMISTIC UI - 0ms DELAY)
+    const oldQuests = [...dailyQuests];
+    const oldCrystals = personalization.crystals || 0;
+    const optimisticCrystals = oldCrystals + (quest.reward || 50);
+
+    setDailyQuests(prev => prev.map(q => q.id === questId ? { ...q, claimed: true } : q));
+    setPersonalization(prev => ({ ...prev, crystals: optimisticCrystals }));
+    playSound.success();
+
+    setLevelRewardModal({
+      show: true,
+      milestone: 0,
+      rewardText: `🎁 Nhận thưởng thành công +${quest.reward} Pha lê Lượng tử 🔮 từ nhiệm vụ "${quest.label}"!`,
+      flipped: true,
+      error: false
+    });
+
     try {
       const processTransaction = httpsCallable(functions, 'processCrystalTransaction');
       const result = await processTransaction({
@@ -394,28 +434,14 @@ export default function ProfilePage() {
         payload: { questId }
       });
 
-      const newCrystals = result.data.newCrystals;
-      const updatedQuests = dailyQuests.map(q => {
-        if (q.id === questId) {
-          return { ...q, claimed: true };
-        }
-        return q;
-      });
-
-      setDailyQuests(updatedQuests);
-      setPersonalization({ crystals: newCrystals });
-
-      playSound.success();
-      
-      setLevelRewardModal({
-        show: true,
-        milestone: 0,
-        rewardText: `🎁 Nhận thưởng thành công +${quest.reward} Pha lê Lượng tử 🔮 từ nhiệm vụ "${quest.label}"!`,
-        flipped: true,
-        error: false
-      });
+      if (result.data?.newCrystals !== undefined) {
+        setPersonalization(prev => ({ ...prev, crystals: result.data.newCrystals }));
+      }
     } catch (err) {
       console.error("Lỗi khi nhận thưởng nhiệm vụ:", err);
+      // Rollback nếu có lỗi
+      setDailyQuests(oldQuests);
+      setPersonalization(prev => ({ ...prev, crystals: oldCrystals }));
       setLevelRewardModal({
         show: true,
         milestone: 0,
@@ -718,7 +744,7 @@ export default function ProfilePage() {
     }, 1500);
   };
 
-  // Mua trang phục trực tiếp từ Shop
+  // Mua trang phục trực tiếp từ Shop (Optimistic 0ms UI)
   const handleBuyCosmetic = async (item) => {
     playSound.click();
     setShopSuccessMsg('');
@@ -735,6 +761,21 @@ export default function ProfilePage() {
       return;
     }
 
+    // ⚡ PHẢN HỒI TỨC THÌ (OPTIMISTIC UI)
+    const oldCrystals = currentCrystals;
+    const oldUnlocked = [...unlocked];
+    const newUnlocked = [...unlocked, item.id];
+    const optimisticCrystals = currentCrystals - item.price;
+
+    setPersonalization(prev => ({
+      ...prev,
+      crystals: optimisticCrystals,
+      unlockedParts: newUnlocked
+    }));
+    playSound.success();
+    setShopSuccessMsg(`🎉 Mua thành công: ${item.name}! Hãy sang tab Tự tạo Nhân vật để trang bị.`);
+    setTimeout(() => setShopSuccessMsg(''), 4000);
+
     try {
       const processTransaction = httpsCallable(functions, 'processCrystalTransaction');
       const result = await processTransaction({
@@ -742,20 +783,20 @@ export default function ProfilePage() {
         payload: { itemId: item.id }
       });
 
-      const { newCrystals } = result.data;
-      const newUnlocked = [...unlocked, item.id];
-
-      // Cập nhật local
-      setPersonalization({
-        crystals: newCrystals,
-        unlockedParts: newUnlocked
-      });
-
-      playSound.success();
-      setShopSuccessMsg(`🎉 Mua thành công: ${item.name}! Hãy sang tab Tự tạo Nhân vật để trang bị.`);
-      setTimeout(() => setShopSuccessMsg(''), 4000);
+      if (result.data?.newCrystals !== undefined) {
+        setPersonalization(prev => ({
+          ...prev,
+          crystals: result.data.newCrystals
+        }));
+      }
     } catch (err) {
       console.error('Lỗi khi mua vật phẩm:', err);
+      // Rollback nếu có lỗi
+      setPersonalization(prev => ({
+        ...prev,
+        crystals: oldCrystals,
+        unlockedParts: oldUnlocked
+      }));
       alert(`Không thể hoàn tất giao dịch: ${err.message || 'Lỗi kết nối.'}`);
     }
   };
@@ -804,7 +845,7 @@ export default function ProfilePage() {
       });
     }
   };
-  // Logic Điểm danh lượng tử 30 ngày
+  // Logic Điểm danh lượng tử 30 ngày (Optimistic 0ms UI)
   const handleDailyCheckIn = async () => {
     playSound.click();
     const todayStr = new Date().toISOString().split('T')[0];
@@ -821,6 +862,55 @@ export default function ProfilePage() {
       return;
     }
 
+    const lastDayIndex = personalization.checkInDayIndex || 0;
+    let nextDayIndex = 1;
+    if (lastDayIndex > 0 && lastDayIndex < 30) {
+      nextDayIndex = lastDayIndex + 1;
+    } else {
+      nextDayIndex = 1;
+    }
+
+    let bonusCrystals = 50;
+    if (nextDayIndex === 30) bonusCrystals = 300;
+    else if (nextDayIndex >= 26) bonusCrystals = 150;
+    else if (nextDayIndex >= 21) bonusCrystals = 120;
+    else if (nextDayIndex >= 16) bonusCrystals = 100;
+    else if (nextDayIndex >= 11) bonusCrystals = 80;
+    else if (nextDayIndex >= 6) bonusCrystals = 60;
+    else bonusCrystals = 50;
+
+    const oldPersonalization = { ...personalization };
+    const currentCrystals = personalization.crystals || 0;
+    const optimisticCrystals = currentCrystals + bonusCrystals;
+
+    const unlocked = personalization.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default'];
+    let newUnlocked = [...unlocked];
+    let giftMsg = '';
+    if (nextDayIndex === 30 && !newUnlocked.includes('crown')) {
+      newUnlocked.push('crown');
+      giftMsg = ' 👑 TẶNG KÈM: Vương Miện Đại Đế!';
+    }
+
+    // ⚡ PHẢN HỒI TỨC THÌ (OPTIMISTIC UI - 0ms DELAY)
+    setPersonalization(prev => ({
+      ...prev,
+      crystals: optimisticCrystals,
+      lastCheckInDate: todayStr,
+      checkInDayIndex: nextDayIndex,
+      unlockedParts: newUnlocked
+    }));
+
+    playSound.success();
+    updateQuestProgress('quest_checkin', 1);
+
+    setLevelRewardModal({
+      show: true,
+      milestone: 0,
+      rewardText: `🔋 Đồng bộ năng lượng ngày ${nextDayIndex} thành công! Nhận +${bonusCrystals} Pha lê Lượng tử 🔮${giftMsg}`,
+      flipped: true,
+      error: false
+    });
+
     try {
       const processTransaction = httpsCallable(functions, 'processCrystalTransaction');
       const result = await processTransaction({
@@ -828,35 +918,17 @@ export default function ProfilePage() {
         payload: {}
       });
 
-      const { newCrystals, bonusCrystals, nextDayIndex, giftMsg } = result.data;
-
-      const unlocked = personalization.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default'];
-      let newUnlocked = [...unlocked];
-      if (nextDayIndex === 30 && !newUnlocked.includes('crown')) {
-        newUnlocked.push('crown');
+      if (result.data?.newCrystals !== undefined) {
+        setPersonalization(prev => ({
+          ...prev,
+          crystals: result.data.newCrystals,
+          checkInDayIndex: result.data.nextDayIndex || nextDayIndex
+        }));
       }
-
-      setPersonalization({
-        crystals: newCrystals,
-        lastCheckInDate: todayStr,
-        checkInDayIndex: nextDayIndex,
-        unlockedParts: newUnlocked
-      });
-
-      playSound.success();
-
-      // Cập nhật nhiệm vụ hàng ngày: Điểm danh
-      updateQuestProgress('quest_checkin', 1);
-
-      setLevelRewardModal({
-        show: true,
-        milestone: 0,
-        rewardText: `🔋 Đồng bộ năng lượng ngày ${nextDayIndex} thành công! Nhận +${bonusCrystals} Pha lê Lượng tử 🔮${giftMsg}`,
-        flipped: true,
-        error: false
-      });
     } catch (err) {
       console.error("Lỗi khi điểm danh:", err);
+      // Rollback on error
+      setPersonalization(oldPersonalization);
       setLevelRewardModal({
         show: true,
         milestone: 0,
@@ -867,7 +939,7 @@ export default function ProfilePage() {
     }
   };
 
-  // Nhận quà thăng cấp nâng cao với Modal Hologram 3D
+  // Nhận quà thăng cấp nâng cao với Modal Hologram 3D (Optimistic 0ms UI)
   const handleClaimMilestone = async (milestoneLevel) => {
     playSound.click();
     setRewardsSuccessMsg('');
@@ -898,6 +970,61 @@ export default function ProfilePage() {
       return;
     }
 
+    const oldPersonalization = { ...personalization };
+    const currentCrystals = personalization.crystals || 0;
+    const optimisticCrystals = currentCrystals + 500;
+    const newClaimed = [...claimed, milestoneLevel];
+
+    let newUnlockedFrames = [...(personalization.unlockedFrames || ['default'])];
+    let newUnlockedTitles = [...(personalization.unlockedTitles || ['apprentice'])];
+    let rewardText = '';
+    let frameReward = '';
+    let titleReward = '';
+
+    if (milestoneLevel === 10) {
+      if (!newUnlockedFrames.includes('gold_vip')) {
+        newUnlockedFrames.push('gold_vip');
+      }
+      frameReward = 'gold_vip';
+      rewardText = 'Khung Avatar "Huyền thoại Vàng" ✨ + 500 Pha lê Lượng tử 🔮';
+    } else if (milestoneLevel === 20) {
+      if (!newUnlockedFrames.includes('neon_fire')) {
+        newUnlockedFrames.push('neon_fire');
+      }
+      frameReward = 'neon_fire';
+      rewardText = 'Khung Avatar "Bão lửa Neon" 🔥 + 500 Pha lê Lượng tử 🔮';
+    } else if (milestoneLevel === 30) {
+      if (!newUnlockedTitles.includes('dimension_creator')) {
+        newUnlockedTitles.push('dimension_creator');
+      }
+      titleReward = 'dimension_creator';
+      rewardText = 'Danh hiệu "Đấng kiến tạo Không gian" 🌌 + 500 Pha lê Lượng tử 🔮';
+    } else {
+      rewardText = '500 Pha lê Lượng tử 🔮';
+    }
+
+    // ⚡ PHẢN HỒI TỨC THÌ (OPTIMISTIC UI - 0ms DELAY)
+    setPersonalization(prev => ({
+      ...prev,
+      crystals: optimisticCrystals,
+      claimedMilestones: newClaimed,
+      unlockedFrames: newUnlockedFrames,
+      unlockedTitles: newUnlockedTitles
+    }));
+
+    playSound.success();
+    
+    setLevelRewardModal({
+      show: true,
+      type: 'level',
+      milestone: milestoneLevel,
+      rewardText,
+      frameReward,
+      titleReward,
+      flipped: false,
+      error: false
+    });
+
     try {
       const processTransaction = httpsCallable(functions, 'processCrystalTransaction');
       const result = await processTransaction({
@@ -905,61 +1032,16 @@ export default function ProfilePage() {
         payload: { milestoneLevel }
       });
 
-      const { newCrystals } = result.data;
-      const newClaimed = [...claimed, milestoneLevel];
-
-      // Thêm quà tặng độc quyền tương ứng mốc
-      let newUnlockedFrames = [...(personalization.unlockedFrames || ['default'])];
-      let newUnlockedTitles = [...(personalization.unlockedTitles || ['apprentice'])];
-      let rewardText = '';
-      let frameReward = '';
-      let titleReward = '';
-
-      if (milestoneLevel === 10) {
-        if (!newUnlockedFrames.includes('gold_vip')) {
-          newUnlockedFrames.push('gold_vip');
-        }
-        frameReward = 'gold_vip';
-        rewardText = 'Khung Avatar "Huyền thoại Vàng" ✨ + 500 Pha lê Lượng tử 🔮';
-      } else if (milestoneLevel === 20) {
-        if (!newUnlockedFrames.includes('neon_fire')) {
-          newUnlockedFrames.push('neon_fire');
-        }
-        frameReward = 'neon_fire';
-        rewardText = 'Khung Avatar "Bão lửa Neon" 🔥 + 500 Pha lê Lượng tử 🔮';
-      } else if (milestoneLevel === 30) {
-        if (!newUnlockedTitles.includes('dimension_creator')) {
-          newUnlockedTitles.push('dimension_creator');
-        }
-        titleReward = 'dimension_creator';
-        rewardText = 'Danh hiệu "Đấng kiến tạo Không gian" 🌌 + 500 Pha lê Lượng tử 🔮';
-      } else {
-        rewardText = '500 Pha lê Lượng tử 🔮';
+      if (result.data?.newCrystals !== undefined) {
+        setPersonalization(prev => ({
+          ...prev,
+          crystals: result.data.newCrystals
+        }));
       }
-
-      // Cập nhật local
-      setPersonalization({
-        crystals: newCrystals,
-        claimedMilestones: newClaimed,
-        unlockedFrames: newUnlockedFrames,
-        unlockedTitles: newUnlockedTitles
-      });
-
-      playSound.success();
-      
-      // Kích hoạt Modal nhận quà level lộng lẫy
-      setLevelRewardModal({
-        show: true,
-        type: 'level',
-        milestone: milestoneLevel,
-        rewardText,
-        frameReward,
-        titleReward,
-        flipped: false,
-        error: false
-      });
     } catch (err) {
       console.error("Lỗi khi nhận quà mốc level:", err);
+      // Rollback on error
+      setPersonalization(oldPersonalization);
       setLevelRewardModal({
         show: true,
         type: 'level',
@@ -1164,73 +1246,82 @@ export default function ProfilePage() {
     setTilt({ x: 0, y: 0 });
   };
 
-  // ================= FRIEND SYSTEM HANDLERS =================
+  // ================= FRIEND SYSTEM HANDLERS (OPTIMISTIC UI - 0ms DELAY) =================
   const sendFriendRequest = async (targetUser) => {
     playSound.click();
     if (!user || !targetUser) return;
-    setProcessingUid(targetUser.uid);
+    
+    // ⚡ PHẢN HỒI TỨC THÌ (OPTIMISTIC UI)
+    setOutgoingRequests(prev => prev.includes(targetUser.uid) ? prev : [...prev, targetUser.uid]);
+    setSettingsMessage({
+      type: 'success',
+      text: `Đã gửi lời mời kết bạn đến ${targetUser.displayName || 'Học viên'}!`
+    });
+    setTimeout(() => setSettingsMessage(null), 4000);
+
     try {
       const processFriend = httpsCallable(functions, 'processFriendAction');
       await processFriend({
         actionType: 'SEND_REQUEST',
         payload: { targetUid: targetUser.uid }
       });
-      
-      setSettingsMessage({
-        type: 'success',
-        text: `Đã gửi lời mời kết bạn đến ${targetUser.displayName || 'Học viên'}!`
-      });
     } catch (err) {
-      console.error(err);
+      console.error("Lỗi khi gửi lời mời kết bạn:", err);
+      // Rollback
+      setOutgoingRequests(prev => prev.filter(id => id !== targetUser.uid));
       setSettingsMessage({ type: 'error', text: `Lỗi khi gửi lời mời: ${err.message}` });
-    } finally {
-      setProcessingUid(null);
     }
   };
 
   const acceptFriendRequest = async (sender) => {
     playSound.success();
     if (!user || !sender) return;
-    setProcessingUid(sender.uid);
+
+    // ⚡ PHẢN HỒI TỨC THÌ (OPTIMISTIC UI)
+    setIncomingRequests(prev => prev.filter(r => (r.uid || r) !== sender.uid));
+    setRichIncomingRequests(prev => prev.filter(r => r.uid !== sender.uid));
+    setFriends(prev => [...prev, sender]);
+    setRichFriends(prev => [...prev, sender]);
+    setSettingsMessage({
+      type: 'success',
+      text: `Đã trở thành bạn bè với ${sender.displayName || 'Học viên'}!`
+    });
+    setTimeout(() => setSettingsMessage(null), 4000);
+
     try {
       const processFriend = httpsCallable(functions, 'processFriendAction');
       await processFriend({
         actionType: 'ACCEPT_REQUEST',
         payload: { targetUid: sender.uid }
       });
-      
-      setSettingsMessage({
-        type: 'success',
-        text: `Đã trở thành bạn bè với ${sender.displayName || 'Học viên'}!`
-      });
     } catch (err) {
-      console.error(err);
+      console.error("Lỗi khi chấp nhận kết bạn:", err);
       setSettingsMessage({ type: 'error', text: `Lỗi khi chấp nhận kết bạn: ${err.message}` });
-    } finally {
-      setProcessingUid(null);
     }
   };
 
   const declineFriendRequest = async (sender) => {
     playSound.click();
     if (!user || !sender) return;
-    setProcessingUid(sender.uid);
+
+    // ⚡ PHẢN HỒI TỨC THÌ (OPTIMISTIC UI)
+    setIncomingRequests(prev => prev.filter(r => (r.uid || r) !== sender.uid));
+    setRichIncomingRequests(prev => prev.filter(r => r.uid !== sender.uid));
+    setSettingsMessage({
+      type: 'success',
+      text: `Đã từ chối lời mời kết bạn từ ${sender.displayName || 'Học viên'}.`
+    });
+    setTimeout(() => setSettingsMessage(null), 4000);
+
     try {
       const processFriend = httpsCallable(functions, 'processFriendAction');
       await processFriend({
         actionType: 'DECLINE_REQUEST',
         payload: { targetUid: sender.uid }
       });
-      
-      setSettingsMessage({
-        type: 'success',
-        text: `Đã từ chối lời mời kết bạn từ ${sender.displayName || 'Học viên'}.`
-      });
     } catch (err) {
-      console.error(err);
+      console.error("Lỗi khi từ chối kết bạn:", err);
       setSettingsMessage({ type: 'error', text: `Lỗi khi từ chối kết bạn: ${err.message}` });
-    } finally {
-      setProcessingUid(null);
     }
   };
 
@@ -1239,23 +1330,25 @@ export default function ProfilePage() {
     if (!user || !friend) return;
     
     if (!window.confirm(`Bạn có chắc chắn muốn hủy kết bạn với ${friend.displayName || 'Học viên'} không?`)) return;
-    setProcessingUid(friend.uid);
+
+    // ⚡ PHẢN HỒI TỨC THÌ (OPTIMISTIC UI)
+    setFriends(prev => prev.filter(f => f.uid !== friend.uid));
+    setRichFriends(prev => prev.filter(f => f.uid !== friend.uid));
+    setSettingsMessage({
+      type: 'success',
+      text: `Đã hủy kết bạn với ${friend.displayName || 'Học viên'}.`
+    });
+    setTimeout(() => setSettingsMessage(null), 4000);
+
     try {
       const processFriend = httpsCallable(functions, 'processFriendAction');
       await processFriend({
         actionType: 'UNFRIEND',
         payload: { targetUid: friend.uid }
       });
-      
-      setSettingsMessage({
-        type: 'success',
-        text: `Đã hủy kết bạn với ${friend.displayName || 'Học viên'}.`
-      });
     } catch (err) {
-      console.error(err);
+      console.error("Lỗi khi hủy kết bạn:", err);
       setSettingsMessage({ type: 'error', text: `Lỗi khi hủy kết bạn: ${err.message}` });
-    } finally {
-      setProcessingUid(null);
     }
   };
 
@@ -4586,45 +4679,97 @@ export default function ProfilePage() {
         </div>
       )}
 
+      {/* ================== CINEMATIC QUANTUM WARP OVERLAY (KHI ĐANG QUAY GACHA) ================== */}
+      {isRolling && (
+        <div className="fixed inset-0 z-[12000] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center select-none overflow-hidden animate-in fade-in duration-300">
+          {/* Nền hiệu ứng lỗ sâu không-thời gian */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.3)_0%,rgba(6,182,212,0.18)_35%,rgba(15,23,42,0.8)_70%,black_100%)] pointer-events-none" />
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none opacity-40" />
+
+          {/* Cụm vòng xoay gia tốc hạt lượng tử */}
+          <div className="relative w-72 h-72 sm:w-88 sm:h-88 flex items-center justify-center mb-8">
+            {/* Vòng ngoài cùng xoay nhanh */}
+            <div className="absolute inset-0 rounded-full border-4 border-dashed border-cyan-400/50 animate-spin" style={{ animationDuration: '6s' }} />
+            {/* Vòng giữa xoay ngược chiều */}
+            <div className="absolute inset-5 rounded-full border-2 border-dashed border-purple-500/70 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '3.5s' }} />
+            {/* Sóng xung kích phát quang */}
+            <div className="absolute inset-12 rounded-full border-2 border-pink-500/60 animate-ping" style={{ animationDuration: '1.8s' }} />
+            {/* Hào quang tâm lỗ sâu */}
+            <div className="absolute w-40 h-40 rounded-full bg-gradient-to-tr from-purple-600 via-pink-500 to-cyan-400 blur-2xl opacity-75 animate-pulse" />
+            
+            {/* Lõi Singularity tinh thể */}
+            <div className="relative z-10 w-28 h-28 rounded-full bg-gradient-to-br from-[#0c0d1e] via-[#1c1236] to-black border-2 border-cyan-300 flex items-center justify-center shadow-[0_0_60px_rgba(6,182,212,0.9)] transform hover:scale-105 transition-transform">
+              <CrystalIcon className="w-14 h-14 text-cyan-300 drop-shadow-[0_0_20px_#00ffff] animate-bounce" />
+            </div>
+          </div>
+
+          {/* Dải thông số HUD Sci-Fi */}
+          <div className="relative z-10 space-y-3 max-w-lg">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/15 border border-cyan-400/40 text-cyan-300 text-xs font-mono font-black tracking-widest uppercase shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+              <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" />
+              CỔNG GIA TỐC HẠT ĐA VŨ TRỤ ĐANG KHAI MỞ
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-pink-300 to-amber-300 uppercase tracking-widest drop-shadow-[0_0_25px_rgba(168,85,247,0.5)]">
+              ĐANG TRÍCH XUẤT VẬT PHẨM LƯỢNG TỬ
+            </h2>
+            <p className="text-xs text-zinc-300 font-mono tracking-wide leading-relaxed">
+              Giải mã liên kết xác suất lượng tử... Vui lòng giữ vững tần số sóng não!
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* ================== MODAL QUAY GACHA LẬT THẺ LƯỢNG TỬ 3D HOLOGRAM ================== */}
       {showGachaModal && (
-        <div className="fixed top-0 bottom-0 right-0 left-0 md:left-[260px] z-[11000] bg-black/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-          <div className="relative w-full max-w-2xl bg-bg-secondary border border-border-theme rounded-3xl p-6 sm:p-8 shadow-2xl text-center overflow-hidden my-8">
+        <div className="fixed top-0 bottom-0 right-0 left-0 md:left-[260px] z-[11000] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div className="relative w-full max-w-3xl bg-bg-secondary border border-purple-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl text-center overflow-hidden my-8 ring-1 ring-purple-500/20">
             {/* Lưới tọa độ laser nền */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(168,85,247,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.03)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
-            <div className="absolute -top-48 -left-48 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-48 -right-48 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(168,85,247,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.05)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+            <div className="absolute -top-48 -left-48 w-96 h-96 bg-purple-500/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-48 -right-48 w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
 
-            <h3 className="text-xl font-black text-purple-400 uppercase tracking-widest mb-2 font-sans">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-[10px] font-mono font-bold uppercase tracking-wider mb-2">
+              ✨ QUANTUM LOOT REVEAL
+            </div>
+            <h3 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-amber-300 uppercase tracking-widest font-sans drop-shadow-sm">
               GIẢI MÃ LIÊN KẾT LƯỢNG TỬ
             </h3>
             <p className="text-text-secondary text-xs font-mono uppercase tracking-wider mb-6">
-              Bạn đã tiêu hao {gachaCrystalsSpent} 🔮 tinh thể. Click vào từng thẻ lượng tử bên dưới để lật mở liên kết!
+              Bạn đã tiêu hao {gachaCrystalsSpent} 🔮 tinh thể. Click vào từng thẻ hoặc chọn &quot;Lật toàn bộ&quot; để khai mở kết quả!
             </p>
 
             {/* Container grid thẻ Gacha 3D */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 my-6 justify-center">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5 sm:gap-4 my-6 justify-center">
               {gachaResults.map((res, idx) => {
                 const isFlipped = flippedGachaCards.includes(idx);
                 const item = res.item;
                 
-                let rarityColor = 'border-border-theme text-text-primary bg-bg-tertiary';
+                let rarityBorder = 'border-border-theme text-text-primary bg-bg-tertiary';
+                let rarityBadge = 'bg-zinc-800 text-zinc-300';
                 let glowColor = '';
+                let rarityTitle = item.rarity;
+
                 if (item.rarity === 'Legendary') {
-                  rarityColor = 'border-amber-500 text-amber-500 bg-amber-500/10';
-                  glowColor = 'shadow-[0_0_20px_rgba(245,158,11,0.25)]';
+                  rarityBorder = 'border-amber-400 bg-gradient-to-b from-amber-500/20 via-zinc-900 to-zinc-950 text-amber-300 ring-1 ring-amber-300/50';
+                  rarityBadge = 'bg-gradient-to-r from-amber-500 to-yellow-400 text-zinc-950 font-black';
+                  glowColor = 'shadow-[0_0_25px_rgba(245,158,11,0.45)]';
+                  rarityTitle = '🌟 [SSR] HUYỀN THOẠI';
                 } else if (item.rarity === 'Epic') {
-                  rarityColor = 'border-purple-500 text-purple-500 bg-purple-500/10';
-                  glowColor = 'shadow-[0_0_20px_rgba(168,85,247,0.25)]';
+                  rarityBorder = 'border-purple-500 bg-gradient-to-b from-purple-500/20 via-zinc-900 to-zinc-950 text-purple-300 ring-1 ring-purple-400/50';
+                  rarityBadge = 'bg-gradient-to-r from-purple-600 to-pink-500 text-white font-black';
+                  glowColor = 'shadow-[0_0_20px_rgba(168,85,247,0.4)]';
+                  rarityTitle = '⚡ [SR] SIÊU CẤP';
                 } else if (item.rarity === 'Rare') {
-                  rarityColor = 'border-cyan-500 text-cyan-500 bg-cyan-500/10';
-                  glowColor = 'shadow-[0_0_15px_rgba(6,182,212,0.2)]';
+                  rarityBorder = 'border-cyan-400 bg-gradient-to-b from-cyan-500/20 via-zinc-900 to-zinc-950 text-cyan-300 ring-1 ring-cyan-300/50';
+                  rarityBadge = 'bg-cyan-500 text-zinc-950 font-black';
+                  glowColor = 'shadow-[0_0_18px_rgba(6,182,212,0.35)]';
+                  rarityTitle = '🔷 [R] HIẾM';
                 }
 
                 return (
                   <div 
                     key={idx}
-                    className="w-full aspect-[3/4.2] relative cursor-pointer group"
+                    className="w-full aspect-[3/4.4] relative cursor-pointer group"
                     style={{ perspective: '1000px' }}
                     onClick={() => {
                       if (!isFlipped) {
@@ -4642,59 +4787,59 @@ export default function ProfilePage() {
                     >
                       {/* CARD BACK (Mặt úp) */}
                       <div 
-                        className="absolute inset-0 rounded-2xl border-2 border-purple-500/30 bg-bg-tertiary flex flex-col items-center justify-center p-4 shadow-xl hover:border-purple-400 transition-colors"
+                        className="absolute inset-0 rounded-2xl border-2 border-purple-500/40 bg-gradient-to-b from-[#18122B] to-[#0D0B18] flex flex-col items-center justify-center p-3.5 shadow-xl hover:border-purple-300 hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all group-hover:scale-[1.02]"
                         style={{ backfaceVisibility: 'hidden' }}
                       >
-                        <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20 mb-2 group-hover:scale-110 duration-300">
-                          <span className="text-xl animate-pulse">🔮</span>
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-600/30 to-cyan-500/30 flex items-center justify-center border border-purple-400/40 mb-2 group-hover:rotate-12 duration-300 shadow-[0_0_15px_rgba(168,85,247,0.3)]">
+                          <span className="text-2xl animate-pulse">🔮</span>
                         </div>
-                        <span className="text-[9px] font-black text-purple-400 uppercase tracking-widest font-mono">Quantum</span>
-                        <span className="text-[8px] text-text-secondary mt-1 uppercase">Click to open</span>
+                        <span className="text-[10px] font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400 uppercase tracking-widest font-mono">Quantum</span>
+                        <span className="text-[8px] text-zinc-400 mt-1 uppercase font-bold tracking-wider">Nhấp để mở</span>
                       </div>
 
                       {/* CARD FRONT (Mặt ngửa) */}
                       <div 
-                        className={`absolute inset-0 rounded-2xl border-2 flex flex-col items-center justify-between p-3 shadow-2xl ${rarityColor} ${glowColor}`}
+                        className={`absolute inset-0 rounded-2xl border-2 flex flex-col items-center justify-between p-3 shadow-2xl ${rarityBorder} ${glowColor}`}
                         style={{ 
                           backfaceVisibility: 'hidden',
                           transform: 'rotateY(180deg)'
                         }}
                       >
-                        {/* Sparkles / Particles for Legendary/Epic */}
+                        {/* Shimmer overlay cho phẩm chất cao */}
                         {(item.rarity === 'Legendary' || item.rarity === 'Epic') && (
-                          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(245,158,11,0.08),transparent)] pointer-events-none" />
+                          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.12),transparent)] pointer-events-none rounded-2xl" />
                         )}
 
-                        <span className="text-[8px] font-black uppercase tracking-wider font-mono">
-                          {item.rarity}
+                        <span className={`text-[7.5px] px-2 py-0.5 rounded-full uppercase tracking-wider font-mono ${rarityBadge}`}>
+                          {rarityTitle}
                         </span>
 
                         <div className="flex-1 flex flex-col items-center justify-center my-1 w-full min-h-0">
                           {item.type === 'title' ? (
-                            <div className="w-12 h-12 bg-gradient-to-br from-purple-500/20 via-pink-500/10 to-cyan-500/20 border border-purple-500/30 rounded-xl flex items-center justify-center text-2xl shadow-[0_0_10px_rgba(168,85,247,0.25)] animate-pulse">
+                            <div className="w-13 h-13 bg-gradient-to-br from-purple-500/30 via-pink-500/20 to-cyan-500/30 border border-purple-400/40 rounded-2xl flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(168,85,247,0.35)] animate-pulse">
                               {getTitleEmoji(item)}
                             </div>
                           ) : (
-                            <div className="w-12 h-12 flex items-center justify-center relative overflow-hidden bg-black/30 rounded-xl border border-white/5 shadow-inner">
-                              <STEMAvatarSVG parts={getCosmeticPreviewParts(item)} className="w-14 h-14 transform translate-y-1 scale-110" />
+                            <div className="w-13 h-13 flex items-center justify-center relative overflow-hidden bg-black/40 rounded-2xl border border-white/10 shadow-inner">
+                              <STEMAvatarSVG parts={getCosmeticPreviewParts(item)} className="w-16 h-16 transform translate-y-1 scale-110" />
                             </div>
                           )}
-                          <h4 className="text-[10px] sm:text-[11px] font-black text-white mt-1 leading-tight w-full px-0.5 text-center whitespace-normal break-words">
+                          <h4 className="text-[10.5px] sm:text-[11.5px] font-black text-white mt-1.5 leading-tight w-full px-0.5 text-center whitespace-normal break-words">
                             {item.name}
                           </h4>
                           {item.desc && (
-                            <p className="text-[7.5px] text-zinc-400 mt-0.5 max-w-[120px] mx-auto leading-none whitespace-normal break-words">{item.desc}</p>
+                            <p className="text-[7.5px] text-zinc-400 mt-0.5 max-w-[130px] mx-auto leading-tight whitespace-normal break-words line-clamp-2">{item.desc}</p>
                           )}
                         </div>
 
                         <div className="w-full mt-1">
                           {res.isDuplicate ? (
-                            <div className="text-[8px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 py-0.5 rounded-lg text-center font-mono">
-                              Trùng: +{res.compensation} 🔮
+                            <div className="text-[8px] font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 py-0.5 rounded-lg text-center font-mono">
+                              Trùng: +{res.compensation} 🔮 hoàn trả
                             </div>
                           ) : (
-                            <div className="text-[8px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 py-0.5 rounded-lg text-center font-mono">
-                              MỚI SỞ HỮU ✨
+                            <div className="text-[8px] font-black text-emerald-300 bg-emerald-500/20 border border-emerald-500/40 py-0.5 rounded-lg text-center font-mono animate-pulse">
+                              ✨ MỚI SỞ HỮU!
                             </div>
                           )}
                         </div>
@@ -4705,24 +4850,53 @@ export default function ProfilePage() {
               })}
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
+            {/* Các nút hành động */}
+            <div className="flex flex-wrap items-center justify-center gap-3 mt-6 pt-4 border-t border-border-theme">
               <button
                 onClick={() => {
                   playSound.success();
-                  setFlippedGachaCards(gachaResults.map((_, i) => i));
+                  gachaResults.forEach((_, i) => {
+                    setTimeout(() => {
+                      setFlippedGachaCards(prev => prev.includes(i) ? prev : [...prev, i]);
+                      playSound.click();
+                    }, i * 90);
+                  });
                 }}
-                className="px-6 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold rounded-xl border border-white/5 transition-all active:scale-95 flex items-center gap-1.5"
+                className="px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold rounded-xl border border-white/10 transition-all active:scale-95 flex items-center gap-1.5 shadow-md"
               >
-                <span>⚡ Lật toàn bộ</span>
+                <span>⚡ Lật toàn bộ (Sóng 3D)</span>
               </button>
+
+              <button
+                disabled={isRolling}
+                onClick={() => {
+                  setShowGachaModal(false);
+                  handleSpinGacha(1);
+                }}
+                className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all active:scale-95 shadow-md shadow-purple-600/30 flex items-center gap-1.5"
+              >
+                <span>Quay tiếp x1 (100 🔮)</span>
+              </button>
+
+              <button
+                disabled={isRolling}
+                onClick={() => {
+                  setShowGachaModal(false);
+                  handleSpinGacha(10);
+                }}
+                className="px-5 py-2.5 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all active:scale-95 shadow-md shadow-pink-600/30 flex items-center gap-1.5"
+              >
+                <span>Quay tiếp x10 (900 🔮)</span>
+              </button>
+
               <button
                 onClick={() => {
                   playSound.click();
                   setShowGachaModal(false);
                 }}
-                className="px-8 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all active:scale-95 shadow-md shadow-purple-500/20"
+                className="px-6 py-2.5 bg-zinc-700 hover:bg-zinc-600 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all active:scale-95"
               >
-                Hoàn tất
+                Đóng
               </button>
             </div>
           </div>

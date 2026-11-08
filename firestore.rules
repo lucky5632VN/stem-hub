@@ -67,6 +67,13 @@ service cloud.firestore {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(allowedKeys) && hasNoPrivilegeEscalation();
     }
 
+    // 6.1 Cho phép người dùng xác thực tương tác bạn bè (gửi lời mời, chấp nhận, từ chối, hủy kết bạn)
+    function isFriendInteraction() {
+      return isAuthenticated() && 
+             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['incomingRequests', 'friends', 'outgoingRequests']) &&
+             hasNoPrivilegeEscalation();
+    }
+
     // 7. Kiểm tra định dạng điểm số phòng đấu: Bắt buộc là Number (chống Type Confusion Attack)
     function isValidRoomScores() {
       return (!('player1Score' in request.resource.data) || request.resource.data.player1Score is number) &&
@@ -97,7 +104,7 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isAuthenticated() && request.auth.uid == userId && 
                     (!('role' in request.resource.data) || request.resource.data.role == 'student' || request.resource.data.role == 'user');
-      allow update: if isAdmin() || (isOwner(userId) && isAllowedUserUpdate());
+      allow update: if isAdmin() || (isOwner(userId) && isAllowedUserUpdate()) || isFriendInteraction();
       allow delete: if isOwner(userId);
 
       // Bộ nhớ cá nhân của học sinh (ai memories)

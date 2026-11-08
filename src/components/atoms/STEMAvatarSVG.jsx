@@ -76,6 +76,12 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
       case 'bio_hazard': return '#eab308';
       case 'ninja_suit': return '#18181b';
       case 'quantum_dress': return '#ec4899';
+      case 'nano_suit': return '#0f172a';
+      case 'phoenix_armor': return '#c2410c';
+      case 'shadow_assassin': return '#3b0764';
+      case 'cyber_pilot': return '#1e293b';
+      case 'celestial_robe': return '#1e1b4b';
+      case 'dark_knight': return '#09090b';
       default: return gender === 'female' ? '#ec4899' : '#0ea5e9'; // Nữ mặc định hồng, Nam mặc định xanh dương
     }
   };
@@ -95,6 +101,14 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
           <stop offset="0%" stopColor="#ec4899" stopOpacity="0.15" />
           <stop offset="100%" stopColor="#1e1b4b" stopOpacity="0" />
         </radialGradient>
+        <linearGradient id="wingGradientL" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#00ffff" />
+          <stop offset="100%" stopColor="#d946ef" />
+        </linearGradient>
+        <linearGradient id="wingGradientR" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#00ffff" />
+          <stop offset="100%" stopColor="#d946ef" />
+        </linearGradient>
         <style>{`
           #legs_section g, #arms_section g {
             transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -105,6 +119,46 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
 
       {/* Nhóm áp dụng tỉ lệ cơ thể và tư thế */}
       <g id="avatar_core_group">
+        
+        {/* ================== 0. BACK ACCESSORIES (WINGS / KATANA / DRONE) ================== */}
+        {accessory === 'quantum_wings' && (
+          <g id="acc_quantum_wings" className="animate-pulse">
+            {/* Cánh trái */}
+            <path d="M40 55 C25 40, 10 30, 4 38 C-2 46, 12 60, 36 68 Z" fill="url(#wingGradientL)" opacity="0.85" />
+            <path d="M38 58 C26 48, 14 42, 8 48 C2 54, 15 65, 36 70 Z" fill="#06b6d4" opacity="0.9" />
+            <path d="M36 62 C28 56, 18 52, 14 56 C10 60, 20 68, 35 72 Z" fill="#ec4899" opacity="0.95" />
+            {/* Cánh phải */}
+            <path d="M60 55 C75 40, 90 30, 96 38 C102 46, 88 60, 64 68 Z" fill="url(#wingGradientR)" opacity="0.85" />
+            <path d="M62 58 C74 48, 86 42, 92 48 C98 54, 85 65, 64 70 Z" fill="#06b6d4" opacity="0.9" />
+            <path d="M64 62 C72 56, 82 52, 86 56 C90 60, 80 68, 65 72 Z" fill="#ec4899" opacity="0.95" />
+          </g>
+        )}
+
+        {accessory === 'cyber_katana' && (
+          <g id="acc_cyber_katana">
+            {/* Thanh kiếm đeo chéo lưng */}
+            <line x1="20" y1="30" x2="80" y2="90" stroke="#0f172a" strokeWidth="5" strokeLinecap="round" />
+            <line x1="22" y1="32" x2="78" y2="88" stroke="#00f2fe" strokeWidth="2.2" strokeLinecap="round" />
+            <line x1="18" y1="28" x2="25" y2="35" stroke="#f43f5e" strokeWidth="3.5" strokeLinecap="round" />
+            <circle cx="17" cy="27" r="2.5" fill="#ffd700" />
+            <circle cx="17" cy="27" r="1.2" fill="#00f2fe" />
+          </g>
+        )}
+
+        {accessory === 'cyber_drone' && (
+          <g id="acc_cyber_drone" className="animate-bounce" style={{ animationDuration: '3s' }}>
+            {/* Drone bay lơ lửng vai phải */}
+            <line x1="68" y1="52" x2="78" y2="38" stroke="#00ffff" strokeWidth="0.8" strokeDasharray="1,1" opacity="0.6" />
+            <ellipse cx="80" cy="35" rx="7" ry="5" fill="#0f172a" stroke="#00ffff" strokeWidth="1" />
+            <circle cx="80" cy="35" r="3" fill="#00ffff" className="animate-ping" style={{ animationDuration: '2s' }} />
+            <circle cx="80" cy="35" r="2" fill="#ffffff" />
+            {/* Cánh quạt mini */}
+            <ellipse cx="74" cy="31" rx="3" ry="1" fill="#64748b" />
+            <ellipse cx="86" cy="31" rx="3" ry="1" fill="#64748b" />
+            <path d="M80 30 L80 26" stroke="#f43f5e" strokeWidth="1" />
+            <circle cx="80" cy="25" r="1" fill="#f43f5e" />
+          </g>
+        )}
         
 
         {/* ================== 1. BOTTOM (QUẦN & CHÂN) ================== */}
@@ -251,6 +305,88 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
                 <rect x="53" y="87" width="4" height="5" fill={skin} />
                 <ellipse cx="55" cy="93" rx="4.5" ry="1.8" fill="#ec4899" />
               </g>
+            </g>
+          )}
+
+          {bottom === 'nano_legs' && (
+            // Quần Giáp Nano LED
+            <g id="bottom_nano_legs">
+              <g transform={pose === 'walk' ? 'rotate(8, 45, 78)' : ''}>
+                <rect x="41" y="78" width="8" height="15" rx="1.5" fill="#0f172a" stroke="#00f2fe" strokeWidth="1" />
+                <line x1="45" y1="80" x2="45" y2="91" stroke="#00f2fe" strokeWidth="1.2" className="animate-pulse" />
+                <path d="M40 92.5 C40 91.5, 47 91.5, 47 92.5 L47 95 H40 Z" fill="#1e293b" stroke="#00f2fe" strokeWidth="0.8" />
+              </g>
+              <g transform={pose === 'walk' ? 'rotate(-8, 55, 78)' : ''}>
+                <rect x="51" y="78" width="8" height="15" rx="1.5" fill="#0f172a" stroke="#00f2fe" strokeWidth="1" />
+                <line x1="55" y1="80" x2="55" y2="91" stroke="#00f2fe" strokeWidth="1.2" className="animate-pulse" />
+                <path d="M53 92.5 C53 91.5, 60 91.5, 60 92.5 L60 95 H53 Z" fill="#1e293b" stroke="#00f2fe" strokeWidth="0.8" />
+              </g>
+            </g>
+          )}
+
+          {bottom === 'flame_trousers' && (
+            // Quần Hỏa Ngục Lôi Điện
+            <g id="bottom_flame_trousers">
+              <rect x="40" y="78" width="20" height="2" fill="#991b1b" />
+              <g transform={pose === 'walk' ? 'rotate(8, 45, 78)' : ''}>
+                <rect x="41" y="78" width="8" height="14" rx="1" fill="#7f1d1d" />
+                <path d="M42 84 L45 81 L46 87 L48 83 L49 89" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round" />
+                <ellipse cx="45" cy="94" rx="4.5" ry="2" fill="#450a0a" />
+              </g>
+              <g transform={pose === 'walk' ? 'rotate(-8, 55, 78)' : ''}>
+                <rect x="51" y="78" width="8" height="14" rx="1" fill="#7f1d1d" />
+                <path d="M52 84 L55 81 L56 87 L58 83 L59 89" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round" />
+                <ellipse cx="55" cy="94" rx="4.5" ry="2" fill="#450a0a" />
+              </g>
+            </g>
+          )}
+
+          {bottom === 'quantum_techwear' && (
+            // Quần Techwear Dây Đai Chiến Thuật
+            <g id="bottom_quantum_techwear">
+              <rect x="40" y="78" width="20" height="2" fill="#18181b" />
+              <g transform={pose === 'walk' ? 'rotate(8, 45, 78)' : ''}>
+                <rect x="41" y="78" width="8.5" height="14" rx="1.5" fill="#27272a" />
+                <line x1="41" y1="84" x2="49.5" y2="86" stroke="#eab308" strokeWidth="1" />
+                <rect x="40.5" y="83" width="2.5" height="4" fill="#3f3f46" rx="0.5" />
+                <ellipse cx="45" cy="94" rx="4.6" ry="2" fill="#09090b" />
+              </g>
+              <g transform={pose === 'walk' ? 'rotate(-8, 55, 78)' : ''}>
+                <rect x="50.5" y="78" width="8.5" height="14" rx="1.5" fill="#27272a" />
+                <line x1="59" y1="84" x2="50.5" y2="86" stroke="#eab308" strokeWidth="1" />
+                <rect x="57" y="83" width="2.5" height="4" fill="#3f3f46" rx="0.5" />
+                <ellipse cx="55" cy="94" rx="4.6" ry="2" fill="#09090b" />
+              </g>
+            </g>
+          )}
+
+          {bottom === 'armored_greaves' && (
+            // Giáp Chân Hiệp Sĩ Lượng Tử
+            <g id="bottom_armored_greaves">
+              <g transform={pose === 'walk' ? 'rotate(8, 45, 78)' : ''}>
+                <rect x="41" y="78" width="8" height="15" rx="2" fill="#334155" stroke="#f59e0b" strokeWidth="1" />
+                <circle cx="45" cy="85" r="2.2" fill="#fbbf24" />
+                <circle cx="45" cy="85" r="1" fill="#ffffff" />
+                <path d="M40 92 L47 92 L48 95 H40 Z" fill="#475569" stroke="#f59e0b" strokeWidth="0.8" />
+              </g>
+              <g transform={pose === 'walk' ? 'rotate(-8, 55, 78)' : ''}>
+                <rect x="51" y="78" width="8" height="15" rx="2" fill="#334155" stroke="#f59e0b" strokeWidth="1" />
+                <circle cx="55" cy="85" r="2.2" fill="#fbbf24" />
+                <circle cx="55" cy="85" r="1" fill="#ffffff" />
+                <path d="M53 92 L60 92 L60 95 H52 Z" fill="#475569" stroke="#f59e0b" strokeWidth="0.8" />
+              </g>
+            </g>
+          )}
+
+          {bottom === 'cyber_hakama' && (
+            // Váy Quần Samurai Cyber
+            <g id="bottom_cyber_hakama">
+              <path d="M37 78 L31 92 H69 L63 78 Z" fill="#09090b" stroke="#a855f7" strokeWidth="1" />
+              <line x1="43" y1="78" x2="40" y2="92" stroke="#a855f7" strokeWidth="0.8" />
+              <line x1="50" y1="78" x2="50" y2="92" stroke="#c084fc" strokeWidth="1.2" />
+              <line x1="57" y1="78" x2="60" y2="92" stroke="#a855f7" strokeWidth="0.8" />
+              <ellipse cx="44" cy="94" rx="4" ry="1.8" fill="#18181b" />
+              <ellipse cx="56" cy="94" rx="4" ry="1.8" fill="#18181b" />
             </g>
           )}
         </g>
@@ -406,6 +542,77 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
               <path d="M35 66 C38 64, 62 64, 65 66 L62 82 H38 Z" fill="#ec4899" />
               <path d="M33 66 C42 63, 58 63, 67 66" stroke="#ffffff" strokeWidth="1.5" fill="none" className="animate-pulse" />
               <circle cx="50" cy="68" r="1.5" fill="#ffffff" />
+            </g>
+          )}
+
+          {top === 'nano_suit' && (
+            // Giáp Nano Lượng Tử LED
+            <g id="body_nano_suit">
+              <path d="M34 64 C34 59, 66 59, 66 64 L62 82 H38 Z" fill="#0f172a" stroke="#00f2fe" strokeWidth="1" />
+              <polygon points="50,68 46,75 54,75" fill="#00f2fe" className="animate-pulse" />
+              <polygon points="50,70 48,74 52,74" fill="#ffffff" />
+              <line x1="42" y1="65" x2="46" y2="72" stroke="#00f2fe" strokeWidth="0.8" />
+              <line x1="58" y1="65" x2="54" y2="72" stroke="#00f2fe" strokeWidth="0.8" />
+              <line x1="50" y1="75" x2="50" y2="81" stroke="#00f2fe" strokeWidth="1" />
+            </g>
+          )}
+
+          {top === 'phoenix_armor' && (
+            // Chiến Giáp Hỏa Phượng Hoàng
+            <g id="body_phoenix_armor">
+              <path d="M34 64 C34 58, 66 58, 66 64 L62 82 H38 Z" fill="#c2410c" stroke="#f97316" strokeWidth="1.2" />
+              <path d="M34 64 L30 58 L38 62 Z" fill="#ea580c" />
+              <path d="M66 64 L70 58 L62 62 Z" fill="#ea580c" />
+              <circle cx="50" cy="71" r="3.5" fill="#facc15" stroke="#dc2626" strokeWidth="1" className="animate-pulse" />
+              <circle cx="50" cy="71" r="1.5" fill="#ffffff" />
+              <path d="M42 78 L50 74 L58 78" stroke="#facc15" strokeWidth="1.2" fill="none" />
+            </g>
+          )}
+
+          {top === 'shadow_assassin' && (
+            // Áo Choàng Sát Thủ Hư Không
+            <g id="body_shadow_assassin">
+              <path d="M33 63 C33 58, 67 58, 67 63 L63 82 H37 Z" fill="#1e1b4b" stroke="#a855f7" strokeWidth="1" />
+              <path d="M33 63 L30 54 L38 62" fill="#312e81" stroke="#c084fc" strokeWidth="0.8" />
+              <path d="M67 63 L70 54 L62 62" fill="#312e81" stroke="#c084fc" strokeWidth="0.8" />
+              <circle cx="50" cy="72" r="3" fill="#6b21a8" stroke="#e879f9" strokeWidth="1" className="animate-pulse" />
+              <line x1="50" y1="67" x2="50" y2="77" stroke="#e879f9" strokeWidth="1" />
+              <line x1="45" y1="72" x2="55" y2="72" stroke="#e879f9" strokeWidth="1" />
+            </g>
+          )}
+
+          {top === 'cyber_pilot' && (
+            // Áo Phi Công Bomber Mecha
+            <g id="body_cyber_pilot">
+              <path d="M34 64 C34 59, 66 59, 66 64 L62 82 H38 Z" fill="#1e293b" />
+              <line x1="46" y1="62" x2="54" y2="82" stroke="#facc15" strokeWidth="1.5" />
+              <path d="M42 61 C45 65, 55 65, 58 61" stroke="#ea580c" strokeWidth="2.5" strokeLinecap="round" />
+              <rect x="38" y="68" width="5" height="3" fill="#facc15" rx="0.5" />
+            </g>
+          )}
+
+          {top === 'celestial_robe' && (
+            // Pháp Phục Tiên Tri Vũ Trụ
+            <g id="body_celestial_robe">
+              <path d="M33 63 C33 58, 67 58, 67 63 L63 82 H37 Z" fill="#0f172a" stroke="#ffd700" strokeWidth="1" />
+              <circle cx="45" cy="68" r="1" fill="#67e8f9" />
+              <circle cx="55" cy="70" r="1.2" fill="#f472b6" />
+              <circle cx="48" cy="76" r="0.8" fill="#ffd700" />
+              <circle cx="53" cy="78" r="1" fill="#ffffff" />
+              <line x1="45" y1="68" x2="55" y2="70" stroke="#67e8f9" strokeWidth="0.5" opacity="0.6" />
+              <line x1="55" y1="70" x2="53" y2="78" stroke="#f472b6" strokeWidth="0.5" opacity="0.6" />
+              <rect x="37" y="77" width="26" height="2.5" fill="#1e1b4b" stroke="#ffd700" strokeWidth="0.8" />
+            </g>
+          )}
+
+          {top === 'dark_knight' && (
+            // Giáp Hắc Hiệp Sĩ Cyber
+            <g id="body_dark_knight">
+              <path d="M34 64 C34 58, 66 58, 66 64 L62 82 H38 Z" fill="#09090b" stroke="#52525b" strokeWidth="1.2" />
+              <polygon points="32,60 36,63 31,66" fill="#27272a" />
+              <polygon points="68,60 64,63 69,66" fill="#27272a" />
+              <polygon points="50,67 46,72 50,77 54,72" fill="#7e22ce" stroke="#d8b4fe" strokeWidth="1" className="animate-pulse" />
+              <polygon points="50,69 48,72 50,75 52,72" fill="#ffffff" />
             </g>
           )}
 
@@ -747,6 +954,68 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
             <circle cx="72" cy="62" r="0.8" fill="#ffffff" className="animate-pulse" />
           </g>
         )}
+
+        {hair === 'anime_super_saiyan' && (
+          // Tóc Siêu Chiến Binh Aura
+          <g id="hair_super_saiyan">
+            <polygon points="50,10 44,28 56,28" fill={hColor} />
+            <polygon points="38,14 36,32 46,28" fill={hColor} />
+            <polygon points="62,14 64,32 54,28" fill={hColor} />
+            <polygon points="26,22 28,36 38,32" fill={hColor} />
+            <polygon points="74,22 72,36 62,32" fill={hColor} />
+            <path d="M30 36 C30 22, 70 22, 70 36 C70 36, 68 33, 50 33 C32 33, 30 36, 30 36 Z" fill={hColor} />
+            <polygon points="43,33 46,41 49,33" fill={hColor} />
+            <polygon points="51,33 54,41 57,33" fill={hColor} />
+          </g>
+        )}
+
+        {hair === 'cyber_wolf' && (
+          // Tóc Sói Hoang Bạc Layer
+          <g id="hair_cyber_wolf">
+            <path d="M28 36 C28 20, 72 20, 72 36 C72 36, 68 31, 50 31 C32 31, 28 36, 28 36 Z" fill={hColor} />
+            <path d="M29 36 L24 45 L32 42 L25 54 L33 49" stroke={hColor} strokeWidth="2.5" fill={hColor} strokeLinejoin="round" />
+            <path d="M71 36 L76 45 L68 42 L75 54 L67 49" stroke={hColor} strokeWidth="2.5" fill={hColor} strokeLinejoin="round" />
+            <polygon points="35,32 40,42 44,32" fill={hColor} />
+            <polygon points="43,32 48,44 52,32" fill={hColor} />
+            <polygon points="53,32 58,41 63,32" fill={hColor} />
+          </g>
+        )}
+
+        {hair === 'twin_tails_mecha' && (
+          // Tóc Song Vĩ Mecha Neon
+          <g id="hair_twin_tails_mecha">
+            <path d="M26 32 C18 42, 16 60, 21 78 C25 68, 26 50, 29 35 Z" fill={hColor} />
+            <path d="M74 32 C82 42, 84 60, 79 78 C75 68, 74 50, 71 35 Z" fill={hColor} />
+            <rect x="23" y="30" width="5" height="5" rx="1" fill="#0f172a" stroke="#00f2fe" strokeWidth="1" />
+            <circle cx="25.5" cy="32.5" r="1" fill="#00f2fe" />
+            <rect x="72" y="30" width="5" height="5" rx="1" fill="#0f172a" stroke="#00f2fe" strokeWidth="1" />
+            <circle cx="74.5" cy="32.5" r="1" fill="#00f2fe" />
+            <path d="M29 35 C29 21, 71 21, 71 35 C71 35, 66 31, 50 31 C34 31, 29 35, 29 35 Z" fill={hColor} />
+            <rect x="36" y="31" width="28" height="6" rx="2" fill={hColor} />
+          </g>
+        )}
+
+        {hair === 'samurai_topknot' && (
+          // Búi Tóc Samurai Điện Tử
+          <g id="hair_samurai_topknot">
+            <ellipse cx="50" cy="18" rx="5" ry="4" fill={hColor} />
+            <rect x="47" y="19" width="6" height="3" fill="#ffd700" rx="1" />
+            <line x1="42" y1="18" x2="58" y2="18" stroke="#f43f5e" strokeWidth="1.2" strokeLinecap="round" />
+            <path d="M32 35 C32 24, 68 24, 68 35 C68 33, 60 28, 50 28 C40 28, 32 33, 32 35 Z" fill={hColor} />
+            <line x1="33" y1="36" x2="35" y2="44" stroke={hColor} strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="67" y1="36" x2="65" y2="44" stroke={hColor} strokeWidth="1.5" strokeLinecap="round" />
+          </g>
+        )}
+
+        {hair === 'galaxy_waves' && (
+          // Tóc Sóng Ngân Hà Gradient
+          <g id="hair_galaxy_waves">
+            <path d="M29 35 C29 21, 71 21, 71 35 C71 35, 67 31, 50 31 C33 31, 29 35, 29 35 Z" fill={hColor} />
+            <path d="M29 35 C24 45, 33 55, 26 66 C22 73, 27 76, 31 72 C35 62, 28 52, 33 42 Z" fill={hColor} opacity="0.9" />
+            <path d="M71 35 C76 45, 67 55, 74 66 C78 73, 73 76, 69 72 C65 62, 72 52, 67 42 Z" fill={hColor} opacity="0.9" />
+            <path d="M40 31 Q48 37 50 40 Q52 37 60 31" stroke={hColor} strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          </g>
+        )}
       </g>
 
       {/* ================== 6. ACCESSORY (PHỤ KIỆN - Nằm đè lên tóc/mặt) ================== */}
@@ -842,6 +1111,45 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
             <path d="M64 30 Q61 35 66 35 Q70 32 65 30 Z" fill="#00f2fe" opacity="0.8" />
             <path d="M64 30 Q68 25 71 28 Q70 33 64 30 Z" fill="#ec4899" opacity="0.8" />
             <circle cx="64" cy="30" r="1" fill="#ffffff" />
+          </g>
+        )}
+
+        {accessory === 'halo_matrix' && (
+          // Vòng Ma Trận Hào Quang
+          <g id="acc_halo_matrix" className="animate-spin" style={{ transformOrigin: '50px 18px', animationDuration: '6s' }}>
+            <ellipse cx="50" cy="18" rx="18" ry="5" fill="none" stroke="#00ffff" strokeWidth="1.2" strokeDasharray="4,2" />
+            <circle cx="32" cy="18" r="1.5" fill="#f43f5e" />
+            <circle cx="68" cy="18" r="1.5" fill="#00ffff" />
+            <circle cx="50" cy="13" r="1.5" fill="#fbbf24" />
+          </g>
+        )}
+
+        {accessory === 'cyber_mask_fox' && (
+          // Mặt Nạ Hồ Ly Kitsune Cyber
+          <g id="acc_cyber_mask_fox" transform="rotate(-12, 58, 36)">
+            <ellipse cx="60" cy="36" rx="9" ry="8" fill="#ffffff" stroke="#0f172a" strokeWidth="0.8" />
+            <polygon points="54,30 52,21 57,26" fill="#f8fafc" stroke="#dc2626" strokeWidth="0.8" />
+            <polygon points="66,30 68,21 63,26" fill="#f8fafc" stroke="#dc2626" strokeWidth="0.8" />
+            <path d="M54 36 Q57 33 60 38" stroke="#dc2626" strokeWidth="1.2" fill="none" />
+            <path d="M66 36 Q63 33 60 38" stroke="#dc2626" strokeWidth="1.2" fill="none" />
+            <circle cx="56" cy="37" r="1" fill="#00ffff" />
+            <circle cx="64" cy="37" r="1" fill="#00ffff" />
+          </g>
+        )}
+
+        {accessory === 'hologram_horns' && (
+          // Sừng Rồng Hologram Tím
+          <g id="acc_hologram_horns">
+            <path d="M37 32 C34 24, 28 20, 24 21 C26 26, 32 29, 36 34 Z" fill="#c084fc" stroke="#e879f9" strokeWidth="0.8" className="animate-pulse" />
+            <path d="M63 32 C66 24, 72 20, 76 21 C74 26, 68 29, 64 34 Z" fill="#c084fc" stroke="#e879f9" strokeWidth="0.8" className="animate-pulse" />
+          </g>
+        )}
+
+        {accessory === 'plasma_shield' && (
+          // Khiên Năng Lượng Lục Giác
+          <g id="acc_plasma_shield" className="animate-pulse">
+            <polygon points="26,62 33,58 40,62 40,70 33,74 26,70" fill="#06b6d4" fillOpacity="0.4" stroke="#00ffff" strokeWidth="1.2" />
+            <polygon points="29,64 33,61 37,64 37,68 33,71 29,68" fill="none" stroke="#ffffff" strokeWidth="0.8" />
           </g>
         )}
       </g>
