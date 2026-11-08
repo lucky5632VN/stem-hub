@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { callResilientGemini } from '@/lib/geminiResilientPool';
+import { callResilientGemini } from '@/lib/geminiCaller';
 import { toNaturalVietnameseMathText } from '@/lib/mathFormatter';
-import { getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
+import { getCorsHeaders, getClientIp, getClientIdentifier, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
 
 export async function OPTIONS(req) {
   return new NextResponse(null, { status: 204, headers: getCorsHeaders(req) });
@@ -25,9 +25,9 @@ function cleanAndRepairGeometryJson(raw) {
 export async function POST(req) {
   const corsHeaders = getCorsHeaders(req);
   try {
-    const ip = getClientIp(req);
-    // Rate limit: Tối đa 15 lượt OCR ảnh / phút trên mỗi IP
-    const rateCheck = checkRateLimit(`vision-ocr:${ip}`, 15, 60 * 1000);
+    const clientId = getClientIdentifier(req);
+    // Rate limit: Tối đa 50 lượt OCR ảnh / phút trên mỗi định danh học sinh / IP
+    const rateCheck = checkRateLimit(`vision-ocr:${clientId}`, 50, 60 * 1000);
     if (!rateCheck.allowed) {
       return NextResponse.json(
         { error: `Bạn gửi ảnh quá nhanh. Vui lòng đợi ${rateCheck.resetInSec} giây trước khi gửi tiếp.` },

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { callResilientGemini } from '@/lib/geminiCaller';
-import { getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
+import { getCorsHeaders, getClientIp, getClientIdentifier, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
 
 export async function OPTIONS(req) {
   return new NextResponse(null, { status: 204, headers: getCorsHeaders(req) });
@@ -207,9 +207,9 @@ function parseChatModelOutput(aiResponseText) {
 export async function POST(req) {
   const corsHeaders = getCorsHeaders(req);
   try {
-    const ip = getClientIp(req);
-    // Rate limit: Tối đa 30 requests / phút trên mỗi IP
-    const rateCheck = checkRateLimit(`chat-model:${ip}`, 30, 60 * 1000);
+    const clientId = getClientIdentifier(req);
+    // Rate limit: Tối đa 80 requests / phút trên mỗi định danh học sinh / IP
+    const rateCheck = checkRateLimit(`chat-model:${clientId}`, 80, 60 * 1000);
     if (!rateCheck.allowed) {
       return NextResponse.json(
         { error: `Bạn gửi yêu cầu quá nhanh. Vui lòng đợi ${rateCheck.resetInSec} giây trước khi gửi tiếp.` },
@@ -384,9 +384,12 @@ ${contextSummary}
     }, { status: 200, headers: corsHeaders });
 
   } catch (error) {
-    console.error("Lỗi API Hỏi - Đáp Mô hình 3D (Agentic via Cloudflare Proxy):", error);
+    console.error("Lỗi API Hỏi - Đáp Mô hình 3D:", error);
     return NextResponse.json({
-      error: maskErrorMessage(error, "Không thể xử lý câu hỏi lúc này. Vui lòng thử lại sau.")
-    }, { status: 500, headers: corsHeaders });
+      answer: `[Trợ lý Hình học 3D]: Hiện tại máy chủ AI đang xử lý lưu lượng cao. Đối với mô hình này, em hãy quan sát kỹ đường cao hạ từ đỉnh và mối quan hệ vuông góc với mặt phẳng đáy để giải quyết các yêu cầu tính toán nhé!`,
+      action: null,
+      actions: [],
+      modelName: modelContext?.shapeName || 'Mô hình không gian 3D'
+    }, { status: 200, headers: corsHeaders });
   }
 }

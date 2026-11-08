@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import nodemailer from 'nodemailer';
-import { getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
+import { getCorsHeaders, getClientIp, getClientIdentifier, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
 
 const TARGET_ADMIN_EMAIL = 'hohoanganh20092021@gmail.com';
 
@@ -14,10 +14,11 @@ export async function POST(req) {
   const corsHeaders = getCorsHeaders(req);
 
   try {
+    const clientId = getClientIdentifier(req);
     const ip = getClientIp(req);
 
-    // Rate limit: Tối đa 5 tin nhắn / 10 phút trên mỗi IP để chống spam
-    const rateCheck = checkRateLimit(`contact-form:${ip}`, 5, 10 * 60 * 1000);
+    // Rate limit: Tối đa 20 tin nhắn / 10 phút trên mỗi định danh học sinh / IP
+    const rateCheck = checkRateLimit(`contact-form:${clientId}`, 20, 10 * 60 * 1000);
     if (!rateCheck.allowed) {
       return NextResponse.json(
         { 
