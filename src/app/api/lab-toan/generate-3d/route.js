@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { callResilientGemini } from '@/lib/geminiResilientPool';
 import { solveGeometryFacts, parseNumericValue, extractFallbackGeometry } from '@/lib/geometryFactSolver';
 import { toNaturalVietnameseMathText } from '@/lib/mathFormatter';
-import { getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
+import { getCorsHeaders, getClientIp, getClientIdentifier, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
 
 export async function OPTIONS(req) {
   return new NextResponse(null, { status: 204, headers: getCorsHeaders(req) });
@@ -234,9 +234,9 @@ export async function POST(req) {
   const corsHeaders = getCorsHeaders(req);
   let problemText = '';
   try {
-    const ip = getClientIp(req);
-    // Rate limit: Tối đa 20 lượt tạo mô hình 3D / phút trên mỗi IP
-    const rateCheck = checkRateLimit(`generate-3d:${ip}`, 20, 60 * 1000);
+    const clientId = getClientIdentifier(req);
+    // Rate limit: Tối đa 80 lượt tạo mô hình 3D / phút trên mỗi định danh học sinh / IP
+    const rateCheck = checkRateLimit(`generate-3d:${clientId}`, 80, 60 * 1000);
     if (!rateCheck.allowed) {
       return NextResponse.json(
         { error: `Bạn gửi yêu cầu quá nhanh. Vui lòng đợi ${rateCheck.resetInSec} giây trước khi gửi tiếp.` },

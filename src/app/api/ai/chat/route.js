@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { callResilientGemini } from '@/lib/geminiCaller';
-import { getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
+import { getCorsHeaders, getClientIdentifier, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
 
 export async function OPTIONS(req) {
   return new NextResponse(null, { status: 204, headers: getCorsHeaders(req) });
@@ -9,9 +9,9 @@ export async function OPTIONS(req) {
 export async function POST(req) {
   const corsHeaders = getCorsHeaders(req);
   try {
-    const ip = getClientIp(req);
-    // Rate limit: Tối đa 30 requests / phút trên mỗi IP cho AI Chatbot
-    const rateCheck = checkRateLimit(`ai-chat:${ip}`, 30, 60 * 1000);
+    const clientId = getClientIdentifier(req);
+    // Rate limit: Tối đa 120 requests / phút trên mỗi định danh học sinh / IP (cho phép cả phòng máy trường học cùng dùng)
+    const rateCheck = checkRateLimit(`ai-chat:${clientId}`, 120, 60 * 1000);
     if (!rateCheck.allowed) {
       return NextResponse.json(
         { error: `Bạn gửi yêu cầu quá nhanh. Vui lòng đợi ${rateCheck.resetInSec} giây trước khi gửi tiếp.` },
@@ -141,14 +141,36 @@ export async function POST(req) {
   } catch (error) {
     console.error('[API /api/ai/chat] Lỗi:', error.message);
     const isLocationBlocked = error.message && error.message.includes('User location is not supported');
-    return NextResponse.json(
-      {
-        error: isLocationBlocked
-          ? 'Dịch vụ AI tạm thời gián đoạn khu vực. Đang tự động điều phối dự phòng.'
-          : maskErrorMessage(error, 'Lỗi xử lý AI Gateway. Vui lòng thử lại sau.'),
-        locationBlocked: isLocationBlocked
-      },
-      { status: 500, headers: corsHeaders }
-    );
+
+    // 🛡️ DỰ PHÒNG TỰ ĐỘNG KHI TẤT CẢ MÔ HÌNH BẬN (RESILIENT FAILOVER):
+    // Cố gắng tra cứu trong kho tri thức nội bộ RAG (303 chủ đề SGK STEM + tri thức tự học)
+    try {
+      const { retrieveTopK } = await import('@/lib/ragService.js');
+      const hits = retrieveTopK(prompt || '', 1);
+      if (hits && hits.length > 0 && (hits[0].content || hits[0].answer)) {
+        const topHit = hits[0];
+        const bodyText = topHit.content || topHit.answer;
+        const answerText = topHit.topic ? `[Chủ đề: ${topHit.topic}]\n\n${bodyText}` : bodyText;
+        return NextResponse.json({
+          success: true,
+          text: `[Trợ lý STEM HUB - Tri thức Chuẩn]: ${answerText}`,
+          model: 'stemhub-rag-offline-resilient',
+          candidates: [{ content: { parts: [{ text: answerText }] }, role: 'model' }]
+        }, { status: 200, headers: corsHeaders });
+      }
+    } catch (ragErr) {
+      console.warn('[API /api/ai/chat] Fallback RAG tra cứu lỗi:', ragErr.message);
+    }
+
+    // Dự phòng cấp 2: Nếu câu hỏi nằm ngoài kho SGK, trả về thông điệp sư phạm thân thiện thay vì trả về lỗi 503
+    return NextResponse.json({
+      success: true,
+      text: `[Trợ lý STEM HUB]: Chào em, hệ thống AI đang trong khung giờ cao điểm với lượng truy cập cao. Em hãy tham khảo lý thuyết và mô phỏng thực hành trong các phòng lab tương ứng hoặc thử gửi lại câu hỏi sau ít giây nhé!`,
+      model: 'stemhub-offline-pedagogical-guard',
+      candidates: [{
+        content: { parts: [{ text: 'Hệ thống AI đang trong khung giờ cao điểm. Em hãy thử lại sau ít giây.' }] },
+        role: 'model'
+      }]
+    }, { status: 200, headers: corsHeaders });
   }
 }

@@ -52,6 +52,18 @@ export function getClientIp(req) {
   return req.headers.get('x-real-ip') || '127.0.0.1';
 }
 
+/**
+ * Trích xuất định danh người dùng (User UID hoặc IP) để tránh việc cả phòng máy trường học dùng chung 1 IP bị chặn rate limit chéo
+ */
+export function getClientIdentifier(req) {
+  if (!req?.headers?.get) return '127.0.0.1';
+  const customId = req.headers.get('x-user-id') || req.headers.get('x-client-id') || req.headers.get('x-session-id');
+  if (customId && typeof customId === 'string' && customId.length < 100) {
+    return `uid:${customId.trim()}`;
+  }
+  return `ip:${getClientIp(req)}`;
+}
+
 // In-Memory Rate Limiter Map (tự động dọn dẹp mỗi 5 phút)
 const rateLimitMap = new Map();
 

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { ALLOWED_HOSTS, getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
+import { ALLOWED_HOSTS, getCorsHeaders, getClientIp, getClientIdentifier, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
 
 export async function OPTIONS(request) {
   return new NextResponse(null, { status: 204, headers: getCorsHeaders(request) });
@@ -116,9 +116,9 @@ if (process.env.NODE_ENV === 'production') {
 export async function POST(request) {
   const corsHeaders = getCorsHeaders(request);
   try {
-    const ip = getClientIp(request);
-    // Rate limit: Tối đa 20 lượt gửi tri thức / phút trên mỗi IP
-    const rateCheck = checkRateLimit(`learned-knowledge:${ip}`, 20, 60 * 1000);
+    const clientId = getClientIdentifier(request);
+    // Rate limit: Tối đa 80 lượt gửi tri thức / phút trên mỗi định danh học sinh / IP
+    const rateCheck = checkRateLimit(`learned-knowledge:${clientId}`, 80, 60 * 1000);
     if (!rateCheck.allowed) {
       return NextResponse.json(
         { error: `Bạn gửi dữ liệu quá nhanh. Vui lòng đợi ${rateCheck.resetInSec} giây trước khi gửi tiếp.` },
