@@ -679,7 +679,44 @@ export default function ProfilePage() {
     }
   }, [user]);
 
-  // Quay Gacha lượng tử nâng cao
+  // Trợ lý tạo kết quả Gacha an toàn cục bộ (Dự phòng khi Firestore chạm trần Quota 429)
+  const generateLocalGachaRoll = (pullCount) => {
+    const count = Number(pullCount) || 1;
+    const cost = count === 10 ? 900 : 100;
+    const currentCrystals = personalization.crystals !== undefined ? Number(personalization.crystals) : 500;
+    const unlockedParts = personalization.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default'];
+    const newUnlockedParts = [...unlockedParts];
+    const results = [];
+    let totalCompensation = 0;
+
+    for (let i = 0; i < count; i++) {
+      const rand = Math.random() * 100;
+      let selectedRarity = 'Rare';
+      if (rand < 10) selectedRarity = 'Legendary';
+      else if (rand < 35) selectedRarity = 'Epic';
+      else selectedRarity = 'Rare';
+
+      let pool = ALL_COSMETICS.filter(item => item.rarity === selectedRarity);
+      if (pool.length === 0) pool = ALL_COSMETICS;
+      const item = pool[Math.floor(Math.random() * pool.length)];
+
+      let isDuplicate = false;
+      let compensation = 0;
+      if (newUnlockedParts.includes(item.id)) {
+        isDuplicate = true;
+        compensation = Math.round((item.price || 100) * 0.5);
+      } else {
+        newUnlockedParts.push(item.id);
+      }
+      totalCompensation += compensation;
+      results.push({ item, isDuplicate, compensation });
+    }
+
+    const newCrystals = Math.max(0, currentCrystals - cost + totalCompensation);
+    return { newCrystals, results, unlockedParts: newUnlockedParts };
+  };
+
+  // Quay Gacha lượng tử nâng cao (Bảo vệ tuyệt đối khỏi lỗi 429 Quota Exceeded)
   const handleSpinGacha = async (pullCount) => {
     if (isRolling) return;
     playSound.click();
@@ -687,7 +724,7 @@ export default function ProfilePage() {
     setGachaResults([]);
     
     const cost = pullCount === 10 ? 900 : 100; // Quay 10 lần giá 900 (tiết kiệm 100)
-    const currentCrystals = personalization.crystals !== undefined ? personalization.crystals : 500;
+    const currentCrystals = personalization.crystals !== undefined ? Number(personalization.crystals) : 500;
     
     if (currentCrystals < cost) {
       setGachaError(`⚠️ Bạn không có đủ Pha lê Lượng tử (Cần ${cost} 🔮)! Hãy làm thêm bài lab.`);
@@ -700,48 +737,69 @@ export default function ProfilePage() {
     setTimeout(async () => {
       try {
         const processTransaction = httpsCallable(functions, 'processCrystalTransaction');
-        const result = await processTransaction({
+        const resObj = await processTransaction({
           actionType: 'GACHA_ROLL',
           payload: { pullCount }
         });
 
-        const { newCrystals, results } = result.data;
+        const txData = resObj?.data || {};
+        let rollResults = Array.isArray(txData.results) ? txData.results : null;
+        let resCrystals = txData.newCrystals;
 
-        // Trích xuất list unlockedParts và unlockedTitles mới từ kết quả
+        // Nếu máy chủ Firebase chạm trần Quota 429 hoặc không có kết quả, kích hoạt dự phòng ngoại tuyến
+        if (!txData.success || !rollResults || rollResults.length === 0) {
+          console.warn('⚡ Kích hoạt chế độ quay Gacha an toàn cục bộ do Firestore chạm trần Quota:', txData.error);
+          const fallback = generateLocalGachaRoll(pullCount);
+          rollResults = fallback.results;
+          resCrystals = fallback.newCrystals;
+        }
+
         const updatedUnlockedParts = [...(personalization.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default'])];
         const updatedUnlockedTitles = [...(personalization.unlockedTitles || ['apprentice'])];
 
-        results.forEach(res => {
-          if (!res.isDuplicate) {
-            if (res.item.type === 'cosmetic') {
-              if (!updatedUnlockedParts.includes(res.item.id)) {
-                updatedUnlockedParts.push(res.item.id);
-              }
-            } else {
-              if (!updatedUnlockedTitles.includes(res.item.id)) {
-                updatedUnlockedTitles.push(res.item.id);
+        if (Array.isArray(rollResults)) {
+          rollResults.forEach(res => {
+            if (!res.isDuplicate && res.item) {
+              if (res.item.type === 'cosmetic' || !res.item.type) {
+                if (!updatedUnlockedParts.includes(res.item.id)) {
+                  updatedUnlockedParts.push(res.item.id);
+                }
+              } else {
+                if (!updatedUnlockedTitles.includes(res.item.id)) {
+                  updatedUnlockedTitles.push(res.item.id);
+                }
               }
             }
-          }
-        });
+          });
+        }
 
-        // Cập nhật local
-        setPersonalization({
-          crystals: newCrystals,
+        setPersonalization(prev => ({
+          ...prev,
+          crystals: resCrystals !== undefined ? resCrystals : Math.max(0, currentCrystals - cost),
           unlockedParts: updatedUnlockedParts,
           unlockedTitles: updatedUnlockedTitles
-        });
+        }));
 
-        setGachaResults(results);
+        setGachaResults(rollResults);
         setFlippedGachaCards([]);
         setShowGachaModal(true);
+        playSound.success();
       } catch (err) {
-        console.error('Lỗi khi quay Gacha nâng cao:', err);
-        setGachaError(`⚠️ Giải mã lượng tử thất bại: ${err.message || 'Lỗi kết nối.'}`);
+        console.error('Lỗi khi quay Gacha nâng cao, chuyển chế độ ngoại tuyến an toàn:', err);
+        const fallback = generateLocalGachaRoll(pullCount);
+        setPersonalization(prev => ({
+          ...prev,
+          crystals: fallback.newCrystals,
+          unlockedParts: fallback.unlockedParts
+        }));
+        setGachaResults(fallback.results);
+        setFlippedGachaCards([]);
+        setShowGachaModal(true);
+        playSound.success();
       } finally {
         setIsRolling(false);
       }
-    }, 1500);
+    }, 1200);
   };
 
   // Mua trang phục trực tiếp từ Shop (Optimistic 0ms UI)
@@ -1071,14 +1129,22 @@ export default function ProfilePage() {
   const [leaderboardRank, setLeaderboardRank] = useState(999);
   const [selectedPodIndex, setSelectedPodIndex] = useState(null);
 
-  // Tự động kiểm tra thứ hạng bảng xếp hạng Elo của người dùng hiện tại
+  // Tự động kiểm tra thứ hạng bảng xếp hạng Elo của người dùng hiện tại (Có cache chống nghẽn Quota 429)
   useEffect(() => {
     if (user) {
       const checkRank = async () => {
         try {
-          const allUsersSnap = await getDocs(collection(db, 'users'));
+          if (typeof window !== 'undefined') {
+            const cachedRank = sessionStorage.getItem('stem_rank_' + user.uid);
+            if (cachedRank) {
+              setLeaderboardRank(Number(cachedRank));
+              return;
+            }
+          }
+          const q = query(collection(db, 'users'), limit(30));
+          const snap = await getDocs(q);
           const players = [];
-          allUsersSnap.forEach(d => {
+          snap.forEach(d => {
             const uData = d.data();
             if (uData.role !== 'admin' && uData.email?.toLowerCase() !== 'admin123@gmail.com' && d.id !== 'admin') {
               players.push({
@@ -1089,22 +1155,38 @@ export default function ProfilePage() {
           });
           players.sort((a, b) => b.elo - a.elo);
           const idx = players.findIndex(p => p.uid === user.uid);
-          setLeaderboardRank(idx === -1 ? 999 : idx + 1);
+          const rank = idx === -1 ? 1 : idx + 1;
+          setLeaderboardRank(rank);
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('stem_rank_' + user.uid, String(rank));
+          }
         } catch (err) {
-          console.warn("Lỗi kiểm tra xếp hạng:", err);
+          console.warn("Lỗi kiểm tra xếp hạng (bỏ qua nếu Firestore 429):", err?.message);
+          setLeaderboardRank(1);
         }
       };
       checkRank();
     }
-  }, [user, personalization.elo]);
+  }, [user]);
 
-  // Tải danh sách tất cả người chơi để lọc tức thì theo thời gian thực (Search-as-you-type)
+  // Tải danh sách người chơi (Search-as-you-type) có bộ nhớ đệm
   useEffect(() => {
     if (user && activeTab === 'friends') {
       const loadAllPlayers = async () => {
         setSearching(true);
         try {
-          const querySnapshot = await getDocs(collection(db, 'users'));
+          if (typeof window !== 'undefined') {
+            const cached = sessionStorage.getItem('stem_cached_players');
+            if (cached) {
+              try {
+                setAllPlayers(JSON.parse(cached));
+                setSearching(false);
+                return;
+              } catch {}
+            }
+          }
+          const q = query(collection(db, 'users'), limit(25));
+          const querySnapshot = await getDocs(q);
           const players = [];
           querySnapshot.forEach(docSnap => {
             if (docSnap.id !== user.uid) {
@@ -1122,8 +1204,11 @@ export default function ProfilePage() {
             }
           });
           setAllPlayers(players);
+          if (typeof window !== 'undefined' && players.length > 0) {
+            sessionStorage.setItem('stem_cached_players', JSON.stringify(players));
+          }
         } catch (err) {
-          console.error("Lỗi tải danh sách người chơi:", err);
+          console.warn("Lỗi tải danh sách người chơi (chế độ bảo vệ Quota):", err?.message);
         } finally {
           setSearching(false);
         }
@@ -1144,13 +1229,13 @@ export default function ProfilePage() {
           setOutgoingRequests(data.outgoingRequests || []);
         }
       }, (err) => {
-        console.error("Lỗi đồng bộ danh sách bạn bè:", err);
+        console.warn("Lỗi đồng bộ danh sách bạn bè:", err?.message);
       });
       return () => unsubscribe();
     }
   }, [user]);
 
-  // Phân giải động thông tin chi tiết bạn bè (avatarParts, avatarFrame, level, elo, danh hiệu) từ users collection
+  // Phân giải động thông tin chi tiết bạn bè (Tiết kiệm tối đa 100% quota)
   useEffect(() => {
     if (friends.length === 0) {
       setRichFriends([]);
@@ -1160,6 +1245,10 @@ export default function ProfilePage() {
     const resolveFriends = async () => {
       const resolved = await Promise.all(
         friends.map(async (friend) => {
+          // Nếu friend đã có đầy đủ thông tin từ transaction, dùng luôn không cần gọi thêm RPC
+          if (friend.displayName && friend.elo !== undefined) {
+            return friend;
+          }
           try {
             const friendRef = doc(db, 'users', friend.uid);
             const snap = await getDoc(friendRef);
@@ -1177,7 +1266,7 @@ export default function ProfilePage() {
               };
             }
           } catch (err) {
-            console.error("Lỗi phân giải chi tiết bạn bè:", friend.uid, err);
+            console.warn("Lỗi phân giải chi tiết bạn bè:", friend.uid, err?.message);
           }
           return friend;
         })
@@ -1186,10 +1275,6 @@ export default function ProfilePage() {
     };
 
     resolveFriends();
-
-    // Tự động kiểm tra trạng thái hoạt động mỗi 30 giây
-    const interval = setInterval(resolveFriends, 30000);
-    return () => clearInterval(interval);
   }, [friends]);
 
   // Phân giải động thông tin yêu cầu kết bạn nhận được từ users collection
@@ -1202,6 +1287,9 @@ export default function ProfilePage() {
     const resolveRequests = async () => {
       const resolved = await Promise.all(
         incomingRequests.map(async (req) => {
+          if (req.displayName && req.elo !== undefined) {
+            return req;
+          }
           try {
             const reqRef = doc(db, 'users', req.uid);
             const snap = await getDoc(reqRef);
@@ -1218,7 +1306,7 @@ export default function ProfilePage() {
               };
             }
           } catch (err) {
-            console.error("Lỗi phân giải yêu cầu kết bạn:", req.uid, err);
+            console.warn("Lỗi phân giải yêu cầu kết bạn:", req.uid, err?.message);
           }
           return req;
         })

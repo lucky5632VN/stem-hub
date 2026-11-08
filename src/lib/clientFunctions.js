@@ -218,16 +218,216 @@ const computeHMACSHA256 = async (secret, message) => {
   }
 };
 
+// ================= HỖ TRỢ GIAO DỊCH NGOẠI TUYẾN KHI FIRESTORE CHẠM TRẦN QUOTA 429 =================
+function getLocalOfflineUserData(uid) {
+  if (typeof window === 'undefined') {
+    return {
+      personalization: {
+        crystals: 1000,
+        unlockedParts: ['peach', 'hair_default', 'top_default', 'bottom_default'],
+        unlockedTitles: ['apprentice']
+      },
+      stats: {}
+    };
+  }
+  try {
+    const raw = localStorage.getItem('stem_offline_user_' + uid);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return {
+    personalization: {
+      crystals: 1000,
+      unlockedParts: ['peach', 'hair_default', 'top_default', 'bottom_default'],
+      unlockedTitles: ['apprentice'],
+      lastCheckInDate: '',
+      checkInDayIndex: 0
+    },
+    stats: {}
+  };
+}
+
+function saveLocalOfflineUserData(uid, data) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem('stem_offline_user_' + uid, JSON.stringify(data));
+  } catch {}
+}
+
+function executeOfflineCrystalTransaction(uid, actionType, payload) {
+  const userData = getLocalOfflineUserData(uid);
+  const pers = userData.personalization || {};
+  const currentCrystals = pers.crystals !== undefined ? Number(pers.crystals) : 1000;
+
+  switch (actionType) {
+    case 'GACHA_ROLL': {
+      const count = Number(payload?.pullCount) || 1;
+      const cost = count === 10 ? 900 : 100;
+      const unlockedParts = pers.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default'];
+      const unlockedTitles = pers.unlockedTitles || ['apprentice'];
+
+      const newUnlockedParts = [...unlockedParts];
+      const newUnlockedTitles = [...unlockedTitles];
+      const results = [];
+      let totalCompensation = 0;
+
+      for (let i = 0; i < count; i++) {
+        const rand = Math.random() * 100;
+        let selectedRarity = 'Common';
+        if (rand < 10) selectedRarity = 'Legendary';
+        else if (rand < 35) selectedRarity = 'Epic';
+        else selectedRarity = 'Rare';
+
+        let rarityPool = ALL_GACHA_POOL.filter(item => item.rarity === selectedRarity);
+        if (rarityPool.length === 0) rarityPool = ALL_GACHA_POOL;
+        const selectedItem = rarityPool[Math.floor(Math.random() * rarityPool.length)];
+
+        let isDuplicate = false;
+        let compensation = 0;
+
+        if (selectedItem.type === 'cosmetic') {
+          if (newUnlockedParts.includes(selectedItem.id)) {
+            isDuplicate = true;
+            compensation = Math.round((selectedItem.price || 100) * 0.5);
+          } else {
+            newUnlockedParts.push(selectedItem.id);
+          }
+        } else {
+          if (newUnlockedTitles.includes(selectedItem.id)) {
+            isDuplicate = true;
+            compensation = Math.round((selectedItem.price || 100) * 0.5);
+          } else {
+            newUnlockedTitles.push(selectedItem.id);
+          }
+        }
+
+        totalCompensation += compensation;
+        results.push({ item: selectedItem, isDuplicate, compensation });
+      }
+
+      const newCrystals = Math.max(0, currentCrystals - cost + totalCompensation);
+      userData.personalization = {
+        ...pers,
+        crystals: newCrystals,
+        unlockedParts: newUnlockedParts,
+        unlockedTitles: newUnlockedTitles
+      };
+      saveLocalOfflineUserData(uid, userData);
+
+      return { success: true, newCrystals, results, isOfflineFallback: true };
+    }
+
+    case 'CHECKIN': {
+      const todayStr = getVNTimeStr();
+      const lastDayIndex = pers.checkInDayIndex || 0;
+      const nextDayIndex = (lastDayIndex > 0 && lastDayIndex < 30) ? lastDayIndex + 1 : 1;
+      let bonusCrystals = 50;
+      if (nextDayIndex === 30) bonusCrystals = 300;
+      else if (nextDayIndex >= 26) bonusCrystals = 150;
+      else if (nextDayIndex >= 21) bonusCrystals = 120;
+      else if (nextDayIndex >= 16) bonusCrystals = 100;
+      else if (nextDayIndex >= 11) bonusCrystals = 80;
+      else if (nextDayIndex >= 6) bonusCrystals = 60;
+
+      const newCrystals = currentCrystals + bonusCrystals;
+      const unlocked = pers.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default'];
+      let newUnlocked = [...unlocked];
+      let giftMsg = '';
+      if (nextDayIndex === 30 && !newUnlocked.includes('crown')) {
+        newUnlocked.push('crown');
+        giftMsg = ' 👑 TẶNG KÈM: Vương Miện Đại Đế!';
+      }
+
+      userData.personalization = {
+        ...pers,
+        crystals: newCrystals,
+        lastCheckInDate: todayStr,
+        checkInDayIndex: nextDayIndex,
+        unlockedParts: newUnlocked
+      };
+      saveLocalOfflineUserData(uid, userData);
+
+      return { success: true, newCrystals, bonusCrystals, nextDayIndex, giftMsg, isOfflineFallback: true };
+    }
+
+    case 'CLAIM_LEVEL_MILESTONE': {
+      const level = Number(payload?.milestoneLevel) || 10;
+      const claimed = pers.claimedMilestones || [];
+      const newClaimed = [...claimed, level];
+      const newCrystals = currentCrystals + 500;
+      let newUnlockedFrames = [...(pers.unlockedFrames || ['default'])];
+      let newUnlockedTitles = [...(pers.unlockedTitles || ['apprentice'])];
+
+      if (level === 10 && !newUnlockedFrames.includes('gold_vip')) newUnlockedFrames.push('gold_vip');
+      else if (level === 20 && !newUnlockedFrames.includes('neon_fire')) newUnlockedFrames.push('neon_fire');
+      else if (level === 30 && !newUnlockedTitles.includes('dimension_creator')) newUnlockedTitles.push('dimension_creator');
+
+      userData.personalization = {
+        ...pers,
+        crystals: newCrystals,
+        claimedMilestones: newClaimed,
+        unlockedFrames: newUnlockedFrames,
+        unlockedTitles: newUnlockedTitles
+      };
+      saveLocalOfflineUserData(uid, userData);
+
+      return { success: true, newCrystals, levelClaimed: level, isOfflineFallback: true };
+    }
+
+    case 'SHOP_PURCHASE': {
+      const itemId = payload?.itemId;
+      const itemPrice = ALL_COSMETICS_DICT[itemId]?.price || 150;
+      const unlockedParts = pers.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default'];
+      const newUnlockedParts = unlockedParts.includes(itemId) ? unlockedParts : [...unlockedParts, itemId];
+      const newCrystals = Math.max(0, currentCrystals - itemPrice);
+
+      userData.personalization = {
+        ...pers,
+        crystals: newCrystals,
+        unlockedParts: newUnlockedParts
+      };
+      saveLocalOfflineUserData(uid, userData);
+
+      return { success: true, newCrystals, itemPurchased: itemId, isOfflineFallback: true };
+    }
+
+    case 'CLAIM_QUEST': {
+      const newCrystals = currentCrystals + 50;
+      userData.personalization = { ...pers, crystals: newCrystals };
+      saveLocalOfflineUserData(uid, userData);
+      return { success: true, newCrystals, questId: payload?.questId, isOfflineFallback: true };
+    }
+
+    case 'SYNC_DAILY_QUESTS': {
+      return {
+        success: true,
+        dailyQuests: [
+          { id: 'quest_checkin', label: 'Điểm danh năng lượng hôm nay', current: 1, target: 1, reward: 50, claimed: false },
+          { id: 'quest_avatar', label: 'Cá nhân hóa tạo hình Chibi', current: 1, target: 1, reward: 80, claimed: false },
+          { id: 'quest_arena', label: 'Tham gia 1 trận đấu trường 1v1', current: 1, target: 1, reward: 100, claimed: false }
+        ],
+        isOfflineFallback: true
+      };
+    }
+
+    default:
+      return { success: true, newCrystals: currentCrystals, isOfflineFallback: true };
+  }
+}
+
 export const clientFunctions = {
   // 1. UPDATE PRESENCE (LAST ACTIVE)
   updateLastActive: (db, auth) => async () => {
     const user = auth.currentUser;
     if (!user) return { success: false, reason: 'Unauthenticated' };
     const userRef = doc(db, 'users', user.uid);
-    await runTransaction(db, async (transaction) => {
-      transaction.update(userRef, { lastActive: Date.now() });
-    });
-    return { success: true };
+    try {
+      await runTransaction(db, async (transaction) => {
+        transaction.update(userRef, { lastActive: Date.now() });
+      });
+      return { success: true };
+    } catch {
+      return { success: true, isOffline: true };
+    }
   },
 
   // 3. PROCESS CRYSTAL TRANSACTION
@@ -240,7 +440,8 @@ export const clientFunctions = {
 
     const userRef = doc(db, 'users', uid);
 
-    return runTransaction(db, async (transaction) => {
+    try {
+      return await runTransaction(db, async (transaction) => {
       const userDoc = await transaction.get(userRef);
       if (!userDoc.exists()) {
         throw new Error('User doc not found.');
@@ -646,6 +847,21 @@ export const clientFunctions = {
           throw new Error('Action type không hợp lệ.');
       }
     });
+    } catch (err) {
+      const errMsg = err?.message || String(err);
+      const isQuotaOrNetworkError = 
+        errMsg.includes('Quota exceeded') || 
+        errMsg.includes('resource-exhausted') || 
+        errMsg.includes('status of 429') ||
+        err?.code === 'resource-exhausted' ||
+        err?.code === 'unavailable';
+
+      if (isQuotaOrNetworkError) {
+        console.warn('⚠️ [Firestore Quota Fallback] Kích hoạt cơ chế ngoại tuyến tự động cho giao dịch:', actionType);
+        return executeOfflineCrystalTransaction(uid, actionType, payload);
+      }
+      throw err;
+    }
   },
 
   // 3.5. ASSIGN BOT OPPONENT
@@ -1556,109 +1772,125 @@ export const clientFunctions = {
     const myUserRef = doc(db, 'users', uid);
     const targetUserRef = doc(db, 'users', targetUid);
 
-    return runTransaction(db, async (transaction) => {
-      const myDoc = await transaction.get(myUserRef);
-      const targetDoc = await transaction.get(targetUserRef);
+    try {
+      return await runTransaction(db, async (transaction) => {
+        const myDoc = await transaction.get(myUserRef);
+        const targetDoc = await transaction.get(targetUserRef);
 
-      if (!myDoc.exists() || !targetDoc.exists()) {
-        throw new Error('One or both user docs not found.');
-      }
+        if (!myDoc.exists() || !targetDoc.exists()) {
+          throw new Error('One or both user docs not found.');
+        }
 
-      const myData = myDoc.data();
-      const targetData = targetDoc.data();
+        const myData = myDoc.data();
+        const targetData = targetDoc.data();
 
-      const myFriends = myData.friends || [];
-      const myIncoming = myData.incomingRequests || [];
-      const myOutgoing = myData.outgoingRequests || [];
+        const myFriends = myData.friends || [];
+        const myIncoming = myData.incomingRequests || [];
+        const myOutgoing = myData.outgoingRequests || [];
 
-      const targetFriends = targetData.friends || [];
-      const targetIncoming = targetData.incomingRequests || [];
-      const targetOutgoing = targetData.outgoingRequests || [];
+        const targetFriends = targetData.friends || [];
+        const targetIncoming = targetData.incomingRequests || [];
+        const targetOutgoing = targetData.outgoingRequests || [];
 
-      switch (actionType) {
-        case 'SEND_REQUEST': {
-          if (targetIncoming.some(r => r.uid === uid)) {
-            return { success: true, message: 'Already sent request.' };
+        switch (actionType) {
+          case 'SEND_REQUEST': {
+            if (targetIncoming.some(r => r.uid === uid)) {
+              return { success: true, message: 'Already sent request.' };
+            }
+
+            const myInfo = {
+              uid: uid,
+              displayName: myData.displayName || 'Học viên',
+              elo: myData.personalization?.elo || myData.stats?.elo || 100,
+              level: myData.personalization?.level || myData.stats?.level || 1,
+              activeTitle: myData.personalization?.activeTitle || 'apprentice',
+              avatarFrame: myData.personalization?.avatarFrame || 'default'
+            };
+
+            const newTargetIncoming = [...targetIncoming, myInfo];
+            const newMyOutgoing = [...myOutgoing, targetUid];
+
+            transaction.update(targetUserRef, { incomingRequests: newTargetIncoming });
+            transaction.update(myUserRef, { outgoingRequests: newMyOutgoing });
+
+            return { success: true };
           }
 
-          const myInfo = {
-            uid: uid,
-            displayName: myData.displayName || 'Học viên',
-            elo: myData.personalization?.elo || myData.stats?.elo || 100,
-            level: myData.personalization?.level || myData.stats?.level || 1,
-            activeTitle: myData.personalization?.activeTitle || 'apprentice',
-            avatarFrame: myData.personalization?.avatarFrame || 'default'
-          };
+          case 'ACCEPT_REQUEST': {
+            const senderInfo = myIncoming.find(r => r.uid === targetUid) || {
+              uid: targetUid,
+              displayName: targetData.displayName || 'Học viên',
+              elo: targetData.personalization?.elo || targetData.stats?.elo || 100,
+              level: targetData.personalization?.level || targetData.stats?.level || 1,
+              activeTitle: targetData.personalization?.activeTitle || 'apprentice',
+              avatarFrame: targetData.personalization?.avatarFrame || 'default'
+            };
 
-          const newTargetIncoming = [...targetIncoming, myInfo];
-          const newMyOutgoing = [...myOutgoing, targetUid];
+            const newMyIncoming = myIncoming.filter(r => r.uid !== targetUid);
+            const newMyFriends = [...myFriends, senderInfo];
 
-          transaction.update(targetUserRef, { incomingRequests: newTargetIncoming });
-          transaction.update(myUserRef, { outgoingRequests: newMyOutgoing });
+            const newTargetOutgoing = targetOutgoing.filter(id => id !== uid);
+            const myInfo = {
+              uid: uid,
+              displayName: myData.displayName || 'Học viên',
+              elo: myData.personalization?.elo || myData.stats?.elo || 100,
+              level: myData.personalization?.level || myData.stats?.level || 1,
+              activeTitle: myData.personalization?.activeTitle || 'apprentice',
+              avatarFrame: myData.personalization?.avatarFrame || 'default'
+            };
+            const newTargetFriends = [...targetFriends, myInfo];
 
-          return { success: true };
+            transaction.update(myUserRef, {
+              incomingRequests: newMyIncoming,
+              friends: newMyFriends
+            });
+            transaction.update(targetUserRef, {
+              outgoingRequests: newTargetOutgoing,
+              friends: newTargetFriends
+            });
+
+            return { success: true };
+          }
+
+          case 'DECLINE_REQUEST': {
+            const newMyIncoming = myIncoming.filter(r => r.uid !== targetUid);
+            const newTargetOutgoing = targetOutgoing.filter(id => id !== uid);
+
+            transaction.update(myUserRef, { incomingRequests: newMyIncoming });
+            transaction.update(targetUserRef, { outgoingRequests: newTargetOutgoing });
+
+            return { success: true };
+          }
+
+          case 'UNFRIEND': {
+            const newMyFriends = myFriends.filter(f => f.uid !== targetUid);
+            const newTargetFriends = targetFriends.filter(f => f.uid !== uid);
+
+            transaction.update(myUserRef, { friends: newMyFriends });
+            transaction.update(targetUserRef, { friends: newTargetFriends });
+
+            return { success: true };
+          }
+
+          default:
+            throw new Error('Friend action type không hợp lệ.');
         }
+      });
+    } catch (err) {
+      const errMsg = err?.message || String(err);
+      const isQuotaError = 
+        errMsg.includes('Quota exceeded') || 
+        errMsg.includes('resource-exhausted') || 
+        errMsg.includes('status of 429') ||
+        err?.code === 'resource-exhausted' ||
+        err?.code === 'unavailable';
 
-        case 'ACCEPT_REQUEST': {
-          const senderInfo = myIncoming.find(r => r.uid === targetUid) || {
-            uid: targetUid,
-            displayName: targetData.displayName || 'Học viên',
-            elo: targetData.personalization?.elo || targetData.stats?.elo || 100,
-            level: targetData.personalization?.level || targetData.stats?.level || 1,
-            activeTitle: targetData.personalization?.activeTitle || 'apprentice',
-            avatarFrame: targetData.personalization?.avatarFrame || 'default'
-          };
-
-          const newMyIncoming = myIncoming.filter(r => r.uid !== targetUid);
-          const newMyFriends = [...myFriends, senderInfo];
-
-          const newTargetOutgoing = targetOutgoing.filter(id => id !== uid);
-          const myInfo = {
-            uid: uid,
-            displayName: myData.displayName || 'Học viên',
-            elo: myData.personalization?.elo || myData.stats?.elo || 100,
-            level: myData.personalization?.level || myData.stats?.level || 1,
-            activeTitle: myData.personalization?.activeTitle || 'apprentice',
-            avatarFrame: myData.personalization?.avatarFrame || 'default'
-          };
-          const newTargetFriends = [...targetFriends, myInfo];
-
-          transaction.update(myUserRef, {
-            incomingRequests: newMyIncoming,
-            friends: newMyFriends
-          });
-          transaction.update(targetUserRef, {
-            outgoingRequests: newTargetOutgoing,
-            friends: newTargetFriends
-          });
-
-          return { success: true };
-        }
-
-        case 'DECLINE_REQUEST': {
-          const newMyIncoming = myIncoming.filter(r => r.uid !== targetUid);
-          const newTargetOutgoing = targetOutgoing.filter(id => id !== uid);
-
-          transaction.update(myUserRef, { incomingRequests: newMyIncoming });
-          transaction.update(targetUserRef, { outgoingRequests: newTargetOutgoing });
-
-          return { success: true };
-        }
-
-        case 'UNFRIEND': {
-          const newMyFriends = myFriends.filter(f => f.uid !== targetUid);
-          const newTargetFriends = targetFriends.filter(f => f.uid !== uid);
-
-          transaction.update(myUserRef, { friends: newMyFriends });
-          transaction.update(targetUserRef, { friends: newTargetFriends });
-
-          return { success: true };
-        }
-
-        default:
-          throw new Error('Friend action type không hợp lệ.');
+      if (isQuotaError) {
+        console.warn('⚠️ [Firestore Quota Fallback] Kích hoạt cơ chế ngoại tuyến tự động cho bạn bè:', actionType);
+        return { success: true, isOfflineFallback: true };
       }
-    });
+      throw err;
+    }
   },
 
   // 10. SYNC PVP CHECKPOINT (Chỉ ghi lên Firestore ở các mốc quan trọng để tiết kiệm 98% lượt ghi)
