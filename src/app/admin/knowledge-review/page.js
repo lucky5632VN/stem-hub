@@ -86,7 +86,7 @@ export default function KnowledgeReviewAdminPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-internal-secret': 'stemhub_rag_internal_sig_2026'
+          'x-admin-secret-key': 'stemhub_admin_secret_key_2026'
         },
         body: JSON.stringify(s)
       }).catch(() => {});
@@ -106,7 +106,7 @@ export default function KnowledgeReviewAdminPage() {
         method: 'PATCH',
         headers: { 
           'Content-Type': 'application/json',
-          'x-internal-secret': 'stemhub_rag_internal_sig_2026'
+          'x-admin-secret-key': 'stemhub_admin_secret_key_2026'
         },
         body: JSON.stringify({
           id,
@@ -134,7 +134,7 @@ export default function KnowledgeReviewAdminPage() {
       const res = await fetch(`/api/learned-knowledge?id=${encodeURIComponent(id)}`, {
         method: 'DELETE',
         headers: {
-          'x-internal-secret': 'stemhub_rag_internal_sig_2026'
+          'x-admin-secret-key': 'stemhub_admin_secret_key_2026'
         }
       });
       if (res.ok) {

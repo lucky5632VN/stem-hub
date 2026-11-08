@@ -98,7 +98,20 @@ function isPersonalOrGreeting(query, answer) {
   return false;
 }
 
-const INTERNAL_AI_SECRET = process.env.INTERNAL_AI_SECRET || process.env.ADMIN_SECRET_KEY || 'stemhub_rag_internal_sig_2026';
+// Khóa bí mật dành riêng cho Quản trị viên/Giáo viên để duyệt (PATCH) và xóa (DELETE) tri thức
+const ADMIN_SECRET = process.env.ADMIN_SECRET_KEY || (process.env.NODE_ENV !== 'production' ? 'stemhub_admin_secret_key_2026' : '');
+
+// Khóa chữ ký nội bộ dành cho việc nạp tri thức mới (POST) ở trạng thái chờ duyệt
+const INTERNAL_AI_SECRET = process.env.INTERNAL_AI_SECRET || (process.env.NODE_ENV !== 'production' ? 'stemhub_rag_internal_sig_2026' : '');
+
+if (process.env.NODE_ENV === 'production') {
+  if (!ADMIN_SECRET) {
+    console.warn('[Security Warning] ADMIN_SECRET_KEY chưa được cấu hình. Các thao tác phê duyệt/xóa tri thức sẽ bị từ chối.');
+  }
+  if (!INTERNAL_AI_SECRET) {
+    console.warn('[Security Warning] INTERNAL_AI_SECRET chưa được cấu hình. Các thao tác nạp tri thức sẽ bị từ chối.');
+  }
+}
 
 export async function POST(request) {
   const corsHeaders = getCorsHeaders(request);
@@ -114,11 +127,16 @@ export async function POST(request) {
     }
 
     // 🛡️ CHẶN ĐẦU ĐỘC RAG (OWASP LLM03): Yêu cầu chữ ký xác thực nội bộ AI hoặc token Admin
-    const reqSecret = request.headers.get('x-internal-secret') || request.headers.get('x-admin-secret-key') || '';
+    const reqInternalSecret = request.headers.get('x-internal-secret') || '';
+    const reqAdminSecret = request.headers.get('x-admin-secret-key') || '';
     const authHeader = request.headers.get('authorization') || '';
-    const isAuthBearer = authHeader.startsWith('Bearer ') && authHeader.substring(7) === INTERNAL_AI_SECRET;
+    const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : '';
 
-    if (reqSecret !== INTERNAL_AI_SECRET && !isAuthBearer) {
+    const isAuthorized =
+      (INTERNAL_AI_SECRET && (reqInternalSecret === INTERNAL_AI_SECRET || bearerToken === INTERNAL_AI_SECRET)) ||
+      (ADMIN_SECRET && (reqAdminSecret === ADMIN_SECRET || bearerToken === ADMIN_SECRET));
+
+    if (!isAuthorized) {
       return NextResponse.json(
         { success: false, error: 'Từ chối quyền truy cập: Cần chữ ký nội bộ AI hoặc token xác thực của Quản trị viên.' },
         { status: 401, headers: corsHeaders }
@@ -239,14 +257,14 @@ export async function POST(request) {
 export async function PATCH(request) {
   const corsHeaders = getCorsHeaders(request);
   try {
-    // 🛡️ CHẶN SỬA ĐỔI TRI THỨC TRÁI PHÉP (OWASP API1 / LLM03): Yêu cầu chữ ký xác thực nội bộ AI hoặc token Admin
-    const reqSecret = request.headers.get('x-internal-secret') || request.headers.get('x-admin-secret-key') || '';
+    // 🛡️ CHẶN SỬA ĐỔI TRI THỨC TRÁI PHÉP (OWASP API1 / LLM03): Yêu cầu chữ ký Admin/Giáo viên
+    const reqSecret = request.headers.get('x-admin-secret-key') || '';
     const authHeader = request.headers.get('authorization') || '';
-    const isAuthBearer = authHeader.startsWith('Bearer ') && authHeader.substring(7) === INTERNAL_AI_SECRET;
+    const isAuthBearer = authHeader.startsWith('Bearer ') && authHeader.substring(7) === ADMIN_SECRET;
 
-    if (reqSecret !== INTERNAL_AI_SECRET && !isAuthBearer) {
+    if (!ADMIN_SECRET || (reqSecret !== ADMIN_SECRET && !isAuthBearer)) {
       return NextResponse.json(
-        { success: false, error: 'Từ chối quyền truy cập: Cần chữ ký nội bộ AI hoặc token xác thực của Quản trị viên.' },
+        { success: false, error: 'Từ chối quyền truy cập: Cần token xác thực của Quản trị viên/Giáo viên để phê duyệt.' },
         { status: 401, headers: corsHeaders }
       );
     }
@@ -304,14 +322,14 @@ export async function PATCH(request) {
 export async function DELETE(request) {
   const corsHeaders = getCorsHeaders(request);
   try {
-    // 🛡️ CHẶN XÓA TRI THỨC TRÁI PHÉP (OWASP API1 / LLM03): Yêu cầu chữ ký xác thực nội bộ AI hoặc token Admin
-    const reqSecret = request.headers.get('x-internal-secret') || request.headers.get('x-admin-secret-key') || '';
+    // 🛡️ CHẶN XÓA TRI THỨC TRÁI PHÉP (OWASP API1 / LLM03): Yêu cầu chữ ký Admin/Giáo viên
+    const reqSecret = request.headers.get('x-admin-secret-key') || '';
     const authHeader = request.headers.get('authorization') || '';
-    const isAuthBearer = authHeader.startsWith('Bearer ') && authHeader.substring(7) === INTERNAL_AI_SECRET;
+    const isAuthBearer = authHeader.startsWith('Bearer ') && authHeader.substring(7) === ADMIN_SECRET;
 
-    if (reqSecret !== INTERNAL_AI_SECRET && !isAuthBearer) {
+    if (!ADMIN_SECRET || (reqSecret !== ADMIN_SECRET && !isAuthBearer)) {
       return NextResponse.json(
-        { success: false, error: 'Từ chối quyền truy cập: Cần chữ ký nội bộ AI hoặc token xác thực của Quản trị viên.' },
+        { success: false, error: 'Từ chối quyền truy cập: Cần token xác thực của Quản trị viên/Giáo viên để xóa bản ghi.' },
         { status: 401, headers: corsHeaders }
       );
     }
