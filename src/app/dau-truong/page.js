@@ -4603,7 +4603,11 @@ function DauTruongContent() {
                       title="Thiết kế Avatar Chibi cá nhân"
                     >
                       <AvatarFrame frame={personalization.avatarFrame} className="w-16 h-16 text-2xl transition-all duration-300 group-hover/avatar:scale-105">
-                        {personalization.avatarParts ? (
+                        {personalization.avatarUrl && (personalization.avatarUrl.startsWith('http') || personalization.avatarUrl.startsWith('data:image/')) ? (
+                          <img src={personalization.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }} />
+                        ) : personalization.avatarUrl && personalization.avatarUrl !== 'custom-avatar' ? (
+                          <span className="select-none flex items-center justify-center w-full h-full text-2xl">{personalization.avatarUrl}</span>
+                        ) : personalization.avatarParts ? (
                           <STEMAvatarSVG parts={personalization.avatarParts} className="w-full h-full transform scale-90" />
                         ) : (
                           <User className="w-8 h-8 text-text-primary" />
@@ -4802,7 +4806,13 @@ function DauTruongContent() {
                 </div>
                 <div className="relative shrink-0 w-24 h-24 flex items-center justify-center mx-auto mb-4">
                   <AvatarFrame frame={personalization.avatarFrame || 'default'} className="w-24 h-24">
-                    <STEMAvatarSVG parts={personalization.avatarParts} className="w-16 h-16" />
+                    {personalization.avatarUrl && (personalization.avatarUrl.startsWith('http') || personalization.avatarUrl.startsWith('data:image/')) ? (
+                      <img src={personalization.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }} />
+                    ) : personalization.avatarUrl && personalization.avatarUrl !== 'custom-avatar' ? (
+                      <span className="select-none flex items-center justify-center w-full h-full text-4xl">{personalization.avatarUrl}</span>
+                    ) : (
+                      <STEMAvatarSVG parts={personalization.avatarParts} className="w-16 h-16" />
+                    )}
                   </AvatarFrame>
                   <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-pink-500 border-2 border-bg-secondary flex items-center justify-center text-[10px] font-black text-white font-mono shadow-md">
                     {personalization.level || 1}

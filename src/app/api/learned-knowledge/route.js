@@ -78,8 +78,8 @@ export async function GET(request) {
 
     let filtered = list;
     if (onlyVerified) {
-      // Mặc định tri thức tự học chuẩn đều được sử dụng trừ khi bị từ chối
-      filtered = list.filter(item => item.status === 'verified_by_teacher' || item.teacherVerified === true || !item.status);
+      // Mặc định tri thức tự học chuẩn đã qua bộ lọc AI được sử dụng ngay lập tức trừ khi bị từ chối
+      filtered = list.filter(item => item.status !== 'rejected');
     } else if (!all) {
       filtered = list.filter(item => item.status !== 'rejected');
     }

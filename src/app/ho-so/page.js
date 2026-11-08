@@ -448,7 +448,22 @@ export default function ProfilePage() {
     playSound.click();
     try {
       setPersonalization({ bgImage: url });
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('stemhub_personalization_bg', url);
+        } catch (_) {}
+      }
       if (user) {
+        try {
+          const userDocRef = doc(db, 'users', user.uid);
+          await updateDoc(userDocRef, {
+            'personalization.bgImage': url,
+            bgImage: url
+          });
+        } catch (dbErr) {
+          console.warn("Direct update failed, falling back to transaction:", dbErr.message);
+        }
+
         const processTransaction = httpsCallable(functions, 'processCrystalTransaction');
         await processTransaction({
           actionType: 'UPDATE_PERSONALIZATION',
@@ -523,7 +538,23 @@ export default function ProfilePage() {
     playSound.click();
     try {
       setPersonalization({ avatarUrl: url });
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('stemhub_personalization_avatar', url);
+        } catch (_) {}
+      }
       if (user) {
+        try {
+          const userDocRef = doc(db, 'users', user.uid);
+          await updateDoc(userDocRef, {
+            'personalization.avatarUrl': url,
+            avatarUrl: url,
+            photoURL: url
+          });
+        } catch (dbErr) {
+          console.warn("Direct update avatar failed, falling back to transaction:", dbErr.message);
+        }
+
         const processTransaction = httpsCallable(functions, 'processCrystalTransaction');
         await processTransaction({
           actionType: 'UPDATE_PERSONALIZATION',

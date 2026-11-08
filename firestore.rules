@@ -49,17 +49,20 @@ service cloud.firestore {
     // CHẶN NGHIÊM NGẶT: Học sinh không được tự ý sửa role, stats, elo, personalization (pha lê, danh hiệu)
     // inventory & pendingExtraSlot: cho phép client tự trừ thẻ chiêu khi xác nhận trang bị trận đấu
     function hasNoPrivilegeEscalation() {
-      let forbiddenKeys = ['role', 'elo', 'level', 'crystals', 'crystal', 'stats', 'personalization', 'isAdmin'];
-      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(forbiddenKeys);
+      let forbiddenKeys = ['role', 'elo', 'level', 'crystals', 'crystal', 'stats', 'isAdmin'];
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(forbiddenKeys) &&
+             (!('personalization' in request.resource.data) || 
+              !('personalization' in resource.data) ||
+              !request.resource.data.personalization.diff(resource.data.personalization).affectedKeys().hasAny(['crystals', 'crystal']));
     }
 
     function isAllowedUserUpdate() {
       let allowedKeys = [
-        'displayName', 'bio', 'photoURL', 'avatar', 'avatarUrl', 'phoneNumber',
+        'displayName', 'bio', 'photoURL', 'avatar', 'avatarUrl', 'bgImage', 'phoneNumber',
         'school', 'grade', 'class', 'faceDescriptor', 'faceEnrolled',
         'friends', 'incomingRequests', 'outgoingRequests', 'lastActive',
         'status', 'updatedAt', 'isDeleted',
-        'inventory', 'pendingExtraSlot'
+        'inventory', 'pendingExtraSlot', 'personalization'
       ];
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(allowedKeys) && hasNoPrivilegeEscalation();
     }

@@ -563,15 +563,22 @@ export const clientFunctions = {
         case 'UPDATE_PERSONALIZATION': {
           const { bgImage, avatarUrl, avatarParts, activeTitle, avatarFrame, pinnedBadges } = payload || {};
           const updates = {};
-          if (bgImage !== undefined) updates['personalization.bgImage'] = bgImage;
-          if (avatarUrl !== undefined) updates['personalization.avatarUrl'] = avatarUrl;
+          if (bgImage !== undefined) {
+            updates['personalization.bgImage'] = bgImage;
+            updates['bgImage'] = bgImage;
+          }
+          if (avatarUrl !== undefined) {
+            updates['personalization.avatarUrl'] = avatarUrl;
+            updates['avatarUrl'] = avatarUrl;
+            updates['photoURL'] = avatarUrl;
+          }
           if (avatarParts !== undefined) updates['personalization.avatarParts'] = avatarParts;
           if (activeTitle !== undefined) updates['personalization.activeTitle'] = activeTitle;
           if (avatarFrame !== undefined) updates['personalization.avatarFrame'] = avatarFrame;
           if (pinnedBadges !== undefined) updates['personalization.pinnedBadges'] = pinnedBadges;
 
           if (Object.keys(updates).length > 0) {
-            transaction.update(userRef, updates);
+            transaction.set(userRef, updates, { merge: true });
           }
 
           return { success: true };

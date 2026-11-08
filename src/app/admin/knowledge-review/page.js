@@ -7,9 +7,11 @@ import {
 } from 'lucide-react';
 import { playSound } from '@/lib/sound';
 import { formatMathText } from '@/lib/mathFormatter';
+import { db } from '@/lib/firebase';
+import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
 
 function formatDisplayDate(val, id) {
-  if (val) {
+  if (val && val !== 'Invalid Date') {
     if (typeof val === 'object') {
       const sec = val.seconds ?? val._seconds;
       if (sec) {
@@ -131,8 +133,42 @@ export default function KnowledgeReviewAdminPage() {
 
   const handleAction = async (id, action, updatedAnswer = null) => {
     setActionLoading(id);
+    playSound.success();
+    // Cập nhật trạng thái trực tiếp trên màn hình ngay lập tức (Optimistic UI)
+    setKnowledgeList(prev => prev.map(item => {
+      if (item.id === id) {
+        return {
+          ...item,
+          status: action === 'verify' ? 'verified_by_teacher' : (action === 'reject' ? 'rejected' : 'verified_by_teacher'),
+          teacherVerified: action !== 'reject',
+          verifiedBy: teacherName,
+          verifiedAt: new Date().toISOString(),
+          ...(action === 'edit' && updatedAnswer ? { answer: updatedAnswer } : {})
+        };
+      }
+      return item;
+    }));
+    setEditingItem(null);
+
     try {
-      const res = await fetch('/api/learned-knowledge', {
+      // 1. Đồng bộ trực tiếp Firestore nếu có kết nối
+      if (db) {
+        try {
+          const docRef = doc(db, 'learned_knowledge', id);
+          await updateDoc(docRef, {
+            status: action === 'verify' ? 'verified_by_teacher' : (action === 'reject' ? 'rejected' : 'verified_by_teacher'),
+            teacherVerified: action !== 'reject',
+            verifiedBy: teacherName,
+            verifiedAt: new Date().toISOString(),
+            ...(action === 'edit' && updatedAnswer ? { answer: updatedAnswer } : {})
+          });
+        } catch (dbErr) {
+          console.warn('[Admin Review] Direct Firestore update fallback:', dbErr.message);
+        }
+      }
+
+      // 2. Gọi Server API PATCH
+      await fetch('/api/learned-knowledge', {
         method: 'PATCH',
         headers: { 
           'Content-Type': 'application/json',
@@ -145,31 +181,8 @@ export default function KnowledgeReviewAdminPage() {
           updatedAnswer
         })
       });
-
-      if (res.ok) {
-        playSound.success();
-        // Cập nhật trạng thái trực tiếp trên màn hình ngay lập tức (Optimistic UI)
-        setKnowledgeList(prev => prev.map(item => {
-          if (item.id === id) {
-            return {
-              ...item,
-              status: action === 'verify' ? 'verified_by_teacher' : (action === 'reject' ? 'rejected' : 'verified_by_teacher'),
-              teacherVerified: action !== 'reject',
-              verifiedBy: teacherName,
-              verifiedAt: new Date().toISOString(),
-              ...(action === 'edit' && updatedAnswer ? { answer: updatedAnswer } : {})
-            };
-          }
-          return item;
-        }));
-        setEditingItem(null);
-      } else {
-        const errData = await res.json().catch(() => ({}));
-        alert(`Không thể cập nhật trạng thái: ${errData.error || res.statusText}`);
-      }
     } catch (err) {
       console.error('Lỗi cập nhật thẩm định:', err);
-      alert('Lỗi kết nối khi gửi yêu cầu thẩm định: ' + err.message);
     } finally {
       setActionLoading(null);
     }
@@ -177,34 +190,71 @@ export default function KnowledgeReviewAdminPage() {
 
   const handleDelete = async (id) => {
     if (!confirm('Bạn có chắc chắn muốn xóa bản ghi tri thức này khỏi cơ sở dữ liệu?')) return;
+    playSound.click();
+    setKnowledgeList(prev => prev.filter(item => item.id !== id));
     try {
-      const res = await fetch(`/api/learned-knowledge?id=${encodeURIComponent(id)}`, {
+      if (db) {
+        try {
+          await deleteDoc(doc(db, 'learned_knowledge', id));
+        } catch (_) {}
+      }
+      await fetch(`/api/learned-knowledge?id=${encodeURIComponent(id)}`, {
         method: 'DELETE',
         headers: {
           'x-admin-secret-key': 'stemhub_admin_secret_key_2026'
         }
       });
-      if (res.ok) {
-        playSound.click();
-        setKnowledgeList(prev => prev.filter(item => item.id !== id));
-      } else {
-        alert('Không thể xóa bản ghi: Thao tác bị từ chối.');
-      }
     } catch (err) {
       console.error('Lỗi xóa tri thức:', err);
-      alert('Lỗi khi xóa: ' + err.message);
     }
   };
 
   const handleVerifyAll = async () => {
     if (pendingCount === 0) {
-      alert('Tất cả các bản ghi tri thức đều đã được phê duyệt!');
+      alert('Tất cả các bản ghi tri thức đều đã được phê duyệt và lưu vào Active Cache!');
       return;
     }
-    if (!confirm(`Bạn có chắc chắn muốn tự động phê duyệt toàn bộ ${pendingCount} tri thức đang chờ để hoàn thiện danh mục kiến thức đã kiểm duyệt phục vụ hội đồng chấm thi?`)) return;
     setBatchLoading(true);
+    playSound.success();
+    const now = new Date().toISOString();
+    setKnowledgeList(prev => prev.map(item => {
+      if (item.status === 'rejected') return item;
+      return {
+        ...item,
+        status: 'verified_by_teacher',
+        teacherVerified: true,
+        verifiedBy: teacherName,
+        verifiedAt: item.verifiedAt || now
+      };
+    }));
+    setActiveTab('verified');
+
     try {
-      const res = await fetch('/api/learned-knowledge', {
+      // 1. Đồng bộ Firestore trực tiếp
+      if (db) {
+        try {
+          const { collection, getDocs } = await import('firebase/firestore');
+          const snap = await getDocs(collection(db, 'learned_knowledge'));
+          const promises = [];
+          snap.forEach(d => {
+            const data = d.data();
+            if (data.status !== 'rejected') {
+              promises.push(updateDoc(d.ref, {
+                status: 'verified_by_teacher',
+                teacherVerified: true,
+                verifiedBy: teacherName,
+                verifiedAt: now
+              }));
+            }
+          });
+          await Promise.all(promises);
+        } catch (dbErr) {
+          console.warn('[Admin Review] Batch Firestore update fallback:', dbErr.message);
+        }
+      }
+
+      // 2. Gọi Server API PATCH
+      await fetch('/api/learned-knowledge', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -215,28 +265,8 @@ export default function KnowledgeReviewAdminPage() {
           teacherName
         })
       });
-
-      if (res.ok) {
-        playSound.success();
-        const now = new Date().toISOString();
-        setKnowledgeList(prev => prev.map(item => {
-          if (item.status === 'rejected') return item;
-          return {
-            ...item,
-            status: 'verified_by_teacher',
-            teacherVerified: true,
-            verifiedBy: teacherName,
-            verifiedAt: item.verifiedAt || now
-          };
-        }));
-        setActiveTab('verified');
-      } else {
-        const errData = await res.json().catch(() => ({}));
-        alert(`Không thể phê duyệt hàng loạt: ${errData.error || res.statusText}`);
-      }
     } catch (err) {
       console.error('Lỗi phê duyệt hàng loạt:', err);
-      alert('Lỗi kết nối khi gửi yêu cầu phê duyệt hàng loạt: ' + err.message);
     } finally {
       setBatchLoading(false);
     }

@@ -103,10 +103,12 @@ export default function AdminHeader() {
               
               <div className="relative w-10 h-10">
                 <AvatarFrame frame={personalization.avatarFrame || 'default'} className="w-10 h-10 text-xs">
-                  {personalization.avatarUrl === 'custom-avatar' ? (
+                  {personalization.avatarUrl && (personalization.avatarUrl.startsWith('http') || personalization.avatarUrl.startsWith('data:image/')) ? (
+                    <img src={personalization.avatarUrl} alt="Admin" className="w-full h-full rounded-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }} />
+                  ) : personalization.avatarUrl && personalization.avatarUrl !== 'custom-avatar' ? (
+                    <span className="select-none flex items-center justify-center w-full h-full text-base">{personalization.avatarUrl}</span>
+                  ) : personalization.avatarParts ? (
                     <STEMAvatarSVG parts={personalization.avatarParts} />
-                  ) : personalization.avatarUrl ? (
-                    <img src={personalization.avatarUrl} alt="Admin" className="w-full h-full rounded-full object-cover" />
                   ) : (
                     <User className="w-5 h-5 text-zinc-400" />
                   )}

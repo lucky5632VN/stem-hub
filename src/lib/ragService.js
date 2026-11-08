@@ -465,6 +465,8 @@ export function extractQuestionCore(text) {
 
   const questionPrefixes = [
     /^(?:thầy|cô|bạn|ad|nova|em)?\s*(?:ơi\s+)?(?:cho\s+em\s+hỏi|em\s+muốn\s+hỏi|thầy\s+cho\s+em\s+hỏi|cô\s+cho\s+em\s+hỏi|thầy\s+cô\s+cho\s+em\s+hỏi)\s+/gi,
+    /^(?:giúp\s+tôi|giúp\s+em|hãy\s+giúp\s+tôi|hãy\s+giúp\s+em|tôi\s+muốn\s+làm|em\s+muốn\s+làm|tôi\s+muốn|em\s+muốn|hướng\s+dẫn\s+tôi|hướng\s+dẫn\s+em|chỉ\s+tôi|chỉ\s+em)\s+/gi,
+    /^(?:thực\s+hiện|làm\s+thí\s+nghiệm|thí\s+nghiệm)\s+/gi,
     /^(?:hãy\s+giải\s+thích|hãy\s+cho\s+biết|hãy\s+nêu|cho\s+biết|giải\s+thích|nêu|cho\s+em\s+biết)\s+/gi,
     /^(?:làm\s+thế\s+nào\s+để|làm\s+sao\s+để|tìm\s+hiểu\s+về|định\s+nghĩa\s+về|khái\s+niệm\s+về)\s+/gi,
     /^(?:công\s+thức\s+tổng\s+quát\s+của|công\s+thức\s+phân\s+tử\s+của|công\s+thức\s+tính|công\s+thức\s+của)\s+/gi,
@@ -473,7 +475,8 @@ export function extractQuestionCore(text) {
 
   const questionSuffixes = [
     /\s+(?:là\s+gì\s+vậy\s+ạ|là\s+gì\s+thế\s+ạ|là\s+gì\s+vậy|là\s+gì\s+thế|là\s+gì\s+nhỉ|là\s+gì|như\s+thế\s+nào\s+vậy|như\s+thế\s+nào|ra\s+sao|vậy\s+ạ|vậy|nhỉ|hở\s+thầy|hở\s+cô|được\s+không\s+ạ|được\s+không|thế\s+nào)[?!\s.]*$/gi,
-    /\s+(?:diễn\s+ra\s+như\s+thế\s+nào|xảy\s+ra\s+khi\s+nào|có\s+ý\s+nghĩa\s+gì|dùng\s+để\s+làm\s+gì)[?!\s.]*$/gi
+    /\s+(?:diễn\s+ra\s+như\s+thế\s+nào|xảy\s+ra\s+khi\s+nào|có\s+ý\s+nghĩa\s+gì|dùng\s+để\s+làm\s+gì)[?!\s.]*$/gi,
+    /\s+(?:đi\s+nhé|đi\s+nha|đi\s+ạ|đi|nhé|nha|với\s+ạ|với|ạ|ơi)[?!\s.]*$/gi
   ];
 
   for (const p of questionPrefixes) s = s.replace(p, '');

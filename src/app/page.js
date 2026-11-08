@@ -433,7 +433,13 @@ export default function Home() {
                 <div className="flex items-center gap-4 bg-bg-tertiary/80 p-4 border border-border-theme rounded-2xl relative">
                   <div className="relative shrink-0 w-16 h-16 flex items-center justify-center">
                     <AvatarFrame frame={personalization.avatarFrame || 'default'} className="w-16 h-16">
-                      <STEMAvatarSVG parts={personalization.avatarParts} className="w-11 h-11" />
+                      {personalization.avatarUrl && (personalization.avatarUrl.startsWith('http') || personalization.avatarUrl.startsWith('data:image/')) ? (
+                        <img src={personalization.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }} />
+                      ) : personalization.avatarUrl && personalization.avatarUrl !== 'custom-avatar' ? (
+                        <span className="select-none flex items-center justify-center w-full h-full text-2xl">{personalization.avatarUrl}</span>
+                      ) : (
+                        <STEMAvatarSVG parts={personalization.avatarParts} className="w-11 h-11" />
+                      )}
                     </AvatarFrame>
                     <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-accent-pink border-2 border-bg-primary flex items-center justify-center text-xs font-black text-white font-mono shadow-md">
                       {personalization.level || 1}

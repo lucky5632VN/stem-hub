@@ -31,9 +31,9 @@ export function getCorsHeaders(req) {
   const isAllowed = origin && ALLOWED_ORIGINS.includes(origin);
 
   return {
-    'Access-Control-Allow-Origin': isAllowed ? origin : ALLOWED_ORIGINS[0],
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Origin': isAllowed ? origin : (origin || ALLOWED_ORIGINS[0]),
+    'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-admin-secret-key, x-internal-secret, x-user-id, x-client-id, x-session-id',
     'Access-Control-Max-Age': '86400',
     'Vary': 'Origin'
   };

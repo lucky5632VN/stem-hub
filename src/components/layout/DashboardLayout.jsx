@@ -209,8 +209,8 @@ export default function DashboardLayout({ children }) {
             activeTitle: data.personalization?.activeTitle || 'apprentice',
             unlockedFrames: isAdmin ? ALL_ADMIN_FRAMES : (data.personalization?.unlockedFrames || ['default']),
             unlockedTitles: isAdmin ? ALL_ADMIN_TITLES : (data.personalization?.unlockedTitles || ['apprentice']),
-            bgImage: data.personalization?.bgImage || '',
-            avatarUrl: data.personalization?.avatarUrl || 'custom-avatar',
+            bgImage: data.personalization?.bgImage || data.bgImage || (typeof window !== 'undefined' ? localStorage.getItem('stemhub_personalization_bg') || '' : ''),
+            avatarUrl: data.personalization?.avatarUrl || data.avatarUrl || data.photoURL || (typeof window !== 'undefined' ? localStorage.getItem('stemhub_personalization_avatar') || 'custom-avatar' : 'custom-avatar'),
             crystals: data.personalization?.crystals !== undefined ? data.personalization.crystals : 500,
             avatarParts: data.personalization?.avatarParts || { gender: 'male', bodyType: 'chibi', pose: 'standard', body: 'peach', hair: 'default', top: 'default', bottom: 'default', accessory: 'none' },
             unlockedParts: isAdmin ? ALL_ADMIN_PARTS : (data.personalization?.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default']),
@@ -758,7 +758,12 @@ export default function DashboardLayout({ children }) {
       )}
 
       {bgImage && !isAnimatedBg && (
-        <div className="absolute inset-0 bg-white/75 dark:bg-[#1c1e29]/80 backdrop-blur-[2px] pointer-events-none z-0" />
+        <div 
+          className="fixed inset-0 pointer-events-none z-0 bg-cover bg-center bg-no-repeat bg-fixed"
+          style={bgStyle}
+        >
+          <div className="absolute inset-0 bg-white/70 dark:bg-[#0c0d14]/75 backdrop-blur-[1px]" />
+        </div>
       )}
       <CustomCursor />
       <EmailLinkAuthHandler />
@@ -818,7 +823,7 @@ export default function DashboardLayout({ children }) {
 
       {/* Global Floating Screenshot Shutter FAB (Game-like Camera tool) */}
       {showFloatingShutter && (
-        <div className={`fixed screenshot-hide group select-none transition-all duration-300 ${pathname === '/ho-so' ? 'bottom-6 right-28 z-[40]' : pathname === '/xep-hang' ? 'bottom-22 right-6 z-[999]' : 'bottom-6 right-6 z-[999]'}`}>
+        <div className={`fixed screenshot-hide group select-none transition-all duration-300 ${pathname === '/ho-so' ? 'bottom-28 right-6 z-[30]' : pathname === '/xep-hang' ? 'bottom-22 right-6 z-[999]' : 'bottom-6 right-6 z-[999]'}`}>
           {/* Neon Floating Tooltip */}
           <div className="absolute bottom-16 right-0 w-max invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 pointer-events-none bg-bg-secondary/95 border border-border-theme backdrop-blur-md px-3.5 py-2 rounded-2xl text-[10px] font-black text-accent-pink tracking-wider shadow-lg select-none flex items-center gap-1.5 uppercase">
             <Sparkles className="w-3.5 h-3.5 text-warning animate-pulse" /> Chụp & Đăng Story 📸
