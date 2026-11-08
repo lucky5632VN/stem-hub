@@ -13,6 +13,8 @@
     "test:rules": "firebase emulators:exec --only firestore \"node tests/firestore.rules.test.js\"",
     "test:security": "firebase emulators:exec --only firestore \"node scripts/test-rules-suite.js\"",
     "test:security:slow": "firebase emulators:exec --only firestore \"node scripts/test-rules-suite.js --slow\"",
+    "test:e2e": "playwright test",
+    "test:simulation": "node scripts/run_real_user_simulation_test.mjs",
     "lint": "eslint"
   },
   "dependencies": {
@@ -38,6 +40,7 @@
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.1",
+    "@playwright/test": "^1.65.0",
     "@tailwindcss/postcss": "^4",
     "cheerio": "^1.2.0",
     "eslint": "^9",
