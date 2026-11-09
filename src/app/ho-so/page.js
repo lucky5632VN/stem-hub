@@ -5335,54 +5335,56 @@ export default function ProfilePage() {
 
       {/* ================== MODAL QUAY GACHA LẬT THẺ LƯỢNG TỬ 3D HOLOGRAM ================== */}
       {mounted && typeof document !== 'undefined' && showGachaModal && createPortal(
-        <div className="fixed inset-0 z-[9999999] bg-[#02040c]/95 backdrop-blur-3xl flex items-center justify-center p-4 sm:p-6 overflow-y-auto select-none">
-          <div className="relative w-full max-w-5xl bg-gradient-to-b from-[#16122d] via-[#0e0b1e] to-[#070511] border border-purple-500/30 rounded-3xl p-6 sm:p-8 shadow-[0_0_80px_rgba(168,85,247,0.25)] text-center overflow-hidden my-auto ring-1 ring-purple-500/20">
+        <div className="fixed inset-0 z-[9999999] bg-[#02040c]/95 backdrop-blur-3xl flex items-center justify-center p-2 sm:p-4 select-none">
+          <div className="relative w-full max-w-4xl max-h-[95vh] bg-gradient-to-b from-[#16122d] via-[#0e0b1e] to-[#070511] border border-purple-500/30 rounded-3xl p-3 sm:p-5 shadow-[0_0_80px_rgba(168,85,247,0.25)] text-center overflow-hidden my-auto ring-1 ring-purple-500/20 flex flex-col justify-between">
             {/* Lưới tọa độ laser nền */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(168,85,247,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.05)_1px,transparent_1px)] bg-[size:28px_28px] pointer-events-none" />
-            <div className="absolute -top-48 -left-48 w-96 h-96 bg-purple-500/15 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-48 -right-48 w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(168,85,247,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.05)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+            <div className="absolute -top-32 -left-32 w-64 h-64 bg-purple-500/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
 
-            {/* Header */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-400/30 text-purple-300 text-[11px] font-mono font-bold uppercase tracking-widest mb-2 shadow-sm">
-              <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin" />
-              <span>QUANTUM LOOT REVEAL</span>
+            {/* Header rút gọn để không chiếm chiều cao */}
+            <div className="relative z-10 shrink-0">
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-purple-500/10 border border-purple-400/30 text-purple-300 text-[9.5px] font-mono font-bold uppercase tracking-widest mb-1 shadow-sm">
+                <Sparkles className="w-3 h-3 text-amber-300 animate-spin" />
+                <span>QUANTUM LOOT REVEAL</span>
+              </div>
+              <h3 className="text-lg sm:text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-amber-300 uppercase tracking-widest font-sans drop-shadow-sm leading-tight">
+                GIẢI MÃ LIÊN KẾT LƯỢNG TỬ
+              </h3>
+              <p className="text-zinc-400 text-[10px] font-mono uppercase tracking-wider mb-1">
+                Tiêu hao {gachaCrystalsSpent} 🔮 tinh thể. Số dư hiện có: <strong className="text-amber-300">{personalization.crystals} 🔮</strong>.
+              </p>
+
+              {/* Dải Banner Tôn vinh khi mở trúng SSR hoặc SR */}
+              {gachaResults.some((r, i) => flippedGachaCards.includes(i) && r.item?.rarity === 'Legendary') ? (
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-500/25 via-yellow-400/20 to-amber-500/25 border border-amber-400/60 text-amber-300 text-[10px] font-black tracking-widest uppercase shadow-[0_0_20px_rgba(251,191,36,0.5)] animate-pulse">
+                  <span>🌟</span>
+                  <span>HUYỀN THOẠI [SSR] ĐÃ XUẤT HIỆN! CHÚC MỪNG BẠN!</span>
+                  <span>🌟</span>
+                </div>
+              ) : gachaResults.some((r, i) => flippedGachaCards.includes(i) && r.item?.rarity === 'Epic') ? (
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 border border-purple-400/50 text-purple-300 text-[10px] font-black tracking-widest uppercase shadow-[0_0_15px_rgba(168,85,247,0.4)]">
+                  <span>⚡</span>
+                  <span>TRÚNG VẬT PHẨM SIÊU CẤP ĐỘT PHÁ [SR]!</span>
+                  <span>⚡</span>
+                </div>
+              ) : null}
             </div>
-            <h3 className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-amber-300 uppercase tracking-widest font-sans drop-shadow-sm">
-              GIẢI MÃ LIÊN KẾT LƯỢNG TỬ
-            </h3>
-            <p className="text-zinc-400 text-xs font-mono uppercase tracking-wider mb-6">
-              Bạn đã tiêu hao {gachaCrystalsSpent} 🔮 tinh thể. Số dư hiện có: <strong className="text-amber-300">{personalization.crystals} 🔮</strong>.
-            </p>
 
             {/* HIỂN THỊ KẾT QUẢ: 1 THẺ (SINGLE PULL) HOẶC 10 THẺ (MULTI PULL) */}
             {lastPullCount === 1 && gachaResults.length === 1 ? (
-              // ============ GIAO DIỆN 1 THẺ ĐƠN ĐẶC BIỆT (SINGLE PULL SHOWCASE) ============
-              <div className="my-6 flex flex-col items-center justify-center">
+              // ============ GIAO DIỆN 1 THẺ ĐƠN GỌN GÀNG (SINGLE PULL SHOWCASE) ============
+              <div className="my-2 flex flex-col items-center justify-center relative z-10 shrink-0">
                 {(() => {
                   const res = gachaResults[0];
                   const item = res.item;
                   const isFlipped = flippedGachaCards.includes(0);
-
-                  let rarityBorder = 'border-cyan-400 bg-gradient-to-b from-cyan-500/20 via-zinc-900 to-zinc-950 text-cyan-300 shadow-[0_0_25px_rgba(6,182,212,0.4)]';
-                  let rarityBadge = 'bg-cyan-500 text-zinc-950 font-black';
-                  let rarityTitle = '🔷 [R] HIẾM';
-                  let auraGlow = 'bg-cyan-500/20';
-
-                  if (item.rarity === 'Legendary') {
-                    rarityBorder = 'border-amber-400 bg-gradient-to-b from-amber-500/30 via-zinc-900 to-zinc-950 text-amber-300 shadow-[0_0_40px_rgba(245,158,11,0.6)] ring-2 ring-amber-300/50';
-                    rarityBadge = 'bg-gradient-to-r from-amber-500 to-yellow-400 text-zinc-950 font-black';
-                    rarityTitle = '🌟 [SSR] HUYỀN THOẠI CỰC ĐẠI';
-                    auraGlow = 'bg-amber-500/30';
-                  } else if (item.rarity === 'Epic') {
-                    rarityBorder = 'border-purple-400 bg-gradient-to-b from-purple-500/30 via-zinc-900 to-zinc-950 text-purple-300 shadow-[0_0_35px_rgba(168,85,247,0.5)] ring-1 ring-purple-400/50';
-                    rarityBadge = 'bg-gradient-to-r from-purple-600 to-pink-500 text-white font-black';
-                    rarityTitle = '⚡ [SR] SIÊU CẤP ĐỘT PHÁ';
-                    auraGlow = 'bg-purple-500/30';
-                  }
+                  const isLegendary = item.rarity === 'Legendary';
+                  const isEpic = item.rarity === 'Epic';
 
                   return (
                     <div 
-                      className="w-72 sm:w-80 aspect-[3/4.5] relative cursor-pointer group"
+                      className="w-64 sm:w-72 h-80 relative cursor-pointer group"
                       style={{ perspective: '1200px' }}
                       onClick={() => {
                         if (!isFlipped) {
@@ -5400,56 +5402,105 @@ export default function ProfilePage() {
                       >
                         {/* Mặt úp */}
                         <div 
-                          className="absolute inset-0 rounded-3xl border-2 border-purple-500/50 bg-gradient-to-b from-[#20173d] to-[#0f0b1e] flex flex-col items-center justify-center p-6 shadow-2xl hover:border-purple-300 transition-all"
+                          className={`absolute inset-0 rounded-3xl border-2 flex flex-col items-center justify-center p-5 shadow-2xl transition-all ${
+                            isLegendary 
+                              ? 'border-amber-400 bg-gradient-to-b from-[#2d1c05] via-[#1a1104] to-[#0c0702] shadow-[0_0_30px_rgba(251,191,36,0.6)]'
+                              : isEpic 
+                              ? 'border-purple-400 bg-gradient-to-b from-[#221338] via-[#140b22] to-[#0a0512] shadow-[0_0_20px_rgba(192,132,252,0.5)]'
+                              : 'border-cyan-400/60 bg-gradient-to-b from-[#101b36] to-[#060b17]'
+                          }`}
                           style={{ backfaceVisibility: 'hidden' }}
                         >
-                          <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-purple-600/40 to-cyan-500/40 flex items-center justify-center border border-purple-400/50 mb-4 shadow-[0_0_25px_rgba(168,85,247,0.4)] animate-bounce">
-                            <span className="text-4xl">🔮</span>
+                          <div className={`w-16 h-16 rounded-full flex items-center justify-center border mb-3 ${
+                            isLegendary 
+                              ? 'bg-amber-500/30 border-amber-300 text-amber-300 shadow-[0_0_20px_#f59e0b] animate-bounce' 
+                              : isEpic
+                              ? 'bg-purple-600/30 border-purple-300 text-purple-300 shadow-[0_0_15px_#c084fc] animate-pulse'
+                              : 'bg-cyan-500/20 border-cyan-300 text-cyan-300'
+                          }`}>
+                            <span className="text-3xl">{isLegendary ? '🌟' : isEpic ? '⚡' : '🔮'}</span>
                           </div>
-                          <span className="text-xs font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-cyan-300 uppercase tracking-widest font-mono">Quantum Card</span>
-                          <span className="text-[10px] text-zinc-400 mt-2 uppercase font-bold tracking-wider">Chạm để lật mở</span>
+                          <span className={`text-xs font-black uppercase tracking-widest font-mono ${
+                            isLegendary ? 'text-amber-300 drop-shadow-[0_0_10px_#f59e0b]' :
+                            isEpic ? 'text-purple-300 drop-shadow-[0_0_8px_#c084fc]' :
+                            'text-cyan-300'
+                          }`}>
+                            {isLegendary ? '🌟 SSR HUYỀN THOẠI' : isEpic ? '⚡ SR SIÊU CẤP' : 'Quantum Card'}
+                          </span>
+                          <span className="text-[9px] text-zinc-400 mt-1 uppercase font-bold tracking-wider">Chạm để lật mở</span>
                         </div>
 
                         {/* Mặt ngửa */}
                         <div 
-                          className={`absolute inset-0 rounded-3xl border-2 flex flex-col items-center justify-between p-5 shadow-2xl ${rarityBorder}`}
+                          className={`absolute inset-0 rounded-3xl border-2 flex flex-col items-center justify-between p-4 shadow-2xl overflow-hidden ${
+                            isLegendary
+                              ? 'border-amber-400 bg-gradient-to-b from-amber-500/35 via-[#1d1304] to-black text-amber-300 shadow-[0_0_45px_rgba(251,191,36,0.8)] ring-2 ring-amber-300'
+                              : isEpic
+                              ? 'border-purple-400 bg-gradient-to-b from-purple-600/30 via-[#160b24] to-black text-purple-300 shadow-[0_0_30px_rgba(192,132,252,0.7)] ring-1 ring-purple-300'
+                              : 'border-cyan-400 bg-gradient-to-b from-cyan-500/20 via-[#0a1224] to-black text-cyan-300 shadow-[0_0_20px_rgba(6,182,212,0.4)]'
+                          }`}
                           style={{ 
                             backfaceVisibility: 'hidden',
                             transform: 'rotateY(180deg)'
                           }}
                         >
-                          <div className={`absolute -top-12 -left-12 w-32 h-32 rounded-full blur-2xl ${auraGlow} pointer-events-none`} />
+                          {/* Tia sáng quét qua cho đồ hiếm */}
+                          {isLegendary && (
+                            <>
+                              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(251,191,36,0.4)_0%,transparent_70%)] pointer-events-none animate-pulse" />
+                              <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full animate-ping shadow-[0_0_12px_#f59e0b]" />
+                              <span className="absolute -bottom-1 -left-1 w-3 h-3 bg-yellow-300 rounded-full animate-ping delay-150 shadow-[0_0_12px_#f59e0b]" />
+                            </>
+                          )}
+                          {isEpic && (
+                            <>
+                              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(192,132,252,0.3)_0%,transparent_70%)] pointer-events-none animate-pulse" />
+                              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-pink-400 rounded-full animate-ping shadow-[0_0_10px_#ec4899]" />
+                            </>
+                          )}
 
-                          <span className={`text-[9px] px-3 py-1 rounded-full uppercase tracking-wider font-mono shadow-md ${rarityBadge}`}>
-                            {rarityTitle}
+                          <span className={`text-[8px] px-2.5 py-0.5 rounded-full uppercase tracking-wider font-mono font-black shadow-md ${
+                            isLegendary ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-zinc-950 shadow-[0_0_12px_rgba(245,158,11,0.7)]' :
+                            isEpic ? 'bg-gradient-to-r from-purple-600 to-pink-500 text-white shadow-[0_0_10px_rgba(168,85,247,0.6)]' :
+                            'bg-cyan-500 text-zinc-950'
+                          }`}>
+                            {isLegendary ? '🌟 SSR HUYỀN THOẠI CỰC ĐẠI' : isEpic ? '⚡ SR SIÊU CẤP ĐỘT PHÁ' : '🔷 R HIẾM'}
                           </span>
 
-                          <div className="flex-1 flex flex-col items-center justify-center my-3 w-full">
+                          <div className="flex-1 flex flex-col items-center justify-center my-1 w-full">
                             {item.type === 'title' ? (
-                              <div className="w-24 h-24 bg-gradient-to-br from-purple-500/30 via-pink-500/20 to-cyan-500/30 border border-purple-400/40 rounded-3xl flex items-center justify-center text-5xl shadow-[0_0_25px_rgba(168,85,247,0.5)] animate-pulse">
+                              <div className={`w-18 h-18 rounded-2xl flex items-center justify-center text-4xl border shadow-lg ${
+                                isLegendary ? 'bg-amber-500/25 border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.5)] animate-bounce' :
+                                isEpic ? 'bg-purple-500/25 border-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.5)] animate-pulse' :
+                                'bg-cyan-500/20 border-cyan-400'
+                              }`}>
                                 {getTitleEmoji(item)}
                               </div>
                             ) : (
-                              <div className="w-28 h-28 flex items-center justify-center relative overflow-hidden bg-black/50 rounded-3xl border border-white/10 shadow-inner">
-                                <STEMAvatarSVG parts={getCosmeticPreviewParts(item)} className="w-24 h-24 transform translate-y-1.5 scale-110" />
+                              <div className="w-20 h-20 flex items-center justify-center relative overflow-hidden bg-black/60 rounded-2xl border border-white/10 shadow-inner">
+                                <STEMAvatarSVG parts={getCosmeticPreviewParts(item)} className="w-20 h-20 transform translate-y-1 scale-110" />
                               </div>
                             )}
 
-                            <h4 className="text-base font-black text-white mt-3 leading-tight text-center">
+                            <h4 className="text-sm font-black text-white mt-2 leading-tight text-center">
                               {item.name}
                             </h4>
                             {item.desc && (
-                              <p className="text-[10px] text-zinc-300 mt-1 max-w-[220px] mx-auto leading-relaxed text-center">{item.desc}</p>
+                              <p className="text-[9.5px] text-zinc-300 mt-0.5 max-w-[200px] mx-auto leading-tight text-center line-clamp-2">{item.desc}</p>
                             )}
                           </div>
 
                           <div className="w-full">
                             {res.isDuplicate ? (
-                              <div className="text-[10px] font-bold text-amber-300 bg-amber-500/20 border border-amber-500/40 py-1 rounded-xl text-center font-mono">
+                              <div className="text-[9px] font-bold text-amber-300 bg-amber-500/20 border border-amber-500/40 py-1 rounded-xl text-center font-mono">
                                 Đã sở hữu: +{res.compensation} 🔮 hoàn trả
                               </div>
                             ) : (
-                              <div className="text-[10px] font-black text-emerald-300 bg-emerald-500/25 border border-emerald-500/50 py-1 rounded-xl text-center font-mono animate-pulse shadow-sm">
+                              <div className={`text-[9px] font-black py-1 rounded-xl text-center font-mono animate-pulse shadow-sm ${
+                                isLegendary ? 'text-amber-200 bg-amber-500/30 border border-amber-400/60 shadow-[0_0_10px_rgba(251,191,36,0.5)]' :
+                                isEpic ? 'text-purple-200 bg-purple-500/30 border border-purple-400/60' :
+                                'text-emerald-300 bg-emerald-500/25 border border-emerald-500/50'
+                              }`}>
                                 ✨ MỚI SỞ HỮU! ĐÃ THÊM VÀO KHO ĐỒ
                               </div>
                             )}
@@ -5461,38 +5512,19 @@ export default function ProfilePage() {
                 })()}
               </div>
             ) : (
-              // ============ GIAO DIỆN 10 THẺ (MULTI PULL 10X GRID) ============
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5 sm:gap-4 my-6 justify-center">
+              // ============ GIAO DIỆN 10 THẺ GỌN GÀNG (100% VỪA MÀN HÌNH - KHÔNG CẦN CUỘN) ============
+              <div className="grid grid-cols-5 gap-2 sm:gap-2.5 my-2 justify-center max-w-4xl mx-auto w-full relative z-10 shrink-0">
                 {gachaResults.map((res, idx) => {
                   const isFlipped = flippedGachaCards.includes(idx);
                   const item = res.item;
-                  
-                  let rarityBorder = 'border-border-theme text-text-primary bg-bg-tertiary';
-                  let rarityBadge = 'bg-zinc-800 text-zinc-300';
-                  let glowColor = '';
-                  let rarityTitle = item.rarity;
-
-                  if (item.rarity === 'Legendary') {
-                    rarityBorder = 'border-amber-400 bg-gradient-to-b from-amber-500/20 via-zinc-900 to-zinc-950 text-amber-300 ring-1 ring-amber-300/50';
-                    rarityBadge = 'bg-gradient-to-r from-amber-500 to-yellow-400 text-zinc-950 font-black';
-                    glowColor = 'shadow-[0_0_25px_rgba(245,158,11,0.45)]';
-                    rarityTitle = '🌟 [SSR]';
-                  } else if (item.rarity === 'Epic') {
-                    rarityBorder = 'border-purple-500 bg-gradient-to-b from-purple-500/20 via-zinc-900 to-zinc-950 text-purple-300 ring-1 ring-purple-400/50';
-                    rarityBadge = 'bg-gradient-to-r from-purple-600 to-pink-500 text-white font-black';
-                    glowColor = 'shadow-[0_0_20px_rgba(168,85,247,0.4)]';
-                    rarityTitle = '⚡ [SR]';
-                  } else if (item.rarity === 'Rare') {
-                    rarityBorder = 'border-cyan-400 bg-gradient-to-b from-cyan-500/20 via-zinc-900 to-zinc-950 text-cyan-300 ring-1 ring-cyan-300/50';
-                    rarityBadge = 'bg-cyan-500 text-zinc-950 font-black';
-                    glowColor = 'shadow-[0_0_18px_rgba(6,182,212,0.35)]';
-                    rarityTitle = '🔷 [R]';
-                  }
+                  const isLegendary = item.rarity === 'Legendary';
+                  const isEpic = item.rarity === 'Epic';
+                  const isRare = item.rarity === 'Rare';
 
                   return (
                     <div 
                       key={idx}
-                      className="w-full aspect-[3/4.4] relative cursor-pointer group"
+                      className="w-full h-28 sm:h-34 relative cursor-pointer group"
                       style={{ perspective: '1000px' }}
                       onClick={() => {
                         if (!isFlipped) {
@@ -5508,52 +5540,118 @@ export default function ProfilePage() {
                           transformStyle: 'preserve-3d'
                         }}
                       >
-                        {/* CARD BACK */}
+                        {/* CARD BACK (MẶT ÚP - CÓ HÀO QUANG THEO ĐỘ HIẾM) */}
                         <div 
-                          className="absolute inset-0 rounded-2xl border-2 border-purple-500/40 bg-gradient-to-b from-[#18122B] to-[#0D0B18] flex flex-col items-center justify-center p-3 shadow-xl hover:border-purple-300 hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all group-hover:scale-[1.02]"
+                          className={`absolute inset-0 rounded-2xl border-2 flex flex-col items-center justify-center p-2 transition-all duration-300 group-hover:scale-[1.03] ${
+                            isLegendary
+                              ? 'border-amber-400/90 bg-gradient-to-b from-[#2d1c05] via-[#1a1104] to-[#0c0702] shadow-[0_0_20px_rgba(251,191,36,0.6)] ring-1 ring-amber-400/50'
+                              : isEpic
+                              ? 'border-purple-400/80 bg-gradient-to-b from-[#221338] via-[#140b22] to-[#0a0512] shadow-[0_0_15px_rgba(192,132,252,0.5)] ring-1 ring-purple-400/40'
+                              : 'border-cyan-500/40 bg-gradient-to-b from-[#0e172e] via-[#090f1d] to-[#050810] hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.3)]'
+                          }`}
                           style={{ backfaceVisibility: 'hidden' }}
                         >
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-600/30 to-cyan-500/30 flex items-center justify-center border border-purple-400/40 mb-2 group-hover:rotate-12 duration-300 shadow-[0_0_15px_rgba(168,85,247,0.3)]">
-                            <span className="text-2xl animate-pulse">🔮</span>
+                          {/* Đốm sáng ping ở góc cho đồ hiếm */}
+                          {isLegendary && (
+                            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping shadow-[0_0_10px_#f59e0b]" />
+                          )}
+                          {isEpic && (
+                            <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-purple-400 animate-ping shadow-[0_0_8px_#c084fc]" />
+                          )}
+
+                          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border mb-1 transition-transform duration-300 group-hover:rotate-12 ${
+                            isLegendary 
+                              ? 'bg-gradient-to-tr from-amber-500/40 to-yellow-400/30 border-amber-300/80 text-amber-300 shadow-[0_0_15px_#f59e0b]'
+                              : isEpic
+                              ? 'bg-gradient-to-tr from-purple-600/40 to-pink-500/30 border-purple-400/80 text-purple-300 shadow-[0_0_12px_#c084fc]'
+                              : 'bg-gradient-to-tr from-cyan-600/30 to-blue-500/20 border-cyan-400/40 text-cyan-300'
+                          }`}>
+                            <span className="text-base sm:text-lg animate-pulse">{isLegendary ? '🌟' : isEpic ? '⚡' : '🔮'}</span>
                           </div>
-                          <span className="text-[10px] font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400 uppercase tracking-widest font-mono">Quantum</span>
-                          <span className="text-[8px] text-zinc-400 mt-1 uppercase font-bold tracking-wider">Nhấp để mở</span>
+
+                          <span className={`text-[8px] sm:text-[9px] font-black uppercase tracking-widest font-mono ${
+                            isLegendary ? 'text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]' :
+                            isEpic ? 'text-purple-300 drop-shadow-[0_0_8px_rgba(192,132,252,0.8)]' :
+                            'text-cyan-300'
+                          }`}>
+                            {isLegendary ? '🌟 SSR' : isEpic ? '⚡ SR' : 'Quantum'}
+                          </span>
+                          <span className="text-[7px] text-zinc-400 mt-0.5 uppercase font-bold tracking-wider">Chạm mở</span>
                         </div>
 
-                        {/* CARD FRONT */}
+                        {/* CARD FRONT (MẶT NGỬA - BÙNG NỔ HÀO QUANG KHI TRÚNG SSR / SR) */}
                         <div 
-                          className={`absolute inset-0 rounded-2xl border-2 flex flex-col items-center justify-between p-3 shadow-2xl ${rarityBorder} ${glowColor}`}
+                          className={`absolute inset-0 rounded-2xl border-2 flex flex-col items-center justify-between p-1.5 sm:p-2 shadow-2xl transition-all overflow-hidden ${
+                            isLegendary
+                              ? 'border-amber-400 bg-gradient-to-b from-amber-500/30 via-[#181104] to-black text-amber-300 shadow-[0_0_30px_rgba(245,158,11,0.7)] ring-2 ring-amber-300/60'
+                              : isEpic
+                              ? 'border-purple-400 bg-gradient-to-b from-purple-600/25 via-[#150a22] to-black text-purple-300 shadow-[0_0_22px_rgba(168,85,247,0.6)] ring-1 ring-purple-400/50'
+                              : 'border-cyan-400/60 bg-gradient-to-b from-cyan-500/15 via-[#080f1d] to-zinc-950 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.35)]'
+                          }`}
                           style={{ 
                             backfaceVisibility: 'hidden',
                             transform: 'rotateY(180deg)'
                           }}
                         >
-                          <span className={`text-[7.5px] px-2 py-0.5 rounded-full uppercase tracking-wider font-mono ${rarityBadge}`}>
-                            {rarityTitle} {item.rarity}
+                          {/* Hiệu ứng bùng nổ hào quang cho SSR */}
+                          {isLegendary && (
+                            <>
+                              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(251,191,36,0.35)_0%,transparent_70%)] pointer-events-none rounded-2xl animate-pulse" />
+                              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping shadow-[0_0_10px_#f59e0b]" />
+                              <span className="absolute -bottom-1 -left-1 w-2.5 h-2.5 rounded-full bg-yellow-300 animate-ping delay-100 shadow-[0_0_10px_#f59e0b]" />
+                            </>
+                          )}
+
+                          {/* Hiệu ứng điện trường cho SR */}
+                          {isEpic && (
+                            <>
+                              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(192,132,252,0.25)_0%,transparent_70%)] pointer-events-none rounded-2xl" />
+                              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-pink-400 animate-ping shadow-[0_0_8px_#ec4899]" />
+                            </>
+                          )}
+
+                          {/* Rarity Badge */}
+                          <span className={`text-[6.5px] sm:text-[7px] px-1.5 py-0.5 rounded-full uppercase tracking-wider font-mono font-black shadow-sm ${
+                            isLegendary ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-zinc-950 shadow-[0_0_10px_rgba(245,158,11,0.6)]' :
+                            isEpic ? 'bg-gradient-to-r from-purple-600 to-pink-500 text-white shadow-[0_0_8px_rgba(168,85,247,0.5)]' :
+                            'bg-cyan-500/25 text-cyan-300 border border-cyan-400/40'
+                          }`}>
+                            {isLegendary ? '🌟 SSR' : isEpic ? '⚡ SR' : '🔷 R'}
                           </span>
 
-                          <div className="flex-1 flex flex-col items-center justify-center my-1 w-full min-h-0">
+                          {/* Preview Icon / Avatar */}
+                          <div className="flex-1 flex flex-col items-center justify-center my-0.5 w-full min-h-0">
                             {item.type === 'title' ? (
-                              <div className="w-13 h-13 bg-gradient-to-br from-purple-500/30 via-pink-500/20 to-cyan-500/30 border border-purple-400/40 rounded-2xl flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(168,85,247,0.35)] animate-pulse">
+                              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-xl border ${
+                                isLegendary ? 'bg-amber-500/25 border-amber-400/50 shadow-[0_0_15px_rgba(245,158,11,0.4)] animate-bounce' :
+                                isEpic ? 'bg-purple-500/25 border-purple-400/50 shadow-[0_0_12px_rgba(168,85,247,0.4)] animate-pulse' :
+                                'bg-cyan-500/20 border-cyan-400/40'
+                              }`}>
                                 {getTitleEmoji(item)}
                               </div>
                             ) : (
-                              <div className="w-13 h-13 flex items-center justify-center relative overflow-hidden bg-black/40 rounded-2xl border border-white/10 shadow-inner">
-                                <STEMAvatarSVG parts={getCosmeticPreviewParts(item)} className="w-16 h-16 transform translate-y-1 scale-110" />
+                              <div className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center relative overflow-hidden bg-black/50 rounded-xl border border-white/10 shadow-inner">
+                                <STEMAvatarSVG parts={getCosmeticPreviewParts(item)} className="w-11 h-11 sm:w-13 sm:h-13 transform translate-y-1 scale-110" />
                               </div>
                             )}
-                            <h4 className="text-[10.5px] sm:text-[11.5px] font-black text-white mt-1.5 leading-tight w-full px-0.5 text-center whitespace-normal break-words">
+
+                            <h4 className="text-[8.5px] sm:text-[9.5px] font-black text-white mt-1 leading-tight w-full px-0.5 text-center truncate">
                               {item.name}
                             </h4>
                           </div>
 
-                          <div className="w-full mt-1">
+                          {/* Status Footer */}
+                          <div className="w-full">
                             {res.isDuplicate ? (
-                              <div className="text-[8px] font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 py-0.5 rounded-lg text-center font-mono">
+                              <div className="text-[6.5px] sm:text-[7px] font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 py-0.5 rounded text-center font-mono truncate">
                                 Trùng: +{res.compensation} 🔮
                               </div>
                             ) : (
-                              <div className="text-[8px] font-black text-emerald-300 bg-emerald-500/20 border border-emerald-500/40 py-0.5 rounded-lg text-center font-mono animate-pulse">
+                              <div className={`text-[6.5px] sm:text-[7px] font-black py-0.5 rounded text-center font-mono animate-pulse truncate ${
+                                isLegendary ? 'text-amber-200 bg-amber-500/30 border border-amber-400/60 shadow-[0_0_8px_rgba(245,158,11,0.5)]' :
+                                isEpic ? 'text-purple-200 bg-purple-500/25 border border-purple-400/50' :
+                                'text-emerald-300 bg-emerald-500/20 border border-emerald-500/40'
+                              }`}>
                                 ✨ MỚI SỞ HỮU!
                               </div>
                             )}
@@ -5566,8 +5664,8 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {/* Các nút hành động */}
-            <div className="flex flex-wrap items-center justify-center gap-3 mt-6 pt-4 border-t border-white/10">
+            {/* Các nút hành động rút gọn, luôn nằm trọn trong màn hình */}
+            <div className="relative z-10 shrink-0 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mt-2 pt-2 border-t border-white/10">
               {lastPullCount > 1 && (
                 <button
                   onClick={() => {
@@ -5576,12 +5674,12 @@ export default function ProfilePage() {
                       setTimeout(() => {
                         setFlippedGachaCards(prev => prev.includes(i) ? prev : [...prev, i]);
                         playSound.click();
-                      }, i * 75);
+                      }, i * 65);
                     });
                   }}
-                  className="px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold rounded-xl border border-white/10 transition-all active:scale-95 flex items-center gap-1.5 shadow-md cursor-pointer"
+                  className="px-3.5 py-1.5 sm:py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[10.5px] sm:text-[11px] font-bold rounded-xl border border-white/10 transition-all active:scale-95 flex items-center gap-1 shadow-md cursor-pointer"
                 >
-                  <Zap className="w-4 h-4 text-amber-400" />
+                  <Zap className="w-3.5 h-3.5 text-amber-400" />
                   <span>Lật toàn bộ (Sóng lượng tử)</span>
                 </button>
               )}
@@ -5592,7 +5690,7 @@ export default function ProfilePage() {
                   setShowGachaModal(false);
                   handleSpinGacha(1);
                 }}
-                className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all active:scale-95 shadow-md shadow-purple-600/30 flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-1.5 sm:py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-[10.5px] sm:text-[11px] font-black uppercase tracking-wider rounded-xl transition-all active:scale-95 shadow-md shadow-purple-600/30 flex items-center gap-1 cursor-pointer"
               >
                 <span>Quay tiếp x1 (100 🔮)</span>
               </button>
@@ -5603,7 +5701,7 @@ export default function ProfilePage() {
                   setShowGachaModal(false);
                   handleSpinGacha(10);
                 }}
-                className="px-5 py-2.5 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all active:scale-95 shadow-md shadow-pink-600/30 flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-1.5 sm:py-2 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white text-[10.5px] sm:text-[11px] font-black uppercase tracking-wider rounded-xl transition-all active:scale-95 shadow-md shadow-pink-600/30 flex items-center gap-1 cursor-pointer"
               >
                 <span>Quay tiếp x10 (900 🔮)</span>
               </button>
@@ -5614,9 +5712,9 @@ export default function ProfilePage() {
                   setShowGachaModal(false);
                   setActivePersonalizationSubTab('character');
                 }}
-                className="px-5 py-2.5 bg-emerald-600/80 hover:bg-emerald-600 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all active:scale-95 flex items-center gap-1.5 shadow-md shadow-emerald-600/20 cursor-pointer"
+                className="px-3.5 py-1.5 sm:py-2 bg-emerald-600/80 hover:bg-emerald-600 text-white text-[10.5px] sm:text-[11px] font-bold uppercase tracking-wider rounded-xl transition-all active:scale-95 flex items-center gap-1 shadow-md shadow-emerald-600/20 cursor-pointer"
               >
-                <Sparkles className="w-4 h-4 text-emerald-200" />
+                <Sparkles className="w-3.5 h-3.5 text-emerald-200" />
                 <span>Vào Chibi Maker Phối Đồ</span>
               </button>
 
@@ -5625,7 +5723,7 @@ export default function ProfilePage() {
                   playSound.click();
                   setShowGachaModal(false);
                 }}
-                className="px-6 py-2.5 bg-zinc-700 hover:bg-zinc-600 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all active:scale-95 cursor-pointer"
+                className="px-4 py-1.5 sm:py-2 bg-zinc-700 hover:bg-zinc-600 text-white text-[10.5px] sm:text-[11px] font-bold uppercase tracking-wider rounded-xl transition-all active:scale-95 cursor-pointer"
               >
                 Đóng
               </button>
