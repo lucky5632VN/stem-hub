@@ -280,15 +280,16 @@ service cloud.firestore {
     // =========================================================================
     // 7. MẠNG XÃ HỘI HỌC TẬP (moments, stories, challengeInvites)
     // =========================================================================
-    // Khoảnh khắc STEM (moments): Ai cũng xem được, chỉ tác giả hoặc admin mới sửa/xóa
-    // Chống Timestamp Spoofing (createdAt == request.time) & Schema Validation (caption <= 1500 ký tự)
+    // Khoảnh khắc STEM (moments): Ai cũng xem được, tác giả sửa/xóa, cộng đồng thả reaction & bình luận
     match /moments/{momentId} {
       allow read: if true;
-      allow create: if isAuthenticated() && isValidMomentPayload();
-      allow update: if isAdmin() || (isAuthenticated() && 
-                    isValidMomentPayload() &&
+      allow create: if isAuthenticated() && 
+                    (!('caption' in request.resource.data) || (request.resource.data.caption is string && request.resource.data.caption.size() <= 1500));
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'comments', 'reports', 'reportsCount']) ||
+                    isAdmin() || (isAuthenticated() && (
                     ((('authorId' in resource.data) && resource.data.authorId == request.auth.uid) || 
-                     (('userId' in resource.data) && resource.data.userId == request.auth.uid)));
+                     (('userId' in resource.data) && resource.data.userId == request.auth.uid))
+                  ));
       allow delete: if isAdmin() || (isAuthenticated() && 
                     ((('authorId' in resource.data) && resource.data.authorId == request.auth.uid) || 
                      (('userId' in resource.data) && resource.data.userId == request.auth.uid)));
@@ -301,10 +302,12 @@ service cloud.firestore {
       allow update: if isAdmin() || (isAuthenticated() && 
                     (!('caption' in request.resource.data) || (request.resource.data.caption is string && request.resource.data.caption.size() <= 1500)) &&
                     (storyId == request.auth.uid || 
-                     (('userId' in resource.data) && resource.data.userId == request.auth.uid)));
+                     (('userId' in resource.data) && resource.data.userId == request.auth.uid) ||
+                     (('authorId' in resource.data) && resource.data.authorId == request.auth.uid)));
       allow delete: if isAdmin() || (isAuthenticated() && 
                     (storyId == request.auth.uid || 
-                     (('userId' in resource.data) && resource.data.userId == request.auth.uid)));
+                     (('userId' in resource.data) && resource.data.userId == request.auth.uid) ||
+                     (('authorId' in resource.data) && resource.data.authorId == request.auth.uid)));
     }
 
     // Lời mời khiêu chiến 1v1 giữa các bạn học sinh: Giới hạn nghiêm ngặt theo người gửi hoặc người nhận

@@ -22,6 +22,8 @@ import { getPresetForEmail } from '@/data/testAccounts';
 import { EQUIPMENT_CATALOG } from '@/data/equipmentCatalog';
 import EmailLinkAuthHandler from '@/components/atoms/EmailLinkAuthHandler';
 import { isFace2FAValid, setFace2FASession } from '@/lib/faceAuthSecurity';
+import StoryStudioModal from '@/components/organisms/StoryStudioModal';
+import { captureScreenOptimized } from '@/lib/screenshotEngine';
 
 export default function DashboardLayout({ children }) {
   const user = useAppStore((state) => state.user);
@@ -38,6 +40,9 @@ export default function DashboardLayout({ children }) {
   const router = useRouter();
   const [isCapturing, setIsCapturing] = useState(false);
   const [showFlash, setShowFlash] = useState(false);
+  const [showStudioModal, setShowStudioModal] = useState(false);
+  const [studioInitialImage, setStudioInitialImage] = useState(null);
+  const [studioInitialContext, setStudioInitialContext] = useState({});
   const userElo = personalization.elo || 0;
   const [maintenance, setMaintenance] = useState(false);
   const [banner, setBanner] = useState({ enabled: false, text: '', type: 'info' });
@@ -539,146 +544,76 @@ export default function DashboardLayout({ children }) {
     if (isCapturing) return;
     setIsCapturing(true);
     
-    // Play initial sound click
-    playSound.click();
+    // Phát âm thanh chụp màn hình chuyên nghiệp & hiệu ứng lóe sáng
+    playSound.shutter();
+    setShowFlash(true);
+    setTimeout(() => {
+      setShowFlash(false);
+    }, 150);
     
     try {
-      // Target body to capture the entire viewport as seen on screen
-      const captureTarget = document.body;
-      
-      // Hide screenshot-hide class elements (like custom cursor and the camera FAB itself)
-      const elementsToHide = document.querySelectorAll('.screenshot-hide');
-      elementsToHide.forEach((el) => {
-        el.style.opacity = '0';
-        el.style.pointerEvents = 'none';
-      });
-      
-      // Let it layout briefly
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      
-      const scrollX = window.scrollX || 0;
-      const scrollY = window.scrollY || 0;
-      
-      const canvas = await html2canvas(captureTarget, {
-        useCORS: true,
-        backgroundColor: '#1c1e29',
-        scale: 1.0,
-        logging: false,
-        width: window.innerWidth,
-        height: window.innerHeight,
-        windowWidth: window.innerWidth,
-        windowHeight: window.innerHeight,
-        scrollX: scrollX,
-        scrollY: scrollY,
-        onclone: (clonedDoc) => {
-          clonedDoc.documentElement.className = document.documentElement.className;
-          clonedDoc.body.className = document.body.className;
-
-          // Force the width to match the desktop size to trigger desktop responsive styles (lg:)
-          clonedDoc.documentElement.style.width = `${window.innerWidth}px`;
-          clonedDoc.documentElement.style.minWidth = `${window.innerWidth}px`;
-          clonedDoc.body.style.width = `${window.innerWidth}px`;
-          clonedDoc.body.style.minWidth = `${window.innerWidth}px`;
-
-          // 1. Hide all elements marked with screenshot-hide using display: none
-          const clonedHides = clonedDoc.querySelectorAll('.screenshot-hide');
-          clonedHides.forEach((el) => {
-            el.style.display = 'none';
-          });
-
-          // Remove max-width constraints to let content span fully
-          const maxWScreens = clonedDoc.querySelectorAll('.screenshot-max-w');
-          maxWScreens.forEach((el) => {
-            el.classList.remove('max-w-5xl');
-            el.classList.add('max-w-none', 'w-full');
-          });
-
-          // Expand specific grid column (Middle Column) to cover space left by hidden Clock Column
-          const expandCols = clonedDoc.querySelectorAll('.screenshot-expand-col');
-          expandCols.forEach((el) => {
-            el.classList.remove('lg:col-span-2');
-            el.classList.add('lg:col-span-3');
-          });
-
-          // 2. Remove margin-left from the main layout wrapper to shift it to full width
-          const mainWrapper = clonedDoc.querySelector('main')?.parentElement;
-          if (mainWrapper) {
-            mainWrapper.classList.remove('ml-[260px]');
-            mainWrapper.classList.add('ml-0');
-            mainWrapper.style.paddingTop = '0';
-          }
-
-          // 3. Make left columns span 12 grid units instead of 8 to occupy full width
-          const fullWidths = clonedDoc.querySelectorAll('.screenshot-full-width');
-          fullWidths.forEach((el) => {
-            el.classList.remove('lg:col-span-8');
-            el.classList.add('lg:col-span-12');
-          });
-        }
-      });
-      
-      // Show hidden elements back
-      elementsToHide.forEach((el) => {
-        el.style.opacity = '';
-        el.style.pointerEvents = '';
-      });
-
-      // Play camera shutter and trigger flash overlay AFTER capturing is completed successfully
-      playSound.shutter();
-      setShowFlash(true);
-      setTimeout(() => {
-        setShowFlash(false);
-      }, 150);
-      
-      const base64Image = canvas.toDataURL('image/jpeg', 0.8);
-        
-        // Contextual title / caption / subject based on route
-        let subject = 'chemistry';
-        let subjectLabel = 'STEM Lab';
-        let caption = 'Đang khám phá thế giới thực hành STEM thực tế ảo siêu sống động! 🚀🧪';
-        
-        if (pathname?.includes('/phong-thi')) {
-          subject = 'physics';
-          subjectLabel = 'Phòng Thi Lượng Tử';
-          caption = 'Thực chiến luyện đề thi chuẩn cấu trúc THPT Quốc Gia MoET 2025 đỉnh cao! ⚡🎓';
-        } else if (pathname?.includes('/dau-truong')) {
-          subject = 'chemistry';
-          subjectLabel = 'Đấu Trường Sinh Tử';
-          caption = 'Thách đấu thực chiến 1v1 trực tiếp tại Đấu Trường Khoa Học kịch tính! ⚔️🔥';
-        } else if (pathname?.includes('/hanh-trinh')) {
-          subject = 'biology';
-          subjectLabel = 'Hành Trình Di Truyền';
-          caption = 'Khám phá thế giới nucleotide, cơ chế di truyền và bản đồ tri thức STEM! 🧬🗺️';
-        } else if (pathname?.includes('/ho-so')) {
-          subject = 'math';
-          subjectLabel = 'Hồ Sơ Danh Vọng';
-          caption = 'Chiêm ngưỡng bảng vàng thành tích danh hiệu vinh hiển và chứng chỉ của tôi! 🏆👑';
-        }
-        
-        const pendingShare = {
-          subject,
-          subjectLabel,
-          caption,
-          elo: userElo,
-          rewardElo: 0,
-          rewardExp: 0,
-          score: 10,
-          totalQuestions: 10,
-          imageUrl: base64Image
-        };
-        
-        const isSaved = await savePendingShare(pendingShare);
-        if (isSaved) {
-          playSound.success();
-          router.push('/story');
-        } else {
-          alert('⚠️ Ảnh chụp màn hình quá lớn hoặc bộ nhớ trình duyệt bị giới hạn, không thể chia sẻ câu chuyện lúc này. Vui lòng thử lại!');
-        }
-      } catch (err) {
-        console.error("Lỗi chụp màn hình:", err);
-      } finally {
-        setIsCapturing(false);
+      // Chụp siêu tốc bằng bộ xử lý tối ưu hóa (tự động nén HD ~90KB, chống đơ và chống treo trình duyệt)
+      const base64Image = await captureScreenOptimized();
+      if (!base64Image) {
+        alert('⚠️ Trình duyệt chưa kịp kết xuất hình ảnh. Vui lòng bấm thử lại!');
+        return;
       }
+      
+      // Nhận diện tự động chủ đề và caption theo trang đang xem
+      let subject = 'chemistry';
+      let subjectLabel = 'STEM Lab';
+      let caption = 'Đang khám phá thế giới thực hành STEM thực tế ảo siêu sống động! 🚀🧪';
+      
+      if (pathname?.includes('/phong-thi')) {
+        subject = 'physics';
+        subjectLabel = 'Phòng Thi Lượng Tử';
+        caption = 'Thực chiến luyện đề thi chuẩn cấu trúc THPT Quốc Gia MoET 2025 đỉnh cao! ⚡🎓';
+      } else if (pathname?.includes('/dau-truong')) {
+        subject = 'chemistry';
+        subjectLabel = 'Đấu Trường Sinh Tử';
+        caption = 'Thách đấu thực chiến 1v1 trực tiếp tại Đấu Trường Khoa Học kịch tính! ⚔️🔥';
+      } else if (pathname?.includes('/hanh-trinh')) {
+        subject = 'biology';
+        subjectLabel = 'Hành Trình Di Truyền';
+        caption = 'Khám phá thế giới nucleotide, cơ chế di truyền và bản đồ tri thức STEM! 🧬🗺️';
+      } else if (pathname?.includes('/ho-so')) {
+        subject = 'math';
+        subjectLabel = 'Hồ Sơ Danh Vọng';
+        caption = 'Chiêm ngưỡng bảng vàng thành tích danh hiệu vinh hiển và chứng chỉ của tôi! 🏆👑';
+      } else if (pathname?.includes('/phong-lab')) {
+        subject = 'chemistry';
+        subjectLabel = 'Phòng Thí Nghiệm Ảo';
+        caption = 'Thực hành thí nghiệm khoa học tương tác cao tại STEM HUB! 🧪✨';
+      }
+      
+      const contextData = {
+        subject,
+        subjectLabel,
+        caption,
+        elo: userElo
+      };
+      
+      // Đồng bộ vào IndexedDB để phòng khi người dùng chuyển thẳng tới /story
+      savePendingShare({
+        ...contextData,
+        rewardElo: 0,
+        rewardExp: 0,
+        score: 10,
+        totalQuestions: 10,
+        imageUrl: base64Image
+      }).catch(() => {});
+      
+      // Kích hoạt ngay Story Studio Modal tại chỗ mà không ép chuyển trang
+      setStudioInitialImage(base64Image);
+      setStudioInitialContext(contextData);
+      setShowStudioModal(true);
+      playSound.success();
+    } catch (err) {
+      console.error("Lỗi chụp màn hình:", err);
+      alert('Không thể hoàn tất chụp màn hình. Vui lòng thử lại!');
+    } finally {
+      setIsCapturing(false);
+    }
   };
 
   const isAdminRoute = pathname?.startsWith('/admin');
@@ -859,6 +794,16 @@ export default function DashboardLayout({ children }) {
           />
         )}
       </AnimatePresence>
+
+      {/* Story & Moments Instant Studio Modal */}
+      <StoryStudioModal
+        isOpen={showStudioModal}
+        onClose={() => setShowStudioModal(false)}
+        initialImage={studioInitialImage}
+        initialContext={studioInitialContext}
+        user={user}
+        personalization={personalization}
+      />
 
       {/* Global Fullscreen Interactive Virtual Lab Sandbox Portal */}
       {activeLab && activeLab.link && !pathname?.match(/^\/phong-lab\/(toan|ly|hoa|sinh|math|phys|chem|bio)/) && (

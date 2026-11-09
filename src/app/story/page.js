@@ -17,11 +17,21 @@ import {
   Camera, 
   Check, 
   Volume2, 
+  VolumeX,
   Lock,
   Compass,
   Trophy,
   Activity,
-  Upload
+  Upload,
+  Download,
+  Share2,
+  Trash2,
+  Play,
+  Pause,
+  Palette,
+  Layers,
+  CheckCircle2,
+  Loader
 } from 'lucide-react';
 import { AvatarFrame } from '@/components/atoms/AvatarFrame';
 import STEMAvatarSVG from '@/components/atoms/STEMAvatarSVG';
@@ -29,23 +39,43 @@ import { useAppStore } from '@/store/useAppStore';
 import { playSound } from '@/lib/sound';
 import { getRankInfo } from '@/lib/matchmaker';
 import { db } from '@/lib/firebase';
-import { doc, setDoc, getDoc, getDocs, updateDoc, onSnapshot, collection, query, orderBy, limit, addDoc, serverTimestamp, arrayUnion } from 'firebase/firestore';
+import { 
+  doc, setDoc, getDoc, getDocs, updateDoc, onSnapshot, collection, 
+  query, orderBy, limit, serverTimestamp, arrayUnion, increment, deleteDoc 
+} from 'firebase/firestore';
 import { getPendingShare, deletePendingShare } from '@/lib/indexedDB';
+import { 
+  compressImageDataUrl, 
+  captureScreenOptimized, 
+  downloadDataUrl, 
+  applyFilterToDataUrl 
+} from '@/lib/screenshotEngine';
 
-// Mẫu ảnh mô phỏng chất lượng cao cho phòng lab để đảm bảo KHÔNG DÙNG PLACEHOLDER
+const QUICK_STICKERS = ['🚀', '🧪', '⚡', '🧬', '👑', '🔥', '🏆', '💎', '🎉', '💡', '😍', '👏'];
+
+const FILTERS = [
+  { id: 'none', label: 'Nguyên Bản', icon: '✨' },
+  { id: 'cyberpunk', label: 'Cyberpunk', icon: '⚡' },
+  { id: 'golden', label: 'Hoàng Kim', icon: '🌟' },
+  { id: 'hologram', label: 'Hologram', icon: '🔮' },
+  { id: 'matrix', label: 'Ma Trận', icon: '💻' },
+  { id: 'vintage', label: 'Lab Cổ Điển', icon: '🔬' },
+];
+
+// Mẫu ảnh mô phỏng chất lượng cao cho phòng lab & đấu trường để đảm bảo KHÔNG DÙNG PLACEHOLDER
 const LAB_TEMPLATES = {
   chemistry: [
     {
       id: 'chem_1',
       title: 'Điện phân dung dịch CuSO₄',
-      desc: 'Tia lửa điện lượng tử phóng qua điện cực cực đồng.',
-      url: 'https://images.unsplash.com/photo-1532187643603-ba119ca4109e?q=80&w=600&auto=format&fit=crop',
+      desc: 'Tia lửa điện lượng tử phóng qua điện cực đồng.',
+      url: 'https://images.unsplash.com/photo-1532187643603-ba119ca4109e?q=80&w=800&auto=format&fit=crop',
     },
     {
       id: 'chem_2',
       title: 'Phản ứng trung hòa siêu đẳng',
       desc: 'Dung dịch đổi màu tím hồng phenolphthalein tuyệt đẹp.',
-      url: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=600&auto=format&fit=crop',
+      url: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=800&auto=format&fit=crop',
     }
   ],
   physics: [
@@ -53,13 +83,13 @@ const LAB_TEMPLATES = {
       id: 'phys_1',
       title: 'Giao thoa ánh sáng Y-âng',
       desc: 'Hệ vân sáng tối đối xứng hoàn mỹ.',
-      url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop',
+      url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop',
     },
     {
       id: 'phys_2',
       title: 'Mạch điện DC Lượng Tử',
       desc: 'Bản mạch lắp ráp cân bằng hiệu điện thế.',
-      url: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=600&auto=format&fit=crop',
+      url: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=800&auto=format&fit=crop',
     }
   ],
   math: [
@@ -67,7 +97,7 @@ const LAB_TEMPLATES = {
       id: 'math_1',
       title: 'Tọa độ Không gian 3D',
       desc: 'Vẽ hình chóp cụt xiên qua tâm O.',
-      url: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?q=80&w=600&auto=format&fit=crop',
+      url: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?q=80&w=800&auto=format&fit=crop',
     }
   ],
   biology: [
@@ -75,7 +105,21 @@ const LAB_TEMPLATES = {
       id: 'bio_1',
       title: 'Tái tổ hợp gen ADN THPT',
       desc: 'Mô phỏng chuỗi Nucleotide xoắn kép xoay quanh tế bào.',
-      url: 'https://images.unsplash.com/photo-1530026405186-ed1ea0ac7a63?q=80&w=600&auto=format&fit=crop',
+      url: 'https://images.unsplash.com/photo-1530026405186-ed1ea0ac7a63?q=80&w=800&auto=format&fit=crop',
+    }
+  ],
+  arena: [
+    {
+      id: 'arena_1',
+      title: 'Chiến Binh MVP Đấu Trường 1v1',
+      desc: 'Chiến thắng áp đảo với chuỗi combo kiến thức chuẩn xác.',
+      url: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=800&auto=format&fit=crop',
+    },
+    {
+      id: 'arena_2',
+      title: 'Vinh Quang Bảng Xếp Hạng ELO',
+      desc: 'Đột phá thứ hạng vươn lên đỉnh cao học thuật.',
+      url: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=800&auto=format&fit=crop',
     }
   ]
 };
@@ -438,7 +482,7 @@ export default function STEMStoriesPage() {
   const [moments, setMoments] = useState(MOCK_MOMENTS);
   const [allStories, setAllStories] = useState(MOCK_STORIES);
   
-  const [activeStoryIndex, setActiveStoryIndex] = useState(null); // index của user trong MOCK_STORIES
+  const [activeStoryIndex, setActiveStoryIndex] = useState(null); // index của user trong allStories
   const [storySubIndex, setStorySubIndex] = useState(0); // index của câu chuyện cụ thể
   const [isPosting, setIsPosting] = useState(false);
   const [newCaption, setNewCaption] = useState('');
@@ -446,6 +490,15 @@ export default function STEMStoriesPage() {
   const [selectedTemplate, setSelectedTemplate] = useState(LAB_TEMPLATES.chemistry[0]);
   const [commentInputs, setCommentInputs] = useState({});
   const [floatingEmojis, setFloatingEmojis] = useState([]);
+
+  // Nâng cấp Studio Đăng Story
+  const [postDestination, setPostDestination] = useState('both'); // 'both' | 'story' | 'moment'
+  const [activeCreationTab, setActiveCreationTab] = useState('templates'); // 'templates' | 'upload' | 'capture'
+  const [activeFilter, setActiveFilter] = useState('none');
+  const [isCapturingFromStory, setIsCapturingFromStory] = useState(false);
+  const [isSubmittingPost, setIsSubmittingPost] = useState(false);
+  const [isViewerPlaying, setIsViewerPlaying] = useState(true);
+  const [toastMessage, setToastMessage] = useState(null);
 
   // Ảnh tùy chỉnh tải lên
   const [customImage, setCustomImage] = useState(null);
@@ -458,6 +511,11 @@ export default function STEMStoriesPage() {
   useEffect(() => {
     setMounted(true);
   }, []);
+  
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 2500);
+  };
   
   // Timer cho Story Viewer
   const progressTimerRef = useRef(null);
@@ -504,7 +562,7 @@ export default function STEMStoriesPage() {
         }
       }
     }, (err) => {
-      console.error("Lỗi đồng bộ moments từ Firestore:", err);
+      console.warn("Lỗi đồng bộ moments từ Firestore (sử dụng cache cục bộ):", err);
     });
 
     const qStories = query(collection(db, 'stories'), orderBy('updatedAt', 'desc'));
@@ -524,7 +582,7 @@ export default function STEMStoriesPage() {
         }
       }
     }, (err) => {
-      console.error("Lỗi đồng bộ stories từ Firestore:", err);
+      console.warn("Lỗi đồng bộ stories từ Firestore (sử dụng cache cục bộ):", err);
     });
 
     return () => {
@@ -535,7 +593,7 @@ export default function STEMStoriesPage() {
 
   // Logic chạy tự động cho Story Viewer
   useEffect(() => {
-    if (activeStoryIndex === null || isHolding) {
+    if (activeStoryIndex === null || isHolding || !isViewerPlaying) {
       if (progressTimerRef.current) clearInterval(progressTimerRef.current);
       return;
     }
@@ -562,7 +620,7 @@ export default function STEMStoriesPage() {
     return () => {
       if (progressTimerRef.current) clearInterval(progressTimerRef.current);
     };
-  }, [activeStoryIndex, storySubIndex, isHolding]);
+  }, [activeStoryIndex, storySubIndex, isHolding, isViewerPlaying]);
 
   // Điều khiển bàn phím cho Story
   useEffect(() => {
@@ -571,6 +629,10 @@ export default function STEMStoriesPage() {
       if (e.key === 'ArrowRight') handleNextStory();
       if (e.key === 'ArrowLeft') handlePrevStory();
       if (e.key === 'Escape') handleCloseStory();
+      if (e.key === ' ') {
+        e.preventDefault();
+        setIsViewerPlaying((p) => !p);
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -617,6 +679,7 @@ export default function STEMStoriesPage() {
     setActiveStoryIndex(null);
     setStorySubIndex(0);
     setStoryProgress(0);
+    setIsViewerPlaying(true);
   };
 
   // Thả reaction nổi bọt (floating emoji)
@@ -631,168 +694,295 @@ export default function STEMStoriesPage() {
     }, 1500);
   };
 
-  // Handle click biểu cảm của Bảng tin
+  // Handle click biểu cảm của Bảng tin với Optimistic UI 0ms
   const handleReact = async (momentId, reactionType, e) => {
     playSound.click();
     
     // Tạo hiệu ứng bong bóng nổi bọt tại vị trí click
-    const rect = e.target.getBoundingClientRect();
+    const rect = e?.target?.getBoundingClientRect ? e.target.getBoundingClientRect() : { left: 100, top: 100 };
     const emojiMap = { heart: '❤️', brain: '🧠', fire: '💥' };
-    triggerFloatingEmoji(emojiMap[reactionType], e.clientX - 15, e.clientY - 15);
+    triggerFloatingEmoji(emojiMap[reactionType] || '✨', (e?.clientX || rect.left) - 15, (e?.clientY || rect.top) - 15);
 
     if (reactionType === 'fire') {
-      playSound.explosion(); // Thêm âm thanh nổ nhỏ cực kỳ đã tai khi thả kích nổ
+      playSound.explosion();
     }
 
-    try {
-      const momentRef = doc(db, 'moments', momentId);
-      const momentSnap = await getDoc(momentRef);
-      if (momentSnap.exists()) {
-        const currentReactions = momentSnap.data().reactions || { heart: 0, brain: 0, fire: 0 };
-        await updateDoc(momentRef, {
-          [`reactions.${reactionType}`]: (currentReactions[reactionType] || 0) + 1
-        });
+    // 1. Cập nhật lạc quan (Optimistic) ngay lập tức
+    setMoments((prev) => {
+      const next = prev.map((m) => {
+        if (String(m.id) === String(momentId)) {
+          const cur = m.reactions || { heart: 0, brain: 0, fire: 0 };
+          return {
+            ...m,
+            reactions: {
+              ...cur,
+              [reactionType]: (cur[reactionType] || 0) + 1
+            }
+          };
+        }
+        return m;
+      });
+      if (typeof window !== 'undefined') {
+        safeCacheToLocalStorage('community_moments', next);
       }
-    } catch (err) {
-      console.error("Lỗi cập nhật Reaction lên Firestore:", err);
-      setMoments((prev) =>
-        prev.map((m) => {
-          if (m.id === momentId) {
-            return {
-              ...m,
-              reactions: {
-                ...m.reactions,
-                [reactionType]: m.reactions[reactionType] + 1
-              }
-            };
-          }
-          return m;
-        })
-      );
+      return next;
+    });
+
+    // 2. Ghi lên Firestore bằng increment(1) nếu đã xác thực
+    if (auth?.currentUser && !String(momentId).startsWith('moment_')) {
+      try {
+        const momentRef = doc(db, 'moments', String(momentId));
+        await updateDoc(momentRef, {
+          [`reactions.${reactionType}`]: increment(1)
+        });
+      } catch (err) {
+        console.warn("Reaction Firestore update fallback to local:", err);
+      }
     }
   };
 
-  // Viết bình luận nhanh
-  const handleAddComment = async (momentId) => {
-    const text = commentInputs[momentId] || '';
-    if (!text.trim()) return;
+  // Viết bình luận nhanh với Optimistic UI 0ms
+  const handleAddComment = async (momentId, explicitText) => {
+    const text = (explicitText !== undefined && explicitText !== '') ? explicitText : (commentInputs[momentId] || '');
+    if (!text || !text.trim()) return;
 
     playSound.success();
     const newComment = {
-      id: Math.random().toString(),
-      userName: user?.displayName || 'Người chơi ẩn danh',
-      text: text,
+      id: `c_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      userName: user?.displayName || 'Nhà Khoa Học',
+      text: text.trim(),
       timestamp: Date.now()
     };
 
     setCommentInputs((prev) => ({ ...prev, [momentId]: '' }));
 
-    try {
-      const momentRef = doc(db, 'moments', momentId);
-      await updateDoc(momentRef, {
-        comments: arrayUnion(newComment)
+    // Cập nhật lạc quan trên giao diện tức thì
+    setMoments((prev) => {
+      const next = prev.map((m) => {
+        if (String(m.id) === String(momentId)) {
+          return {
+            ...m,
+            comments: [...(m.comments || []), newComment]
+          };
+        }
+        return m;
       });
-    } catch (err) {
-      console.error("Lỗi thêm bình luận lên Firestore:", err);
-      setMoments((prev) =>
-        prev.map((m) => {
-          if (m.id === momentId) {
-            return {
-              ...m,
-              comments: [...(m.comments || []), newComment]
-            };
-          }
-          return m;
-        })
-      );
+      if (typeof window !== 'undefined') {
+        safeCacheToLocalStorage('community_moments', next);
+      }
+      return next;
+    });
+
+    // Lưu vào Firestore nếu người dùng đã đăng nhập và không phải mock ID
+    if (auth?.currentUser && !String(momentId).startsWith('moment_')) {
+      try {
+        const momentRef = doc(db, 'moments', String(momentId));
+        await updateDoc(momentRef, {
+          comments: arrayUnion(newComment)
+        });
+      } catch (err) {
+        console.warn("Thêm bình luận lên Firestore gặp trục trặc, đã lưu tạm cục bộ:", err);
+      }
     }
   };
 
-  // Đăng khoảnh khắc mới
-  const handleCreatePost = async () => {
-    if (!newCaption.trim()) return;
+  // Xóa khoảnh khắc nếu là tác giả hoặc Admin
+  const handleDeleteMoment = async (momentId) => {
+    playSound.click();
+    if (!confirm('Bạn có chắc chắn muốn xóa bài viết này khỏi bảng tin cộng đồng?')) return;
 
-    playSound.success();
-
-    const newPostId = `moment_${Date.now()}`;
-    const subjectLabels = {
-      chemistry: 'Hóa Học Ảo',
-      physics: 'Vật Lý Lượng Tử',
-      math: 'Toán Học 3D',
-      biology: 'Sinh Học Di Truyền'
-    };
-
-    // Ưu tiên sử dụng ảnh tùy chỉnh tự tải lên, nếu không dùng template lab
-    const postImageUrl = customImage || selectedTemplate.url;
-
-    const newPost = {
-      id: newPostId,
-      userName: user?.displayName || 'Bạn',
-      avatar: '👑',
-      avatarUrl: personalization.avatarUrl || '',
-      avatarParts: personalization.avatarParts || null,
-      title: rankInfo.title,
-      elo: userElo,
-      avatarFrame: personalization.avatarFrame || 'border border-pink-500/40',
-      imageUrl: postImageUrl,
-      caption: newCaption,
-      subject: selectedSubject,
-      subjectLabel: subjectLabels[selectedSubject],
-      createdAt: 'Vừa xong',
-      reactions: { heart: 0, brain: 0, fire: 0 },
-      comments: [],
-      timestamp: serverTimestamp()
-    };
-
-    // Reset Form
-    setNewCaption('');
-    setCustomImage(null);
-    setIsPosting(false);
+    // Cập nhật lạc quan
+    setMoments((prev) => prev.filter((m) => m.id !== momentId));
+    showToast('Đã xóa bài viết thành công!');
 
     try {
-      // 1. Lưu bài viết Moments mới lên Firestore
-      await setDoc(doc(db, 'moments', newPostId), newPost);
+      await deleteDoc(doc(db, 'moments', momentId));
+    } catch (err) {
+      console.warn('Lỗi khi xóa bài viết trên Firestore:', err);
+    }
+  };
 
-      // 2. Lưu tin lên danh sách Stories chung của cộng đồng trên Firestore
-      const storyDocId = user?.uid || 'guest_user';
-      const storyDocRef = doc(db, 'stories', storyDocId);
-      const storySnap = await getDoc(storyDocRef);
+  // Sao chép liên kết khoảnh khắc
+  const handleShareMoment = (momentId) => {
+    playSound.click();
+    if (typeof window !== 'undefined' && navigator.clipboard) {
+      const shareUrl = `${window.location.origin}/story#${momentId}`;
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        showToast('Đã sao chép liên kết khoảnh khắc! 📋');
+        playSound.success();
+      }).catch(() => {
+        showToast('Đã sao chép liên kết! 📋');
+      });
+    }
+  };
 
-      const newStorySlide = {
-        id: `s_${Date.now()}`,
-        imageUrl: postImageUrl,
-        caption: newPost.caption,
-        createdAt: 'Vừa xong'
-      };
-
-      if (storySnap.exists()) {
-        const currentStories = storySnap.data().stories || [];
-        await setDoc(storyDocRef, {
-          ...storySnap.data(),
-          elo: userElo,
-          title: rankInfo.title,
-          activeFrame: personalization.avatarFrame || 'border border-pink-500/40',
-          avatarUrl: personalization.avatarUrl || '',
-          avatarParts: personalization.avatarParts || null,
-          stories: [newStorySlide, ...currentStories],
-          updatedAt: serverTimestamp()
-        }, { merge: true });
-      } else {
-        await setDoc(storyDocRef, {
-          id: storyDocId,
-          userName: user?.displayName || 'Bạn',
-          avatar: '👑',
-          avatarUrl: personalization.avatarUrl || '',
-          avatarParts: personalization.avatarParts || null,
-          elo: userElo,
-          title: rankInfo.title,
-          activeFrame: personalization.avatarFrame || 'border border-pink-500/40',
-          stories: [newStorySlide],
-          updatedAt: serverTimestamp()
-        });
+  // Chụp màn hình nhanh trực tiếp từ giao diện trang Story
+  const handleCaptureFromStory = async () => {
+    setIsCapturingFromStory(true);
+    playSound.shutter();
+    try {
+      const dataUrl = await captureScreenOptimized();
+      if (dataUrl) {
+        setCustomImage(dataUrl);
+        playSound.success();
+        showToast('Đã chụp ảnh màn hình thành công! 📸');
       }
     } catch (err) {
-      console.error("Lỗi khi lưu bài viết lên Firestore:", err);
+      console.error('Lỗi khi chụp màn hình:', err);
+      alert('Không thể hoàn tất chụp màn hình lúc này. Vui lòng thử lại!');
+    } finally {
+      setIsCapturingFromStory(false);
+    }
+  };
+
+  // Đăng khoảnh khắc mới với bộ nén ảnh siêu nhẹ & bộ lọc Sci-Fi
+  const handleCreatePost = async () => {
+    if (!newCaption.trim() || isSubmittingPost) return;
+    setIsSubmittingPost(true);
+    playSound.click();
+
+    try {
+      // 1. Xác định ảnh gốc
+      let rawImage = customImage || selectedTemplate?.url;
+      if (!rawImage) {
+        rawImage = LAB_TEMPLATES.chemistry[0].url;
+      }
+
+      // 2. Áp dụng filter (nếu có)
+      const filteredImage = await applyFilterToDataUrl(rawImage, activeFilter);
+
+      // 3. Nén ảnh bảo đảm dung lượng < 120KB
+      const finalImage = await compressImageDataUrl(filteredImage, 1280, 0.78);
+
+      const timestampNow = Date.now();
+      const newPostId = `moment_${timestampNow}`;
+      const uid = user?.uid || 'guest_user';
+      const displayName = user?.displayName || 'Bạn';
+
+      const subjectLabels = {
+        chemistry: 'Hóa Học Ảo',
+        physics: 'Vật Lý Lượng Tử',
+        math: 'Toán Học 3D',
+        biology: 'Sinh Học Di Truyền',
+        arena: 'Đấu Trường Lượng Tử'
+      };
+
+      const newPost = {
+        id: newPostId,
+        userId: uid,
+        authorId: uid,
+        userName: displayName,
+        avatar: '👑',
+        avatarUrl: personalization.avatarUrl || '',
+        avatarParts: personalization.avatarParts || null,
+        title: rankInfo.title,
+        elo: userElo,
+        avatarFrame: personalization.avatarFrame || 'default',
+        imageUrl: finalImage,
+        caption: newCaption.trim(),
+        subject: selectedSubject,
+        subjectLabel: subjectLabels[selectedSubject] || 'STEM Lab',
+        createdAt: 'Vừa xong',
+        reactions: { heart: 0, brain: 0, fire: 0 },
+        comments: [],
+        timestamp: serverTimestamp(),
+        clientTime: timestampNow
+      };
+
+      // Cập nhật lạc quan (Optimistic update) trên giao diện tức thì
+      if (postDestination === 'both' || postDestination === 'moment') {
+        setMoments((prev) => [newPost, ...prev]);
+      }
+
+      const newStorySlide = {
+        id: `s_${timestampNow}`,
+        imageUrl: finalImage,
+        caption: newCaption.trim(),
+        createdAt: 'Vừa xong',
+        timestamp: timestampNow
+      };
+
+      if (postDestination === 'both' || postDestination === 'story') {
+        setAllStories((prev) => {
+          const existingUserIndex = prev.findIndex((s) => s.id === uid || s.userName === displayName);
+          if (existingUserIndex >= 0) {
+            const updated = [...prev];
+            updated[existingUserIndex] = {
+              ...updated[existingUserIndex],
+              stories: [newStorySlide, ...(updated[existingUserIndex].stories || [])]
+            };
+            return updated;
+          } else {
+            return [
+              {
+                id: uid,
+                userName: displayName,
+                avatar: '👑',
+                avatarUrl: personalization.avatarUrl || '',
+                avatarParts: personalization.avatarParts || null,
+                elo: userElo,
+                title: rankInfo.title,
+                activeFrame: personalization.avatarFrame || 'default',
+                stories: [newStorySlide]
+              },
+              ...prev
+            ];
+          }
+        });
+      }
+
+      // Reset Form & Đóng Modal
+      setNewCaption('');
+      setCustomImage(null);
+      setIsPosting(false);
+      playSound.success();
+      showToast('Đã đăng khoảnh khắc thành công! 🎉');
+
+      // Ghi đồng bộ lên Firestore
+      if (postDestination === 'both' || postDestination === 'moment') {
+        await setDoc(doc(db, 'moments', newPostId), newPost);
+      }
+
+      if (postDestination === 'both' || postDestination === 'story') {
+        const storyDocRef = doc(db, 'stories', uid);
+        const storySnap = await getDoc(storyDocRef);
+
+        if (storySnap.exists()) {
+          const currentStories = storySnap.data().stories || [];
+          await setDoc(storyDocRef, {
+            ...storySnap.data(),
+            userId: uid,
+            authorId: uid,
+            userName: displayName,
+            elo: userElo,
+            title: rankInfo.title,
+            activeFrame: personalization.avatarFrame || 'default',
+            avatarUrl: personalization.avatarUrl || '',
+            avatarParts: personalization.avatarParts || null,
+            stories: [newStorySlide, ...currentStories.slice(0, 8)],
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+        } else {
+          await setDoc(storyDocRef, {
+            id: uid,
+            userId: uid,
+            authorId: uid,
+            userName: displayName,
+            avatar: '👑',
+            avatarUrl: personalization.avatarUrl || '',
+            avatarParts: personalization.avatarParts || null,
+            elo: userElo,
+            title: rankInfo.title,
+            activeFrame: personalization.avatarFrame || 'default',
+            stories: [newStorySlide],
+            updatedAt: serverTimestamp()
+          });
+        }
+      }
+    } catch (err) {
+      console.warn("Lỗi khi lưu bài viết lên Firestore (dữ liệu đã lưu cục bộ):", err);
+    } finally {
+      setIsSubmittingPost(false);
     }
   };
 
@@ -802,83 +992,103 @@ export default function STEMStoriesPage() {
 
     playSound.success();
 
-    const newPostId = `moment_${Date.now()}`;
+    const timestampNow = Date.now();
+    const newPostId = `moment_${timestampNow}`;
+    const uid = user?.uid || 'guest_user';
+    const displayName = user?.displayName || 'Bạn';
+
     const subjectLabels = {
       chemistry: 'Hóa Học Ảo',
       physics: 'Vật Lý Lượng Tử',
       math: 'Toán Học 3D',
-      biology: 'Sinh Học Di Truyền'
+      biology: 'Sinh Học Di Truyền',
+      arena: 'Đấu Trường Lượng Tử'
     };
 
     const finalCaption = customCaption || pendingShare.caption;
 
+    // Nén ảnh bảo đảm an toàn Firestore
+    const compressedImage = await compressImageDataUrl(pendingShare.imageUrl, 1280, 0.78);
+
     const newPost = {
       id: newPostId,
-      userName: user?.displayName || 'Bạn',
+      userId: uid,
+      authorId: uid,
+      userName: displayName,
       avatar: '👑',
       avatarUrl: personalization.avatarUrl || '',
       avatarParts: personalization.avatarParts || null,
       title: rankInfo.title,
       elo: pendingShare.elo || userElo,
-      avatarFrame: personalization.avatarFrame || 'border border-pink-500/40',
-      imageUrl: pendingShare.imageUrl,
+      avatarFrame: personalization.avatarFrame || 'default',
+      imageUrl: compressedImage,
       caption: finalCaption,
-      subject: pendingShare.subject,
-      subjectLabel: subjectLabels[pendingShare.subject] || pendingShare.subjectLabel,
+      subject: pendingShare.subject || 'chemistry',
+      subjectLabel: subjectLabels[pendingShare.subject] || pendingShare.subjectLabel || 'STEM Lab',
       createdAt: 'Vừa xong',
       reactions: { heart: 0, brain: 0, fire: 0 },
       comments: [],
-      timestamp: serverTimestamp()
+      timestamp: serverTimestamp(),
+      clientTime: timestampNow
     };
 
     // Reset tin chờ xác nhận
     setPendingShare(null);
     deletePendingShare();
 
+    // Cập nhật lạc quan
+    setMoments((prev) => [newPost, ...prev]);
+    showToast('Đã xác nhận chia sẻ chiến tích! 🎉');
+
     try {
       // 1. Lưu bài viết Moments mới lên Firestore
       await setDoc(doc(db, 'moments', newPostId), newPost);
 
       // 2. Lưu tin lên danh sách Stories chung của cộng đồng trên Firestore
-      const storyDocId = user?.uid || 'guest_user';
-      const storyDocRef = doc(db, 'stories', storyDocId);
+      const storyDocRef = doc(db, 'stories', uid);
       const storySnap = await getDoc(storyDocRef);
 
       const newStorySlide = {
-        id: `s_${Date.now()}`,
-        imageUrl: pendingShare.imageUrl,
+        id: `s_${timestampNow}`,
+        imageUrl: compressedImage,
         caption: finalCaption,
-        createdAt: 'Vừa xong'
+        createdAt: 'Vừa xong',
+        timestamp: timestampNow
       };
 
       if (storySnap.exists()) {
         const currentStories = storySnap.data().stories || [];
         await setDoc(storyDocRef, {
           ...storySnap.data(),
+          userId: uid,
+          authorId: uid,
+          userName: displayName,
           elo: pendingShare.elo || userElo,
           title: rankInfo.title,
-          activeFrame: personalization.avatarFrame || 'border border-pink-500/40',
+          activeFrame: personalization.avatarFrame || 'default',
           avatarUrl: personalization.avatarUrl || '',
           avatarParts: personalization.avatarParts || null,
-          stories: [newStorySlide, ...currentStories],
+          stories: [newStorySlide, ...currentStories.slice(0, 8)],
           updatedAt: serverTimestamp()
         }, { merge: true });
       } else {
         await setDoc(storyDocRef, {
-          id: storyDocId,
-          userName: user?.displayName || 'Bạn',
+          id: uid,
+          userId: uid,
+          authorId: uid,
+          userName: displayName,
           avatar: '👑',
           avatarUrl: personalization.avatarUrl || '',
           avatarParts: personalization.avatarParts || null,
           elo: pendingShare.elo || userElo,
           title: rankInfo.title,
-          activeFrame: personalization.avatarFrame || 'border border-pink-500/40',
+          activeFrame: personalization.avatarFrame || 'default',
           stories: [newStorySlide],
           updatedAt: serverTimestamp()
         });
       }
     } catch (err) {
-      console.error("Lỗi khi xác nhận lưu bài viết lên Firestore:", err);
+      console.warn("Lỗi khi xác nhận lưu bài viết lên Firestore:", err);
     }
   };
 
@@ -1048,9 +1258,20 @@ export default function STEMStoriesPage() {
                 </div>
               </div>
 
-              {/* Tag Môn Học */}
-              <div className="px-3 py-1 bg-white/[0.04] border border-border-theme rounded-full text-[9px] font-extrabold text-accent-pink uppercase tracking-widest">
-                {moment.subjectLabel}
+              {/* Tag Môn Học & Nút Xóa (nếu là chính chủ hoặc admin) */}
+              <div className="flex items-center gap-2">
+                <div className="px-3 py-1 bg-white/[0.04] border border-border-theme rounded-full text-[9px] font-extrabold text-accent-pink uppercase tracking-widest">
+                  {moment.subjectLabel}
+                </div>
+                {(user?.uid === moment.userId || user?.uid === moment.authorId || user?.email === 'admin123@gmail.com') && (
+                  <button
+                    onClick={() => handleDeleteMoment(moment.id)}
+                    className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-all active:scale-95 cursor-pointer"
+                    title="Xóa bài viết này"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
             </div>
 
@@ -1072,53 +1293,78 @@ export default function STEMStoriesPage() {
               {/* Bóng mờ tối dần ở đáy */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
               
-              {/* Nút bấm phóng to lab giả lập */}
-              <div className="absolute top-3 right-3 px-2 py-1 bg-black/50 border border-border-theme rounded-lg text-[9px] font-bold text-text-secondary flex items-center gap-1">
-                <Camera className="w-3 h-3" /> Chụp từ Lab
+              {/* Nút bấm tải ảnh & phóng to lab */}
+              <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    downloadDataUrl(moment.imageUrl, `STEM_Moment_${moment.id}.jpg`);
+                    playSound.success();
+                    showToast('Đang tải ảnh về máy... 💾');
+                  }}
+                  className="px-2 py-1 bg-black/60 hover:bg-black/80 border border-white/10 rounded-lg text-[9px] font-bold text-cyan-300 flex items-center gap-1 transition-all active:scale-95 cursor-pointer"
+                  title="Tải ảnh này về máy"
+                >
+                  <Download className="w-3 h-3" /> Tải về
+                </button>
+                <div className="px-2 py-1 bg-black/50 border border-border-theme rounded-lg text-[9px] font-bold text-text-secondary flex items-center gap-1">
+                  <Camera className="w-3 h-3" /> Phóng to
+                </div>
               </div>
             </div>
 
             {/* Bộ điều khiển biểu cảm (Reaction bar) */}
             <div className="flex items-center justify-between border-t border-b border-border-theme py-3 mb-4">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 sm:gap-4">
                 
                 {/* Thả tim */}
                 <button 
                   onClick={(e) => handleReact(moment.id, 'heart', e)}
-                  className="flex items-center gap-1.5 text-text-secondary hover:text-rose-500 text-xs font-bold transition-all hover:scale-110"
+                  className="flex items-center gap-1.5 text-text-secondary hover:text-rose-500 text-xs font-bold transition-all hover:scale-110 cursor-pointer"
                 >
                   <Heart className="w-4 h-4 text-rose-500" fill="currentColor" />
-                  <span>{moment.reactions.heart}</span>
+                  <span>{moment.reactions?.heart || 0}</span>
                 </button>
 
                 {/* Thả trí tuệ */}
                 <button 
                   onClick={(e) => handleReact(moment.id, 'brain', e)}
-                  className="flex items-center gap-1.5 text-text-secondary hover:text-cyan-400 text-xs font-bold transition-all hover:scale-110"
+                  className="flex items-center gap-1.5 text-text-secondary hover:text-cyan-400 text-xs font-bold transition-all hover:scale-110 cursor-pointer"
                 >
                   <Brain className="w-4 h-4 text-cyan-400" />
-                  <span>{moment.reactions.brain}</span>
+                  <span>{moment.reactions?.brain || 0}</span>
                 </button>
 
                 {/* Thả kích nổ */}
                 <button 
                   onClick={(e) => handleReact(moment.id, 'fire', e)}
-                  className="flex items-center gap-1.5 text-text-secondary hover:text-orange-500 text-xs font-bold transition-all hover:scale-110"
+                  className="flex items-center gap-1.5 text-text-secondary hover:text-orange-500 text-xs font-bold transition-all hover:scale-110 cursor-pointer"
                 >
                   <Flame className="w-4 h-4 text-orange-500 animate-pulse" />
-                  <span>{moment.reactions.fire}</span>
+                  <span>{moment.reactions?.fire || 0}</span>
+                </button>
+
+                {/* Nút Chia sẻ liên kết */}
+                <button 
+                  onClick={() => handleShareMoment(moment.id)}
+                  className="flex items-center gap-1.5 text-text-secondary hover:text-purple-400 text-xs font-bold transition-all hover:scale-105 cursor-pointer"
+                  title="Sao chép liên kết"
+                >
+                  <Share2 className="w-3.5 h-3.5 text-purple-400" />
+                  <span className="hidden sm:inline">Chia sẻ</span>
                 </button>
               </div>
 
               {/* Đếm số bình luận */}
               <div className="flex items-center gap-1.5 text-text-secondary text-[11px] font-bold">
                 <MessageSquare className="w-4 h-4" />
-                <span>{moment.comments.length} bình luận</span>
+                <span>{moment.comments?.length || 0} bình luận</span>
               </div>
             </div>
 
             {/* Danh sách bình luận */}
-            {moment.comments.length > 0 && (
+            {(moment.comments?.length || 0) > 0 && (
               <div className="space-y-2 mb-4 bg-white/[0.01] border border-border-theme rounded-2xl p-3">
                 {moment.comments.map((comment) => (
                   <div key={comment.id} className="text-[11px] text-text-secondary leading-relaxed select-text">
@@ -1149,24 +1395,33 @@ export default function STEMStoriesPage() {
             </div>
 
             {/* Viết bình luận nhanh */}
-            <div className="flex items-center gap-2 relative">
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                const inputEl = e.currentTarget.elements.namedItem('commentInput');
+                const val = inputEl ? inputEl.value : (commentInputs[moment.id] || '');
+                handleAddComment(moment.id, val);
+              }}
+              className="flex items-center gap-2 relative"
+            >
               <input 
+                name="commentInput"
                 type="text" 
                 placeholder="Viết câu trả lời..." 
                 value={commentInputs[moment.id] || ''}
-                onChange={(e) => setCommentInputs({ ...commentInputs, [moment.id]: e.target.value })}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleAddComment(moment.id);
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setCommentInputs((prev) => ({ ...prev, [moment.id]: val }));
                 }}
                 className="flex-1 bg-bg-tertiary text-xs text-text-primary rounded-xl px-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-accent-pink/50 border border-border-theme transition-all placeholder:text-text-secondary"
               />
               <button 
-                onClick={() => handleAddComment(moment.id)}
+                type="submit"
                 className="p-2.5 bg-accent-pink hover:bg-accent-pink/90 text-white rounded-xl transition-all active:scale-90"
               >
                 <Send className="w-3.5 h-3.5" />
               </button>
-            </div>
+            </form>
           </div>
         ))}
       </div>
@@ -1227,13 +1482,46 @@ export default function STEMStoriesPage() {
                     </div>
                   </div>
 
-                  {/* Đóng Story */}
-                  <button 
-                    onClick={handleCloseStory}
-                    className="p-2 bg-black/40 hover:bg-black/60 rounded-full text-zinc-400 hover:text-white transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                  {/* Bộ điều khiển Story: Chỉ số, Play/Pause, Tải về, Đóng */}
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[9.5px] font-mono font-bold text-zinc-300 bg-black/50 px-2 py-0.5 rounded-full border border-white/10 select-none">
+                      {storySubIndex + 1}/{allStories[activeStoryIndex]?.stories?.length || 1}
+                    </span>
+
+                    <button 
+                      onClick={() => {
+                        playSound.click();
+                        setIsViewerPlaying(p => !p);
+                      }}
+                      className="p-1.5 bg-black/40 hover:bg-black/70 rounded-full text-zinc-300 hover:text-white transition-colors cursor-pointer"
+                      title={isViewerPlaying ? 'Tạm dừng (Phím Space)' : 'Tiếp tục phát'}
+                    >
+                      {isViewerPlaying ? <Pause className="w-3.5 h-3.5 text-amber-300" /> : <Play className="w-3.5 h-3.5 text-emerald-400" />}
+                    </button>
+
+                    <button 
+                      onClick={() => {
+                        const curUrl = allStories[activeStoryIndex]?.stories[storySubIndex]?.imageUrl;
+                        if (curUrl) {
+                          downloadDataUrl(curUrl, `STEM_Story_Slide_${Date.now()}.jpg`);
+                          playSound.success();
+                          showToast('Đang tải ảnh story về máy... 💾');
+                        }
+                      }}
+                      className="p-1.5 bg-black/40 hover:bg-black/70 rounded-full text-zinc-300 hover:text-white transition-colors cursor-pointer"
+                      title="Tải ảnh story này"
+                    >
+                      <Download className="w-3.5 h-3.5 text-cyan-400" />
+                    </button>
+
+                    <button 
+                      onClick={handleCloseStory}
+                      className="p-1.5 bg-black/40 hover:bg-black/70 rounded-full text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                      title="Đóng Story"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Vùng Ảnh & Trượt chạm */}
@@ -1304,7 +1592,7 @@ export default function STEMStoriesPage() {
         document.body
       )}
 
-      {/* ================== CREATE MOMENT MODAL ================== */}
+      {/* ================== CREATE STORY & MOMENTS STUDIO MODAL ================== */}
       {mounted && createPortal(
         <AnimatePresence>
           {isPosting && (
@@ -1312,105 +1600,178 @@ export default function STEMStoriesPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[999997] bg-black/80 flex items-center justify-center p-4"
+              className="fixed inset-0 z-[999997] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 select-none overflow-y-auto"
             >
               <motion.div 
                 initial={{ scale: 0.95, y: 15 }}
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.95, y: 15 }}
-                className="bg-bg-secondary border border-border-theme rounded-3xl w-full max-w-lg p-6 shadow-2xl relative overflow-hidden text-left"
+                className="bg-gradient-to-b from-[#181335] via-[#0f0c22] to-[#070511] border border-purple-500/30 rounded-3xl w-full max-w-2xl p-5 sm:p-7 shadow-2xl relative overflow-hidden text-left my-auto ring-1 ring-purple-400/20"
               >
+                {/* Laser grid nền */}
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(168,85,247,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.05)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+
                 {/* Header Modal */}
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-2">
-                    <Camera className="w-5 h-5 text-accent-pink" />
-                    <span className="text-sm font-black text-text-primary">Đăng Khoảnh Khắc Lên STEM Stories</span>
+                <div className="relative z-10 flex items-center justify-between mb-5 pb-3 border-b border-white/10">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-pink-500 to-purple-600 flex items-center justify-center text-white shadow-md shadow-pink-500/30">
+                      <Camera className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm sm:text-base font-black text-white uppercase tracking-wider">
+                        STEM Story & Moment Studio
+                      </h3>
+                      <p className="text-[10px] text-zinc-400">Chia sẻ khoảnh khắc học tập, vinh hiển và mô phỏng 3D</p>
+                    </div>
                   </div>
                   <button 
                     onClick={() => setIsPosting(false)}
-                    className="p-1.5 bg-white/5 hover:bg-white/10 rounded-full text-text-secondary hover:text-text-primary transition-colors"
+                    className="p-1.5 bg-white/5 hover:bg-white/10 rounded-full text-zinc-400 hover:text-white transition-colors cursor-pointer"
                   >
                     <X className="w-4 h-4" />
                   </button>
                 </div>
 
-                {/* Lựa chọn Môn học */}
-                <div className="mb-4">
-                  <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-secondary block mb-2">1. Chọn Môn Học Tác Nghiệp</label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {Object.keys(LAB_TEMPLATES).map((subject) => {
-                      const labelMap = { chemistry: '🧪 Hóa', physics: '⚡ Lý', math: '📐 Toán', biology: '🧬 Sinh' };
-                      return (
-                        <button
-                          key={subject}
-                          onClick={() => handleSubjectChange(subject)}
-                          className={`py-2 px-1 text-2xs font-extrabold rounded-xl border transition-all active:scale-95 ${
-                            selectedSubject === subject 
-                              ? 'bg-accent-pink border-accent-pink text-white shadow-lg shadow-accent-pink/10' 
-                              : 'bg-bg-tertiary/60 border-border-theme text-text-secondary hover:text-text-primary'
+                {/* 3 Tab chọn nguồn ảnh */}
+                <div className="relative z-10 grid grid-cols-3 gap-2 mb-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playSound.click();
+                      setActiveCreationTab('templates');
+                    }}
+                    className={`py-2 px-2 text-xs font-bold rounded-xl border flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                      activeCreationTab === 'templates'
+                        ? 'bg-purple-600/30 border-purple-400 text-white shadow-md shadow-purple-600/20'
+                        : 'bg-zinc-900/60 border-white/5 text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    <span>🔬 Thí Nghiệm & Lab</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playSound.click();
+                      setActiveCreationTab('upload');
+                    }}
+                    className={`py-2 px-2 text-xs font-bold rounded-xl border flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                      activeCreationTab === 'upload'
+                        ? 'bg-pink-600/30 border-pink-400 text-white shadow-md shadow-pink-600/20'
+                        : 'bg-zinc-900/60 border-white/5 text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    <Upload className="w-3.5 h-3.5 text-pink-400" />
+                    <span>Tải Lên Từ Máy</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playSound.click();
+                      setActiveCreationTab('capture');
+                      handleCaptureFromStory();
+                    }}
+                    disabled={isCapturingFromStory}
+                    className={`py-2 px-2 text-xs font-bold rounded-xl border flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                      activeCreationTab === 'capture'
+                        ? 'bg-cyan-600/30 border-cyan-400 text-white shadow-md shadow-cyan-600/20'
+                        : 'bg-zinc-900/60 border-white/5 text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    <Camera className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>{isCapturingFromStory ? 'Đang chụp...' : 'Chụp Màn Hình'}</span>
+                  </button>
+                </div>
+
+                {/* Nội dung Tab 1: Mẫu Thí Nghiệm & Đấu Trường */}
+                {activeCreationTab === 'templates' && (
+                  <div className="relative z-10 mb-4 bg-zinc-900/60 border border-white/5 rounded-2xl p-3">
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none mb-2.5">
+                      {Object.keys(LAB_TEMPLATES).map((subject) => {
+                        const labelMap = { 
+                          chemistry: '🧪 Hóa Học', 
+                          physics: '⚡ Vật Lý', 
+                          math: '📐 Toán 3D', 
+                          biology: '🧬 Sinh Học',
+                          arena: '🏆 Đấu Trường'
+                        };
+                        return (
+                          <button
+                            key={subject}
+                            type="button"
+                            onClick={() => handleSubjectChange(subject)}
+                            className={`py-1 px-3 text-[10px] font-bold rounded-full border transition-all shrink-0 cursor-pointer ${
+                              selectedSubject === subject 
+                                ? 'bg-pink-500/25 border-pink-400 text-pink-300 shadow-sm' 
+                                : 'bg-black/30 border-white/5 text-zinc-400 hover:text-white'
+                            }`}
+                          >
+                            {labelMap[subject] || subject}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-36 overflow-y-auto pr-1 scrollbar-thin">
+                      {(LAB_TEMPLATES[selectedSubject] || []).map((template) => (
+                        <div 
+                          key={template.id}
+                          onClick={() => {
+                            playSound.click();
+                            setCustomImage(null);
+                            setSelectedTemplate(template);
+                          }}
+                          className={`h-20 rounded-xl overflow-hidden relative cursor-pointer border-2 transition-all group ${
+                            !customImage && selectedTemplate.id === template.id 
+                              ? 'border-pink-500 shadow-md shadow-pink-500/25 scale-98' 
+                              : 'border-transparent opacity-60 hover:opacity-100'
                           }`}
                         >
-                          {labelMap[subject]}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Lựa chọn Ảnh chụp mẫu chất lượng cao */}
-                <div className="mb-4">
-                  <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-secondary block mb-2">2. Chọn Kết Quả Phòng Lab Thí Nghiệm</label>
-                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none mb-3">
-                    {LAB_TEMPLATES[selectedSubject].map((template) => (
-                      <div 
-                        key={template.id}
-                        onClick={() => {
-                          setCustomImage(null); // Xóa ảnh custom nếu chọn template
-                          setSelectedTemplate(template);
-                        }}
-                        className={`w-32 h-20 shrink-0 rounded-xl overflow-hidden relative cursor-pointer border-2 transition-all ${
-                          !customImage && selectedTemplate.id === template.id ? 'border-accent-pink scale-98 shadow-md shadow-accent-pink/10' : 'border-transparent opacity-60 hover:opacity-100'
-                        }`}
-                      >
-                        <img src={template.url} alt="template" className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/40 p-1.5 flex flex-col justify-end">
-                          <span className="text-[7px] font-black text-white truncate">{template.title}</span>
+                          <img src={template.url} alt="template" className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-1.5 flex flex-col justify-end">
+                            <span className="text-[8px] font-black text-white truncate">{template.title}</span>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* Tải ảnh tùy chỉnh của riêng bạn (Chụp màn hình...) */}
-                <div className="mb-4">
-                  <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-secondary block mb-2">
-                    Hoặc tự tải lên ảnh/ảnh chụp màn hình của bạn
-                  </label>
-                  <div className="flex gap-4 items-center bg-white/[0.02] border border-border-theme p-3 rounded-2xl">
+                {/* Nội dung Tab 2: Tải ảnh tùy chỉnh */}
+                {activeCreationTab === 'upload' && (
+                  <div className="relative z-10 mb-4 bg-zinc-900/60 border border-white/5 rounded-2xl p-4">
                     {customImage ? (
-                      <div className="relative w-32 h-20 rounded-xl overflow-hidden border border-accent-pink shrink-0">
-                        <img src={customImage} alt="custom upload" className="w-full h-full object-cover" />
+                      <div className="relative w-full h-36 rounded-xl overflow-hidden border border-pink-500 shadow-inner">
+                        <img src={customImage} alt="custom upload" className="w-full h-full object-contain bg-black" />
                         <button 
                           onClick={() => setCustomImage(null)}
-                          className="absolute top-1 right-1 p-1 bg-danger hover:bg-danger/90 text-white rounded-full transition-colors active:scale-90"
+                          className="absolute top-2 right-2 p-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-full transition-colors active:scale-90 cursor-pointer shadow-md"
                         >
-                          <X className="w-2.5 h-2.5" />
+                          <X className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     ) : (
-                      <label className="w-32 h-20 shrink-0 rounded-xl border-2 border-dashed border-border-theme hover:border-accent-pink/40 bg-bg-tertiary/60 hover:bg-bg-tertiary transition-all cursor-pointer flex flex-col items-center justify-center gap-1 group">
-                        <Upload className="w-4 h-4 text-text-secondary group-hover:text-accent-pink transition-colors" />
-                        <span className="text-[8px] font-black text-text-secondary group-hover:text-text-primary uppercase tracking-wider">Tải ảnh lên</span>
+                      <label className="w-full h-32 rounded-xl border-2 border-dashed border-white/10 hover:border-pink-500/50 bg-black/30 hover:bg-black/50 transition-all cursor-pointer flex flex-col items-center justify-center gap-2 group">
+                        <Upload className="w-6 h-6 text-zinc-400 group-hover:text-pink-400 transition-colors" />
+                        <span className="text-xs font-bold text-zinc-300 group-hover:text-white uppercase tracking-wider">
+                          Chọn ảnh hoặc Kéo thả vào đây
+                        </span>
+                        <span className="text-[9px] text-zinc-500">
+                          Hệ thống tự động nén thông minh HD (~90KB) bảo đảm tốc độ siêu tốc
+                        </span>
                         <input 
                           type="file" 
                           accept="image/*" 
                           className="hidden" 
                           onChange={(e) => {
-                            const file = e.target.files[0];
+                            const file = e.target.files?.[0];
                             if (file) {
                               const reader = new FileReader();
-                              reader.onload = (event) => {
-                                setCustomImage(event.target.result);
+                              reader.onload = async (event) => {
+                                const compressed = await compressImageDataUrl(event.target.result, 1280, 0.78);
+                                setCustomImage(compressed);
+                                playSound.success();
                               };
                               reader.readAsDataURL(file);
                             }
@@ -1418,35 +1779,179 @@ export default function STEMStoriesPage() {
                         />
                       </label>
                     )}
-                    <div className="text-[8px] text-text-secondary leading-relaxed font-bold">
-                      Hệ thống tự động mã hóa Base64 siêu tốc để lưu trữ an toàn trong LocalSession. Phù hợp tải ảnh chụp màn hình đấu trường, vinh danh của riêng bạn.
-                    </div>
+                  </div>
+                )}
+
+                {/* Nội dung Tab 3: Chụp ảnh màn hình */}
+                {activeCreationTab === 'capture' && (
+                  <div className="relative z-10 mb-4 bg-zinc-900/60 border border-white/5 rounded-2xl p-4 text-center">
+                    {customImage ? (
+                      <div className="relative w-full h-36 rounded-xl overflow-hidden border border-cyan-400 shadow-inner">
+                        <img src={customImage} alt="captured screenshot" className="w-full h-full object-contain bg-black" />
+                        <div className="absolute top-2 right-2 flex gap-1.5">
+                          <button
+                            type="button"
+                            onClick={handleCaptureFromStory}
+                            className="px-2.5 py-1 bg-black/70 hover:bg-black/90 border border-white/20 rounded-lg text-[9.5px] font-bold text-cyan-300 flex items-center gap-1 cursor-pointer"
+                          >
+                            <Camera className="w-3 h-3" /> Chụp lại
+                          </button>
+                          <button 
+                            onClick={() => setCustomImage(null)}
+                            className="p-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition-colors cursor-pointer"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="py-6 flex flex-col items-center justify-center">
+                        <button
+                          type="button"
+                          onClick={handleCaptureFromStory}
+                          disabled={isCapturingFromStory}
+                          className="px-6 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-cyan-500/20 active:scale-95 cursor-pointer"
+                        >
+                          <Camera className="w-4 h-4" />
+                          <span>{isCapturingFromStory ? 'Đang Chụp Màn Hình...' : 'Bấm Để Chụp Màn Hình Nhanh'}</span>
+                        </button>
+                        <p className="text-[10px] text-zinc-400 mt-2">Chụp toàn bộ giao diện làm việc hiện tại tức thì không bị lag</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Thanh Lựa Chọn Bộ Lọc Màu Sci-Fi */}
+                <div className="relative z-10 mb-3">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[9.5px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1">
+                      <Palette className="w-3.5 h-3.5 text-amber-400" /> Chọn Bộ Lọc Sci-Fi:
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
+                    {FILTERS.map((f) => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => {
+                          playSound.click();
+                          setActiveFilter(f.id);
+                        }}
+                        className={`py-1.5 px-2 rounded-xl text-[10px] font-bold border transition-all flex flex-col items-center gap-0.5 cursor-pointer ${
+                          activeFilter === f.id
+                            ? 'bg-purple-600/40 border-purple-400 text-white shadow-md shadow-purple-600/20'
+                            : 'bg-zinc-900/60 border-white/5 text-zinc-400 hover:text-white hover:bg-zinc-800'
+                        }`}
+                      >
+                        <span className="text-xs">{f.icon}</span>
+                        <span className="text-[8.5px] truncate w-full text-center">{f.label}</span>
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                {/* Nhập Caption */}
-                <div className="mb-6">
-                  <label className="text-[10px] font-extrabold uppercase tracking-widest text-text-secondary block mb-2">3. Trải nghiệm/Thành tích của bạn</label>
+                {/* Tùy Chọn Đích Đến */}
+                <div className="relative z-10 mb-3 grid grid-cols-2 gap-2 text-xs">
+                  <label className="flex items-center gap-2 p-2 rounded-xl bg-zinc-900/60 hover:bg-zinc-800 border border-white/5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={postDestination === 'both' || postDestination === 'story'}
+                      onChange={(e) => {
+                        const curStory = postDestination === 'both' || postDestination === 'story';
+                        const curMoment = postDestination === 'both' || postDestination === 'moment';
+                        const nextStory = e.target.checked;
+                        if (nextStory && curMoment) setPostDestination('both');
+                        else if (nextStory) setPostDestination('story');
+                        else if (curMoment) setPostDestination('moment');
+                        else setPostDestination('moment'); // Giữ ít nhất 1
+                      }}
+                      className="rounded accent-pink-500 w-4 h-4 cursor-pointer"
+                    />
+                    <div className="leading-tight">
+                      <div className="font-bold text-white text-[10.5px]">Đăng vào Story 24h</div>
+                      <div className="text-[8px] text-zinc-400">Hiển thị ở thanh Story trên đầu</div>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-2 p-2 rounded-xl bg-zinc-900/60 hover:bg-zinc-800 border border-white/5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={postDestination === 'both' || postDestination === 'moment'}
+                      onChange={(e) => {
+                        const curStory = postDestination === 'both' || postDestination === 'story';
+                        const curMoment = postDestination === 'both' || postDestination === 'moment';
+                        const nextMoment = e.target.checked;
+                        if (curStory && nextMoment) setPostDestination('both');
+                        else if (nextMoment) setPostDestination('moment');
+                        else if (curStory) setPostDestination('story');
+                        else setPostDestination('story'); // Giữ ít nhất 1
+                      }}
+                      className="rounded accent-purple-500 w-4 h-4 cursor-pointer"
+                    />
+                    <div className="leading-tight">
+                      <div className="font-bold text-white text-[10.5px]">Đăng lên Bảng Tin Moments</div>
+                      <div className="text-[8px] text-zinc-400">Hiển thị trên dòng thời gian</div>
+                    </div>
+                  </label>
+                </div>
+
+                {/* Nhập Caption & Stickers */}
+                <div className="relative z-10 mb-4">
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                      Cảm Nghĩ / Trải Nghiệm Của Bạn:
+                    </label>
+                    <span className="text-[9px] font-mono text-zinc-500">{newCaption.length}/500</span>
+                  </div>
                   <textarea 
-                    rows="3"
+                    rows="2"
+                    maxLength={500}
                     placeholder="Ghi chú thành tựu phản ứng, ELO, hay mẹo giải toán... (ví dụ: pH đạt 7.1 tuyệt vời!)"
                     value={newCaption}
                     onChange={(e) => setNewCaption(e.target.value)}
-                    className="w-full bg-bg-tertiary/60 border border-border-theme focus:border-accent-pink/30 rounded-xl p-3 text-xs text-text-primary placeholder:text-text-secondary focus:outline-none transition-all resize-none"
+                    className="w-full bg-zinc-900/80 border border-purple-500/30 focus:border-pink-500/60 rounded-xl p-3 text-xs text-white placeholder:text-zinc-500 focus:outline-none transition-all resize-none shadow-inner"
                   />
+
+                  {/* Thanh Sticker nhanh */}
+                  <div className="flex items-center gap-1.5 mt-1.5 overflow-x-auto pb-1 scrollbar-none">
+                    <span className="text-[9px] text-zinc-500 shrink-0 font-bold">Gắn nhanh:</span>
+                    {QUICK_STICKERS.map((stk) => (
+                      <button
+                        key={stk}
+                        type="button"
+                        onClick={() => {
+                          playSound.click();
+                          setNewCaption((prev) => (prev ? `${prev} ${stk}` : stk));
+                        }}
+                        className="w-6 h-6 rounded-lg bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center text-xs shrink-0 transition-transform active:scale-90 cursor-pointer"
+                      >
+                        {stk}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Nút Đăng */}
                 <button 
                   onClick={handleCreatePost}
-                  disabled={!newCaption.trim()}
-                  className={`w-full py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98 ${
-                    newCaption.trim()
-                      ? 'bg-gradient-to-r from-accent-pink to-accent-purple hover:opacity-90 text-white shadow-lg shadow-accent-pink/10'
-                      : 'bg-bg-tertiary text-text-secondary cursor-not-allowed border border-border-theme'
+                  disabled={!newCaption.trim() || isSubmittingPost}
+                  className={`relative z-10 w-full py-3 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-98 cursor-pointer shadow-lg ${
+                    newCaption.trim() && !isSubmittingPost
+                      ? 'bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 hover:from-pink-600 hover:to-purple-700 text-white shadow-pink-500/25 border border-pink-400/30'
+                      : 'bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5'
                   }`}
                 >
-                  <Sparkles className="w-4 h-4 animate-pulse" /> Đăng Lên Bảng Tin Lập Tức
+                  {isSubmittingPost ? (
+                    <>
+                      <Loader className="w-4 h-4 animate-spin text-white" />
+                      <span>Đang Xuất Bản Lập Tức...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 animate-pulse text-amber-300" />
+                      <span>Xuất Bản Lên STEM Stories & Bảng Tin</span>
+                    </>
+                  )}
                 </button>
               </motion.div>
             </motion.div>
@@ -1594,17 +2099,41 @@ export default function STEMStoriesPage() {
                   alt="Enlarged screenshot" 
                   className="max-w-full max-h-full object-contain rounded-2xl border border-white/10 shadow-2xl"
                 />
-                <button 
-                  onClick={() => setLightboxImage(null)}
-                  className="absolute top-4 right-4 p-3 bg-black/50 hover:bg-black/80 rounded-full text-white/70 hover:text-white transition-all border border-white/10 cursor-pointer"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+                <div className="absolute top-4 right-4 flex items-center gap-2">
+                  <button 
+                    onClick={() => {
+                      if (lightboxImage) {
+                        downloadDataUrl(lightboxImage, `STEM_HUB_Image_${Date.now()}.jpg`);
+                        playSound.success();
+                        showToast('Đang tải ảnh về máy... 💾');
+                      }
+                    }}
+                    className="p-3 bg-black/50 hover:bg-black/80 rounded-full text-white/70 hover:text-white transition-all border border-white/10 cursor-pointer"
+                    title="Tải ảnh này về máy"
+                  >
+                    <Download className="w-5 h-5 text-cyan-400" />
+                  </button>
+                  <button 
+                    onClick={() => setLightboxImage(null)}
+                    className="p-3 bg-black/50 hover:bg-black/80 rounded-full text-white/70 hover:text-white transition-all border border-white/10 cursor-pointer"
+                    title="Đóng xem ảnh"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
             </motion.div>
           )}
         </AnimatePresence>,
         document.body
+      )}
+
+      {/* Floating Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999999] px-4 py-2.5 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold text-xs shadow-2xl flex items-center gap-2 border border-white/20 animate-bounce pointer-events-none select-none">
+          <CheckCircle2 className="w-4 h-4 text-emerald-300" />
+          <span>{toastMessage}</span>
+        </div>
       )}
     </div>
   );
