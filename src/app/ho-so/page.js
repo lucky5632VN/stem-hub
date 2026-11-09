@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/store/useAppStore';
 import { playSound } from '@/lib/sound';
 import { auth, db, functions, httpsCallable } from '@/lib/firebase';
@@ -13,7 +14,8 @@ import {
   Mail, Lock, ShieldAlert, Key, Users, UserPlus,
   UserMinus, UserCheck, UserX, Search, MessageSquare,
   Smile, Swords, Upload, ShoppingBag, Gift, X,
-  Atom, Crown, Cpu, Dna, FlaskConical, Camera, ShieldCheck
+  Atom, Crown, Cpu, Dna, FlaskConical, Camera, ShieldCheck,
+  Check, RotateCcw
 } from 'lucide-react';
 import { 
   sendEmailVerification, 
@@ -198,6 +200,98 @@ const QuantumParticlesCanvas = ({ active, color = '#f472b6' }) => {
       className="absolute inset-0 w-full h-full pointer-events-none z-10" 
     />
   );
+};
+
+// Component hoạt ảnh du hành xuyên không gian Warp Speed (Hyperspace Starfield)
+const WarpSpeedCanvas = ({ active, speed = 1, colorMode = 'cyan' }) => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    if (!active) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationFrameId;
+    let stars = [];
+    const numStars = 280;
+
+    const resize = () => {
+      if (typeof window !== 'undefined') {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    for (let i = 0; i < numStars; i++) {
+      stars.push({
+        x: (Math.random() - 0.5) * canvas.width * 2,
+        y: (Math.random() - 0.5) * canvas.height * 2,
+        z: Math.random() * canvas.width,
+        pz: 0
+      });
+    }
+
+    const render = () => {
+      ctx.fillStyle = 'rgba(3, 7, 18, 0.32)'; // vệt mờ chuyển động
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const currentSpeed = 18 * speed;
+
+      for (let i = 0; i < stars.length; i++) {
+        const star = stars[i];
+        star.pz = star.z;
+        star.z -= currentSpeed;
+
+        if (star.z <= 0) {
+          star.z = canvas.width;
+          star.pz = star.z;
+          star.x = (Math.random() - 0.5) * canvas.width * 2;
+          star.y = (Math.random() - 0.5) * canvas.height * 2;
+        }
+
+        const k = 260 / star.z;
+        const px = star.x * k + cx;
+        const py = star.y * k + cy;
+
+        const pk = 260 / star.pz;
+        const prevPx = star.x * pk + cx;
+        const prevPy = star.y * pk + cy;
+
+        if (px >= 0 && px <= canvas.width && py >= 0 && py <= canvas.height) {
+          ctx.beginPath();
+          ctx.moveTo(prevPx, prevPy);
+          ctx.lineTo(px, py);
+          ctx.lineWidth = Math.min(3.5, (1 - star.z / canvas.width) * 3);
+
+          if (colorMode === 'gold') {
+            ctx.strokeStyle = `rgba(251, 191, 36, ${Math.min(1, (1 - star.z / canvas.width) * 1.5)})`;
+          } else if (colorMode === 'purple') {
+            ctx.strokeStyle = `rgba(192, 132, 252, ${Math.min(1, (1 - star.z / canvas.width) * 1.5)})`;
+          } else {
+            ctx.strokeStyle = `rgba(6, 182, 212, ${Math.min(1, (1 - star.z / canvas.width) * 1.5)})`;
+          }
+          ctx.stroke();
+        }
+      }
+
+      animationFrameId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', resize);
+    };
+  }, [active, speed, colorMode]);
+
+  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-0" />;
 };
 
 // Helper chuyển đổi vật phẩm sang avatar parts để render hình đồ lượng tử thực tế
@@ -642,6 +736,8 @@ export default function ProfilePage() {
   const [warpStage, setWarpStage] = useState(1); // 1: Nạp năng lượng, 2: Gia tốc lỗ sâu, 3: Khai mở
   const [recentWonGachaIds, setRecentWonGachaIds] = useState([]);
   const [warpBoosted, setWarpBoosted] = useState(false);
+  const [lastPullCount, setLastPullCount] = useState(1);
+  const [gachaRarity, setGachaRarity] = useState('Rare'); // 'Legendary' | 'Epic' | 'Rare'
   const skipWarpRef = useRef(false);
   const [gachaResult, setGachaResult] = useState(null);
   const [gachaError, setGachaError] = useState('');
@@ -745,6 +841,7 @@ export default function ProfilePage() {
     setGachaResults([]);
     
     const count = Number(pullCount) || 1;
+    setLastPullCount(count);
     const cost = count === 10 ? 900 : 100; // Quay 10 lần giá 900 (tiết kiệm 100)
     const currentCrystals = personalization.crystals !== undefined ? Number(personalization.crystals) : 500;
     
@@ -765,6 +862,7 @@ export default function ProfilePage() {
     setIsRolling(true);
     setWarpProgress(0);
     setWarpStage(1);
+    setGachaRarity('Rare');
     setGachaCrystalsSpent(cost);
     skipWarpRef.current = false;
     setWarpBoosted(false);
@@ -834,6 +932,14 @@ export default function ProfilePage() {
       resCrystals = fallback.newCrystals;
     }
 
+    // Tự động nhận diện phẩm chất cao nhất để nhuộm màu hào quang Lỗ sâu
+    if (Array.isArray(rollResults)) {
+      const hasSSR = rollResults.some(r => r?.item?.rarity === 'Legendary');
+      const hasSR = rollResults.some(r => r?.item?.rarity === 'Epic');
+      const detectedRarity = hasSSR ? 'Legendary' : hasSR ? 'Epic' : 'Rare';
+      setGachaRarity(detectedRarity);
+    }
+
     // Đợi hoạt ảnh Warp hoàn thành (hoặc người dùng bấm bỏ qua)
     await warpAnimationPromise;
 
@@ -901,7 +1007,15 @@ export default function ProfilePage() {
     }
 
     setGachaResults(rollResults || []);
-    setFlippedGachaCards([]);
+    if (count === 1) {
+      setFlippedGachaCards([]);
+      setTimeout(() => {
+        setFlippedGachaCards([0]);
+        playSound.success();
+      }, 350);
+    } else {
+      setFlippedGachaCards([]);
+    }
     setShowGachaModal(true);
     setIsRolling(false);
     playSound.success();
@@ -3943,20 +4057,43 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 
                 {/* Máy quay Gacha */}
-                <div className="lg:col-span-5 bg-[#2a2c3a] border border-white/5 rounded-3xl p-6 flex flex-col items-between justify-between relative overflow-hidden text-center min-h-[490px]">
-                  <div className="absolute -top-12 -left-12 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="lg:col-span-5 bg-gradient-to-b from-[#18132e] via-[#100d20] to-[#0a0715] border border-purple-500/30 rounded-3xl p-6 flex flex-col items-between justify-between relative overflow-hidden text-center min-h-[500px] shadow-[0_0_40px_rgba(168,85,247,0.15)] ring-1 ring-purple-500/20">
+                  <div className="absolute -top-12 -left-12 w-48 h-48 bg-purple-500/15 rounded-full blur-3xl pointer-events-none" />
+                  <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
                   
-                  <div className="w-full">
-                    <h4 className="text-xs font-black text-purple-400 uppercase tracking-widest mb-6">Máy Gacha Lượng Tử</h4>
+                  <div className="w-full relative z-10">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-400/30 text-purple-300 text-[10px] font-mono font-bold uppercase tracking-widest mb-3">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin" />
+                      <span>CỔNG GIA TỐC HẠT LƯỢNG TỬ</span>
+                    </div>
+
+                    <h4 className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-amber-300 uppercase tracking-widest mb-2 font-sans">
+                      MÁY GACHA LƯỢNG TỬ
+                    </h4>
+
+                    {/* Tỷ lệ quay & Số dư pha lê */}
+                    <div className="flex items-center justify-center gap-2 text-[9.5px] font-mono font-bold uppercase mb-2">
+                      <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">🌟 SSR 5%</span>
+                      <span className="px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30">⚡ SR 25%</span>
+                      <span className="px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">🔷 R 70%</span>
+                    </div>
+
+                    <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-black/40 border border-white/10 text-[11px] font-mono text-zinc-300 mb-5">
+                      <span>Số dư:</span>
+                      <strong className="text-amber-300 font-bold">{personalization.crystals !== undefined ? personalization.crystals : 500}</strong>
+                      <CrystalIcon className="w-3.5 h-3.5 text-amber-300" />
+                    </div>
 
                     {/* Vòng quay Neon cầu Gacha */}
-                    <div className="relative w-40 h-40 flex items-center justify-center mb-6 mx-auto">
-                      <div className={`absolute inset-0 rounded-full border-4 border-dashed border-purple-500/30 ${isRolling ? 'animate-spin border-purple-500' : ''}`} />
-                      <div className={`absolute w-32 h-32 rounded-full bg-gradient-to-tr from-purple-600/20 via-pink-600/10 to-cyan-500/10 flex items-center justify-center border border-white/10 shadow-2xl ${isRolling ? 'scale-110 blur-[1px]' : 'scale-100 hover:scale-105 transition-all duration-300'}`}>
+                    <div className="relative w-44 h-44 flex items-center justify-center mb-6 mx-auto group">
+                      <div className={`absolute inset-0 rounded-full border-4 border-dashed border-purple-500/40 ${isRolling ? 'animate-spin border-purple-400' : 'animate-spin'}`} style={{ animationDuration: isRolling ? '1.5s' : '12s' }} />
+                      <div className="absolute inset-3 rounded-full border-2 border-dashed border-cyan-400/30 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '9s' }} />
+                      
+                      <div className={`absolute w-32 h-32 rounded-full bg-gradient-to-tr from-purple-600/30 via-pink-600/20 to-cyan-500/20 flex items-center justify-center border border-white/15 shadow-[0_0_30px_rgba(168,85,247,0.3)] ${isRolling ? 'scale-110 blur-[1px]' : 'scale-100 group-hover:scale-105 transition-all duration-300'}`}>
                         {isRolling ? (
-                          <div className="text-3xl animate-bounce">🧬</div>
+                          <div className="text-4xl animate-bounce">🧬</div>
                         ) : (
-                          <CrystalIcon className="w-16 h-16 drop-shadow-[0_0_20px_rgba(168,85,247,0.6)]" />
+                          <CrystalIcon className="w-18 h-18 text-amber-300 drop-shadow-[0_0_25px_rgba(251,191,36,0.7)] group-hover:rotate-12 transition-transform duration-300" />
                         )}
                       </div>
                     </div>
@@ -3969,32 +4106,32 @@ export default function ProfilePage() {
                       <button
                         disabled={isRolling}
                         onClick={() => handleSpinGacha(1)}
-                        className={`py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg border flex items-center justify-center gap-1.5 ${
+                        className={`py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-lg border flex items-center justify-center gap-1.5 cursor-pointer ${
                           isRolling
                             ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed border-white/5'
-                            : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 border-purple-500/20 text-white shadow-purple-500/10'
+                            : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 border-purple-400/30 text-white shadow-[0_0_20px_rgba(147,51,234,0.3)]'
                         }`}
                       >
                         <span>Quay x1 (100</span>
-                        <CrystalIcon className="w-4 h-4" />
+                        <CrystalIcon className="w-4 h-4 text-amber-300" />
                         <span>)</span>
                       </button>
                       <button
                         disabled={isRolling}
                         onClick={() => handleSpinGacha(10)}
-                        className={`py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg border flex items-center justify-center gap-1.5 ${
+                        className={`py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-lg border flex items-center justify-center gap-1.5 cursor-pointer ${
                           isRolling
                             ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed border-white/5'
-                            : 'bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 border-pink-500/20 text-white shadow-pink-500/10'
+                            : 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 border-pink-400/30 text-white shadow-[0_0_20px_rgba(236,72,153,0.3)]'
                         }`}
                       >
                         <span>Quay x10 (900</span>
-                        <CrystalIcon className="w-4 h-4" />
+                        <CrystalIcon className="w-4 h-4 text-amber-300" />
                         <span>)</span>
                       </button>
                     </div>
-                    <p className="text-[8.5px] text-zinc-500 mt-3 leading-relaxed">
-                      Mỗi lượt quay ngẫu nhiên mở khóa một trang phục hoặc danh hiệu quý hiếm bất kỳ. Quay x10 tiết kiệm 10% Pha lê!
+                    <p className="text-[9px] text-zinc-400 mt-3 leading-relaxed font-mono">
+                      ✨ Mỗi lượt quay mở khóa một trang phục hoặc danh hiệu quý hiếm bất kỳ. Quay x10 tiết kiệm 100 🔮!
                     </p>
                   </div>
 
@@ -5048,27 +5185,28 @@ export default function ProfilePage() {
       )}
 
       {/* ================== CINEMATIC QUANTUM WARP OVERLAY (KHI ĐANG QUAY GACHA) ================== */}
-      {isRolling && (
+      {mounted && typeof document !== 'undefined' && isRolling && createPortal(
         <div 
           onClick={handleBoostWarp}
-          title="Nhấp chuột để tăng tốc gia tốc hạt!"
-          className="fixed inset-0 z-[999999] bg-[#030712] flex flex-col items-center justify-between p-6 text-center select-none overflow-hidden animate-in fade-in duration-300 cursor-pointer"
+          title="Nhấp chuột liên tục để tăng tốc gia tốc hạt!"
+          className="fixed inset-0 z-[9999999] bg-[#02040c] flex flex-col items-center justify-between p-6 sm:p-8 text-center select-none overflow-hidden animate-in fade-in duration-300 cursor-pointer"
         >
-          {/* Nền hiệu ứng lỗ sâu không-thời gian & Tia laser tốc độ Warp */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.35)_0%,rgba(6,182,212,0.22)_35%,rgba(15,23,42,0.92)_70%,#030712_100%)] pointer-events-none" />
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.06)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none opacity-40" />
-          
-          {/* Hiệu ứng vệt sáng sao băng Warp Tunnel đa chiều */}
-          <div className={`absolute inset-0 pointer-events-none overflow-hidden transition-all duration-500 ${warpStage >= 2 ? 'opacity-80 scale-110' : 'opacity-40 scale-100'}`}>
-            <div className="absolute inset-0 bg-[repeating-conic-gradient(from_0deg,transparent_0deg_8deg,rgba(6,182,212,0.08)_8deg_10deg,transparent_10deg_20deg)] animate-spin" style={{ animationDuration: warpStage === 3 ? '2s' : warpStage === 2 ? '4s' : '9s' }} />
-            <div className="absolute inset-0 bg-[repeating-conic-gradient(from_45deg,transparent_0deg_12deg,rgba(236,72,153,0.07)_12deg_14deg,transparent_14deg_28deg)] animate-spin" style={{ animationDirection: 'reverse', animationDuration: warpStage === 3 ? '2.5s' : warpStage === 2 ? '5s' : '11s' }} />
-          </div>
+          {/* Nền hoạt ảnh du hành Hyperspace Warp Speed */}
+          <WarpSpeedCanvas 
+            active={isRolling} 
+            speed={warpStage === 3 ? 3.2 : warpStage === 2 ? 2.0 : 1.2} 
+            colorMode={gachaRarity === 'Legendary' ? 'gold' : gachaRarity === 'Epic' ? 'purple' : 'cyan'} 
+          />
+
+          {/* Lớp phủ ánh sáng lượng tử & lưới toạ độ vũ trụ */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.25)_0%,rgba(6,182,212,0.15)_35%,rgba(3,7,18,0.85)_75%,#02040c_100%)] pointer-events-none" />
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.04)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none opacity-40" />
 
           {/* Thanh HUD Điều khiển & Trạng thái phía trên */}
           <div className="relative z-10 w-full max-w-5xl flex items-center justify-between pt-2">
-            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-[10px] font-mono tracking-widest uppercase shadow-[0_0_15px_rgba(6,182,212,0.2)]">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-              <span>HỆ THỐNG GIA TỐC HẠT LƯỢNG TỬ v4.5</span>
+            <div className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-mono font-bold tracking-widest uppercase shadow-[0_0_20px_rgba(6,182,212,0.25)]">
+              <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" />
+              <span>CỔNG GIA TỐC HẠT ĐA VŨ TRỤ v4.5</span>
             </div>
             
             <button
@@ -5076,7 +5214,7 @@ export default function ProfilePage() {
                 e.stopPropagation();
                 handleSkipWarp();
               }}
-              className="px-4 py-1.5 rounded-full bg-purple-500/20 hover:bg-purple-500/40 border border-purple-400/50 text-purple-200 hover:text-white text-xs font-mono font-bold tracking-wider uppercase transition-all active:scale-95 flex items-center gap-1.5 shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:border-purple-400"
+              className="px-5 py-2 rounded-full bg-purple-500/20 hover:bg-purple-500/40 border border-purple-400/50 text-purple-200 hover:text-white text-xs font-mono font-black tracking-wider uppercase transition-all active:scale-95 flex items-center gap-2 shadow-[0_0_25px_rgba(168,85,247,0.4)] hover:border-purple-300 cursor-pointer"
             >
               <span>BỎ QUA HOẠT ẢNH</span>
               <ChevronRight className="w-4 h-4" />
@@ -5085,236 +5223,368 @@ export default function ProfilePage() {
 
           {/* Cụm vòng xoay gia tốc hạt lượng tử Trung tâm */}
           <div className="relative z-10 flex flex-col items-center justify-center my-auto">
-            <div className={`relative w-64 h-64 sm:w-80 sm:h-80 flex items-center justify-center transition-transform duration-300 ${warpBoosted ? 'scale-110' : 'scale-100'}`}>
+            <div className={`relative w-72 h-72 sm:w-96 sm:h-96 flex items-center justify-center transition-transform duration-300 ${warpBoosted ? 'scale-110' : 'scale-100'}`}>
               {/* Vòng ngoài cùng xoay gia tốc */}
               <div 
-                className="absolute inset-0 rounded-full border-4 border-dashed border-cyan-400/60 animate-spin" 
-                style={{ animationDuration: warpStage === 3 ? '1.5s' : warpStage === 2 ? '3s' : '6s' }} 
+                className={`absolute inset-0 rounded-full border-4 border-dashed animate-spin transition-colors duration-500 ${
+                  gachaRarity === 'Legendary' && warpStage === 3 ? 'border-amber-400/80 shadow-[0_0_40px_rgba(251,191,36,0.6)]' :
+                  gachaRarity === 'Epic' && warpStage === 3 ? 'border-purple-400/80 shadow-[0_0_40px_rgba(192,132,252,0.6)]' :
+                  'border-cyan-400/70 shadow-[0_0_30px_rgba(6,182,212,0.4)]'
+                }`}
+                style={{ animationDuration: warpStage === 3 ? '1.2s' : warpStage === 2 ? '2.5s' : '5s' }} 
               />
               
               {/* Vòng giữa xoay ngược chiều */}
               <div 
-                className="absolute inset-4 rounded-full border-2 border-dashed border-purple-500/80 animate-spin" 
-                style={{ animationDirection: 'reverse', animationDuration: warpStage === 3 ? '1s' : warpStage === 2 ? '2s' : '4s' }} 
+                className="absolute inset-6 rounded-full border-2 border-dashed border-purple-400/70 animate-spin" 
+                style={{ animationDirection: 'reverse', animationDuration: warpStage === 3 ? '0.9s' : warpStage === 2 ? '1.8s' : '3.6s' }} 
               />
               
               {/* Sóng xung kích phát quang liên tục */}
               <div 
-                className={`absolute inset-10 rounded-full border-2 ${warpStage === 3 ? 'border-amber-400/80 animate-ping' : warpStage === 2 ? 'border-pink-500/70 animate-ping' : 'border-cyan-400/50 animate-ping'}`} 
-                style={{ animationDuration: warpStage === 3 ? '0.8s' : '1.4s' }} 
+                className={`absolute inset-12 rounded-full border-2 animate-ping ${
+                  gachaRarity === 'Legendary' && warpStage === 3 ? 'border-amber-400' :
+                  gachaRarity === 'Epic' && warpStage === 3 ? 'border-pink-500' :
+                  'border-cyan-400/60'
+                }`} 
+                style={{ animationDuration: warpStage === 3 ? '0.7s' : '1.3s' }} 
               />
               
-              {/* Hào quang tâm lỗ sâu theo giai đoạn */}
-              <div className={`absolute w-36 h-36 rounded-full blur-2xl opacity-80 animate-pulse transition-all duration-700 ${
-                warpStage === 3
-                  ? 'bg-gradient-to-tr from-amber-500 via-rose-500 to-yellow-300'
+              {/* Hào quang tâm lỗ sâu theo phẩm chất */}
+              <div className={`absolute w-44 h-44 rounded-full blur-3xl opacity-80 animate-pulse transition-all duration-700 ${
+                gachaRarity === 'Legendary' && warpStage === 3
+                  ? 'bg-gradient-to-tr from-amber-500 via-yellow-400 to-orange-500 shadow-[0_0_80px_rgba(251,191,36,0.8)]'
+                  : gachaRarity === 'Epic' && warpStage === 3
+                  ? 'bg-gradient-to-tr from-purple-600 via-pink-500 to-indigo-500 shadow-[0_0_80px_rgba(236,72,153,0.8)]'
                   : warpStage === 2
                   ? 'bg-gradient-to-tr from-purple-600 via-pink-500 to-cyan-400'
                   : 'bg-gradient-to-tr from-cyan-500 via-blue-600 to-purple-600'
               }`} />
               
               {/* Lõi Singularity tinh thể */}
-              <div className="relative z-10 w-28 h-28 rounded-full bg-gradient-to-br from-[#0c0d1e] via-[#1c1236] to-black border-2 border-cyan-300 flex items-center justify-center shadow-[0_0_60px_rgba(6,182,212,0.9)] transform hover:scale-105 transition-transform">
-                <CrystalIcon className={`w-14 h-14 drop-shadow-[0_0_25px_#00ffff] animate-bounce transition-colors duration-500 ${
-                  warpStage === 3 ? 'text-amber-300' : warpStage === 2 ? 'text-pink-300' : 'text-cyan-300'
+              <div className={`relative z-10 w-32 h-32 rounded-full bg-gradient-to-br from-[#0c0d1e] via-[#1c1236] to-black border-2 flex items-center justify-center transition-all duration-500 ${
+                gachaRarity === 'Legendary' && warpStage === 3 ? 'border-amber-400 shadow-[0_0_60px_rgba(251,191,36,0.9)]' :
+                gachaRarity === 'Epic' && warpStage === 3 ? 'border-purple-400 shadow-[0_0_60px_rgba(192,132,252,0.9)]' :
+                'border-cyan-300 shadow-[0_0_50px_rgba(6,182,212,0.8)]'
+              }`}>
+                <CrystalIcon className={`w-16 h-16 animate-bounce transition-colors duration-500 ${
+                  gachaRarity === 'Legendary' && warpStage === 3 ? 'text-amber-300 drop-shadow-[0_0_30px_#f59e0b]' :
+                  gachaRarity === 'Epic' && warpStage === 3 ? 'text-purple-300 drop-shadow-[0_0_30px_#c084fc]' :
+                  'text-cyan-300 drop-shadow-[0_0_25px_#00ffff]'
                 }`} />
               </div>
             </div>
 
             {/* Thông báo tương tác gia tốc khi nhấn/giữ */}
-            <div className="mt-4 flex items-center gap-2">
-              <span className={`text-[11px] font-mono tracking-wider transition-all duration-200 ${
+            <div className="mt-5 flex items-center gap-2">
+              <span className={`text-xs font-mono tracking-wider transition-all duration-200 ${
                 warpBoosted 
-                  ? 'text-amber-300 font-bold scale-105' 
+                  ? 'text-amber-300 font-black scale-110 drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]' 
                   : 'text-zinc-400 hover:text-cyan-300'
               }`}>
-                {warpBoosted ? '⚡ XUNG LỰC GIA TỐC: +12% TỐC ĐỘ!' : '💡 Nhấp chuột liên tục để TĂNG TỐC GIA TỐC HẠT!'}
+                {warpBoosted ? '⚡ XUNG LỰC GIA TỐC: +15% TỐC ĐỘ!' : '💡 Nhấp chuột liên tục để TĂNG TỐC GIA TỐC HẠT!'}
               </span>
             </div>
           </div>
 
           {/* Dải thông số HUD Sci-Fi & Thanh tiến trình phía dưới */}
-          <div className="relative z-10 w-full max-w-lg space-y-3.5 pb-4">
+          <div className="relative z-10 w-full max-w-xl space-y-4 pb-4">
             {/* Stage Pill */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/60 border border-cyan-400/40 text-xs font-mono font-bold tracking-widest uppercase shadow-[0_0_15px_rgba(6,182,212,0.25)]">
+            <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-black/70 border border-cyan-400/40 text-xs font-mono font-bold tracking-widest uppercase shadow-[0_0_20px_rgba(6,182,212,0.3)]">
               <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" />
               {warpStage === 1 && <span className="text-cyan-300">GIAI ĐOẠN 1: NẠP NĂNG LƯỢNG LÕI PHẢN ỨNG (4.2 THz)</span>}
-              {warpStage === 2 && <span className="text-pink-300">GIAI ĐOẠN 2: GIA TỐC XUYÊN LỖ SÂU THỜI KHÔNG</span>}
-              {warpStage === 3 && <span className="text-amber-300">GIAI ĐOẠN 3: GIẢI MÃ THÀNH CÔNG VẬT PHẨM LƯỢNG TỬ!</span>}
+              {warpStage === 2 && <span className="text-pink-300">GIAI ĐOẠN 2: GIA TỐC XUYÊN LỖ SÂU THỜI KHÔNG (8.6 THz)</span>}
+              {warpStage === 3 && (
+                gachaRarity === 'Legendary' 
+                  ? <span className="text-amber-300 font-black animate-pulse">🌟 [SSR] PHÁT HIỆN TÍN HIỆU CỰC HIẾM HUYỀN THOẠI!</span>
+                  : gachaRarity === 'Epic'
+                  ? <span className="text-purple-300 font-black animate-pulse">⚡ [SR] PHÁT HIỆN TÍN HIỆU SIÊU CẤP ĐỘT PHÁ!</span>
+                  : <span className="text-cyan-300 font-bold">🔷 [R] GIẢI MÃ THÀNH CÔNG VẬT PHẨM LƯỢNG TỬ!</span>
+              )}
             </div>
 
             {/* High-tech Sci-Fi Progress Bar */}
-            <div className="space-y-1">
-              <div className="w-full h-3 bg-zinc-950/80 rounded-full border border-cyan-500/30 p-0.5 overflow-hidden shadow-[0_0_15px_rgba(6,182,212,0.25)]">
+            <div className="space-y-1.5">
+              <div className="w-full h-3.5 bg-zinc-950/90 rounded-full border border-cyan-500/40 p-0.5 overflow-hidden shadow-[0_0_20px_rgba(6,182,212,0.35)]">
                 <div 
-                  className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-pink-500 to-amber-400 transition-all duration-100"
+                  className={`h-full rounded-full transition-all duration-100 ${
+                    gachaRarity === 'Legendary' && warpStage === 3
+                      ? 'bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-400'
+                      : 'bg-gradient-to-r from-cyan-400 via-pink-500 to-purple-500'
+                  }`}
                   style={{ width: `${warpProgress}%` }}
                 />
               </div>
-              <div className="flex justify-between items-center text-[10px] font-mono text-zinc-400 px-1">
+              <div className="flex justify-between items-center text-[11px] font-mono text-zinc-400 px-1">
                 <span>TIẾN TRÌNH: <strong className="text-cyan-300">{warpProgress}%</strong></span>
-                <span>TẦN SỐ: <strong className="text-pink-300">{(3.2 + (warpProgress * 0.05)).toFixed(2)} THz</strong></span>
+                <span>TẦN SỐ: <strong className="text-pink-300">{(3.2 + (warpProgress * 0.08)).toFixed(2)} THz</strong></span>
                 <span>TIÊU HAO: <strong className="text-amber-300">{gachaCrystalsSpent} 🔮</strong></span>
               </div>
             </div>
 
-            <h2 className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-pink-300 to-amber-300 uppercase tracking-widest drop-shadow-[0_0_25px_rgba(168,85,247,0.5)]">
+            <h2 className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-pink-300 to-amber-300 uppercase tracking-widest drop-shadow-[0_0_30px_rgba(168,85,247,0.6)]">
               ĐANG TRÍCH XUẤT VẬT PHẨM LƯỢNG TỬ
             </h2>
-            <p className="text-[11px] text-zinc-400 font-mono tracking-wide leading-relaxed">
+            <p className="text-xs text-zinc-400 font-mono tracking-wide leading-relaxed">
               Giải mã liên kết xác suất lượng tử... Vui lòng giữ vững tần số sóng não!
             </p>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ================== MODAL QUAY GACHA LẬT THẺ LƯỢNG TỬ 3D HOLOGRAM ================== */}
-      {showGachaModal && (
-        <div className="fixed inset-0 z-[11000] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-          <div className="relative w-full max-w-3xl bg-bg-secondary border border-purple-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl text-center overflow-hidden my-8 ring-1 ring-purple-500/20">
+      {mounted && typeof document !== 'undefined' && showGachaModal && createPortal(
+        <div className="fixed inset-0 z-[9999999] bg-[#02040c]/95 backdrop-blur-3xl flex items-center justify-center p-4 sm:p-6 overflow-y-auto select-none">
+          <div className="relative w-full max-w-5xl bg-gradient-to-b from-[#16122d] via-[#0e0b1e] to-[#070511] border border-purple-500/30 rounded-3xl p-6 sm:p-8 shadow-[0_0_80px_rgba(168,85,247,0.25)] text-center overflow-hidden my-auto ring-1 ring-purple-500/20">
             {/* Lưới tọa độ laser nền */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(168,85,247,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.05)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(168,85,247,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.05)_1px,transparent_1px)] bg-[size:28px_28px] pointer-events-none" />
             <div className="absolute -top-48 -left-48 w-96 h-96 bg-purple-500/15 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute -bottom-48 -right-48 w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-[10px] font-mono font-bold uppercase tracking-wider mb-2">
-              ✨ QUANTUM LOOT REVEAL
+            {/* Header */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-400/30 text-purple-300 text-[11px] font-mono font-bold uppercase tracking-widest mb-2 shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin" />
+              <span>QUANTUM LOOT REVEAL</span>
             </div>
-            <h3 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-amber-300 uppercase tracking-widest font-sans drop-shadow-sm">
+            <h3 className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-amber-300 uppercase tracking-widest font-sans drop-shadow-sm">
               GIẢI MÃ LIÊN KẾT LƯỢNG TỬ
             </h3>
-            <p className="text-text-secondary text-xs font-mono uppercase tracking-wider mb-6">
-              Bạn đã tiêu hao {gachaCrystalsSpent} 🔮 tinh thể. Click vào từng thẻ hoặc chọn &quot;Lật toàn bộ&quot; để khai mở kết quả!
+            <p className="text-zinc-400 text-xs font-mono uppercase tracking-wider mb-6">
+              Bạn đã tiêu hao {gachaCrystalsSpent} 🔮 tinh thể. Số dư hiện có: <strong className="text-amber-300">{personalization.crystals} 🔮</strong>.
             </p>
 
-            {/* Container grid thẻ Gacha 3D */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5 sm:gap-4 my-6 justify-center">
-              {gachaResults.map((res, idx) => {
-                const isFlipped = flippedGachaCards.includes(idx);
-                const item = res.item;
-                
-                let rarityBorder = 'border-border-theme text-text-primary bg-bg-tertiary';
-                let rarityBadge = 'bg-zinc-800 text-zinc-300';
-                let glowColor = '';
-                let rarityTitle = item.rarity;
+            {/* HIỂN THỊ KẾT QUẢ: 1 THẺ (SINGLE PULL) HOẶC 10 THẺ (MULTI PULL) */}
+            {lastPullCount === 1 && gachaResults.length === 1 ? (
+              // ============ GIAO DIỆN 1 THẺ ĐƠN ĐẶC BIỆT (SINGLE PULL SHOWCASE) ============
+              <div className="my-6 flex flex-col items-center justify-center">
+                {(() => {
+                  const res = gachaResults[0];
+                  const item = res.item;
+                  const isFlipped = flippedGachaCards.includes(0);
 
-                if (item.rarity === 'Legendary') {
-                  rarityBorder = 'border-amber-400 bg-gradient-to-b from-amber-500/20 via-zinc-900 to-zinc-950 text-amber-300 ring-1 ring-amber-300/50';
-                  rarityBadge = 'bg-gradient-to-r from-amber-500 to-yellow-400 text-zinc-950 font-black';
-                  glowColor = 'shadow-[0_0_25px_rgba(245,158,11,0.45)]';
-                  rarityTitle = '🌟 [SSR] HUYỀN THOẠI';
-                } else if (item.rarity === 'Epic') {
-                  rarityBorder = 'border-purple-500 bg-gradient-to-b from-purple-500/20 via-zinc-900 to-zinc-950 text-purple-300 ring-1 ring-purple-400/50';
-                  rarityBadge = 'bg-gradient-to-r from-purple-600 to-pink-500 text-white font-black';
-                  glowColor = 'shadow-[0_0_20px_rgba(168,85,247,0.4)]';
-                  rarityTitle = '⚡ [SR] SIÊU CẤP';
-                } else if (item.rarity === 'Rare') {
-                  rarityBorder = 'border-cyan-400 bg-gradient-to-b from-cyan-500/20 via-zinc-900 to-zinc-950 text-cyan-300 ring-1 ring-cyan-300/50';
-                  rarityBadge = 'bg-cyan-500 text-zinc-950 font-black';
-                  glowColor = 'shadow-[0_0_18px_rgba(6,182,212,0.35)]';
-                  rarityTitle = '🔷 [R] HIẾM';
-                }
+                  let rarityBorder = 'border-cyan-400 bg-gradient-to-b from-cyan-500/20 via-zinc-900 to-zinc-950 text-cyan-300 shadow-[0_0_25px_rgba(6,182,212,0.4)]';
+                  let rarityBadge = 'bg-cyan-500 text-zinc-950 font-black';
+                  let rarityTitle = '🔷 [R] HIẾM';
+                  let auraGlow = 'bg-cyan-500/20';
 
-                return (
-                  <div 
-                    key={idx}
-                    className="w-full aspect-[3/4.4] relative cursor-pointer group"
-                    style={{ perspective: '1000px' }}
-                    onClick={() => {
-                      if (!isFlipped) {
-                        playSound.success();
-                        setFlippedGachaCards(prev => [...prev, idx]);
-                      }
-                    }}
-                  >
+                  if (item.rarity === 'Legendary') {
+                    rarityBorder = 'border-amber-400 bg-gradient-to-b from-amber-500/30 via-zinc-900 to-zinc-950 text-amber-300 shadow-[0_0_40px_rgba(245,158,11,0.6)] ring-2 ring-amber-300/50';
+                    rarityBadge = 'bg-gradient-to-r from-amber-500 to-yellow-400 text-zinc-950 font-black';
+                    rarityTitle = '🌟 [SSR] HUYỀN THOẠI CỰC ĐẠI';
+                    auraGlow = 'bg-amber-500/30';
+                  } else if (item.rarity === 'Epic') {
+                    rarityBorder = 'border-purple-400 bg-gradient-to-b from-purple-500/30 via-zinc-900 to-zinc-950 text-purple-300 shadow-[0_0_35px_rgba(168,85,247,0.5)] ring-1 ring-purple-400/50';
+                    rarityBadge = 'bg-gradient-to-r from-purple-600 to-pink-500 text-white font-black';
+                    rarityTitle = '⚡ [SR] SIÊU CẤP ĐỘT PHÁ';
+                    auraGlow = 'bg-purple-500/30';
+                  }
+
+                  return (
                     <div 
-                      className="w-full h-full relative transition-transform duration-700"
-                      style={{ 
-                        transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-                        transformStyle: 'preserve-3d'
+                      className="w-72 sm:w-80 aspect-[3/4.5] relative cursor-pointer group"
+                      style={{ perspective: '1200px' }}
+                      onClick={() => {
+                        if (!isFlipped) {
+                          playSound.success();
+                          setFlippedGachaCards([0]);
+                        }
                       }}
                     >
-                      {/* CARD BACK (Mặt úp) */}
                       <div 
-                        className="absolute inset-0 rounded-2xl border-2 border-purple-500/40 bg-gradient-to-b from-[#18122B] to-[#0D0B18] flex flex-col items-center justify-center p-3.5 shadow-xl hover:border-purple-300 hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all group-hover:scale-[1.02]"
-                        style={{ backfaceVisibility: 'hidden' }}
-                      >
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-600/30 to-cyan-500/30 flex items-center justify-center border border-purple-400/40 mb-2 group-hover:rotate-12 duration-300 shadow-[0_0_15px_rgba(168,85,247,0.3)]">
-                          <span className="text-2xl animate-pulse">🔮</span>
-                        </div>
-                        <span className="text-[10px] font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400 uppercase tracking-widest font-mono">Quantum</span>
-                        <span className="text-[8px] text-zinc-400 mt-1 uppercase font-bold tracking-wider">Nhấp để mở</span>
-                      </div>
-
-                      {/* CARD FRONT (Mặt ngửa) */}
-                      <div 
-                        className={`absolute inset-0 rounded-2xl border-2 flex flex-col items-center justify-between p-3 shadow-2xl ${rarityBorder} ${glowColor}`}
+                        className="w-full h-full relative transition-transform duration-700"
                         style={{ 
-                          backfaceVisibility: 'hidden',
-                          transform: 'rotateY(180deg)'
+                          transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+                          transformStyle: 'preserve-3d'
                         }}
                       >
-                        {/* Shimmer overlay cho phẩm chất cao */}
-                        {(item.rarity === 'Legendary' || item.rarity === 'Epic') && (
-                          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.12),transparent)] pointer-events-none rounded-2xl" />
-                        )}
-
-                        <span className={`text-[7.5px] px-2 py-0.5 rounded-full uppercase tracking-wider font-mono ${rarityBadge}`}>
-                          {rarityTitle}
-                        </span>
-
-                        <div className="flex-1 flex flex-col items-center justify-center my-1 w-full min-h-0">
-                          {item.type === 'title' ? (
-                            <div className="w-13 h-13 bg-gradient-to-br from-purple-500/30 via-pink-500/20 to-cyan-500/30 border border-purple-400/40 rounded-2xl flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(168,85,247,0.35)] animate-pulse">
-                              {getTitleEmoji(item)}
-                            </div>
-                          ) : (
-                            <div className="w-13 h-13 flex items-center justify-center relative overflow-hidden bg-black/40 rounded-2xl border border-white/10 shadow-inner">
-                              <STEMAvatarSVG parts={getCosmeticPreviewParts(item)} className="w-16 h-16 transform translate-y-1 scale-110" />
-                            </div>
-                          )}
-                          <h4 className="text-[10.5px] sm:text-[11.5px] font-black text-white mt-1.5 leading-tight w-full px-0.5 text-center whitespace-normal break-words">
-                            {item.name}
-                          </h4>
-                          {item.desc && (
-                            <p className="text-[7.5px] text-zinc-400 mt-0.5 max-w-[130px] mx-auto leading-tight whitespace-normal break-words line-clamp-2">{item.desc}</p>
-                          )}
+                        {/* Mặt úp */}
+                        <div 
+                          className="absolute inset-0 rounded-3xl border-2 border-purple-500/50 bg-gradient-to-b from-[#20173d] to-[#0f0b1e] flex flex-col items-center justify-center p-6 shadow-2xl hover:border-purple-300 transition-all"
+                          style={{ backfaceVisibility: 'hidden' }}
+                        >
+                          <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-purple-600/40 to-cyan-500/40 flex items-center justify-center border border-purple-400/50 mb-4 shadow-[0_0_25px_rgba(168,85,247,0.4)] animate-bounce">
+                            <span className="text-4xl">🔮</span>
+                          </div>
+                          <span className="text-xs font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-cyan-300 uppercase tracking-widest font-mono">Quantum Card</span>
+                          <span className="text-[10px] text-zinc-400 mt-2 uppercase font-bold tracking-wider">Chạm để lật mở</span>
                         </div>
 
-                        <div className="w-full mt-1">
-                          {res.isDuplicate ? (
-                            <div className="text-[8px] font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 py-0.5 rounded-lg text-center font-mono">
-                              Trùng: +{res.compensation} 🔮 hoàn trả
-                            </div>
-                          ) : (
-                            <div className="text-[8px] font-black text-emerald-300 bg-emerald-500/20 border border-emerald-500/40 py-0.5 rounded-lg text-center font-mono animate-pulse">
-                              ✨ MỚI SỞ HỮU!
-                            </div>
-                          )}
+                        {/* Mặt ngửa */}
+                        <div 
+                          className={`absolute inset-0 rounded-3xl border-2 flex flex-col items-center justify-between p-5 shadow-2xl ${rarityBorder}`}
+                          style={{ 
+                            backfaceVisibility: 'hidden',
+                            transform: 'rotateY(180deg)'
+                          }}
+                        >
+                          <div className={`absolute -top-12 -left-12 w-32 h-32 rounded-full blur-2xl ${auraGlow} pointer-events-none`} />
+
+                          <span className={`text-[9px] px-3 py-1 rounded-full uppercase tracking-wider font-mono shadow-md ${rarityBadge}`}>
+                            {rarityTitle}
+                          </span>
+
+                          <div className="flex-1 flex flex-col items-center justify-center my-3 w-full">
+                            {item.type === 'title' ? (
+                              <div className="w-24 h-24 bg-gradient-to-br from-purple-500/30 via-pink-500/20 to-cyan-500/30 border border-purple-400/40 rounded-3xl flex items-center justify-center text-5xl shadow-[0_0_25px_rgba(168,85,247,0.5)] animate-pulse">
+                                {getTitleEmoji(item)}
+                              </div>
+                            ) : (
+                              <div className="w-28 h-28 flex items-center justify-center relative overflow-hidden bg-black/50 rounded-3xl border border-white/10 shadow-inner">
+                                <STEMAvatarSVG parts={getCosmeticPreviewParts(item)} className="w-24 h-24 transform translate-y-1.5 scale-110" />
+                              </div>
+                            )}
+
+                            <h4 className="text-base font-black text-white mt-3 leading-tight text-center">
+                              {item.name}
+                            </h4>
+                            {item.desc && (
+                              <p className="text-[10px] text-zinc-300 mt-1 max-w-[220px] mx-auto leading-relaxed text-center">{item.desc}</p>
+                            )}
+                          </div>
+
+                          <div className="w-full">
+                            {res.isDuplicate ? (
+                              <div className="text-[10px] font-bold text-amber-300 bg-amber-500/20 border border-amber-500/40 py-1 rounded-xl text-center font-mono">
+                                Đã sở hữu: +{res.compensation} 🔮 hoàn trả
+                              </div>
+                            ) : (
+                              <div className="text-[10px] font-black text-emerald-300 bg-emerald-500/25 border border-emerald-500/50 py-1 rounded-xl text-center font-mono animate-pulse shadow-sm">
+                                ✨ MỚI SỞ HỮU! ĐÃ THÊM VÀO KHO ĐỒ
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })()}
+              </div>
+            ) : (
+              // ============ GIAO DIỆN 10 THẺ (MULTI PULL 10X GRID) ============
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5 sm:gap-4 my-6 justify-center">
+                {gachaResults.map((res, idx) => {
+                  const isFlipped = flippedGachaCards.includes(idx);
+                  const item = res.item;
+                  
+                  let rarityBorder = 'border-border-theme text-text-primary bg-bg-tertiary';
+                  let rarityBadge = 'bg-zinc-800 text-zinc-300';
+                  let glowColor = '';
+                  let rarityTitle = item.rarity;
+
+                  if (item.rarity === 'Legendary') {
+                    rarityBorder = 'border-amber-400 bg-gradient-to-b from-amber-500/20 via-zinc-900 to-zinc-950 text-amber-300 ring-1 ring-amber-300/50';
+                    rarityBadge = 'bg-gradient-to-r from-amber-500 to-yellow-400 text-zinc-950 font-black';
+                    glowColor = 'shadow-[0_0_25px_rgba(245,158,11,0.45)]';
+                    rarityTitle = '🌟 [SSR]';
+                  } else if (item.rarity === 'Epic') {
+                    rarityBorder = 'border-purple-500 bg-gradient-to-b from-purple-500/20 via-zinc-900 to-zinc-950 text-purple-300 ring-1 ring-purple-400/50';
+                    rarityBadge = 'bg-gradient-to-r from-purple-600 to-pink-500 text-white font-black';
+                    glowColor = 'shadow-[0_0_20px_rgba(168,85,247,0.4)]';
+                    rarityTitle = '⚡ [SR]';
+                  } else if (item.rarity === 'Rare') {
+                    rarityBorder = 'border-cyan-400 bg-gradient-to-b from-cyan-500/20 via-zinc-900 to-zinc-950 text-cyan-300 ring-1 ring-cyan-300/50';
+                    rarityBadge = 'bg-cyan-500 text-zinc-950 font-black';
+                    glowColor = 'shadow-[0_0_18px_rgba(6,182,212,0.35)]';
+                    rarityTitle = '🔷 [R]';
+                  }
+
+                  return (
+                    <div 
+                      key={idx}
+                      className="w-full aspect-[3/4.4] relative cursor-pointer group"
+                      style={{ perspective: '1000px' }}
+                      onClick={() => {
+                        if (!isFlipped) {
+                          playSound.success();
+                          setFlippedGachaCards(prev => [...prev, idx]);
+                        }
+                      }}
+                    >
+                      <div 
+                        className="w-full h-full relative transition-transform duration-700"
+                        style={{ 
+                          transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+                          transformStyle: 'preserve-3d'
+                        }}
+                      >
+                        {/* CARD BACK */}
+                        <div 
+                          className="absolute inset-0 rounded-2xl border-2 border-purple-500/40 bg-gradient-to-b from-[#18122B] to-[#0D0B18] flex flex-col items-center justify-center p-3 shadow-xl hover:border-purple-300 hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all group-hover:scale-[1.02]"
+                          style={{ backfaceVisibility: 'hidden' }}
+                        >
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-600/30 to-cyan-500/30 flex items-center justify-center border border-purple-400/40 mb-2 group-hover:rotate-12 duration-300 shadow-[0_0_15px_rgba(168,85,247,0.3)]">
+                            <span className="text-2xl animate-pulse">🔮</span>
+                          </div>
+                          <span className="text-[10px] font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400 uppercase tracking-widest font-mono">Quantum</span>
+                          <span className="text-[8px] text-zinc-400 mt-1 uppercase font-bold tracking-wider">Nhấp để mở</span>
+                        </div>
+
+                        {/* CARD FRONT */}
+                        <div 
+                          className={`absolute inset-0 rounded-2xl border-2 flex flex-col items-center justify-between p-3 shadow-2xl ${rarityBorder} ${glowColor}`}
+                          style={{ 
+                            backfaceVisibility: 'hidden',
+                            transform: 'rotateY(180deg)'
+                          }}
+                        >
+                          <span className={`text-[7.5px] px-2 py-0.5 rounded-full uppercase tracking-wider font-mono ${rarityBadge}`}>
+                            {rarityTitle} {item.rarity}
+                          </span>
+
+                          <div className="flex-1 flex flex-col items-center justify-center my-1 w-full min-h-0">
+                            {item.type === 'title' ? (
+                              <div className="w-13 h-13 bg-gradient-to-br from-purple-500/30 via-pink-500/20 to-cyan-500/30 border border-purple-400/40 rounded-2xl flex items-center justify-center text-3xl shadow-[0_0_15px_rgba(168,85,247,0.35)] animate-pulse">
+                                {getTitleEmoji(item)}
+                              </div>
+                            ) : (
+                              <div className="w-13 h-13 flex items-center justify-center relative overflow-hidden bg-black/40 rounded-2xl border border-white/10 shadow-inner">
+                                <STEMAvatarSVG parts={getCosmeticPreviewParts(item)} className="w-16 h-16 transform translate-y-1 scale-110" />
+                              </div>
+                            )}
+                            <h4 className="text-[10.5px] sm:text-[11.5px] font-black text-white mt-1.5 leading-tight w-full px-0.5 text-center whitespace-normal break-words">
+                              {item.name}
+                            </h4>
+                          </div>
+
+                          <div className="w-full mt-1">
+                            {res.isDuplicate ? (
+                              <div className="text-[8px] font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 py-0.5 rounded-lg text-center font-mono">
+                                Trùng: +{res.compensation} 🔮
+                              </div>
+                            ) : (
+                              <div className="text-[8px] font-black text-emerald-300 bg-emerald-500/20 border border-emerald-500/40 py-0.5 rounded-lg text-center font-mono animate-pulse">
+                                ✨ MỚI SỞ HỮU!
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             {/* Các nút hành động */}
-            <div className="flex flex-wrap items-center justify-center gap-3 mt-6 pt-4 border-t border-border-theme">
-              <button
-                onClick={() => {
-                  playSound.success();
-                  gachaResults.forEach((_, i) => {
-                    setTimeout(() => {
-                      setFlippedGachaCards(prev => prev.includes(i) ? prev : [...prev, i]);
-                      playSound.click();
-                    }, i * 90);
-                  });
-                }}
-                className="px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold rounded-xl border border-white/10 transition-all active:scale-95 flex items-center gap-1.5 shadow-md"
-              >
-                <span>⚡ Lật toàn bộ (Sóng 3D)</span>
-              </button>
+            <div className="flex flex-wrap items-center justify-center gap-3 mt-6 pt-4 border-t border-white/10">
+              {lastPullCount > 1 && (
+                <button
+                  onClick={() => {
+                    playSound.success();
+                    gachaResults.forEach((_, i) => {
+                      setTimeout(() => {
+                        setFlippedGachaCards(prev => prev.includes(i) ? prev : [...prev, i]);
+                        playSound.click();
+                      }, i * 75);
+                    });
+                  }}
+                  className="px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold rounded-xl border border-white/10 transition-all active:scale-95 flex items-center gap-1.5 shadow-md cursor-pointer"
+                >
+                  <Zap className="w-4 h-4 text-amber-400" />
+                  <span>Lật toàn bộ (Sóng lượng tử)</span>
+                </button>
+              )}
 
               <button
                 disabled={isRolling}
@@ -5322,7 +5592,7 @@ export default function ProfilePage() {
                   setShowGachaModal(false);
                   handleSpinGacha(1);
                 }}
-                className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all active:scale-95 shadow-md shadow-purple-600/30 flex items-center gap-1.5"
+                className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all active:scale-95 shadow-md shadow-purple-600/30 flex items-center gap-1.5 cursor-pointer"
               >
                 <span>Quay tiếp x1 (100 🔮)</span>
               </button>
@@ -5333,7 +5603,7 @@ export default function ProfilePage() {
                   setShowGachaModal(false);
                   handleSpinGacha(10);
                 }}
-                className="px-5 py-2.5 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all active:scale-95 shadow-md shadow-pink-600/30 flex items-center gap-1.5"
+                className="px-5 py-2.5 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all active:scale-95 shadow-md shadow-pink-600/30 flex items-center gap-1.5 cursor-pointer"
               >
                 <span>Quay tiếp x10 (900 🔮)</span>
               </button>
@@ -5342,137 +5612,231 @@ export default function ProfilePage() {
                 onClick={() => {
                   playSound.click();
                   setShowGachaModal(false);
+                  setActivePersonalizationSubTab('character');
                 }}
-                className="px-6 py-2.5 bg-zinc-700 hover:bg-zinc-600 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all active:scale-95"
+                className="px-5 py-2.5 bg-emerald-600/80 hover:bg-emerald-600 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all active:scale-95 flex items-center gap-1.5 shadow-md shadow-emerald-600/20 cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4 text-emerald-200" />
+                <span>Vào Chibi Maker Phối Đồ</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  playSound.click();
+                  setShowGachaModal(false);
+                }}
+                className="px-6 py-2.5 bg-zinc-700 hover:bg-zinc-600 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all active:scale-95 cursor-pointer"
               >
                 Đóng
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* ================== MODAL NHẬN QUÀ THĂNG CẤP 3D HOLOGRAM ================== */}
-      {levelRewardModal.show && (
-        <div className="fixed top-0 bottom-0 right-0 left-0 md:left-[260px] z-[12000] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="relative w-full max-w-md bg-gradient-to-br from-[#121324] to-[#0a0a14] border border-white/10 rounded-3xl p-8 shadow-2xl text-center overflow-hidden">
-            {/* Lớp lưới lượng tử */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(251,191,36,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(251,191,36,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
-            <div className="absolute -top-32 -left-32 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-            
+      {/* ================== MODAL NHẬN QUÀ THĂNG CẤP & ĐIỂM DANH (QUANTUM VAULT CHEST) ================== */}
+      {mounted && typeof document !== 'undefined' && levelRewardModal.show && createPortal(
+        <div className="fixed inset-0 z-[9999999] bg-[#02040c]/90 backdrop-blur-2xl flex items-center justify-center p-4 select-none animate-in fade-in duration-300">
+          <div className="relative w-full max-w-lg bg-gradient-to-b from-[#16132d] via-[#0d0b1d] to-[#070512] border border-amber-400/30 rounded-3xl p-6 sm:p-8 shadow-[0_0_80px_rgba(245,158,11,0.25)] text-center overflow-hidden my-auto ring-1 ring-amber-400/20">
+            {/* Lưới tọa độ laser & hào quang nền */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(245,158,11,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(245,158,11,0.03)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+            <div className="absolute -top-32 -left-32 w-64 h-64 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-purple-500/15 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Nút đóng góc phải */}
+            <button
+              onClick={() => {
+                playSound.click();
+                setLevelRewardModal(prev => ({ ...prev, show: false }));
+              }}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white flex items-center justify-center transition-all cursor-pointer z-20"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
             {levelRewardModal.error ? (
               // Trường hợp Thông báo lỗi hoặc cảnh báo
-              <div className="relative z-10 py-4">
-                <div className="w-14 h-14 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mx-auto mb-4 text-2xl">
+              <div className="relative z-10 py-6">
+                <div className="w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center mx-auto mb-4 text-3xl shadow-[0_0_20px_rgba(244,63,94,0.3)]">
                   ⚠️
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">Thông Báo Hệ Thống</h3>
-                <p className="text-zinc-400 text-xs px-2 leading-relaxed">{levelRewardModal.rewardText}</p>
+                <h3 className="text-lg font-bold text-white mb-2">Thông Báo Hệ Thống</h3>
+                <p className="text-zinc-300 text-xs px-2 leading-relaxed whitespace-pre-line">{levelRewardModal.rewardText}</p>
                 <button
                   onClick={() => { playSound.click(); setLevelRewardModal(prev => ({ ...prev, show: false })); }}
-                  className="mt-6 px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold rounded-xl transition-all active:scale-95 border border-white/5"
+                  className="mt-6 px-8 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold rounded-xl transition-all active:scale-95 border border-white/10 shadow-md cursor-pointer"
                 >
                   Đồng ý
                 </button>
               </div>
-            ) : (
-              // Trường hợp nhận quà thăng cấp thành công lộng lẫy
-              <div className="relative z-10">
-                <h4 className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-1.5">
+            ) : !levelRewardModal.flipped ? (
+              // ============ GIAI ĐOẠN 1: RƯƠNG NĂNG LƯỢNG LƯỢNG TỬ CHƯA MỞ (MYSTERY CRATE) ============
+              <div className="relative z-10 py-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-400/30 text-amber-300 text-[10px] font-mono font-bold uppercase tracking-wider mb-2">
+                  <span>✨ TIẾP NHẬN PHẦN THƯỞNG CHIẾN DỊCH</span>
+                </div>
+
+                <h3 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 uppercase tracking-widest font-sans mb-1">
                   {levelRewardModal.type === 'avatar' 
-                    ? 'Cá Nhân Hóa' 
+                    ? 'ĐỒNG BỘ GIAO DIỆN' 
                     : levelRewardModal.type === 'checkin'
-                    ? 'Điểm Danh Hàng Ngày'
-                    : 'Phần Thưởng Đột Phá'}
-                </h4>
-                <h3 className="text-xl font-black text-amber-400 uppercase tracking-wider mb-6 font-sans">
-                  {levelRewardModal.type === 'avatar'
-                    ? 'ĐỒNG BỘ GIAO DIỆN'
-                    : levelRewardModal.type === 'checkin'
-                    ? 'ĐỒNG BỘ NĂNG LƯỢNG'
+                    ? `ĐỒNG BỘ NĂNG LƯỢNG NGÀY ${levelRewardModal.milestone}`
+                    : levelRewardModal.type === 'quest'
+                    ? 'NHIỆM VỤ HOÀN THÀNH'
                     : `QUÀ CẤP ĐỘ ${levelRewardModal.milestone > 0 ? levelRewardModal.milestone : ''}`}
                 </h3>
+                <p className="text-xs text-zinc-400 mb-6">
+                  Phần quà giá trị cao đã được gửi tới tài khoản của bạn!
+                </p>
 
-                {/* Thẻ quà 3D lật mở */}
+                {/* Khối Rương Lượng Tử 3D Lơ Lửng */}
                 <div 
-                  className="w-44 h-56 mx-auto cursor-pointer relative mb-6"
-                  style={{ perspective: '1000px' }}
-                  onClick={() => setLevelRewardModal(prev => ({ ...prev, flipped: !prev.flipped }))}
+                  onClick={() => {
+                    playSound.success();
+                    setLevelRewardModal(prev => ({ ...prev, flipped: true }));
+                  }}
+                  className="relative w-48 h-48 mx-auto my-4 flex items-center justify-center cursor-pointer group"
                 >
-                  <div 
-                    className="w-full h-full duration-700 transform-style-3d relative transition-transform"
-                    style={{ transform: levelRewardModal.flipped ? 'rotateY(180deg)' : 'rotateY(0)' }}
-                  >
-                    {/* Mặt úp (Chiếc rương lơ lửng) */}
-                    <div className="absolute inset-0 backface-hidden rounded-2xl border border-amber-500/30 bg-gradient-to-br from-[#241c12] to-[#0c0a07] flex flex-col items-center justify-center p-4 shadow-xl hover:border-amber-400 transition-colors">
-                      <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center text-3xl mb-3 shadow-[0_0_15px_rgba(245,158,11,0.2)] animate-bounce">
-                        {levelRewardModal.type === 'avatar' 
-                          ? '🎨' 
-                          : levelRewardModal.type === 'checkin'
-                          ? '⚡'
-                          : '🎁'}
-                      </div>
-                      <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest font-mono">Hologram Card</span>
-                      <span className="text-[8px] text-zinc-500 mt-1 uppercase">Click to flip</span>
-                    </div>
+                  {/* Vòng hào quang xoay */}
+                  <div className="absolute inset-0 rounded-full border-2 border-dashed border-amber-400/40 animate-spin" style={{ animationDuration: '8s' }} />
+                  <div className="absolute inset-4 rounded-full border border-dashed border-orange-400/30 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '6s' }} />
+                  
+                  {/* Glow chùm sáng */}
+                  <div className="absolute w-32 h-32 rounded-full bg-gradient-to-tr from-amber-500/30 to-yellow-400/20 blur-xl group-hover:scale-125 transition-transform duration-500 animate-pulse" />
 
-                    {/* Mặt ngửa (Nội dung phần thưởng) */}
-                    <div className="absolute inset-0 backface-hidden rounded-2xl border-2 border-amber-400 bg-zinc-950 flex flex-col items-center justify-between p-5 rotate-y-180 shadow-[0_0_25px_rgba(245,158,11,0.3)]">
-                      <span className="text-[8px] font-black text-amber-400 uppercase tracking-wider font-mono">
-                        {levelRewardModal.type === 'avatar' 
-                          ? 'Custom Avatar' 
-                          : levelRewardModal.type === 'checkin'
-                          ? 'Check-in Reward'
-                          : 'Legendary Gift'}
-                      </span>
-                      
-                      <div className="my-2">
-                        {levelRewardModal.frameReward ? (
-                          <div className="w-14 h-14 rounded-full border-2 border-amber-500/50 flex items-center justify-center mx-auto bg-amber-500/5 text-2xl relative overflow-hidden shadow-inner">
-                            <div className="absolute inset-0 bg-gradient-to-t from-amber-500/10 to-transparent" />
-                            🖼️
-                          </div>
-                        ) : levelRewardModal.titleReward ? (
-                          <div className="w-14 h-14 rounded-full border-2 border-cyan-500/50 flex items-center justify-center mx-auto bg-cyan-500/5 text-2xl relative overflow-hidden shadow-inner">
-                            <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/10 to-transparent" />
-                            🏆
-                          </div>
-                        ) : levelRewardModal.type === 'avatar' ? (
-                          <div className="w-14 h-14 rounded-full border-2 border-pink-500/50 flex items-center justify-center mx-auto bg-pink-500/5 text-2xl relative overflow-hidden shadow-inner animate-pulse">
-                            <div className="absolute inset-0 bg-gradient-to-t from-pink-500/10 to-transparent" />
-                            ✨
-                          </div>
-                        ) : (
-                          <div className="text-4xl animate-pulse">🔮</div>
-                        )}
-                        <h4 className="text-xs font-black text-white mt-3 leading-snug whitespace-pre-line">{levelRewardModal.rewardText}</h4>
-                      </div>
-
-                      <span className="text-[8.5px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-lg select-none">
-                        {levelRewardModal.type === 'avatar' ? 'THÀNH CÔNG ✨' : 'ĐÃ NHẬN ✨'}
-                      </span>
-                    </div>
+                  {/* Icon Rương Báu / Hộp Quà Lượng Tử */}
+                  <div className="relative z-10 w-28 h-28 rounded-3xl bg-gradient-to-br from-[#2a1d0f] via-[#1a1208] to-[#0a0703] border-2 border-amber-400/80 flex flex-col items-center justify-center shadow-[0_0_40px_rgba(245,158,11,0.5)] group-hover:scale-110 group-active:scale-95 transition-all duration-300">
+                    <span className="text-5xl animate-bounce">🎁</span>
+                    <span className="text-[9px] font-mono font-black text-amber-300 mt-1 uppercase tracking-widest">Hologram Crate</span>
                   </div>
                 </div>
 
-                <p className="text-[9px] text-zinc-500 mb-6 max-w-[280px] mx-auto leading-relaxed">
-                  {levelRewardModal.type === 'avatar'
-                    ? 'Nhấp vào thẻ để xoay lật 3D và hiển thị trạng thái đồng bộ diện mạo!'
-                    : levelRewardModal.type === 'checkin'
-                    ? 'Nhấp vào thẻ để xoay lật 3D và xem phần thưởng năng lượng điểm danh!'
-                    : 'Nhấp vào thẻ để xoay lật 3D và hiển thị các phần quà độc quyền thăng cấp của bạn!'}
+                <p className="text-[11px] text-zinc-400 font-mono mb-6 mt-4">
+                  Chạm vào rương hoặc nhấn nút bên dưới để giải mã toàn bộ phần thưởng!
                 </p>
 
                 <button
-                  onClick={() => { playSound.click(); setLevelRewardModal(prev => ({ ...prev, show: false })); }}
-                  className="px-8 py-2.5 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-zinc-950 text-xs font-black uppercase tracking-wider rounded-xl transition-all active:scale-95 shadow-md shadow-amber-500/20"
+                  onClick={() => {
+                    playSound.success();
+                    setLevelRewardModal(prev => ({ ...prev, flipped: true }));
+                  }}
+                  className="w-full py-3.5 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-500 hover:to-yellow-500 text-zinc-950 text-xs font-black uppercase tracking-widest rounded-2xl transition-all active:scale-95 shadow-[0_0_30px_rgba(245,158,11,0.4)] flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  Tuyệt vời!
+                  <Sparkles className="w-4 h-4 text-zinc-950 animate-spin" />
+                  <span>KHAI MỞ RƯƠNG LƯỢNG TỬ</span>
                 </button>
+              </div>
+            ) : (
+              // ============ GIAI ĐOẠN 2: BỆ PHÓNG VẬT PHẨM ĐÃ GIẢI MÃ (SHOWCASE PEDESTAL) ============
+              <div className="relative z-10 py-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 text-[10px] font-mono font-bold uppercase tracking-wider mb-2">
+                  <span>✨ GIẢI MÃ PHẦN THƯỞNG THÀNH CÔNG</span>
+                </div>
+
+                <h3 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 uppercase tracking-widest font-sans mb-1">
+                  CHÚC MỪNG NHÀ KHOA HỌC!
+                </h3>
+                <p className="text-xs text-zinc-400 mb-6">
+                  {levelRewardModal.type === 'avatar' 
+                    ? 'Diện mạo mới đã sẵn sàng tỏa sáng trên toàn hệ sinh thái!'
+                    : 'Toàn bộ vật phẩm đã được ghi nhận vào kho lưu trữ cá nhân.'}
+                </p>
+
+                {/* Danh sách vật phẩm bay ra từ rương */}
+                <div className="space-y-3.5 my-4">
+                  {/* Card Pha lê nếu có */}
+                  {levelRewardModal.rewardText.includes('Pha lê') && (
+                    <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-yellow-500/10 to-amber-500/5 border border-amber-400/40 flex items-center gap-3.5 text-left shadow-lg">
+                      <div className="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-400/50 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(245,158,11,0.35)]">
+                        <CrystalIcon className="w-8 h-8 text-amber-300 animate-pulse" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-wider">Tiền tệ Lượng Tử</span>
+                        <h4 className="text-base font-black text-white">
+                          +{levelRewardModal.crystalsReward || 500} Pha Lê Lượng Tử 🔮
+                        </h4>
+                        <p className="text-[10px] text-zinc-400">Dùng để quay Gacha và mở khóa trang phục hiếm.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Card Khung Avatar nếu có */}
+                  {levelRewardModal.frameReward && (
+                    <div className="p-4 rounded-2xl bg-gradient-to-r from-pink-500/15 via-purple-500/10 to-transparent border border-pink-400/40 flex items-center justify-between gap-3 text-left shadow-lg">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-14 h-14 rounded-2xl bg-pink-500/20 border border-pink-400/50 flex items-center justify-center shrink-0 text-3xl shadow-[0_0_20px_rgba(236,72,153,0.35)]">
+                          🖼️
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-mono font-bold text-pink-400 uppercase tracking-wider">Khung Avatar Độc Quyền</span>
+                          <h4 className="text-sm font-black text-white">Khung {levelRewardModal.frameReward}</h4>
+                          <span className="text-[9px] text-emerald-400 font-bold">✨ Đã mở khóa vĩnh viễn</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          playSound.click();
+                          setPersonalization({ avatarFrame: levelRewardModal.frameReward });
+                          alert(`Đã trang bị Khung "${levelRewardModal.frameReward}" thành công!`);
+                        }}
+                        className="px-3 py-1.5 bg-pink-500/20 hover:bg-pink-500/40 border border-pink-400/50 text-pink-200 text-[10px] font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap"
+                      >
+                        Đeo ngay
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Card Danh hiệu nếu có */}
+                  {levelRewardModal.titleReward && (
+                    <div className="p-4 rounded-2xl bg-gradient-to-r from-cyan-500/15 via-indigo-500/10 to-transparent border border-cyan-400/40 flex items-center justify-between gap-3 text-left shadow-lg">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-14 h-14 rounded-2xl bg-cyan-500/20 border border-cyan-400/50 flex items-center justify-center shrink-0 text-3xl shadow-[0_0_20px_rgba(6,182,212,0.35)]">
+                          🏆
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-mono font-bold text-cyan-400 uppercase tracking-wider">Danh Hiệu Danh Dự</span>
+                          <h4 className="text-sm font-black text-white">{getTitleLabel(levelRewardModal.titleReward)}</h4>
+                          <span className="text-[9px] text-emerald-400 font-bold">✨ Đã mở khóa vĩnh viễn</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          playSound.click();
+                          setPersonalization({ activeTitle: levelRewardModal.titleReward });
+                          alert(`Đã kích hoạt Danh hiệu "${getTitleLabel(levelRewardModal.titleReward)}" thành công!`);
+                        }}
+                        className="px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/40 border border-cyan-400/50 text-cyan-200 text-[10px] font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap"
+                      >
+                        Kích hoạt
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Nội dung chi tiết nếu không có frame/title đặc thù */}
+                  {!levelRewardModal.frameReward && !levelRewardModal.titleReward && !levelRewardModal.rewardText.includes('Pha lê') && (
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-center">
+                      <p className="text-xs font-bold text-white leading-relaxed whitespace-pre-line">{levelRewardModal.rewardText}</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-6 flex items-center justify-center">
+                  <button
+                    onClick={() => {
+                      playSound.click();
+                      setLevelRewardModal(prev => ({ ...prev, show: false }));
+                    }}
+                    className="w-full py-3 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-zinc-950 text-xs font-black uppercase tracking-widest rounded-2xl transition-all active:scale-95 shadow-[0_0_25px_rgba(245,158,11,0.35)] cursor-pointer"
+                  >
+                    TUYỆT VỜI / XÁC NHẬN
+                  </button>
+                </div>
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Modal Đăng ký Face 2FA bằng AI */}
