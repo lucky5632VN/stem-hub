@@ -1,9 +1,14 @@
 'use client';
 
-import React, { useRef, useMemo, useEffect, useState } from 'react';
+import React, { useRef, useMemo, useEffect, useState, useSyncExternalStore } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
+
+const emptySubscribe = () => () => {};
+function useMounted() {
+  return useSyncExternalStore(emptySubscribe, () => true, () => false);
+}
 import {
   MODEL_TYPES,
   PRESET_SKINS,
@@ -430,37 +435,23 @@ export default function VoxelCharacter3D({
   onSnapshotReady = null,
   showControls = false
 }) {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const [skinData, setSkinData] = useState(null);
-  const [currentSkin, setCurrentSkin] = useState(skin);
-  const [currentHeldItem, setCurrentHeldItem] = useState(heldItem);
-  const [currentAnimation, setCurrentAnimation] = useState(animation);
+  const [internalSkin, setInternalSkin] = useState(null);
+  const [internalHeldItem, setInternalHeldItem] = useState(null);
+  const [internalAnimation, setInternalAnimation] = useState(null);
   const [isRotating, setIsRotating] = useState(autoRotate);
 
-  // SSR Safe mount
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Update internal states if props change
-  useEffect(() => {
-    setCurrentSkin(skin);
-  }, [skin]);
-
-  useEffect(() => {
-    setCurrentHeldItem(heldItem);
-  }, [heldItem]);
-
-  useEffect(() => {
-    setCurrentAnimation(animation);
-  }, [animation]);
+  const activeSkin = internalSkin ?? skin;
+  const activeHeldItem = internalHeldItem ?? heldItem;
+  const activeAnimation = internalAnimation ?? animation;
 
   // Load and synthesize skin texture
   useEffect(() => {
     let active = true;
     async function initSkin() {
       try {
-        const loaded = await loadSkin(currentSkin);
+        const loaded = await loadSkin(activeSkin);
         if (!active) return;
         setSkinData(loaded);
 
@@ -482,7 +473,7 @@ export default function VoxelCharacter3D({
     }
     initSkin();
     return () => { active = false; };
-  }, [currentSkin, onSnapshotReady]);
+  }, [activeSkin, onSnapshotReady]);
 
   // Three.js Textures
   const skinTexture = useMemo(() => {
@@ -550,8 +541,8 @@ export default function VoxelCharacter3D({
             isSlim={isSlim}
             showOverlay={showOverlay}
             showCape={showCape && cape !== 'none'}
-            heldItem={currentHeldItem}
-            animation={currentAnimation}
+            heldItem={activeHeldItem}
+            animation={activeAnimation}
           />
 
           {/* Interactive 360 Orbit Controls */}
@@ -582,9 +573,9 @@ export default function VoxelCharacter3D({
             ].map((p) => (
               <button
                 key={p.id}
-                onClick={() => setCurrentSkin(p.id)}
+                onClick={() => setInternalSkin(p.id)}
                 className={`px-2 py-1 rounded-md text-[11px] font-medium transition-all ${
-                  currentSkin === p.id
+                  activeSkin === p.id
                     ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20'
                     : 'text-slate-300 hover:bg-slate-800'
                 }`}
@@ -597,8 +588,8 @@ export default function VoxelCharacter3D({
           {/* Held Items & Action */}
           <div className="flex items-center gap-1.5">
             <select
-              value={currentHeldItem}
-              onChange={(e) => setCurrentHeldItem(e.target.value)}
+              value={activeHeldItem}
+              onChange={(e) => setInternalHeldItem(e.target.value)}
               className="bg-slate-800 text-slate-200 border border-slate-700 rounded-md px-2 py-1 text-[11px] outline-none"
             >
               <option value="test_tube">🧪 Test Tube</option>
@@ -608,11 +599,11 @@ export default function VoxelCharacter3D({
             </select>
 
             <button
-              onClick={() => setCurrentAnimation((prev) => (prev === 'idle' ? 'walk' : prev === 'walk' ? 'celebrate' : 'idle'))}
+              onClick={() => setInternalAnimation((prev) => ((prev || animation) === 'idle' ? 'walk' : (prev || animation) === 'walk' ? 'celebrate' : 'idle'))}
               className="px-2 py-1 rounded-md bg-slate-800 text-slate-200 hover:bg-slate-700 text-[11px] font-mono border border-slate-700"
               title="Toggle Animation"
             >
-              🏃 {currentAnimation}
+              🏃 {activeAnimation}
             </button>
 
             <button

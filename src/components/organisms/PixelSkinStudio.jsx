@@ -767,6 +767,28 @@ export function generateIsometricHeadAvatar(config, size = 96) {
 }
 
 // ─── MAIN PIXEL SKIN STUDIO COMPONENT ───────────────────────────────────────
+function computeIsometricSnapshot(skinState) {
+  try {
+    if (typeof engineIsometricHeadAvatar === 'function' && !skinState.customSkinUrl) {
+      const presetKey = skinState.outfit === 'lab_coat' 
+        ? 'stem_steve' 
+        : skinState.outfit === 'cyber_hoodie' 
+          ? 'cyber_alex' 
+          : skinState.outfit === 'astronaut_nebula' 
+            ? 'biohazard_hazmat' 
+            : 'quantum_physicist';
+      const snap = engineIsometricHeadAvatar(presetKey, { size: 128 });
+      if (snap) {
+        const finalUrl = typeof snap === 'string' ? snap : (snap.toDataURL ? snap.toDataURL() : null);
+        if (finalUrl) return finalUrl;
+      }
+    }
+    return generateIsometricHeadAvatar(skinState, 128);
+  } catch (e) {
+    return generateIsometricHeadAvatar(skinState, 128);
+  }
+}
+
 export default function PixelSkinStudio({
   isOpen = true,
   onClose,
@@ -805,7 +827,6 @@ export default function PixelSkinStudio({
   const [toastMessage, setToastMessage] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
-  const [snapshotAvatarUrl, setSnapshotAvatarUrl] = useState(null);
 
   // Hidden File Input Ref
   const fileInputRef = useRef(null);
@@ -817,32 +838,7 @@ export default function PixelSkinStudio({
   }, [skinState]);
 
   // Generate 2D Isometric Head Avatar
-  useEffect(() => {
-    try {
-      if (typeof engineIsometricHeadAvatar === 'function' && !skinState.customSkinUrl) {
-        const presetKey = skinState.outfit === 'lab_coat' 
-          ? 'stem_steve' 
-          : skinState.outfit === 'cyber_hoodie' 
-            ? 'cyber_alex' 
-            : skinState.outfit === 'astronaut_nebula' 
-              ? 'biohazard_hazmat' 
-              : 'quantum_physicist';
-        const snap = engineIsometricHeadAvatar(presetKey, { size: 128 });
-        if (snap) {
-          const finalUrl = typeof snap === 'string' ? snap : (snap.toDataURL ? snap.toDataURL() : null);
-          if (finalUrl) {
-            setSnapshotAvatarUrl(finalUrl);
-            return;
-          }
-        }
-      }
-      const snap = generateIsometricHeadAvatar(skinState, 128);
-      setSnapshotAvatarUrl(snap);
-    } catch (e) {
-      const snap = generateIsometricHeadAvatar(skinState, 128);
-      setSnapshotAvatarUrl(snap);
-    }
-  }, [skinState]);
+  const snapshotAvatarUrl = useMemo(() => computeIsometricSnapshot(skinState), [skinState]);
 
   // Show Toast
   const showToast = useCallback((msg, type = 'success') => {

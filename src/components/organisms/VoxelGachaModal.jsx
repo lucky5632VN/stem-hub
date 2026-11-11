@@ -357,12 +357,14 @@ function LuckyBlock3DScene({
     }
 
     // 9. Vòng lặp Render (Animation Loop)
-    let clock = new THREE.Clock();
+    let lastTime = performance.now();
+    const startTime = performance.now();
 
-    const animate = () => {
+    const animate = (now = performance.now()) => {
       animFrameRef.current = requestAnimationFrame(animate);
-      const delta = clock.getDelta();
-      const time = clock.getElapsedTime();
+      const delta = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+      const time = (now - startTime) / 1000;
 
       // Cập nhật tia lửa điện quay quanh
       if (sparkParticlesRef.current) {
@@ -592,7 +594,7 @@ function HologramVoxelCard({
       starColor: 'text-zinc-400',
       particleFlame: false
     };
-  }, [isLegendary, isEpic, isRare, isCommon]);
+  }, [isLegendary, isEpic, isRare]);
 
   return (
     <div
@@ -770,17 +772,25 @@ export default function VoxelGachaModal({
   });
 
   const crystals = personalization?.crystals !== undefined ? Number(personalization.crystals) : 500;
-  const currentUnlocked = personalization?.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default'];
-  const currentTitles = personalization?.unlockedTitles || ['apprentice'];
+  const currentUnlocked = useMemo(() => personalization?.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default'], [personalization?.unlockedParts]);
+  const currentTitles = useMemo(() => personalization?.unlockedTitles || ['apprentice'], [personalization?.unlockedTitles]);
 
-  // Đồng bộ pullCount từ props
-  useEffect(() => {
-    if (isOpen) {
-      setPullCount(initialPullCount);
-      setErrorMsg('');
-      startGachaRoll(initialPullCount);
-    }
-  }, [isOpen, initialPullCount]);
+  // Kích hoạt chuỗi nổ vỡ khối Lucky Block
+  const triggerShatterSequence = useCallback(() => {
+    setStage('shattering');
+    voxelAudio.playShatter();
+
+    setTimeout(() => {
+      setStage('revealed');
+      // Tự động phát âm thanh hoành tráng nếu có đồ Legendary
+      setResults(currentResults => {
+        if (currentResults.some(r => r.item.rarity === 'Legendary')) {
+          voxelAudio.playLegendaryStinger();
+        }
+        return currentResults;
+      });
+    }, 850);
+  }, []);
 
   // =========================================================================
   // LOGIC QUAY GACHA VÀ TÍNH TOÁN BẢO HIỂM (PITY SYSTEM)
@@ -824,22 +834,37 @@ export default function VoxelGachaModal({
       unlockedTitles: updatedTitles
     });
 
-    // Đồng bộ vào Firestore nếu người dùng đã đăng nhập
+    // Đồng bộ vào Firestore nếu người dùng đã đăng nhập (bọc an toàn tránh throw)
     if (user?.uid) {
-      const userRef = doc(db, 'users', user.uid);
-      updateDoc(userRef, {
-        'personalization.crystals': newBalance,
-        'personalization.unlockedParts': workingUnlocked,
-        'personalization.unlockedTitles': workingTitles
-      }).catch(err => {
-        console.warn('Lỗi đồng bộ gacha vào Firestore (đã lưu local):', err?.message);
-      });
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        updateDoc(userRef, {
+          'personalization.crystals': newBalance,
+          'personalization.unlockedParts': updatedUnlocked,
+          'personalization.unlockedTitles': updatedTitles
+        }).catch(err => {
+          console.warn('Lỗi đồng bộ gacha vào Firestore (đã lưu local):', err?.message);
+        });
+      } catch (e) {
+        console.warn('Lỗi gọi Firestore updateDoc:', e?.message);
+      }
     }
 
     setResults(rollResults);
-    setTotalRefundCrystals(refund);
+    setTotalRefundCrystals(totalCompensation);
     setIsRolling(false);
   }, [crystals, pityCounter, currentUnlocked, currentTitles, setPersonalization, user]);
+
+  // Đồng bộ pullCount từ props khi modal mở
+  const prevIsOpenRef = useRef(false);
+  useEffect(() => {
+    if (isOpen && !prevIsOpenRef.current) {
+      setPullCount(initialPullCount);
+      setErrorMsg('');
+      startGachaRoll(initialPullCount);
+    }
+    prevIsOpenRef.current = isOpen;
+  }, [isOpen, initialPullCount, startGachaRoll]);
 
   // =========================================================================
   // XỬ LÝ CLICK / GIỮ ĐỂ TÍCH TỤ NĂNG LƯỢNG (STAGE 2 -> 3)
@@ -863,21 +888,7 @@ export default function VoxelGachaModal({
       }
       return next;
     });
-  }, [stage]);
-
-  // Kích hoạt chuỗi nổ vỡ khối Lucky Block
-  const triggerShatterSequence = () => {
-    setStage('shattering');
-    voxelAudio.playShatter();
-
-    setTimeout(() => {
-      setStage('revealed');
-      // Tự động lật thẻ đầu tiên hoặc thẻ hiếm nhất nếu có
-      if (results.some(r => r.item.rarity === 'Legendary')) {
-        voxelAudio.playLegendaryStinger();
-      }
-    }, 850);
-  };
+  }, [stage, triggerShatterSequence]);
 
   // Bỏ qua hiệu ứng (Mở nhanh)
   const handleSkipAnimation = () => {
@@ -1110,7 +1121,7 @@ export default function VoxelGachaModal({
                       </div>
                     ) : (
                       <span className="text-zinc-400 text-xs font-mono">
-                        Chạm vào từng thẻ hoặc bấm "Mở tất cả" để giải mã.
+                        Chạm vào từng thẻ hoặc bấm &quot;Mở tất cả&quot; để giải mã.
                       </span>
                     )}
                   </div>
