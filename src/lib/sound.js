@@ -309,6 +309,71 @@ export const playSound = {
     } catch (e) {
       console.warn("Sound play failed", e);
     }
+  },
+
+  legendary: () => {
+    if (!useAppStore.getState().soundEnabled) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    try {
+      const now = ctx.currentTime;
+      const playTone = (freq, offset, duration, gainVal = 0.06, type = 'sine') => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now + offset);
+        gain.gain.setValueAtTime(0, now + offset);
+        gain.gain.linearRampToValueAtTime(gainVal, now + offset + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + offset + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + offset);
+        osc.stop(now + offset + duration);
+      };
+
+      // Triumphant SSR Fanfare progression: C5 -> E5 -> G5 -> B5 -> C6 -> E6
+      playTone(523.25, 0.00, 0.40, 0.05, 'triangle');
+      playTone(659.25, 0.08, 0.45, 0.05, 'triangle');
+      playTone(783.99, 0.16, 0.50, 0.06, 'sine');
+      playTone(987.77, 0.24, 0.55, 0.06, 'sine');
+      playTone(1046.50, 0.32, 0.70, 0.08, 'sine');
+      playTone(1318.51, 0.40, 0.90, 0.07, 'sine');
+      // Shimmer sparkle overlay
+      playTone(2093.00, 0.42, 0.60, 0.03, 'sine');
+      playTone(2637.02, 0.50, 0.60, 0.025, 'sine');
+    } catch (e) {
+      console.warn("Sound play failed", e);
+    }
+  },
+
+  epic: () => {
+    if (!useAppStore.getState().soundEnabled) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    try {
+      const now = ctx.currentTime;
+      const playTone = (freq, offset, duration, gainVal = 0.05) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + offset);
+        gain.gain.setValueAtTime(0, now + offset);
+        gain.gain.linearRampToValueAtTime(gainVal, now + offset + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + offset + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + offset);
+        osc.stop(now + offset + duration);
+      };
+
+      // SR Electric crystalline progression: F#5 -> A5 -> C#6 -> E6
+      playTone(739.99, 0.00, 0.30, 0.04);
+      playTone(880.00, 0.07, 0.35, 0.05);
+      playTone(1108.73, 0.14, 0.45, 0.06);
+      playTone(1318.51, 0.21, 0.60, 0.06);
+    } catch (e) {
+      console.warn("Sound play failed", e);
+    }
   }
 };
 

@@ -89,6 +89,10 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
       case 'cyber_pilot': return '#1e293b';
       case 'celestial_robe': return '#1e1b4b';
       case 'dark_knight': return '#09090b';
+      case 'academy_uniform': return '#1e3a8a';
+      case 'quantum_lab_coat': return '#0284c7';
+      case 'cyber_mecha': return '#047857';
+      case 'streetwear_hoodie': return '#2e1065';
       default: return gender === 'female' ? '#ec4899' : '#0ea5e9'; // Nữ mặc định hồng, Nam mặc định xanh dương
     }
   };
@@ -126,6 +130,20 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
           <stop offset="60%" stopColor="#3b82f6" stopOpacity="0.4" />
           <stop offset="100%" stopColor="#06b6d4" stopOpacity="0" />
         </radialGradient>
+        <radialGradient id="solarFlareGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#fef08a" stopOpacity="0.9" />
+          <stop offset="35%" stopColor="#f59e0b" stopOpacity="0.7" />
+          <stop offset="70%" stopColor="#ef4444" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="#7c2d12" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id="superpositionCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#00ffff" stopOpacity="0.7" />
+          <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.1" />
+        </linearGradient>
+        <linearGradient id="superpositionPink" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.7" />
+          <stop offset="100%" stopColor="#a855f7" stopOpacity="0.1" />
+        </linearGradient>
         <style>{`
           #legs_section g, #arms_section g {
             transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -170,6 +188,42 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
             <ellipse cx="50" cy="18" rx="16" ry="3.5" stroke="#4ade80" strokeWidth="1" fill="#22c55e" fillOpacity="0.15" />
             <text x="33" y="15" fill="#22c55e" fontSize="4" fontFamily="monospace" opacity="0.8">1 0 1</text>
             <text x="55" y="15" fill="#22c55e" fontSize="4" fontFamily="monospace" opacity="0.8">0 1 0</text>
+          </g>
+        )}
+        {aura === 'quantum_superposition' && (
+          <g id="aura_quantum_superposition">
+            {/* Phân thân lượng tử đa thực tại (RGB Glitch Distortion Ghosts) */}
+            <g transform="translate(-4, -1)" opacity="0.35" className="animate-pulse">
+              <ellipse cx="50" cy="52" rx="36" ry="38" fill="url(#superpositionCyan)" />
+              <path d="M20 48 L28 48 M72 48 L80 48" stroke="#00ffff" strokeWidth="1.2" strokeDasharray="2,2" />
+            </g>
+            <g transform="translate(4, 1)" opacity="0.35" className="animate-pulse" style={{ animationDelay: '0.4s' }}>
+              <ellipse cx="50" cy="52" rx="36" ry="38" fill="url(#superpositionPink)" />
+              <path d="M18 56 L26 56 M74 56 L82 56" stroke="#f43f5e" strokeWidth="1.2" strokeDasharray="2,2" />
+            </g>
+            {/* Ký tự lượng tử bay lượn */}
+            <text x="12" y="32" fill="#00ffff" fontSize="3.8" fontFamily="monospace" opacity="0.85" className="animate-bounce">|Ψ⟩</text>
+            <text x="76" y="32" fill="#f43f5e" fontSize="3.8" fontFamily="monospace" opacity="0.85" className="animate-bounce" style={{ animationDelay: '0.5s' }}>ħ</text>
+            <text x="16" y="74" fill="#38bdf8" fontSize="3.2" fontFamily="monospace" opacity="0.75">α|0⟩</text>
+            <text x="72" y="74" fill="#e879f9" fontSize="3.2" fontFamily="monospace" opacity="0.75">β|1⟩</text>
+          </g>
+        )}
+        {aura === 'solar_flare' && (
+          <g id="aura_solar_flare">
+            {/* Vành nhật hoa bốc cháy xoay tròn */}
+            <circle cx="50" cy="50" r="45" fill="url(#solarFlareGrad)" className="animate-pulse" opacity="0.45" />
+            <g className="animate-spin" style={{ animationDuration: '10s', transformOrigin: '50px 50px' }}>
+              <path d="M50 4 Q54 18 50 24 Q46 18 50 4 Z" fill="#fbbf24" opacity="0.8" />
+              <path d="M50 96 Q54 82 50 76 Q46 82 50 96 Z" fill="#fbbf24" opacity="0.8" />
+              <path d="M4 50 Q18 54 24 50 Q18 46 4 50 Z" fill="#f59e0b" opacity="0.8" />
+              <path d="M96 50 Q82 54 76 50 Q82 46 96 50 Z" fill="#f59e0b" opacity="0.8" />
+              <path d="M18 18 Q28 26 30 32 Q24 30 18 18 Z" fill="#ef4444" opacity="0.7" />
+              <path d="M82 82 Q72 74 70 68 Q76 70 82 82 Z" fill="#ef4444" opacity="0.7" />
+              <path d="M82 18 Q74 28 68 30 Q70 24 82 18 Z" fill="#ef4444" opacity="0.7" />
+              <path d="M18 82 Q26 72 32 70 Q30 76 18 82 Z" fill="#ef4444" opacity="0.7" />
+            </g>
+            <circle cx="28" cy="22" r="1.5" fill="#fef08a" className="animate-ping" />
+            <circle cx="72" cy="78" r="1.5" fill="#fef08a" className="animate-ping" style={{ animationDelay: '0.6s' }} />
           </g>
         )}
         
@@ -440,6 +494,60 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
               <line x1="57" y1="78" x2="60" y2="92" stroke="#a855f7" strokeWidth="0.8" />
               <ellipse cx="44" cy="94" rx="4" ry="1.8" fill="#18181b" />
               <ellipse cx="56" cy="94" rx="4" ry="1.8" fill="#18181b" />
+            </g>
+          )}
+
+          {bottom === 'academy_skirt_pants' && (
+            gender === 'female' ? (
+              <g id="bottom_academy_skirt">
+                {/* Chân váy xếp ly xanh navy viền vàng Hoàng gia */}
+                <path d="M38 78 L33 87 H67 L62 78 Z" fill="#1e3a8a" stroke="#f59e0b" strokeWidth="0.8" />
+                <line x1="42" y1="78" x2="40" y2="87" stroke="#3b82f6" strokeWidth="0.8" />
+                <line x1="47" y1="78" x2="46" y2="87" stroke="#f59e0b" strokeWidth="0.8" />
+                <line x1="53" y1="78" x2="54" y2="87" stroke="#f59e0b" strokeWidth="0.8" />
+                <line x1="58" y1="78" x2="60" y2="87" stroke="#3b82f6" strokeWidth="0.8" />
+                <g transform={pose === 'walk' ? 'rotate(10, 45, 87)' : ''}>
+                  <rect x="43" y="87" width="4" height="4" fill={skin} />
+                  <ellipse cx="45" cy="93" rx="4.2" ry="1.8" fill="#0f172a" stroke="#f59e0b" strokeWidth="0.5" />
+                </g>
+                <g transform={pose === 'walk' ? 'rotate(-10, 55, 87)' : ''}>
+                  <rect x="53" y="87" width="4" height="4" fill={skin} />
+                  <ellipse cx="55" cy="93" rx="4.2" ry="1.8" fill="#0f172a" stroke="#f59e0b" strokeWidth="0.5" />
+                </g>
+              </g>
+            ) : (
+              <g id="bottom_academy_pants">
+                <rect x="40" y="78" width="20" height="2" fill="#1e3a8a" />
+                <g transform={pose === 'walk' ? 'rotate(8, 45, 78)' : ''}>
+                  <rect x="41.5" y="78" width="7.5" height="15" rx="1" fill="#1e3a8a" />
+                  <line x1="45.25" y1="79" x2="45.25" y2="92" stroke="#3b82f6" strokeWidth="0.6" />
+                  <ellipse cx="45.25" cy="94" rx="4.5" ry="2" fill="#0f172a" stroke="#f59e0b" strokeWidth="0.5" />
+                </g>
+                <g transform={pose === 'walk' ? 'rotate(-8, 55, 78)' : ''}>
+                  <rect x="51" y="78" width="7.5" height="15" rx="1" fill="#1e3a8a" />
+                  <line x1="54.75" y1="79" x2="54.75" y2="92" stroke="#3b82f6" strokeWidth="0.6" />
+                  <ellipse cx="54.75" cy="94" rx="4.5" ry="2" fill="#0f172a" stroke="#f59e0b" strokeWidth="0.5" />
+                </g>
+              </g>
+            )
+          )}
+
+          {bottom === 'cyber_exo_legs' && (
+            <g id="bottom_cyber_exo">
+              <g transform={pose === 'walk' ? 'rotate(8, 45, 78)' : ''}>
+                <rect x="41.5" y="78" width="7.5" height="14" rx="1" fill="#0f172a" />
+                <line x1="40" y1="80" x2="40" y2="92" stroke="#00f2fe" strokeWidth="1.5" strokeLinecap="round" />
+                <circle cx="40" cy="86" r="1.5" fill="#f43f5e" />
+                <rect x="42" y="83" width="6.5" height="2.5" fill="#334155" stroke="#00f2fe" strokeWidth="0.6" />
+                <ellipse cx="45" cy="94" rx="4.8" ry="2.2" fill="#1e293b" stroke="#00f2fe" strokeWidth="1" />
+              </g>
+              <g transform={pose === 'walk' ? 'rotate(-8, 55, 78)' : ''}>
+                <rect x="51" y="78" width="7.5" height="14" rx="1" fill="#0f172a" />
+                <line x1="60" y1="80" x2="60" y2="92" stroke="#00f2fe" strokeWidth="1.5" strokeLinecap="round" />
+                <circle cx="60" cy="86" r="1.5" fill="#f43f5e" />
+                <rect x="51.5" y="83" width="6.5" height="2.5" fill="#334155" stroke="#00f2fe" strokeWidth="0.6" />
+                <ellipse cx="55" cy="94" rx="4.8" ry="2.2" fill="#1e293b" stroke="#00f2fe" strokeWidth="1" />
+              </g>
             </g>
           )}
         </g>
@@ -747,6 +855,76 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
               <polygon points="68,60 64,63 69,66" fill="#27272a" />
               <polygon points="50,67 46,72 50,77 54,72" fill="#7e22ce" stroke="#d8b4fe" strokeWidth="1" className="animate-pulse" />
               <polygon points="50,69 48,72 50,75 52,72" fill="#ffffff" />
+            </g>
+          )}
+
+          {top === 'academy_uniform' && (
+            // Đồng Phục Viện STEM Hoàng Gia
+            <g id="body_academy_uniform">
+              <path d="M34 64 C34 58, 66 58, 66 64 L62 82 H38 Z" fill="#1e3a8a" stroke="#f59e0b" strokeWidth="0.8" />
+              {/* Sơ mi trắng cổ áo */}
+              <polygon points="46,62 50,68 54,62" fill="#ffffff" />
+              {/* Cà vạt sọc đỏ vàng */}
+              <path d="M49 67 L51 67 L52 75 L50 78 L48 75 Z" fill="#dc2626" />
+              <line x1="49" y1="70" x2="51" y2="71" stroke="#f59e0b" strokeWidth="0.8" />
+              <line x1="48.5" y1="73" x2="51.5" y2="74" stroke="#f59e0b" strokeWidth="0.8" />
+              {/* Huy hiệu STEM Academy trên ngực trái */}
+              <circle cx="41" cy="68" r="2.2" fill="#f59e0b" />
+              <polygon points="41,66.8 41.8,68.4 40.2,68.4" fill="#ffffff" />
+              {/* Cúc áo vàng */}
+              <circle cx="50" cy="73" r="0.8" fill="#f59e0b" />
+              <circle cx="50" cy="77" r="0.8" fill="#f59e0b" />
+            </g>
+          )}
+
+          {top === 'quantum_lab_coat' && (
+            // Blouse Lượng Tử Tân Tiến
+            <g id="body_quantum_lab_coat">
+              <path d="M34 64 C34 58, 66 58, 66 64 L62 82 H38 Z" fill="#0f172a" />
+              {/* Thân áo blouse trắng phát quang */}
+              <path d="M35 64 C35 59, 48 59, 48 68 L46 82 H37 Z" fill="#f0f9ff" stroke="#00f2fe" strokeWidth="0.6" />
+              <path d="M65 64 C65 59, 52 59, 52 68 L54 82 H63 Z" fill="#f0f9ff" stroke="#00f2fe" strokeWidth="0.6" />
+              {/* Áo trong màu đen công nghệ cao */}
+              <polygon points="47,63 50,68 53,63" fill="#0284c7" />
+              {/* Bình thí nghiệm lượng tử mini ở thắt lưng */}
+              <path d="M57 74 L61 74 L62 79 L56 79 Z" fill="#06b6d4" fillOpacity="0.8" stroke="#ffffff" strokeWidth="0.5" className="animate-pulse" />
+              <circle cx="59" cy="76" r="1" fill="#ffffff" />
+              {/* Thẻ ID lượng tử phát sáng */}
+              <rect x="39" y="68" width="4" height="5" rx="0.5" fill="#0284c7" stroke="#38bdf8" strokeWidth="0.5" />
+              <rect x="40" y="69" width="2" height="1" fill="#ffffff" />
+            </g>
+          )}
+
+          {top === 'cyber_mecha' && (
+            // Giáp Ngoại Khung Lõi Arc
+            <g id="body_cyber_mecha">
+              <path d="M33 64 C33 58, 67 58, 67 64 L63 82 H37 Z" fill="#064e3b" stroke="#10b981" strokeWidth="1" />
+              <polygon points="36,62 44,65 38,71" fill="#047857" />
+              <polygon points="64,62 56,65 62,71" fill="#047857" />
+              {/* Lõi Arc Reactor năng lượng xanh ngọc */}
+              <circle cx="50" cy="71" r="5" fill="#022c22" stroke="#10b981" strokeWidth="1" />
+              <circle cx="50" cy="71" r="3.2" fill="#34d399" className="animate-pulse" />
+              <circle cx="50" cy="71" r="1.5" fill="#ffffff" />
+              {/* Khe tản nhiệt năng lượng */}
+              <line x1="43" y1="77" x2="48" y2="77" stroke="#10b981" strokeWidth="1" />
+              <line x1="52" y1="77" x2="57" y2="77" stroke="#10b981" strokeWidth="1" />
+              <line x1="44" y1="80" x2="56" y2="80" stroke="#047857" strokeWidth="1.2" />
+            </g>
+          )}
+
+          {top === 'streetwear_hoodie' && (
+            // Hoodie Streetwear Tím Neon
+            <g id="body_streetwear_hoodie">
+              <path d="M33 63 C33 58, 67 58, 67 63 L63 82 H37 Z" fill="#2e1065" stroke="#a855f7" strokeWidth="0.8" />
+              {/* Cổ áo hoodie rộng */}
+              <path d="M42 62 Q50 67 58 62 L56 65 Q50 70 44 65 Z" fill="#3b0764" />
+              {/* Dây áo hoodie rủ xuống màu vàng neon */}
+              <line x1="47" y1="65" x2="46" y2="74" stroke="#facc15" strokeWidth="1" strokeLinecap="round" />
+              <line x1="53" y1="65" x2="54" y2="74" stroke="#facc15" strokeWidth="1" strokeLinecap="round" />
+              {/* Logo STEM phong cách Cyberpunk trước ngực */}
+              <polygon points="50,68 47,72 53,72" fill="#c084fc" />
+              {/* Túi kangaroo trước bụng */}
+              <path d="M41 75 H59 L57 81 H43 Z" fill="#1e1b4b" stroke="#7e22ce" strokeWidth="0.6" />
             </g>
           )}
 
@@ -1320,6 +1498,31 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
           <g id="acc_plasma_shield" className="animate-pulse">
             <polygon points="26,62 33,58 40,62 40,70 33,74 26,70" fill="#06b6d4" fillOpacity="0.4" stroke="#00ffff" strokeWidth="1.2" />
             <polygon points="29,64 33,61 37,64 37,68 33,71 29,68" fill="none" stroke="#ffffff" strokeWidth="0.8" />
+          </g>
+        )}
+
+        {accessory === 'scholar_badge' && (
+          // Huy Hiệu Viện Sĩ STEM Vàng
+          <g id="acc_scholar_badge">
+            {/* Dải ruy băng đỏ vắt qua ngực */}
+            <path d="M41 63 L39 67 L43 67 Z" fill="#dc2626" />
+            {/* Cành nguyệt quế và huy chương vàng danh dự */}
+            <circle cx="41" cy="68" r="3.2" fill="#f59e0b" stroke="#fef08a" strokeWidth="0.6" />
+            <circle cx="41" cy="68" r="1.8" fill="#dc2626" />
+            <polygon points="41,66.8 41.5,67.8 42.5,68 41.7,68.8 41.9,69.8 41,69.2 40.1,69.8 40.3,68.8 39.5,68 40.5,67.8" fill="#ffd700" />
+          </g>
+        )}
+
+        {accessory === 'quantum_pen' && (
+          // Bút Lượng Tử Vẽ Không Gian
+          <g id="acc_quantum_pen" className="animate-bounce" style={{ animationDuration: '2.5s' }}>
+            {/* Cây bút stylus lượng tử lơ lửng */}
+            <line x1="82" y1="46" x2="76" y2="58" stroke="#0f172a" strokeWidth="3" strokeLinecap="round" />
+            <line x1="82" y1="46" x2="77" y2="56" stroke="#00f2fe" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="75" cy="60" r="1.5" fill="#f43f5e" className="animate-ping" />
+            {/* Nét vẽ phương trình không gian phát sáng Cyan */}
+            <text x="64" y="44" fill="#00ffff" fontSize="3.5" fontFamily="monospace" fontWeight="bold" opacity="0.9" className="animate-pulse">E=mc²</text>
+            <path d="M72 48 L76 46 L80 48 L80 52 L76 54 L72 52 Z" stroke="#38bdf8" strokeWidth="0.6" fill="none" opacity="0.8" />
           </g>
         )}
       </g>

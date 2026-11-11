@@ -74,6 +74,10 @@ export const ALL_COSMETICS = [
   { id: 'cyber_pilot', category: 'top', name: 'Áo Phi Công Bomber Mecha', rarity: 'Epic', price: 270, value: 'cyber_pilot', desc: 'Áo khoác bomber da công nghệ kèm đai chiến thuật vàng dạ quang.', genderTarget: 'unisex' },
   { id: 'celestial_robe', category: 'top', name: 'Pháp Phục Tiên Tri Vũ Trụ', rarity: 'Legendary', price: 490, value: 'celestial_robe', desc: 'Áo choàng dệt từ bụi sao đêm đính hoa văn chòm sao hoàng đạo dát vàng.', genderTarget: 'unisex' },
   { id: 'dark_knight', category: 'top', name: 'Giáp Hắc Hiệp Sĩ Cyber', rarity: 'Epic', price: 320, value: 'dark_knight', desc: 'Chiến giáp gai nhọn hầm hố màu thép đen với lõi thạch anh tím.', genderTarget: 'unisex' },
+  { id: 'academy_uniform', category: 'top', name: 'Đồng Phục Viện STEM Hoàng Gia', rarity: 'Epic', price: 280, value: 'academy_uniform', desc: 'Áo vest xanh navy viền vàng kèm cà vạt học viện danh giá.', genderTarget: 'unisex' },
+  { id: 'quantum_lab_coat', category: 'top', name: 'Blouse Lượng Tử Tân Tiến', rarity: 'Legendary', price: 440, value: 'quantum_lab_coat', desc: 'Áo Blouse trắng phát quang cyan kèm bình phản ứng lượng tử.', genderTarget: 'unisex' },
+  { id: 'cyber_mecha', category: 'top', name: 'Giáp Ngoại Khung Lõi Arc', rarity: 'Legendary', price: 490, value: 'cyber_mecha', desc: 'Chiến giáp cơ giới xanh lục bảo tích hợp lò phản ứng mini trước ngực.', genderTarget: 'unisex' },
+  { id: 'streetwear_hoodie', category: 'top', name: 'Hoodie Streetwear Tím Neon', rarity: 'Epic', price: 260, value: 'streetwear_hoodie', desc: 'Hoodie phong cách đường phố tương lai kèm tai nghe quàng cổ.', genderTarget: 'unisex' },
 
   // Quần (Hạ y)
   { id: 'space_shorts', category: 'bottom', name: 'Quần Đùi Vũ Trụ', rarity: 'Rare', price: 120, value: 'space_shorts', desc: 'Quần đùi màu slate phản quang tiện dụng.', genderTarget: 'unisex' },
@@ -88,6 +92,8 @@ export const ALL_COSMETICS = [
   { id: 'quantum_techwear', category: 'bottom', name: 'Quần Techwear Dây Đai Chiến Thuật', rarity: 'Epic', price: 220, value: 'quantum_techwear', desc: 'Quần jogger phong cách Techwear đai chéo và túi hộp.', genderTarget: 'unisex' },
   { id: 'armored_greaves', category: 'bottom', name: 'Giáp Chân Hiệp Sĩ Lượng Tử', rarity: 'Legendary', price: 380, value: 'armored_greaves', desc: 'Giáp bọc chân kim loại mạ vàng sang trọng với khớp gối phát sáng.', genderTarget: 'unisex' },
   { id: 'cyber_hakama', category: 'bottom', name: 'Váy Quần Samurai Cyber', rarity: 'Epic', price: 240, value: 'cyber_hakama', desc: 'Quần xếp ly hakama phong cách kiếm sĩ tương lai.', genderTarget: 'unisex' },
+  { id: 'academy_skirt_pants', category: 'bottom', name: 'Trang Phục Hạ Y Học Viện', rarity: 'Epic', price: 220, value: 'academy_skirt_pants', desc: 'Váy xếp ly / Quần âu thanh lịch chuẩn phong cách học viện.', genderTarget: 'unisex' },
+  { id: 'cyber_exo_legs', category: 'bottom', name: 'Chân Trợ Lực Ngoại Khung Exo', rarity: 'Legendary', price: 390, value: 'cyber_exo_legs', desc: 'Khung xương trợ lực chân hợp kim titan piston thủy lực.', genderTarget: 'unisex' },
 
   // Phụ kiện (Accessory)
   { id: 'sci_glasses', category: 'accessory', name: 'Kính Trí Tuệ Giáo Sư', rarity: 'Rare', price: 100, value: 'sci_glasses', desc: 'Kính gọng vàng trí thức của nhà bác học.', genderTarget: 'unisex' },
@@ -104,7 +110,9 @@ export const ALL_COSMETICS = [
   { id: 'halo_matrix', category: 'accessory', name: 'Vòng Ma Trận Hào Quang', rarity: 'Epic', price: 310, value: 'halo_matrix', desc: 'Vòng hào quang ma trận số nhị phân xoay tròn trên đỉnh đầu.', genderTarget: 'unisex' },
   { id: 'cyber_mask_fox', category: 'accessory', name: 'Mặt Nạ Hồ Ly Kitsune Cyber', rarity: 'Epic', price: 290, value: 'cyber_mask_fox', desc: 'Mặt nạ cáo kitsune sơn trắng đỏ viền LED công nghệ tương lai.', genderTarget: 'unisex' },
   { id: 'hologram_horns', category: 'accessory', name: 'Sừng Rồng Hologram Tím', rarity: 'Epic', price: 280, value: 'hologram_horns', desc: 'Cặp sừng rồng quang học phát sáng tím huyền ảo.', genderTarget: 'unisex' },
-  { id: 'plasma_shield', category: 'accessory', name: 'Khiên Năng Lượng Lục Giác', rarity: 'Epic', price: 300, value: 'plasma_shield', desc: 'Lá chắn plasma tổ ong lục giác bao bọc cánh tay.', genderTarget: 'unisex' }
+  { id: 'plasma_shield', category: 'accessory', name: 'Khiên Năng Lượng Lục Giác', rarity: 'Epic', price: 300, value: 'plasma_shield', desc: 'Lá chắn plasma tổ ong lục giác bao bọc cánh tay.', genderTarget: 'unisex' },
+  { id: 'scholar_badge', category: 'accessory', name: 'Huy Hiệu Viện Sĩ STEM Vàng', rarity: 'Epic', price: 250, value: 'scholar_badge', desc: 'Huy chương cành nguyệt quế vàng nạm ruby tôn vinh trí tuệ STEM.', genderTarget: 'unisex' },
+  { id: 'quantum_pen', category: 'accessory', name: 'Bút Lượng Tử Vẽ Không Gian', rarity: 'Legendary', price: 470, value: 'quantum_pen', desc: 'Bút stylus quang học phóng chiếu công thức Einstein & lượng tử trong không trung.', genderTarget: 'unisex' }
 ];
 
 export const HAIR_COLORS = [
@@ -401,6 +409,13 @@ export default function ProfilePage() {
   const [gachaResults, setGachaResults] = useState([]);
   const [flippedGachaCards, setFlippedGachaCards] = useState([]);
   const [gachaCrystalsSpent, setGachaCrystalsSpent] = useState(0);
+
+  // Trạng thái Pity Bảo hiểm Gacha (10 lượt ra SR, 50 lượt ra SSR)
+  const [gachaPity, setGachaPity] = useState({ sr: 0, ssr: 0 });
+  // Hiệu ứng Bùng nổ Hào quang Hoàng kim toàn màn hình khi mở trúng SSR
+  const [goldenFlashActive, setGoldenFlashActive] = useState(false);
+  // Modal Thẻ Căn Cước Học Sinh STEM THPT Quỳnh Lưu 4
+  const [showIdCardModal, setShowIdCardModal] = useState(false);
 
   // Trạng thái Modal Nhận quà Thăng cấp 3D
   const [levelRewardModal, setLevelRewardModal] = useState({
@@ -779,7 +794,19 @@ export default function ProfilePage() {
     }
   }, [user]);
 
-  // Trợ lý tạo kết quả Gacha an toàn cục bộ (Dự phòng khi Firestore chạm trần Quota 429)
+  // Tải trạng thái Pity Bảo hiểm Gacha từ localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined' && user?.uid) {
+      try {
+        const saved = JSON.parse(localStorage.getItem('stem_gacha_pity_' + user.uid) || '{"sr":0,"ssr":0}');
+        if (saved && typeof saved.sr === 'number') {
+          setGachaPity(saved);
+        }
+      } catch {}
+    }
+  }, [user]);
+
+  // Trợ lý tạo kết quả Gacha an toàn cục bộ (Dự phòng khi Firestore chạm trần Quota 429) & Tích hợp Pity System
   const generateLocalGachaRoll = (pullCount) => {
     const count = Number(pullCount) || 1;
     const cost = count === 10 ? 900 : 100;
@@ -789,12 +816,29 @@ export default function ProfilePage() {
     const results = [];
     let totalCompensation = 0;
 
+    let currentSrPity = gachaPity.sr;
+    let currentSsrPity = gachaPity.ssr;
+
     for (let i = 0; i < count; i++) {
-      const rand = Math.random() * 100;
+      currentSrPity += 1;
+      currentSsrPity += 1;
+
       let selectedRarity = 'Rare';
-      if (rand < 10) selectedRarity = 'Legendary';
-      else if (rand < 35) selectedRarity = 'Epic';
-      else selectedRarity = 'Rare';
+      const rand = Math.random() * 100;
+
+      // Cơ chế bảo hiểm (Pity):
+      // - 50 lượt chắc chắn có SSR (hoặc 7% cơ bản)
+      // - 10 lượt chắc chắn có SR (hoặc 32% cơ bản)
+      if (currentSsrPity >= 50 || rand < 7) {
+        selectedRarity = 'Legendary';
+        currentSsrPity = 0;
+        currentSrPity = 0;
+      } else if (currentSrPity >= 10 || rand < 32) {
+        selectedRarity = 'Epic';
+        currentSrPity = 0;
+      } else {
+        selectedRarity = 'Rare';
+      }
 
       let pool = ALL_COSMETICS.filter(item => item.rarity === selectedRarity);
       if (pool.length === 0) pool = ALL_COSMETICS;
@@ -805,12 +849,21 @@ export default function ProfilePage() {
       let compensation = 0;
       if (newUnlockedParts.includes(item.id)) {
         isDuplicate = true;
-        compensation = Math.round((item.price || 100) * 0.5);
+        // Hoàn tiền hào phóng khi quay trùng: R = 50 🔮, SR = 150 🔮, SSR = 500 🔮
+        compensation = selectedRarity === 'Legendary' ? 500 : selectedRarity === 'Epic' ? 150 : 50;
       } else {
         newUnlockedParts.push(item.id);
       }
       totalCompensation += compensation;
       results.push({ item, isDuplicate, compensation });
+    }
+
+    const nextPity = { sr: currentSrPity, ssr: currentSsrPity };
+    setGachaPity(nextPity);
+    if (typeof window !== 'undefined' && user?.uid) {
+      try {
+        localStorage.setItem('stem_gacha_pity_' + user.uid, JSON.stringify(nextPity));
+      } catch {}
     }
 
     const newCrystals = Math.max(0, currentCrystals - cost + totalCompensation);
@@ -938,6 +991,20 @@ export default function ProfilePage() {
       const hasSR = rollResults.some(r => r?.item?.rarity === 'Epic');
       const detectedRarity = hasSSR ? 'Legendary' : hasSR ? 'Epic' : 'Rare';
       setGachaRarity(detectedRarity);
+
+      // Cập nhật trạng thái Bảo hiểm Pity
+      setGachaPity(prev => {
+        const next = {
+          sr: (hasSSR || hasSR) ? 0 : Math.min(10, prev.sr + count),
+          ssr: hasSSR ? 0 : Math.min(50, prev.ssr + count)
+        };
+        if (typeof window !== 'undefined' && user?.uid) {
+          try {
+            localStorage.setItem('stem_gacha_pity_' + user.uid, JSON.stringify(next));
+          } catch {}
+        }
+        return next;
+      });
     }
 
     // Đợi hoạt ảnh Warp hoàn thành (hoặc người dùng bấm bỏ qua)
@@ -1081,6 +1148,33 @@ export default function ProfilePage() {
   // Lưu tạo hình nhân vật
   const handleEquipAvatarParts = async () => {
     playSound.click();
+
+    // Kiểm tra xem người dùng có đang mặc thử trang phục chưa mở khóa không
+    const localCached = (typeof window !== 'undefined' && user?.uid)
+      ? JSON.parse(localStorage.getItem('stem_unlocked_parts_' + user.uid) || '[]')
+      : [];
+    const unlocked = [...(personalization.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default']), ...localCached];
+    const isAdmin = user && (user.displayName === 'admin' || user.email?.includes('admin'));
+
+    if (!isAdmin) {
+      const lockedItems = ALL_COSMETICS.filter(c => 
+        tempAvatarParts[c.category] === c.value && !unlocked.includes(c.id)
+      );
+
+      if (lockedItems.length > 0) {
+        playSound.error?.() || playSound.click();
+        setLevelRewardModal({
+          show: true,
+          type: 'avatar',
+          milestone: 0,
+          rewardText: `⚠️ Bạn đang mặc thử ${lockedItems.length} vật phẩm chưa mở khóa:\n• ${lockedItems.map(i => i.name).join('\n• ')}\n\nHãy vào Cửa Hàng hoặc quay Gacha Lượng Tử để sở hữu vĩnh viễn trước khi đồng bộ avatar đại diện nhé!`,
+          flipped: true,
+          error: true
+        });
+        return;
+      }
+    }
+
     try {
       setPersonalization({
         avatarUrl: 'custom-avatar',
@@ -3514,16 +3608,60 @@ export default function ProfilePage() {
                   </button>
                 </div>
 
-                <p className="text-[10px] text-zinc-500 text-center mt-3 leading-snug px-4">
-                  Bạn có thể chọn phối mọi trang phục, biểu cảm & hào quang. Bấm nút dưới để đồng bộ avatar chính!
-                </p>
+                {/* Cảnh báo trang phục đang mặc thử */}
+                {(() => {
+                  const localCached = (typeof window !== 'undefined' && user?.uid)
+                    ? JSON.parse(localStorage.getItem('stem_unlocked_parts_' + user.uid) || '[]')
+                    : [];
+                  const unlocked = [...(personalization.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default']), ...localCached];
+                  const isAdmin = user && (user.displayName === 'admin' || user.email?.includes('admin'));
+                  if (isAdmin) return null;
+
+                  const lockedList = ALL_COSMETICS.filter(c => 
+                    tempAvatarParts[c.category] === c.value && !unlocked.includes(c.id)
+                  );
+
+                  if (lockedList.length === 0) return null;
+
+                  return (
+                    <div className="w-full mt-3 p-2.5 rounded-2xl bg-amber-500/15 border border-amber-400/40 text-center text-[10px] font-mono text-amber-300">
+                      <div className="font-bold flex items-center justify-center gap-1 mb-0.5">
+                        <span>⚠️ Đang mặc thử {lockedList.length} món chưa sở hữu:</span>
+                      </div>
+                      <div className="text-[9px] text-zinc-300 truncate">
+                        {lockedList.map(i => i.name).join(', ')}
+                      </div>
+                      <button
+                        onClick={() => {
+                          playSound.click();
+                          setActivePersonalizationSubTab('shop_gacha');
+                        }}
+                        className="mt-1.5 px-3 py-1 bg-amber-400 hover:bg-amber-300 text-zinc-950 font-black rounded-lg text-[9px] uppercase tracking-wider transition-all active:scale-95 inline-flex items-center gap-1 cursor-pointer"
+                      >
+                        <Sparkles className="w-2.5 h-2.5" />
+                        <span>Đến Gacha săn đồ ngay 🔮</span>
+                      </button>
+                    </div>
+                  );
+                })()}
 
                 <button
                   onClick={handleEquipAvatarParts}
-                  className="w-full mt-4 py-3 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all active:scale-95 shadow-lg shadow-pink-500/20 flex items-center justify-center gap-2"
+                  className="w-full mt-3 py-3 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all active:scale-95 shadow-lg shadow-pink-500/20 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Sparkles className="w-4 h-4" />
                   Đồng bộ Avatar đại diện
+                </button>
+
+                {/* Nút xem Thẻ Căn Cước Học Sinh STEM */}
+                <button
+                  onClick={() => {
+                    playSound.click();
+                    setShowIdCardModal(true);
+                  }}
+                  className="w-full mt-2 py-2.5 bg-gradient-to-r from-cyan-600/30 via-indigo-600/30 to-purple-600/30 hover:from-cyan-600/50 hover:to-purple-600/50 text-cyan-200 text-xs font-bold rounded-2xl border border-cyan-400/30 transition-all active:scale-95 shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span>🪪 Thẻ Căn Cước Học Sinh STEM</span>
                 </button>
               </div>
 
@@ -3698,13 +3836,15 @@ export default function ProfilePage() {
                   {/* KHÍ CHẤT & HÀO QUANG */}
                   <div>
                     <h5 className="text-[10px] font-black text-text-secondary uppercase tracking-widest mb-2">Khí chất & Hào quang Vũ trụ (Aura)</h5>
-                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-1.5">
                       {[
                         { id: 'none', label: 'Không có ❌' },
                         { id: 'phoenix', label: 'Hỏa Phượng 🔥' },
                         { id: 'lightning', label: 'Lôi Điện ⚡' },
                         { id: 'galaxy', label: 'Ngân Hà 🌌' },
-                        { id: 'matrix_halo', label: 'Ma Trận Số 💻' }
+                        { id: 'matrix_halo', label: 'Ma Trận Số 💻' },
+                        { id: 'quantum_superposition', label: 'Phân Thân 🌀' },
+                        { id: 'solar_flare', label: 'Thái Dương ☀️' }
                       ].map(aur => (
                         <button
                           key={aur.id}
@@ -3752,18 +3892,19 @@ export default function ProfilePage() {
                       return (
                         <button
                           key={item.id}
-                          disabled={!isUnlocked}
-                          title={!isUnlocked ? "Vật phẩm đang khóa! Hãy quay Gacha hoặc mua tại Cửa Hàng để mở khóa." : ""}
+                          title={!isUnlocked ? "Vật phẩm đang khóa! Nhấp để mặc thử lên nhân vật." : item.desc || item.name}
                           onClick={() => {
                             playSound.click();
                             setTempAvatarParts(prev => ({ ...prev, body: item.value }));
                           }}
-                          className={`px-3 py-2 rounded-xl text-[11px] font-bold border transition-all text-center flex flex-col items-center gap-1 relative ${
+                          className={`px-3 py-2 rounded-xl text-[11px] font-bold border transition-all text-center flex flex-col items-center gap-1 relative active:scale-95 cursor-pointer ${
                             isSelected
-                              ? 'bg-pink-500/20 border-pink-500 text-pink-400'
+                              ? isUnlocked
+                                ? 'bg-pink-500/20 border-pink-500 text-pink-400 ring-1 ring-pink-500/40 shadow-sm shadow-pink-500/20'
+                                : 'bg-amber-500/20 border-amber-500 text-amber-300 ring-1 ring-amber-500/50 shadow-sm shadow-amber-500/20'
                               : isUnlocked
-                              ? 'bg-bg-tertiary border-border-theme text-text-primary active:scale-95'
-                              : 'bg-bg-primary border-border-theme text-text-secondary opacity-55 cursor-not-allowed'
+                              ? 'bg-bg-tertiary border-border-theme text-text-primary hover:border-pink-500/40'
+                              : 'bg-bg-primary/90 border-dashed border-amber-500/40 text-text-secondary hover:border-amber-400 hover:text-amber-300'
                           }`}
                         >
                           {isNewlyWon && (
@@ -3772,7 +3913,7 @@ export default function ProfilePage() {
                           <span className="w-4 h-4 rounded-full border border-border-theme" style={{ backgroundColor: skinColors[item.value] }} />
                           <span className="truncate w-full">{item.name.replace('Màu da ', '')}</span>
                           {!isUnlocked && (
-                            <span className="absolute top-1 right-1 text-[8px] bg-bg-primary text-amber-400 p-0.5 rounded">🔒</span>
+                            <span className="absolute top-1 right-1 text-[8px] bg-bg-primary text-amber-400 px-1 py-0.5 rounded-full font-mono border border-amber-500/30">🔒 Thử</span>
                           )}
                         </button>
                       );
@@ -3807,18 +3948,19 @@ export default function ProfilePage() {
                         return (
                           <button
                             key={item.id}
-                            disabled={!isUnlocked}
-                            title={!isUnlocked ? "Vật phẩm đang khóa! Hãy quay Gacha hoặc mua tại Cửa Hàng để mở khóa." : ""}
+                            title={!isUnlocked ? "Vật phẩm đang khóa! Nhấp để mặc thử lên nhân vật." : item.desc || item.name}
                             onClick={() => {
                               playSound.click();
                               setTempAvatarParts(prev => ({ ...prev, hair: item.value }));
                             }}
-                            className={`px-3 py-2 rounded-xl text-[11px] font-bold border transition-all text-center flex flex-col items-center gap-1 relative ${
+                            className={`px-3 py-2 rounded-xl text-[11px] font-bold border transition-all text-center flex flex-col items-center gap-1 relative active:scale-95 cursor-pointer ${
                               isSelected
-                                ? 'bg-pink-500/20 border-pink-500 text-pink-400'
+                                ? isUnlocked
+                                  ? 'bg-pink-500/20 border-pink-500 text-pink-400 ring-1 ring-pink-500/40 shadow-sm shadow-pink-500/20'
+                                  : 'bg-amber-500/20 border-amber-500 text-amber-300 ring-1 ring-amber-500/50 shadow-sm shadow-amber-500/20'
                                 : isUnlocked
-                                ? 'bg-bg-tertiary border-border-theme text-text-primary active:scale-95'
-                                : 'bg-bg-primary border-border-theme text-text-secondary opacity-55 cursor-not-allowed'
+                                ? 'bg-bg-tertiary border-border-theme text-text-primary hover:border-pink-500/40'
+                                : 'bg-bg-primary/90 border-dashed border-amber-500/40 text-text-secondary hover:border-amber-400 hover:text-amber-300'
                             }`}
                           >
                             {isNewlyWon && (
@@ -3826,7 +3968,7 @@ export default function ProfilePage() {
                             )}
                             <span className="truncate w-full">{item.name.replace('Tóc ', '')}</span>
                             {!isUnlocked && (
-                              <span className="absolute top-1 right-1 text-[8px] bg-bg-primary text-amber-400 p-0.5 rounded">🔒</span>
+                              <span className="absolute top-1 right-1 text-[8px] bg-bg-primary text-amber-400 px-1 py-0.5 rounded-full font-mono border border-amber-500/30">🔒 Thử</span>
                             )}
                           </button>
                         );
@@ -3884,18 +4026,19 @@ export default function ProfilePage() {
                         return (
                           <button
                             key={item.id}
-                            disabled={!isUnlocked}
-                            title={!isUnlocked ? "Vật phẩm đang khóa! Hãy quay Gacha hoặc mua tại Cửa Hàng để mở khóa." : ""}
+                            title={!isUnlocked ? "Vật phẩm đang khóa! Nhấp để mặc thử lên nhân vật." : item.desc || item.name}
                             onClick={() => {
                               playSound.click();
                               setTempAvatarParts(prev => ({ ...prev, top: item.value }));
                             }}
-                            className={`w-full px-3 py-2 rounded-xl text-[11px] font-bold border transition-all text-left flex justify-between items-center relative ${
+                            className={`w-full px-3 py-2 rounded-xl text-[11px] font-bold border transition-all text-left flex justify-between items-center relative active:scale-95 cursor-pointer ${
                               isSelected
-                                ? 'bg-pink-500/20 border-pink-500 text-pink-400'
+                                ? isUnlocked
+                                  ? 'bg-pink-500/20 border-pink-500 text-pink-400 ring-1 ring-pink-500/40 shadow-sm shadow-pink-500/20'
+                                  : 'bg-amber-500/20 border-amber-500 text-amber-300 ring-1 ring-amber-500/50 shadow-sm shadow-amber-500/20'
                                 : isUnlocked
-                                ? 'bg-bg-tertiary border-border-theme text-text-primary active:scale-95'
-                                : 'bg-bg-primary border-border-theme text-text-secondary opacity-55 cursor-not-allowed'
+                                ? 'bg-bg-tertiary border-border-theme text-text-primary hover:border-pink-500/40'
+                                : 'bg-bg-primary/90 border-dashed border-amber-500/40 text-text-secondary hover:border-amber-400 hover:text-amber-300'
                             }`}
                           >
                             <span className="flex items-center gap-1.5">
@@ -3905,7 +4048,7 @@ export default function ProfilePage() {
                               )}
                             </span>
                             {!isUnlocked && (
-                              <span className="text-[10px] text-amber-400 flex items-center gap-1">🔒 Khóa</span>
+                              <span className="text-[9px] text-amber-400 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 font-mono">🔒 Thử</span>
                             )}
                           </button>
                         );
@@ -3940,18 +4083,19 @@ export default function ProfilePage() {
                         return (
                           <button
                             key={item.id}
-                            disabled={!isUnlocked}
-                            title={!isUnlocked ? "Vật phẩm đang khóa! Hãy quay Gacha hoặc mua tại Cửa Hàng để mở khóa." : ""}
+                            title={!isUnlocked ? "Vật phẩm đang khóa! Nhấp để mặc thử lên nhân vật." : item.desc || item.name}
                             onClick={() => {
                               playSound.click();
                               setTempAvatarParts(prev => ({ ...prev, bottom: item.value }));
                             }}
-                            className={`w-full px-3 py-2 rounded-xl text-[11px] font-bold border transition-all text-left flex justify-between items-center relative ${
+                            className={`w-full px-3 py-2 rounded-xl text-[11px] font-bold border transition-all text-left flex justify-between items-center relative active:scale-95 cursor-pointer ${
                               isSelected
-                                ? 'bg-pink-500/20 border-pink-500 text-pink-400'
+                                ? isUnlocked
+                                  ? 'bg-pink-500/20 border-pink-500 text-pink-400 ring-1 ring-pink-500/40 shadow-sm shadow-pink-500/20'
+                                  : 'bg-amber-500/20 border-amber-500 text-amber-300 ring-1 ring-amber-500/50 shadow-sm shadow-amber-500/20'
                                 : isUnlocked
-                                ? 'bg-bg-tertiary border-border-theme text-text-primary active:scale-95'
-                                : 'bg-bg-primary border-border-theme text-text-secondary opacity-55 cursor-not-allowed'
+                                ? 'bg-bg-tertiary border-border-theme text-text-primary hover:border-pink-500/40'
+                                : 'bg-bg-primary/90 border-dashed border-amber-500/40 text-text-secondary hover:border-amber-400 hover:text-amber-300'
                             }`}
                           >
                             <span className="flex items-center gap-1.5">
@@ -3961,7 +4105,7 @@ export default function ProfilePage() {
                               )}
                             </span>
                             {!isUnlocked && (
-                              <span className="text-[10px] text-amber-400 flex items-center gap-1">🔒 Khóa</span>
+                              <span className="text-[9px] text-amber-400 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 font-mono">🔒 Thử</span>
                             )}
                           </button>
                         );
@@ -3996,18 +4140,19 @@ export default function ProfilePage() {
                       return (
                         <button
                           key={item.id}
-                          disabled={!isUnlocked}
-                          title={!isUnlocked ? "Vật phẩm đang khóa! Hãy quay Gacha hoặc mua tại Cửa Hàng để mở khóa." : ""}
+                          title={!isUnlocked ? "Vật phẩm đang khóa! Nhấp để mặc thử lên nhân vật." : item.desc || item.name}
                           onClick={() => {
                             playSound.click();
                             setTempAvatarParts(prev => ({ ...prev, accessory: item.value }));
                           }}
-                          className={`px-3 py-2 rounded-xl text-[11px] font-bold border transition-all text-center flex flex-col items-center justify-center min-h-[46px] relative ${
+                          className={`px-3 py-2 rounded-xl text-[11px] font-bold border transition-all text-center flex flex-col items-center justify-center min-h-[46px] relative active:scale-95 cursor-pointer ${
                             isSelected
-                              ? 'bg-pink-500/20 border-pink-500 text-pink-400'
+                              ? isUnlocked
+                                ? 'bg-pink-500/20 border-pink-500 text-pink-400 ring-1 ring-pink-500/40 shadow-sm shadow-pink-500/20'
+                                : 'bg-amber-500/20 border-amber-500 text-amber-300 ring-1 ring-amber-500/50 shadow-sm shadow-amber-500/20'
                               : isUnlocked
-                              ? 'bg-bg-tertiary border-border-theme text-text-primary active:scale-95'
-                              : 'bg-bg-primary border-border-theme text-text-secondary opacity-55 cursor-not-allowed'
+                              ? 'bg-bg-tertiary border-border-theme text-text-primary hover:border-pink-500/40'
+                              : 'bg-bg-primary/90 border-dashed border-amber-500/40 text-text-secondary hover:border-amber-400 hover:text-amber-300'
                           }`}
                         >
                           {isNewlyWon && (
@@ -4015,7 +4160,7 @@ export default function ProfilePage() {
                           )}
                           <span className="truncate w-full">{item.name.replace('Kính Thực Tế Ảo ', '')}</span>
                           {!isUnlocked && (
-                            <span className="absolute top-1 right-1 text-[8px] bg-bg-primary text-amber-400 p-0.5 rounded">🔒</span>
+                            <span className="absolute top-1 right-1 text-[8px] bg-bg-primary text-amber-400 px-1 py-0.5 rounded-full font-mono border border-amber-500/30">🔒 Thử</span>
                           )}
                         </button>
                       );
@@ -4076,6 +4221,41 @@ export default function ProfilePage() {
                       <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">🌟 SSR 5%</span>
                       <span className="px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30">⚡ SR 25%</span>
                       <span className="px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">🔷 R 70%</span>
+                    </div>
+
+                    {/* BẢO HIỂM GACHA (PITY TRACKER) */}
+                    <div className="grid grid-cols-2 gap-2 max-w-xs mx-auto mb-3">
+                      <div className="bg-purple-950/40 border border-purple-500/30 rounded-xl p-2 text-left">
+                        <div className="flex justify-between items-center text-[9px] font-mono text-purple-300 font-bold mb-1">
+                          <span>BẢO HIỂM SR</span>
+                          <span className="text-white font-black">{gachaPity.sr}/10</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-black/60 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-300" 
+                            style={{ width: `${Math.min(100, (gachaPity.sr / 10) * 100)}%` }} 
+                          />
+                        </div>
+                        <div className="text-[7.5px] text-zinc-400 mt-1 font-mono">
+                          {gachaPity.sr >= 9 ? '⚡ Lượt kế chắc chắn SR+' : `Còn ${10 - gachaPity.sr} lượt`}
+                        </div>
+                      </div>
+
+                      <div className="bg-amber-950/40 border border-amber-500/30 rounded-xl p-2 text-left">
+                        <div className="flex justify-between items-center text-[9px] font-mono text-amber-300 font-bold mb-1">
+                          <span>BẢO HIỂM SSR</span>
+                          <span className="text-white font-black">{gachaPity.ssr}/50</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-black/60 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-amber-500 to-yellow-400 rounded-full transition-all duration-300" 
+                            style={{ width: `${Math.min(100, (gachaPity.ssr / 50) * 100)}%` }} 
+                          />
+                        </div>
+                        <div className="text-[7.5px] text-zinc-400 mt-1 font-mono">
+                          {gachaPity.ssr >= 49 ? '🌟 Lượt kế chắc chắn SSR' : `Còn ${50 - gachaPity.ssr} lượt`}
+                        </div>
+                      </div>
                     </div>
 
                     <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-black/40 border border-white/10 text-[11px] font-mono text-zinc-300 mb-5">
@@ -5342,6 +5522,16 @@ export default function ProfilePage() {
             <div className="absolute -top-32 -left-32 w-64 h-64 bg-purple-500/15 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
 
+            {/* Lớp phủ Bùng nổ Hào quang Hoàng kim toàn màn hình khi mở trúng SSR */}
+            {goldenFlashActive && (
+              <div className="absolute inset-0 z-50 bg-gradient-to-r from-amber-400/40 via-yellow-200/60 to-amber-500/40 pointer-events-none animate-in fade-in duration-150 backdrop-blur-[2px] flex items-center justify-center">
+                <div className="text-center animate-bounce">
+                  <div className="text-6xl drop-shadow-[0_0_30px_#f59e0b]">🌟</div>
+                  <div className="text-xl font-black text-amber-200 font-mono tracking-widest uppercase drop-shadow-[0_0_15px_#f59e0b]">SSR HUYỀN THOẠI CỰC ĐẠI!</div>
+                </div>
+              </div>
+            )}
+
             {/* Header rút gọn để không chiếm chiều cao */}
             <div className="relative z-10 shrink-0">
               <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-purple-500/10 border border-purple-400/30 text-purple-300 text-[9.5px] font-mono font-bold uppercase tracking-widest mb-1 shadow-sm">
@@ -5388,7 +5578,15 @@ export default function ProfilePage() {
                       style={{ perspective: '1200px' }}
                       onClick={() => {
                         if (!isFlipped) {
-                          playSound.success();
+                          if (isLegendary) {
+                            playSound.legendary();
+                            setGoldenFlashActive(true);
+                            setTimeout(() => setGoldenFlashActive(false), 900);
+                          } else if (isEpic) {
+                            playSound.epic();
+                          } else {
+                            playSound.success();
+                          }
                           setFlippedGachaCards([0]);
                         }
                       }}
@@ -5490,7 +5688,7 @@ export default function ProfilePage() {
                             )}
                           </div>
 
-                          <div className="w-full">
+                          <div className="w-full space-y-1.5">
                             {res.isDuplicate ? (
                               <div className="text-[9px] font-bold text-amber-300 bg-amber-500/20 border border-amber-500/40 py-1 rounded-xl text-center font-mono">
                                 Đã sở hữu: +{res.compensation} 🔮 hoàn trả
@@ -5503,6 +5701,25 @@ export default function ProfilePage() {
                               }`}>
                                 ✨ MỚI SỞ HỮU! ĐÃ THÊM VÀO KHO ĐỒ
                               </div>
+                            )}
+
+                            {item.category && item.value && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  playSound.click();
+                                  setShowGachaModal(false);
+                                  setActivePersonalizationSubTab('character');
+                                  setTempAvatarParts(prev => ({
+                                    ...prev,
+                                    [item.category]: item.value
+                                  }));
+                                }}
+                                className="w-full py-1.5 px-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-[10px] font-black uppercase tracking-wider rounded-xl transition-all active:scale-95 flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
+                              >
+                                <Sparkles className="w-3.5 h-3.5" />
+                                <span>Mặc thử ngay vào Chibi</span>
+                              </button>
                             )}
                           </div>
                         </div>
@@ -5528,7 +5745,15 @@ export default function ProfilePage() {
                       style={{ perspective: '1000px' }}
                       onClick={() => {
                         if (!isFlipped) {
-                          playSound.success();
+                          if (isLegendary) {
+                            playSound.legendary();
+                            setGoldenFlashActive(true);
+                            setTimeout(() => setGoldenFlashActive(false), 900);
+                          } else if (isEpic) {
+                            playSound.epic();
+                          } else {
+                            playSound.success();
+                          }
                           setFlippedGachaCards(prev => [...prev, idx]);
                         }
                       }}
@@ -5655,6 +5880,24 @@ export default function ProfilePage() {
                                 ✨ MỚI SỞ HỮU!
                               </div>
                             )}
+                            {item.category && item.value && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  playSound.click();
+                                  setShowGachaModal(false);
+                                  setActivePersonalizationSubTab('character');
+                                  setTempAvatarParts(prev => ({
+                                    ...prev,
+                                    [item.category]: item.value
+                                  }));
+                                }}
+                                className="w-full mt-0.5 py-0.5 bg-emerald-600/80 hover:bg-emerald-500 text-white text-[6.5px] font-bold rounded flex items-center justify-center gap-0.5 transition-all cursor-pointer"
+                                title="Mặc thử ngay vào Chibi Maker"
+                              >
+                                <span>👕 Thử</span>
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -5669,11 +5912,20 @@ export default function ProfilePage() {
               {lastPullCount > 1 && (
                 <button
                   onClick={() => {
-                    playSound.success();
+                    const hasLegendary = gachaResults.some(r => r.item?.rarity === 'Legendary');
+                    const hasEpic = gachaResults.some(r => r.item?.rarity === 'Epic');
+                    if (hasLegendary) {
+                      playSound.legendary();
+                      setGoldenFlashActive(true);
+                      setTimeout(() => setGoldenFlashActive(false), 900);
+                    } else if (hasEpic) {
+                      playSound.epic();
+                    } else {
+                      playSound.success();
+                    }
                     gachaResults.forEach((_, i) => {
                       setTimeout(() => {
                         setFlippedGachaCards(prev => prev.includes(i) ? prev : [...prev, i]);
-                        playSound.click();
                       }, i * 65);
                     });
                   }}
@@ -5724,6 +5976,195 @@ export default function ProfilePage() {
                   setShowGachaModal(false);
                 }}
                 className="px-4 py-1.5 sm:py-2 bg-zinc-700 hover:bg-zinc-600 text-white text-[10.5px] sm:text-[11px] font-bold uppercase tracking-wider rounded-xl transition-all active:scale-95 cursor-pointer"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ================== MODAL THẺ CĂN CƯỚC HỌC SINH STEM (STEM STUDENT ID CARD) ================== */}
+      {mounted && typeof document !== 'undefined' && showIdCardModal && createPortal(
+        <div className="fixed inset-0 z-[999999] bg-[#02040c]/85 backdrop-blur-2xl flex items-center justify-center p-3 select-none animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg bg-gradient-to-b from-[#141226] via-[#0d0b1a] to-[#060410] border border-cyan-500/40 rounded-3xl p-5 sm:p-6 shadow-[0_0_80px_rgba(6,182,212,0.3)] overflow-hidden my-auto ring-1 ring-cyan-400/30">
+            {/* Lưới tọa độ laser & hào quang nền */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(6,182,212,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(6,182,212,0.04)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
+            <div className="absolute -top-24 -left-24 w-56 h-56 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -right-24 w-56 h-56 bg-purple-500/15 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Nút đóng */}
+            <button
+              onClick={() => {
+                playSound.click();
+                setShowIdCardModal(false);
+              }}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white flex items-center justify-center transition-all cursor-pointer z-30"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Header thông tin thẻ */}
+            <div className="relative z-10 text-center mb-3">
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-[9px] font-mono font-bold uppercase tracking-widest mb-1 shadow-sm">
+                <Sparkles className="w-3 h-3 text-cyan-300 animate-spin" />
+                <span>STEM SMART IDENTITY CARD • V4.5</span>
+              </div>
+              <h3 className="text-base sm:text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-purple-300 uppercase tracking-widest font-sans leading-tight">
+                THẺ CĂN CƯỚC HỌC SINH STEM
+              </h3>
+              <p className="text-[10px] text-zinc-400 font-mono uppercase tracking-wider">
+                TRƯỜNG THPT QUỲNH LƯU 4 • NGHỆ AN
+              </p>
+            </div>
+
+            {/* THÂN THẺ CĂN CƯỚC HÌNH THỨC THẺ THÔNG MINH HOLOGRAPHIC (SMART CARD) */}
+            <div className="relative z-10 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#1b2342] via-[#0f1424] to-[#090b14] border-2 border-cyan-400/60 shadow-[0_0_35px_rgba(6,182,212,0.25)] overflow-hidden">
+              {/* Lớp phản quang Hologram lấp lánh */}
+              <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.06)_0%,transparent_40%,rgba(0,242,254,0.06)_60%,transparent_100%)] pointer-events-none" />
+
+              {/* Dải trên của thẻ: Tên Trường & Smart Chip mạ vàng */}
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/10 relative z-10">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-black text-xs shadow-md">
+                    QL4
+                  </div>
+                  <div>
+                    <div className="text-[10.5px] font-black text-white uppercase tracking-wider leading-none">
+                      THPT QUỲNH LƯU 4
+                    </div>
+                    <div className="text-[8px] font-mono text-cyan-300 uppercase tracking-widest">
+                      CLB SÁNG TẠO STEM HUB
+                    </div>
+                  </div>
+                </div>
+
+                {/* Smart Chip vàng công nghệ cao */}
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-6 rounded-md bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-600 border border-amber-300 p-0.5 shadow-sm flex flex-col justify-between">
+                    <div className="w-full h-[1px] bg-amber-800/60" />
+                    <div className="w-full h-[1px] bg-amber-800/60" />
+                    <div className="w-full h-[1px] bg-amber-800/60" />
+                  </div>
+                  <div className="text-[9px] font-mono font-bold text-amber-300 tracking-wider">
+                    RFID NFC
+                  </div>
+                </div>
+              </div>
+
+              {/* Khu vực giữa: Ảnh Avatar Chibi & Thông tin cá nhân */}
+              <div className="grid grid-cols-12 gap-3 sm:gap-4 items-center relative z-10">
+                {/* Khung ảnh đại diện Chibi bên trái */}
+                <div className="col-span-5 sm:col-span-4 flex flex-col items-center">
+                  <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-2xl bg-black/60 border-2 border-cyan-400/80 p-1 shadow-[0_0_20px_rgba(6,182,212,0.35)] overflow-hidden flex items-center justify-center">
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(6,182,212,0.2)_0%,transparent_70%)] pointer-events-none" />
+                    {/* Laser scanning line effect */}
+                    <div className="absolute inset-x-0 h-[2px] bg-cyan-400/70 shadow-[0_0_8px_#00f2fe] animate-bounce pointer-events-none" />
+                    <STEMAvatarSVG parts={tempAvatarParts} className="w-full h-full transform translate-y-1 scale-105" />
+                  </div>
+                  <div className="mt-1.5 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-400/50 text-cyan-300 text-[8.5px] font-black font-mono">
+                    <span>LV.{personalization.level || 1}</span>
+                    <span>•</span>
+                    <span>{personalization.elo || 1000} ELO</span>
+                  </div>
+                </div>
+
+                {/* Thông tin hồ sơ học sinh bên phải */}
+                <div className="col-span-7 sm:col-span-8 space-y-1.5 text-left">
+                  <div>
+                    <span className="text-[8px] font-mono text-zinc-400 uppercase tracking-widest block">Họ & Tên Nhà Nghiên Cứu</span>
+                    <h4 className="text-sm sm:text-base font-black text-white tracking-wide truncate">
+                      {user?.displayName || 'Nhà Khoa Học STEM'}
+                    </h4>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <span className="text-[7.5px] font-mono text-zinc-400 uppercase tracking-widest block">Mã Định Danh</span>
+                      <span className="text-[10px] font-mono font-black text-cyan-300">
+                        QL4-{user?.uid ? user.uid.slice(0, 8).toUpperCase() : 'STEM2026'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[7.5px] font-mono text-zinc-400 uppercase tracking-widest block">Khóa Học</span>
+                      <span className="text-[10px] font-mono font-bold text-zinc-200">
+                        2024 - 2027
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-[7.5px] font-mono text-zinc-400 uppercase tracking-widest block">Danh Hiệu Danh Dự</span>
+                    <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-pink-500/15 border border-pink-400/40 text-pink-300 text-[9.5px] font-bold">
+                      <span>🏆</span>
+                      <span>{getTitleLabel(personalization.activeTitle)}</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-[7.5px] font-mono text-zinc-400 uppercase tracking-widest block">Chiến Lực 4 Trụ Cột</span>
+                    <div className="grid grid-cols-4 gap-1 mt-0.5 text-center text-[7.5px] font-mono font-bold">
+                      <span className="py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-400/30">Toán</span>
+                      <span className="py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-400/30">Lý</span>
+                      <span className="py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30">Hóa</span>
+                      <span className="py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">Sinh</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Dải dưới của thẻ: Mã vạch mô phỏng & Con dấu số */}
+              <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between relative z-10">
+                {/* Barcode mô phỏng */}
+                <div className="flex flex-col items-start">
+                  <div className="flex gap-[2px] h-5 items-end">
+                    {[3, 1, 2, 4, 1, 3, 2, 1, 4, 2, 3, 1, 2, 4, 1, 3, 2, 3, 1, 4].map((w, i) => (
+                      <div key={i} className="bg-cyan-300/80 h-full" style={{ width: `${w}px` }} />
+                    ))}
+                  </div>
+                  <span className="text-[7px] font-mono text-zinc-500 mt-0.5 tracking-widest">
+                    *STEM-{user?.uid ? user.uid.slice(0, 10).toUpperCase() : 'HUB-VERIFIED'}*
+                  </span>
+                </div>
+
+                {/* Con dấu xác thực số */}
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-xl bg-emerald-500/10 border border-emerald-400/40 text-emerald-300 text-[8px] font-mono font-bold uppercase tracking-wider">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                  <span>XÁC THỰC SỐ STEM</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Các nút hành động Modal */}
+            <div className="relative z-10 flex flex-wrap items-center justify-center gap-2 mt-4 pt-3 border-t border-white/10">
+              <button
+                onClick={() => {
+                  playSound.click();
+                  setShowIdCardModal(false);
+                  router.push('/story');
+                }}
+                className="px-5 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all active:scale-95 shadow-lg shadow-pink-500/30 flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>📸 Khoe Thẻ Lên Story</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  playSound.success();
+                  alert('Đã lưu cấu hình thẻ căn cước học sinh STEM của bạn!');
+                }}
+                className="px-4 py-2.5 bg-cyan-600/30 hover:bg-cyan-600/50 border border-cyan-400/40 text-cyan-200 text-xs font-bold rounded-xl transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>📥 Lưu Thẻ Căn Cước</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  playSound.click();
+                  setShowIdCardModal(false);
+                }}
+                className="px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold rounded-xl transition-all active:scale-95 cursor-pointer"
               >
                 Đóng
               </button>
