@@ -1,13 +1,56 @@
 'use client';
 
 import React, { useRef, useMemo, useEffect, useState, useSyncExternalStore } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 
 const emptySubscribe = () => () => {};
 function useMounted() {
   return useSyncExternalStore(emptySubscribe, () => true, () => false);
+}
+
+/**
+ * Camera controller reacting dynamically to external zoom and reset triggers.
+ * Zooms along current viewing direction without breaking manual orbit rotation.
+ * Reset trigger snaps back to clean front-facing full-body framing.
+ */
+function CameraController({ zoomLevel = 1.0, resetTrigger = 0, controlsRef }) {
+  const { camera } = useThree();
+  const lastResetRef = useRef(resetTrigger);
+
+  useEffect(() => {
+    const baseDistance = 54;
+    const clampedZoom = Math.max(0.45, Math.min(2.5, zoomLevel || 1.0));
+    const targetDist = baseDistance / clampedZoom;
+    const target = new THREE.Vector3(0, -2, 0);
+
+    if (resetTrigger !== lastResetRef.current) {
+      lastResetRef.current = resetTrigger;
+      camera.position.set(0, -2, targetDist);
+      camera.lookAt(target);
+      if (controlsRef?.current) {
+        controlsRef.current.target.copy(target);
+        controlsRef.current.update();
+      }
+    } else {
+      const currentDir = new THREE.Vector3().subVectors(camera.position, target);
+      if (currentDir.lengthSq() < 0.001) {
+        currentDir.set(0, 0, 1);
+      } else {
+        currentDir.normalize();
+      }
+      camera.position.copy(target).addScaledVector(currentDir, targetDist);
+      camera.lookAt(target);
+      if (controlsRef?.current) {
+        controlsRef.current.target.copy(target);
+        controlsRef.current.update();
+      }
+    }
+    camera.updateProjectionMatrix();
+  }, [zoomLevel, resetTrigger, camera, controlsRef]);
+
+  return null;
 }
 import {
   MODEL_TYPES,
@@ -169,6 +212,52 @@ function STEMTabletItem() {
 }
 
 /**
+ * 3D Diamond Sword in authentic Minecraft voxel style.
+ */
+function DiamondSwordItem() {
+  return (
+    <group position={[0, -3.2, 2.2]} rotation={[0.8, -0.2, 0.4]} scale={[0.6, 0.6, 0.6]}>
+      {/* Blade (Diamond Cyan) */}
+      <mesh position={[2.5, 2.5, 0]} rotation={[0, 0, Math.PI / 4]}>
+        <boxGeometry args={[1.4, 9.5, 0.8]} />
+        <meshStandardMaterial
+          color="#06b6d4"
+          emissive="#22d3ee"
+          emissiveIntensity={0.6}
+          roughness={0.2}
+          metalness={0.4}
+        />
+      </mesh>
+      {/* Blade Tip Highlight */}
+      <mesh position={[5.8, 5.8, 0]} rotation={[0, 0, Math.PI / 4]}>
+        <boxGeometry args={[1.0, 1.0, 0.9]} />
+        <meshStandardMaterial color="#a5f3fc" emissive="#e0f2fe" emissiveIntensity={1.2} />
+      </mesh>
+      {/* Crossguard (Obsidian / Gold) */}
+      <mesh position={[0.2, 0.2, 0]} rotation={[0, 0, -Math.PI / 4]}>
+        <boxGeometry args={[5.2, 1.4, 1.0]} />
+        <meshStandardMaterial color="#1e1b4b" roughness={0.5} />
+      </mesh>
+      {/* Guard Gold Inset */}
+      <mesh position={[0.2, 0.2, 0]}>
+        <boxGeometry args={[1.2, 1.2, 1.1]} />
+        <meshStandardMaterial color="#f59e0b" emissive="#d97706" emissiveIntensity={0.8} />
+      </mesh>
+      {/* Handle Grip (Dark Wood) */}
+      <mesh position={[-1.4, -1.4, 0]} rotation={[0, 0, Math.PI / 4]}>
+        <boxGeometry args={[1.0, 3.2, 0.9]} />
+        <meshStandardMaterial color="#78350f" roughness={0.9} />
+      </mesh>
+      {/* Pommel */}
+      <mesh position={[-2.7, -2.7, 0]}>
+        <boxGeometry args={[1.3, 1.3, 1.0]} />
+        <meshStandardMaterial color="#06b6d4" emissive="#0891b2" emissiveIntensity={0.5} />
+      </mesh>
+    </group>
+  );
+}
+
+/**
  * Held Item Switcher.
  */
 function HeldItemMesh({ itemType = 'test_tube' }) {
@@ -176,10 +265,13 @@ function HeldItemMesh({ itemType = 'test_tube' }) {
   if (itemType === 'pickaxe' || itemType === 'diamond_pickaxe') {
     return <DiamondPickaxeItem />;
   }
-  if (itemType === 'stem_tablet' || itemType === 'tablet') {
+  if (itemType === 'sword' || itemType === 'diamond_sword') {
+    return <DiamondSwordItem />;
+  }
+  if (itemType === 'stem_tablet' || itemType === 'tablet' || itemType === 'ruler_3d' || itemType === 'stem_trophy') {
     return <STEMTabletItem />;
   }
-  // Default to glowing test tube
+  // Default to glowing test tube / chemical flask
   return <TestTubeItem fluidColor="#00f2fe" />;
 }
 
@@ -262,7 +354,61 @@ function CharacterRig({
   useFrame(({ clock }) => {
     const time = clock.getElapsedTime();
 
-    if (animation === 'walk') {
+    if (animation === 'wave') {
+      // Waving hand friendly animation
+      const waveSpeed = 8.0;
+      if (rightArmRef.current) {
+        rightArmRef.current.rotation.x = -2.7;
+        rightArmRef.current.rotation.z = -0.3 + Math.sin(time * waveSpeed) * 0.45;
+        rightArmRef.current.rotation.y = Math.cos(time * waveSpeed) * 0.2;
+      }
+      if (leftArmRef.current) {
+        leftArmRef.current.rotation.x = 0;
+        leftArmRef.current.rotation.z = 0.1;
+      }
+      if (headRef.current) {
+        headRef.current.rotation.y = 0.2 + Math.sin(time * 3) * 0.1;
+        headRef.current.rotation.z = -0.05;
+      }
+      if (bodyRef.current) {
+        bodyRef.current.position.y = 6 + Math.sin(time * 4) * 0.15;
+      }
+      if (rightLegRef.current) rightLegRef.current.rotation.x = 0;
+      if (leftLegRef.current) leftLegRef.current.rotation.x = 0;
+      if (capeRef.current) capeRef.current.rotation.x = -0.2 - Math.sin(time * 3) * 0.1;
+    } else if (animation === 'combat') {
+      // Dynamic Battle Combat Stance
+      const combatSpeed = 3.0;
+      if (rightArmRef.current) {
+        rightArmRef.current.rotation.x = -1.2 + Math.sin(time * combatSpeed) * 0.1;
+        rightArmRef.current.rotation.y = -0.4;
+        rightArmRef.current.rotation.z = -0.2;
+      }
+      if (leftArmRef.current) {
+        leftArmRef.current.rotation.x = -1.4 + Math.cos(time * combatSpeed) * 0.08;
+        leftArmRef.current.rotation.y = 0.4;
+        leftArmRef.current.rotation.z = 0.3;
+      }
+      if (rightLegRef.current) {
+        rightLegRef.current.rotation.x = -0.35;
+        rightLegRef.current.rotation.y = -0.15;
+      }
+      if (leftLegRef.current) {
+        leftLegRef.current.rotation.x = 0.35;
+        leftLegRef.current.rotation.y = 0.15;
+      }
+      if (bodyRef.current) {
+        bodyRef.current.position.y = 5.6 + Math.sin(time * 4) * 0.1;
+        bodyRef.current.rotation.y = 0.2;
+      }
+      if (headRef.current) {
+        headRef.current.rotation.y = -0.15;
+        headRef.current.rotation.x = 0.1;
+      }
+      if (capeRef.current) {
+        capeRef.current.rotation.x = -0.45 - Math.sin(time * 5) * 0.15;
+      }
+    } else if (animation === 'walk') {
       // Walking animation
       const walkSpeed = 7.0;
       const legSwing = Math.sin(time * walkSpeed) * 0.65;
@@ -428,7 +574,9 @@ export default function VoxelCharacter3D({
   autoRotateSpeed = 1.2,
   enableZoom = true,
   enableRotate = true,
-  cameraPosition = [0, 4, 38],
+  cameraPosition = [0, -2, 54],
+  zoomLevel = 1.0,
+  resetTrigger = 0,
   className = '',
   height = '420px',
   width = '100%',
@@ -436,6 +584,7 @@ export default function VoxelCharacter3D({
   showControls = false
 }) {
   const mounted = useMounted();
+  const controlsRef = useRef();
   const [skinData, setSkinData] = useState(null);
   const [internalSkin, setInternalSkin] = useState(null);
   const [internalHeldItem, setInternalHeldItem] = useState(null);
@@ -517,10 +666,13 @@ export default function VoxelCharacter3D({
       {skinTexture && (
         <Canvas
           shadows
-          camera={{ position: cameraPosition, fov: 42 }}
+          camera={{ position: cameraPosition, fov: 40 }}
           gl={{ antialias: true, alpha: true, preserveDrawingBuffer: true }}
           className="w-full h-full cursor-grab active:cursor-grabbing"
         >
+          {/* Dynamic Camera Zoom & Reset Controller */}
+          <CameraController zoomLevel={zoomLevel} resetTrigger={resetTrigger} controlsRef={controlsRef} />
+
           {/* Lighting */}
           <ambientLight intensity={1.2} />
           <directionalLight
@@ -545,14 +697,15 @@ export default function VoxelCharacter3D({
             animation={activeAnimation}
           />
 
-          {/* Interactive 360 Orbit Controls */}
+          {/* Interactive 360 Orbit Controls (Centered at waist [0, -2, 0]) */}
           <OrbitControls
+            ref={controlsRef}
             enablePan={false}
             enableZoom={enableZoom}
             enableRotate={enableRotate}
-            minDistance={18}
-            maxDistance={65}
-            target={[0, 0, 0]}
+            minDistance={16}
+            maxDistance={80}
+            target={[0, -2, 0]}
             autoRotate={isRotating}
             autoRotateSpeed={autoRotateSpeed}
           />

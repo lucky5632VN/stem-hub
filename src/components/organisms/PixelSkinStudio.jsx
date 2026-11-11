@@ -36,7 +36,14 @@ import {
   Box,
   Sliders,
   CheckCircle2,
-  Info
+  Info,
+  Lock,
+  Unlock,
+  Smile,
+  Target,
+  Sword,
+  Wand2,
+  Headphones
 } from 'lucide-react';
 import { playSound } from '@/lib/sound';
 import { useAppStore } from '@/store/useAppStore';
@@ -54,7 +61,7 @@ import {
 const VoxelCharacter3D = dynamic(
   () => import('@/components/atoms/VoxelCharacter3D').catch(() => {
     // Return fallback if component is loading or building
-    return function FallbackPreview({ modelType, skinConfig, cape, heldItem, autoRotate }) {
+    return function FallbackPreview({ modelType, skinConfig }) {
       return (
         <div className="relative w-full h-full flex flex-col items-center justify-center p-6 text-center select-none overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-950/40 via-slate-950/80 to-slate-950" />
@@ -196,6 +203,15 @@ export const SKIN_TONE_OPTIONS = [
     rarityColor: 'text-cyan-400 border-cyan-500/40'
   },
   {
+    id: 'pale',
+    name: 'Trắng Sứ Thanh Lịch',
+    hex: '#fae1cf',
+    palette: ['#fff1e6', '#fae1cf', '#e8cbb7', '#ccad97'],
+    desc: 'Tone da trắng ngà thanh tao của nhà nghiên cứu trong phòng lab',
+    rarity: 'Hiếm',
+    rarityColor: 'text-cyan-400 border-cyan-500/40'
+  },
+  {
     id: 'cyborg_silver',
     name: 'Bạc Cyborg',
     hex: '#94a3b8',
@@ -206,7 +222,7 @@ export const SKIN_TONE_OPTIONS = [
   },
   {
     id: 'alien_green',
-    name: 'Lục Hành Tinh',
+    name: 'Lục Hành Tinh / Zombie',
     hex: '#10b981',
     palette: ['#a7f3d0', '#6ee7b7', '#10b981', '#047857'],
     desc: 'Sắc tố sinh học người ngoài Trái Đất huỳnh quang phát sáng',
@@ -222,7 +238,8 @@ export const EYE_COLOR_OPTIONS = [
     hex: '#06b6d4',
     glowColor: 'rgba(6,182,212,0.9)',
     desc: 'Quang phổ 490nm phát quang HUD quét dữ liệu tức thì',
-    badge: 'Phát Sáng 2x1'
+    badge: 'Phát Sáng 2x1',
+    rarity: 'Cơ bản'
   },
   {
     id: 'ruby',
@@ -230,7 +247,8 @@ export const EYE_COLOR_OPTIONS = [
     hex: '#f43f5e',
     glowColor: 'rgba(244,63,94,0.9)',
     desc: 'Năng lượng phản ứng nhiệt hạch bốc cháy nhiệt huyết',
-    badge: 'Phát Sáng 2x1'
+    badge: 'Phát Sáng 2x1',
+    rarity: 'Hiếm'
   },
   {
     id: 'emerald',
@@ -238,7 +256,8 @@ export const EYE_COLOR_OPTIONS = [
     hex: '#10b981',
     glowColor: 'rgba(16,185,129,0.9)',
     desc: 'Nguyên tố thiên nhiên và sóng sinh thái hài hòa',
-    badge: 'Phát Sáng 2x1'
+    badge: 'Phát Sáng 2x1',
+    rarity: 'Hiếm'
   },
   {
     id: 'amethyst',
@@ -246,7 +265,82 @@ export const EYE_COLOR_OPTIONS = [
     hex: '#a855f7',
     glowColor: 'rgba(168,85,247,0.9)',
     desc: 'Tần số năng lượng không-thời gian bí ẩn và sâu lắng',
-    badge: 'Phát Sáng 2x1'
+    badge: 'Phát Sáng 2x1',
+    rarity: 'Sử thi'
+  },
+  {
+    id: 'amber',
+    name: 'Mắt Vàng Hổ Phách',
+    hex: '#f59e0b',
+    glowColor: 'rgba(245,158,11,0.9)',
+    desc: 'Hào quang vàng rực rỡ tích tụ năng lượng mặt trời',
+    badge: 'Phát Sáng 2x1',
+    rarity: 'Hiếm'
+  },
+  {
+    id: 'sunglasses',
+    name: 'Kính Râm Đen Ngầu',
+    hex: '#0f172a',
+    glowColor: 'rgba(255,255,255,0.4)',
+    desc: 'Cặp kính râm 2x2 thời thượng chống lóa phong cách siêu ngầu',
+    badge: 'Kính Râm 2x2',
+    rarity: 'Sử thi'
+  },
+  {
+    id: 'wink',
+    name: 'Mắt Nháy Tinh Nghịch',
+    hex: '#06b6d4',
+    glowColor: 'rgba(6,182,212,0.8)',
+    desc: 'Một bên mắt mở to thông tuệ, một bên nháy mắt duyên dáng',
+    badge: 'Biểu Cảm 1 Bên',
+    rarity: 'Hiếm'
+  },
+  {
+    id: 'herobrine',
+    name: 'Mắt Herobrine Trắng Sáng',
+    hex: '#ffffff',
+    glowColor: 'rgba(255,255,255,1.0)',
+    desc: 'Đôi mắt trắng toát phát hào quang thần thoại bí ẩn của Minecraft',
+    badge: 'Hào Quang Trắng',
+    rarity: 'Huyền thoại'
+  }
+];
+
+export const EXPRESSION_OPTIONS = [
+  {
+    id: 'smile',
+    name: 'Cười Tươi Rạng Rỡ',
+    desc: 'Nụ cười thân thiện mang lại năng lượng tích cực cho cả đội lab',
+    icon: '😊',
+    rarity: 'Cơ bản'
+  },
+  {
+    id: 'neutral',
+    name: 'Nghiêm Túc Tỉnh Táo',
+    desc: 'Khuôn mặt bình thản tập trung 100% vào các tính toán logic',
+    icon: '😐',
+    rarity: 'Cơ bản'
+  },
+  {
+    id: 'smirk',
+    name: 'Nhếch Mép Tinh Quái',
+    desc: 'Nụ cười nửa miệng tự tin của thiên tài nắm chắc phần thắng',
+    icon: '😏',
+    rarity: 'Hiếm'
+  },
+  {
+    id: 'surprised',
+    name: 'Bất Ngờ Mắt Tròn',
+    desc: 'Biểu cảm ngạc nhiên thán phục trước phát hiện khoa học đột phá',
+    icon: '😮',
+    rarity: 'Hiếm'
+  },
+  {
+    id: 'cyber_jaw',
+    name: 'Khí Chất Ngầu / Râu Quai Nón',
+    desc: 'Góc cằm nam tính hoặc viền giáp Titan bảo vệ cằm cực kỳ phong độ',
+    icon: '🧔',
+    rarity: 'Sử thi'
   }
 ];
 
@@ -258,6 +352,22 @@ export const HAIR_HAT_OPTIONS = [
     desc: 'Kiểu tóc tự nhiên gọn gàng của học viên STEM',
     rarity: 'Cơ bản',
     icon: '✂️'
+  },
+  {
+    id: 'brown_classic',
+    name: 'Tóc Nâu Ngắn Cổ Điển',
+    category: 'Cổ Điển',
+    desc: 'Mái tóc nâu ngắn rẽ ngôi chuẩn mực phong thái học giả',
+    rarity: 'Cơ bản',
+    icon: '💇'
+  },
+  {
+    id: 'anime_blonde',
+    name: 'Tóc Vàng Anime Lãng Tử',
+    category: 'Anime',
+    desc: 'Mái tóc vàng óng ả phong cách nhân vật chính trong truyện tranh',
+    rarity: 'Hiếm',
+    icon: '👱'
   },
   {
     id: 'lab_helmet',
@@ -294,6 +404,42 @@ export const HAIR_HAT_OPTIONS = [
     rarity: 'Sử thi',
     icon: '🥽',
     statBoost: '+18% Phân Tích Dữ Liệu'
+  },
+  {
+    id: 'gaming_headset',
+    name: 'Tai Nghe Gamer LED RGB',
+    category: 'Gaming Gear',
+    desc: 'Tai nghe gaming chụp tai cách âm với dải đèn LED RGB và micro định hướng',
+    rarity: 'Sử thi',
+    icon: '🎧',
+    statBoost: '+15% Phản Xạ Đấu Trường'
+  },
+  {
+    id: 'diamond_helmet',
+    name: 'Mũ Giáp Kim Cương 3D',
+    category: 'Voxel Siêu Cấp',
+    desc: 'Mũ giáp bảo vệ đầu chế tác từ khối Kim Cương nguyên chất Minecraft siêu bền',
+    rarity: 'Huyền thoại',
+    icon: '💠',
+    statBoost: '+30% Giáp Phòng Thủ'
+  },
+  {
+    id: 'ninja_mask',
+    name: 'Mặt Nạ Ninja Hacker',
+    category: 'Stealth',
+    desc: 'Mặt nạ vải Nano đen che nửa khuôn mặt phong cách gián điệp mạng',
+    rarity: 'Hiếm',
+    icon: '🥷',
+    statBoost: '+12% Tốc Độ Luồn Lách'
+  },
+  {
+    id: 'wizard_hat',
+    name: 'Mũ Phù Thủy Học Viện',
+    category: 'Học Viện Ma Pháp',
+    desc: 'Mũ chóp tím nạm sao vàng tượng trưng cho đỉnh cao học thuật toán học',
+    rarity: 'Sử thi',
+    icon: '🧙',
+    statBoost: '+20% Uy Lực Phép Lượng Tử'
   }
 ];
 
@@ -322,7 +468,7 @@ export const OUTFIT_OPTIONS = [
     category: 'Cyberpunk',
     desc: 'Áo trùm đầu đen tàng hình cảm ứng với chuỗi mã ma trận nhị phân chạy dọc sống lưng',
     rarity: 'Sử thi',
-    icon: '🥷',
+    icon: '🧥',
     statBoost: '+15% Thuật Toán Code'
   },
   {
@@ -335,6 +481,15 @@ export const OUTFIT_OPTIONS = [
     statBoost: '+30% Khí Chất Đấu Trường'
   },
   {
+    id: 'diamond_armor',
+    name: 'Bộ Giáp Kim Cương Minecraft',
+    category: 'Biểu Tượng Voxel',
+    desc: 'Bộ giáp ngọc kim cương xanh biếc bất hoại lừng danh khắp thế giới hình hộp',
+    rarity: 'Huyền thoại',
+    icon: '💎',
+    statBoost: '+35% Giáp Toàn Diện'
+  },
+  {
     id: 'stem_pioneer',
     name: 'Đồng Phục STEM Pioneer',
     category: 'Học Viện',
@@ -342,6 +497,24 @@ export const OUTFIT_OPTIONS = [
     rarity: 'Cơ bản',
     icon: '🥋',
     statBoost: '+5% Tự Tin Thi Đấu'
+  },
+  {
+    id: 'tuxedo',
+    name: 'Áo Vest Nhà Khoa Học Lịch Lãm',
+    category: 'Trang Trọng',
+    desc: 'Bộ tuxedo đen tuyền thắt nơ quý phái tham dự các lễ trao giải Nobel danh giá',
+    rarity: 'Sử thi',
+    icon: '🤵',
+    statBoost: '+20% Phong Thái Đĩnh Đạc'
+  },
+  {
+    id: 'mecha_golem',
+    name: 'Giáp Robot Mecha Golem',
+    category: 'Cơ Giới',
+    desc: 'Bộ giáp người máy khổng lồ tích hợp lò phản ứng hồ quang năng lượng vĩnh cửu',
+    rarity: 'Huyền thoại',
+    icon: '🦾',
+    statBoost: '+28% Sức Mạnh Cơ Bắp'
   }
 ];
 
@@ -376,6 +549,30 @@ export const CAPE_OPTIONS = [
     rarity: 'Sử thi',
     icon: '💻',
     particle: 'Mã số 0101'
+  },
+  {
+    id: 'stem',
+    name: 'Khiên Biểu Tượng STEM',
+    desc: 'Áo choàng màu xanh Cyan với quốc huy khiên năng lượng học viện STEM HUB',
+    rarity: 'Hiếm',
+    icon: '🛡️',
+    particle: 'Hào quang Cyan'
+  },
+  {
+    id: 'migrator_creeper',
+    name: 'Creeper Cổ Điển Migrator',
+    desc: 'Áo choàng nhung đỏ thẫm in hình mặt Creeper huyền thoại Minecraft',
+    rarity: 'Huyền thoại',
+    icon: '🧨',
+    particle: 'Tia lửa đỏ'
+  },
+  {
+    id: 'hazard',
+    name: 'Vạch Cảnh Báo Nguy Hiểm',
+    desc: 'Áo choàng sọc vàng đen cảnh báo vật liệu phóng xạ và nguy cơ sinh học cao',
+    rarity: 'Hiếm',
+    icon: '⚠️',
+    particle: 'Cảnh báo vàng'
   }
 ];
 
@@ -395,6 +592,20 @@ export const HELD_ITEM_OPTIONS = [
     icon: '🧪'
   },
   {
+    id: 'diamond_pickaxe',
+    name: 'Cuốc Kim Cương Lượng Tử',
+    desc: 'Công cụ biểu tượng huyền thoại của Minecraft khai thác khoáng thạch tri thức',
+    rarity: 'Huyền thoại',
+    icon: '⛏️'
+  },
+  {
+    id: 'diamond_sword',
+    name: 'Kiếm Kim Cương Pixel',
+    desc: 'Thanh bảo kiếm Minecraft bằng kim cương xanh sắc bén bất khả chiến bại',
+    rarity: 'Huyền thoại',
+    icon: '⚔️'
+  },
+  {
     id: 'stem_trophy',
     name: 'Cúp Kim Cương STEM',
     desc: 'Cúp quán quân đúc từ tinh thể pha lê kim cương phát hào quang chiến thắng lẫy lừng',
@@ -407,13 +618,6 @@ export const HELD_ITEM_OPTIONS = [
     desc: 'Thước kẹp vi mô laser chiếu tia Hologram đo đạc không gian với độ chính xác nano',
     rarity: 'Sử thi',
     icon: '📐'
-  },
-  {
-    id: 'diamond_pickaxe',
-    name: 'Cuốc Kim Cương Lượng Tử',
-    desc: 'Công cụ biểu tượng huyền thoại của Minecraft khai thác khoáng thạch tri thức',
-    rarity: 'Huyền thoại',
-    icon: '⛏️'
   }
 ];
 
@@ -425,6 +629,7 @@ export const PRESET_SKINS = [
     model: 'steve',
     skinTone: 'natural',
     eyeColor: 'cyan',
+    expression: 'smile',
     hairHat: 'ar_goggles',
     outfit: 'lab_coat',
     cape: 'none',
@@ -438,6 +643,7 @@ export const PRESET_SKINS = [
     model: 'alex',
     skinTone: 'cyborg_silver',
     eyeColor: 'ruby',
+    expression: 'smirk',
     hairHat: 'cyber_anime',
     outfit: 'cyber_hoodie',
     cape: 'matrix',
@@ -451,11 +657,40 @@ export const PRESET_SKINS = [
     model: 'steve',
     skinTone: 'tan',
     eyeColor: 'emerald',
+    expression: 'neutral',
     hairHat: 'lab_helmet',
     outfit: 'astronaut_nebula',
-    cape: 'none',
+    cape: 'hazard',
     heldItem: 'ruler_3d',
     desc: 'Chuyên gia xử lý vật liệu nguy cơ cao với mũ bảo hộ phòng thí nghiệm'
+  },
+  {
+    id: 'diamond_hero',
+    name: 'Chiến Binh Kim Cương',
+    icon: '💎',
+    model: 'steve',
+    skinTone: 'natural',
+    eyeColor: 'amber',
+    expression: 'smile',
+    hairHat: 'diamond_helmet',
+    outfit: 'diamond_armor',
+    cape: 'dragon_elo',
+    heldItem: 'diamond_sword',
+    desc: 'Hiệp sĩ vô địch mang trọn bộ giáp và kiếm Kim Cương toàn diện'
+  },
+  {
+    id: 'gamer_pro',
+    name: 'Pro Gamer RGB',
+    icon: '🎧',
+    model: 'alex',
+    skinTone: 'pale',
+    eyeColor: 'amethyst',
+    expression: 'smirk',
+    hairHat: 'gaming_headset',
+    outfit: 'cyber_hoodie',
+    cape: 'aurora',
+    heldItem: 'diamond_pickaxe',
+    desc: 'Streamer kỳ cựu với tai nghe RGB phát sáng và dải cực quang lãng mạn'
   },
   {
     id: 'quantum_physicist',
@@ -463,12 +698,13 @@ export const PRESET_SKINS = [
     icon: '🌌',
     model: 'alex',
     skinTone: 'natural',
-    eyeColor: 'amethyst',
+    eyeColor: 'herobrine',
+    expression: 'neutral',
     hairHat: 'einstein_fuzzy',
     outfit: 'nether_armor',
     cape: 'aurora',
     heldItem: 'ruler_3d',
-    desc: 'Bác học vật lý lượng tử với mái tóc xù Einstein và dải cực quang Aurora'
+    desc: 'Bác học vật lý lượng tử với mái tóc xù Einstein và đôi mắt thông tuệ'
   }
 ];
 
@@ -507,16 +743,16 @@ export function generateMinecraft64x64Skin(config) {
   const skinColorMap = {
     natural: '#f7c297',
     tan: '#c58c65',
+    pale: '#fae1cf',
     cyborg_silver: '#94a3b8',
     alien_green: '#10b981'
   };
   const baseSkin = skinColorMap[config.skinTone] || '#f7c297';
 
-  // Helper function to fill rectangle with noise shading
-  const fillShadedRect = (x, y, w, h, baseHex, shadeFactor = 0.9) => {
+  // Helper function to fill rectangle with subtle pixel noise shading
+  const fillShadedRect = (x, y, w, h, baseHex) => {
     ctx.fillStyle = baseHex;
     ctx.fillRect(x, y, w, h);
-    // Subtle pixel shading for realistic Minecraft texture
     for (let px = x; px < x + w; px++) {
       for (let py = y; py < y + h; py++) {
         if ((px + py) % 3 === 0) {
@@ -530,62 +766,145 @@ export function generateMinecraft64x64Skin(config) {
     }
   };
 
-  // 1. HEAD BASE (0,0 to 32,16)
+  // 1. HEAD BASE LAYER (0,0 to 32,16)
   // Top (8,0,8,8), Bottom (16,0,8,8)
   fillShadedRect(8, 0, 8, 8, baseSkin);
   fillShadedRect(16, 0, 8, 8, baseSkin);
-  // Sides & Back: Right (0,8,8,8), Left (16,8,8,8), Back (24,8,8,8)
+  // Sides & Back: Right (0,8,8,8), Front (8,8,8,8), Left (16,8,8,8), Back (24,8,8,8)
   fillShadedRect(0, 8, 8, 8, baseSkin);
+  fillShadedRect(8, 8, 8, 8, baseSkin);
   fillShadedRect(16, 8, 8, 8, baseSkin);
   fillShadedRect(24, 8, 8, 8, baseSkin);
 
-  // Front Face (8,8,8,8)
-  fillShadedRect(8, 8, 8, 8, baseSkin);
+  // Hair Base Shading (Nền tóc cơ bản)
+  const hairBaseColor = config.hairHat === 'anime_blonde' ? '#eab308' :
+                        config.hairHat === 'einstein_fuzzy' ? '#e2e8f0' :
+                        config.hairHat === 'cyber_anime' ? '#a855f7' : '#451a03';
+  ctx.fillStyle = hairBaseColor;
+  ctx.fillRect(8, 0, 8, 3); // Đỉnh đầu
+  ctx.fillRect(8, 8, 8, 2); // Trán trước
 
-  // Draw 2x1 Glowing Eyes on Front Face (at x: 9-10 & 13-14, y: 12)
+  // Draw Eyes on Front Face (at x: 9-10 & 13-14, y: 12)
   const eyeColorMap = {
     cyan: '#06b6d4',
     ruby: '#f43f5e',
     emerald: '#10b981',
-    amethyst: '#a855f7'
+    amethyst: '#a855f7',
+    amber: '#f59e0b',
+    sunglasses: '#0f172a',
+    wink: '#06b6d4',
+    herobrine: '#ffffff'
   };
   const eyeHex = eyeColorMap[config.eyeColor] || '#06b6d4';
 
-  // Sclera (White)
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(9, 12, 1, 1);
-  ctx.fillRect(14, 12, 1, 1);
+  if (config.eyeColor === 'sunglasses') {
+    // Kính râm đen ngầu 2x2 kèm gọng và vệt phản quang
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(9, 11, 2, 2);
+    ctx.fillRect(13, 11, 2, 2);
+    ctx.fillRect(11, 11, 2, 1); // Cầu kính
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(9, 11, 1, 1); // Vệt bóng sáng
+    ctx.fillRect(13, 11, 1, 1);
+  } else if (config.eyeColor === 'herobrine') {
+    // Mắt trắng toát Herobrine
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(9, 12, 2, 1);
+    ctx.fillRect(13, 12, 2, 1);
+  } else if (config.eyeColor === 'wink') {
+    // Mắt trái mở to cyan, mắt phải nháy
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(9, 12, 1, 1);
+    ctx.fillStyle = eyeHex;
+    ctx.fillRect(10, 12, 1, 1);
+    // Nháy mắt phải (đường ngang sẫm)
+    ctx.fillStyle = '#78350f';
+    ctx.fillRect(13, 12, 2, 1);
+  } else {
+    // Mắt tiêu chuẩn 2x1 có lòng trắng và tròng mắt phát sáng
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(9, 12, 1, 1);
+    ctx.fillRect(14, 12, 1, 1);
+    ctx.fillStyle = eyeHex;
+    ctx.fillRect(10, 12, 1, 1);
+    ctx.fillRect(13, 12, 1, 1);
+  }
 
-  // Glowing Pupil
-  ctx.fillStyle = eyeHex;
-  ctx.fillRect(10, 12, 1, 1);
-  ctx.fillRect(13, 12, 1, 1);
+  // Draw Mouth / Facial Expression (y: 13-15)
+  const mouthColor = '#884433';
+  if (config.expression === 'neutral') {
+    ctx.fillStyle = mouthColor;
+    ctx.fillRect(11, 14, 2, 1);
+  } else if (config.expression === 'smirk') {
+    ctx.fillStyle = mouthColor;
+    ctx.fillRect(11, 14, 2, 1);
+    ctx.fillRect(13, 13, 1, 1); // Nhếch lên
+  } else if (config.expression === 'surprised') {
+    ctx.fillStyle = '#442211';
+    ctx.fillRect(11, 13, 2, 2);
+  } else if (config.expression === 'cyber_jaw') {
+    ctx.fillStyle = '#475569';
+    ctx.fillRect(10, 14, 4, 1);
+    ctx.fillRect(11, 15, 2, 1);
+  } else {
+    // Mặc định: Nụ cười thân thiện (Smile)
+    ctx.fillStyle = mouthColor;
+    ctx.fillRect(11, 14, 2, 1);
+    ctx.fillRect(10, 13, 1, 1);
+    ctx.fillRect(13, 13, 1, 1);
+  }
 
-  // Mouth (11-12, 14)
-  ctx.fillStyle = '#995544';
-  ctx.fillRect(11, 14, 2, 1);
-
-  // 2. HEAD OUTER LAYER (Hat/Hair) (32,0 to 64,16)
+  // 2. HEAD OUTER LAYER (Hat/Hair/Headset) (32,0 to 64,16)
   if (config.hairHat === 'lab_helmet') {
-    // Yellow industrial helmet
+    // Mũ bảo hộ vàng công nghiệp
     ctx.fillStyle = '#eab308';
-    ctx.fillRect(40, 0, 8, 8); // Top
-    ctx.fillRect(32, 8, 8, 8); // Right
-    ctx.fillRect(40, 8, 8, 3); // Front top
-    ctx.fillRect(48, 8, 8, 8); // Left
-    ctx.fillRect(56, 8, 8, 8); // Back
-    // Visor Glass
-    ctx.fillStyle = 'rgba(6,182,212,0.7)';
+    ctx.fillRect(40, 0, 8, 8); // Đỉnh
+    ctx.fillRect(32, 8, 8, 8); // Phải
+    ctx.fillRect(40, 8, 8, 4); // Trán trước
+    ctx.fillRect(48, 8, 8, 8); // Trái
+    ctx.fillRect(56, 8, 8, 8); // Sau
+    // Kính chắn Polycarbonate Cyan
+    ctx.fillStyle = 'rgba(6,182,212,0.85)';
     ctx.fillRect(40, 11, 8, 3);
+  } else if (config.hairHat === 'gaming_headset') {
+    // Tai nghe Gamer LED RGB
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(40, 1, 8, 2); // Khung vòm trên đỉnh
+    // Ốp tai trái & phải
+    ctx.fillStyle = '#06b6d4';
+    ctx.fillRect(32, 9, 3, 5); // Tai phải
+    ctx.fillStyle = '#a855f7';
+    ctx.fillRect(53, 9, 3, 5); // Tai trái
+    // Micro đàm thoại
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillRect(41, 14, 3, 1);
+  } else if (config.hairHat === 'diamond_helmet') {
+    // Mũ giáp Kim Cương Minecraft 3D
+    ctx.fillStyle = '#06b6d4';
+    ctx.fillRect(40, 0, 8, 8); // Đỉnh
+    ctx.fillRect(32, 8, 8, 7); // Phải
+    ctx.fillRect(40, 8, 8, 4); // Trán
+    ctx.fillRect(48, 8, 8, 7); // Trái
+    ctx.fillRect(56, 8, 8, 8); // Sau
+    // Điểm nhấn kim cương sáng bóng
+    ctx.fillStyle = '#67e8f9';
+    ctx.fillRect(41, 9, 2, 2);
+    ctx.fillRect(45, 9, 2, 2);
+  } else if (config.hairHat === 'ninja_mask') {
+    // Mặt nạ Ninja Hacker đen che nửa mặt
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(40, 12, 8, 4);
+    ctx.fillRect(32, 12, 8, 4);
+    ctx.fillRect(48, 12, 8, 4);
   } else if (config.hairHat === 'einstein_fuzzy') {
-    // Wild white hair
+    // Tóc xù Einstein trắng xóa
     ctx.fillStyle = '#e2e8f0';
     ctx.fillRect(39, 0, 10, 9);
     ctx.fillRect(31, 7, 10, 8);
     ctx.fillRect(47, 7, 10, 8);
     ctx.fillRect(55, 7, 10, 8);
   } else if (config.hairHat === 'cyber_anime') {
-    // Neon Cyan / Purple Spiky Hair
+    // Tóc vuốt nhọn Cyberpunk Cyan & Magenta
     ctx.fillStyle = '#06b6d4';
     ctx.fillRect(40, 0, 8, 8);
     ctx.fillStyle = '#a855f7';
@@ -593,21 +912,32 @@ export function generateMinecraft64x64Skin(config) {
     ctx.fillRect(32, 8, 8, 5);
     ctx.fillRect(48, 8, 8, 5);
   } else if (config.hairHat === 'ar_goggles') {
-    // AR Visor across eyes on outer layer
+    // Kính viễn vọng AR Hologram
     ctx.fillStyle = '#1e293b';
-    ctx.fillRect(40, 11, 8, 3);
+    ctx.fillRect(40, 10, 8, 4);
     ctx.fillStyle = '#00f2fe';
-    ctx.fillRect(41, 12, 2, 1);
-    ctx.fillRect(45, 12, 2, 1);
+    ctx.fillRect(41, 11, 2, 2);
+    ctx.fillRect(45, 11, 2, 2);
+  } else if (config.hairHat === 'wizard_hat') {
+    // Mũ phù thủy tím
+    ctx.fillStyle = '#6b21a8';
+    ctx.fillRect(39, 6, 10, 3);
+    ctx.fillRect(41, 2, 6, 4);
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillRect(43, 6, 2, 2);
   }
 
-  // 3. TORSO / BODY BASE (16,16 to 40,32)
+  // 3. TORSO / BODY (16,16 to 40,32) & JACKET LAYER (16,32 to 40,48)
   const outfitColorMap = {
-    lab_coat: '#ffffff',
+    lab_coat: '#f8fafc',
     astronaut_nebula: '#3b0764',
     cyber_hoodie: '#0f172a',
     nether_armor: '#1e1b4b',
-    stem_pioneer: '#0284c7'
+    nether_tech: '#1e1b4b',
+    diamond_armor: '#0891b2',
+    stem_pioneer: '#0284c7',
+    tuxedo: '#09090b',
+    mecha_golem: '#334155'
   };
   const outfitHex = outfitColorMap[config.outfit] || '#0284c7';
 
@@ -615,69 +945,95 @@ export function generateMinecraft64x64Skin(config) {
   fillShadedRect(20, 20, 8, 12, outfitHex);
   // Back Torso (32,20,8,12)
   fillShadedRect(32, 20, 8, 12, outfitHex);
-  // Sides (16,20,4,12) and (28,20,4,12)
+  // Sides Torso (16,20,4,12) and (28,20,4,12)
   fillShadedRect(16, 20, 4, 12, outfitHex);
   fillShadedRect(28, 20, 4, 12, outfitHex);
+  // Top & Bottom Torso
+  fillShadedRect(20, 16, 8, 4, outfitHex);
+  fillShadedRect(28, 16, 8, 4, outfitHex);
 
-  // Outer Torso / Jacket layer (16,32 to 40,48)
+  // Outer Torso / Jacket Layer (16,32 to 40,48)
   if (config.outfit === 'lab_coat') {
-    // Neon Cyan trims
+    // Áo blouse trắng viền Cyan, túi ngực cắm bút
     ctx.fillStyle = '#06b6d4';
     ctx.fillRect(20, 36, 1, 12);
     ctx.fillRect(27, 36, 1, 12);
-    // Lab pen in pocket
+    // Bút trong túi
     ctx.fillStyle = '#f43f5e';
     ctx.fillRect(22, 39, 1, 3);
+    ctx.fillStyle = '#0284c7';
+    ctx.fillRect(23, 39, 1, 3);
+  } else if (config.outfit === 'diamond_armor') {
+    // Giáp Kim Cương với viền Cyan sáng chói
+    ctx.fillStyle = '#67e8f9';
+    ctx.fillRect(21, 36, 6, 2);
+    ctx.fillRect(21, 40, 2, 4);
+    ctx.fillRect(25, 40, 2, 4);
   } else if (config.outfit === 'astronaut_nebula') {
-    // Neon chest dial
+    // Bảng đồng hồ áp suất ngực phi hành gia
     ctx.fillStyle = '#06b6d4';
     ctx.fillRect(23, 38, 2, 2);
     ctx.fillStyle = '#f59e0b';
-    ctx.fillRect(22, 43, 4, 2);
+    ctx.fillRect(22, 42, 4, 2);
   } else if (config.outfit === 'cyber_hoodie') {
-    // Matrix binary code dots
+    // Mã ma trận xanh lá Matrix
     ctx.fillStyle = '#10b981';
     ctx.fillRect(22, 38, 1, 1);
     ctx.fillRect(25, 41, 1, 1);
     ctx.fillRect(23, 44, 1, 1);
+  } else if (config.outfit === 'tuxedo') {
+    // Áo sơ mi trắng & nơ bướm đỏ
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(23, 36, 2, 6);
+    ctx.fillStyle = '#f43f5e';
+    ctx.fillRect(23, 37, 2, 1); // Nơ
   }
 
-  // 4. ARMS (Steve 4px or Alex 3px)
+  // 4. ARMS (Steve 4px / Alex 3px)
   const isAlex = config.modelType === 'alex';
   const armW = isAlex ? 3 : 4;
 
-  // Right Arm (40,16 to 56,32)
+  // Right Arm Base (40,16 to 56,32)
   fillShadedRect(44, 20, armW, 12, outfitHex);
   fillShadedRect(40, 20, 4, 12, outfitHex);
   fillShadedRect(44 + armW, 20, 4, 12, outfitHex);
   fillShadedRect(48 + armW, 20, armW, 12, outfitHex);
-  // Hand (Bottom 4 pixels)
+  fillShadedRect(44, 16, armW, 4, outfitHex); // Vai
+  // Bàn tay (4 pixel dưới cùng)
   fillShadedRect(44, 28, armW, 4, baseSkin);
 
-  // Left Arm (32,48 to 48,64)
+  // Left Arm Base (32,48 to 48,64)
   fillShadedRect(36, 52, armW, 12, outfitHex);
   fillShadedRect(32, 52, 4, 12, outfitHex);
   fillShadedRect(36 + armW, 52, 4, 12, outfitHex);
   fillShadedRect(40 + armW, 52, armW, 12, outfitHex);
-  // Hand
+  fillShadedRect(36, 48, armW, 4, outfitHex); // Vai
+  // Bàn tay
   fillShadedRect(36, 60, armW, 4, baseSkin);
 
-  // 5. LEGS
-  // Right Leg (0,16 to 16,32)
-  fillShadedRect(4, 20, 4, 12, '#1e293b');
-  fillShadedRect(0, 20, 4, 12, '#1e293b');
-  fillShadedRect(8, 20, 4, 12, '#1e293b');
-  fillShadedRect(12, 20, 4, 12, '#1e293b');
-  // Left Leg (16,48 to 32,64)
-  fillShadedRect(20, 52, 4, 12, '#1e293b');
-  fillShadedRect(16, 52, 4, 12, '#1e293b');
-  fillShadedRect(24, 52, 4, 12, '#1e293b');
-  fillShadedRect(28, 52, 4, 12, '#1e293b');
+  // 5. LEGS (Quần và Giày Boots)
+  const pantsHex = '#1e293b';
+  // Right Leg Base (0,16 to 16,32)
+  fillShadedRect(4, 20, 4, 12, pantsHex);
+  fillShadedRect(0, 20, 4, 12, pantsHex);
+  fillShadedRect(8, 20, 4, 12, pantsHex);
+  fillShadedRect(12, 20, 4, 12, pantsHex);
 
-  // Boots
-  ctx.fillStyle = '#0f172a';
+  // Left Leg Base (16,48 to 32,64)
+  fillShadedRect(20, 52, 4, 12, pantsHex);
+  fillShadedRect(16, 52, 4, 12, pantsHex);
+  fillShadedRect(24, 52, 4, 12, pantsHex);
+  fillShadedRect(28, 52, 4, 12, pantsHex);
+
+  // Giày Boots chuyên dụng
+  const bootHex = '#090d16';
+  ctx.fillStyle = bootHex;
   ctx.fillRect(4, 28, 4, 4);
   ctx.fillRect(20, 60, 4, 4);
+  // Đế giày viền Cyan thể thao
+  ctx.fillStyle = '#06b6d4';
+  ctx.fillRect(4, 31, 4, 1);
+  ctx.fillRect(20, 63, 4, 1);
 
   return canvas.toDataURL('image/png');
 }
@@ -695,30 +1051,32 @@ export function generateIsometricHeadAvatar(config, size = 96) {
   const skinColorMap = {
     natural: '#f7c297',
     tan: '#c58c65',
+    pale: '#fae1cf',
     cyborg_silver: '#94a3b8',
     alien_green: '#10b981'
   };
-  const skin = skinColorMap[config.skinTone] || '#f7c297';
+  const skin = skinColorMap[config?.skinTone] || '#f7c297';
 
   // Eye color
   const eyeColorMap = {
     cyan: '#06b6d4',
     ruby: '#f43f5e',
     emerald: '#10b981',
-    amethyst: '#a855f7'
+    amethyst: '#a855f7',
+    amber: '#f59e0b',
+    sunglasses: '#0f172a',
+    wink: '#06b6d4',
+    herobrine: '#ffffff'
   };
-  const eyeHex = eyeColorMap[config.eyeColor] || '#06b6d4';
+  const eyeHex = eyeColorMap[config?.eyeColor] || '#06b6d4';
 
   const cx = size / 2;
   const cy = size / 2;
   const scale = size / 48; // scale factor
 
-  // Isometric 3D Head Box Projection
-  // Front face
   ctx.save();
   ctx.translate(cx, cy);
 
-  // Draw 2.5D Isometric Cube for Head
   // Front face (slightly lit)
   ctx.fillStyle = skin;
   ctx.beginPath();
@@ -730,8 +1088,6 @@ export function generateIsometricHeadAvatar(config, size = 96) {
   ctx.fill();
 
   // Right face (shaded)
-  ctx.fillStyle = 'rgba(0,0,0,0.2)';
-  ctx.fillRect(0, 0, 0, 0); // trigger
   ctx.fillStyle = skin;
   ctx.beginPath();
   ctx.moveTo(0, 0);
@@ -741,7 +1097,7 @@ export function generateIsometricHeadAvatar(config, size = 96) {
   ctx.closePath();
   ctx.fill();
   ctx.fillStyle = 'rgba(0,0,0,0.18)';
-  ctx.fill(); // darker shade for depth
+  ctx.fill();
 
   // Top face (brightest)
   ctx.fillStyle = skin;
@@ -753,13 +1109,20 @@ export function generateIsometricHeadAvatar(config, size = 96) {
   ctx.closePath();
   ctx.fill();
   ctx.fillStyle = 'rgba(255,255,255,0.15)';
-  ctx.fill(); // highlight
+  ctx.fill();
 
   // Eyes on front face
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(-14 * scale, 12 * scale, 3 * scale, 2 * scale);
-  ctx.fillStyle = eyeHex;
-  ctx.fillRect(-11 * scale, 12 * scale, 2 * scale, 2 * scale);
+  if (config?.eyeColor === 'sunglasses') {
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(-15 * scale, 10 * scale, 6 * scale, 4 * scale);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(-14 * scale, 11 * scale, 2 * scale, 1 * scale);
+  } else {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(-14 * scale, 12 * scale, 3 * scale, 2 * scale);
+    ctx.fillStyle = eyeHex;
+    ctx.fillRect(-11 * scale, 12 * scale, 2 * scale, 2 * scale);
+  }
 
   ctx.restore();
 
@@ -800,6 +1163,7 @@ export default function PixelSkinStudio({
 
   // Active Category Tab
   const [activeTab, setActiveTab] = useState('model'); // 'model' | 'skin_face' | 'hair_hat' | 'outfit' | 'cape' | 'heldItem'
+  const [skinFaceSubTab, setSkinFaceSubTab] = useState('tone'); // 'tone' | 'eyes' | 'expression'
 
   // Skin Customization State
   const [skinState, setSkinState] = useState(() => {
@@ -808,6 +1172,7 @@ export default function PixelSkinStudio({
       modelType: existing.modelType || 'steve',
       skinTone: existing.skinTone || 'natural',
       eyeColor: existing.eyeColor || 'cyan',
+      expression: existing.expression || 'smile',
       hairHat: existing.hairHat || 'ar_goggles',
       outfit: existing.outfit || 'lab_coat',
       cape: existing.cape || 'none',
@@ -820,6 +1185,7 @@ export default function PixelSkinStudio({
   const [autoRotate, setAutoRotate] = useState(true);
   const [currentPose, setCurrentPose] = useState('idle'); // 'idle' | 'wave' | 'combat'
   const [zoomLevel, setZoomLevel] = useState(1.0);
+  const [resetTrigger, setResetTrigger] = useState(0);
   const [showHoloGrid, setShowHoloGrid] = useState(true);
   const [soundMuted, setSoundMuted] = useState(false);
 
@@ -830,6 +1196,11 @@ export default function PixelSkinStudio({
 
   // Hidden File Input Ref
   const fileInputRef = useRef(null);
+
+  // Danh sách các vật phẩm người dùng đã mở khóa
+  const unlockedParts = useMemo(() => {
+    return personalization?.unlockedParts || ['natural', 'cyan', 'smile', 'none', 'lab_coat', 'chemical_flask', 'stem_pioneer', 'brown_classic'];
+  }, [personalization?.unlockedParts]);
 
   // Generate real 64x64 skin dataUrl whenever state changes
   const activeSkinDataUrl = useMemo(() => {
@@ -875,6 +1246,7 @@ export default function PixelSkinStudio({
       modelType: preset.model,
       skinTone: preset.skinTone,
       eyeColor: preset.eyeColor,
+      expression: preset.expression || 'smile',
       hairHat: preset.hairHat,
       outfit: preset.outfit,
       cape: preset.cape,
@@ -884,7 +1256,7 @@ export default function PixelSkinStudio({
     showToast(`✨ Đã nạp Preset mẫu: ${preset.name}!`);
   };
 
-  // 1. TẢI SKIN TỪ MÁY (IMPORT PNG 64x64)
+  // 1. TẢI SKIN TỪ MÁY (IMPORT PNG 64x64 hoặc 64x32 LEGACY)
   const handleImportFile = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -907,10 +1279,39 @@ export default function PixelSkinStudio({
           return;
         }
 
+        let finalDataUrl = event.target.result;
+        let detectedModel = 'steve';
+
+        // Tự động chuyển đổi skin cổ điển 64x32 sang chuẩn hiện đại 64x64
+        if (img.height === 32) {
+          const c = document.createElement('canvas');
+          c.width = 64;
+          c.height = 64;
+          const ctx = c.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          // Mirror Right Leg (0,16,16,16) to Left Leg (16,48)
+          ctx.drawImage(img, 0, 16, 16, 16, 16, 48, 16, 16);
+          // Mirror Right Arm (40,16,16,16) to Left Arm (32,48)
+          ctx.drawImage(img, 40, 16, 16, 16, 32, 48, 16, 16);
+          finalDataUrl = c.toDataURL('image/png');
+        } else {
+          // Nhận diện kiểu thân Alex (3px) dựa trên độ trong suốt cột tay phải
+          try {
+            const c = document.createElement('canvas');
+            c.width = 64;
+            c.height = 64;
+            const ctx = c.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            const p = ctx.getImageData(54, 20, 1, 1).data;
+            if (p[3] === 0) detectedModel = 'alex';
+          } catch (err) {}
+        }
+
         // Set imported skin texture
         setSkinState(prev => ({
           ...prev,
-          customSkinUrl: event.target.result
+          modelType: detectedModel,
+          customSkinUrl: finalDataUrl
         }));
 
         playSfx('success');
@@ -940,7 +1341,6 @@ export default function PixelSkinStudio({
       if (typeof engineDownloadSkin === 'function') {
         engineDownloadSkin(dataUrl, filename);
       } else {
-        // Fallback trigger
         const link = document.createElement('a');
         link.download = filename;
         link.href = dataUrl;
@@ -1023,7 +1423,7 @@ export default function PixelSkinStudio({
         exit={{ opacity: 0, scale: 0.96 }}
         transition={{ duration: 0.25 }}
         className={`relative w-full max-w-7xl rounded-2xl sm:rounded-3xl border border-cyan-500/30 bg-slate-950/90 shadow-[0_0_80px_rgba(6,182,212,0.15)] flex flex-col overflow-hidden ${
-          embedded ? 'min-h-[700px]' : 'max-h-[95vh] h-[92vh]'
+          embedded ? 'min-h-[720px]' : 'max-h-[95vh] h-[92vh]'
         }`}
       >
         {/* Hologram Scanline & Grid Effect */}
@@ -1162,10 +1562,24 @@ export default function PixelSkinStudio({
                   <Box className="w-3.5 h-3.5" />
                 </button>
 
+                {/* Reset Camera View Button */}
                 <button
                   onClick={() => {
                     playSfx('click');
-                    setZoomLevel(prev => Math.min(prev + 0.15, 1.6));
+                    setZoomLevel(1.0);
+                    setResetTrigger(prev => prev + 1);
+                    showToast('🎯 Đã căn chỉnh góc nhìn camera toàn thân!');
+                  }}
+                  className="w-7 h-7 rounded-md bg-slate-900/80 hover:bg-cyan-950/80 text-slate-300 hover:text-cyan-300 border border-slate-800 hover:border-cyan-500/40 flex items-center justify-center transition-all"
+                  title="Căn chỉnh lại góc nhìn toàn thân mặc định"
+                >
+                  <Target className="w-3.5 h-3.5" />
+                </button>
+
+                <button
+                  onClick={() => {
+                    playSfx('click');
+                    setZoomLevel(prev => Math.min(Number((prev + 0.15).toFixed(2)), 2.2));
                   }}
                   className="w-7 h-7 rounded-md bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 flex items-center justify-center"
                   title="Phóng to camera"
@@ -1176,7 +1590,7 @@ export default function PixelSkinStudio({
                 <button
                   onClick={() => {
                     playSfx('click');
-                    setZoomLevel(prev => Math.max(prev - 0.15, 0.7));
+                    setZoomLevel(prev => Math.max(Number((prev - 0.15).toFixed(2)), 0.6));
                   }}
                   className="w-7 h-7 rounded-md bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 flex items-center justify-center"
                   title="Thu nhỏ camera"
@@ -1186,8 +1600,28 @@ export default function PixelSkinStudio({
               </div>
             </div>
 
+            {/* Custom Skin Loaded Notice Banner */}
+            {skinState.customSkinUrl && (
+              <div className="absolute top-12 left-3 right-3 z-20 flex items-center justify-between px-3 py-1.5 rounded-lg bg-emerald-950/90 border border-emerald-500/50 backdrop-blur-md text-[11px] font-mono text-emerald-200">
+                <span className="flex items-center gap-1.5 truncate">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  Đang xem Skin nạp từ máy tính
+                </span>
+                <button
+                  onClick={() => {
+                    playSfx('click');
+                    setSkinState(prev => ({ ...prev, customSkinUrl: null }));
+                    showToast('🎨 Đã chuyển sang chế độ tự phối đồ Pixel!');
+                  }}
+                  className="ml-2 px-2 py-0.5 rounded bg-emerald-800 hover:bg-emerald-700 text-white font-bold text-[10px] shrink-0"
+                >
+                  Tự Phối Đồ
+                </button>
+              </div>
+            )}
+
             {/* 3D Canvas Container */}
-            <div className="relative flex-1 min-h-[300px] sm:min-h-[380px] lg:min-h-0 flex items-center justify-center overflow-hidden">
+            <div className="relative flex-1 min-h-[460px] sm:min-h-[500px] lg:min-h-[540px] h-[540px] flex items-center justify-center overflow-hidden">
               {/* Sci-fi Cyber Background Pedestal */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 {showHoloGrid && (
@@ -1204,12 +1638,15 @@ export default function PixelSkinStudio({
                 skinConfig={skinState}
                 modelType={skinState.modelType === 'alex' ? 'alex' : 'steve'}
                 cape={
-                  skinState.cape === 'dragon_elo' ? 'stem' :
-                  skinState.cape === 'matrix' ? 'cyber' :
-                  skinState.cape === 'aurora' ? 'quantum' :
+                  skinState.cape === 'dragon_elo' ? 'dragon_elo' :
+                  skinState.cape === 'matrix' ? 'matrix' :
+                  skinState.cape === 'aurora' ? 'aurora' :
+                  skinState.cape === 'hazard' ? 'hazard' :
+                  skinState.cape === 'migrator_creeper' ? 'migrator_creeper' :
                   skinState.cape === 'none' ? 'none' : 'stem'
                 }
                 heldItem={
+                  skinState.heldItem === 'diamond_sword' ? 'diamond_sword' :
                   skinState.heldItem === 'chemical_flask' ? 'test_tube' :
                   skinState.heldItem === 'diamond_pickaxe' ? 'pickaxe' :
                   (skinState.heldItem === 'stem_trophy' || skinState.heldItem === 'ruler_3d') ? 'stem_tablet' :
@@ -1221,13 +1658,10 @@ export default function PixelSkinStudio({
                 autoRotateSpeed={1.2}
                 enableZoom={true}
                 enableRotate={true}
+                zoomLevel={zoomLevel}
+                resetTrigger={resetTrigger}
                 height="100%"
                 width="100%"
-                onSnapshotReady={(snap) => {
-                  if (snap) {
-                    setSnapshotAvatarUrl(snap);
-                  }
-                }}
                 className="w-full h-full"
               />
 
@@ -1267,6 +1701,7 @@ export default function PixelSkinStudio({
                   }}
                   title="Nhấn để dùng ảnh 2D này làm Avatar BXH STEM HUB"
                 >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img 
                     src={snapshotAvatarUrl} 
                     alt="Head Snapshot" 
@@ -1296,7 +1731,7 @@ export default function PixelSkinStudio({
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {PRESET_SKINS.map((preset) => (
                   <button
                     key={preset.id}
@@ -1323,7 +1758,7 @@ export default function PixelSkinStudio({
             <div className="flex items-center overflow-x-auto no-scrollbar border-b border-cyan-500/20 bg-slate-950/60 px-2 pt-2 gap-1">
               {[
                 { id: 'model', label: 'Dáng Người', icon: User, color: 'text-cyan-400' },
-                { id: 'skin_face', label: 'Da & Mắt', icon: Palette, color: 'text-amber-400' },
+                { id: 'skin_face', label: 'Da & Mắt & Biểu Cảm', icon: Palette, color: 'text-amber-400' },
                 { id: 'hair_hat', label: 'Tóc & Mũ', icon: ShieldCheck, color: 'text-emerald-400' },
                 { id: 'outfit', label: 'Trang Phục', icon: Shirt, color: 'text-sky-400' },
                 { id: 'cape', label: 'Áo Choàng', icon: Flame, color: 'text-purple-400' },
@@ -1383,7 +1818,7 @@ export default function PixelSkinStudio({
                           key={model.id}
                           onClick={() => {
                             playSfx('click');
-                            setSkinState(prev => ({ ...prev, modelType: model.id }));
+                            setSkinState(prev => ({ ...prev, modelType: model.id, customSkinUrl: null }));
                           }}
                           onMouseEnter={() => playSfx('hover')}
                           className={`relative p-4 rounded-xl border transition-all cursor-pointer flex flex-col justify-between group active:scale-98 ${
@@ -1425,105 +1860,176 @@ export default function PixelSkinStudio({
                 </div>
               )}
 
-              {/* ─── TAB 2: MÀU DA PIXEL & MẮT PHÁT SÁNG ────────────────── */}
+              {/* ─── TAB 2: DA & MẮT & BIỂU CẢM ─────────────────────────── */}
               {activeTab === 'skin_face' && (
                 <div className="space-y-6">
-                  {/* Skin Tone Selector */}
-                  <div>
-                    <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wide mb-1">
-                      Màu Da Pixel Chuẩn Khoa Học
-                    </h3>
-                    <p className="text-xs text-slate-400 mb-3">
-                      Lớp màu sắc tố biểu bì được tổng hợp từ 4 cấp độ sáng và đổ bóng pixel tự nhiên
-                    </p>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      {SKIN_TONE_OPTIONS.map((tone) => {
-                        const isSelected = skinState.skinTone === tone.id;
-                        return (
-                          <div
-                            key={tone.id}
-                            onClick={() => {
-                              playSfx('click');
-                              setSkinState(prev => ({ ...prev, skinTone: tone.id, customSkinUrl: null }));
-                            }}
-                            onMouseEnter={() => playSfx('hover')}
-                            className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col items-center text-center group active:scale-95 ${
-                              isSelected
-                                ? 'border-cyan-400 bg-cyan-950/40 shadow-[0_0_20px_rgba(6,182,212,0.25)]'
-                                : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
-                            }`}
-                          >
-                            {/* Color Palette Preview Swatch */}
-                            <div className="w-12 h-12 rounded-lg border-2 border-slate-700 flex flex-wrap overflow-hidden shadow-md group-hover:scale-105 transition-transform mb-2">
-                              {tone.palette.map((c, i) => (
-                                <div key={i} className="w-6 h-6" style={{ backgroundColor: c }} />
-                              ))}
-                            </div>
-
-                            <span className="text-xs font-bold text-slate-200 group-hover:text-cyan-300 font-mono">
-                              {tone.name}
-                            </span>
-                            <span className={`text-[9px] font-mono mt-1 px-1.5 py-0.5 rounded border ${tone.rarityColor}`}>
-                              {tone.rarity}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
+                  {/* Sub-tab Switcher: Tone / Eyes / Expression */}
+                  <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
+                    {[
+                      { id: 'tone', label: '1. Màu Da Pixel', icon: Palette },
+                      { id: 'eyes', label: '2. Đôi Mắt Lượng Tử', icon: Eye },
+                      { id: 'expression', label: '3. Khuôn Miệng & Biểu Cảm', icon: Smile }
+                    ].map(sub => (
+                      <button
+                        key={sub.id}
+                        onClick={() => {
+                          playSfx('click');
+                          setSkinFaceSubTab(sub.id);
+                        }}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
+                          skinFaceSubTab === sub.id 
+                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' 
+                            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                        }`}
+                      >
+                        <sub.icon className="w-3.5 h-3.5" />
+                        <span>{sub.label}</span>
+                      </button>
+                    ))}
                   </div>
 
-                  {/* 2x1 Glowing Eyes Selector */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wide flex items-center gap-2">
-                        <Eye className="w-4 h-4 text-cyan-400" />
-                        Màu Mắt 2x1 px Phát Sáng Lượng Tử
+                  {/* SUB 1: SKIN TONES */}
+                  {skinFaceSubTab === 'tone' && (
+                    <div>
+                      <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wide mb-1">
+                        Màu Da Pixel Chuẩn Khoa Học
                       </h3>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono text-cyan-400 bg-cyan-950 border border-cyan-500/30">
-                        Hiệu ứng Dạ Quang
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-400 mb-3">
-                      Tạo điểm nhấn với cặp mắt phát quang đặc trưng của nhà khoa học STEM
-                    </p>
+                      <p className="text-xs text-slate-400 mb-3">
+                        Lớp màu sắc tố biểu bì được tổng hợp từ 4 cấp độ sáng và đổ bóng pixel tự nhiên
+                      </p>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      {EYE_COLOR_OPTIONS.map((eye) => {
-                        const isSelected = skinState.eyeColor === eye.id;
-                        return (
-                          <div
-                            key={eye.id}
-                            onClick={() => {
-                              playSfx('click');
-                              setSkinState(prev => ({ ...prev, eyeColor: eye.id, customSkinUrl: null }));
-                            }}
-                            onMouseEnter={() => playSfx('hover')}
-                            className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col items-center text-center group active:scale-95 ${
-                              isSelected
-                                ? 'border-cyan-400 bg-cyan-950/40 shadow-[0_0_20px_rgba(6,182,212,0.25)]'
-                                : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
-                            }`}
-                          >
-                            {/* Glowing Eye Indicator */}
-                            <div className="relative my-2 flex items-center justify-center">
-                              <div 
-                                className="w-8 h-4 rounded-xs border border-white/60 shadow-[0_0_15px_currentColor] transition-transform group-hover:scale-110"
-                                style={{ backgroundColor: eye.hex, color: eye.hex }}
-                              />
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {SKIN_TONE_OPTIONS.map((tone) => {
+                          const isSelected = skinState.skinTone === tone.id;
+                          return (
+                            <div
+                              key={tone.id}
+                              onClick={() => {
+                                playSfx('click');
+                                setSkinState(prev => ({ ...prev, skinTone: tone.id, customSkinUrl: null }));
+                              }}
+                              onMouseEnter={() => playSfx('hover')}
+                              className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col items-center text-center group active:scale-95 ${
+                                isSelected
+                                  ? 'border-cyan-400 bg-cyan-950/40 shadow-[0_0_20px_rgba(6,182,212,0.25)]'
+                                  : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
+                              }`}
+                            >
+                              <div className="w-12 h-12 rounded-lg border-2 border-slate-700 flex flex-wrap overflow-hidden shadow-md group-hover:scale-105 transition-transform mb-2">
+                                {tone.palette.map((c, i) => (
+                                  <div key={i} className="w-6 h-6" style={{ backgroundColor: c }} />
+                                ))}
+                              </div>
+
+                              <span className="text-xs font-bold text-slate-200 group-hover:text-cyan-300 font-mono">
+                                {tone.name}
+                              </span>
+                              <span className={`text-[9px] font-mono mt-1 px-1.5 py-0.5 rounded border ${tone.rarityColor}`}>
+                                {tone.rarity}
+                              </span>
                             </div>
-
-                            <span className="text-xs font-bold text-slate-200 group-hover:text-cyan-300 font-mono">
-                              {eye.name}
-                            </span>
-                            <span className="text-[10px] text-slate-400 font-mono mt-1">
-                              {eye.badge}
-                            </span>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
+                  )}
+
+                  {/* SUB 2: EYES */}
+                  {skinFaceSubTab === 'eyes' && (
+                    <div>
+                      <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wide mb-1">
+                        Màu Mắt Phát Sáng Lượng Tử & Kính Râm
+                      </h3>
+                      <p className="text-xs text-slate-400 mb-3">
+                        Tùy biến tròng mắt 2x1 phát quang hoặc kính râm 2x2 siêu ngầu
+                      </p>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        {EYE_COLOR_OPTIONS.map((eye) => {
+                          const isSelected = skinState.eyeColor === eye.id;
+                          return (
+                            <div
+                              key={eye.id}
+                              onClick={() => {
+                                playSfx('click');
+                                setSkinState(prev => ({ ...prev, eyeColor: eye.id, customSkinUrl: null }));
+                              }}
+                              onMouseEnter={() => playSfx('hover')}
+                              className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col items-center text-center group active:scale-95 ${
+                                isSelected
+                                  ? 'border-cyan-400 bg-cyan-950/40 shadow-[0_0_20px_rgba(6,182,212,0.25)]'
+                                  : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
+                              }`}
+                            >
+                              <div className="relative my-2 flex items-center justify-center">
+                                <div 
+                                  className="w-8 h-4 rounded-xs border border-white/60 shadow-[0_0_15px_currentColor] transition-transform group-hover:scale-110"
+                                  style={{ backgroundColor: eye.hex, color: eye.hex }}
+                                />
+                              </div>
+
+                              <span className="text-xs font-bold text-slate-200 group-hover:text-cyan-300 font-mono">
+                                {eye.name}
+                              </span>
+                              <span className="text-[10px] text-slate-400 font-mono mt-1">
+                                {eye.badge}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* SUB 3: EXPRESSIONS */}
+                  {skinFaceSubTab === 'expression' && (
+                    <div>
+                      <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wide mb-1">
+                        Khuôn Miệng & Biểu Cảm Khuôn Mặt
+                      </h3>
+                      <p className="text-xs text-slate-400 mb-3">
+                        Thể hiện cảm xúc và cá tính của nhân vật qua các nét vẽ Pixel Art đặc sắc
+                      </p>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {EXPRESSION_OPTIONS.map((exp) => {
+                          const isSelected = skinState.expression === exp.id;
+                          return (
+                            <div
+                              key={exp.id}
+                              onClick={() => {
+                                playSfx('click');
+                                setSkinState(prev => ({ ...prev, expression: exp.id, customSkinUrl: null }));
+                              }}
+                              onMouseEnter={() => playSfx('hover')}
+                              className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center gap-3 group active:scale-98 ${
+                                isSelected
+                                  ? 'border-amber-400 bg-amber-950/30 shadow-[0_0_20px_rgba(245,158,11,0.2)]'
+                                  : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
+                              }`}
+                            >
+                              <div className="text-2xl shrink-0 group-hover:scale-110 transition-transform">
+                                {exp.icon}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between">
+                                  <h4 className="text-xs font-bold text-slate-200 group-hover:text-amber-300 font-mono">
+                                    {exp.name}
+                                  </h4>
+                                  <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${getRarityBadge(exp.rarity)}`}>
+                                    {exp.rarity}
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-slate-400 mt-1 line-clamp-1">
+                                  {exp.desc}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1542,6 +2048,8 @@ export default function PixelSkinStudio({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {HAIR_HAT_OPTIONS.map((item) => {
                       const isSelected = skinState.hairHat === item.id;
+                      const isUnlocked = item.rarity === 'Cơ bản' || unlockedParts.includes(item.id);
+
                       return (
                         <div
                           key={item.id}
@@ -1572,11 +2080,22 @@ export default function PixelSkinStudio({
                             <p className="text-[11px] text-slate-400 mt-1 line-clamp-2">
                               {item.desc}
                             </p>
-                            {item.statBoost && (
-                              <span className="inline-block mt-1 text-[10px] font-mono text-emerald-400">
-                                ⚡ {item.statBoost}
-                              </span>
-                            )}
+                            <div className="flex items-center justify-between mt-1.5">
+                              {item.statBoost && (
+                                <span className="text-[10px] font-mono text-emerald-400">
+                                  ⚡ {item.statBoost}
+                                </span>
+                              )}
+                              {isUnlocked ? (
+                                <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-0.5">
+                                  <Check className="w-3 h-3" /> Đã mở
+                                </span>
+                              ) : (
+                                <span className="text-[9px] font-mono text-amber-400 flex items-center gap-0.5">
+                                  <Lock className="w-3 h-3" /> Gacha / Thử đồ
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );
@@ -1590,7 +2109,7 @@ export default function PixelSkinStudio({
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wide">
-                      Trang Phục Phòng Lab & Cyberpunk
+                      Trang Phục Phòng Lab, Giáp Kim Cương & Cyberpunk
                     </h3>
                     <p className="text-xs text-slate-400">
                       Bao phủ thân, cánh tay và chân với các chất liệu cách điện, chống bức xạ công nghệ cao
@@ -1600,6 +2119,8 @@ export default function PixelSkinStudio({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {OUTFIT_OPTIONS.map((outfit) => {
                       const isSelected = skinState.outfit === outfit.id;
+                      const isUnlocked = outfit.rarity === 'Cơ bản' || unlockedParts.includes(outfit.id) || unlockedParts.includes('nether_tech');
+
                       return (
                         <div
                           key={outfit.id}
@@ -1630,11 +2151,22 @@ export default function PixelSkinStudio({
                             <p className="text-[11px] text-slate-400 mt-1 line-clamp-2">
                               {outfit.desc}
                             </p>
-                            {outfit.statBoost && (
-                              <span className="inline-block mt-1 text-[10px] font-mono text-sky-400">
-                                🛡️ {outfit.statBoost}
-                              </span>
-                            )}
+                            <div className="flex items-center justify-between mt-1.5">
+                              {outfit.statBoost && (
+                                <span className="text-[10px] font-mono text-sky-400">
+                                  🛡️ {outfit.statBoost}
+                                </span>
+                              )}
+                              {isUnlocked ? (
+                                <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-0.5">
+                                  <Check className="w-3 h-3" /> Đã mở
+                                </span>
+                              ) : (
+                                <span className="text-[9px] font-mono text-amber-400 flex items-center gap-0.5">
+                                  <Lock className="w-3 h-3" /> Gacha / Thử đồ
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );
@@ -1651,13 +2183,15 @@ export default function PixelSkinStudio({
                       Áo Choàng Động Voxel (Dynamic Capes)
                     </h3>
                     <p className="text-xs text-slate-400">
-                      Vẫy bay theo nhịp di chuyển với hiệu ứng sóng cực quang và rồng hoàng kim
+                      Vẫy bay theo nhịp di chuyển với hiệu ứng sóng cực quang, rồng hoàng kim và creeper
                     </p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {CAPE_OPTIONS.map((cape) => {
                       const isSelected = skinState.cape === cape.id;
+                      const isUnlocked = cape.id === 'none' || unlockedParts.includes(cape.id);
+
                       return (
                         <div
                           key={cape.id}
@@ -1688,11 +2222,22 @@ export default function PixelSkinStudio({
                             <p className="text-[11px] text-slate-400 mt-1 line-clamp-2">
                               {cape.desc}
                             </p>
-                            {cape.particle && (
-                              <span className="inline-block mt-1 text-[10px] font-mono text-purple-400">
-                                ✨ Hiệu ứng: {cape.particle}
-                              </span>
-                            )}
+                            <div className="flex items-center justify-between mt-1.5">
+                              {cape.particle && (
+                                <span className="text-[10px] font-mono text-purple-400">
+                                  ✨ {cape.particle}
+                                </span>
+                              )}
+                              {isUnlocked ? (
+                                <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-0.5">
+                                  <Check className="w-3 h-3" /> Đã mở
+                                </span>
+                              ) : (
+                                <span className="text-[9px] font-mono text-amber-400 flex items-center gap-0.5">
+                                  <Lock className="w-3 h-3" /> Gacha / Thử đồ
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );
@@ -1706,16 +2251,18 @@ export default function PixelSkinStudio({
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wide">
-                      Vật Phẩm Cầm Tay Khoa Học (Held Item)
+                      Vật Phẩm Cầm Tay Khoa Học & Chiến Đấu (Held Item)
                     </h3>
                     <p className="text-xs text-slate-400">
-                      Trang bị trên tay phụ kiện biểu tượng của nhà khoa học và đấu sĩ STEM
+                      Trang bị trên tay vũ khí, dụng cụ thí nghiệm và biểu tượng chiến thắng của STEM
                     </p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {HELD_ITEM_OPTIONS.map((item) => {
                       const isSelected = skinState.heldItem === item.id;
+                      const isUnlocked = item.id === 'none' || unlockedParts.includes(item.id);
+
                       return (
                         <div
                           key={item.id}
@@ -1746,6 +2293,17 @@ export default function PixelSkinStudio({
                             <p className="text-[11px] text-slate-400 mt-1 line-clamp-2">
                               {item.desc}
                             </p>
+                            <div className="flex items-center justify-between mt-1.5">
+                              {isUnlocked ? (
+                                <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-0.5">
+                                  <Check className="w-3 h-3" /> Đã mở
+                                </span>
+                              ) : (
+                                <span className="text-[9px] font-mono text-amber-400 flex items-center gap-0.5">
+                                  <Lock className="w-3 h-3" /> Gacha / Thử đồ
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );

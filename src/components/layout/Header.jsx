@@ -590,7 +590,9 @@ export default function Header() {
                 className="flex items-center gap-3 px-3 py-1.5 rounded-full hover:bg-bg-tertiary border border-transparent hover:border-border-theme transition-all select-none active:scale-95 relative z-[1001]"
               >
                 <AvatarFrame frame={personalization.avatarFrame} className="w-9 h-9 text-base">
-                  {personalization.avatarUrl && (personalization.avatarUrl.startsWith('http') || personalization.avatarUrl.startsWith('data:image/')) ? (
+                  {personalization.voxelAvatarUrl ? (
+                    <img src={personalization.voxelAvatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+                  ) : personalization.avatarUrl && (personalization.avatarUrl.startsWith('http') || personalization.avatarUrl.startsWith('data:image/')) ? (
                     <img src={personalization.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }} />
                   ) : personalization.avatarUrl && personalization.avatarUrl !== 'custom-avatar' ? (
                     <span className="select-none flex items-center justify-center w-full h-full text-base">{personalization.avatarUrl}</span>

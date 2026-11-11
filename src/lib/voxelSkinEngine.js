@@ -1021,37 +1021,71 @@ export function generateCapeTexture(capeType = 'stem') {
   const c = new UniversalCanvas(64, 32);
   const type = (capeType || 'stem').toLowerCase();
 
-  if (type.includes('cyber')) {
-    // Dark matrix grid with cyan circuit traces
-    c.fillRect(0, 0, 64, 32, '#0f172a');
-    // Front face (1..11, 1..17)
-    c.fillRect(1, 1, 10, 16, '#020617');
-    c.fillRect(3, 3, 6, 1, '#00f2fe');
-    c.fillRect(5, 3, 1, 10, '#00f2fe');
-    c.fillRect(3, 12, 6, 1, '#00f2fe');
-    // Back face (12..22, 1..17)
-    c.fillRect(12, 1, 10, 16, '#020617');
-    c.fillRect(14, 4, 6, 1, '#00f2fe');
-    c.fillRect(17, 4, 1, 8, '#00f2fe');
-    c.fillRect(14, 11, 6, 1, '#00f2fe');
+  if (type.includes('dragon') || type.includes('elo')) {
+    // ELO Gold Dragon Cape
+    c.fillRect(0, 0, 64, 32, '#b45309');
+    c.fillRect(1, 1, 10, 16, '#d97706');
+    c.fillRect(12, 1, 10, 16, '#78350f');
+    // Golden Dragon Wings & Crown on back (12..22, 1..17)
+    c.fillRect(14, 3, 6, 2, '#fde68a'); // Crown
+    c.fillRect(16, 2, 2, 1, '#f59e0b');
+    // Wing shapes
+    c.fillRect(13, 6, 8, 2, '#fbbf24');
+    c.fillRect(14, 8, 6, 3, '#f59e0b');
+    c.fillRect(15, 11, 4, 3, '#d97706');
+    c.fillRect(16, 14, 2, 2, '#fbbf24');
+  } else if (type.includes('matrix') || type.includes('cyber')) {
+    // Dark matrix grid with green/cyan code rain
+    c.fillRect(0, 0, 64, 32, '#052e16');
+    c.fillRect(1, 1, 10, 16, '#022c22');
+    c.fillRect(12, 1, 10, 16, '#022c22');
+    // Green binary digital rain on back (12..22, 1..17)
+    const codeCols = [
+      [13, 2, 1, 4, '#4ade80'],
+      [15, 4, 1, 6, '#22c55e'],
+      [17, 1, 1, 8, '#86efac'],
+      [19, 5, 1, 7, '#16a34a'],
+      [21, 3, 1, 5, '#4ade80'],
+      [14, 9, 1, 5, '#15803d'],
+      [18, 10, 1, 6, '#86efac']
+    ];
+    codeCols.forEach(([x, y, w, h, col]) => {
+      c.fillRect(x, y, w, h, col);
+    });
+  } else if (type.includes('aurora') || type.includes('quantum')) {
+    // Deep cosmic purple to cyan aurora waves
+    c.fillRect(0, 0, 64, 32, '#1e1b4b');
+    c.fillRect(1, 1, 10, 16, '#0f172a');
+    c.fillRect(12, 1, 10, 16, '#0f172a');
+    // Aurora waves on back (12..22, 1..17)
+    c.fillRect(12, 4, 10, 2, '#06b6d4');
+    c.fillRect(12, 6, 10, 3, '#3b82f6');
+    c.fillRect(12, 9, 10, 3, '#8b5cf6');
+    c.fillRect(12, 12, 10, 2, '#d946ef');
+    // Shimmer sparkles
+    c.fillRect(14, 5, 1, 1, '#ffffff');
+    c.fillRect(19, 8, 1, 1, '#ffffff');
+    c.fillRect(16, 11, 1, 1, '#ffffff');
+  } else if (type.includes('creeper') || type.includes('migrator')) {
+    // Classic Minecraft Migrator / Creeper Cape
+    c.fillRect(0, 0, 64, 32, '#991b1b');
+    c.fillRect(1, 1, 10, 16, '#b91c1c');
+    c.fillRect(12, 1, 10, 16, '#b91c1c');
+    // Dark Creeper Face on back (12..22, 1..17)
+    c.fillRect(14, 5, 2, 2, '#450a0a'); // Left eye
+    c.fillRect(18, 5, 2, 2, '#450a0a'); // Right eye
+    c.fillRect(16, 7, 2, 3, '#450a0a'); // Nose
+    c.fillRect(15, 9, 4, 3, '#450a0a'); // Mouth center
+    c.fillRect(14, 11, 2, 3, '#450a0a'); // Mouth left
+    c.fillRect(18, 11, 2, 3, '#450a0a'); // Mouth right
   } else if (type.includes('hazard')) {
     // Yellow hazard caution stripes
     c.fillRect(0, 0, 64, 32, '#facc15');
     c.fillRect(1, 1, 10, 16, '#eab308');
     c.fillRect(12, 1, 10, 16, '#eab308');
-    // Diagonal stripes on back (12..22, 1..17)
     for (let i = 0; i < 16; i += 4) {
       c.fillRect(12, 1 + i, 10, 2, '#09090b');
     }
-  } else if (type.includes('quantum')) {
-    // Deep cosmic purple with nebula stars
-    c.fillRect(0, 0, 64, 32, '#2e1065');
-    c.fillRect(1, 1, 10, 16, '#1e1b4b');
-    c.fillRect(12, 1, 10, 16, '#1e1b4b');
-    c.fillRect(14, 4, 1, 1, '#ffffff');
-    c.fillRect(18, 7, 1, 1, '#c084fc');
-    c.fillRect(15, 12, 1, 1, '#a855f7');
-    c.fillRect(19, 14, 1, 1, '#ffffff');
   } else {
     // Default STEM Cape: Gradient cyan/blue with golden atom
     c.fillRect(0, 0, 64, 32, '#0369a1');
@@ -1240,10 +1274,17 @@ export function generateIsometricHeadAvatar(skinSource, options = {}) {
 
   // Resolve source canvas
   let skinCanvas = null;
-  if (typeof skinSource === 'string' && !skinSource.startsWith('data:') && !skinSource.startsWith('http')) {
-    skinCanvas = generatePresetSkin(skinSource);
-  } else if (skinSource && skinSource.getImageData) {
+  if (skinSource && typeof skinSource.getImageData === 'function') {
     skinCanvas = skinSource;
+  } else if (skinSource && typeof skinSource.getContext === 'function') {
+    const ctx = skinSource.getContext('2d');
+    skinCanvas = {
+      isDom: true,
+      ctx,
+      getImageData: (x, y, w, h) => ctx.getImageData(x, y, w, h)
+    };
+  } else if (typeof skinSource === 'string' && !skinSource.startsWith('data:') && !skinSource.startsWith('http')) {
+    skinCanvas = generatePresetSkin(skinSource);
   } else {
     skinCanvas = generatePresetSkin('stem_steve');
   }

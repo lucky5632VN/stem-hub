@@ -3283,7 +3283,15 @@ export default function ProfilePage() {
                       )}
 
                       <AvatarFrame frame={frame.id} className="w-14 h-14 text-xl mb-4">
-                        {user.displayName ? user.displayName.charAt(0).toUpperCase() : <User className="w-6 h-6" />}
+                        {personalization.voxelAvatarUrl ? (
+                          <img src={personalization.voxelAvatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+                        ) : personalization.avatarUrl && personalization.avatarUrl !== 'custom-avatar' && (personalization.avatarUrl.startsWith('http') || personalization.avatarUrl.startsWith('data:image/')) ? (
+                          <img src={personalization.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" onError={(e) => { e.target.onerror = null; e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a1a1aa'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"; }} />
+                        ) : personalization.avatarUrl === 'custom-avatar' ? (
+                          <STEMAvatarSVG parts={personalization.avatarParts} />
+                        ) : (
+                          user.displayName ? user.displayName.charAt(0).toUpperCase() : <User className="w-6 h-6" />
+                        )}
                       </AvatarFrame>
 
                       <div>
@@ -3527,26 +3535,24 @@ export default function ProfilePage() {
 
                     <div className="grid grid-cols-2 gap-3 w-full">
                       <button
-                        disabled={isRolling}
-                        onClick={() => handleSpinGacha(1)}
-                        className={`py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-lg border flex items-center justify-center gap-1.5 cursor-pointer ${
-                          isRolling
-                            ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed border-white/5'
-                            : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 border-purple-400/30 text-white shadow-[0_0_20px_rgba(147,51,234,0.3)]'
-                        }`}
+                        onClick={() => {
+                          playSound.click();
+                          setLastPullCount(1);
+                          setShowGachaModal(true);
+                        }}
+                        className="py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-lg border flex items-center justify-center gap-1.5 cursor-pointer bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 border-purple-400/30 text-white shadow-[0_0_20px_rgba(147,51,234,0.3)]"
                       >
                         <span>Quay x1 (100</span>
                         <CrystalIcon className="w-4 h-4 text-amber-300" />
                         <span>)</span>
                       </button>
                       <button
-                        disabled={isRolling}
-                        onClick={() => handleSpinGacha(10)}
-                        className={`py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-lg border flex items-center justify-center gap-1.5 cursor-pointer ${
-                          isRolling
-                            ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed border-white/5'
-                            : 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 border-pink-400/30 text-white shadow-[0_0_20px_rgba(236,72,153,0.3)]'
-                        }`}
+                        onClick={() => {
+                          playSound.click();
+                          setLastPullCount(10);
+                          setShowGachaModal(true);
+                        }}
+                        className="py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-lg border flex items-center justify-center gap-1.5 cursor-pointer bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 border-pink-400/30 text-white shadow-[0_0_20px_rgba(236,72,153,0.3)]"
                       >
                         <span>Quay x10 (900</span>
                         <CrystalIcon className="w-4 h-4 text-amber-300" />

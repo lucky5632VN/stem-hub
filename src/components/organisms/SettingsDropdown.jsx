@@ -147,7 +147,9 @@ export default function SettingsDropdown({ onClose }) {
             title="Thiết kế Avatar Chibi cá nhân"
           >
             <AvatarFrame frame={personalization.avatarFrame} className="w-16 h-16 text-2xl mb-2 transition-all duration-300 group-hover/avatar:scale-105">
-              {personalization.avatarUrl && (personalization.avatarUrl.startsWith('http') || personalization.avatarUrl.startsWith('data:image/')) ? (
+              {personalization.voxelAvatarUrl ? (
+                <img src={personalization.voxelAvatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+              ) : personalization.avatarUrl && (personalization.avatarUrl.startsWith('http') || personalization.avatarUrl.startsWith('data:image/')) ? (
                 <img src={personalization.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }} />
               ) : personalization.avatarUrl && personalization.avatarUrl !== 'custom-avatar' ? (
                 <span className="select-none flex items-center justify-center w-full h-full text-2xl">{personalization.avatarUrl}</span>
