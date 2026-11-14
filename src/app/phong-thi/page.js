@@ -1075,7 +1075,7 @@ export default function RealCombatExamPage() {
           </div>
 
           {/* Chọn Môn Học (Tabbar chính) */}
-          <div className="flex flex-wrap gap-2 mb-4 bg-bg-secondary/60 border border-border-theme p-1.5 rounded-2xl w-fit">
+          <div className="flex flex-wrap gap-2 mb-4 bg-bg-secondary border border-border-theme p-1.5 rounded-2xl w-fit shadow-sm">
             {[
               { id: 'physics', label: '⚡ Vật Lý Lượng Tử' },
               { id: 'chemistry', label: '🧪 Hóa Học Ảo' },
@@ -1098,7 +1098,7 @@ export default function RealCombatExamPage() {
 
           {/* Chọn Phân Loại & Cấp Độ Khó */}
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <div className="flex flex-wrap gap-2 bg-bg-secondary/40 border border-border-theme p-1 rounded-xl">
+            <div className="flex flex-wrap gap-2 bg-bg-secondary border border-border-theme p-1 rounded-xl shadow-xs">
               {[
                 { id: 'bo-gddt', label: '🏫 Bộ GD&ĐT & Đề Ôn Tập' },
                 { id: 'so-gddt', label: '🗺️ Sở GD&ĐT (Tỉnh/Thành)' },
@@ -1140,7 +1140,7 @@ export default function RealCombatExamPage() {
           </div>
 
           {/* Bộ lọc nâng cao theo độ khó, năm học, tỉnh thành */}
-          <div className="mb-8 p-4 bg-bg-secondary/60 border border-border-theme rounded-2xl flex flex-wrap gap-6 items-center">
+          <div className="mb-8 p-4 bg-bg-secondary border border-border-theme rounded-2xl flex flex-wrap gap-6 items-center shadow-sm">
             {/* Cấp độ khó */}
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-bold text-text-secondary uppercase">Độ khó:</span>
@@ -1216,30 +1216,30 @@ export default function RealCombatExamPage() {
             {filteredExams.map((exam) => {
               const subjectTheme = {
                 physics: {
-                  gradient: 'from-blue-950/70 via-indigo-950/50 to-bg-secondary',
+                  gradient: 'from-blue-500/15 via-indigo-500/10 to-blue-500/5 dark:from-blue-950/70 dark:via-indigo-950/50 dark:to-[#1a1428]',
                   glow: 'group-hover:shadow-blue-500/10 hover:border-blue-500/40',
-                  badge: 'bg-blue-500/15 border-blue-500/30 text-blue-400',
+                  badge: 'bg-blue-500/10 border-blue-500/25 text-blue-600 dark:text-blue-400',
                   icon: '⚡',
                   btn: 'from-blue-600 to-indigo-600'
                 },
                 chemistry: {
-                  gradient: 'from-emerald-950/70 via-teal-950/50 to-bg-secondary',
+                  gradient: 'from-emerald-500/15 via-teal-500/10 to-emerald-500/5 dark:from-emerald-950/70 dark:via-teal-950/50 dark:to-[#1a1428]',
                   glow: 'group-hover:shadow-emerald-500/10 hover:border-emerald-500/40',
-                  badge: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400',
+                  badge: 'bg-emerald-500/10 border-emerald-500/25 text-emerald-600 dark:text-emerald-400',
                   icon: '🧪',
                   btn: 'from-emerald-600 to-teal-600'
                 },
                 math: {
-                  gradient: 'from-amber-950/70 via-orange-950/50 to-bg-secondary',
+                  gradient: 'from-amber-500/15 via-orange-500/10 to-amber-500/5 dark:from-amber-950/70 dark:via-orange-950/50 dark:to-[#1a1428]',
                   glow: 'group-hover:shadow-amber-500/10 hover:border-amber-500/40',
-                  badge: 'bg-amber-500/15 border-amber-500/30 text-amber-400',
+                  badge: 'bg-amber-500/10 border-amber-500/25 text-amber-600 dark:text-amber-400',
                   icon: '📐',
                   btn: 'from-amber-600 to-orange-600'
                 },
                 biology: {
-                  gradient: 'from-pink-950/70 via-purple-950/50 to-bg-secondary',
+                  gradient: 'from-pink-500/15 via-purple-500/10 to-pink-500/5 dark:from-pink-950/70 dark:via-purple-950/50 dark:to-[#1a1428]',
                   glow: 'group-hover:shadow-pink-500/10 hover:border-pink-500/40',
-                  badge: 'bg-pink-500/15 border-pink-500/30 text-pink-400',
+                  badge: 'bg-pink-500/10 border-pink-500/25 text-pink-600 dark:text-pink-400',
                   icon: '🧬',
                   btn: 'from-pink-600 to-purple-600'
                 }
@@ -1251,9 +1251,9 @@ export default function RealCombatExamPage() {
               const timeMins = Math.round((exam.timeLimit || 3000) / 60);
 
               const diffColors = {
-                hard: 'bg-rose-500/15 border-rose-500/30 text-rose-400',
-                medium: 'bg-amber-500/15 border-amber-500/30 text-amber-400',
-                easy: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                hard: 'bg-rose-500/10 border-rose-500/25 text-rose-600 dark:text-rose-400',
+                medium: 'bg-amber-500/10 border-amber-500/25 text-amber-600 dark:text-amber-400',
+                easy: 'bg-emerald-500/10 border-emerald-500/25 text-emerald-600 dark:text-emerald-400'
               };
 
               return (
@@ -1263,20 +1263,20 @@ export default function RealCombatExamPage() {
                     isRandom ? 'border-accent-pink/40 shadow-accent-pink/5' : ''
                   }`}
                 >
-                  <div className={`relative h-32 bg-gradient-to-br ${theme.gradient} flex flex-col items-center justify-center overflow-hidden shrink-0`}>
-                    <span className="text-4xl drop-shadow-lg select-none z-10 group-hover:scale-110 transition-transform duration-300">
+                  <div className={`relative h-32 bg-gradient-to-br ${theme.gradient} flex flex-col items-center justify-center overflow-hidden shrink-0 border-b border-border-theme/40`}>
+                    <span className="text-4xl drop-shadow-md select-none z-10 group-hover:scale-110 transition-transform duration-300">
                       {isRandom ? '🎲' : theme.icon}
                     </span>
-                    <span className="mt-2 px-2.5 py-0.5 bg-black/30 backdrop-blur-sm rounded-full text-[8.5px] font-black text-white/90 uppercase tracking-wider z-10">
+                    <span className="mt-2 px-3 py-0.5 bg-bg-secondary/90 dark:bg-black/50 backdrop-blur-md rounded-full text-[8.5px] font-black text-text-primary dark:text-white/90 uppercase tracking-wider z-10 border border-border-theme dark:border-white/10 shadow-xs">
                       {exam.typeLabel || 'Đề thi THPT'}
                     </span>
                     {!isRandom && exam.difficulty && (
-                      <span className={`absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${diffColors[exam.difficulty] || diffColors.easy}`}>
+                      <span className={`absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border backdrop-blur-md shadow-xs ${diffColors[exam.difficulty] || diffColors.easy}`}>
                         {exam.difficultyLabel || 'Cơ bản'}
                       </span>
                     )}
                     {exam.year && (
-                      <span className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-black/40 rounded-full text-[8px] font-bold text-white/80">
+                      <span className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-bg-secondary/90 dark:bg-black/50 border border-border-theme dark:border-white/10 rounded-full text-[8px] font-bold text-text-primary dark:text-white/80 backdrop-blur-md shadow-xs">
                         {exam.year}
                       </span>
                     )}
@@ -1306,10 +1306,10 @@ export default function RealCombatExamPage() {
 
                     <div className="flex items-center gap-1.5 mt-auto pt-2 border-t border-border-theme/40 text-[9px] text-text-secondary">
                       <span>Phần thưởng:</span>
-                      <span className="px-1.5 py-0.2 bg-amber-500/10 border border-amber-500/25 rounded-md text-[8.5px] font-bold text-amber-500">
+                      <span className="px-1.5 py-0.2 bg-amber-500/10 border border-amber-500/30 rounded-md text-[8.5px] font-bold text-amber-700 dark:text-amber-400">
                         +30 ELO
                       </span>
-                      <span className="px-1.5 py-0.2 bg-pink-500/10 border border-pink-500/25 rounded-md text-[8.5px] font-bold text-pink-500">
+                      <span className="px-1.5 py-0.2 bg-pink-500/10 border border-pink-500/30 rounded-md text-[8.5px] font-bold text-accent-pink dark:text-pink-400">
                         +200 EXP
                       </span>
                     </div>

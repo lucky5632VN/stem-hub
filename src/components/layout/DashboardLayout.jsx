@@ -770,13 +770,13 @@ export default function DashboardLayout({ children }) {
         {!isPlaying && banner.enabled && banner.text && (
           <div className={`w-full py-2 px-6 border-b text-xs font-bold transition-all relative z-30 flex items-center justify-between gap-4 select-none ${
             banner.type === 'warning' 
-              ? 'bg-amber-500/10 text-amber-400 border-amber-500/10'
+              ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20'
               : banner.type === 'event'
-                ? 'bg-pink-500/10 text-pink-400 border-pink-500/10'
-                : 'bg-blue-500/10 text-blue-400 border-blue-500/10'
+                ? 'bg-pink-500/10 text-pink-700 dark:text-pink-400 border-pink-500/20'
+                : 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20'
           }`}>
             <div className="flex items-center gap-2 overflow-hidden w-full">
-              <Megaphone className={`w-4 h-4 shrink-0 ${banner.type === 'warning' ? 'text-amber-400 animate-pulse' : banner.type === 'event' ? 'text-pink-400 animate-bounce' : 'text-blue-400 animate-pulse'}`} />
+              <Megaphone className={`w-4 h-4 shrink-0 ${banner.type === 'warning' ? 'text-amber-600 dark:text-amber-400 animate-pulse' : banner.type === 'event' ? 'text-pink-600 dark:text-pink-400 animate-bounce' : 'text-blue-600 dark:text-blue-400 animate-pulse'}`} />
               <marquee className="w-full font-mono uppercase tracking-wider font-semibold">{banner.text}</marquee>
             </div>
           </div>
