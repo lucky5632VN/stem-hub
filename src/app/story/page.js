@@ -452,17 +452,17 @@ const safeCacheToLocalStorage = (key, list) => {
     const sanitized = list.slice(0, 10).map(item => {
       const copy = { ...item };
       if (copy.imageUrl && copy.imageUrl.startsWith('data:image')) {
-        copy.imageUrl = '';
+        copy.imageUrl = null;
       }
       if (Array.isArray(copy.stories)) {
-        copy.stories = copy.stories.map(s => (s.imageUrl && s.imageUrl.startsWith('data:image') ? { ...s, imageUrl: '' } : s));
+        copy.stories = copy.stories.map(s => (s.imageUrl && s.imageUrl.startsWith('data:image') ? { ...s, imageUrl: null } : s));
       }
       return copy;
     });
     localStorage.setItem(key, JSON.stringify(sanitized));
   } catch (e) {
     try {
-      const minimal = list.slice(0, 3).map(item => ({ ...item, imageUrl: '', stories: [] }));
+      const minimal = list.slice(0, 3).map(item => ({ ...item, imageUrl: null, stories: [] }));
       localStorage.setItem(key, JSON.stringify(minimal));
     } catch (err) {
       console.warn(`Could not cache ${key} in localStorage:`, err);
@@ -1191,7 +1191,7 @@ export default function STEMStoriesPage() {
               <div className={`absolute inset-[-3px] rounded-full bg-gradient-to-tr ${getFrameColorClass(storyUser.activeFrame)} opacity-80 group-hover:opacity-100 group-hover:rotate-180 transition-all duration-700 blur-[2px]`} />
               
               <div className="w-[66px] h-[66px] rounded-full bg-bg-tertiary border-[3px] border-bg-primary flex items-center justify-center text-3xl relative z-10 select-none overflow-hidden">
-                {storyUser.avatarUrl ? (
+                {storyUser.avatarUrl && typeof storyUser.avatarUrl === 'string' && storyUser.avatarUrl.trim() !== '' ? (
                   storyUser.avatarUrl === 'custom-avatar' ? (
                     <STEMAvatarSVG parts={storyUser.avatarParts} className="w-full h-full transform scale-90" />
                   ) : storyUser.avatarUrl.startsWith('http') || storyUser.avatarUrl.startsWith('data:image/') ? (
@@ -1200,7 +1200,7 @@ export default function STEMStoriesPage() {
                     <span className="select-none text-2xl">{storyUser.avatarUrl}</span>
                   )
                 ) : (
-                  storyUser.avatar
+                  storyUser.avatar || '🧑‍🔬'
                 )}
               </div>
 
@@ -1231,7 +1231,7 @@ export default function STEMStoriesPage() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <AvatarFrame frame={moment.avatarFrame} className="w-11 h-11 text-xl">
-                  {moment.avatarUrl ? (
+                  {moment.avatarUrl && typeof moment.avatarUrl === 'string' && moment.avatarUrl.trim() !== '' ? (
                     moment.avatarUrl === 'custom-avatar' ? (
                       <STEMAvatarSVG parts={moment.avatarParts} className="w-full h-full transform scale-90" />
                     ) : moment.avatarUrl.startsWith('http') || moment.avatarUrl.startsWith('data:image/') ? (
@@ -1240,7 +1240,7 @@ export default function STEMStoriesPage() {
                       <span className="select-none text-xl">{moment.avatarUrl}</span>
                     )
                   ) : (
-                    moment.avatar
+                    moment.avatar || '🧑‍🔬'
                   )}
                 </AvatarFrame>
                 <div>
@@ -1282,36 +1282,47 @@ export default function STEMStoriesPage() {
 
             {/* Ảnh chụp màn hình lab hoặc thành quả */}
             <div 
-              onClick={() => setLightboxImage(moment.imageUrl)}
-              className="h-64 rounded-2xl overflow-hidden relative border border-border-theme mb-4 bg-bg-tertiary cursor-zoom-in group"
+              onClick={() => (moment.imageUrl && typeof moment.imageUrl === 'string' && moment.imageUrl.trim() !== '') ? setLightboxImage(moment.imageUrl) : null}
+              className={`h-64 rounded-2xl overflow-hidden relative border border-border-theme mb-4 bg-bg-tertiary group ${
+                moment.imageUrl && typeof moment.imageUrl === 'string' && moment.imageUrl.trim() !== '' ? 'cursor-zoom-in' : 'cursor-default'
+              }`}
             >
-              <img 
-                src={moment.imageUrl} 
-                alt="Workspace screenshot" 
-                className="w-full h-full object-cover group-hover/card:scale-102 transition-transform duration-700 cursor-zoom-in" 
-              />
+              {moment.imageUrl && typeof moment.imageUrl === 'string' && moment.imageUrl.trim() !== '' ? (
+                <img 
+                  src={moment.imageUrl} 
+                  alt="Workspace screenshot" 
+                  className="w-full h-full object-cover group-hover/card:scale-102 transition-transform duration-700 cursor-zoom-in" 
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center bg-bg-tertiary text-text-secondary select-none p-4 text-center">
+                  <Camera className="w-9 h-9 opacity-30 mb-2 text-accent-pink" />
+                  <span className="text-xs font-semibold text-text-secondary">Khoảnh khắc STEM không kèm ảnh</span>
+                </div>
+              )}
               {/* Bóng mờ tối dần ở đáy */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
               
-              {/* Nút bấm tải ảnh & phóng to lab */}
-              <div className="absolute top-3 right-3 flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    downloadDataUrl(moment.imageUrl, `STEM_Moment_${moment.id}.jpg`);
-                    playSound.success();
-                    showToast('Đang tải ảnh về máy... 💾');
-                  }}
-                  className="px-2 py-1 bg-black/60 hover:bg-black/80 border border-white/10 rounded-lg text-[9px] font-bold text-cyan-300 flex items-center gap-1 transition-all active:scale-95 cursor-pointer"
-                  title="Tải ảnh này về máy"
-                >
-                  <Download className="w-3 h-3" /> Tải về
-                </button>
-                <div className="px-2 py-1 bg-black/50 border border-border-theme rounded-lg text-[9px] font-bold text-text-secondary flex items-center gap-1">
-                  <Camera className="w-3 h-3" /> Phóng to
+              {/* Nút bấm tải ảnh & phóng to lab (chỉ hiện khi có ảnh) */}
+              {moment.imageUrl && typeof moment.imageUrl === 'string' && moment.imageUrl.trim() !== '' && (
+                <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      downloadDataUrl(moment.imageUrl, `STEM_Moment_${moment.id}.jpg`);
+                      playSound.success();
+                      showToast('Đang tải ảnh về máy... 💾');
+                    }}
+                    className="px-2 py-1 bg-black/60 hover:bg-black/80 border border-white/10 rounded-lg text-[9px] font-bold text-cyan-300 flex items-center gap-1 transition-all active:scale-95 cursor-pointer"
+                    title="Tải ảnh này về máy"
+                  >
+                    <Download className="w-3 h-3" /> Tải về
+                  </button>
+                  <div className="px-2 py-1 bg-black/50 border border-border-theme rounded-lg text-[9px] font-bold text-text-secondary flex items-center gap-1">
+                    <Camera className="w-3 h-3" /> Phóng to
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Bộ điều khiển biểu cảm (Reaction bar) */}
@@ -1459,16 +1470,16 @@ export default function STEMStoriesPage() {
                 <div className="absolute top-8 left-4 right-4 z-50 flex items-center justify-between">
                   <div className="flex items-center gap-3 animate-none">
                     <div className="w-9 h-9 rounded-full bg-bg-secondary border border-border-theme flex items-center justify-center text-xl shadow-lg overflow-hidden">
-                      {allStories[activeStoryIndex]?.avatarUrl ? (
-                        allStories[activeStoryIndex]?.avatarUrl === 'custom-avatar' ? (
+                      {allStories[activeStoryIndex]?.avatarUrl && typeof allStories[activeStoryIndex].avatarUrl === 'string' && allStories[activeStoryIndex].avatarUrl.trim() !== '' ? (
+                        allStories[activeStoryIndex].avatarUrl === 'custom-avatar' ? (
                           <STEMAvatarSVG parts={allStories[activeStoryIndex]?.avatarParts} className="w-full h-full transform scale-90" />
-                        ) : allStories[activeStoryIndex]?.avatarUrl.startsWith('http') || allStories[activeStoryIndex]?.avatarUrl.startsWith('data:image/') ? (
-                          <img src={allStories[activeStoryIndex]?.avatarUrl} alt={allStories[activeStoryIndex]?.userName} className="w-full h-full object-cover rounded-full" />
+                        ) : allStories[activeStoryIndex].avatarUrl.startsWith('http') || allStories[activeStoryIndex].avatarUrl.startsWith('data:image/') ? (
+                          <img src={allStories[activeStoryIndex].avatarUrl} alt={allStories[activeStoryIndex]?.userName} className="w-full h-full object-cover rounded-full" />
                         ) : (
-                          <span className="select-none text-sm">{allStories[activeStoryIndex]?.avatarUrl}</span>
+                          <span className="select-none text-sm">{allStories[activeStoryIndex].avatarUrl}</span>
                         )
                       ) : (
-                        allStories[activeStoryIndex]?.avatar
+                        allStories[activeStoryIndex]?.avatar || '🧑‍🔬'
                       )}
                     </div>
                     <div className="text-left">
@@ -1532,11 +1543,18 @@ export default function STEMStoriesPage() {
                   onTouchStart={() => setIsHolding(true)}
                   onTouchEnd={() => setIsHolding(false)}
                 >
-                  <img 
-                    src={allStories[activeStoryIndex]?.stories[storySubIndex]?.imageUrl} 
-                    alt="Story moment" 
-                    className="w-full h-full object-contain"
-                  />
+                  {allStories[activeStoryIndex]?.stories[storySubIndex]?.imageUrl && typeof allStories[activeStoryIndex].stories[storySubIndex].imageUrl === 'string' && allStories[activeStoryIndex].stories[storySubIndex].imageUrl.trim() !== '' ? (
+                    <img 
+                      src={allStories[activeStoryIndex].stories[storySubIndex].imageUrl} 
+                      alt="Story moment" 
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-zinc-500">
+                      <Camera className="w-12 h-12 mb-2 opacity-50 text-pink-400" />
+                      <span className="text-xs font-mono text-zinc-400">Không có hình ảnh</span>
+                    </div>
+                  )}
 
                   {/* Các nút bấm điều hướng trái/phải cực lớn ẩn */}
                   <div 
@@ -1728,7 +1746,11 @@ export default function STEMStoriesPage() {
                               : 'border-transparent opacity-60 hover:opacity-100'
                           }`}
                         >
-                          <img src={template.url} alt="template" className="w-full h-full object-cover" />
+                          {template.url && typeof template.url === 'string' && template.url.trim() !== '' ? (
+                            <img src={template.url} alt="template" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full bg-zinc-800 flex items-center justify-center text-[8px] text-zinc-500">Mẫu Lab</div>
+                          )}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-1.5 flex flex-col justify-end">
                             <span className="text-[8px] font-black text-white truncate">{template.title}</span>
                           </div>
@@ -1741,7 +1763,7 @@ export default function STEMStoriesPage() {
                 {/* Nội dung Tab 2: Tải ảnh tùy chỉnh */}
                 {activeCreationTab === 'upload' && (
                   <div className="relative z-10 mb-4 bg-zinc-900/60 border border-white/5 rounded-2xl p-4">
-                    {customImage ? (
+                    {customImage && typeof customImage === 'string' && customImage.trim() !== '' ? (
                       <div className="relative w-full h-36 rounded-xl overflow-hidden border border-pink-500 shadow-inner">
                         <img src={customImage} alt="custom upload" className="w-full h-full object-contain bg-black" />
                         <button 
@@ -1785,7 +1807,7 @@ export default function STEMStoriesPage() {
                 {/* Nội dung Tab 3: Chụp ảnh màn hình */}
                 {activeCreationTab === 'capture' && (
                   <div className="relative z-10 mb-4 bg-zinc-900/60 border border-white/5 rounded-2xl p-4 text-center">
-                    {customImage ? (
+                    {customImage && typeof customImage === 'string' && customImage.trim() !== '' ? (
                       <div className="relative w-full h-36 rounded-xl overflow-hidden border border-cyan-400 shadow-inner">
                         <img src={customImage} alt="captured screenshot" className="w-full h-full object-contain bg-black" />
                         <div className="absolute top-2 right-2 flex gap-1.5">
@@ -2006,7 +2028,14 @@ export default function STEMStoriesPage() {
 
                   {/* Simulated screenshot / visual score badge */}
                   <div className="w-full h-32 rounded-xl overflow-hidden relative border border-border-theme mb-3 bg-bg-primary flex items-center justify-center">
-                    <img src={pendingShare.imageUrl} alt="preview" className="w-full h-full object-contain" />
+                    {pendingShare.imageUrl && typeof pendingShare.imageUrl === 'string' && pendingShare.imageUrl.trim() !== '' ? (
+                      <img src={pendingShare.imageUrl} alt="preview" className="w-full h-full object-contain" />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-zinc-500">
+                        <Camera className="w-8 h-8 mb-1 opacity-40 text-accent-pink" />
+                        <span className="text-[10px] text-zinc-400">Không có ảnh chụp</span>
+                      </div>
+                    )}
                     {(pendingShare.rewardElo > 0 || pendingShare.rewardExp > 0) ? (
                       <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-center p-2">
                         <span className="text-[9px] font-black text-accent-pink uppercase tracking-widest mb-1">Thi đấu hoàn tất</span>

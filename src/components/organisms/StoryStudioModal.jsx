@@ -199,6 +199,8 @@ export default function StoryStudioModal({
     }
   };
 
+  if (!isOpen) return null;
+
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-[9999999] bg-black/90 backdrop-blur-2xl flex items-center justify-center p-3 sm:p-5 select-none overflow-y-auto">
@@ -299,11 +301,18 @@ export default function StoryStudioModal({
 
                   {/* Khung ảnh chụp mô phỏng */}
                   <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-purple-500/30 bg-black/60 shadow-2xl group">
-                    <img
-                      src={initialImage}
-                      alt="Captured Screenshot"
-                      className={`w-full h-full object-contain transition-all duration-300 ${getFilterStyle(activeFilter)}`}
-                    />
+                    {initialImage && typeof initialImage === 'string' && initialImage.trim() !== '' ? (
+                      <img
+                        src={initialImage}
+                        alt="Captured Screenshot"
+                        className={`w-full h-full object-contain transition-all duration-300 ${getFilterStyle(activeFilter)}`}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-zinc-500">
+                        <Camera className="w-10 h-10 mb-2 opacity-40 text-purple-400" />
+                        <span className="text-xs font-mono text-zinc-400">Không có hình ảnh xem trước</span>
+                      </div>
+                    )}
 
                     {/* Watermark STEM HUB xịn sò góc trái trên */}
                     <div className="absolute top-2.5 left-2.5 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/75 backdrop-blur-md border border-white/15 shadow-md">
@@ -320,7 +329,7 @@ export default function StoryStudioModal({
                       <div className="w-6 h-6 rounded-full bg-purple-600/30 border border-purple-400/50 flex items-center justify-center overflow-hidden">
                         {personalization.avatarUrl === 'custom-avatar' ? (
                           <STEMAvatarSVG parts={personalization.avatarParts} className="w-full h-full scale-90" />
-                        ) : personalization.avatarUrl && personalization.avatarUrl.startsWith('http') ? (
+                        ) : personalization.avatarUrl && (personalization.avatarUrl.startsWith('http') || personalization.avatarUrl.startsWith('data:image/')) ? (
                           <img src={personalization.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                         ) : (
                           <span className="text-xs">👑</span>

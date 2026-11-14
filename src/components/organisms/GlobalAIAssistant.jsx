@@ -2262,7 +2262,7 @@ ${conciseInstruction}
                           </>
                         ) : (
                           <>
-                            {m.image && (
+                            {m.image && typeof m.image === 'string' && m.image.trim() !== '' && (
                               <div className="mb-2 rounded-xl overflow-hidden border border-white/20 max-w-[260px] bg-black/40 shadow-md">
                                 <img src={m.image} alt="Ảnh đính kèm" className="w-full h-auto max-h-48 object-contain" />
                               </div>
@@ -2324,7 +2324,7 @@ ${conciseInstruction}
               </div>
 
               {/* Preview ảnh đính kèm (Paste qua Ctrl+V hoặc Tải lên) */}
-              {attachedImage && (
+              {attachedImage && typeof attachedImage === 'string' && attachedImage.trim() !== '' && (
                 <div className={`px-3 py-2 border-t flex items-center gap-2.5 ${
                   isDark ? 'bg-zinc-950/90 border-cyan-500/20' : 'bg-pink-50 border-pink-200'
                 }`}>

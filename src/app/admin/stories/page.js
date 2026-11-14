@@ -258,8 +258,12 @@ export default function StoryModeration() {
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2.5">
                     <AvatarFrame frame={post.avatarFrame || 'default'} className="w-9 h-9 text-xs">
-                      {post.avatarUrl ? (
-                        <img src={post.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+                      {post.avatarUrl && typeof post.avatarUrl === 'string' && post.avatarUrl.trim() !== '' ? (
+                        post.avatarUrl.startsWith('http') || post.avatarUrl.startsWith('data:image/') ? (
+                          <img src={post.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+                        ) : (
+                          <span className="text-xs">{post.avatarUrl}</span>
+                        )
                       ) : (
                         <span className="text-sm">{post.avatar || '👑'}</span>
                       )}
@@ -293,7 +297,7 @@ export default function StoryModeration() {
                     {post.caption}
                   </p>
                   
-                  {post.imageUrl && (
+                  {post.imageUrl && typeof post.imageUrl === 'string' && post.imageUrl.trim() !== '' && (
                     <div className="w-full h-32 rounded-xl overflow-hidden border border-[#1f2235] relative group cursor-pointer" onClick={() => { playSound.click(); setPreviewPost(post); }}>
                       <img src={post.imageUrl} alt="Lab capture" className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs font-bold text-white transition-opacity select-none">
@@ -367,14 +371,26 @@ export default function StoryModeration() {
               {/* Image & Post text */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="rounded-2xl overflow-hidden border border-[#1f2235] bg-black/40 flex items-center justify-center aspect-video md:aspect-auto md:h-64">
-                  <img src={previewPost.imageUrl} alt="High resolution" className="w-full h-full object-cover" />
+                  {previewPost.imageUrl && typeof previewPost.imageUrl === 'string' && previewPost.imageUrl.trim() !== '' ? (
+                    <img src={previewPost.imageUrl} alt="High resolution" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="text-zinc-600 text-xs font-mono">Không có hình ảnh</div>
+                  )}
                 </div>
 
                 <div className="flex flex-col justify-between gap-3 text-xs md:text-sm font-semibold text-zinc-400">
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
                       <AvatarFrame frame={previewPost.avatarFrame} className="w-9 h-9 text-xs">
-                        {previewPost.avatarUrl ? <img src={previewPost.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" /> : <span>{previewPost.avatar || '👑'}</span>}
+                        {previewPost.avatarUrl && typeof previewPost.avatarUrl === 'string' && previewPost.avatarUrl.trim() !== '' ? (
+                          previewPost.avatarUrl.startsWith('http') || previewPost.avatarUrl.startsWith('data:image/') ? (
+                            <img src={previewPost.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+                          ) : (
+                            <span className="text-xs">{previewPost.avatarUrl}</span>
+                          )
+                        ) : (
+                          <span>{previewPost.avatar || '👑'}</span>
+                        )}
                       </AvatarFrame>
                       <div>
                         <div className="text-white text-xs font-bold font-mono leading-none">{previewPost.userName}</div>

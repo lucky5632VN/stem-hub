@@ -461,8 +461,10 @@ export default function StudentManagement() {
                         <AvatarFrame frame={student.personalization?.avatarFrame || 'default'} className="w-9 h-9 text-[10px]">
                           {student.personalization?.avatarUrl === 'custom-avatar' ? (
                             <STEMAvatarSVG parts={student.personalization?.avatarParts} />
-                          ) : student.personalization?.avatarUrl ? (
+                          ) : (student.personalization?.avatarUrl && (student.personalization.avatarUrl.startsWith('http') || student.personalization.avatarUrl.startsWith('data:image/'))) ? (
                             <img src={student.personalization.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+                          ) : (student.personalization?.avatarUrl && typeof student.personalization.avatarUrl === 'string' && student.personalization.avatarUrl.trim() !== '') ? (
+                            <span className="select-none text-xs">{student.personalization.avatarUrl}</span>
                           ) : (
                             <User className="w-4 h-4 text-zinc-500" />
                           )}
@@ -659,8 +661,10 @@ export default function StudentManagement() {
                       <AvatarFrame frame={selectedStudent.personalization?.avatarFrame || 'default'} className="w-24 h-24 text-4xl">
                         {selectedStudent.personalization?.avatarUrl === 'custom-avatar' ? (
                           <STEMAvatarSVG parts={selectedStudent.personalization?.avatarParts} />
-                        ) : selectedStudent.personalization?.avatarUrl ? (
+                        ) : (selectedStudent.personalization?.avatarUrl && (selectedStudent.personalization.avatarUrl.startsWith('http') || selectedStudent.personalization.avatarUrl.startsWith('data:image/'))) ? (
                           <img src={selectedStudent.personalization.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+                        ) : (selectedStudent.personalization?.avatarUrl && typeof selectedStudent.personalization.avatarUrl === 'string' && selectedStudent.personalization.avatarUrl.trim() !== '') ? (
+                          <span className="select-none text-2xl">{selectedStudent.personalization.avatarUrl}</span>
                         ) : (
                           <User className="w-8 h-8 text-zinc-500" />
                         )}

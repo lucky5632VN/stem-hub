@@ -352,7 +352,7 @@ export default function VirtualLabSandbox({
                       ? 'bg-pink-600 text-white rounded-tr-none shadow-md' 
                       : 'bg-slate-800/80 border border-slate-700/60 text-slate-200 rounded-tl-none whitespace-pre-wrap'
                   }`}>
-                    {msg.image && (
+                    {msg.image && typeof msg.image === 'string' && msg.image.trim() !== '' && (
                       <div className="mb-2 rounded-xl overflow-hidden border border-white/20 max-w-[200px] bg-black/40">
                         <img src={msg.image} alt="Ảnh đính kèm" className="w-full h-auto max-h-36 object-contain" />
                       </div>
@@ -391,7 +391,7 @@ export default function VirtualLabSandbox({
               </div>
 
               {/* Preview ảnh đính kèm (Paste qua Ctrl+V hoặc Tải lên) */}
-              {attachedImage && (
+              {attachedImage && typeof attachedImage === 'string' && attachedImage.trim() !== '' && (
                 <div className="flex items-center gap-2 p-1.5 bg-slate-900 border border-pink-500/40 rounded-xl">
                   <img src={attachedImage} alt="Preview" className="w-9 h-9 rounded-lg object-cover border border-pink-400 shrink-0 bg-black/40" />
                   <div className="flex-1 min-w-0 text-[10px] text-pink-300 truncate font-semibold">
