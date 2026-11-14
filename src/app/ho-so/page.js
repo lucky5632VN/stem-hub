@@ -32,87 +32,156 @@ import dynamic from 'next/dynamic';
 const FaceAuthModal = dynamic(() => import('@/components/organisms/FaceAuthModal'), { ssr: false });
 
 export const ALL_COSMETICS = [
-  // Màu da (Unisex)
-  { id: 'chocolate', category: 'body', name: 'Màu da Chocolate', rarity: 'Rare', price: 150, value: 'chocolate', desc: 'Màu đồng đậm sang trọng.', genderTarget: 'unisex' },
-  { id: 'neon_blue', category: 'body', name: 'Màu da Xanh Neon', rarity: 'Epic', price: 250, value: 'neon_blue', desc: 'Màu xanh công nghệ lượng tử phát sáng.', genderTarget: 'unisex' },
+  // =================== 1. MÀU DA & CHỦNG TỘC (BODY) ===================
+  { id: 'chocolate', category: 'body', name: 'Màu da Chocolate', rarity: 'Rare', price: 150, value: 'chocolate', desc: 'Màu đồng đậm sang trọng và khỏe khoắn.', genderTarget: 'unisex' },
+  { id: 'porcelain_white', category: 'body', name: 'Màu da Trắng Sứ Bắc Cực', rarity: 'Rare', price: 160, value: 'porcelain_white', desc: 'Làn da trắng sáng thuần khiết như tuyết Bắc Cực.', genderTarget: 'unisex' },
+  { id: 'neon_blue', category: 'body', name: 'Màu da Xanh Neon', rarity: 'Epic', price: 250, value: 'neon_blue', desc: 'Màu xanh công nghệ lượng tử phát sáng huyền ảo.', genderTarget: 'unisex' },
+  { id: 'emerald_alien', category: 'body', name: 'Màu da Alien Ngọc Lục', rarity: 'Epic', price: 200, value: 'emerald_alien', desc: 'Màu da xanh ngọc lục bảo người ngoài hành tinh.', genderTarget: 'unisex' },
+  { id: 'shadow_vampire', category: 'body', name: 'Màu da Bạch Tử Ma Cà Rồng', rarity: 'Epic', price: 270, value: 'shadow_vampire', desc: 'Làn da tái lạnh quý phái của bá tước bóng đêm.', genderTarget: 'unisex' },
   { id: 'cosmic_purple', category: 'body', name: 'Màu da Tím Vũ Trụ', rarity: 'Legendary', price: 350, value: 'cosmic_purple', desc: 'Tím huyền bí từ dải ngân hà xa xôi.', genderTarget: 'unisex' },
-  { id: 'emerald_alien', category: 'body', name: 'Màu da Alien Ngọc Lục', rarity: 'Epic', price: 200, value: 'emerald_alien', desc: 'Màu da xanh ngọc lục bảo ngoài hành tinh.', genderTarget: 'unisex' },
-  { id: 'cyborg_silver', category: 'body', name: 'Màu da Cyborg Bạc', rarity: 'Legendary', price: 380, value: 'cyborg_silver', desc: 'Màu kim loại bạc nhám của robot Cyborg.', genderTarget: 'unisex' },
-  { id: 'sunfire_gold', category: 'body', name: 'Màu da Thái Dương Vàng', rarity: 'Legendary', price: 420, value: 'sunfire_gold', desc: 'Da vàng rực rỡ mang năng lượng mặt trời.', genderTarget: 'unisex' },
+  { id: 'cyborg_silver', category: 'body', name: 'Màu da Cyborg Bạc', rarity: 'Legendary', price: 380, value: 'cyborg_silver', desc: 'Màu kim loại bạc nhám của robot Cyborg tương lai.', genderTarget: 'unisex' },
+  { id: 'sunfire_gold', category: 'body', name: 'Màu da Thái Dương Vàng', rarity: 'Legendary', price: 420, value: 'sunfire_gold', desc: 'Da vàng rực rỡ mang năng lượng thái dương cực đại.', genderTarget: 'unisex' },
+  { id: 'volcanic_magma', category: 'body', name: 'Màu da Nham Thạch Lava', rarity: 'Legendary', price: 440, value: 'volcanic_magma', desc: 'Làn da dung nham đỏ cam bốc khói rực lửa.', genderTarget: 'unisex' },
+  { id: 'frost_ice', category: 'body', name: 'Màu da Băng Tinh Hàn Khí', rarity: 'Legendary', price: 430, value: 'frost_ice', desc: 'Làn da phủ sương băng giá xanh ngọc phát quang.', genderTarget: 'unisex' },
+  { id: 'mystic_elf', category: 'body', name: 'Màu da Tiên Tộc Dạ Thần', rarity: 'Legendary', price: 460, value: 'mystic_elf', desc: 'Làn da ánh hồng tím huyền bí của tiên tộc ngàn năm.', genderTarget: 'unisex' },
 
-  // Kiểu tóc (Nam / Nữ / Unisex)
-  { id: 'cyberpunk_spiky', category: 'hair', name: 'Tóc Gai Nhọn Cyber', rarity: 'Epic', price: 200, value: 'cyberpunk_spiky', desc: 'Tóc gai nhọn cá tính phát sáng.', genderTarget: 'unisex' },
-  { id: 'long_nebula', category: 'hair', name: 'Tóc Tinh Vân Nebula', rarity: 'Legendary', price: 350, value: 'long_nebula', desc: 'Tóc dài bồng bềnh cuộn tròn lượng tử.', genderTarget: 'female' },
-  { id: 'curly', category: 'hair', name: 'Tóc Curly Lãng Tử', rarity: 'Rare', price: 150, value: 'curly', desc: 'Kiểu tóc xoăn bồng bềnh lãng tử.', genderTarget: 'male' },
-  { id: 'ponytail', category: 'hair', name: 'Tóc Đuôi Ngựa Nữ Tính', rarity: 'Rare', price: 160, value: 'ponytail', desc: 'Tóc buộc cao năng động trẻ trung.', genderTarget: 'female' },
-  { id: 'dreadlocks', category: 'hair', name: 'Tóc Tết Dreadlocks', rarity: 'Epic', price: 240, value: 'dreadlocks', desc: 'Tóc tết châu Phi đai vàng cực cá tính.', genderTarget: 'unisex' },
-  { id: 'mohawk', category: 'hair', name: 'Tóc Chỏm Mohawk Nam', rarity: 'Epic', price: 220, value: 'mohawk', desc: 'Tóc chỏm giữa dựng đứng mạnh mẽ.', genderTarget: 'male' },
-  { id: 'side_part', category: 'hair', name: 'Tóc Rẽ Ngôi Tài Phiệt', rarity: 'Rare', price: 130, value: 'side_part', desc: 'Mái tóc rẽ ngôi lịch lãm.', genderTarget: 'male' },
-  { id: 'bob', category: 'hair', name: 'Tóc Bob Ngắn', rarity: 'Rare', price: 140, value: 'bob', desc: 'Tóc bob ngắn cúp ôm lấy gương mặt.', genderTarget: 'female' },
-  { id: 'double_bun', category: 'hair', name: 'Búi Đôi Lượng Tử', rarity: 'Rare', price: 180, value: 'double_bun', desc: 'Kiểu tóc búi tròn hai bên cực kỳ đáng yêu cho nữ.', genderTarget: 'female' },
-  { id: 'quantum_pixie', category: 'hair', name: 'Tóc tém Pixie Tiên Nữ', rarity: 'Epic', price: 220, value: 'quantum_pixie', desc: 'Mái tém Pixie cá tính với các lọn tóc phát sáng.', genderTarget: 'female' },
-  { id: 'crystal_waterfall', category: 'hair', name: 'Tóc Thác Nước Tinh Thể', rarity: 'Legendary', price: 380, value: 'crystal_waterfall', desc: 'Tóc siêu dài gợn sóng đính các hạt tinh thể lấp lánh.', genderTarget: 'female' },
-  { id: 'anime_super_saiyan', category: 'hair', name: 'Tóc Siêu Chiến Binh Aura', rarity: 'Legendary', price: 420, value: 'anime_super_saiyan', desc: 'Mái tóc dựng ngược hoàng kim toả năng lượng cực đại.', genderTarget: 'unisex' },
-  { id: 'cyber_wolf', category: 'hair', name: 'Tóc Sói Hoang Bạc Layer', rarity: 'Epic', price: 260, value: 'cyber_wolf', desc: 'Kiểu tóc tỉa layer sói hoang phong cách Anime ngầu lòi.', genderTarget: 'unisex' },
-  { id: 'twin_tails_mecha', category: 'hair', name: 'Tóc Song Vĩ Mecha Neon', rarity: 'Legendary', price: 390, value: 'twin_tails_mecha', desc: 'Tóc hai đuôi dài kẹp ribbon cơ giới phát sáng viền neon.', genderTarget: 'female' },
+  // =================== 2. KIỂU TÓC (HAIR) ===================
+  // --- TÓC NAM (MALE) ---
+  { id: 'curly', category: 'hair', name: 'Tóc Curly Lãng Tử', rarity: 'Rare', price: 150, value: 'curly', desc: 'Kiểu tóc xoăn bồng bềnh lãng tử phong trần.', genderTarget: 'male' },
+  { id: 'side_part', category: 'hair', name: 'Tóc Rẽ Ngôi Tài Phiệt', rarity: 'Rare', price: 130, value: 'side_part', desc: 'Mái tóc rẽ ngôi 7/3 lịch lãm chuẩn học sinh gương mẫu.', genderTarget: 'male' },
+  { id: 'academic_neat', category: 'hair', name: 'Tóc Học Sinh THPT QL4', rarity: 'Rare', price: 140, value: 'academic_neat', desc: 'Mái tóc tỉa gọn gàng thanh lịch chuẩn phong cách học viện Quỳnh Lưu 4.', genderTarget: 'male' },
+  { id: 'mohawk', category: 'hair', name: 'Tóc Chỏm Mohawk Nam', rarity: 'Epic', price: 220, value: 'mohawk', desc: 'Tóc chỏm giữa dựng đứng mạnh mẽ đầy cá tính.', genderTarget: 'male' },
   { id: 'samurai_topknot', category: 'hair', name: 'Búi Tóc Samurai Điện Tử', rarity: 'Epic', price: 240, value: 'samurai_topknot', desc: 'Búi tóc kiếm khách Nhật Bản cạo undercut sắc bén.', genderTarget: 'male' },
-  { id: 'galaxy_waves', category: 'hair', name: 'Tóc Sóng Ngân Hà Gradient', rarity: 'Legendary', price: 410, value: 'galaxy_waves', desc: 'Tóc uốn sóng bồng bềnh chuyển sắc ngân hà tím hồng vi diệu.', genderTarget: 'female' },
+  { id: 'undercut_fade', category: 'hair', name: 'Undercut Kỹ Sư Cyber', rarity: 'Epic', price: 250, value: 'undercut_fade', desc: 'Kiểu tóc cạo hai bên viền fade chuẩn hacker công nghệ cao.', genderTarget: 'male' },
+  { id: 'kaito_wolf', category: 'hair', name: 'Tóc Kaito Layer Lãng Tử', rarity: 'Epic', price: 270, value: 'kaito_wolf', desc: 'Mái tóc tỉa layer sói hoang bồng bềnh phong cách anime.', genderTarget: 'male' },
+  { id: 'shonen_spiky', category: 'hair', name: 'Tóc Gai Anh Hùng Shonen', rarity: 'Legendary', price: 400, value: 'shonen_spiky', desc: 'Tóc gai nhọn dựng ngược của nhân vật chính Shonen Anime rực cháy.', genderTarget: 'male' },
+  { id: 'cyber_braid', category: 'hair', name: 'Bím Tóc Cơ Giới Mecha', rarity: 'Legendary', price: 420, value: 'cyber_braid', desc: 'Bím tóc bọc vi mạch hợp kim phát sáng kết hợp với undercut.', genderTarget: 'male' },
 
-  // Áo (Thượng y)
-  { id: 'lab_coat', category: 'top', name: 'Áo Choàng Phòng Lab', rarity: 'Rare', price: 150, value: 'lab_coat', desc: 'Trang phục chuyên nghiệp cho nhà hóa học.', genderTarget: 'unisex' },
-  { id: 'astronaut_suit', category: 'top', name: 'Giáp Phi Hành Vũ Trụ', rarity: 'Epic', price: 250, value: 'astronaut_suit', desc: 'Trang phục khám phá các hành tinh mới.', genderTarget: 'unisex' },
-  { id: 'mech_armor', category: 'top', name: 'Giáp Cơ Giới Lượng Tử', rarity: 'Legendary', price: 400, value: 'mech_armor', desc: 'Áo giáp robot đỏ-vàng lõi phản ứng.', genderTarget: 'unisex' },
-  { id: 'cyber_hoodie', category: 'top', name: 'Hoodie Cyberpunk Tối', rarity: 'Epic', price: 220, value: 'cyber_hoodie', desc: 'Hoodie đen có dây khóa phát sáng xanh lá.', genderTarget: 'unisex' },
-  { id: 'steampunk_vest', category: 'top', name: 'Áo Gile Steampunk', rarity: 'Rare', price: 160, value: 'steampunk_vest', desc: 'Gile da bò kèm cà vạt nơ cổ điển.', genderTarget: 'male' },
-  { id: 'royal_cape', category: 'top', name: 'Choàng Hoàng Gia Đỏ', rarity: 'Legendary', price: 450, value: 'royal_cape', desc: 'Áo giáp vàng thêu tơ tằm đỏ thượng lưu.', genderTarget: 'unisex' },
-  { id: 'bio_hazard', category: 'top', name: 'Đồ Bảo Hộ Chống Độc', rarity: 'Rare', price: 180, value: 'bio_hazard', desc: 'Bộ đồ bảo hộ màu vàng có khóa kéo.', genderTarget: 'unisex' },
-  { id: 'ninja_suit', category: 'top', name: 'Y Phục Ninja Bóng Đêm', rarity: 'Epic', price: 260, value: 'ninja_suit', desc: 'Bộ đồ đen Ninja quấn đai đỏ bí ẩn.', genderTarget: 'unisex' },
+  // --- TÓC NỮ (FEMALE) ---
+  { id: 'ponytail', category: 'hair', name: 'Tóc Đuôi Ngựa Năng Động', rarity: 'Rare', price: 160, value: 'ponytail', desc: 'Tóc buộc cao năng động trẻ trung và thanh thoát.', genderTarget: 'female' },
+  { id: 'bob', category: 'hair', name: 'Tóc Bob Ngắn Thanh Lịch', rarity: 'Rare', price: 140, value: 'bob', desc: 'Tóc bob ngắn cúp ôm lấy gương mặt nữ sinh.', genderTarget: 'female' },
+  { id: 'double_bun', category: 'hair', name: 'Búi Đôi Lượng Tử Đáng Yêu', rarity: 'Rare', price: 180, value: 'double_bun', desc: 'Kiểu tóc búi tròn hai bên cực kỳ dễ thương cho nữ sinh.', genderTarget: 'female' },
+  { id: 'school_twin_braids', category: 'hair', name: 'Tóc Tết Bím Nữ Sinh QL4', rarity: 'Rare', price: 170, value: 'school_twin_braids', desc: 'Hai bím tóc tết ruy băng đỏ dịu dàng truyền thống.', genderTarget: 'female' },
+  { id: 'quantum_pixie', category: 'hair', name: 'Tóc Tém Pixie Tiên Nữ', rarity: 'Epic', price: 220, value: 'quantum_pixie', desc: 'Mái tém Pixie cá tính với các lọn tóc phát sáng.', genderTarget: 'female' },
+  { id: 'hime_cut', category: 'hair', name: 'Tóc Hime Cut Tiểu Thư', rarity: 'Epic', price: 280, value: 'hime_cut', desc: 'Kiểu tóc công chúa Nhật Bản cắt ngang má quý phái.', genderTarget: 'female' },
+  { id: 'long_nebula', category: 'hair', name: 'Tóc Tinh Vân Nebula', rarity: 'Legendary', price: 350, value: 'long_nebula', desc: 'Tóc dài bồng bềnh cuộn tròn lượng tử huyền ảo.', genderTarget: 'female' },
+  { id: 'crystal_waterfall', category: 'hair', name: 'Tóc Thác Nước Tinh Thể', rarity: 'Legendary', price: 380, value: 'crystal_waterfall', desc: 'Tóc siêu dài gợn sóng đính các hạt tinh thể lấp lánh.', genderTarget: 'female' },
+  { id: 'twin_tails_mecha', category: 'hair', name: 'Tóc Song Vĩ Mecha Neon', rarity: 'Legendary', price: 390, value: 'twin_tails_mecha', desc: 'Tóc hai đuôi dài kẹp ribbon cơ giới phát sáng viền neon.', genderTarget: 'female' },
+  { id: 'galaxy_waves', category: 'hair', name: 'Tóc Sóng Ngân Hà Gradient', rarity: 'Legendary', price: 410, value: 'galaxy_waves', desc: 'Tóc uốn sóng bồng bềnh chuyển sắc ngân hà tím hồng vi diệu.', genderTarget: 'female' },
+  { id: 'gothic_drill', category: 'hair', name: 'Lọn Xoắn Công Chúa Lolita', rarity: 'Legendary', price: 430, value: 'gothic_drill', desc: 'Hai lọn tóc xoắn ốc kiểu công chúa quý tộc châu Âu kiêu kỳ.', genderTarget: 'female' },
+
+  // --- TÓC UNISEX (UNISEX) ---
+  { id: 'cyberpunk_spiky', category: 'hair', name: 'Tóc Gai Nhọn Cyber', rarity: 'Epic', price: 200, value: 'cyberpunk_spiky', desc: 'Tóc gai nhọn cá tính phát sáng phong cách tương lai.', genderTarget: 'unisex' },
+  { id: 'dreadlocks', category: 'hair', name: 'Tóc Tết Dreadlocks', rarity: 'Epic', price: 240, value: 'dreadlocks', desc: 'Tóc tết châu Phi đai vàng cực cá tính.', genderTarget: 'unisex' },
+  { id: 'cyber_wolf', category: 'hair', name: 'Tóc Sói Hoang Bạc Layer', rarity: 'Epic', price: 260, value: 'cyber_wolf', desc: 'Kiểu tóc tỉa layer sói hoang phong cách Anime ngầu lòi.', genderTarget: 'unisex' },
+  { id: 'anime_super_saiyan', category: 'hair', name: 'Tóc Siêu Chiến Binh Aura', rarity: 'Legendary', price: 420, value: 'anime_super_saiyan', desc: 'Mái tóc dựng ngược hoàng kim toả năng lượng cực đại.', genderTarget: 'unisex' },
+  { id: 'messy_scientist', category: 'hair', name: 'Tóc Bác Học Bù Xù Sáng Tạo', rarity: 'Legendary', price: 390, value: 'messy_scientist', desc: 'Mái tóc bù xù của thiên tài khoa học sau thí nghiệm thành công.', genderTarget: 'unisex' },
+
+  // =================== 3. THƯỢNG Y (TOPS) ===================
+  // --- ÁO NAM (MALE) ---
+  { id: 'stem_ql4_male', category: 'top', name: 'Đồng Phục Nam THPT Quỳnh Lưu 4', rarity: 'Rare', price: 160, value: 'stem_ql4_male', desc: 'Áo sơ mi trắng thêu phù hiệu QL4 ngực trái kèm cà vạt xanh navy lịch lãm.', genderTarget: 'male' },
+  { id: 'steampunk_vest', category: 'top', name: 'Áo Gile Steampunk Nam', rarity: 'Rare', price: 160, value: 'steampunk_vest', desc: 'Gile da bò kèm cà vạt nơ cổ điển phong trần.', genderTarget: 'male' },
+  { id: 'academy_uniform', category: 'top', name: 'Đồng Phục Viện STEM Hoàng Gia', rarity: 'Epic', price: 280, value: 'academy_uniform', desc: 'Áo vest xanh navy viền vàng kèm cà vạt học viện danh giá.', genderTarget: 'male' },
+  { id: 'cyber_pilot', category: 'top', name: 'Áo Phi Công Bomber Mecha', rarity: 'Epic', price: 270, value: 'cyber_pilot', desc: 'Áo khoác bomber da công nghệ kèm đai chiến thuật vàng dạ quang.', genderTarget: 'male' },
+  { id: 'dark_knight', category: 'top', name: 'Giáp Hắc Hiệp Sĩ Cyber', rarity: 'Epic', price: 320, value: 'dark_knight', desc: 'Chiến giáp gai nhọn hầm hố màu thép đen với lõi thạch anh tím.', genderTarget: 'male' },
+  { id: 'street_dj_jacket', category: 'top', name: 'Áo Khoác DJ Neon Tương Lai', rarity: 'Epic', price: 290, value: 'street_dj_jacket', desc: 'Áo khoác da DJ đính đèn LED equalizer nhấp nháy.', genderTarget: 'male' },
+  { id: 'scholar_blazer', category: 'top', name: 'Blazer Kẻ Viện Sĩ Danh Dự', rarity: 'Epic', price: 310, value: 'scholar_blazer', desc: 'Áo blazer kẻ caro xám than của nhà nghiên cứu xuất sắc.', genderTarget: 'male' },
+  { id: 'cyber_mecha', category: 'top', name: 'Giáp Ngoại Khung Lõi Arc', rarity: 'Legendary', price: 490, value: 'cyber_mecha', desc: 'Chiến giáp cơ giới xanh lục bảo tích hợp lò phản ứng mini trước ngực.', genderTarget: 'male' },
+  { id: 'techno_samurai_coat', category: 'top', name: 'Áo Choàng Kiếm Khách Cyber', rarity: 'Legendary', price: 520, value: 'techno_samurai_coat', desc: 'Áo haori công nghệ đen tuyền đính vi mạch phát quang của Ronin.', genderTarget: 'male' },
+
+  // --- ÁO NỮ (FEMALE) ---
+  { id: 'stem_ql4_female', category: 'top', name: 'Đồng Phục Nữ THPT Quỳnh Lưu 4', rarity: 'Rare', price: 160, value: 'stem_ql4_female', desc: 'Áo sơ mi trắng cổ bẻ sen đính nơ xanh navy và phù hiệu trường QL4.', genderTarget: 'female' },
+  { id: 'cozy_stem_cardigan', category: 'top', name: 'Cardigan Nữ Sinh Ấm Áp', rarity: 'Rare', price: 170, value: 'cozy_stem_cardigan', desc: 'Áo len cardigan hồng phấn ngọt ngào cài cúc gỗ.', genderTarget: 'female' },
+  { id: 'cyber_croptop', category: 'top', name: 'Croptop Lượng Tử Nữ', rarity: 'Epic', price: 260, value: 'cyber_croptop', desc: 'Áo croptop thể thao đen viền cyan khoe vòng eo thon gọn.', genderTarget: 'female' },
+  { id: 'academy_blazer_fem', category: 'top', name: 'Blazer Nữ Sinh Hoàng Gia', rarity: 'Epic', price: 290, value: 'academy_blazer_fem', desc: 'Áo vest lửng tím than sang trọng đính nơ vàng học viện.', genderTarget: 'female' },
+  { id: 'mecha_idol_top', category: 'top', name: 'Áo Trình Diễn Idol Cyber', rarity: 'Epic', price: 300, value: 'mecha_idol_top', desc: 'Trang phục biểu diễn của thần tượng ảo với cầu vai phát sáng.', genderTarget: 'female' },
+  { id: 'magical_girl_vest', category: 'top', name: 'Áo Khoác Thiếu Nữ Ma Pháp', rarity: 'Epic', price: 310, value: 'magical_girl_vest', desc: 'Áo vest đính đá ruby phong cách ma pháp thiếu nữ.', genderTarget: 'female' },
   { id: 'quantum_dress', category: 'top', name: 'Đầm Dạ Hội Lượng Tử', rarity: 'Legendary', price: 460, value: 'quantum_dress', desc: 'Đầm dạ hội trễ vai hồng cánh sen sang trọng quý phái.', genderTarget: 'female' },
+  { id: 'valkyrie_corset', category: 'top', name: 'Giáp Ngực Valkyrie Nữ Thần', rarity: 'Legendary', price: 490, value: 'valkyrie_corset', desc: 'Chiến giáp mạ vàng ngọc lam của nữ thần chiến binh phương Bắc.', genderTarget: 'female' },
+  { id: 'celestial_kimono', category: 'top', name: 'Kimono Cách Tân Dạ Quang', rarity: 'Legendary', price: 510, value: 'celestial_kimono', desc: 'Kimono cách tân lụa tím dệt chỉ bạc phát sáng hoa văn anh đào.', genderTarget: 'female' },
+
+  // --- ÁO UNISEX (UNISEX) ---
+  { id: 'lab_coat', category: 'top', name: 'Áo Choàng Phòng Lab', rarity: 'Rare', price: 150, value: 'lab_coat', desc: 'Trang phục chuyên nghiệp cho nhà khoa học STEM.', genderTarget: 'unisex' },
+  { id: 'bio_hazard', category: 'top', name: 'Đồ Bảo Hộ Chống Độc', rarity: 'Rare', price: 180, value: 'bio_hazard', desc: 'Bộ đồ bảo hộ màu vàng có khóa kéo an toàn sinh học.', genderTarget: 'unisex' },
+  { id: 'cyber_hoodie', category: 'top', name: 'Hoodie Cyberpunk Tối', rarity: 'Epic', price: 220, value: 'cyber_hoodie', desc: 'Hoodie đen có dây khóa phát sáng xanh lá matrix.', genderTarget: 'unisex' },
+  { id: 'streetwear_hoodie', category: 'top', name: 'Hoodie Streetwear Tím Neon', rarity: 'Epic', price: 260, value: 'streetwear_hoodie', desc: 'Hoodie phong cách đường phố tương lai kèm tai nghe quàng cổ.', genderTarget: 'unisex' },
+  { id: 'ninja_suit', category: 'top', name: 'Y Phục Ninja Bóng Đêm', rarity: 'Epic', price: 260, value: 'ninja_suit', desc: 'Bộ đồ đen Ninja quấn đai đỏ bí ẩn.', genderTarget: 'unisex' },
+  { id: 'shadow_assassin', category: 'top', name: 'Áo Choàng Sát Thủ Hư Không', rarity: 'Epic', price: 290, value: 'shadow_assassin', desc: 'Áo choàng bóng đêm viền tím đậm với ký tự ma thuật phát quang.', genderTarget: 'unisex' },
+  { id: 'astronaut_suit', category: 'top', name: 'Giáp Phi Hành Vũ Trụ', rarity: 'Epic', price: 250, value: 'astronaut_suit', desc: 'Trang phục khám phá các hành tinh mới của NASA.', genderTarget: 'unisex' },
+  { id: 'mech_armor', category: 'top', name: 'Giáp Cơ Giới Lượng Tử', rarity: 'Legendary', price: 400, value: 'mech_armor', desc: 'Áo giáp robot đỏ-vàng tích hợp lõi phản ứng hạt nhân.', genderTarget: 'unisex' },
+  { id: 'quantum_lab_coat', category: 'top', name: 'Blouse Lượng Tử Tân Tiến', rarity: 'Legendary', price: 440, value: 'quantum_lab_coat', desc: 'Áo Blouse trắng phát quang cyan kèm bình phản ứng lượng tử.', genderTarget: 'unisex' },
+  { id: 'royal_cape', category: 'top', name: 'Choàng Hoàng Gia Đỏ', rarity: 'Legendary', price: 450, value: 'royal_cape', desc: 'Áo giáp vàng thêu tơ tằm đỏ thượng lưu của hoàng tộc.', genderTarget: 'unisex' },
   { id: 'nano_suit', category: 'top', name: 'Giáp Nano Lượng Tử LED', rarity: 'Legendary', price: 480, value: 'nano_suit', desc: 'Chiến giáp sợi carbon siêu nhẹ phủ mạch điện tử Cyan phát sáng.', genderTarget: 'unisex' },
   { id: 'phoenix_armor', category: 'top', name: 'Chiến Giáp Hỏa Phượng Hoàng', rarity: 'Legendary', price: 500, value: 'phoenix_armor', desc: 'Bộ giáp titan cam đỏ rực cháy với viên ngọc dung nham trước ngực.', genderTarget: 'unisex' },
-  { id: 'shadow_assassin', category: 'top', name: 'Áo Choàng Sát Thủ Hư Không', rarity: 'Epic', price: 290, value: 'shadow_assassin', desc: 'Áo choàng bóng đêm viền tím đậm với ký tự ma thuật phát quang.', genderTarget: 'unisex' },
-  { id: 'cyber_pilot', category: 'top', name: 'Áo Phi Công Bomber Mecha', rarity: 'Epic', price: 270, value: 'cyber_pilot', desc: 'Áo khoác bomber da công nghệ kèm đai chiến thuật vàng dạ quang.', genderTarget: 'unisex' },
-  { id: 'celestial_robe', category: 'top', name: 'Pháp Phục Tiên Tri Vũ Trụ', rarity: 'Legendary', price: 490, value: 'celestial_robe', desc: 'Áo choàng dệt từ bụi sao đêm đính hoa văn chòm sao hoàng đạo dát vàng.', genderTarget: 'unisex' },
-  { id: 'dark_knight', category: 'top', name: 'Giáp Hắc Hiệp Sĩ Cyber', rarity: 'Epic', price: 320, value: 'dark_knight', desc: 'Chiến giáp gai nhọn hầm hố màu thép đen với lõi thạch anh tím.', genderTarget: 'unisex' },
-  { id: 'academy_uniform', category: 'top', name: 'Đồng Phục Viện STEM Hoàng Gia', rarity: 'Epic', price: 280, value: 'academy_uniform', desc: 'Áo vest xanh navy viền vàng kèm cà vạt học viện danh giá.', genderTarget: 'unisex' },
-  { id: 'quantum_lab_coat', category: 'top', name: 'Blouse Lượng Tử Tân Tiến', rarity: 'Legendary', price: 440, value: 'quantum_lab_coat', desc: 'Áo Blouse trắng phát quang cyan kèm bình phản ứng lượng tử.', genderTarget: 'unisex' },
-  { id: 'cyber_mecha', category: 'top', name: 'Giáp Ngoại Khung Lõi Arc', rarity: 'Legendary', price: 490, value: 'cyber_mecha', desc: 'Chiến giáp cơ giới xanh lục bảo tích hợp lò phản ứng mini trước ngực.', genderTarget: 'unisex' },
-  { id: 'streetwear_hoodie', category: 'top', name: 'Hoodie Streetwear Tím Neon', rarity: 'Epic', price: 260, value: 'streetwear_hoodie', desc: 'Hoodie phong cách đường phố tương lai kèm tai nghe quàng cổ.', genderTarget: 'unisex' },
+  { id: 'celestial_robe', category: 'top', name: 'Pháp Phục Tiên Tri Vũ Trụ', rarity: 'Legendary', price: 490, value: 'celestial_robe', desc: 'Áo choàng dệt từ bụi sao đêm đính hoa văn chòm sao dát vàng.', genderTarget: 'unisex' },
+  { id: 'hacker_trenchcoat', category: 'top', name: 'Áo Măng Tô Hacker Ma Trận', rarity: 'Legendary', price: 530, value: 'hacker_trenchcoat', desc: 'Áo măng tô da xanh thẫm chảy dòng code nhị phân 0101.', genderTarget: 'unisex' },
 
-  // Quần (Hạ y)
-  { id: 'space_shorts', category: 'bottom', name: 'Quần Đùi Vũ Trụ', rarity: 'Rare', price: 120, value: 'space_shorts', desc: 'Quần đùi màu slate phản quang tiện dụng.', genderTarget: 'unisex' },
-  { id: 'robotic_legs', category: 'bottom', name: 'Chân Robot Cybernetic', rarity: 'Legendary', price: 350, value: 'robotic_legs', desc: 'Chân cơ khí thép phát sáng cyan.', genderTarget: 'unisex' },
-  { id: 'cyber_skirt', category: 'bottom', name: 'Chân Váy Cyber Neon', rarity: 'Epic', price: 200, value: 'cyber_skirt', desc: 'Chân váy đen phát sáng cyan quyến rũ.', genderTarget: 'female' },
-  { id: 'steampunk_pants', category: 'bottom', name: 'Quần Steampunk Ông Côn', rarity: 'Rare', price: 140, value: 'steampunk_pants', desc: 'Quần Steampunk da nâu ống côn có đai.', genderTarget: 'male' },
-  { id: 'ninja_pants', category: 'bottom', name: 'Quần Ninja Quấn Băng', rarity: 'Epic', price: 210, value: 'ninja_pants', desc: 'Quần Ninja đen quấn băng trắng cổ chân.', genderTarget: 'unisex' },
-  { id: 'lightweight_joggers', category: 'bottom', name: 'Quần Jogger Thể Thao', rarity: 'Rare', price: 130, value: 'lightweight_joggers', desc: 'Jogger xám sọc trắng kèm giày thể thao cyan.', genderTarget: 'unisex' },
+  // =================== 4. HẠ Y (BOTTOMS) ===================
+  // --- QUẦN NAM (MALE) ---
+  { id: 'steampunk_pants', category: 'bottom', name: 'Quần Steampunk Da Nâu', rarity: 'Rare', price: 140, value: 'steampunk_pants', desc: 'Quần Steampunk da nâu ống côn có dây đai cổ điển.', genderTarget: 'male' },
+  { id: 'academy_slacks', category: 'bottom', name: 'Quần Âu Học Viện QL4 Nam', rarity: 'Rare', price: 150, value: 'academy_slacks', desc: 'Quần âu navy ủi ly sắc sảo chuẩn học sinh THPT Quỳnh Lưu 4.', genderTarget: 'male' },
+  { id: 'cargo_tactical', category: 'bottom', name: 'Quần Túi Hộp Chiến Thuật', rarity: 'Epic', price: 210, value: 'cargo_tactical', desc: 'Quần jogger rằn ri túi hộp có đai molle công nghệ cao.', genderTarget: 'male' },
+  { id: 'samurai_hakama_male', category: 'bottom', name: 'Quần Xếp Ly Samurai Nam', rarity: 'Epic', price: 240, value: 'samurai_hakama_male', desc: 'Quần hakama kiếm khách Nhật Bản xẻ tà phóng khoáng.', genderTarget: 'male' },
+  { id: 'cyber_motor_pants', category: 'bottom', name: 'Quần Da Đua Xe Mecha', rarity: 'Epic', price: 250, value: 'cyber_motor_pants', desc: 'Quần da chống trầy viền kevlar phát quang của tay đua mecha.', genderTarget: 'male' },
+  { id: 'biker_jeans', category: 'bottom', name: 'Quần Jean Rách Cyber Bụi Bặm', rarity: 'Epic', price: 230, value: 'biker_jeans', desc: 'Jean đen rách gối lót lưới neon phong cách đường phố.', genderTarget: 'male' },
+
+  // --- VÁY / QUẦN NỮ (FEMALE) ---
   { id: 'tennis_skirt', category: 'bottom', name: 'Chân Váy Tennis Trắng', rarity: 'Rare', price: 150, value: 'tennis_skirt', desc: 'Chân váy xếp ly trắng thể thao năng động và trẻ trung.', genderTarget: 'female' },
-  { id: 'nano_legs', category: 'bottom', name: 'Quần Giáp Nano LED', rarity: 'Legendary', price: 360, value: 'nano_legs', desc: 'Giáp chân trợ lực sợi carbon viền LED xanh băng giá.', genderTarget: 'unisex' },
+  { id: 'ql4_pleated_skirt', category: 'bottom', name: 'Chân Váy Xếp Ly THPT QL4', rarity: 'Rare', price: 160, value: 'ql4_pleated_skirt', desc: 'Chân váy xếp ly xanh navy thanh lịch của nữ sinh Quỳnh Lưu 4.', genderTarget: 'female' },
+  { id: 'cyber_skirt', category: 'bottom', name: 'Chân Váy Cyber Neon', rarity: 'Epic', price: 200, value: 'cyber_skirt', desc: 'Chân váy đen phát sáng viền cyan quyến rũ.', genderTarget: 'female' },
+  { id: 'gothic_frill_skirt', category: 'bottom', name: 'Chân Váy Ren Lolita Dạ Tối', rarity: 'Epic', price: 260, value: 'gothic_frill_skirt', desc: 'Chân váy ren đen nhiều tầng đính ruy băng tím hoàng gia.', genderTarget: 'female' },
+  { id: 'highwaist_shorts', category: 'bottom', name: 'Quần Short Cạp Cao Da Bóng', rarity: 'Epic', price: 220, value: 'highwaist_shorts', desc: 'Quần short da cạp cao tôn dáng hiện đại.', genderTarget: 'female' },
+  { id: 'mermaid_tail_skirt', category: 'bottom', name: 'Váy Dạ Hội Xẻ Tà Tinh Thể', rarity: 'Legendary', price: 380, value: 'mermaid_tail_skirt', desc: 'Váy dạ hội đuôi cá xẻ tà đính kim cương lấp lánh.', genderTarget: 'female' },
+  { id: 'cyber_boot_leggings', category: 'bottom', name: 'Quần Tất Legging Mecha', rarity: 'Legendary', price: 370, value: 'cyber_boot_leggings', desc: 'Quần tất đen đính đèn LED chạy dọc bắp chân kèm bốt cao cổ.', genderTarget: 'female' },
+
+  // --- HẠ Y UNISEX (UNISEX) ---
+  { id: 'space_shorts', category: 'bottom', name: 'Quần Đùi Vũ Trụ', rarity: 'Rare', price: 120, value: 'space_shorts', desc: 'Quần đùi màu slate phản quang tiện dụng.', genderTarget: 'unisex' },
+  { id: 'lightweight_joggers', category: 'bottom', name: 'Quần Jogger Thể Thao', rarity: 'Rare', price: 130, value: 'lightweight_joggers', desc: 'Jogger xám sọc trắng kèm giày thể thao cyan năng động.', genderTarget: 'unisex' },
+  { id: 'ninja_pants', category: 'bottom', name: 'Quần Ninja Quấn Băng', rarity: 'Epic', price: 210, value: 'ninja_pants', desc: 'Quần Ninja đen quấn băng trắng cổ chân bí ẩn.', genderTarget: 'unisex' },
   { id: 'flame_trousers', category: 'bottom', name: 'Quần Hỏa Ngục Lôi Điện', rarity: 'Epic', price: 230, value: 'flame_trousers', desc: 'Quần chiến thuật họa tiết lửa cam đỏ rực rỡ.', genderTarget: 'unisex' },
-  { id: 'quantum_techwear', category: 'bottom', name: 'Quần Techwear Dây Đai Chiến Thuật', rarity: 'Epic', price: 220, value: 'quantum_techwear', desc: 'Quần jogger phong cách Techwear đai chéo và túi hộp.', genderTarget: 'unisex' },
-  { id: 'armored_greaves', category: 'bottom', name: 'Giáp Chân Hiệp Sĩ Lượng Tử', rarity: 'Legendary', price: 380, value: 'armored_greaves', desc: 'Giáp bọc chân kim loại mạ vàng sang trọng với khớp gối phát sáng.', genderTarget: 'unisex' },
+  { id: 'quantum_techwear', category: 'bottom', name: 'Quần Techwear Dây Đai', rarity: 'Epic', price: 220, value: 'quantum_techwear', desc: 'Quần jogger phong cách Techwear đai chéo và túi hộp.', genderTarget: 'unisex' },
   { id: 'cyber_hakama', category: 'bottom', name: 'Váy Quần Samurai Cyber', rarity: 'Epic', price: 240, value: 'cyber_hakama', desc: 'Quần xếp ly hakama phong cách kiếm sĩ tương lai.', genderTarget: 'unisex' },
   { id: 'academy_skirt_pants', category: 'bottom', name: 'Trang Phục Hạ Y Học Viện', rarity: 'Epic', price: 220, value: 'academy_skirt_pants', desc: 'Váy xếp ly / Quần âu thanh lịch chuẩn phong cách học viện.', genderTarget: 'unisex' },
+  { id: 'robotic_legs', category: 'bottom', name: 'Chân Robot Cybernetic', rarity: 'Legendary', price: 350, value: 'robotic_legs', desc: 'Chân cơ khí thép phát sáng cyan.', genderTarget: 'unisex' },
+  { id: 'nano_legs', category: 'bottom', name: 'Quần Giáp Nano LED', rarity: 'Legendary', price: 360, value: 'nano_legs', desc: 'Giáp chân trợ lực sợi carbon viền LED xanh băng giá.', genderTarget: 'unisex' },
+  { id: 'armored_greaves', category: 'bottom', name: 'Giáp Chân Hiệp Sĩ Lượng Tử', rarity: 'Legendary', price: 380, value: 'armored_greaves', desc: 'Giáp bọc chân kim loại mạ vàng sang trọng với khớp gối phát sáng.', genderTarget: 'unisex' },
   { id: 'cyber_exo_legs', category: 'bottom', name: 'Chân Trợ Lực Ngoại Khung Exo', rarity: 'Legendary', price: 390, value: 'cyber_exo_legs', desc: 'Khung xương trợ lực chân hợp kim titan piston thủy lực.', genderTarget: 'unisex' },
 
-  // Phụ kiện (Accessory)
+  // =================== 5. PHỤ KIỆN (ACCESSORIES) ===================
   { id: 'sci_glasses', category: 'accessory', name: 'Kính Trí Tuệ Giáo Sư', rarity: 'Rare', price: 100, value: 'sci_glasses', desc: 'Kính gọng vàng trí thức của nhà bác học.', genderTarget: 'unisex' },
+  { id: 'gas_mask', category: 'accessory', name: 'Mặt Nạ Phòng Độc Lab', rarity: 'Rare', price: 180, value: 'gas_mask', desc: 'Mặt nạ chuyên dụng phòng độc hóa học.', genderTarget: 'unisex' },
+  { id: 'steampunk_monocle', category: 'accessory', name: 'Kính Một Mắt Đồng Thau', rarity: 'Rare', price: 160, value: 'steampunk_monocle', desc: 'Kính một mắt cơ khí phong cách Steampunk cổ điển.', genderTarget: 'unisex' },
   { id: 'vr_goggles', category: 'accessory', name: 'Kính Thực Tế Ảo VR', rarity: 'Epic', price: 250, value: 'vr_goggles', desc: 'Kính VR phát sáng dải màu neon cyan.', genderTarget: 'unisex' },
   { id: 'headphones', category: 'accessory', name: 'Tai Nghe Lượng Tử Đỏ', rarity: 'Epic', price: 200, value: 'headphones', desc: 'Tai nghe chụp tai phát sáng lõi hạt nhân đỏ.', genderTarget: 'unisex' },
-  { id: 'gas_mask', category: 'accessory', name: 'Mặt Nạ Phòng Độc Lab', rarity: 'Rare', price: 180, value: 'gas_mask', desc: 'Mặt nạ chuyên dụng phòng độc hóa học.', genderTarget: 'unisex' },
-  { id: 'cyber_eyepatch', category: 'accessory', name: 'Bịt Mắt Laser Cyber', rarity: 'Epic', price: 240, value: 'cyber_eyepatch', desc: 'Bịt mắt công nghệ có tia laser đỏ.', genderTarget: 'unisex' },
-  { id: 'scientific_magnifier', category: 'accessory', name: 'Kính Vi Phẫu Nhãn Quang', rarity: 'Epic', price: 220, value: 'scientific_magnifier', desc: 'Kính lúp hỗ trợ phẫu thuật vi lượng.', genderTarget: 'unisex' },
-  { id: 'crown', category: 'accessory', name: 'Vương Miện Đại Đế', rarity: 'Legendary', price: 500, value: 'crown', desc: 'Vương miện vàng nạm ngọc ruby tối cao của Đại Đế STEM.', genderTarget: 'unisex' },
-  { id: 'butterfly_hairpin', category: 'accessory', name: 'Kẹp Tóc Bướm Hologram', rarity: 'Epic', price: 230, value: 'butterfly_hairpin', desc: 'Kẹp tóc hình cánh bướm hologram phát sáng lung linh.', genderTarget: 'female' },
-  { id: 'quantum_wings', category: 'accessory', name: 'Đôi Cánh Lượng Tử Photon', rarity: 'Legendary', price: 550, value: 'quantum_wings', desc: 'Đôi cánh thiên thần ánh sáng photon phát sáng rực rỡ sau lưng.', genderTarget: 'unisex' },
-  { id: 'cyber_drone', category: 'accessory', name: 'Drone Trợ Thủ AI Mini', rarity: 'Legendary', price: 480, value: 'cyber_drone', desc: 'Drone trợ lý AI bay lơ lửng trên vai với mắt laser và động cơ phản lực.', genderTarget: 'unisex' },
-  { id: 'cyber_katana', category: 'accessory', name: 'Kiếm Quang Laser Sau Lưng', rarity: 'Legendary', price: 460, value: 'cyber_katana', desc: 'Thanh katana năng lượng laser plasma đeo chéo lưng siêu ngầu.', genderTarget: 'unisex' },
+  { id: 'cyber_eyepatch', category: 'accessory', name: 'Bịt Mắt Laser Cyber', rarity: 'Epic', price: 240, value: 'cyber_eyepatch', desc: 'Bịt mắt công nghệ có tia laser đỏ ngắm chuẩn.', genderTarget: 'unisex' },
+  { id: 'scientific_magnifier', category: 'accessory', name: 'Kính Vi Phẫu Nhãn Quang', rarity: 'Epic', price: 220, value: 'scientific_magnifier', desc: 'Kính lúp hỗ trợ phẫu thuật vi lượng phát quang.', genderTarget: 'unisex' },
   { id: 'halo_matrix', category: 'accessory', name: 'Vòng Ma Trận Hào Quang', rarity: 'Epic', price: 310, value: 'halo_matrix', desc: 'Vòng hào quang ma trận số nhị phân xoay tròn trên đỉnh đầu.', genderTarget: 'unisex' },
-  { id: 'cyber_mask_fox', category: 'accessory', name: 'Mặt Nạ Hồ Ly Kitsune Cyber', rarity: 'Epic', price: 290, value: 'cyber_mask_fox', desc: 'Mặt nạ cáo kitsune sơn trắng đỏ viền LED công nghệ tương lai.', genderTarget: 'unisex' },
+  { id: 'cyber_mask_fox', category: 'accessory', name: 'Mặt Nạ Hồ Ly Kitsune Cyber', rarity: 'Epic', price: 290, value: 'cyber_mask_fox', desc: 'Mặt nạ cáo kitsune sơn trắng đỏ viền LED công nghệ.', genderTarget: 'unisex' },
   { id: 'hologram_horns', category: 'accessory', name: 'Sừng Rồng Hologram Tím', rarity: 'Epic', price: 280, value: 'hologram_horns', desc: 'Cặp sừng rồng quang học phát sáng tím huyền ảo.', genderTarget: 'unisex' },
   { id: 'plasma_shield', category: 'accessory', name: 'Khiên Năng Lượng Lục Giác', rarity: 'Epic', price: 300, value: 'plasma_shield', desc: 'Lá chắn plasma tổ ong lục giác bao bọc cánh tay.', genderTarget: 'unisex' },
   { id: 'scholar_badge', category: 'accessory', name: 'Huy Hiệu Viện Sĩ STEM Vàng', rarity: 'Epic', price: 250, value: 'scholar_badge', desc: 'Huy chương cành nguyệt quế vàng nạm ruby tôn vinh trí tuệ STEM.', genderTarget: 'unisex' },
-  { id: 'quantum_pen', category: 'accessory', name: 'Bút Lượng Tử Vẽ Không Gian', rarity: 'Legendary', price: 470, value: 'quantum_pen', desc: 'Bút stylus quang học phóng chiếu công thức Einstein & lượng tử trong không trung.', genderTarget: 'unisex' }
+  { id: 'butterfly_hairpin', category: 'accessory', name: 'Kẹp Tóc Bướm Hologram', rarity: 'Epic', price: 230, value: 'butterfly_hairpin', desc: 'Kẹp tóc hình cánh bướm hologram phát sáng lung linh.', genderTarget: 'female' },
+  { id: 'cat_ears_mecha', category: 'accessory', name: 'Tai Mèo Cơ Giới Mecha LED', rarity: 'Epic', price: 270, value: 'cat_ears_mecha', desc: 'Cặp tai mèo cơ khí phát đèn LED hồng đáng yêu.', genderTarget: 'female' },
+  { id: 'cyber_shuriken', category: 'accessory', name: 'Phi Tiêu Hào Quang Điện Tử', rarity: 'Epic', price: 260, value: 'cyber_shuriken', desc: 'Phi tiêu nhẫn giả laser xoay tròn quanh cổ tay.', genderTarget: 'unisex' },
+  { id: 'crown', category: 'accessory', name: 'Vương Miện Đại Đế STEM', rarity: 'Legendary', price: 500, value: 'crown', desc: 'Vương miện vàng nạm ngọc ruby tối cao của Đại Đế STEM.', genderTarget: 'unisex' },
+  { id: 'quantum_wings', category: 'accessory', name: 'Đôi Cánh Lượng Tử Photon', rarity: 'Legendary', price: 550, value: 'quantum_wings', desc: 'Đôi cánh thiên thần ánh sáng photon phát sáng rực rỡ sau lưng.', genderTarget: 'unisex' },
+  { id: 'cyber_drone', category: 'accessory', name: 'Drone Trợ Thủ AI Mini', rarity: 'Legendary', price: 480, value: 'cyber_drone', desc: 'Drone trợ lý AI bay lơ lửng trên vai với mắt laser.', genderTarget: 'unisex' },
+  { id: 'cyber_katana', category: 'accessory', name: 'Kiếm Quang Laser Sau Lưng', rarity: 'Legendary', price: 460, value: 'cyber_katana', desc: 'Thanh katana năng lượng laser plasma đeo chéo lưng siêu ngầu.', genderTarget: 'unisex' },
+  { id: 'quantum_pen', category: 'accessory', name: 'Bút Lượng Tử Vẽ Không Gian', rarity: 'Legendary', price: 470, value: 'quantum_pen', desc: 'Bút stylus quang học phóng chiếu công thức Einstein & lượng tử.', genderTarget: 'unisex' },
+  { id: 'jetpack_thruster', category: 'accessory', name: 'Balo Phản Lực Jetpack', rarity: 'Legendary', price: 510, value: 'jetpack_thruster', desc: 'Balo phản lực hai buồng đốt phóng xung lực xanh neon.', genderTarget: 'unisex' },
+  { id: 'chemistry_flask_pet', category: 'accessory', name: 'Bình Cầu Hóa Học Bốc Khói', rarity: 'Legendary', price: 450, value: 'chemistry_flask_pet', desc: 'Bình thí nghiệm hóa học ma thuật lơ lửng bốc khói xanh ngọc.', genderTarget: 'unisex' },
+  { id: 'dragon_tail_holo', category: 'accessory', name: 'Đuôi Rồng Hologram Tinh Thể', rarity: 'Legendary', price: 520, value: 'dragon_tail_holo', desc: 'Đuôi rồng năng lượng quang học uốn lượn sau lưng.', genderTarget: 'unisex' },
+  { id: 'beam_saber_dual', category: 'accessory', name: 'Song Kiếm Quang Vũ Trụ', rarity: 'Legendary', price: 530, value: 'beam_saber_dual', desc: 'Cặp kiếm ánh sáng năng lượng bắt chéo chữ X sau lưng.', genderTarget: 'unisex' },
+
+  // =================== 6. HÀO QUANG TOÀN THÂN (AURAS) ===================
+  { id: 'aura_phoenix', category: 'aura', name: 'Hào Quang Hỏa Phụng', rarity: 'Epic', price: 320, value: 'phoenix', desc: 'Ngọn lửa phượng hoàng thiêu đốt xung quanh nhân vật.', genderTarget: 'unisex' },
+  { id: 'aura_lightning', category: 'aura', name: 'Bão Sét Lôi Điện Lượng Tử', rarity: 'Epic', price: 310, value: 'lightning', desc: 'Tia chớp lôi điện xanh ngọc phóng điện liên tục.', genderTarget: 'unisex' },
+  { id: 'aura_matrix_halo', category: 'aura', name: 'Ma Trận Nhị Phân Hacker', rarity: 'Epic', price: 330, value: 'matrix_halo', desc: 'Dòng mã nguồn nhị phân 0101 bay lượn quanh cơ thể.', genderTarget: 'unisex' },
+  { id: 'aura_galaxy', category: 'aura', name: 'Tinh Vân Vũ Trụ Sao Băng', rarity: 'Legendary', price: 500, value: 'galaxy', desc: 'Dải ngân hà sao đêm huyền ảo và bụi tinh vân phát sáng.', genderTarget: 'unisex' },
+  { id: 'aura_quantum_superposition', category: 'aura', name: 'Phân Thân Lượng Tử Đa Thực Tại', rarity: 'Legendary', price: 560, value: 'quantum_superposition', desc: 'Bóng ma phân thân glitch đa vũ trụ cùng ký tự |Ψ⟩ và ħ.', genderTarget: 'unisex' },
+  { id: 'aura_solar_flare', category: 'aura', name: 'Vành Nhật Hoa Bốc Cháy', rarity: 'Legendary', price: 540, value: 'solar_flare', desc: 'Vành nhật hoa rực lửa thái dương xoay tròn cực đại.', genderTarget: 'unisex' },
+  { id: 'aura_black_hole', category: 'aura', name: 'Hố Đen Lực Hấp Dẫn Hư Không', rarity: 'Legendary', price: 580, value: 'black_hole', desc: 'Hố đen vũ trụ hút mọi ánh sáng xung quanh nhân vật.', genderTarget: 'unisex' },
+  { id: 'aura_celestial_wings', category: 'aura', name: 'Cánh Hào Quang Thiên Sứ', rarity: 'Legendary', price: 590, value: 'celestial_wings', desc: 'Vầng hào quang thánh khiết thiên thần ban phước.', genderTarget: 'unisex' }
 ];
 
 export const HAIR_COLORS = [
@@ -332,6 +401,10 @@ const getCosmeticPreviewParts = (item) => {
   else if (category === 'top') baseParts.top = value;
   else if (category === 'bottom') baseParts.bottom = value;
   else if (category === 'accessory') baseParts.accessory = value;
+  else if (category === 'aura') baseParts.aura = value;
+
+  if (item.genderTarget === 'female') baseParts.gender = 'female';
+  else if (item.genderTarget === 'male') baseParts.gender = 'male';
   
   return baseParts;
 };
@@ -393,6 +466,10 @@ export default function ProfilePage() {
   const [hoveredSubject, setHoveredSubject] = useState(null);
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('all');
   const [selectedGenderFilter, setSelectedGenderFilter] = useState('all');
+  const [activeStudioCategory, setActiveStudioCategory] = useState('body');
+  const [studioRarityFilter, setStudioRarityFilter] = useState('all');
+  const [studioOwnedFilter, setStudioOwnedFilter] = useState('all');
+  const [studioSearchQuery, setStudioSearchQuery] = useState('');
 
   // Trạng thái Tương tác Chibi Avatar
   const [speechBubbleText, setSpeechBubbleText] = useState('');
@@ -794,13 +871,42 @@ export default function ProfilePage() {
     }
   }, [user]);
 
-  // Tải trạng thái Pity Bảo hiểm Gacha từ localStorage
+  // Tải trạng thái Pity, Pha lê, Vật phẩm & Tạo hình từ localStorage (Chống mất đồ / reset)
   useEffect(() => {
     if (typeof window !== 'undefined' && user?.uid) {
       try {
-        const saved = JSON.parse(localStorage.getItem('stem_gacha_pity_' + user.uid) || '{"sr":0,"ssr":0}');
-        if (saved && typeof saved.sr === 'number') {
-          setGachaPity(saved);
+        const savedPity = JSON.parse(localStorage.getItem('stem_gacha_pity_' + user.uid) || '{"sr":0,"ssr":0}');
+        if (savedPity && typeof savedPity.sr === 'number') {
+          setGachaPity(savedPity);
+        }
+
+        const localCrystals = localStorage.getItem('stem_crystals_' + user.uid);
+        const localParts = JSON.parse(localStorage.getItem('stem_unlocked_parts_' + user.uid) || '[]');
+        const localTitles = JSON.parse(localStorage.getItem('stem_unlocked_titles_' + user.uid) || '[]');
+        const localAvatarParts = JSON.parse(localStorage.getItem('stem_avatar_parts_' + user.uid) || 'null');
+
+        const updates = {};
+        if (localCrystals !== null) {
+          const numCrystals = Number(localCrystals);
+          if (numCrystals !== personalization.crystals) updates.crystals = numCrystals;
+        }
+        if (Array.isArray(localParts) && localParts.length > 0) {
+          const currentParts = personalization.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default'];
+          const mergedParts = Array.from(new Set([...currentParts, ...localParts]));
+          if (mergedParts.length !== currentParts.length) updates.unlockedParts = mergedParts;
+        }
+        if (Array.isArray(localTitles) && localTitles.length > 0) {
+          const currentTitles = personalization.unlockedTitles || ['apprentice'];
+          const mergedTitles = Array.from(new Set([...currentTitles, ...localTitles]));
+          if (mergedTitles.length !== currentTitles.length) updates.unlockedTitles = mergedTitles;
+        }
+        if (localAvatarParts && typeof localAvatarParts === 'object') {
+          updates.avatarParts = { ...(personalization.avatarParts || {}), ...localAvatarParts };
+          setTempAvatarParts(prev => ({ ...prev, ...localAvatarParts }));
+        }
+
+        if (Object.keys(updates).length > 0) {
+          setPersonalization(updates);
         }
       } catch {}
     }
@@ -1088,61 +1194,179 @@ export default function ProfilePage() {
     playSound.success();
   };
 
-  // Mua trang phục trực tiếp từ Shop (Optimistic 0ms UI)
+  // Mua trang phục trực tiếp từ Shop (Bảo toàn dữ liệu bền vững qua localStorage & Firestore)
   const handleBuyCosmetic = async (item) => {
     playSound.click();
     setShopSuccessMsg('');
-    const currentCrystals = personalization.crystals !== undefined ? personalization.crystals : 500;
+    const currentCrystals = personalization.crystals !== undefined ? Number(personalization.crystals) : 500;
     
     if (currentCrystals < item.price) {
-      alert(`⚠️ Bạn không có đủ Pha lê Lượng tử để mua vật phẩm này (Cần ${item.price} 🔮)!`);
+      alert(`⚠️ Bạn không có đủ Pha lê Lượng tử để mua vật phẩm này (Cần ${item.price} 🔮, hiện có ${currentCrystals} 🔮)!`);
       return;
     }
 
-    const unlocked = personalization.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default'];
+    const localCached = (typeof window !== 'undefined' && user?.uid)
+      ? JSON.parse(localStorage.getItem('stem_unlocked_parts_' + user.uid) || '[]')
+      : [];
+    const unlocked = Array.from(new Set([...(personalization.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default']), ...localCached]));
+    
     if (unlocked.includes(item.id)) {
       alert('Bạn đã sở hữu vật phẩm này rồi!');
       return;
     }
 
-    // ⚡ PHẢN HỒI TỨC THÌ (OPTIMISTIC UI)
-    const oldCrystals = currentCrystals;
-    const oldUnlocked = [...unlocked];
     const newUnlocked = [...unlocked, item.id];
     const optimisticCrystals = currentCrystals - item.price;
 
-    setPersonalization(prev => ({
-      ...prev,
+    // 1. Cập nhật Zustand Store tức thì
+    setPersonalization({
       crystals: optimisticCrystals,
       unlockedParts: newUnlocked
-    }));
-    playSound.success();
-    setShopSuccessMsg(`🎉 Mua thành công: ${item.name}! Hãy sang tab Tự tạo Nhân vật để trang bị.`);
-    setTimeout(() => setShopSuccessMsg(''), 4000);
+    });
 
-    try {
-      const processTransaction = httpsCallable(functions, 'processCrystalTransaction');
-      const result = await processTransaction({
-        actionType: 'SHOP_PURCHASE',
-        payload: { itemId: item.id }
-      });
-
-      if (result.data?.newCrystals !== undefined) {
-        setPersonalization(prev => ({
-          ...prev,
-          crystals: result.data.newCrystals
-        }));
-      }
-    } catch (err) {
-      console.error('Lỗi khi mua vật phẩm:', err);
-      // Rollback nếu có lỗi
-      setPersonalization(prev => ({
-        ...prev,
-        crystals: oldCrystals,
-        unlockedParts: oldUnlocked
-      }));
-      alert(`Không thể hoàn tất giao dịch: ${err.message || 'Lỗi kết nối.'}`);
+    // 2. Lưu bền vững vào localStorage
+    if (typeof window !== 'undefined' && user?.uid) {
+      try {
+        localStorage.setItem('stem_crystals_' + user.uid, String(optimisticCrystals));
+        localStorage.setItem('stem_unlocked_parts_' + user.uid, JSON.stringify(newUnlocked));
+      } catch {}
     }
+
+    // 3. Ghi Firestore an toàn
+    if (user?.uid) {
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        updateDoc(userRef, {
+          'personalization.crystals': optimisticCrystals,
+          'personalization.unlockedParts': newUnlocked
+        }).catch(() => {});
+      } catch {}
+    }
+
+    playSound.success();
+    setShopSuccessMsg(`🎉 Mua thành công: ${item.name}! Đã mở khóa vĩnh viễn trong kho đồ.`);
+    setTimeout(() => setShopSuccessMsg(''), 4000);
+  };
+
+  // MUA TRỌN BỘ ĐANG MẶC THỬ TRỰC TIẾP (INSTANT BUY ALL TRIED-ON UNOWNED ITEMS)
+  const handleBuyEntireTryOnSet = async (unownedItems, totalPrice) => {
+    playSound.click();
+    const currentCrystals = personalization.crystals !== undefined ? Number(personalization.crystals) : 500;
+    if (currentCrystals < totalPrice) {
+      alert(`⚠️ Bạn không có đủ Pha lê Lượng tử (Cần ${totalPrice} 🔮, bạn đang có ${currentCrystals} 🔮)! Hãy làm thêm bài lab hoặc săn Pha lê ở Đấu trường.`);
+      return;
+    }
+
+    const newCrystals = currentCrystals - totalPrice;
+    const localCached = (typeof window !== 'undefined' && user?.uid)
+      ? JSON.parse(localStorage.getItem('stem_unlocked_parts_' + user.uid) || '[]')
+      : [];
+    const newUnlocked = Array.from(new Set([
+      ...(personalization.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default']),
+      ...localCached,
+      ...unownedItems.map(i => i.id)
+    ]));
+
+    setPersonalization({
+      crystals: newCrystals,
+      unlockedParts: newUnlocked
+    });
+
+    if (typeof window !== 'undefined' && user?.uid) {
+      try {
+        localStorage.setItem('stem_crystals_' + user.uid, String(newCrystals));
+        localStorage.setItem('stem_unlocked_parts_' + user.uid, JSON.stringify(newUnlocked));
+      } catch {}
+    }
+
+    if (user?.uid) {
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        updateDoc(userRef, {
+          'personalization.crystals': newCrystals,
+          'personalization.unlockedParts': newUnlocked
+        }).catch(() => {});
+      } catch {}
+    }
+
+    playSound.success();
+    alert(`🎉 Chúc mừng bạn đã mua thành công trọn bộ ${unownedItems.length} món trang phục với ${totalPrice} 🔮! Tất cả đã được thêm vĩnh viễn vào kho đồ.`);
+  };
+
+  // LƯU TRANG PHỤC NHÂN VẬT & ĐỒNG BỘ TOÀN HỆ THỐNG (SAVE CHARACTER OUTFIT)
+  const handleSaveCharacterOutfit = async () => {
+    playSound.click();
+    const localCached = (typeof window !== 'undefined' && user?.uid)
+      ? JSON.parse(localStorage.getItem('stem_unlocked_parts_' + user.uid) || '[]')
+      : [];
+    const unlocked = [...(personalization.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default']), ...localCached];
+    const isAdmin = user && (user.displayName === 'admin' || user.email?.includes('admin'));
+
+    const unownedLocked = ALL_COSMETICS.filter(c => {
+      if (isAdmin) return false;
+      if (c.category === 'aura') return tempAvatarParts.aura === c.value && !unlocked.includes(c.id);
+      return tempAvatarParts[c.category] === c.value && !unlocked.includes(c.id);
+    });
+
+    if (unownedLocked.length > 0) {
+      alert(`⚠️ Bạn đang mặc thử ${unownedLocked.length} món đồ chưa sở hữu (${unownedLocked.map(i => i.name).join(', ')})!
+Vui lòng nhấn 'Mua trọn bộ đang thử' hoặc đổi về trang phục đã sở hữu trước khi lưu.`);
+      return;
+    }
+
+    // 1. Cập nhật Zustand Store
+    setPersonalization({
+      avatarParts: tempAvatarParts
+    });
+
+    // 2. Lưu bền vững vào localStorage
+    if (typeof window !== 'undefined' && user?.uid) {
+      try {
+        localStorage.setItem('stem_avatar_parts_' + user.uid, JSON.stringify(tempAvatarParts));
+      } catch {}
+    }
+
+    // 3. Cập nhật Firestore
+    if (user?.uid) {
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        updateDoc(userRef, {
+          'personalization.avatarParts': tempAvatarParts
+        }).catch(() => {});
+      } catch {}
+    }
+
+    playSound.success();
+    alert('✨ Đã lưu diện mạo nhân vật STEM thành công! Tất cả nơi hiển thị nhân vật (Đấu trường, Hồ sơ, Story, Xếp hạng) đã được đồng bộ hoàn hảo.');
+  };
+
+  // HỦY THAY ĐỔI & KHÔI PHỤC TRANG PHỤC ĐÃ LƯU TRƯỚC ĐÓ (CANCEL / REVERT)
+  const handleCancelOutfitChanges = () => {
+    playSound.click();
+    if (personalization.avatarParts) {
+      setTempAvatarParts(personalization.avatarParts);
+    }
+  };
+
+  // NÚT RIÊNG: ĐẶT NHÂN VẬT CHIBI LÀM ẢNH ĐẠI DIỆN CHÍNH (AVATAR URL)
+  const handleSetAsMainAvatar = async () => {
+    playSound.click();
+    setPersonalization({ avatarUrl: 'custom-avatar' });
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('stemhub_personalization_avatar', 'custom-avatar');
+      } catch {}
+    }
+    if (user?.uid) {
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        updateDoc(userRef, {
+          'personalization.avatarUrl': 'custom-avatar'
+        }).catch(() => {});
+      } catch {}
+    }
+    playSound.success();
+    alert('✨ Đã cài đặt nhân vật Chibi làm Ảnh đại diện chính (Avatar) của bạn thành công!');
   };
 
   // Lưu tạo hình nhân vật
@@ -3529,648 +3753,604 @@ export default function ProfilePage() {
             </button>
           </div>
 
-          {/* Sub-tab 1: Character Creator */}
-          {activePersonalizationSubTab === 'character' && (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-              
-              {/* Cột trái: Hologram Preview */}
-              <div className="lg:col-span-5 lg:sticky lg:top-24 bg-[#2a2c3a] border border-white/5 rounded-3xl p-6 flex flex-col items-center justify-center relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+          {/* Sub-tab 1: Character Creator Studio 2.0 (Redesigned & Expanded) */}
+          {activePersonalizationSubTab === 'character' && (() => {
+            const localCachedUnlocked = (typeof window !== 'undefined' && user?.uid)
+              ? JSON.parse(localStorage.getItem('stem_unlocked_parts_' + user.uid) || '[]')
+              : [];
+            const allUnlockedIds = Array.from(new Set([
+              ...(personalization.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default']),
+              ...localCachedUnlocked
+            ]));
+            const isAdmin = user && (user.displayName === 'admin' || user.email?.includes('admin'));
+            const currentGender = tempAvatarParts.gender || 'male';
+
+            // Danh sách các món đang mặc thử nhưng CHƯA SỞ HỮU
+            const equippedUnownedItems = ALL_COSMETICS.filter(item => {
+              if (isAdmin) return false;
+              if (allUnlockedIds.includes(item.id)) return false;
+              if (item.category === 'aura') return tempAvatarParts.aura === item.value;
+              return tempAvatarParts[item.category] === item.value;
+            });
+            const totalTryOnPrice = equippedUnownedItems.reduce((acc, item) => acc + (item.price || 0), 0);
+            const userCrystals = personalization.crystals !== undefined ? Number(personalization.crystals) : 500;
+            const canAffordAll = userCrystals >= totalTryOnPrice;
+
+            // Danh mục trang phục với số lượng theo giới tính hiện tại
+            const categories = [
+              { id: 'body', label: 'Dáng & Da', icon: '👤' },
+              { id: 'hair', label: 'Kiểu tóc', icon: '💇' },
+              { id: 'top', label: 'Áo & Giáp', icon: '👕' },
+              { id: 'bottom', label: 'Quần & Váy', icon: '👖' },
+              { id: 'accessory', label: 'Phụ kiện', icon: '🎒' },
+              { id: 'aura', label: 'Hào quang', icon: '✨' },
+              { id: 'pose', label: 'Cử chỉ', icon: '🎭' }
+            ];
+
+            // Đếm số món cho từng danh mục
+            const getCatCount = (catId) => {
+              if (catId === 'pose') return 6;
+              return ALL_COSMETICS.filter(item => {
+                if (item.category !== catId) return false;
+                if (currentGender === 'male' && item.genderTarget === 'female') return false;
+                if (currentGender === 'female' && item.genderTarget === 'male') return false;
+                return true;
+              }).length;
+            };
+
+            // Lọc danh sách hiển thị
+            const filteredCosmetics = ALL_COSMETICS.filter(item => {
+              // Phân chia nghiêm ngặt giới tính
+              if (currentGender === 'male' && item.genderTarget === 'female') return false;
+              if (currentGender === 'female' && item.genderTarget === 'male') return false;
+
+              // Lọc danh mục
+              if (activeStudioCategory !== 'pose' && item.category !== activeStudioCategory) return false;
+
+              // Lọc phẩm chất
+              if (studioRarityFilter !== 'all' && item.rarity !== studioRarityFilter) return false;
+
+              // Lọc sở hữu
+              const isOwned = isAdmin || allUnlockedIds.includes(item.id);
+              if (studioOwnedFilter === 'owned' && !isOwned) return false;
+              if (studioOwnedFilter === 'unowned' && isOwned) return false;
+
+              // Tìm kiếm theo tên
+              if (studioSearchQuery.trim()) {
+                const q = studioSearchQuery.toLowerCase();
+                if (!item.name.toLowerCase().includes(q) && !(item.desc || '').toLowerCase().includes(q)) {
+                  return false;
+                }
+              }
+
+              return true;
+            });
+
+            // Chuyển giới tính và dọn dẹp trang phục khác giới
+            const handleSwitchStudioGender = (newGender) => {
+              playSound.click();
+              setTempAvatarParts(prev => {
+                let topVal = prev.top;
+                let bottomVal = prev.bottom;
+                let hairVal = prev.hair;
+
+                const curTop = ALL_COSMETICS.find(c => c.category === 'top' && c.value === prev.top);
+                if (curTop && curTop.genderTarget !== 'unisex' && curTop.genderTarget !== newGender) {
+                  topVal = 'default';
+                }
+                const curBottom = ALL_COSMETICS.find(c => c.category === 'bottom' && c.value === prev.bottom);
+                if (curBottom && curBottom.genderTarget !== 'unisex' && curBottom.genderTarget !== newGender) {
+                  bottomVal = 'default';
+                }
+                const curHair = ALL_COSMETICS.find(c => c.category === 'hair' && c.value === prev.hair);
+                if (curHair && curHair.genderTarget !== 'unisex' && curHair.genderTarget !== newGender) {
+                  hairVal = 'default';
+                }
+
+                return {
+                  ...prev,
+                  gender: newGender,
+                  top: topVal,
+                  bottom: bottomVal,
+                  hair: hairVal
+                };
+              });
+            };
+
+            // Mặc thử hoặc tháo phụ kiện/hào quang
+            const handleEquipOrTryOn = (item) => {
+              playSound.click();
+              setTempAvatarParts(prev => {
+                if (item.category === 'aura') {
+                  return { ...prev, aura: prev.aura === item.value ? 'none' : item.value };
+                }
+                if (item.category === 'accessory') {
+                  return { ...prev, accessory: prev.accessory === item.value ? 'none' : item.value };
+                }
+                return { ...prev, [item.category]: item.value };
+              });
+            };
+
+            // Tạo dáng ngẫu nhiên từ đồ đã sở hữu
+            const handleRandomizeOwnedOutfit = () => {
+              playSound.click();
+              const ownedPool = ALL_COSMETICS.filter(c => {
+                if (!isAdmin && !allUnlockedIds.includes(c.id)) return false;
+                if (currentGender === 'male' && c.genderTarget === 'female') return false;
+                if (currentGender === 'female' && c.genderTarget === 'male') return false;
+                return true;
+              });
+
+              const pickRandom = (cat, fallback = 'default') => {
+                const sub = ownedPool.filter(c => c.category === cat);
+                if (sub.length === 0) return fallback;
+                return sub[Math.floor(Math.random() * sub.length)].value;
+              };
+
+              setTempAvatarParts(prev => ({
+                ...prev,
+                body: pickRandom('body', 'peach'),
+                hair: pickRandom('hair', 'default'),
+                top: pickRandom('top', 'default'),
+                bottom: pickRandom('bottom', 'default'),
+                accessory: pickRandom('accessory', 'none'),
+                aura: pickRandom('aura', 'none')
+              }));
+              playSound.success();
+            };
+
+            return (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 
-                <h4 className="text-xs font-black text-zinc-400 uppercase tracking-widest mb-4">Xem trước tạo hình</h4>
-
-                {/* Bong bóng thoại tương tác của Chibi */}
-                <div className={`transition-all duration-300 w-full flex justify-center mb-2 min-h-[48px] ${speechBubbleText ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
-                  <div className="relative bg-zinc-900/90 border border-pink-500/40 rounded-2xl px-4 py-2.5 text-xs text-pink-300 max-w-[240px] text-center shadow-lg backdrop-blur-md font-sans">
-                    {speechBubbleText}
-                    {/* Arrow pointing down */}
-                    <div className="absolute bottom-[-6px] left-1/2 transform -translate-x-1/2 w-3 h-3 bg-zinc-900 border-r border-b border-pink-500/40 rotate-45" />
-                  </div>
-                </div>
-                
-                {/* Hologram Glass Box */}
-                <div 
-                  onClick={triggerSpeechBubble}
-                  title="Click vào để tương tác với Chibi!"
-                  className="w-56 h-56 rounded-2xl bg-gradient-to-b from-white/5 to-white/0 border border-white/10 flex items-center justify-center p-4 relative shadow-2xl backdrop-blur-sm cursor-pointer hover:border-cyan-400/30 transition-all active:scale-98"
-                >
-                  {/* Quantum Particles for Dance effect */}
-                  <QuantumParticlesCanvas active={isDancing} color="#f472b6" />
+                {/* ================== CỘT TRÁI: HOLOGRAM PREVIEW & PHÒNG THỬ ĐỒ ================== */}
+                <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-4">
                   
-                  {/* Neon laser corners */}
-                  <div className="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-cyan-400" />
-                  <div className="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-cyan-400" />
-                  <div className="absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-cyan-400" />
-                  <div className="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-cyan-400" />
-                  
-                  <div className={`transition-all duration-300 ${isDancing ? 'animate-bounce' : ''}`}>
-                    <STEMAvatarSVG 
-                      parts={tempAvatarParts} 
-                      className={`w-48 h-48 drop-shadow-[0_0_15px_rgba(34,211,238,0.2)] transition-transform duration-300 ${
-                        isFlipped ? 'scale-x-[-1]' : 'scale-x-[1]'
-                      }`} 
-                    />
-                  </div>
-                </div>
-
-                {/* Các nút tương tác Chibi lượng tử */}
-                <div className="flex flex-wrap gap-2 w-full mt-4 justify-center">
-                  <button
-                    onClick={triggerSpeechBubble}
-                    className="px-3 py-1.5 bg-zinc-800/80 hover:bg-zinc-800 text-zinc-300 rounded-xl text-xs font-bold border border-white/5 transition-all active:scale-95 flex items-center gap-1.5"
-                  >
-                    <span>💬 Nói chuyện</span>
-                  </button>
-                  <button
-                    onClick={handleDance}
-                    disabled={isDancing}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all active:scale-95 flex items-center gap-1.5 ${
-                      isDancing 
-                        ? 'bg-pink-500/20 border-pink-500 text-pink-400' 
-                        : 'bg-zinc-800/80 hover:bg-zinc-800 border-white/5 text-zinc-300'
-                    }`}
-                  >
-                    <span>💃 Nhảy múa</span>
-                  </button>
-                  <button
-                    onClick={() => { playSound.click(); setIsFlipped(!isFlipped); }}
-                    className="px-3 py-1.5 bg-zinc-800/80 hover:bg-zinc-800 text-zinc-300 rounded-xl text-xs font-bold border border-white/5 transition-all active:scale-95 flex items-center gap-1.5"
-                  >
-                    <span>🔄 Xoay lật</span>
-                  </button>
-                  <button
-                    onClick={handleRandomizeOutfit}
-                    title="Ngẫu nhiên tạo một phong cách thời trang cực ngầu!"
-                    className="px-3 py-1.5 bg-gradient-to-r from-purple-600/40 via-pink-600/30 to-amber-500/30 hover:from-purple-600/60 hover:to-amber-500/50 text-amber-300 rounded-xl text-xs font-bold border border-amber-400/40 transition-all active:scale-95 flex items-center gap-1.5 shadow-sm shadow-purple-500/20"
-                  >
-                    <span>🎲 Phối ngẫu nhiên</span>
-                  </button>
-                </div>
-
-                {/* Cảnh báo trang phục đang mặc thử */}
-                {(() => {
-                  const localCached = (typeof window !== 'undefined' && user?.uid)
-                    ? JSON.parse(localStorage.getItem('stem_unlocked_parts_' + user.uid) || '[]')
-                    : [];
-                  const unlocked = [...(personalization.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default']), ...localCached];
-                  const isAdmin = user && (user.displayName === 'admin' || user.email?.includes('admin'));
-                  if (isAdmin) return null;
-
-                  const lockedList = ALL_COSMETICS.filter(c => 
-                    tempAvatarParts[c.category] === c.value && !unlocked.includes(c.id)
-                  );
-
-                  if (lockedList.length === 0) return null;
-
-                  return (
-                    <div className="w-full mt-3 p-2.5 rounded-2xl bg-amber-500/15 border border-amber-400/40 text-center text-[10px] font-mono text-amber-300">
-                      <div className="font-bold flex items-center justify-center gap-1 mb-0.5">
-                        <span>⚠️ Đang mặc thử {lockedList.length} món chưa sở hữu:</span>
+                  {/* Hộp Preview Chibi Hologram */}
+                  <div className="bg-gradient-to-b from-[#1b1c2b] to-[#11121d] border border-cyan-500/20 rounded-3xl p-5 flex flex-col items-center justify-center relative overflow-hidden group shadow-2xl">
+                    <div className="absolute top-0 right-0 w-36 h-36 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 w-36 h-36 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+                    
+                    {/* Header thông số Chibi */}
+                    <div className="w-full flex items-center justify-between mb-3 z-10">
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-[10px] font-mono font-bold uppercase tracking-wider">
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+                        <span>Hologram Fitting Room</span>
                       </div>
-                      <div className="text-[9px] text-zinc-300 truncate">
-                        {lockedList.map(i => i.name).join(', ')}
+                      <div className="text-[10px] font-mono text-zinc-400">
+                        Giới tính: <strong className="text-white capitalize">{currentGender === 'female' ? 'Nữ 👧' : currentGender === 'cyborg' ? 'Cyborg 🤖' : 'Nam 👨'}</strong>
                       </div>
+                    </div>
+
+                    {/* Bong bóng thoại tương tác Chibi */}
+                    <div className={`transition-all duration-300 w-full flex justify-center mb-1 min-h-[44px] z-10 ${speechBubbleText ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
+                      <div className="relative bg-zinc-900/95 border border-pink-500/50 rounded-2xl px-3.5 py-2 text-xs text-pink-300 max-w-[260px] text-center shadow-lg backdrop-blur-md font-sans">
+                        {speechBubbleText}
+                        <div className="absolute bottom-[-6px] left-1/2 transform -translate-x-1/2 w-3 h-3 bg-zinc-900 border-r border-b border-pink-500/50 rotate-45" />
+                      </div>
+                    </div>
+                    
+                    {/* Bục Hologram hiển thị Chibi */}
+                    <div 
+                      onClick={triggerSpeechBubble}
+                      title="Click vào để tương tác nói chuyện với Chibi!"
+                      className="w-56 h-56 rounded-2xl bg-gradient-to-b from-white/5 to-white/0 border border-white/10 flex items-center justify-center p-3 relative cursor-pointer group-hover:border-cyan-500/40 transition-all shadow-inner"
+                    >
+                      {/* Vòng đĩa lượng tử xoay dưới chân */}
+                      <div className="absolute bottom-3 w-40 h-10 rounded-[100%] border border-cyan-400/40 bg-cyan-500/10 blur-[1px] animate-pulse" />
+                      <div className="absolute bottom-1 w-28 h-6 rounded-[100%] border border-pink-500/40 bg-pink-500/20 blur-[0.5px]" />
+                      
+                      <div className={`w-44 h-44 relative z-10 filter drop-shadow-[0_10px_20px_rgba(0,242,254,0.3)] transition-transform duration-300 ${isDancing ? 'animate-bounce' : ''}`}>
+                        <STEMAvatarSVG parts={{ ...tempAvatarParts, isFlipped }} className="w-full h-full" />
+                      </div>
+
+                      {/* Huy hiệu đang thử đồ nếu có món chưa mở khóa */}
+                      {equippedUnownedItems.length > 0 && (
+                        <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-300 text-[10px] font-bold flex items-center gap-1 shadow-md animate-pulse">
+                          <Sparkles className="w-2.5 h-2.5" />
+                          <span>Đang thử {equippedUnownedItems.length} món</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Phím tương tác nhanh với Avatar */}
+                    <div className="flex items-center gap-2 mt-4 z-10 w-full justify-center">
                       <button
-                        onClick={() => {
-                          playSound.click();
-                          setActivePersonalizationSubTab('shop_gacha');
-                        }}
-                        className="mt-1.5 px-3 py-1 bg-amber-400 hover:bg-amber-300 text-zinc-950 font-black rounded-lg text-[9px] uppercase tracking-wider transition-all active:scale-95 inline-flex items-center gap-1 cursor-pointer"
+                        onClick={(e) => { e.stopPropagation(); setIsFlipped(prev => !prev); playSound.click(); }}
+                        className="px-2.5 py-1 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 hover:text-white text-[11px] font-bold flex items-center gap-1 border border-zinc-700 transition-all"
+                        title="Đổi hướng quay trái / phải"
                       >
-                        <Sparkles className="w-2.5 h-2.5" />
-                        <span>Đến Gacha săn đồ ngay 🔮</span>
+                        <RotateCcw className="w-3 h-3" />
+                        <span>Đổi hướng</span>
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setIsDancing(prev => !prev); playSound.click(); }}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 border transition-all ${isDancing ? 'bg-pink-500/20 border-pink-500 text-pink-300' : 'bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border-zinc-700'}`}
+                        title="Nhún nhảy hoạt ảnh"
+                      >
+                        <Sparkles className="w-3 h-3" />
+                        <span>{isDancing ? 'Dừng nhảy' : 'Nhún nhảy'}</span>
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleRandomizeOwnedOutfit(); }}
+                        className="px-2.5 py-1 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 hover:text-white text-[11px] font-bold flex items-center gap-1 border border-zinc-700 transition-all"
+                        title="Phối ngẫu nhiên từ kho đồ đã có"
+                      >
+                        <span>🎲 Phối nhanh</span>
                       </button>
                     </div>
-                  );
-                })()}
 
-                <button
-                  onClick={handleEquipAvatarParts}
-                  className="w-full mt-3 py-3 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white text-xs font-black uppercase tracking-wider rounded-2xl transition-all active:scale-95 shadow-lg shadow-pink-500/20 flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  Đồng bộ Avatar đại diện
-                </button>
+                  </div>
 
-                {/* Nút xem Thẻ Căn Cước Học Sinh STEM */}
-                <button
-                  onClick={() => {
-                    playSound.click();
-                    setShowIdCardModal(true);
-                  }}
-                  className="w-full mt-2 py-2.5 bg-gradient-to-r from-cyan-600/30 via-indigo-600/30 to-purple-600/30 hover:from-cyan-600/50 hover:to-purple-600/50 text-cyan-200 text-xs font-bold rounded-2xl border border-cyan-400/30 transition-all active:scale-95 shadow-md flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <span>🪪 Thẻ Căn Cước Học Sinh STEM</span>
-                </button>
-              </div>
+                  {/* ================== THẺ TỔNG GIÁ TRỊ MẶC THỬ & MUA TRỰC TIẾP ================== */}
+                  {equippedUnownedItems.length > 0 ? (
+                    <div className="bg-gradient-to-br from-amber-950/40 via-purple-950/30 to-zinc-900/90 border border-amber-500/40 rounded-2xl p-4 shadow-xl backdrop-blur-md relative overflow-hidden">
+                      <div className="flex items-center justify-between pb-3 border-b border-amber-500/20">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400">
+                            <ShoppingBag className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                              <span>Trang phục đang mặc thử</span>
+                              <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 text-[10px] font-mono">
+                                {equippedUnownedItems.length} món
+                              </span>
+                            </div>
+                            <div className="text-[10px] text-zinc-400">Chưa có trong kho đồ của bạn</div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-[10px] text-zinc-400 font-mono uppercase">Tổng giá trị</div>
+                          <div className="text-sm font-black text-amber-300 flex items-center justify-end gap-1">
+                            <span>{totalTryOnPrice}</span>
+                            <CrystalIcon className="w-3.5 h-3.5" />
+                          </div>
+                        </div>
+                      </div>
 
-              {/* Cột phải: Customize Parts Panels */}
-              <div className="lg:col-span-7 bg-bg-secondary border border-border-theme rounded-3xl p-6 space-y-6">
-                <h4 className="text-sm font-bold text-text-primary mb-2 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-                  Studio thiết kế nhân vật STEM phong cách Game
-                </h4>
+                      {/* Danh sách các món đang mặc thử */}
+                      <div className="py-2.5 space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                        {equippedUnownedItems.map(item => (
+                          <div key={item.id} className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-zinc-900/60 border border-white/5 text-xs">
+                            <div className="flex items-center gap-2 truncate">
+                              <span className={`w-2 h-2 rounded-full ${item.rarity === 'Legendary' ? 'bg-amber-400 shadow-[0_0_8px_#f59e0b]' : item.rarity === 'Epic' ? 'bg-purple-400 shadow-[0_0_8px_#a855f7]' : 'bg-cyan-400'}`} />
+                              <span className="text-zinc-200 truncate font-medium text-[11px]">{item.name}</span>
+                            </div>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <span className="text-amber-300 font-mono font-bold text-[11px] flex items-center gap-0.5">
+                                {item.price} <CrystalIcon className="w-3 h-3" />
+                              </span>
+                              <button
+                                onClick={() => handleBuyCosmetic(item)}
+                                className="px-2 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-black font-bold text-[10px] transition-all"
+                                title="Mua lẻ món này"
+                              >
+                                Mua lẻ
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
 
-                {/* BỘ CHỌN THỂ HÌNH, GIỚI TÍNH, BIỂU CẢM VÀ TẠO DÁNG */}
-                <div className="space-y-4 bg-bg-tertiary p-4 rounded-2xl border border-border-theme">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* GIỚI TÍNH */}
-                    <div>
-                      <h5 className="text-[10px] font-black text-text-secondary uppercase tracking-widest mb-2">Giới tính & Dòng dõi</h5>
-                      <div className="flex gap-1.5">
+                      {/* Số dư & Nút Mua Trọn Bộ */}
+                      <div className="pt-2 border-t border-white/5 flex flex-col gap-2">
+                        <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                          <span>Số dư Pha lê hiện tại:</span>
+                          <span className={`font-mono font-bold flex items-center gap-1 ${canAffordAll ? 'text-cyan-300' : 'text-rose-400'}`}>
+                            {userCrystals} <CrystalIcon className="w-3 h-3" />
+                            {!canAffordAll && `(Thiếu ${totalTryOnPrice - userCrystals} 🔮)`}
+                          </span>
+                        </div>
                         <button
-                          onClick={() => {
-                            playSound.click();
-                            setTempAvatarParts(prev => {
-                              const nextParts = { ...prev, gender: 'male' };
-                              const hairItem = ALL_COSMETICS.find(c => c.category === 'hair' && c.value === prev.hair);
-                              const topItem = ALL_COSMETICS.find(c => c.category === 'top' && c.value === prev.top);
-                              const bottomItem = ALL_COSMETICS.find(c => c.category === 'bottom' && c.value === prev.bottom);
-                              if (hairItem && hairItem.genderTarget === 'female') nextParts.hair = 'default';
-                              if (topItem && topItem.genderTarget === 'female') nextParts.top = 'default';
-                              if (bottomItem && bottomItem.genderTarget === 'female') nextParts.bottom = 'default';
-                              return nextParts;
-                            });
-                          }}
-                          className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all active:scale-95 ${
-                            tempAvatarParts.gender === 'male'
-                              ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400'
-                              : 'bg-bg-primary border-border-theme text-text-secondary hover:text-text-primary'
-                          }`}
+                          onClick={() => handleBuyEntireTryOnSet(equippedUnownedItems, totalTryOnPrice)}
+                          disabled={!canAffordAll}
+                          className={`w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-lg ${canAffordAll ? 'bg-gradient-to-r from-amber-500 via-pink-500 to-purple-600 hover:brightness-110 text-white shadow-amber-500/25 cursor-pointer' : 'bg-zinc-800 text-zinc-500 cursor-not-allowed border border-zinc-700'}`}
                         >
-                          Nam 🧑
-                        </button>
-                        <button
-                          onClick={() => {
-                            playSound.click();
-                            setTempAvatarParts(prev => {
-                              const nextParts = { ...prev, gender: 'female' };
-                              const hairItem = ALL_COSMETICS.find(c => c.category === 'hair' && c.value === prev.hair);
-                              const topItem = ALL_COSMETICS.find(c => c.category === 'top' && c.value === prev.top);
-                              const bottomItem = ALL_COSMETICS.find(c => c.category === 'bottom' && c.value === prev.bottom);
-                              if (hairItem && hairItem.genderTarget === 'male') nextParts.hair = 'default';
-                              if (topItem && topItem.genderTarget === 'male') nextParts.top = 'default';
-                              if (bottomItem && bottomItem.genderTarget === 'male') nextParts.bottom = 'default';
-                              return nextParts;
-                            });
-                          }}
-                          className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all active:scale-95 ${
-                            tempAvatarParts.gender === 'female'
-                              ? 'bg-pink-500/20 border-pink-500 text-pink-400'
-                              : 'bg-bg-primary border-border-theme text-text-secondary hover:text-text-primary'
-                          }`}
-                        >
-                          Nữ 👧
-                        </button>
-                        <button
-                          onClick={() => {
-                            playSound.click();
-                            setTempAvatarParts(prev => ({ ...prev, gender: 'cyborg' }));
-                          }}
-                          className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all active:scale-95 ${
-                            tempAvatarParts.gender === 'cyborg'
-                              ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-sm shadow-emerald-500/20'
-                              : 'bg-bg-primary border-border-theme text-text-secondary hover:text-text-primary'
-                          }`}
-                        >
-                          Cyborg 🤖
+                          <ShoppingBag className="w-4 h-4" />
+                          <span>MUA TRỌN BỘ ĐANG THỬ ({totalTryOnPrice} 🔮)</span>
                         </button>
                       </div>
                     </div>
+                  ) : (
+                    <div className="px-4 py-3 rounded-2xl bg-cyan-950/20 border border-cyan-500/20 flex items-center gap-2.5 text-xs text-cyan-300">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+                      <span>Bạn đang mặc toàn bộ trang phục đã sở hữu. Hãy nhấn <strong>Lưu trang phục</strong> để áp dụng toàn hệ thống!</span>
+                    </div>
+                  )}
 
-                    {/* THỂ HÌNH */}
+                  {/* ================== THANH HÀNH ĐỘNG: LƯU / HỦY / AVATAR RIÊNG ================== */}
+                  <div className="bg-[#1b1c2b] border border-white/10 rounded-2xl p-3.5 space-y-2.5">
+                    <div className="text-[10px] font-mono uppercase text-zinc-400 tracking-wider font-bold">
+                      Áp dụng diện mạo
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2">
+                      {/* Nút 1: Lưu trang phục (Đồng bộ nhân vật toàn game) */}
+                      <button
+                        onClick={handleSaveCharacterOutfit}
+                        className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer"
+                        title="Lưu tạo hình Chibi đồng bộ toàn bộ game (Đấu trường, Hồ sơ, Story, Bảng xếp hạng)"
+                      >
+                        <Check className="w-4 h-4" />
+                        <span>Lưu trang phục</span>
+                      </button>
+
+                      {/* Nút 2: Hủy thay đổi */}
+                      <button
+                        onClick={handleCancelOutfitChanges}
+                        className="w-full py-2.5 px-3 rounded-xl bg-zinc-800/80 hover:bg-zinc-700 hover:text-rose-400 text-zinc-300 font-bold text-xs flex items-center justify-center gap-1.5 border border-zinc-700 transition-all cursor-pointer"
+                        title="Hủy các thay đổi và khôi phục trang phục đã lưu trước đó"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span>Hủy thay đổi</span>
+                      </button>
+                    </div>
+
+                    {/* Nút 3: NÚT RIÊNG ĐẶT LÀM ẢNH ĐẠI DIỆN AVATAR */}
+                    <button
+                      onClick={handleSetAsMainAvatar}
+                      className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-cyan-600/30 to-blue-600/30 hover:from-cyan-600/50 hover:to-blue-600/50 border border-cyan-500/40 text-cyan-200 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
+                      title="Chụp nhân vật này làm ảnh đại diện chính (Avatar) hiển thị ở góc trên thanh công cụ"
+                    >
+                      <Camera className="w-4 h-4 text-cyan-400" />
+                      <span>Đặt nhân vật này làm Avatar chính</span>
+                    </button>
+                  </div>
+
+                </div>
+
+                {/* ================== CỘT PHẢI: KHO TRANG PHỤC ĐA DẠNG 100+ BỘ ================== */}
+                <div className="lg:col-span-7 bg-[#1b1c2b] border border-white/10 rounded-3xl p-5 space-y-4 shadow-xl">
+                  
+                  {/* BỘ CHỌN GIỚI TÍNH NHÂN VẬT & PHÂN CHIA NGHIÊM NGẶT */}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-white/5">
                     <div>
-                      <h5 className="text-[10px] font-black text-text-secondary uppercase tracking-widest mb-2">Vóc dáng cơ thể</h5>
-                      <div className="flex gap-1.5">
-                        {[
-                          { id: 'chibi', label: 'Chibi 🧸' },
-                          { id: 'tall', label: 'Cao ráo 🕴️' },
-                          { id: 'muscular', label: 'Cơ bắp 💪' },
-                          { id: 'slender', label: 'Mảnh mai 💃' }
-                        ].map(bt => (
+                      <h3 className="text-sm font-black text-white flex items-center gap-2">
+                        <span>Studio Tủ Đồ STEM 2.0</span>
+                        <span className="px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 text-[10px] font-mono">
+                          120+ Mẫu
+                        </span>
+                      </h3>
+                      <p className="text-[11px] text-zinc-400">Chọn giới tính để tự động lọc trang phục phù hợp nhất</p>
+                    </div>
+
+                    {/* Gender switch tabs */}
+                    <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-zinc-900/80 border border-white/10">
+                      {[
+                        { id: 'male', label: 'Nam 👨' },
+                        { id: 'female', label: 'Nữ 👧' },
+                        { id: 'cyborg', label: 'Cyborg 🤖' }
+                      ].map(g => (
+                        <button
+                          key={g.id}
+                          onClick={() => handleSwitchStudioGender(g.id)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${currentGender === g.id ? 'bg-gradient-to-r from-pink-500 to-cyan-500 text-white shadow-md' : 'text-zinc-400 hover:text-white'}`}
+                        >
+                          {g.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* THANH DANH MỤC TRANG PHỤC (CATEGORY TABS) */}
+                  <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5">
+                    {categories.map(cat => {
+                      const isActive = activeStudioCategory === cat.id;
+                      const count = getCatCount(cat.id);
+                      return (
+                        <button
+                          key={cat.id}
+                          onClick={() => { playSound.click(); setActiveStudioCategory(cat.id); }}
+                          className={`py-2 px-1.5 rounded-xl flex flex-col items-center gap-1 transition-all text-center border ${isActive ? 'bg-gradient-to-b from-cyan-500/20 to-blue-500/20 border-cyan-400 text-cyan-200 shadow-md shadow-cyan-500/10' : 'bg-zinc-900/50 hover:bg-zinc-800/80 border-transparent text-zinc-400 hover:text-zinc-200'}`}
+                        >
+                          <span className="text-base">{cat.icon}</span>
+                          <span className="text-[10px] font-bold leading-tight">{cat.label}</span>
+                          <span className={`text-[9px] px-1.5 rounded-full font-mono ${isActive ? 'bg-cyan-400/20 text-cyan-300' : 'bg-zinc-800 text-zinc-500'}`}>
+                            {count}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* THANH TÌM KIẾM & BỘ LỌC PHẨM CHẤT / SỞ HỮU */}
+                  {activeStudioCategory !== 'pose' && (
+                    <div className="flex flex-wrap items-center gap-2 pt-1 pb-1">
+                      {/* Ô tìm kiếm */}
+                      <div className="relative flex-1 min-w-[140px]">
+                        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500" />
+                        <input
+                          type="text"
+                          value={studioSearchQuery}
+                          onChange={(e) => setStudioSearchQuery(e.target.value)}
+                          placeholder="Tìm món đồ..."
+                          className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-zinc-900/80 border border-white/10 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500"
+                        />
+                        {studioSearchQuery && (
                           <button
-                            key={bt.id}
-                            onClick={() => {
-                              playSound.click();
-                              setTempAvatarParts(prev => ({ ...prev, bodyType: bt.id }));
-                            }}
-                            className={`flex-1 py-2 rounded-lg text-[10px] font-bold border transition-all active:scale-95 ${
-                              tempAvatarParts.bodyType === bt.id
-                                ? 'bg-purple-500/20 border-purple-500 text-purple-400'
-                                : 'bg-bg-primary border-border-theme text-text-secondary hover:text-text-primary'
-                            }`}
+                            onClick={() => setStudioSearchQuery('')}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white"
                           >
-                            {bt.label}
+                            <X className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Lọc Phẩm chất */}
+                      <select
+                        value={studioRarityFilter}
+                        onChange={(e) => setStudioRarityFilter(e.target.value)}
+                        className="px-2.5 py-1.5 rounded-xl bg-zinc-900/80 border border-white/10 text-xs text-zinc-300 focus:outline-none focus:border-cyan-500 font-sans"
+                      >
+                        <option value="all">Mọi phẩm chất</option>
+                        <option value="Rare">Hiếm (Rare)</option>
+                        <option value="Epic">Sử thi (Epic)</option>
+                        <option value="Legendary">Huyền thoại (Legendary)</option>
+                      </select>
+
+                      {/* Lọc Trạng thái sở hữu */}
+                      <div className="flex items-center gap-1 p-0.5 rounded-xl bg-zinc-900/80 border border-white/10 text-[11px]">
+                        {[
+                          { id: 'all', label: 'Tất cả' },
+                          { id: 'owned', label: 'Đã có' },
+                          { id: 'unowned', label: 'Chưa có' }
+                        ].map(f => (
+                          <button
+                            key={f.id}
+                            onClick={() => setStudioOwnedFilter(f.id)}
+                            className={`px-2 py-1 rounded-lg font-medium transition-all ${studioOwnedFilter === f.id ? 'bg-cyan-500/20 text-cyan-300 font-bold' : 'text-zinc-400 hover:text-zinc-200'}`}
+                          >
+                            {f.label}
                           </button>
                         ))}
                       </div>
                     </div>
-                  </div>
+                  )}
 
-                  {/* TẠO DÁNG */}
-                  <div>
-                    <h5 className="text-[10px] font-black text-text-secondary uppercase tracking-widest mb-2">Tư thế & Tạo dáng</h5>
-                    <div className="grid grid-cols-5 gap-1.5">
+                  {/* ================== GRID HIỂN THỊ CỬ CHỈ (POSE) ================== */}
+                  {activeStudioCategory === 'pose' ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {[
-                        { id: 'standard', label: 'Chuẩn 🧍' },
-                        { id: 'wave', label: 'Chào 👋' },
-                        { id: 'thinker', label: 'Nghĩ 🧠' },
-                        { id: 'victory', label: 'Thắng ✌️' },
-                        { id: 'walk', label: 'Đi bộ 🏃' },
-                        { id: 'heart', label: 'Bắn tim 💖' },
-                        { id: 'super', label: 'Bay cao 🦸' },
-                        { id: 'spark', label: 'Bắn sét ⚡' },
-                        { id: 'cross_arms', label: 'Khoanh tay 🦾' },
-                        { id: 'battle', label: 'Chiến đấu 🥋' }
-                      ].map(ps => (
-                        <button
-                          key={ps.id}
-                          onClick={() => {
-                            playSound.click();
-                            setTempAvatarParts(prev => ({ ...prev, pose: ps.id }));
-                          }}
-                          className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all text-center active:scale-95 ${
-                            tempAvatarParts.pose === ps.id
-                              ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-sm shadow-amber-500/15'
-                              : 'bg-bg-primary border-border-theme text-text-secondary hover:text-text-primary'
-                          }`}
-                        >
-                          {ps.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* BIỂU CẢM GƯƠNG MẶT */}
-                  <div>
-                    <h5 className="text-[10px] font-black text-text-secondary uppercase tracking-widest mb-2">Biểu cảm khuôn mặt</h5>
-                    <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5">
-                      {[
-                        { id: 'confident', label: 'Tự tin 😎' },
-                        { id: 'happy', label: 'Vui tươi 😊' },
-                        { id: 'cool', label: 'Lạnh lùng 🧊' },
-                        { id: 'wink', label: 'Nháy mắt 😉' },
-                        { id: 'determined', label: 'Quyết tâm 🔥' },
-                        { id: 'cyber_glow', label: 'Laser HUD 🤖' },
-                        { id: 'shy', label: 'Bẽn lẽn 😳' }
-                      ].map(expr => (
-                        <button
-                          key={expr.id}
-                          onClick={() => {
-                            playSound.click();
-                            setTempAvatarParts(prev => ({ ...prev, expression: expr.id }));
-                          }}
-                          className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all text-center active:scale-95 ${
-                            tempAvatarParts.expression === expr.id
-                              ? 'bg-rose-500/20 border-rose-500 text-rose-400 shadow-sm shadow-rose-500/15'
-                              : 'bg-bg-primary border-border-theme text-text-secondary hover:text-text-primary'
-                          }`}
-                        >
-                          {expr.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* KHÍ CHẤT & HÀO QUANG */}
-                  <div>
-                    <h5 className="text-[10px] font-black text-text-secondary uppercase tracking-widest mb-2">Khí chất & Hào quang Vũ trụ (Aura)</h5>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-1.5">
-                      {[
-                        { id: 'none', label: 'Không có ❌' },
-                        { id: 'phoenix', label: 'Hỏa Phượng 🔥' },
-                        { id: 'lightning', label: 'Lôi Điện ⚡' },
-                        { id: 'galaxy', label: 'Ngân Hà 🌌' },
-                        { id: 'matrix_halo', label: 'Ma Trận Số 💻' },
-                        { id: 'quantum_superposition', label: 'Phân Thân 🌀' },
-                        { id: 'solar_flare', label: 'Thái Dương ☀️' }
-                      ].map(aur => (
-                        <button
-                          key={aur.id}
-                          onClick={() => {
-                            playSound.click();
-                            setTempAvatarParts(prev => ({ ...prev, aura: aur.id }));
-                          }}
-                          className={`py-1.5 rounded-lg text-[9px] font-bold border transition-all text-center active:scale-95 ${
-                            (tempAvatarParts.aura || 'none') === aur.id
-                              ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400 shadow-sm shadow-cyan-500/15'
-                              : 'bg-bg-primary border-border-theme text-text-secondary hover:text-text-primary'
-                          }`}
-                        >
-                          {aur.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* 1. MÀU DA */}
-                <div>
-                  <h5 className="text-[11px] font-black text-text-secondary uppercase tracking-widest mb-2.5">1. Lớp da sinh học (Body)</h5>
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                    {/* Peach mặc định */}
-                    <button
-                      onClick={() => { playSound.click(); setTempAvatarParts(prev => ({ ...prev, body: 'peach' })); }}
-                      className={`px-3 py-2 rounded-xl text-[11px] font-bold border transition-all active:scale-95 text-center flex flex-col items-center gap-1 ${
-                        tempAvatarParts.body === 'peach'
-                          ? 'bg-pink-500/20 border-pink-500 text-pink-400'
-                          : 'bg-bg-tertiary border-border-theme text-text-primary'
-                      }`}
-                    >
-                      <span className="w-4 h-4 rounded-full bg-[#ffd1b3] border border-border-theme" />
-                      <span>Hồng Đào</span>
-                    </button>
-                    {/* Các màu da khác */}
-                    {ALL_COSMETICS.filter(c => c.category === 'body' && (c.genderTarget === 'unisex' || c.genderTarget === tempAvatarParts.gender)).map((item) => {
-                      const localCachedParts = (typeof window !== 'undefined' && user?.uid)
-                        ? JSON.parse(localStorage.getItem('stem_unlocked_parts_' + user.uid) || '[]')
-                        : [];
-                      const isUnlocked = (personalization.unlockedParts || []).includes(item.id) || localCachedParts.includes(item.id) || (user && (user.displayName === 'admin' || user.email?.includes('admin')));
-                      const isNewlyWon = recentWonGachaIds.includes(item.id);
-                      const isSelected = tempAvatarParts.body === item.value;
-                      return (
-                        <button
-                          key={item.id}
-                          title={!isUnlocked ? "Vật phẩm đang khóa! Nhấp để mặc thử lên nhân vật." : item.desc || item.name}
-                          onClick={() => {
-                            playSound.click();
-                            setTempAvatarParts(prev => ({ ...prev, body: item.value }));
-                          }}
-                          className={`px-3 py-2 rounded-xl text-[11px] font-bold border transition-all text-center flex flex-col items-center gap-1 relative active:scale-95 cursor-pointer ${
-                            isSelected
-                              ? isUnlocked
-                                ? 'bg-pink-500/20 border-pink-500 text-pink-400 ring-1 ring-pink-500/40 shadow-sm shadow-pink-500/20'
-                                : 'bg-amber-500/20 border-amber-500 text-amber-300 ring-1 ring-amber-500/50 shadow-sm shadow-amber-500/20'
-                              : isUnlocked
-                              ? 'bg-bg-tertiary border-border-theme text-text-primary hover:border-pink-500/40'
-                              : 'bg-bg-primary/90 border-dashed border-amber-500/40 text-text-secondary hover:border-amber-400 hover:text-amber-300'
-                          }`}
-                        >
-                          {isNewlyWon && (
-                            <span className="absolute -top-1.5 -right-1 text-[7px] font-black bg-gradient-to-r from-pink-500 to-amber-400 text-white px-1.5 py-0.5 rounded-full shadow-md animate-bounce z-10">MỚI ✨</span>
-                          )}
-                          <span className="w-4 h-4 rounded-full border border-border-theme" style={{ backgroundColor: skinColors[item.value] }} />
-                          <span className="truncate w-full">{item.name.replace('Màu da ', '')}</span>
-                          {!isUnlocked && (
-                            <span className="absolute top-1 right-1 text-[8px] bg-bg-primary text-amber-400 px-1 py-0.5 rounded-full font-mono border border-amber-500/30">🔒 Thử</span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* 2. KIỂU TÓC & MÀU TÓC */}
-                <div className="border-t border-border-theme pt-5 space-y-4">
-                  <div>
-                    <h5 className="text-[11px] font-black text-text-secondary uppercase tracking-widest mb-2.5">2. Kiểu tóc lượng tử (Hair)</h5>
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                      {/* Tóc mặc định */}
-                      <button
-                        onClick={() => { playSound.click(); setTempAvatarParts(prev => ({ ...prev, hair: 'default' })); }}
-                        className={`px-3 py-2 rounded-xl text-[11px] font-bold border transition-all active:scale-95 text-center flex flex-col items-center gap-1 ${
-                          tempAvatarParts.hair === 'default'
-                            ? 'bg-pink-500/20 border-pink-500 text-pink-400'
-                            : 'bg-bg-tertiary border-border-theme text-text-primary'
-                        }`}
-                      >
-                        <span>Cơ Bản</span>
-                      </button>
-                      {/* Các kiểu tóc khác */}
-                      {ALL_COSMETICS.filter(c => c.category === 'hair' && (c.genderTarget === 'unisex' || c.genderTarget === tempAvatarParts.gender)).map((item) => {
-                        const localCachedParts = (typeof window !== 'undefined' && user?.uid)
-                          ? JSON.parse(localStorage.getItem('stem_unlocked_parts_' + user.uid) || '[]')
-                          : [];
-                        const isUnlocked = (personalization.unlockedParts || []).includes(item.id) || localCachedParts.includes(item.id) || (user && (user.displayName === 'admin' || user.email?.includes('admin')));
-                        const isNewlyWon = recentWonGachaIds.includes(item.id);
-                        const isSelected = tempAvatarParts.hair === item.value;
+                        { id: 'standard', name: 'Đứng Chuẩn Mực', desc: 'Tư thế nghiêm trang chuẩn học sinh STEM.', icon: '🧍' },
+                        { id: 'confident', name: 'Khoanh Tay Tự Tin', desc: 'Dáng đứng bản lĩnh tự tin của cao thủ.', icon: '😎' },
+                        { id: 'study', name: 'Ôm Sách Nghiên Cứu', desc: 'Tập trung nghiên cứu công thức khoa học.', icon: '📖' },
+                        { id: 'walk', name: 'Bước Đi Năng Động', desc: 'Chuyển động sải bước tự tin.', icon: '🚶' },
+                        { id: 'dance', name: 'Nhún Nhảy Sôi Động', desc: 'Vũ đạo nhịp nhàng vui tươi.', icon: '💃' },
+                        { id: 'happy', name: 'Vẫy Tay Chào Bạn', desc: 'Nụ cười tươi tắn thân thiện.', icon: '👋' }
+                      ].map(p => {
+                        const isSelected = tempAvatarParts.pose === p.id;
                         return (
                           <button
-                            key={item.id}
-                            title={!isUnlocked ? "Vật phẩm đang khóa! Nhấp để mặc thử lên nhân vật." : item.desc || item.name}
+                            key={p.id}
                             onClick={() => {
                               playSound.click();
-                              setTempAvatarParts(prev => ({ ...prev, hair: item.value }));
+                              setTempAvatarParts(prev => ({ ...prev, pose: p.id }));
                             }}
-                            className={`px-3 py-2 rounded-xl text-[11px] font-bold border transition-all text-center flex flex-col items-center gap-1 relative active:scale-95 cursor-pointer ${
-                              isSelected
-                                ? isUnlocked
-                                  ? 'bg-pink-500/20 border-pink-500 text-pink-400 ring-1 ring-pink-500/40 shadow-sm shadow-pink-500/20'
-                                  : 'bg-amber-500/20 border-amber-500 text-amber-300 ring-1 ring-amber-500/50 shadow-sm shadow-amber-500/20'
-                                : isUnlocked
-                                ? 'bg-bg-tertiary border-border-theme text-text-primary hover:border-pink-500/40'
-                                : 'bg-bg-primary/90 border-dashed border-amber-500/40 text-text-secondary hover:border-amber-400 hover:text-amber-300'
-                            }`}
+                            className={`p-3.5 rounded-2xl border text-left transition-all relative flex flex-col justify-between ${isSelected ? 'bg-gradient-to-b from-cyan-500/20 to-blue-500/20 border-cyan-400 text-white shadow-lg shadow-cyan-500/10' : 'bg-zinc-900/60 hover:bg-zinc-800/80 border-white/5 text-zinc-300'}`}
                           >
-                            {isNewlyWon && (
-                              <span className="absolute -top-1.5 -right-1 text-[7px] font-black bg-gradient-to-r from-pink-500 to-amber-400 text-white px-1.5 py-0.5 rounded-full shadow-md animate-bounce z-10">MỚI ✨</span>
-                            )}
-                            <span className="truncate w-full">{item.name.replace('Tóc ', '')}</span>
-                            {!isUnlocked && (
-                              <span className="absolute top-1 right-1 text-[8px] bg-bg-primary text-amber-400 px-1 py-0.5 rounded-full font-mono border border-amber-500/30">🔒 Thử</span>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h5 className="text-[10px] font-black text-text-secondary uppercase tracking-wider mb-2">Chọn màu nhuộm tóc</h5>
-                    <div className="flex flex-wrap gap-2.5">
-                      {HAIR_COLORS.map((hc) => (
-                        <button
-                          key={hc.id}
-                          onClick={() => { playSound.click(); setTempAvatarParts(prev => ({ ...prev, hairColor: hc.id })); }}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[10px] font-bold transition-all active:scale-95 ${
-                            tempAvatarParts.hairColor === hc.id
-                              ? 'border-pink-500 bg-pink-500/10 text-pink-400'
-                              : 'border-border-theme bg-bg-tertiary text-text-primary'
-                          }`}
-                        >
-                          <span className="w-3.5 h-3.5 rounded-full border border-border-theme" style={{ backgroundColor: hc.hex }} />
-                          {hc.name}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* 3. TRANG PHỤC (ÁO & QUẦN) */}
-                <div className="border-t border-border-theme pt-5 grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* ÁO */}
-                  <div>
-                    <h5 className="text-[11px] font-black text-text-secondary uppercase tracking-widest mb-2.5">3. Trang phục Thượng y (Top)</h5>
-                    <div className="space-y-2">
-                      {/* Mặc định */}
-                      <button
-                        onClick={() => { playSound.click(); setTempAvatarParts(prev => ({ ...prev, top: 'default' })); }}
-                        className={`w-full px-3 py-2 rounded-xl text-[11px] font-bold border transition-all active:scale-95 text-left flex justify-between items-center ${
-                          tempAvatarParts.top === 'default'
-                            ? 'bg-pink-500/20 border-pink-500 text-pink-400'
-                            : 'bg-bg-tertiary border-border-theme text-text-primary'
-                        }`}
-                      >
-                        <span>Áo Thun STEM cơ bản</span>
-                        <span className="text-[10px] text-text-secondary">Mặc định</span>
-                      </button>
-                      {/* Mở rộng */}
-                      {ALL_COSMETICS.filter(c => c.category === 'top' && (c.genderTarget === 'unisex' || c.genderTarget === tempAvatarParts.gender)).map((item) => {
-                        const localCachedParts = (typeof window !== 'undefined' && user?.uid)
-                          ? JSON.parse(localStorage.getItem('stem_unlocked_parts_' + user.uid) || '[]')
-                          : [];
-                        const isUnlocked = (personalization.unlockedParts || []).includes(item.id) || localCachedParts.includes(item.id) || (user && (user.displayName === 'admin' || user.email?.includes('admin')));
-                        const isNewlyWon = recentWonGachaIds.includes(item.id);
-                        const isSelected = tempAvatarParts.top === item.value;
-                        return (
-                          <button
-                            key={item.id}
-                            title={!isUnlocked ? "Vật phẩm đang khóa! Nhấp để mặc thử lên nhân vật." : item.desc || item.name}
-                            onClick={() => {
-                              playSound.click();
-                              setTempAvatarParts(prev => ({ ...prev, top: item.value }));
-                            }}
-                            className={`w-full px-3 py-2 rounded-xl text-[11px] font-bold border transition-all text-left flex justify-between items-center relative active:scale-95 cursor-pointer ${
-                              isSelected
-                                ? isUnlocked
-                                  ? 'bg-pink-500/20 border-pink-500 text-pink-400 ring-1 ring-pink-500/40 shadow-sm shadow-pink-500/20'
-                                  : 'bg-amber-500/20 border-amber-500 text-amber-300 ring-1 ring-amber-500/50 shadow-sm shadow-amber-500/20'
-                                : isUnlocked
-                                ? 'bg-bg-tertiary border-border-theme text-text-primary hover:border-pink-500/40'
-                                : 'bg-bg-primary/90 border-dashed border-amber-500/40 text-text-secondary hover:border-amber-400 hover:text-amber-300'
-                            }`}
-                          >
-                            <span className="flex items-center gap-1.5">
-                              {item.name}
-                              {isNewlyWon && (
-                                <span className="text-[7px] font-black bg-gradient-to-r from-pink-500 to-amber-400 text-white px-1.5 py-0.2 rounded-full shadow-sm animate-bounce">MỚI ✨</span>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-2xl">{p.icon}</span>
+                              {isSelected && (
+                                <span className="px-2 py-0.5 rounded-full bg-cyan-400 text-black text-[9px] font-black uppercase">
+                                  Đang chọn
+                                </span>
                               )}
-                            </span>
-                            {!isUnlocked && (
-                              <span className="text-[9px] text-amber-400 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 font-mono">🔒 Thử</span>
-                            )}
+                            </div>
+                            <div>
+                              <div className="text-xs font-bold text-white mb-0.5">{p.name}</div>
+                              <div className="text-[10px] text-zinc-400 line-clamp-2">{p.desc}</div>
+                            </div>
                           </button>
                         );
                       })}
                     </div>
-                  </div>
-
-                  {/* QUẦN */}
-                  <div>
-                    <h5 className="text-[11px] font-black text-text-secondary uppercase tracking-widest mb-2.5">4. Trang phục Hạ y (Bottom)</h5>
-                    <div className="space-y-2">
-                      {/* Mặc định */}
-                      <button
-                        onClick={() => { playSound.click(); setTempAvatarParts(prev => ({ ...prev, bottom: 'default' })); }}
-                        className={`w-full px-3 py-2 rounded-xl text-[11px] font-bold border transition-all active:scale-95 text-left flex justify-between items-center ${
-                          tempAvatarParts.bottom === 'default'
-                            ? 'bg-pink-500/20 border-pink-500 text-pink-400'
-                            : 'bg-bg-tertiary border-border-theme text-text-primary'
-                        }`}
-                      >
-                        <span>Quần Jeans cơ bản</span>
-                        <span className="text-[10px] text-text-secondary">Mặc định</span>
-                      </button>
-                      {/* Mở rộng */}
-                      {ALL_COSMETICS.filter(c => c.category === 'bottom' && (c.genderTarget === 'unisex' || c.genderTarget === tempAvatarParts.gender)).map((item) => {
-                        const localCachedParts = (typeof window !== 'undefined' && user?.uid)
-                          ? JSON.parse(localStorage.getItem('stem_unlocked_parts_' + user.uid) || '[]')
-                          : [];
-                        const isUnlocked = (personalization.unlockedParts || []).includes(item.id) || localCachedParts.includes(item.id) || (user && (user.displayName === 'admin' || user.email?.includes('admin')));
-                        const isNewlyWon = recentWonGachaIds.includes(item.id);
-                        const isSelected = tempAvatarParts.bottom === item.value;
-                        return (
+                  ) : (
+                    /* ================== GRID HIỂN THỊ TRANG PHỤC ================== */
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[500px] overflow-y-auto pr-1">
+                      {filteredCosmetics.length === 0 ? (
+                        <div className="col-span-full py-12 text-center text-zinc-500 space-y-2">
+                          <ShoppingBag className="w-8 h-8 mx-auto opacity-40" />
+                          <p className="text-xs">Không tìm thấy món đồ phù hợp với bộ lọc hiện tại.</p>
                           <button
-                            key={item.id}
-                            title={!isUnlocked ? "Vật phẩm đang khóa! Nhấp để mặc thử lên nhân vật." : item.desc || item.name}
-                            onClick={() => {
-                              playSound.click();
-                              setTempAvatarParts(prev => ({ ...prev, bottom: item.value }));
-                            }}
-                            className={`w-full px-3 py-2 rounded-xl text-[11px] font-bold border transition-all text-left flex justify-between items-center relative active:scale-95 cursor-pointer ${
-                              isSelected
-                                ? isUnlocked
-                                  ? 'bg-pink-500/20 border-pink-500 text-pink-400 ring-1 ring-pink-500/40 shadow-sm shadow-pink-500/20'
-                                  : 'bg-amber-500/20 border-amber-500 text-amber-300 ring-1 ring-amber-500/50 shadow-sm shadow-amber-500/20'
-                                : isUnlocked
-                                ? 'bg-bg-tertiary border-border-theme text-text-primary hover:border-pink-500/40'
-                                : 'bg-bg-primary/90 border-dashed border-amber-500/40 text-text-secondary hover:border-amber-400 hover:text-amber-300'
-                            }`}
+                            onClick={() => { setStudioSearchQuery(''); setStudioRarityFilter('all'); setStudioOwnedFilter('all'); }}
+                            className="px-3 py-1 rounded-lg bg-zinc-800 text-xs text-cyan-400 hover:underline"
                           >
-                            <span className="flex items-center gap-1.5">
-                              {item.name}
-                              {isNewlyWon && (
-                                <span className="text-[7px] font-black bg-gradient-to-r from-pink-500 to-amber-400 text-white px-1.5 py-0.2 rounded-full shadow-sm animate-bounce">MỚI ✨</span>
-                              )}
-                            </span>
-                            {!isUnlocked && (
-                              <span className="text-[9px] text-amber-400 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 font-mono">🔒 Thử</span>
-                            )}
+                            Xóa bộ lọc
                           </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
+                        </div>
+                      ) : (
+                        filteredCosmetics.map(item => {
+                          const isUnlocked = isAdmin || allUnlockedIds.includes(item.id);
+                          const isEquipped = item.category === 'aura'
+                            ? tempAvatarParts.aura === item.value
+                            : tempAvatarParts[item.category] === item.value;
+                          const isNewlyWon = recentWonGachaIds.includes(item.id);
 
-                {/* 4. PHỤ KIỆN */}
-                <div className="border-t border-border-theme pt-5">
-                  <h5 className="text-[11px] font-black text-text-secondary uppercase tracking-widest mb-2.5">4. Phụ kiện lượng tử (Accessory)</h5>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {/* Không đeo */}
-                    <button
-                      onClick={() => { playSound.click(); setTempAvatarParts(prev => ({ ...prev, accessory: 'none' })); }}
-                      className={`px-3 py-2 rounded-xl text-[11px] font-bold border transition-all active:scale-95 text-center flex flex-col items-center justify-center min-h-[46px] ${
-                        tempAvatarParts.accessory === 'none'
-                          ? 'bg-pink-500/20 border-pink-500 text-pink-400'
-                          : 'bg-bg-tertiary border-border-theme text-text-primary'
-                      }`}
-                    >
-                      Không đeo
-                    </button>
-                    {/* Các phụ kiện khác */}
-                    {ALL_COSMETICS.filter(c => c.category === 'accessory' && (c.genderTarget === 'unisex' || c.genderTarget === tempAvatarParts.gender)).map((item) => {
-                      const localCachedParts = (typeof window !== 'undefined' && user?.uid)
-                        ? JSON.parse(localStorage.getItem('stem_unlocked_parts_' + user.uid) || '[]')
-                        : [];
-                      const isUnlocked = (personalization.unlockedParts || []).includes(item.id) || localCachedParts.includes(item.id) || (user && (user.displayName === 'admin' || user.email?.includes('admin')));
-                      const isNewlyWon = recentWonGachaIds.includes(item.id);
-                      const isSelected = tempAvatarParts.accessory === item.value;
-                      return (
-                        <button
-                          key={item.id}
-                          title={!isUnlocked ? "Vật phẩm đang khóa! Nhấp để mặc thử lên nhân vật." : item.desc || item.name}
-                          onClick={() => {
-                            playSound.click();
-                            setTempAvatarParts(prev => ({ ...prev, accessory: item.value }));
-                          }}
-                          className={`px-3 py-2 rounded-xl text-[11px] font-bold border transition-all text-center flex flex-col items-center justify-center min-h-[46px] relative active:scale-95 cursor-pointer ${
-                            isSelected
-                              ? isUnlocked
-                                ? 'bg-pink-500/20 border-pink-500 text-pink-400 ring-1 ring-pink-500/40 shadow-sm shadow-pink-500/20'
-                                : 'bg-amber-500/20 border-amber-500 text-amber-300 ring-1 ring-amber-500/50 shadow-sm shadow-amber-500/20'
-                              : isUnlocked
-                              ? 'bg-bg-tertiary border-border-theme text-text-primary hover:border-pink-500/40'
-                              : 'bg-bg-primary/90 border-dashed border-amber-500/40 text-text-secondary hover:border-amber-400 hover:text-amber-300'
-                          }`}
-                        >
-                          {isNewlyWon && (
-                            <span className="absolute -top-1.5 -right-1 text-[7px] font-black bg-gradient-to-r from-pink-500 to-amber-400 text-white px-1.5 py-0.5 rounded-full shadow-md animate-bounce z-10">MỚI ✨</span>
-                          )}
-                          <span className="truncate w-full">{item.name.replace('Kính Thực Tế Ảo ', '')}</span>
-                          {!isUnlocked && (
-                            <span className="absolute top-1 right-1 text-[8px] bg-bg-primary text-amber-400 px-1 py-0.5 rounded-full font-mono border border-amber-500/30">🔒 Thử</span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
+                          // Phẩm chất màu viền
+                          const rarityBorder = item.rarity === 'Legendary'
+                            ? 'border-amber-500/50 hover:border-amber-400 shadow-amber-500/10'
+                            : item.rarity === 'Epic'
+                            ? 'border-purple-500/50 hover:border-purple-400 shadow-purple-500/10'
+                            : 'border-cyan-500/30 hover:border-cyan-400 shadow-cyan-500/5';
+
+                          const rarityBadge = item.rarity === 'Legendary'
+                            ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                            : item.rarity === 'Epic'
+                            ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+                            : 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40';
+
+                          return (
+                            <div
+                              key={item.id}
+                              className={`rounded-2xl border p-2.5 flex flex-col justify-between transition-all relative group ${rarityBorder} ${isEquipped ? 'bg-cyan-950/30 ring-2 ring-cyan-400/50' : 'bg-zinc-900/70 hover:bg-zinc-800/80'}`}
+                            >
+                              {/* Huy hiệu vừa quay trúng */}
+                              {isNewlyWon && (
+                                <span className="absolute -top-1.5 -right-1 text-[8px] bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black px-1.5 py-0.5 rounded-full shadow-md animate-pulse z-10">
+                                  MỚI 🌟
+                                </span>
+                              )}
+
+                              {/* Đầu thẻ: Phẩm chất & Trạng thái sở hữu */}
+                              <div>
+                                <div className="flex items-center justify-between mb-1.5">
+                                  <span className={`px-1.5 py-0.5 rounded text-[8px] font-mono font-bold uppercase border ${rarityBadge}`}>
+                                    {item.rarity}
+                                  </span>
+
+                                  {isUnlocked ? (
+                                    <span className="text-[9px] text-emerald-400 font-bold flex items-center gap-0.5">
+                                      <CheckCircle className="w-2.5 h-2.5" />
+                                      <span>Đã có</span>
+                                    </span>
+                                  ) : (
+                                    <span className="text-[10px] text-amber-300 font-mono font-bold flex items-center gap-0.5">
+                                      {item.price} <CrystalIcon className="w-2.5 h-2.5" />
+                                    </span>
+                                  )}
+                                </div>
+
+                                {/* Tên món đồ */}
+                                <div className="text-xs font-bold text-white mb-0.5 truncate" title={item.name}>
+                                  {item.name}
+                                </div>
+                                <div className="text-[10px] text-zinc-400 line-clamp-1 mb-2" title={item.desc}>
+                                  {item.desc || 'Trang phục STEM thời thượng.'}
+                                </div>
+                              </div>
+
+                              {/* Nút hành động trên từng thẻ */}
+                              <div className="flex items-center gap-1.5 pt-1.5 border-t border-white/5">
+                                <button
+                                  onClick={() => handleEquipOrTryOn(item)}
+                                  className={`flex-1 py-1 px-1.5 rounded-lg text-[10px] font-bold transition-all text-center ${isEquipped ? (isUnlocked ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse') : (isUnlocked ? 'bg-cyan-500/20 hover:bg-cyan-500 text-cyan-300 hover:text-black' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white')}`}
+                                >
+                                  {isEquipped ? (isUnlocked ? 'Đang mặc ✓' : 'Đang thử đồ 🔮') : (isUnlocked ? 'Trang bị' : 'Mặc thử')}
+                                </button>
+
+                                {!isUnlocked && (
+                                  <button
+                                    onClick={() => handleBuyCosmetic(item)}
+                                    className="py-1 px-2 rounded-lg bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-black text-[10px] font-bold border border-amber-500/40 transition-all flex items-center gap-0.5"
+                                    title={`Mua ngay món này với giá ${item.price} 🔮`}
+                                  >
+                                    <span>Mua</span>
+                                  </button>
+                                )}
+                              </div>
+
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  )}
+
                 </div>
 
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Sub-tab 2: Shop & Gacha */}
           {activePersonalizationSubTab === 'shop_gacha' && (

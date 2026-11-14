@@ -13,7 +13,12 @@ export const skinColors = {
   cyborg_silver: '#94a3b8',
   sunfire_gold: '#f59e0b',
   ghostly_white: '#f8fafc',
-  vampire_pale: '#f5f5f4'
+  vampire_pale: '#f5f5f4',
+  porcelain_white: '#fff1f2',
+  shadow_vampire: '#e2e8f0',
+  volcanic_magma: '#ea580c',
+  frost_ice: '#bae6fd',
+  mystic_elf: '#d8b4fe'
 };
 
 export const hairColors = {
@@ -93,6 +98,19 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
       case 'quantum_lab_coat': return '#0284c7';
       case 'cyber_mecha': return '#047857';
       case 'streetwear_hoodie': return '#2e1065';
+      case 'stem_ql4_male': return '#1e40af';
+      case 'stem_ql4_female': return '#1e40af';
+      case 'cozy_stem_cardigan': return '#fb7185';
+      case 'cyber_croptop': return '#06b6d4';
+      case 'academy_blazer_fem': return '#4338ca';
+      case 'mecha_idol_top': return '#f43f5e';
+      case 'magical_girl_vest': return '#c084fc';
+      case 'techno_samurai_coat': return '#0f172a';
+      case 'street_dj_jacket': return '#e11d48';
+      case 'scholar_blazer': return '#334155';
+      case 'valkyrie_corset': return '#e2e8f0';
+      case 'celestial_kimono': return '#818cf8';
+      case 'hacker_trenchcoat': return '#022c22';
       default: return gender === 'female' ? '#ec4899' : '#0ea5e9'; // Nữ mặc định hồng, Nam mặc định xanh dương
     }
   };
@@ -226,6 +244,25 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
             <circle cx="72" cy="78" r="1.5" fill="#fef08a" className="animate-ping" style={{ animationDelay: '0.6s' }} />
           </g>
         )}
+
+        {aura === 'black_hole' && (
+          <g id="aura_black_hole">
+            {/* Hố đen lực hấp dẫn không gian */}
+            <circle cx="50" cy="50" r="46" fill="#000000" opacity="0.8" />
+            <circle cx="50" cy="50" r="44" stroke="#7e22ce" strokeWidth="2.5" fill="none" className="animate-pulse" opacity="0.8" />
+            <circle cx="50" cy="50" r="48" stroke="#38bdf8" strokeWidth="1.2" strokeDasharray="6,4" fill="none" className="animate-spin" style={{ animationDuration: '6s', transformOrigin: '50px 50px' }} />
+            <ellipse cx="50" cy="52" rx="42" ry="12" fill="none" stroke="#c084fc" strokeWidth="1.5" opacity="0.7" transform="rotate(-18, 50, 52)" />
+          </g>
+        )}
+
+        {aura === 'celestial_wings' && (
+          <g id="aura_celestial_wings">
+            {/* Cánh hào quang thiên sứ ánh sáng */}
+            <circle cx="50" cy="50" r="45" fill="url(#sunfireGrad)" opacity="0.35" className="animate-pulse" />
+            <path d="M50 20 Q20 30 15 50 Q30 65 50 45 Q70 65 85 50 Q80 30 50 20 Z" fill="#fef08a" opacity="0.25" className="animate-ping" />
+            <path d="M50 15 L52 25 L62 25 L54 31 L57 41 L50 35 L43 41 L46 31 L38 25 L48 25 Z" fill="#facc15" opacity="0.6" className="animate-bounce" />
+          </g>
+        )}
         
         {/* ================== 0. BACK ACCESSORIES (WINGS / KATANA / DRONE) ================== */}
         {accessory === 'quantum_wings' && (
@@ -267,6 +304,43 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
           </g>
         )}
         
+
+                {accessory === 'jetpack_thruster' && (
+          // Balo Phản Lực Jetpack Hai Buồng Đốt
+          <g id="acc_jetpack">
+            <rect x="36" y="58" width="8" height="18" rx="3" fill="#1e293b" stroke="#00f2fe" strokeWidth="1" />
+            <rect x="56" y="58" width="8" height="18" rx="3" fill="#1e293b" stroke="#00f2fe" strokeWidth="1" />
+            <rect x="42" y="62" width="16" height="10" rx="2" fill="#0f172a" stroke="#64748b" strokeWidth="0.8" />
+            {/* Lửa phản lực neon blue */}
+            <polygon points="37,76 40,86 43,76" fill="#00f2fe" className="animate-pulse" />
+            <polygon points="57,76 60,86 63,76" fill="#00f2fe" className="animate-pulse" />
+            <circle cx="40" cy="80" r="1.5" fill="#ffffff" />
+            <circle cx="60" cy="80" r="1.5" fill="#ffffff" />
+          </g>
+        )}
+
+        {accessory === 'dragon_tail_holo' && (
+          // Đuôi Rồng Hologram Tinh Thể
+          <g id="acc_dragon_tail" className="animate-pulse">
+            <path d="M50 82 Q30 84 22 72 Q16 62 26 58 Q20 54 18 64 Q22 80 50 86 Z" fill="url(#wingGrad)" opacity="0.85" />
+            <circle cx="20" cy="60" r="2" fill="#00f2fe" className="animate-ping" />
+            <circle cx="24" cy="70" r="1.5" fill="#ec4899" />
+          </g>
+        )}
+
+        {accessory === 'beam_saber_dual' && (
+          // Song Kiếm Quang Chữ X Sau Lưng
+          <g id="acc_beam_saber_dual">
+            {/* Thanh kiếm 1 (chéo trái) */}
+            <line x1="20" y1="35" x2="80" y2="85" stroke="#ef4444" strokeWidth="3" strokeLinecap="round" opacity="0.9" />
+            <line x1="20" y1="35" x2="80" y2="85" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" />
+            <rect x="18" y="33" width="7" height="4" fill="#1e293b" rx="1" transform="rotate(40, 21, 35)" />
+            {/* Thanh kiếm 2 (chéo phải) */}
+            <line x1="80" y1="35" x2="20" y2="85" stroke="#00f2fe" strokeWidth="3" strokeLinecap="round" opacity="0.9" />
+            <line x1="80" y1="35" x2="20" y2="85" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" />
+            <rect x="75" y="33" width="7" height="4" fill="#1e293b" rx="1" transform="rotate(-40, 79, 35)" />
+          </g>
+        )}
 
         {/* ================== 1. BOTTOM (QUẦN & CHÂN) ================== */}
         <g id="legs_section" transform={`translate(0, ${bodyYOffset}) scale(${scaleXBody}, ${scaleYBody})`} style={{ transformOrigin: '50% 78%' }}>
@@ -548,6 +622,155 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
                 <rect x="51.5" y="83" width="6.5" height="2.5" fill="#334155" stroke="#00f2fe" strokeWidth="0.6" />
                 <ellipse cx="55" cy="94" rx="4.8" ry="2.2" fill="#1e293b" stroke="#00f2fe" strokeWidth="1" />
               </g>
+            </g>
+          )}
+
+          {bottom === 'academy_slacks' && (
+            // Quần Âu Học Viện QL4 Nam
+            <g id="bottom_academy_slacks">
+              <rect x="40" y="78" width="20" height="2" fill="#0f172a" />
+              <g transform={pose === 'walk' ? 'rotate(8, 45, 78)' : ''}>
+                <rect x="41" y="78" width="8" height="15" rx="1.5" fill="#1e3a8a" />
+                <line x1="45" y1="78" x2="45" y2="92" stroke="#3b82f6" strokeWidth="0.5" />
+                <ellipse cx="45" cy="94" rx="4.5" ry="2" fill="#09090b" />
+              </g>
+              <g transform={pose === 'walk' ? 'rotate(-8, 55, 78)' : ''}>
+                <rect x="51" y="78" width="8" height="15" rx="1.5" fill="#1e3a8a" />
+                <line x1="55" y1="78" x2="55" y2="92" stroke="#3b82f6" strokeWidth="0.5" />
+                <ellipse cx="55" cy="94" rx="4.5" ry="2" fill="#09090b" />
+              </g>
+            </g>
+          )}
+
+          {bottom === 'cargo_tactical' && (
+            // Quần Túi Hộp Chiến Thuật
+            <g id="bottom_cargo_tactical">
+              <g transform={pose === 'walk' ? 'rotate(8, 45, 78)' : ''}>
+                <rect x="41" y="78" width="8.5" height="15" rx="2" fill="#1f2937" stroke="#10b981" strokeWidth="0.6" />
+                <rect x="39.5" y="82" width="2" height="4" fill="#10b981" rx="0.5" />
+                <ellipse cx="45" cy="94" rx="4.8" ry="2.2" fill="#111827" stroke="#374151" strokeWidth="0.8" />
+              </g>
+              <g transform={pose === 'walk' ? 'rotate(-8, 55, 78)' : ''}>
+                <rect x="50.5" y="78" width="8.5" height="15" rx="2" fill="#1f2937" stroke="#10b981" strokeWidth="0.6" />
+                <rect x="58.5" y="82" width="2" height="4" fill="#10b981" rx="0.5" />
+                <ellipse cx="55" cy="94" rx="4.8" ry="2.2" fill="#111827" stroke="#374151" strokeWidth="0.8" />
+              </g>
+            </g>
+          )}
+
+          {bottom === 'ql4_pleated_skirt' && (
+            // Chân Váy Xếp Ly THPT Quỳnh Lưu 4 Nữ
+            <g id="bottom_ql4_skirt">
+              <path d="M38 78 L32 88 H68 L62 78 Z" fill="#1e40af" stroke="#93c5fd" strokeWidth="0.8" />
+              <line x1="42" y1="78" x2="39" y2="88" stroke="#3b82f6" strokeWidth="0.7" />
+              <line x1="47" y1="78" x2="46" y2="88" stroke="#60a5fa" strokeWidth="0.7" />
+              <line x1="53" y1="78" x2="54" y2="88" stroke="#60a5fa" strokeWidth="0.7" />
+              <line x1="58" y1="78" x2="61" y2="88" stroke="#3b82f6" strokeWidth="0.7" />
+              <g transform={pose === 'walk' ? 'rotate(10, 45, 88)' : ''}>
+                <rect x="43" y="88" width="4" height="4" fill={skin} />
+                <ellipse cx="45" cy="93.5" rx="4.5" ry="1.8" fill="#ffffff" stroke="#1e40af" strokeWidth="0.5" />
+              </g>
+              <g transform={pose === 'walk' ? 'rotate(-10, 55, 88)' : ''}>
+                <rect x="53" y="88" width="4" height="4" fill={skin} />
+                <ellipse cx="55" cy="93.5" rx="4.5" ry="1.8" fill="#ffffff" stroke="#1e40af" strokeWidth="0.5" />
+              </g>
+            </g>
+          )}
+
+          {bottom === 'gothic_frill_skirt' && (
+            // Chân Váy Ren Lolita Dạ Tối
+            <g id="bottom_gothic_frill">
+              <path d="M37 78 L30 89 H70 L63 78 Z" fill="#18181b" stroke="#a855f7" strokeWidth="0.8" />
+              <path d="M30 89 Q35 91 40 89 Q45 91 50 89 Q55 91 60 89 Q65 91 70 89" fill="#27272a" stroke="#d8b4fe" strokeWidth="0.8" />
+              <g transform={pose === 'walk' ? 'rotate(10, 45, 89)' : ''}>
+                <rect x="43" y="89" width="4" height="3" fill="#18181b" />
+                <ellipse cx="45" cy="93.5" rx="4.5" ry="1.8" fill="#581c87" stroke="#c084fc" strokeWidth="0.5" />
+              </g>
+              <g transform={pose === 'walk' ? 'rotate(-10, 55, 89)' : ''}>
+                <rect x="53" y="89" width="4" height="3" fill="#18181b" />
+                <ellipse cx="55" cy="93.5" rx="4.5" ry="1.8" fill="#581c87" stroke="#c084fc" strokeWidth="0.5" />
+              </g>
+            </g>
+          )}
+
+          {bottom === 'cyber_boot_leggings' && (
+            // Quần Tất Legging Mecha Phát Sáng
+            <g id="bottom_boot_leggings">
+              <g transform={pose === 'walk' ? 'rotate(8, 45, 78)' : ''}>
+                <rect x="41.5" y="78" width="7" height="15" rx="1.5" fill="#09090b" stroke="#ec4899" strokeWidth="0.8" />
+                <line x1="45" y1="80" x2="45" y2="88" stroke="#f43f5e" strokeWidth="1" strokeDasharray="1,1" />
+                <ellipse cx="45" cy="94" rx="4.5" ry="2.2" fill="#e11d48" />
+              </g>
+              <g transform={pose === 'walk' ? 'rotate(-8, 55, 78)' : ''}>
+                <rect x="51.5" y="78" width="7" height="15" rx="1.5" fill="#09090b" stroke="#ec4899" strokeWidth="0.8" />
+                <line x1="55" y1="80" x2="55" y2="88" stroke="#f43f5e" strokeWidth="1" strokeDasharray="1,1" />
+                <ellipse cx="55" cy="94" rx="4.5" ry="2.2" fill="#e11d48" />
+              </g>
+            </g>
+          )}
+          {bottom === 'samurai_hakama_male' && (
+            // Quần Hakama Võ Sĩ Samurai
+            <g id="bottom_hakama_male">
+              <path d="M38 78 L32 94 H48 L46 78 Z" fill="#0f172a" stroke="#334155" strokeWidth="0.8" />
+              <path d="M54 78 L52 94 H68 L62 78 Z" fill="#0f172a" stroke="#334155" strokeWidth="0.8" />
+              <line x1="40" y1="78" x2="38" y2="92" stroke="#e2e8f0" strokeWidth="0.5" />
+              <line x1="60" y1="78" x2="62" y2="92" stroke="#e2e8f0" strokeWidth="0.5" />
+              {/* Dây thắt lưng trắng */}
+              <rect x="38" y="78" width="24" height="2" fill="#f8fafc" />
+            </g>
+          )}
+
+          {bottom === 'cyber_motor_pants' && (
+            // Quần Motor Giáp Gối Cyber
+            <g id="bottom_motor_pants">
+              <g transform={pose === 'walk' ? 'rotate(8, 45, 78)' : ''}>
+                <rect x="41" y="78" width="8.5" height="15" rx="1.5" fill="#18181b" />
+                <rect x="42" y="83" width="6.5" height="4" rx="1" fill="#3b82f6" />
+                <ellipse cx="45" cy="94" rx="4.5" ry="2" fill="#09090b" />
+              </g>
+              <g transform={pose === 'walk' ? 'rotate(-8, 55, 78)' : ''}>
+                <rect x="50.5" y="78" width="8.5" height="15" rx="1.5" fill="#18181b" />
+                <rect x="51.5" y="83" width="6.5" height="4" rx="1" fill="#3b82f6" />
+                <ellipse cx="55" cy="94" rx="4.5" ry="2" fill="#09090b" />
+              </g>
+            </g>
+          )}
+
+          {bottom === 'biker_jeans' && (
+            // Quần Jean Biker Rách Gối
+            <g id="bottom_biker_jeans">
+              <g transform={pose === 'walk' ? 'rotate(8, 45, 78)' : ''}>
+                <rect x="41" y="78" width="8" height="15" rx="1" fill="#1e3a8a" />
+                <line x1="43" y1="84" x2="47" y2="84" stroke="#93c5fd" strokeWidth="1" />
+                <ellipse cx="45" cy="94" rx="4.5" ry="2" fill="#713f12" />
+              </g>
+              <g transform={pose === 'walk' ? 'rotate(-8, 55, 78)' : ''}>
+                <rect x="51" y="78" width="8" height="15" rx="1" fill="#1e3a8a" />
+                <line x1="53" y1="84" x2="57" y2="84" stroke="#93c5fd" strokeWidth="1" />
+                <ellipse cx="55" cy="94" rx="4.5" ry="2" fill="#713f12" />
+              </g>
+            </g>
+          )}
+
+          {bottom === 'highwaist_shorts' && (
+            // Quần Đùi Cạp Cao Sành Điệu Nữ
+            <g id="bottom_highwaist_shorts">
+              <rect x="40" y="77" width="20" height="7" rx="1" fill="#475569" />
+              <rect x="48" y="77" width="4" height="2" fill="#facc15" />
+              {/* Đôi chân thon */}
+              <rect x="42" y="84" width="6" height="9" fill={skin} />
+              <rect x="52" y="84" width="6" height="9" fill={skin} />
+              <ellipse cx="45" cy="94" rx="4" ry="2" fill="#f43f5e" />
+              <ellipse cx="55" cy="94" rx="4" ry="2" fill="#f43f5e" />
+            </g>
+          )}
+
+          {bottom === 'mermaid_tail_skirt' && (
+            // Chân Váy Đuôi Cá Hologram Thần Thoại
+            <g id="bottom_mermaid_tail">
+              <path d="M40 78 Q36 86 44 92 Q50 94 56 92 Q64 86 60 78 Z" fill="url(#wingGrad)" opacity="0.9" />
+              <polygon points="44,92 38,98 48,95" fill="#00f2fe" opacity="0.8" />
+              <polygon points="56,92 62,98 52,95" fill="#ec4899" opacity="0.8" />
             </g>
           )}
         </g>
@@ -928,6 +1151,77 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
             </g>
           )}
 
+          {top === 'stem_ql4_male' && (
+            // Đồng Phục Nam Sinh THPT Quỳnh Lưu 4
+            <g id="body_stem_ql4_male">
+              <path d="M34 64 C34 58, 66 58, 66 64 L62 82 H38 Z" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+              {/* Cổ áo sơ mi & Cà vạt xanh navy logo QL4 */}
+              <polygon points="45,62 50,67 55,62" fill="#f1f5f9" />
+              <path d="M48.5 66 L51.5 66 L52.5 75 L50 78 L47.5 75 Z" fill="#1e40af" />
+              <rect x="49" y="69" width="2" height="1" fill="#facc15" />
+              {/* Phù hiệu trường THPT Quỳnh Lưu 4 ngực trái */}
+              <rect x="38" y="67" width="5" height="4" rx="0.5" fill="#1e40af" stroke="#facc15" strokeWidth="0.4" />
+              <text x="39" y="70" fill="#ffffff" fontSize="2" fontWeight="bold">QL4</text>
+            </g>
+          )}
+
+          {top === 'stem_ql4_female' && (
+            // Đồng Phục Nữ Sinh THPT Quỳnh Lưu 4
+            <g id="body_stem_ql4_female">
+              <path d="M34 64 C34 58, 66 58, 66 64 L62 82 H38 Z" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+              {/* Cổ sen nữ sinh & Nơ bướm xanh navy */}
+              <path d="M43 62 C45 66, 50 66, 50 62" stroke="#1e40af" strokeWidth="1" fill="#f8fafc" />
+              <path d="M57 62 C55 66, 50 66, 50 62" stroke="#1e40af" strokeWidth="1" fill="#f8fafc" />
+              <polygon points="47,65 53,65 50,67" fill="#1e40af" />
+              <circle cx="50" cy="65.5" r="1.2" fill="#f43f5e" />
+              {/* Phù hiệu QL4 */}
+              <rect x="38" y="67" width="5" height="4" rx="0.5" fill="#1e40af" stroke="#f43f5e" strokeWidth="0.4" />
+              <text x="39" y="70" fill="#ffffff" fontSize="2" fontWeight="bold">QL4</text>
+            </g>
+          )}
+
+          {top === 'cyber_croptop' && (
+            // Croptop Lượng Tử Nữ
+            <g id="body_cyber_croptop">
+              <path d="M34 63 C34 58, 66 58, 66 63 L63 74 H37 Z" fill="#0f172a" stroke="#00f2fe" strokeWidth="1" />
+              <polygon points="46,62 50,67 54,62" fill="#06b6d4" />
+              <line x1="38" y1="73" x2="62" y2="73" stroke="#f43f5e" strokeWidth="1.2" />
+              {/* Vùng eo hở da */}
+              <rect x="37" y="74" width="26" height="8" fill={skin} />
+              <circle cx="50" cy="78" r="1" fill="#cbd5e1" />
+            </g>
+          )}
+
+          {top === 'cozy_stem_cardigan' && (
+            // Cardigan Nữ Sinh Ấm Áp
+            <g id="body_cozy_cardigan">
+              <path d="M33 63 C33 58, 67 58, 67 63 L63 82 H37 Z" fill="#fda4af" stroke="#f43f5e" strokeWidth="0.8" />
+              <polygon points="46,62 50,69 54,62" fill="#ffffff" />
+              <circle cx="50" cy="72" r="1" fill="#9f1239" />
+              <circle cx="50" cy="76" r="1" fill="#9f1239" />
+              <circle cx="50" cy="80" r="1" fill="#9f1239" />
+            </g>
+          )}
+
+          {top === 'valkyrie_corset' && (
+            // Giáp Ngực Valkyrie Nữ Thần
+            <g id="body_valkyrie">
+              <path d="M34 63 C34 58, 66 58, 66 63 L63 82 H37 Z" fill="#1e293b" stroke="#facc15" strokeWidth="1" />
+              <polygon points="40,64 50,72 60,64 50,67" fill="#f59e0b" />
+              <polygon points="45,73 50,77 55,73" fill="#e2e8f0" stroke="#facc15" strokeWidth="0.6" />
+              <circle cx="50" cy="70" r="2" fill="#38bdf8" className="animate-pulse" />
+            </g>
+          )}
+
+          {top === 'hacker_trenchcoat' && (
+            // Áo Măng Tô Hacker Ma Trận
+            <g id="body_hacker_coat">
+              <path d="M33 62 C33 57, 67 57, 67 62 L64 82 H36 Z" fill="#022c22" stroke="#10b981" strokeWidth="1" />
+              <polygon points="44,61 50,70 56,61" fill="#064e3b" />
+              <text x="43" y="76" fill="#34d399" fontSize="2.8" fontFamily="monospace">0101</text>
+              <line x1="50" y1="62" x2="50" y2="82" stroke="#10b981" strokeWidth="0.8" />
+            </g>
+          )}
         </g>
 
         {/* ================== 4. TAY & TẠO DÁNG (HANDS & POSE) ================== */}
@@ -1364,9 +1658,142 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
             <path d="M40 31 Q48 37 50 40 Q52 37 60 31" stroke={hColor} strokeWidth="2.5" fill="none" strokeLinecap="round" />
           </g>
         )}
+
+        {hair === 'academic_neat' && (
+          // Tóc Học Sinh Gọn Gàng Lịch Sự
+          <g id="hair_academic_neat">
+            <path d="M30 36 C30 22, 70 22, 70 36 C70 36, 65 30, 50 30 C35 30, 30 36, 30 36 Z" fill={hColor} />
+            <path d="M30 36 C30 42, 33 46, 33 46 C33 46, 35 38, 38 35 Z" fill={hColor} />
+            <path d="M70 36 C70 42, 67 46, 67 46 C67 46, 65 38, 62 35 Z" fill={hColor} />
+            <path d="M44 30 Q48 36 50 38 Q52 36 58 31" stroke={hColor} strokeWidth="2" fill="none" strokeLinecap="round" />
+          </g>
+        )}
+
+        {hair === 'undercut_fade' && (
+          // Undercut Kỹ Sư Cyber
+          <g id="hair_undercut">
+            <path d="M32 34 C32 21, 68 21, 68 34 L66 31 C56 26, 44 26, 34 31 Z" fill={hColor} />
+            <path d="M32 34 C32 40, 33 43, 33 43 L36 38 Z" fill={hColor} opacity="0.6" />
+            <path d="M68 34 C68 40, 67 43, 67 43 L64 38 Z" fill={hColor} opacity="0.6" />
+            <polygon points="40,24 50,18 58,24 50,22" fill={hColor} />
+          </g>
+        )}
+
+        {hair === 'shonen_spiky' && (
+          // Tóc Gai Anh Hùng Shonen
+          <g id="hair_shonen_spiky">
+            <polygon points="32,32 26,24 36,26" fill={hColor} />
+            <polygon points="36,26 38,16 46,22" fill={hColor} />
+            <polygon points="46,22 50,12 54,22" fill={hColor} />
+            <polygon points="54,22 62,16 64,26" fill={hColor} />
+            <polygon points="64,26 74,24 68,32" fill={hColor} />
+            <path d="M32 32 C32 22, 68 22, 68 32 C68 32, 50 30, 32 32 Z" fill={hColor} />
+          </g>
+        )}
+
+        {hair === 'school_twin_braids' && (
+          // Tóc Tết Bím Nữ Sinh
+          <g id="hair_twin_braids">
+            <path d="M30 35 C30 22, 70 22, 70 35 C70 35, 65 31, 50 31 C35 31, 30 35, 30 35 Z" fill={hColor} />
+            <path d="M36 32 Q42 38 46 38 Q48 33 50 32" stroke={hColor} strokeWidth="2.5" fill="none" />
+            <path d="M64 32 Q58 38 54 38 Q52 33 50 32" stroke={hColor} strokeWidth="2.5" fill="none" />
+            {/* Hai bím tóc hai bên */}
+            <g id="braid_left">
+              <ellipse cx="28" cy="46" rx="2.5" ry="3" fill={hColor} />
+              <ellipse cx="27" cy="52" rx="2.2" ry="3" fill={hColor} />
+              <ellipse cx="26" cy="58" rx="1.8" ry="2.5" fill={hColor} />
+              <circle cx="26" cy="55" r="1.5" fill="#f43f5e" />
+            </g>
+            <g id="braid_right">
+              <ellipse cx="72" cy="46" rx="2.5" ry="3" fill={hColor} />
+              <ellipse cx="73" cy="52" rx="2.2" ry="3" fill={hColor} />
+              <ellipse cx="74" cy="58" rx="1.8" ry="2.5" fill={hColor} />
+              <circle cx="74" cy="55" r="1.5" fill="#f43f5e" />
+            </g>
+          </g>
+        )}
+
+        {hair === 'hime_cut' && (
+          // Hime Cut Tiểu Thư
+          <g id="hair_hime_cut">
+            <path d="M29 35 C29 20, 71 20, 71 35 C71 35, 65 30, 50 30 C35 30, 29 35, 29 35 Z" fill={hColor} />
+            {/* Mái ngố thẳng ngang */}
+            <rect x="36" y="32" width="28" height="7" rx="1" fill={hColor} />
+            {/* Hai lọn tóc mai cắt ngang má đặc trưng hime */}
+            <rect x="29" y="35" width="4.5" height="18" rx="1" fill={hColor} />
+            <rect x="66.5" y="35" width="4.5" height="18" rx="1" fill={hColor} />
+            {/* Tóc sau dài thẳng */}
+            <path d="M28 40 L26 68 L32 68 L32 40 Z" fill={hColor} opacity="0.85" />
+            <path d="M72 40 L74 68 L68 68 L68 40 Z" fill={hColor} opacity="0.85" />
+          </g>
+        )}
       </g>
 
-      {/* ================== 6. ACCESSORY (PHỤ KIỆN - Nằm đè lên tóc/mặt) ================== */}
+              {hair === 'kaito_wolf' && (
+          // Tóc Kaito Layer Sói Hoang Nam
+          <g id="hair_kaito_wolf">
+            <path d="M30 35 C30 20, 70 20, 70 35 C70 35, 62 28, 50 28 C38 28, 30 35, 30 35 Z" fill={hColor} />
+            <polygon points="32,30 24,35 34,36" fill={hColor} />
+            <polygon points="68,30 76,35 66,36" fill={hColor} />
+            <polygon points="40,24 45,16 48,25" fill={hColor} />
+            <polygon points="52,24 55,16 60,25" fill={hColor} />
+            <path d="M36 32 Q44 38 48 34" stroke={hColor} strokeWidth="3" fill="none" />
+          </g>
+        )}
+
+        {hair === 'cyber_braid' && (
+          // Bím Tóc Cơ Giới Mecha Nam/Unisex
+          <g id="hair_cyber_braid">
+            <path d="M32 34 C32 22, 68 22, 68 34 C68 30, 50 28, 32 34 Z" fill={hColor} />
+            {/* Bên cạo undercut viền neon */}
+            <path d="M30 34 L32 44 L36 38 Z" fill="#09090b" />
+            <line x1="30" y1="36" x2="34" y2="42" stroke="#00f2fe" strokeWidth="0.8" />
+            {/* Bím bọc cơ giới sau gáy vắt sang vai */}
+            <path d="M66 34 Q74 46 72 60" stroke={hColor} strokeWidth="4.5" fill="none" />
+            <circle cx="73" cy="46" r="2" fill="#00f2fe" />
+            <circle cx="72" cy="55" r="1.5" fill="#f43f5e" />
+          </g>
+        )}
+
+        {hair === 'gothic_drill' && (
+          // Tóc Xoăn Lọn Đôi Gothic Drill Nữ
+          <g id="hair_gothic_drill">
+            <path d="M30 34 C30 20, 70 20, 70 34 C70 30, 50 28, 30 34 Z" fill={hColor} />
+            {/* Lọn xoăn lò xo bên trái */}
+            <g id="drill_l">
+              <ellipse cx="26" cy="42" rx="4" ry="3" fill={hColor} />
+              <ellipse cx="25" cy="48" rx="3.5" ry="3" fill={hColor} />
+              <ellipse cx="24" cy="54" rx="3" ry="2.5" fill={hColor} />
+              <ellipse cx="23" cy="60" rx="2" ry="2" fill={hColor} />
+              <rect x="25" y="38" width="3" height="3" fill="#a855f7" />
+            </g>
+            {/* Lọn xoăn lò xo bên phải */}
+            <g id="drill_r">
+              <ellipse cx="74" cy="42" rx="4" ry="3" fill={hColor} />
+              <ellipse cx="75" cy="48" rx="3.5" ry="3" fill={hColor} />
+              <ellipse cx="76" cy="54" rx="3" ry="2.5" fill={hColor} />
+              <ellipse cx="77" cy="60" rx="2" ry="2" fill={hColor} />
+              <rect x="72" y="38" width="3" height="3" fill="#a855f7" />
+            </g>
+          </g>
+        )}
+
+        {hair === 'messy_scientist' && (
+          // Tóc Bác Học Điên Điên Cuồng Einstein
+          <g id="hair_messy_scientist">
+            <circle cx="32" cy="30" r="7" fill={hColor} opacity="0.9" />
+            <circle cx="68" cy="30" r="7" fill={hColor} opacity="0.9" />
+            <circle cx="50" cy="22" r="8" fill={hColor} />
+            <circle cx="40" cy="24" r="7" fill={hColor} />
+            <circle cx="60" cy="24" r="7" fill={hColor} />
+            <circle cx="28" cy="38" r="5" fill={hColor} />
+            <circle cx="72" cy="38" r="5" fill={hColor} />
+            {/* Tia lửa lượng tử trên đỉnh đầu */}
+            <path d="M50 14 L52 10 L50 6" stroke="#facc15" strokeWidth="1" fill="none" className="animate-ping" />
+          </g>
+        )}
+
+{/* ================== 6. ACCESSORY (PHỤ KIỆN - Nằm đè lên tóc/mặt) ================== */}
       <g id="accessory_layer" transform={`scale(${headScale})`} style={{ transformOrigin: '50% 45px' }}>
         {accessory === 'vr_goggles' && (
           // Kính thực tế ảo VR
@@ -1523,6 +1950,43 @@ function STEMAvatarSVG({ parts, className = "w-full h-full" }) {
             {/* Nét vẽ phương trình không gian phát sáng Cyan */}
             <text x="64" y="44" fill="#00ffff" fontSize="3.5" fontFamily="monospace" fontWeight="bold" opacity="0.9" className="animate-pulse">E=mc²</text>
             <path d="M72 48 L76 46 L80 48 L80 52 L76 54 L72 52 Z" stroke="#38bdf8" strokeWidth="0.6" fill="none" opacity="0.8" />
+          </g>
+        )}
+
+        {accessory === 'cat_ears_mecha' && (
+          // Tai Mèo Mecha LED Nữ
+          <g id="acc_cat_ears">
+            <polygon points="32,28 38,16 44,28" fill="#1e293b" stroke="#ec4899" strokeWidth="1" />
+            <polygon points="35,27 38,19 41,27" fill="#f43f5e" className="animate-pulse" />
+            <polygon points="56,28 62,16 68,28" fill="#1e293b" stroke="#ec4899" strokeWidth="1" />
+            <polygon points="59,27 62,19 65,27" fill="#f43f5e" className="animate-pulse" />
+          </g>
+        )}
+
+        {accessory === 'chemistry_flask_pet' && (
+          // Bình Cầu Hóa Học Bốc Khói Lơ Lửng
+          <g id="acc_flask_pet" className="animate-bounce" style={{ animationDuration: '3s' }}>
+            <line x1="20" y1="46" x2="20" y2="50" stroke="#cbd5e1" strokeWidth="2" />
+            <circle cx="20" cy="54" r="5" fill="#10b981" fillOpacity="0.8" stroke="#34d399" strokeWidth="1" />
+            <circle cx="20" cy="53" r="2" fill="#ffffff" opacity="0.5" />
+            <path d="M19 44 Q22 41 20 38 Q18 35 21 32" stroke="#a7f3d0" strokeWidth="1" fill="none" opacity="0.7" className="animate-pulse" />
+          </g>
+        )}
+
+        {accessory === 'steampunk_monocle' && (
+          // Kính Một Mắt Đồng Thau Kỹ Thuật
+          <g id="acc_monocle">
+            <circle cx="43" cy="45" r="4.5" fill="#fef08a" fillOpacity="0.3" stroke="#b45309" strokeWidth="1.5" />
+            <path d="M39 45 L32 48" stroke="#b45309" strokeWidth="1" />
+            <circle cx="43" cy="45" r="1.5" fill="#ffffff" opacity="0.6" />
+          </g>
+        )}
+
+        {accessory === 'cyber_shuriken' && (
+          // Phi Tiêu Hào Quang Điện Tử
+          <g id="acc_shuriken" className="animate-spin" style={{ animationDuration: '4s', transformOrigin: '80px 45px' }}>
+            <circle cx="80" cy="45" r="2" fill="#00f2fe" />
+            <polygon points="80,38 82,43 87,45 82,47 80,52 78,47 73,45 78,43" fill="#06b6d4" stroke="#00f2fe" strokeWidth="0.6" />
           </g>
         )}
       </g>

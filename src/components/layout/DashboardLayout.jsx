@@ -209,16 +209,42 @@ export default function DashboardLayout({ children }) {
           const computedAccuracy = totalGames > 0 ? Number((data.stats.wins / totalGames).toFixed(2)) : 0.85;
           const computedStreak = data.stats?.streakCount !== undefined ? data.stats.streakCount : Math.max(1, data.stats?.wins || 1);
 
+          let resolvedCrystals = data.personalization?.crystals !== undefined ? data.personalization.crystals : 500;
+          let resolvedUnlockedParts = isAdmin ? ALL_ADMIN_PARTS : (data.personalization?.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default']);
+          let resolvedUnlockedTitles = isAdmin ? ALL_ADMIN_TITLES : (data.personalization?.unlockedTitles || ['apprentice']);
+          let resolvedAvatarParts = data.personalization?.avatarParts || { gender: 'male', bodyType: 'chibi', pose: 'standard', body: 'peach', hair: 'default', top: 'default', bottom: 'default', accessory: 'none' };
+
+          if (typeof window !== 'undefined' && user?.uid) {
+            try {
+              const localCrystals = localStorage.getItem('stem_crystals_' + user.uid);
+              if (localCrystals !== null) {
+                resolvedCrystals = Number(localCrystals);
+              }
+              const localParts = JSON.parse(localStorage.getItem('stem_unlocked_parts_' + user.uid) || '[]');
+              if (Array.isArray(localParts) && localParts.length > 0) {
+                resolvedUnlockedParts = Array.from(new Set([...resolvedUnlockedParts, ...localParts]));
+              }
+              const localTitles = JSON.parse(localStorage.getItem('stem_unlocked_titles_' + user.uid) || '[]');
+              if (Array.isArray(localTitles) && localTitles.length > 0) {
+                resolvedUnlockedTitles = Array.from(new Set([...resolvedUnlockedTitles, ...localTitles]));
+              }
+              const localAvatarParts = JSON.parse(localStorage.getItem('stem_avatar_parts_' + user.uid) || 'null');
+              if (localAvatarParts && typeof localAvatarParts === 'object') {
+                resolvedAvatarParts = { ...resolvedAvatarParts, ...localAvatarParts };
+              }
+            } catch {}
+          }
+
           setPersonalization({
             avatarFrame: data.personalization?.avatarFrame || 'default',
             activeTitle: data.personalization?.activeTitle || 'apprentice',
             unlockedFrames: isAdmin ? ALL_ADMIN_FRAMES : (data.personalization?.unlockedFrames || ['default']),
-            unlockedTitles: isAdmin ? ALL_ADMIN_TITLES : (data.personalization?.unlockedTitles || ['apprentice']),
+            unlockedTitles: resolvedUnlockedTitles,
             bgImage: data.personalization?.bgImage || data.bgImage || (typeof window !== 'undefined' ? localStorage.getItem('stemhub_personalization_bg') || '' : ''),
             avatarUrl: data.personalization?.avatarUrl || data.avatarUrl || data.photoURL || (typeof window !== 'undefined' ? localStorage.getItem('stemhub_personalization_avatar') || 'custom-avatar' : 'custom-avatar'),
-            crystals: data.personalization?.crystals !== undefined ? data.personalization.crystals : 500,
-            avatarParts: data.personalization?.avatarParts || { gender: 'male', bodyType: 'chibi', pose: 'standard', body: 'peach', hair: 'default', top: 'default', bottom: 'default', accessory: 'none' },
-            unlockedParts: isAdmin ? ALL_ADMIN_PARTS : (data.personalization?.unlockedParts || ['peach', 'hair_default', 'top_default', 'bottom_default']),
+            crystals: resolvedCrystals,
+            avatarParts: resolvedAvatarParts,
+            unlockedParts: resolvedUnlockedParts,
             claimedMilestones: data.personalization?.claimedMilestones || [],
             face2FAEnabled: data.personalization?.face2FAEnabled || data.face2FAEnabled || false,
             faceDescriptor: data.personalization?.faceDescriptor || data.faceDescriptor || null,
@@ -290,6 +316,29 @@ export default function DashboardLayout({ children }) {
             displayName: displayNameToUse,
           });
 
+          let initialCrystals = 500;
+          let initialParts = ['peach', 'hair_default', 'top_default', 'bottom_default'];
+          let initialAvatarParts = {
+            gender: 'male',
+            bodyType: 'chibi',
+            pose: 'standard',
+            body: 'peach',
+            hair: 'default',
+            top: 'default',
+            bottom: 'default',
+            accessory: 'none'
+          };
+          if (typeof window !== 'undefined' && user?.uid) {
+            try {
+              const lc = localStorage.getItem('stem_crystals_' + user.uid);
+              if (lc !== null) initialCrystals = Number(lc);
+              const lp = JSON.parse(localStorage.getItem('stem_unlocked_parts_' + user.uid) || '[]');
+              if (Array.isArray(lp) && lp.length > 0) initialParts = Array.from(new Set([...initialParts, ...lp]));
+              const lap = JSON.parse(localStorage.getItem('stem_avatar_parts_' + user.uid) || 'null');
+              if (lap && typeof lap === 'object') initialAvatarParts = { ...initialAvatarParts, ...lap };
+            } catch {}
+          }
+
           setPersonalization({
             avatarFrame: 'default',
             activeTitle: 'apprentice',
@@ -297,18 +346,9 @@ export default function DashboardLayout({ children }) {
             unlockedTitles: ['apprentice'],
             avatarUrl: '',
             bgImage: '',
-            crystals: 500,
-            avatarParts: {
-              gender: 'male',
-              bodyType: 'chibi',
-              pose: 'standard',
-              body: 'peach',
-              hair: 'default',
-              top: 'default',
-              bottom: 'default',
-              accessory: 'none'
-            },
-            unlockedParts: ['peach', 'hair_default', 'top_default', 'bottom_default'],
+            crystals: initialCrystals,
+            avatarParts: initialAvatarParts,
+            unlockedParts: initialParts,
             claimedMilestones: [],
             level: preset ? preset.level : 1,
             exp: 0,
