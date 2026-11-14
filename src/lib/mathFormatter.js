@@ -254,10 +254,16 @@ export const formatMathText = (text) => {
   // 2. Bảo vệ các thẻ HTML token đơn lẻ (<tag...>, </tag>, <img...>)
   const htmlPlaceholders = [];
   
-  // a. Bảo vệ thẻ <img> (mã hóa URL an toàn)
-  formatted = formatted.replace(/<img\s+([^>]*?)src="([^"]+?)"([^>]*?)>/gi, (match, before, src, after) => {
+  // a. Bảo vệ thẻ <img> (mã hóa URL an toàn, chuẩn hóa NFD cho file tiếng Việt và bọc khung đẹp mắt)
+  formatted = formatted.replace(/<img\s+([^>]*?)src=["']([^"']+?)["']([^>]*?)>/gi, (match, before, src, after) => {
     const idx = htmlPlaceholders.length;
-    const cleanImg = `<img referrerpolicy="no-referrer" ${before}src="${encodeURI(src.trim())}"${after}>`;
+    let cleanSrc = src.trim();
+    if (cleanSrc.includes('dethitracnghiem.vn') || cleanSrc.includes('detracnghiem.edu.vn')) {
+      cleanSrc = encodeURI(cleanSrc.normalize('NFD'));
+    } else if (cleanSrc.startsWith('http')) {
+      cleanSrc = encodeURI(cleanSrc);
+    }
+    const cleanImg = `<div class="exam-img-wrapper my-3 text-center"><img referrerpolicy="no-referrer" loading="lazy" class="exam-question-img max-w-full h-auto max-h-[380px] object-contain rounded-2xl mx-auto border border-border-theme/60 bg-white/[0.03] p-2 shadow-md cursor-zoom-in transition-all hover:border-pink-500/50 hover:shadow-pink-500/10" data-zoomable="true" ${before}src="${cleanSrc}"${after} onerror="if(!this.dataset.proxied){this.dataset.proxied='1';this.src='/api/proxy-image?url='+encodeURIComponent('${cleanSrc}');}"></div>`;
     htmlPlaceholders.push(cleanImg);
     return `⟦HTML:${idx}⟧`;
   });
