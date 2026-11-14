@@ -263,7 +263,7 @@ export const formatMathText = (text) => {
     } else if (cleanSrc.startsWith('http')) {
       cleanSrc = encodeURI(cleanSrc);
     }
-    const cleanImg = `<div class="exam-img-wrapper my-3 text-center"><img referrerpolicy="no-referrer" loading="lazy" class="exam-question-img max-w-full h-auto max-h-[380px] object-contain rounded-2xl mx-auto border border-border-theme/60 bg-white/[0.03] p-2 shadow-md cursor-zoom-in transition-all hover:border-pink-500/50 hover:shadow-pink-500/10" data-zoomable="true" ${before}src="${cleanSrc}"${after} onerror="if(!this.dataset.proxied){this.dataset.proxied='1';this.src='/api/proxy-image?url='+encodeURIComponent('${cleanSrc}');}"></div>`;
+    const cleanImg = `<div class="exam-img-wrapper my-3 text-center"><img referrerpolicy="no-referrer" loading="lazy" class="exam-question-img max-w-full h-auto max-h-[380px] object-contain rounded-2xl mx-auto border border-border-theme bg-white dark:bg-[#1a1c2b] p-2.5 shadow-sm dark:shadow-md cursor-zoom-in transition-all hover:border-pink-500/50 hover:shadow-pink-500/10" data-zoomable="true" ${before}src="${cleanSrc}"${after} onerror="if(!this.dataset.proxied){this.dataset.proxied='1';this.src='/api/proxy-image?url='+encodeURIComponent('${cleanSrc}');}"></div>`;
     htmlPlaceholders.push(cleanImg);
     return `⟦HTML:${idx}⟧`;
   });

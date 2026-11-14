@@ -39,9 +39,12 @@ import {
   GraduationCap,
   ListFilter,
   CheckSquare,
-  Hash
+  Hash,
+  Sun,
+  Moon
 } from 'lucide-react';
 import html2canvas from 'html2canvas-pro';
+import { useTheme } from 'next-themes';
 import { useAppStore } from '@/store/useAppStore';
 import { playSound } from '@/lib/sound';
 import { getRankInfo } from '@/lib/matchmaker';
@@ -57,6 +60,8 @@ export default function RealCombatExamPage() {
   const updateStats = useAppStore((state) => state.setPersonalization);
   const personalization = useAppStore((state) => state.personalization);
   const setIsExamPlaying = useAppStore((state) => state.setIsExamPlaying);
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const isDark = (resolvedTheme || theme) === 'dark';
 
   // States bộ lọc trang chủ
   const [selectedSubject, setSelectedSubject] = useState('physics');
@@ -902,7 +907,7 @@ export default function RealCombatExamPage() {
       
       const canvas = await html2canvas(captureTarget, {
         useCORS: true,
-        backgroundColor: '#131524',
+        backgroundColor: isDark ? '#131524' : '#F8F6FC',
         scale: 1.0,
         width: window.innerWidth,
         height: window.innerHeight,
@@ -947,7 +952,7 @@ export default function RealCombatExamPage() {
       
       const canvas = await html2canvas(captureTarget, {
         useCORS: true,
-        backgroundColor: '#131524',
+        backgroundColor: isDark ? '#131524' : '#F8F6FC',
         scale: 1.0,
         width: window.innerWidth,
         height: window.innerHeight,
@@ -1342,12 +1347,12 @@ export default function RealCombatExamPage() {
         </motion.div>
       )}
 
-      {/* ================== SCREEN 2: PHÒNG THI THỰC CHIẾN CBT (CHẾ ĐỘ THI CAO CẤP) ================== */}
+      {/* ================== SCREEN 2: PHÒNG THI THỰC CHIẾN CBT (CHẾ ĐỘ THI CAO CẤP - HỖ TRỢ SÁNG/TỐI) ================== */}
       {examStatus === 'playing' && activeExam && currentQ && (
-        <div className="w-full min-h-screen flex flex-col bg-[#0b0d17] text-zinc-100 select-none relative z-20">
+        <div className="w-full min-h-screen flex flex-col bg-bg-primary text-text-primary select-none relative z-20 transition-colors">
           
           {/* 1. THANH TIÊU ĐỀ PHÒNG THI CHUYÊN NGHIỆP (CBT TOP COMMAND BAR) */}
-          <header className="sticky top-0 z-40 w-full bg-[#0d0f1a]/95 backdrop-blur-xl border-b border-white/10 px-4 md:px-8 py-3 transition-all shadow-xl">
+          <header className="sticky top-0 z-40 w-full bg-bg-secondary/95 dark:bg-[#0d0f1a]/95 backdrop-blur-xl border-b border-border-theme dark:border-white/10 px-4 md:px-8 py-3 transition-colors shadow-lg dark:shadow-xl">
             <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-4">
               
               {/* Trái: Nút Thoát & Thông tin đề thi */}
@@ -1355,7 +1360,7 @@ export default function RealCombatExamPage() {
                 <button
                   type="button"
                   onClick={() => setShowExitModal(true)}
-                  className="p-2.5 rounded-2xl bg-white/5 hover:bg-rose-500/15 border border-white/10 hover:border-rose-500/30 text-zinc-400 hover:text-rose-300 transition-all active:scale-95 cursor-pointer shrink-0"
+                  className="p-2.5 rounded-2xl bg-bg-tertiary hover:bg-rose-500/15 border border-border-theme hover:border-rose-500/30 text-text-secondary hover:text-rose-500 dark:hover:text-rose-300 transition-all active:scale-95 cursor-pointer shrink-0"
                   title="Rời khỏi phòng thi"
                 >
                   <ArrowLeft className="w-4 h-4" />
@@ -1363,17 +1368,17 @@ export default function RealCombatExamPage() {
 
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-gradient-to-r from-pink-500/20 to-purple-500/20 border border-pink-500/30 text-pink-300 font-mono tracking-wider shrink-0">
+                    <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-gradient-to-r from-pink-500/15 to-purple-500/15 border border-pink-500/30 text-accent-pink font-mono tracking-wider shrink-0">
                       {activeExam.subjectLabel || activeExam.subject?.toUpperCase() || 'THPT QUỐC GIA'}
                     </span>
-                    <span className="text-[10px] font-mono text-zinc-400">
+                    <span className="text-[10px] font-mono text-text-secondary">
                       {activeExam.year || '2025 - 2026'}
                     </span>
-                    <span className="text-[10px] font-bold text-emerald-400 hidden sm:flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> ĐANG THI TRỰC TUYẾN
+                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 hidden sm:flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> ĐANG THI TRỰC TUYẾN
                     </span>
                   </div>
-                  <h1 className="text-xs md:text-sm lg:text-base font-black text-white truncate max-w-[240px] sm:max-w-md lg:max-w-xl">
+                  <h1 className="text-xs md:text-sm lg:text-base font-black text-text-primary truncate max-w-[240px] sm:max-w-md lg:max-w-xl">
                     {activeExam.title}
                   </h1>
                 </div>
@@ -1382,42 +1387,62 @@ export default function RealCombatExamPage() {
               {/* Giữa: Đồng hồ đếm ngược HUD */}
               <div className={`flex items-center gap-3 px-4 md:px-6 py-1.5 md:py-2 rounded-2xl border transition-all duration-300 shrink-0 ${
                 timeRemaining <= 300 
-                  ? 'bg-rose-500/20 border-rose-500/60 text-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.3)] animate-pulse' 
-                  : 'bg-[#151828] border-pink-500/30 shadow-[0_0_20px_rgba(244,63,94,0.15)] text-zinc-100'
+                  ? 'bg-rose-500/20 border-rose-500/60 text-rose-500 dark:text-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.3)] animate-pulse' 
+                  : 'bg-bg-tertiary dark:bg-[#151828] border-accent-pink/30 shadow-[0_0_20px_rgba(240,57,140,0.12)] text-text-primary'
               }`}>
-                <Clock className={`w-4 h-4 md:w-5 md:h-5 ${timeRemaining <= 300 ? 'text-rose-400 animate-spin' : 'text-pink-400'}`} style={timeRemaining <= 300 ? { animationDuration: '3s' } : {}} />
+                <Clock className={`w-4 h-4 md:w-5 md:h-5 ${timeRemaining <= 300 ? 'text-rose-500 animate-spin' : 'text-accent-pink'}`} style={timeRemaining <= 300 ? { animationDuration: '3s' } : {}} />
                 <div className="flex flex-col items-center">
-                  <span className={`font-mono text-lg md:text-2xl font-black tracking-wider ${timeRemaining <= 300 ? 'text-rose-400' : 'text-pink-400'}`}>
+                  <span className={`font-mono text-lg md:text-2xl font-black tracking-wider ${timeRemaining <= 300 ? 'text-rose-500 dark:text-rose-400' : 'text-accent-pink'}`}>
                     {formatTime(timeRemaining)}
                   </span>
-                  <span className="text-[9px] uppercase tracking-wider text-zinc-400 font-semibold -mt-1 hidden sm:inline">
+                  <span className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold -mt-1 hidden sm:inline">
                     {timeRemaining <= 300 ? 'Sắp hết giờ!' : 'Thời gian làm bài'}
                   </span>
                 </div>
               </div>
 
-              {/* Phải: Toàn màn hình & Nộp bài */}
-              <div className="flex items-center gap-2.5 shrink-0">
+              {/* Phải: Chuyển Giao diện Sáng/Tối, Toàn màn hình & Nộp bài */}
+              <div className="flex items-center gap-2 md:gap-2.5 shrink-0">
+                {/* Nút Đổi Giao Diện Sáng / Tối trong phòng thi */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    playSound.click();
+                    setTheme(isDark ? 'light' : 'dark');
+                  }}
+                  className="p-2.5 rounded-xl bg-bg-tertiary hover:bg-bg-secondary border border-border-theme text-text-secondary hover:text-text-primary transition-all flex items-center justify-center cursor-pointer active:scale-95"
+                  title={isDark ? 'Chuyển sang Giao diện Sáng (Light Theme)' : 'Chuyển sang Giao diện Tối (Dark Theme)'}
+                >
+                  {isDark ? (
+                    <Sun className="w-4 h-4 text-amber-400 transition-transform duration-300 hover:rotate-45" />
+                  ) : (
+                    <Moon className="w-4 h-4 text-accent-pink transition-transform duration-300 hover:-rotate-12" />
+                  )}
+                </button>
+
+                {/* Toàn màn hình */}
                 <button
                   type="button"
                   onClick={toggleFullscreen}
-                  className="hidden md:flex p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white transition-all items-center gap-1.5 text-xs font-semibold cursor-pointer"
+                  className="hidden md:flex p-2.5 rounded-xl bg-bg-tertiary hover:bg-bg-secondary border border-border-theme text-text-secondary hover:text-text-primary transition-all items-center gap-1.5 text-xs font-semibold cursor-pointer active:scale-95"
                   title={isFullscreen ? 'Thu nhỏ cửa sổ' : 'Toàn màn hình phòng thi (F11)'}
                 >
                   {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                   <span className="hidden xl:inline">{isFullscreen ? 'Thu nhỏ' : 'Toàn màn hình'}</span>
                 </button>
 
+                {/* Nút Mục Lục Câu Hỏi trên Mobile */}
                 <button
                   type="button"
                   onClick={() => setMobilePaletteOpen(true)}
-                  className="lg:hidden p-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-300 hover:text-white transition-all flex items-center gap-1.5 text-xs font-bold"
+                  className="lg:hidden p-2.5 rounded-xl bg-bg-tertiary border border-border-theme text-text-secondary hover:text-text-primary transition-all flex items-center gap-1.5 text-xs font-bold"
                   title="Mở mục lục câu hỏi"
                 >
-                  <LayoutGrid className="w-4 h-4 text-pink-400" />
+                  <LayoutGrid className="w-4 h-4 text-accent-pink" />
                   <span className="hidden sm:inline">Câu hỏi ({answeredStats.answered}/{answeredStats.total})</span>
                 </button>
 
+                {/* Nút Nộp Bài */}
                 <button
                   type="button"
                   onClick={() => setShowSubmitModal(true)}
@@ -1430,7 +1455,7 @@ export default function RealCombatExamPage() {
             </div>
 
             {/* 2. THANH TABS CHUYỂN NHANH 3 PHẦN THI (PART NAVIGATION TABS) */}
-            <div className="max-w-[1600px] mx-auto mt-3 pt-2.5 border-t border-white/5 flex items-center justify-between gap-3 overflow-x-auto pb-1 scrollbar-none">
+            <div className="max-w-[1600px] mx-auto mt-3 pt-2.5 border-t border-border-theme/60 flex items-center justify-between gap-3 overflow-x-auto pb-1 scrollbar-none">
               <div className="flex items-center gap-2.5 min-w-max">
                 {partStats.map((part) => {
                   const isActive = currentPart?.id === part.id;
@@ -1444,30 +1469,30 @@ export default function RealCombatExamPage() {
                       }}
                       className={`px-4 py-2 rounded-2xl transition-all duration-200 flex items-center gap-3 border text-left cursor-pointer group ${
                         isActive
-                          ? 'bg-gradient-to-r from-pink-500/25 via-purple-600/20 to-transparent border-pink-500 shadow-[0_0_20px_rgba(244,63,94,0.25)] ring-1 ring-pink-500/50'
-                          : 'bg-white/[0.02] border-white/10 hover:bg-white/[0.06] hover:border-white/20'
+                          ? 'bg-gradient-to-r from-pink-500/15 via-purple-600/10 to-transparent border-pink-500 shadow-[0_0_20px_rgba(240,57,140,0.18)] ring-1 ring-pink-500/40'
+                          : 'bg-bg-tertiary/50 dark:bg-white/[0.02] border-border-theme dark:border-white/10 hover:bg-bg-tertiary hover:border-pink-500/30'
                       }`}
                     >
                       <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs shrink-0 transition-colors font-mono ${
                         isActive 
                           ? 'bg-pink-500 text-white shadow-md shadow-pink-500/40' 
-                          : 'bg-zinc-800 text-zinc-400 group-hover:text-zinc-200'
+                          : 'bg-bg-secondary dark:bg-zinc-800 text-text-secondary border border-border-theme'
                       }`}>
                         {part.id === 'part_1' ? 'I' : part.id === 'part_2' ? 'II' : 'III'}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className={`text-xs font-bold ${isActive ? 'text-white' : 'text-zinc-300'}`}>
+                          <span className={`text-xs font-bold ${isActive ? 'text-text-primary font-black' : 'text-text-secondary group-hover:text-text-primary'}`}>
                             {part.title}: {part.shortName}
                           </span>
                           {part.isCompleted && (
-                            <span className="w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-emerald-400/30" title="Đã hoàn thành phần này" />
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-500/30" title="Đã hoàn thành phần này" />
                           )}
                         </div>
-                        <div className="flex items-center gap-2 text-[10px] text-zinc-400 font-mono">
+                        <div className="flex items-center gap-2 text-[10px] text-text-secondary font-mono">
                           <span>{part.total} câu</span>
                           <span>•</span>
-                          <span className={part.answeredCount === part.total ? 'text-emerald-400 font-bold' : ''}>
+                          <span className={part.answeredCount === part.total ? 'text-emerald-600 dark:text-emerald-400 font-bold' : ''}>
                             Đã làm: {part.answeredCount}/{part.total}
                           </span>
                         </div>
@@ -1477,10 +1502,10 @@ export default function RealCombatExamPage() {
                 })}
               </div>
 
-              <div className="hidden xl:flex items-center gap-3 text-xs text-zinc-400 font-mono">
-                <span>Toàn bài: <strong className="text-white">{answeredStats.answered}/{answeredStats.total} câu ({answeredStats.percentage}%)</strong></span>
+              <div className="hidden xl:flex items-center gap-3 text-xs text-text-secondary font-mono">
+                <span>Toàn bài: <strong className="text-text-primary font-bold">{answeredStats.answered}/{answeredStats.total} câu ({answeredStats.percentage}%)</strong></span>
                 <span>•</span>
-                <span>Cờ: <strong className="text-orange-400">{answeredStats.flaggedIndices.length}</strong></span>
+                <span>Cờ: <strong className="text-orange-500 font-bold">{answeredStats.flaggedIndices.length}</strong></span>
               </div>
             </div>
           </header>
@@ -1489,35 +1514,35 @@ export default function RealCombatExamPage() {
           <div className="flex-1 max-w-[1600px] w-full mx-auto p-4 md:p-6 lg:p-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               
-              {/* CỘT CHÍNH (8/12 hoặc 9/12): THẺ CÂU HỎI */}
+              {/* CỘT CHÍNH: THẺ CÂU HỎI */}
               <main className="lg:col-span-8 xl:col-span-9 flex flex-col gap-5">
                 
-                <div className="bg-[#121422]/95 border border-white/10 p-6 sm:p-8 rounded-3xl shadow-2xl backdrop-blur-xl flex flex-col justify-between min-h-[560px]">
+                <div className="bg-bg-secondary dark:bg-[#121422]/95 border border-border-theme dark:border-white/10 p-6 sm:p-8 rounded-3xl shadow-xl dark:shadow-2xl backdrop-blur-xl flex flex-col justify-between min-h-[560px] transition-colors">
                   <div>
                     {/* Header Thẻ Câu Hỏi */}
-                    <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10 mb-5">
+                    <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-border-theme dark:border-white/10 mb-5">
                       <div className="flex items-center gap-2.5 flex-wrap">
-                        <span className="px-3 py-1 rounded-xl bg-pink-500/15 border border-pink-500/30 text-pink-400 font-mono text-xs font-black uppercase tracking-wider">
+                        <span className="px-3 py-1 rounded-xl bg-pink-500/15 border border-pink-500/30 text-accent-pink font-mono text-xs font-black uppercase tracking-wider">
                           {currentPart?.title}: {currentPart?.name?.toUpperCase()}
                         </span>
-                        <span className="text-sm font-black text-white font-mono">
+                        <span className="text-sm font-black text-text-primary font-mono">
                           CÂU {questionNumberInPart}/{currentPart?.total}
                         </span>
-                        <span className="text-xs text-zinc-400 font-mono hidden sm:inline">
+                        <span className="text-xs text-text-secondary font-mono hidden sm:inline">
                           (Câu {currentQuestionIndex + 1}/{activeExam.questions.length} toàn bài)
                         </span>
-                        <span className="text-[10px] font-bold text-amber-400/90 px-2 py-0.5 rounded-md bg-amber-400/10 border border-amber-400/20 font-mono">
+                        <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 font-mono">
                           {currentPart?.pointsPerQuestion}
                         </span>
                       </div>
 
                       {/* Nút cỡ chữ & Gắn cờ */}
                       <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/10 text-[10px] font-bold">
+                        <div className="flex items-center gap-1 bg-bg-tertiary p-1 rounded-xl border border-border-theme text-[10px] font-bold">
                           <button
                             type="button"
                             onClick={() => setFontSize('normal')}
-                            className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${fontSize === 'normal' ? 'bg-pink-500 text-white shadow-sm font-black' : 'text-zinc-400 hover:text-white'}`}
+                            className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${fontSize === 'normal' ? 'bg-pink-500 text-white shadow-sm font-black' : 'text-text-secondary hover:text-text-primary'}`}
                             title="Cỡ chữ vừa"
                           >
                             A
@@ -1525,7 +1550,7 @@ export default function RealCombatExamPage() {
                           <button
                             type="button"
                             onClick={() => setFontSize('large')}
-                            className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${fontSize === 'large' ? 'bg-pink-500 text-white shadow-sm font-black' : 'text-zinc-400 hover:text-white'}`}
+                            className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${fontSize === 'large' ? 'bg-pink-500 text-white shadow-sm font-black' : 'text-text-secondary hover:text-text-primary'}`}
                             title="Cỡ chữ to"
                           >
                             A+
@@ -1533,7 +1558,7 @@ export default function RealCombatExamPage() {
                           <button
                             type="button"
                             onClick={() => setFontSize('xlarge')}
-                            className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${fontSize === 'xlarge' ? 'bg-pink-500 text-white shadow-sm font-black' : 'text-zinc-400 hover:text-white'}`}
+                            className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${fontSize === 'xlarge' ? 'bg-pink-500 text-white shadow-sm font-black' : 'text-text-secondary hover:text-text-primary'}`}
                             title="Cỡ chữ rất to"
                           >
                             A++
@@ -1545,8 +1570,8 @@ export default function RealCombatExamPage() {
                           onClick={() => toggleFlag(currentQuestionIndex)}
                           className={`px-3 py-1.5 rounded-xl transition-all active:scale-95 flex items-center gap-1.5 text-xs font-bold border cursor-pointer ${
                             flaggedQuestions.has(currentQuestionIndex) 
-                              ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.25)]' 
-                              : 'bg-white/5 text-zinc-400 hover:text-white border-white/10'
+                              ? 'bg-rose-500/15 text-rose-500 dark:text-rose-300 border-rose-500/40 shadow-sm' 
+                              : 'bg-bg-tertiary text-text-secondary hover:text-text-primary border-border-theme'
                           }`}
                           title="Đánh dấu câu này để xem lại trước khi nộp (Phím F)"
                         >
@@ -1557,15 +1582,15 @@ export default function RealCombatExamPage() {
                     </div>
 
                     {/* Dòng ghi chú hướng dẫn thể thức thi của Phần hiện tại */}
-                    <div className="mb-5 px-4 py-2.5 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center gap-2 text-xs text-zinc-400">
-                      <Sparkles className="w-3.5 h-3.5 text-pink-400 shrink-0" />
+                    <div className="mb-5 px-4 py-2.5 rounded-2xl bg-bg-tertiary/70 dark:bg-white/[0.02] border border-border-theme dark:border-white/5 flex items-center gap-2 text-xs text-text-secondary">
+                      <Sparkles className="w-3.5 h-3.5 text-accent-pink shrink-0" />
                       <span>{currentPart?.desc}</span>
                     </div>
 
                     {/* Nội dung câu hỏi KaTeX (hỗ trợ click hình để zoom) */}
                     <div 
                       onClick={handleQuestionBodyClick}
-                      className={`text-zinc-100 leading-relaxed mb-6 select-text selection:bg-pink-500/30 ${
+                      className={`text-text-primary dark:text-zinc-100 leading-relaxed mb-6 select-text selection:bg-pink-500/25 ${
                         fontSize === 'xlarge' ? 'text-lg leading-loose' : fontSize === 'large' ? 'text-base leading-relaxed' : 'text-sm sm:text-[15px] leading-relaxed'
                       }`}
                       dangerouslySetInnerHTML={{ __html: formatMathText(currentQ.text) }}
@@ -1580,10 +1605,10 @@ export default function RealCombatExamPage() {
                           const isSelected = userAnswers[currentQ.id] === optIdx;
                           const letter = String.fromCharCode(65 + optIdx);
                           const letterBadges = [
-                            { bg: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30' },
-                            { bg: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30' },
-                            { bg: 'bg-amber-500/10 text-amber-400 border-amber-500/30' },
-                            { bg: 'bg-pink-500/10 text-pink-400 border-pink-500/30' }
+                            { bg: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/30' },
+                            { bg: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/30' },
+                            { bg: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30' },
+                            { bg: 'bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/30' }
                           ];
                           const badge = letterBadges[optIdx] || letterBadges[0];
 
@@ -1594,8 +1619,8 @@ export default function RealCombatExamPage() {
                               onClick={() => handleSelectMcq(currentQ.id, optIdx)}
                               className={`p-4 rounded-2xl text-left transition-all duration-200 border flex items-center justify-between gap-3.5 group cursor-pointer ${
                                 isSelected 
-                                  ? 'bg-gradient-to-r from-pink-500/20 via-purple-500/15 to-transparent border-pink-500 text-white shadow-[0_0_25px_rgba(244,63,94,0.25)] ring-1 ring-pink-500/50' 
-                                  : 'bg-white/[0.02] border-white/10 hover:bg-white/[0.06] hover:border-pink-500/40 text-zinc-200'
+                                  ? 'bg-gradient-to-r from-pink-500/15 via-purple-500/10 to-transparent border-pink-500 text-text-primary shadow-[0_0_20px_rgba(240,57,140,0.18)] ring-1 ring-pink-500/50' 
+                                  : 'bg-bg-secondary dark:bg-white/[0.02] border-border-theme dark:border-white/10 hover:bg-bg-tertiary hover:border-pink-500/40 text-text-primary dark:text-zinc-200 shadow-sm'
                               }`}
                             >
                               <div className="flex items-center gap-3.5 flex-1 min-w-0">
@@ -1607,16 +1632,16 @@ export default function RealCombatExamPage() {
                                   {letter}
                                 </div>
                                 <div 
-                                  className={`flex-1 text-xs sm:text-sm font-medium leading-relaxed ${isSelected ? 'text-white font-semibold' : 'text-zinc-200 group-hover:text-white'}`}
+                                  className={`flex-1 text-xs sm:text-sm font-medium leading-relaxed ${isSelected ? 'text-text-primary font-bold' : 'text-text-primary dark:text-zinc-200 group-hover:text-accent-pink'}`}
                                   dangerouslySetInnerHTML={{ __html: formatMathText(option) }} 
                                 />
                               </div>
                               <div className="flex items-center gap-2 shrink-0">
-                                <span className="hidden sm:inline-block text-[10px] font-mono text-zinc-500 px-2 py-1 rounded-md bg-white/5 border border-white/5 group-hover:text-zinc-300">
+                                <span className="hidden sm:inline-block text-[10px] font-mono text-text-secondary px-2 py-1 rounded-md bg-bg-tertiary border border-border-theme">
                                   [{optIdx + 1}]
                                 </span>
                                 {isSelected && (
-                                  <div className="w-5 h-5 rounded-full bg-pink-500/20 text-pink-400 flex items-center justify-center shrink-0">
+                                  <div className="w-5 h-5 rounded-full bg-pink-500/20 text-pink-500 flex items-center justify-center shrink-0">
                                     <Check className="w-3.5 h-3.5" />
                                   </div>
                                 )}
@@ -1631,35 +1656,36 @@ export default function RealCombatExamPage() {
                     {currentQ.type === 'true_false' && (
                       <div className="space-y-3.5 mt-6">
                         <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-between">
-                          <span className="text-xs text-purple-300 font-medium flex items-center gap-1.5">
-                            <Sparkles className="w-4 h-4 text-purple-400" />
+                          <span className="text-xs text-purple-700 dark:text-purple-300 font-medium flex items-center gap-1.5">
+                            <Sparkles className="w-4 h-4 text-accent-purple" />
                             Đánh giá Đúng hoặc Sai cho mỗi mệnh đề a), b), c), d)
                           </span>
-                          <span className="text-xs font-mono font-bold text-purple-300">
+                          <span className="text-xs font-mono font-bold text-accent-purple">
                             Đã chọn: {Object.keys(userAnswers[currentQ.id] || {}).length}/4 ý
                           </span>
                         </div>
 
                         <div className="space-y-3">
                           {currentQ.statements.map((stmt, sIdx) => {
-                            const answersObj = userAnswers[currentQ.id] || {};
-                            const currentVal = answersObj[stmt.id];
-                            const letter = ['a', 'b', 'c', 'd'][sIdx] || `${sIdx + 1}`;
+                            const currentVal = userAnswers[currentQ.id]?.[stmt.id];
+                            const letter = String.fromCharCode(97 + sIdx);
+                            const hasAnswered = currentVal !== undefined;
+
                             return (
                               <div 
                                 key={stmt.id}
-                                className={`p-4 md:p-5 rounded-2xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 ${
-                                  currentVal !== undefined
-                                    ? 'bg-white/[0.04] border-white/20'
-                                    : 'bg-white/[0.02] border-white/10'
+                                className={`p-4 rounded-2xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+                                  hasAnswered 
+                                    ? 'bg-bg-tertiary/80 dark:bg-white/[0.04] border-accent-pink/30 dark:border-white/20' 
+                                    : 'bg-bg-secondary dark:bg-white/[0.02] border-border-theme dark:border-white/10 hover:border-border-theme'
                                 }`}
                               >
                                 <div className="flex items-start gap-3.5 flex-1 min-w-0">
-                                  <span className="w-7 h-7 rounded-xl bg-purple-500/20 border border-purple-500/30 text-purple-300 text-xs font-black flex items-center justify-center shrink-0 mt-0.5 font-mono">
+                                  <span className="w-7 h-7 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-black flex items-center justify-center shrink-0 mt-0.5 font-mono">
                                     {letter})
                                   </span>
                                   <div 
-                                    className="text-xs sm:text-sm text-zinc-100 leading-relaxed font-medium"
+                                    className="text-xs sm:text-sm text-text-primary dark:text-zinc-100 leading-relaxed font-medium"
                                     dangerouslySetInnerHTML={{ __html: formatMathText(stmt.text) }} 
                                   />
                                 </div>
@@ -1670,7 +1696,7 @@ export default function RealCombatExamPage() {
                                     className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
                                       currentVal === true 
                                         ? 'bg-emerald-600 border-emerald-400 text-white shadow-lg shadow-emerald-600/30 scale-105 font-black' 
-                                        : 'bg-white/5 border-white/10 text-zinc-300 hover:text-emerald-400 hover:border-emerald-500/40'
+                                        : 'bg-bg-tertiary border-border-theme text-text-secondary hover:text-emerald-600 hover:border-emerald-500/40'
                                     }`}
                                   >
                                     <Check className="w-3.5 h-3.5" /> Đúng
@@ -1681,7 +1707,7 @@ export default function RealCombatExamPage() {
                                     className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
                                       currentVal === false 
                                         ? 'bg-rose-600 border-rose-400 text-white shadow-lg shadow-rose-600/30 scale-105 font-black' 
-                                        : 'bg-white/5 border-white/10 text-zinc-300 hover:text-rose-400 hover:border-rose-500/40'
+                                        : 'bg-bg-tertiary border-border-theme text-text-secondary hover:text-rose-600 hover:border-rose-500/40'
                                     }`}
                                   >
                                     <X className="w-3.5 h-3.5" /> Sai
@@ -1698,7 +1724,7 @@ export default function RealCombatExamPage() {
                     {currentQ.type === 'short_answer' && (
                       <div className="mt-6 max-w-xl mx-auto space-y-4">
                         <div className="p-3.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-center">
-                          <p className="text-xs text-cyan-300 font-medium">
+                          <p className="text-xs text-cyan-800 dark:text-cyan-300 font-medium">
                             💡 Điền kết quả số (số nguyên hoặc số thập phân, dùng dấu . hoặc ,)
                           </p>
                         </div>
@@ -1709,12 +1735,12 @@ export default function RealCombatExamPage() {
                             placeholder="Nhập kết quả số..."
                             value={userAnswers[currentQ.id] || ''}
                             onChange={(e) => handleShortAnswerChange(currentQ.id, e.target.value)}
-                            className="w-full text-center text-2xl md:text-3xl font-black font-mono tracking-wider py-4 px-6 rounded-2xl bg-[#0e101a] border-2 border-pink-500/40 focus:border-cyan-400 text-cyan-300 placeholder:text-zinc-600 shadow-inner outline-none transition-all"
+                            className="w-full text-center text-2xl md:text-3xl font-black font-mono tracking-wider py-4 px-6 rounded-2xl bg-bg-secondary dark:bg-[#0e101a] border-2 border-pink-500/40 focus:border-cyan-500 text-cyan-700 dark:text-cyan-300 placeholder:text-text-secondary/40 shadow-inner outline-none transition-all"
                           />
                           {userAnswers[currentQ.id] && (
                             <button
                               onClick={() => handleShortAnswerChange(currentQ.id, '')}
-                              className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-rose-400 transition-colors p-1 cursor-pointer"
+                              className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary hover:text-rose-500 transition-colors p-1 cursor-pointer"
                               title="Xóa kết quả"
                             >
                               <X className="w-5 h-5" />
@@ -1723,8 +1749,8 @@ export default function RealCombatExamPage() {
                         </div>
 
                         {/* Bàn phím số ảo nhanh */}
-                        <div className="bg-[#0e101a] border border-white/10 rounded-2xl p-4 shadow-xl">
-                          <div className="text-[11px] text-zinc-400 font-semibold mb-2.5 text-center uppercase tracking-wider">
+                        <div className="bg-bg-secondary dark:bg-[#0e101a] border border-border-theme dark:border-white/10 rounded-2xl p-4 shadow-lg">
+                          <div className="text-[11px] text-text-secondary font-semibold mb-2.5 text-center uppercase tracking-wider">
                             Bàn phím nhập số nhanh
                           </div>
                           <div className="grid grid-cols-3 gap-2">
@@ -1737,7 +1763,7 @@ export default function RealCombatExamPage() {
                                   const curr = String(userAnswers[currentQ.id] || '');
                                   handleShortAnswerChange(currentQ.id, curr + key);
                                 }}
-                                className="py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-mono font-bold text-lg active:scale-95 transition-all cursor-pointer"
+                                className="py-3 rounded-xl bg-bg-tertiary hover:bg-bg-tertiary/80 border border-border-theme text-text-primary font-mono font-bold text-lg active:scale-95 transition-all cursor-pointer shadow-sm"
                               >
                                 {key}
                               </button>
@@ -1751,7 +1777,7 @@ export default function RealCombatExamPage() {
                                 const curr = String(userAnswers[currentQ.id] || '');
                                 handleShortAnswerChange(currentQ.id, curr.slice(0, -1));
                               }}
-                              className="py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 font-bold text-xs uppercase transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                              className="py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-700 dark:text-amber-300 font-bold text-xs uppercase transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                             >
                               <span>⌫ Xóa ký tự</span>
                             </button>
@@ -1761,7 +1787,7 @@ export default function RealCombatExamPage() {
                                 playSound.click();
                                 handleShortAnswerChange(currentQ.id, '');
                               }}
-                              className="py-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 font-bold text-xs uppercase transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                              className="py-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-700 dark:text-rose-300 font-bold text-xs uppercase transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                             >
                               <span>Xóa hết</span>
                             </button>
@@ -1772,18 +1798,18 @@ export default function RealCombatExamPage() {
                   </div>
 
                   {/* Thanh điều hướng chân câu hỏi */}
-                  <div className="flex items-center justify-between border-t border-white/10 pt-6 mt-8">
+                  <div className="flex items-center justify-between border-t border-border-theme dark:border-white/10 pt-6 mt-8">
                     <button
                       type="button"
                       onClick={() => { playSound.click(); setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1)); }}
                       disabled={currentQuestionIndex === 0}
-                      className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-200 text-xs font-bold rounded-xl transition-all disabled:opacity-30 disabled:pointer-events-none flex items-center gap-2 cursor-pointer"
+                      className="px-5 py-2.5 bg-bg-tertiary hover:bg-bg-secondary border border-border-theme text-text-primary text-xs font-bold rounded-xl transition-all disabled:opacity-30 disabled:pointer-events-none flex items-center gap-2 cursor-pointer"
                     >
                       <ChevronLeft className="w-4 h-4" />
                       <span>Câu trước (Phím [)</span>
                     </button>
 
-                    <span className="text-[11px] font-mono text-zinc-400 hidden sm:inline">
+                    <span className="text-[11px] font-mono text-text-secondary hidden sm:inline">
                       Phím tắt: [ hoặc ← lùi • ] hoặc → tiến • 1-4/A-D chọn • F cờ
                     </span>
 
@@ -1811,20 +1837,20 @@ export default function RealCombatExamPage() {
               </main>
 
               {/* CỘT PHỤ: BẢNG TIẾN TRÌNH 3 PHẦN THI ĐỘC LẬP (STICKY) */}
-              <aside className="hidden lg:block lg:col-span-4 xl:col-span-3 sticky top-28 bg-[#121422]/95 border border-white/10 p-5 rounded-3xl shadow-2xl backdrop-blur-xl space-y-4 max-h-[calc(100vh-140px)] flex flex-col">
+              <aside className="hidden lg:block lg:col-span-4 xl:col-span-3 sticky top-28 bg-bg-secondary dark:bg-[#121422]/95 border border-border-theme dark:border-white/10 p-5 rounded-3xl shadow-xl dark:shadow-2xl backdrop-blur-xl space-y-4 max-h-[calc(100vh-140px)] flex flex-col transition-colors">
                 
                 {/* Header Thống kê tiến trình */}
-                <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                  <h3 className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2 font-mono">
-                    <LayoutGrid className="w-4 h-4 text-pink-400" /> BẢNG TIẾN TRÌNH THI
+                <div className="flex items-center justify-between pb-3 border-b border-border-theme dark:border-white/10">
+                  <h3 className="text-xs font-black text-text-primary uppercase tracking-wider flex items-center gap-2 font-mono">
+                    <LayoutGrid className="w-4 h-4 text-accent-pink" /> BẢNG TIẾN TRÌNH THI
                   </h3>
-                  <span className="text-[11px] font-mono font-bold text-pink-400 bg-pink-500/10 border border-pink-500/20 px-2 py-0.5 rounded-full">
+                  <span className="text-[11px] font-mono font-bold text-accent-pink bg-pink-500/10 border border-pink-500/20 px-2 py-0.5 rounded-full">
                     {answeredStats.answered}/{answeredStats.total} câu
                   </span>
                 </div>
 
                 {/* Progress bar */}
-                <div className="w-full bg-zinc-800/80 rounded-full h-2 overflow-hidden border border-white/5">
+                <div className="w-full bg-bg-tertiary dark:bg-zinc-800/80 rounded-full h-2 overflow-hidden border border-border-theme dark:border-white/5">
                   <motion.div 
                     className="h-full bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-400 rounded-full"
                     initial={{ width: 0 }}
@@ -1834,14 +1860,14 @@ export default function RealCombatExamPage() {
                 </div>
 
                 {/* Bộ lọc câu hỏi */}
-                <div className="flex gap-1 bg-white/5 p-1 rounded-xl text-[10px] font-bold">
+                <div className="flex gap-1 bg-bg-tertiary p-1 rounded-xl text-[10px] font-bold border border-border-theme">
                   <button
                     type="button"
                     onClick={() => setQuestionPaletteFilter('all')}
                     className={`flex-1 py-1 rounded-lg transition-all cursor-pointer ${
                       questionPaletteFilter === 'all'
                         ? 'bg-pink-500 text-white shadow-sm'
-                        : 'text-zinc-400 hover:text-white'
+                        : 'text-text-secondary hover:text-text-primary'
                     }`}
                   >
                     Tất cả ({answeredStats.total})
@@ -1852,7 +1878,7 @@ export default function RealCombatExamPage() {
                     className={`flex-1 py-1 rounded-lg transition-all cursor-pointer ${
                       questionPaletteFilter === 'unanswered'
                         ? 'bg-amber-500 text-white shadow-sm'
-                        : 'text-zinc-400 hover:text-amber-400'
+                        : 'text-text-secondary hover:text-amber-500'
                     }`}
                   >
                     Chưa ({answeredStats.unansweredIndices.length})
@@ -1863,7 +1889,7 @@ export default function RealCombatExamPage() {
                     className={`flex-1 py-1 rounded-lg transition-all cursor-pointer ${
                       questionPaletteFilter === 'flagged'
                         ? 'bg-rose-500 text-white shadow-sm'
-                        : 'text-zinc-400 hover:text-rose-400'
+                        : 'text-text-secondary hover:text-rose-500'
                     }`}
                   >
                     Cờ ({answeredStats.flaggedIndices.length})
@@ -1877,20 +1903,20 @@ export default function RealCombatExamPage() {
                       key={part.id} 
                       className={`rounded-2xl border p-3.5 transition-all ${
                         currentPart?.id === part.id 
-                          ? 'bg-white/[0.03] border-pink-500/40 shadow-[0_0_15px_rgba(244,63,94,0.08)]' 
-                          : 'bg-black/20 border-white/5'
+                          ? 'bg-accent-pink/5 dark:bg-white/[0.03] border-pink-500/40 shadow-sm' 
+                          : 'bg-bg-tertiary/50 dark:bg-black/20 border-border-theme dark:border-white/5'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2.5">
                         <div className="flex items-center gap-2">
                           <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md font-mono ${
-                            currentPart?.id === part.id ? 'bg-pink-500 text-white' : 'bg-zinc-800 text-zinc-300'
+                            currentPart?.id === part.id ? 'bg-pink-500 text-white' : 'bg-bg-secondary dark:bg-zinc-800 text-text-primary dark:text-zinc-300 border border-border-theme'
                           }`}>
                             {part.title}
                           </span>
-                          <span className="text-xs font-bold text-zinc-200">{part.shortName}</span>
+                          <span className="text-xs font-bold text-text-primary">{part.shortName}</span>
                         </div>
-                        <span className="text-[11px] font-mono text-zinc-400">
+                        <span className="text-[11px] font-mono text-text-secondary">
                           {part.answeredCount}/{part.total}
                         </span>
                       </div>
@@ -1926,18 +1952,18 @@ export default function RealCombatExamPage() {
                               }}
                               className={`relative h-9 rounded-xl text-xs font-bold transition-all duration-150 flex items-center justify-center cursor-pointer ${
                                 isCurrent
-                                  ? 'ring-2 ring-pink-400 ring-offset-2 ring-offset-[#121422] scale-105 z-10 font-black ' + 
+                                  ? 'ring-2 ring-pink-500 ring-offset-2 ring-offset-bg-secondary dark:ring-offset-[#121422] scale-105 z-10 font-black ' + 
                                     (status === 'answered' ? 'bg-emerald-600 text-white' : status === 'partial' ? 'bg-amber-600 text-white' : 'bg-pink-500 text-white')
                                   : status === 'answered'
-                                    ? 'bg-emerald-600/30 hover:bg-emerald-600/40 border border-emerald-500/50 text-emerald-300'
+                                    ? 'bg-emerald-500/15 dark:bg-emerald-600/30 hover:bg-emerald-500/25 border border-emerald-500/50 text-emerald-700 dark:text-emerald-300 font-bold'
                                     : status === 'partial'
-                                      ? 'bg-amber-500/25 hover:bg-amber-500/35 border border-amber-500/50 text-amber-300'
-                                      : 'bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-zinc-400 hover:text-white'
+                                      ? 'bg-amber-500/15 dark:bg-amber-500/25 hover:bg-amber-500/25 border border-amber-500/50 text-amber-700 dark:text-amber-300 font-bold'
+                                      : 'bg-bg-tertiary hover:bg-bg-tertiary/70 border border-border-theme text-text-secondary hover:text-text-primary'
                               }`}
                             >
                               <span>{idx + 1}</span>
                               {isFlagged && (
-                                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-[#121422] shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
+                                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-bg-secondary dark:border-[#121422] shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
                               )}
                             </button>
                           );
@@ -1948,15 +1974,15 @@ export default function RealCombatExamPage() {
                 </div>
 
                 {/* Chú thích màu sắc */}
-                <div className="border-t border-white/10 pt-3 text-[10px] text-zinc-400 grid grid-cols-2 gap-1.5 font-medium">
+                <div className="border-t border-border-theme pt-3 text-[10px] text-text-secondary grid grid-cols-2 gap-1.5 font-medium">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded bg-pink-500" /> <span>Đang làm</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded bg-emerald-500/40 border border-emerald-500" /> <span>Đã hoàn thành</span>
+                    <span className="w-2.5 h-2.5 rounded bg-emerald-500/30 border border-emerald-500" /> <span>Đã hoàn thành</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded bg-amber-500/40 border border-amber-500" /> <span>Làm 1 phần (Đ/S)</span>
+                    <span className="w-2.5 h-2.5 rounded bg-amber-500/30 border border-amber-500" /> <span>Làm 1 phần (Đ/S)</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-rose-500" /> <span>Đặt cờ xem lại</span>
@@ -1978,7 +2004,7 @@ export default function RealCombatExamPage() {
         </div>
       )}
 
-      {/* ================== MOBILE DRAWER BẢNG CÂU HỎI (CHIA 3 PHẦN) ================== */}
+      {/* ================== MOBILE DRAWER BẢNG CÂU HỎI (CHIA 3 PHẦN - HỖ TRỢ SÁNG/TỐI) ================== */}
       <AnimatePresence>
         {mobilePaletteOpen && activeExam && (
           <div className="fixed inset-0 z-50 lg:hidden">
@@ -1987,22 +2013,22 @@ export default function RealCombatExamPage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setMobilePaletteOpen(false)}
-              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             />
             <motion.div 
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 20 }}
-              className="absolute right-0 top-0 bottom-0 w-84 bg-[#121422] border-l border-white/10 p-5 flex flex-col shadow-2xl z-10"
+              className="absolute right-0 top-0 bottom-0 w-84 bg-bg-secondary dark:bg-[#121422] border-l border-border-theme dark:border-white/10 p-5 flex flex-col shadow-2xl z-10 transition-colors"
             >
-              <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
-                <h3 className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2 font-mono">
-                  <LayoutGrid className="w-4 h-4 text-pink-400" /> BẢNG TIẾN TRÌNH ({answeredStats.answered}/{answeredStats.total})
+              <div className="flex items-center justify-between pb-3 border-b border-border-theme dark:border-white/10 mb-4">
+                <h3 className="text-xs font-black text-text-primary uppercase tracking-wider flex items-center gap-2 font-mono">
+                  <LayoutGrid className="w-4 h-4 text-accent-pink" /> BẢNG TIẾN TRÌNH ({answeredStats.answered}/{answeredStats.total})
                 </h3>
                 <button
                   onClick={() => setMobilePaletteOpen(false)}
-                  className="p-1 rounded-lg text-zinc-400 hover:text-white cursor-pointer"
+                  className="p-1 rounded-lg text-text-secondary hover:text-text-primary cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -2011,10 +2037,10 @@ export default function RealCombatExamPage() {
               {/* DANH SÁCH 3 PHẦN THI TRÊN MOBILE */}
               <div className="flex-1 overflow-y-auto space-y-4 pr-1">
                 {partStats.map((part) => (
-                  <div key={part.id} className="rounded-2xl border border-white/10 p-3.5 bg-white/[0.02]">
+                  <div key={part.id} className="rounded-2xl border border-border-theme dark:border-white/10 p-3.5 bg-bg-tertiary/50 dark:bg-white/[0.02]">
                     <div className="flex items-center justify-between mb-2.5">
-                      <span className="text-xs font-black text-pink-400 uppercase font-mono">{part.title}: {part.shortName}</span>
-                      <span className="text-[11px] font-mono text-zinc-400">{part.answeredCount}/{part.total}</span>
+                      <span className="text-xs font-black text-accent-pink uppercase font-mono">{part.title}: {part.shortName}</span>
+                      <span className="text-[11px] font-mono text-text-secondary">{part.answeredCount}/{part.total}</span>
                     </div>
                     <div className="grid grid-cols-5 gap-1.5">
                       {part.questions.map((q) => {
@@ -2040,8 +2066,8 @@ export default function RealCombatExamPage() {
                               isCurrent
                                 ? 'bg-pink-500 border-pink-400 text-white font-black shadow-md'
                                 : isAnswered
-                                  ? 'bg-emerald-500/30 border-emerald-500/50 text-emerald-300'
-                                  : 'bg-white/5 border-white/10 text-zinc-400'
+                                  ? 'bg-emerald-500/20 dark:bg-emerald-500/30 border-emerald-500/50 text-emerald-700 dark:text-emerald-300 font-bold'
+                                  : 'bg-bg-tertiary dark:bg-white/5 border-border-theme dark:border-white/10 text-text-secondary hover:text-text-primary'
                             }`}
                           >
                             {idx + 1}
@@ -2054,14 +2080,14 @@ export default function RealCombatExamPage() {
                 ))}
               </div>
 
-              <div className="pt-4 border-t border-white/10 mt-3">
+              <div className="pt-4 border-t border-border-theme dark:border-white/10 mt-3">
                 <button
                   type="button"
                   onClick={() => {
                     setMobilePaletteOpen(false);
                     setShowSubmitModal(true);
                   }}
-                  className="w-full py-3 bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 text-white text-xs font-black rounded-xl uppercase tracking-wider cursor-pointer shadow-lg shadow-pink-500/20"
+                  className="w-full py-3 bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 text-white font-black text-xs rounded-xl shadow-md cursor-pointer"
                 >
                   Nộp Bài Thi
                 </button>
@@ -2530,15 +2556,17 @@ export default function RealCombatExamPage() {
                 </div>
               </div>
 
-              <div className="overflow-auto max-h-[78vh] w-full flex items-center justify-center p-4 bg-[#12141f] rounded-3xl border border-white/15 shadow-2xl">
-                <img 
-                  src={zoomedImage}
-                  alt="Enlarged diagram"
-                  style={{ transform: `scale(${imageZoomLevel})`, transformOrigin: 'center center' }}
-                  className="max-w-full max-h-[72vh] object-contain transition-transform duration-200 rounded-xl"
-                />
+              <div className="overflow-auto max-h-[78vh] w-full flex items-center justify-center p-4 bg-bg-secondary dark:bg-[#12141f] rounded-3xl border border-border-theme dark:border-white/15 shadow-2xl">
+                {zoomedImage && (
+                  <img 
+                    src={zoomedImage}
+                    alt="Enlarged diagram"
+                    style={{ transform: `scale(${imageZoomLevel})`, transformOrigin: 'center center' }}
+                    className="max-w-full max-h-[72vh] object-contain transition-transform duration-200 rounded-xl"
+                  />
+                )}
               </div>
-              <p className="text-[11px] text-zinc-400 mt-2 font-mono">
+              <p className="text-[11px] text-text-secondary mt-2 font-mono">
                 💡 Nhấn ESC hoặc click ra ngoài để đóng • Kéo cuộn để quan sát các thông số nhỏ
               </p>
             </div>
