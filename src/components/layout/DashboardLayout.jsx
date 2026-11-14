@@ -35,6 +35,7 @@ export default function DashboardLayout({ children }) {
   const setActiveLab = useAppStore((state) => state.setActiveLab);
   const isSidebarOpen = useAppStore((state) => state.isSidebarOpen);
   const toggleSidebar = useAppStore((state) => state.toggleSidebar);
+  const isExamPlaying = useAppStore((state) => state.isExamPlaying);
 
   const pathname = usePathname();
   const router = useRouter();
@@ -659,7 +660,7 @@ export default function DashboardLayout({ children }) {
   const isAdminRoute = pathname?.startsWith('/admin');
   const isHome = pathname === '/';
   const isLabRoute = pathname?.startsWith('/phong-lab');
-  const isPlaying = arenaState.status === 'playing' || arenaState.status === 'matching' || !!activeLab || isAdminRoute || isLabRoute;
+  const isPlaying = arenaState.status === 'playing' || arenaState.status === 'matching' || !!activeLab || isAdminRoute || isLabRoute || isExamPlaying;
   const showFloatingShutter = !isPlaying && pathname !== '/story' && pathname !== '/auth';
 
   const bgImage = personalization?.bgImage || '';

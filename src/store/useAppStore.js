@@ -17,6 +17,10 @@ export const useAppStore = create((set) => ({
   toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
   setSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
 
+  // Exam Fullscreen Mode State (Chế độ thi thực chiến Zen mode - ẩn toàn bộ sidebar/header toàn cục)
+  isExamPlaying: false,
+  setIsExamPlaying: (isExamPlaying) => set({ isExamPlaying }),
+
   // Auth State
   user: null,
   setUser: (user) => set({ user }),
