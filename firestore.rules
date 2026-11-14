@@ -23,10 +23,13 @@ service cloud.firestore {
         (
           request.auth.token.get('email', '').lower() == 'admin123@gmail.com' ||
           request.auth.token.get('email', '').lower() == 'admin@stemhub.edu.vn' ||
+          request.auth.token.get('email', '').lower() == 'admin@gmail.com' ||
           request.auth.token.get('email', '').lower() == 'hohoanganh20092021@gmail.com'
         ) ||
         request.auth.token.get('role', '') == 'admin' ||
-        request.auth.token.get('admin', false) == true
+        request.auth.token.get('admin', false) == true ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'admin')
       );
     }
 
@@ -105,7 +108,7 @@ service cloud.firestore {
       allow create: if isAuthenticated() && request.auth.uid == userId && 
                     (!('role' in request.resource.data) || request.resource.data.role == 'student' || request.resource.data.role == 'user');
       allow update: if isAdmin() || (isOwner(userId) && isAllowedUserUpdate()) || isFriendInteraction();
-      allow delete: if isOwner(userId);
+      allow delete: if isOwner(userId) || isAdmin();
 
       // Bộ nhớ cá nhân của học sinh (ai memories)
       match /memories/{memId} {

@@ -6,7 +6,7 @@ import { collection, getDocs, doc, updateDoc, deleteDoc, query, where, getDoc } 
 import { 
   Search, SlidersHorizontal, ShieldAlert, ShieldCheck, 
   Trash2, X, Trophy, Star, ChevronLeft, ChevronRight, User, Mail, Calendar, Eye,
-  Sparkles, Award, Download
+  Sparkles, Award, Download, Loader2, AlertTriangle, CheckCircle
 } from 'lucide-react';
 import { AvatarFrame } from '@/components/atoms/AvatarFrame';
 import STEMAvatarSVG from '@/components/atoms/STEMAvatarSVG';
@@ -32,6 +32,7 @@ export default function StudentManagement() {
   // Delete Confirm Modal state
   const [deleteConfirmUser, setDeleteConfirmUser] = useState(null);
   const [confirmInputName, setConfirmInputName] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Crystal modification state
   const [crystalAmount, setCrystalAmount] = useState('50');
@@ -270,34 +271,48 @@ export default function StudentManagement() {
 
   // Thực thi xóa tài khoản (Bước 2)
   const handleExecuteDelete = async () => {
-    if (!deleteConfirmUser) return;
+    if (!deleteConfirmUser || isDeleting) return;
     playSound.click();
-    
-    if (confirmInputName.trim() !== deleteConfirmUser.displayName) {
-      alert("Tên học sinh nhập vào không khớp. Vui lòng thử lại.");
+
+    const expectedName = (deleteConfirmUser.displayName || deleteConfirmUser.name || deleteConfirmUser.email || '').trim();
+    const input = confirmInputName.trim();
+    const isMatch = (input.toLowerCase() === expectedName.toLowerCase()) || 
+                    (input.toUpperCase() === 'XOA') || 
+                    (input.toUpperCase() === 'XÓA') || 
+                    (input.toUpperCase() === 'DELETE');
+
+    if (!isMatch) {
+      alert(`Tên học sinh nhập vào không khớp. Vui lòng nhập đúng "${expectedName}" hoặc gõ "XOA" để xác nhận.`);
       return;
     }
 
     try {
+      setIsDeleting(true);
+
       // Xóa tài liệu Firestore
       await deleteDoc(doc(db, 'users', deleteConfirmUser.id));
-      
+
       await logAdminAction(
         "DELETE_USER",
         deleteConfirmUser.id,
-        deleteConfirmUser.displayName || deleteConfirmUser.email || "Ẩn danh",
-        "Xóa tài khoản học sinh vĩnh viễn khỏi hệ thống"
+        expectedName,
+        `Xóa tài khoản học sinh vĩnh viễn (ID: ${deleteConfirmUser.id})`
       );
 
       // Cập nhật state
-      setStudents(prev => prev.filter(s => s.id !== deleteConfirmUser.id));
-      if (selectedStudent && selectedStudent.id === deleteConfirmUser.id) {
+      const deletedId = deleteConfirmUser.id;
+      setStudents(prev => prev.filter(s => s.id !== deletedId));
+      if (selectedStudent && selectedStudent.id === deletedId) {
         setSelectedStudent(null);
       }
       setDeleteConfirmUser(null);
       playSound.success();
+      alert(`✅ Đã xóa vĩnh viễn tài khoản của học sinh "${expectedName}" thành công!`);
     } catch (err) {
       console.error("Lỗi khi xóa tài khoản:", err);
+      alert(`❌ Không thể xóa tài khoản: ${err.message || 'Lỗi phân quyền Firestore hoặc tài khoản không tồn tại.'}`);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -454,12 +469,22 @@ export default function StudentManagement() {
                         </AvatarFrame>
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-white text-xs font-bold font-mono leading-tight">
-                          {student.displayName || 'Chưa đặt tên'}
+                        <span className="text-white text-xs font-bold font-mono leading-tight flex items-center gap-1.5">
+                          <span>{student.displayName || student.name || 'Chưa đặt tên'}</span>
+                          {!student.createdAt && (
+                            <span className="px-1.5 py-0.2 rounded text-[8px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                              Chưa rõ ngày tạo
+                            </span>
+                          )}
                         </span>
-                        <span className="text-[9px] text-pink-500 font-bold mt-0.5 leading-none">
-                          {getTitleLabel(student.personalization?.activeTitle || 'apprentice')}
-                        </span>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[9px] text-pink-500 font-bold leading-none">
+                            {getTitleLabel(student.personalization?.activeTitle || 'apprentice')}
+                          </span>
+                          <span className="text-[9px] text-zinc-500 font-mono leading-none">
+                            ID: {student.id.slice(0, 8)}...
+                          </span>
+                        </div>
                       </div>
                     </td>
 
@@ -874,50 +899,134 @@ export default function StudentManagement() {
       })()}
 
       {/* DELETE CONFIRM MODAL (2-step verification) */}
-      {deleteConfirmUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="w-full max-w-md bg-[#0c0d14] border border-rose-500/20 rounded-3xl overflow-hidden shadow-2xl p-6 relative animate-in zoom-in-95 duration-150 space-y-5">
-            <div className="flex items-center gap-2.5 text-rose-500">
-              <ShieldAlert className="w-6 h-6 filter drop-shadow-[0_0_8px_rgba(244,63,94,0.3)] animate-bounce" />
-              <h3 className="text-base font-black uppercase tracking-wider font-mono">Xác thực xóa tài khoản</h3>
-            </div>
-            
-            <p className="text-xs text-zinc-400 font-semibold leading-relaxed">
-              Bạn đang thực hiện thao tác xóa vĩnh viễn tài khoản của học sinh <strong className="text-white">"{deleteConfirmUser.displayName}"</strong>. Mọi chỉ số ELO, EXP, lịch sử trận đấu và Chibi avatar sẽ bị hủy và KHÔNG THỂ KHÔI PHỤC.
-            </p>
+      {deleteConfirmUser && (() => {
+        const expectedName = (deleteConfirmUser.displayName || deleteConfirmUser.name || deleteConfirmUser.email || '').trim();
+        const input = confirmInputName.trim();
+        const isMatch = (input.toLowerCase() === expectedName.toLowerCase()) || 
+                        (input.toUpperCase() === 'XOA') || 
+                        (input.toUpperCase() === 'XÓA') || 
+                        (input.toUpperCase() === 'DELETE');
 
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-zinc-550 uppercase tracking-widest font-mono">
-                Nhập lại tên học sinh để xác nhận:
-              </label>
-              <input
-                type="text"
-                value={confirmInputName}
-                onChange={(e) => setConfirmInputName(e.target.value)}
-                placeholder={deleteConfirmUser.displayName}
-                className="w-full bg-[#08090d] border border-[#1f2235] focus:border-rose-500/50 rounded-xl py-2.5 px-4 text-xs font-mono font-bold text-white focus:outline-none placeholder-zinc-700 transition-all"
-              />
-            </div>
-
-            <div className="flex items-center gap-3 pt-2">
-              <button
-                onClick={handleExecuteDelete}
-                disabled={confirmInputName.trim() !== deleteConfirmUser.displayName}
-                className="flex-1 py-3 bg-rose-500 hover:bg-rose-600 disabled:opacity-40 disabled:pointer-events-none text-white text-xs font-bold rounded-xl transition-all cursor-pointer active:scale-95 shadow-lg font-mono uppercase"
-              >
-                Xác nhận XÓA vĩnh viễn
-              </button>
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-in fade-in duration-150">
+            <div className="w-full max-w-lg bg-[#0c0d14] border border-rose-500/30 rounded-3xl overflow-hidden shadow-2xl p-6 relative animate-in zoom-in-95 duration-150 space-y-5">
               
-              <button
-                onClick={() => setDeleteConfirmUser(null)}
-                className="px-5 py-3 bg-zinc-800 hover:bg-zinc-750 text-zinc-300 hover:text-white text-xs font-bold rounded-xl transition-all cursor-pointer active:scale-95 border border-zinc-700/60"
-              >
-                Hủy bỏ
-              </button>
+              {/* Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-rose-500/20">
+                <div className="flex items-center gap-2.5 text-rose-500">
+                  <ShieldAlert className="w-6 h-6 filter drop-shadow-[0_0_8px_rgba(244,63,94,0.4)] animate-bounce" />
+                  <h3 className="text-base font-black uppercase tracking-wider font-mono">Xác thực xóa tài khoản</h3>
+                </div>
+                <button
+                  onClick={() => !isDeleting && setDeleteConfirmUser(null)}
+                  disabled={isDeleting}
+                  className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              
+              {/* Chi tiết tài khoản cần xóa để phân biệt trùng tên */}
+              <div className="bg-[#12141f] border border-white/10 rounded-2xl p-4 space-y-2.5 text-xs">
+                <div className="text-[10px] uppercase font-mono text-zinc-400 font-bold tracking-wider">
+                  Thông tin tài khoản sắp xóa:
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3 text-zinc-300">
+                  <div>
+                    <span className="text-zinc-500 block text-[10px]">Họ và tên:</span>
+                    <strong className="text-white text-sm font-mono">{expectedName}</strong>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500 block text-[10px]">Email:</span>
+                    <span className="font-mono text-zinc-300">{deleteConfirmUser.email || 'Ẩn danh / Chưa có email'}</span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500 block text-[10px]">Mã ID người dùng (UID):</span>
+                    <span className="font-mono text-amber-300 text-[11px] select-all bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+                      {deleteConfirmUser.id}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500 block text-[10px]">Ngày tham gia:</span>
+                    {deleteConfirmUser.createdAt ? (
+                      <span className="font-mono text-emerald-400">{formatDate(deleteConfirmUser.createdAt)}</span>
+                    ) : (
+                      <span className="font-mono text-rose-400 font-bold bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/20">
+                        Chưa rõ (Tài khoản rác / Trùng lặp)
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-white/5 flex items-center gap-4 text-[11px] text-zinc-400 font-mono">
+                  <span>Cấp độ: <strong className="text-cyan-400">Lv {deleteConfirmUser.stats?.level || 1}</strong></span>
+                  <span>ELO: <strong className="text-emerald-400">{deleteConfirmUser.stats?.elo || 0}</strong></span>
+                  <span>EXP: <strong className="text-pink-400">{deleteConfirmUser.stats?.exp || 0}</strong></span>
+                </div>
+              </div>
+
+              <p className="text-xs text-rose-400/90 font-medium leading-relaxed bg-rose-500/10 border border-rose-500/20 rounded-xl p-3">
+                ⚠️ Cảnh báo: Thao tác này sẽ xóa vĩnh viễn tài liệu học sinh trên hệ thống. Mọi dữ liệu ELO, lịch sử trận đấu, nhân vật Chibi và bài thi sẽ bị hủy và KHÔNG THỂ KHÔI PHỤC.
+              </p>
+
+              {/* Input xác nhận */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest font-mono">
+                    Nhập lại tên học sinh hoặc gõ <span className="text-rose-400">XOA</span>:
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmInputName(expectedName)}
+                    className="text-[10px] text-cyan-400 hover:text-cyan-300 underline font-mono cursor-pointer"
+                  >
+                    Điền nhanh tên
+                  </button>
+                </div>
+                
+                <input
+                  type="text"
+                  value={confirmInputName}
+                  onChange={(e) => setConfirmInputName(e.target.value)}
+                  placeholder={`Nhập "${expectedName}" hoặc "XOA"`}
+                  disabled={isDeleting}
+                  className="w-full bg-[#08090d] border border-[#1f2235] focus:border-rose-500 rounded-xl py-2.5 px-4 text-xs font-mono font-bold text-white focus:outline-none placeholder-zinc-700 transition-all"
+                />
+              </div>
+
+              {/* Nút hành động */}
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  onClick={handleExecuteDelete}
+                  disabled={!isMatch || isDeleting}
+                  className="flex-1 py-3 bg-rose-500 hover:bg-rose-600 disabled:opacity-40 disabled:pointer-events-none text-white text-xs font-bold rounded-xl transition-all cursor-pointer active:scale-95 shadow-lg font-mono uppercase flex items-center justify-center gap-2"
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Đang xử lý xóa...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      <span>Xác nhận XÓA vĩnh viễn</span>
+                    </>
+                  )}
+                </button>
+                
+                <button
+                  onClick={() => setDeleteConfirmUser(null)}
+                  disabled={isDeleting}
+                  className="px-5 py-3 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 text-zinc-300 hover:text-white text-xs font-bold rounded-xl transition-all cursor-pointer active:scale-95 border border-zinc-700"
+                >
+                  Hủy bỏ
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
