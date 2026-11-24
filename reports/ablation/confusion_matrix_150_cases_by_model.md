@@ -30,16 +30,16 @@
 
 ### 2. BẢNG SO SÁNH TRỰC DIỆN CHỈ SỐ HIỆU NĂNG GIỮA 2 MÔ HÌNH
 
-| Chỉ số Đánh giá | Mô hình 1: Base Model (No-RAG) | Mô hình 2: STEM-RAG Guard | Chênh lệch Cải tiến ($\Delta$) | Ý nghĩa thực tiễn GDPT 2018 |
+| Chỉ số đánh giá | Mô hình 1: Base (No-RAG) | Mô hình 2: STEM-RAG Guard | Chênh lệch cải tiến ($\Delta$) | Ý nghĩa GDPT 2018 |
 | :--- | :---: | :---: | :---: | :--- |
-| **Độ chính xác (Accuracy)** | **83.33%**<br>[76.55% – 88.45%] | **93.33%**<br>[88.16% – 96.34%] | **+10.00%** | Mức độ tin cậy tổng thể khi phục vụ học sinh THPT |
-| **Độ chuẩn xác (Precision)** | 91.2% | **96.09%** | **+4.89%** | Tránh đưa ra các lời giải sai lệch / ngụy biện |
-| **Độ nhạy / Thu hồi (Recall)** | 89.06% | **96.09%** | **+7.03%** | Không bỏ sót hoặc từ chối oan câu hỏi học sinh |
-| **Độ đặc hiệu (Specificity)** | 50% | **77.27%** | **+27.27%** | Khả năng phát hiện bẫy đề thi và ngộ nhận khái niệm |
-| **Điểm F1-Score** | 90.12% | **96.09%** | **+5.97%** | Điểm cân bằng hài hòa giữa Precision và Recall |
-| **Hệ số Cohen's Kappa ($\kappa$)** | 0.3697 | **0.7337** | **+0.3640** | Mức độ đồng thuận với chuẩn SGK ngoài yếu tố may rủi |
-| **Tỷ lệ đúng Đáp án cuối cùng** | 61.33% | **96.67%** | **+35.34%** | Số học, công thức và phương án chọn A/B/C/D |
-| **Tỷ lệ đúng Trình bày logic** | 74% | **88.67%** | **+14.67%** | Các bước suy luận và văn phong gợi mở Socratic |
+| **Độ chính xác (Accuracy)** | **83.33%**<br>[76.55% – 88.45%] | **93.33%**<br>[88.16% – 96.34%] | **+10.00%** | Tỷ lệ đồng thuận chung với chuẩn kiến thức SGK |
+| **Độ chuẩn xác (Precision)** | **91.2%** | **96.09%** | **+4.89%** | Giảm thiểu tối đa ảo tưởng kiến thức (Hallucination) |
+| **Độ nhạy / Thu hồi (Recall)** | **89.06%** | **96.09%** | **+7.03%** | Không từ chối nhầm câu hỏi chính đáng của học sinh |
+| **Độ đặc hiệu (Specificity)** | **50%** | **77.27%** | **+27.27%** | Năng lực phát hiện cạm bẫy và từ chối an toàn |
+| **F1-Score** | **90.12%**<br>*(Đạt: 90.12% / Chưa đạt: 46.81%)* | **96.09%**<br>*(Đạt: 96.09% / Chưa đạt: 77.27%)* | **+5.97%**<br>*(+30.46% ở lớp bắt bẫy)* | Cân bằng hài hòa giữa độ chuẩn xác và độ bao quát |
+| **Cohen's Kappa ($\kappa$)** | **0.3697** | **0.7337** | **+0.3640** | Đồng thuận thực chất loại trừ yếu tố may rủi ngẫu nhiên |
+| **Đúng Đáp án cuối cùng** | **61.33%** (92/150) | **96.67%** (145/150) | **+35.34%** | Đúng kết quả số học, công thức hoặc phương án A/B/C/D |
+| **Đúng Trình bày logic** | **74%** (111/150) | **88.67%** (133/150) | **+14.67%** | Mạch lạc, suy luận sư phạm, không giải hộ từ A đến Z |
 
 ---
 

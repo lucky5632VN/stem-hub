@@ -294,18 +294,58 @@ def create_document():
     # Bảng số liệu Ma trận nhầm lẫn & Chỉ số định lượng 150 ca
     add_bullet("Bảng đối chiếu định lượng Ma trận nhầm lẫn trên 150 ca kiểm thử độc lập: ", "Thực nghiệm trên 150 ca chuẩn GDPT 2018 (Toán: 40, Vật lý: 38, Hóa học: 38, Sinh học: 34), tách biệt hoàn toàn khỏi kho tri thức SGK:")
 
+    # Ma trận 2x2 CÓ RAG
+    add_p("• Phân bố Ma trận 2x2 khi CÓ RAG (STEM-RAG Guard — TP=123, FN=5, FP=5, TN=17):", bold=True, size=11, space_before=2, space_after=2)
+    grid_rag = doc.add_table(rows=3, cols=4)
+    grid_rag.alignment = WD_TABLE_ALIGNMENT.CENTER
+    grid_rag_headers = ["Ground Truth \\ AI Dự Đoán", "AI: ĐẠT (Positive)", "AI: CHƯA ĐẠT (Negative)", "Tổng Hàng (SGK)"]
+    grid_rag_data = [
+        ["ĐẠT (Positive)", "TP = 123 (Đồng thuận Đạt)", "FN = 5 (AI từ chối thừa)", "128 ca"],
+        ["CHƯA ĐẠT (Negative)", "FP = 5 (AI ảo tưởng / Sót lỗi)", "TN = 17 (Đồng thuận bắt lỗi)", "22 ca"]
+    ]
+    for col_idx, h_text in enumerate(grid_rag_headers):
+        cell = grid_rag.cell(0, col_idx)
+        cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r = cell.paragraphs[0].add_run(h_text)
+        r.font.name = 'Times New Roman'
+        r.font.size = Pt(10)
+        r.bold = True
+        cell._element.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="EAECEF"/>'.format(nsdecls('w'))))
+    for row_idx, row_vals in enumerate(grid_rag_data, start=1):
+        for col_idx, val in enumerate(row_vals):
+            cell = grid_rag.cell(row_idx, col_idx)
+            cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT if col_idx == 0 else WD_ALIGN_PARAGRAPH.CENTER
+            r = cell.paragraphs[0].add_run(val)
+            r.font.name = 'Times New Roman'
+            r.font.size = Pt(9.5)
+            if col_idx == 0:
+                r.bold = True
+    for row in grid_rag.rows:
+        for cell in row.cells:
+            tcPr = cell._element.get_or_add_tcPr()
+            borders = parse_xml(
+                r'<w:tcBorders {}><w:top w:val="single" w:sz="4" w:space="0" w:color="CCCCCC"/>'
+                r'<w:bottom w:val="single" w:sz="4" w:space="0" w:color="CCCCCC"/>'
+                r'<w:left w:val="none"/><w:right w:val="none"/></w:tcBorders>'.format(nsdecls('w'))
+            )
+            tcPr.append(borders)
+
+    add_p("", space_before=2, space_after=2)
+
+    # Bảng so sánh 8 chỉ số trực diện
+    add_p("• Bảng so sánh đối đầu trực diện 8 chỉ số hiệu năng 2 mô hình trên 150 ca:", bold=True, size=11, space_before=2, space_after=2)
     table_150 = doc.add_table(rows=9, cols=5)
     table_150.alignment = WD_TABLE_ALIGNMENT.CENTER
-    headers_150 = ["Chỉ số Đánh giá", "Base Model (No-RAG)", "STEM-RAG Guard", "Chênh lệch (Δ)", "Ý nghĩa thực tiễn GDPT 2018"]
+    headers_150 = ["Chỉ số đánh giá", "Mô hình 1: Base (No-RAG)", "Mô hình 2: STEM-RAG Guard", "Chênh lệch cải tiến (Δ)", "Ý nghĩa GDPT 2018"]
     data_150 = [
-        ["Ma trận nhầm lẫn (TP / FN / FP / TN)", "114 / 14 / 11 / 11", "123 / 5 / 5 / 17", "+9 TP, -6 FP", "Giảm 54.5% lỗi ảo giác, tăng bắt lỗi bẫy"],
-        ["Độ chính xác (Accuracy)", "83.33%", "93.33%", "+10.00%", "Độ tin cậy tổng thể khi phục vụ học sinh THPT"],
-        ["Độ chuẩn xác (Precision)", "91.20%", "96.09%", "+4.89%", "Hạn chế tối đa đưa ra đáp án sai lệch, ngụy biện"],
-        ["Độ nhạy / Thu hồi (Recall)", "89.06%", "96.09%", "+7.03%", "Không từ chối oan câu hỏi chính đáng của học sinh"],
-        ["Độ đặc hiệu (Specificity)", "50.00%", "77.27%", "+27.27%", "Phát hiện và cảnh báo cạm bẫy, ngoài SGK"],
-        ["Điểm F1-Score", "90.12%", "96.09%", "+5.97%", "Cân bằng hài hòa giữa độ chuẩn xác và độ bao quát"],
-        ["Hệ số Cohen's Kappa (κ)", "0.3697", "0.7337", "+0.3640", "Đồng thuận cao với chuẩn SGK ngoài yếu tố may rủi"],
-        ["Tỷ lệ đúng Đáp án cuối cùng", "61.33%", "96.67%", "+35.34%", "Số học, công thức và phương án chọn A/B/C/D"]
+        ["Độ chính xác (Accuracy)", "83.33%\n[76.55% – 88.45%]", "93.33%\n[88.16% – 96.34%]", "+10.00%", "Tỷ lệ đồng thuận chung với chuẩn kiến thức SGK"],
+        ["Độ chuẩn xác (Precision)", "91.2%", "96.09%", "+4.89%", "Giảm thiểu tối đa ảo tưởng kiến thức (Hallucination)"],
+        ["Độ nhạy / Thu hồi (Recall)", "89.06%", "96.09%", "+7.03%", "Không từ chối nhầm câu hỏi chính đáng của học sinh"],
+        ["Độ đặc hiệu (Specificity)", "50%", "77.27%", "+27.27%", "Năng lực phát hiện cạm bẫy và từ chối an toàn"],
+        ["F1-Score", "90.12%\n(Đạt: 90.12% / Chưa: 46.81%)", "96.09%\n(Đạt: 96.09% / Chưa: 77.27%)", "+5.97%", "Cân bằng hài hòa giữa độ chuẩn xác và độ bao quát"],
+        ["Cohen's Kappa (κ)", "0.3697", "0.7337", "+0.3640", "Đồng thuận thực chất loại trừ yếu tố may rủi ngẫu nhiên"],
+        ["Đúng Đáp án cuối cùng", "61.33% (92/150)", "96.67% (145/150)", "+35.34%", "Đúng kết quả số học, công thức hoặc phương án A/B/C/D"],
+        ["Đúng Trình bày logic", "74% (111/150)", "88.67% (133/150)", "+14.67%", "Mạch lạc, suy luận sư phạm, không giải hộ từ A đến Z"]
     ]
 
     for col_idx, h_text in enumerate(headers_150):
@@ -313,7 +353,7 @@ def create_document():
         cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
         r = cell.paragraphs[0].add_run(h_text)
         r.font.name = 'Times New Roman'
-        r.font.size = Pt(10.5)
+        r.font.size = Pt(10)
         r.bold = True
         cell._element.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="EAECEF"/>'.format(nsdecls('w'))))
 
@@ -323,7 +363,7 @@ def create_document():
             cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT if col_idx == 0 or col_idx == 4 else WD_ALIGN_PARAGRAPH.CENTER
             r = cell.paragraphs[0].add_run(val)
             r.font.name = 'Times New Roman'
-            r.font.size = Pt(10)
+            r.font.size = Pt(9.5)
             if col_idx == 0:
                 r.bold = True
 
@@ -396,9 +436,14 @@ def create_document():
     add_bullet("Kết luận thực nghiệm: ", "Qua đối chiếu thực nghiệm, mỗi thành phần trong kiến trúc đa tầng của STEM HUB đều đảm nhiệm một vai trò chuyên biệt và bổ trợ lẫn nhau: các quy tắc xác định xử lý tối ưu các bài toán công thức có cấu trúc cố định với độ trễ cực thấp; mô hình học máy và AI giải quyết xuất sắc bài toán hiểu ngữ cảnh tự nhiên và ngôn ngữ của học sinh; và hệ thống RAG đóng vai trò là chiếc mỏ neo kiểm soát chất lượng, neo chặt mọi phản hồi của AI vào học liệu chuẩn Sách giáo khoa GDPT 2018.")
 
     output_path = 'MẪU HỒ SƠ CẢI TIẾN CHẶNG 1.docx'
-    doc.save(output_path)
+    try:
+        doc.save(output_path)
+        print(f"File saved successfully to {output_path}")
+    except PermissionError:
+        alt_path = 'MẪU HỒ SƠ CẢI TIẾN CHẶNG 1_MOI.docx'
+        doc.save(alt_path)
+        print(f"Lưu ý: File '{output_path}' đang được mở trong Word. Đã lưu bản cập nhật vào '{alt_path}'.")
     shutil.rmtree('temp_media', ignore_errors=True)
-    print(f"File saved successfully to {output_path}")
 
 if __name__ == '__main__':
     create_document()

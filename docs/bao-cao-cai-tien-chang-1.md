@@ -66,30 +66,50 @@ Dữ liệu được trích xuất trực tiếp từ [reports/ablation/ml_vs_ru
 
 ### 2.4. Model 4: Thực nghiệm Ablation Bật RAG vs Không RAG trên 150 ca độc lập (Held-out Test Set) — Đo đóng góp riêng của AI và RAG (Ý Cải Tiến 3)
 - **Bản chất kỹ thuật**: Thử nghiệm đối đầu trực diện giữa 2 cấu hình mô hình trên cùng tập kiểm thử 150 ca chuẩn GDPT 2018 (Held-out Test Set):
-  1. *Mô hình 1 (Base Model / No-RAG)*: Gemini 3.5 Flash Lite hoạt động độc lập (dựa trên tham số nội tại, tắt RAG).
-  2. *Mô hình 2 (Full Pipeline / STEM-RAG Guard)*: Gemini 3.5 Flash Lite kết hợp truy xuất SGK chuẩn 2 tầng (Tier A/B Retrieval) và bộ lọc sư phạm Socratic Guard.
+  1. *Mô hình 1: Base (No-RAG)*: Gemini 3.5 Flash Lite hoạt động độc lập (dựa trên tham số nội tại, tắt RAG).
+  2. *Mô hình 2: STEM-RAG Guard*: Gemini 3.5 Flash Lite kết hợp truy xuất SGK chuẩn 2 tầng (Tier A/B Retrieval) và bộ lọc sư phạm Socratic Guard.
 - **Tách biệt dữ liệu kiểm thử (Held-out Split)**: Toàn bộ 150 ca này ($N = 150$, gồm Toán: 40, Vật lý: 38, Hóa học: 38, Sinh học: 34) hoàn toàn độc lập, không nằm trong tập ngữ cảnh huấn luyện hay sinh tài liệu (Corpus SGK).
-- **Bảng phân bố Ma trận nhầm lẫn (Confusion Matrix 2x2)**:
 
-| Cấu hình | True Positive (TP) | False Negative (FN) | False Positive (FP - Ảo tưởng) | True Negative (TN - Bắt lỗi) | Tổng số mẫu |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Mô hình 1: Base Model (No-RAG)** | 114 | 14 | 11 *(Ảo giác số liệu / Sót lỗi)* | 11 | $N = 150$ |
-| **Mô hình 2: STEM-RAG Guard (Có RAG)** | **123** *(+9)* | **5** *(-9)* | **5** *(Giảm 54.5% lỗi ảo giác)* | **17** *(+6, bắt bẫy tốt)* | $N = 150$ |
+#### A. Bảng Phân Bố Ma Trận Nhầm Lẫn 2x2 (Confusion Matrix Grid) trên 150 mẫu
 
-- **Bảng so sánh trực diện 8 chỉ số hiệu năng có kiểm định thống kê**:
+* **Ma trận 1: Khi CÓ RAG (STEM-RAG Guard — Truy xuất SGK chuẩn)**:
 
-| Chỉ số Đánh giá | Base Model (No-RAG) | STEM-RAG Guard (Có RAG) | Chênh lệch Cải tiến ($\Delta$) | Ý nghĩa thực tiễn GDPT 2018 |
+| Ground Truth (SGK / GV) \ Dự Đoán Của AI | AI: ĐẠT (Positive) | AI: CHƯA ĐẠT (Negative) | Tổng Hàng (Ground Truth) |
+| :--- | :---: | :---: | :---: |
+| **ĐẠT (Positive)** | **TP = 123** *(Đồng thuận Đạt)* | **FN = 5** *(AI từ chối thừa)* | 128 |
+| **CHƯA ĐẠT (Negative)** | **FP = 5** *(AI ảo tưởng / Sót lỗi)* | **TN = 17** *(Đồng thuận bắt lỗi)* | 22 |
+| **Tổng Cột (AI)** | 128 | 22 | **N = 150** |
+
+* **Ma trận 2: Khi KHÔNG CÓ RAG (Base Model — Tắt truy xuất SGK)**:
+
+| Ground Truth (SGK / GV) \ Dự Đoán Của AI | AI: ĐẠT (Positive) | AI: CHƯA ĐẠT (Negative) | Tổng Hàng (Ground Truth) |
+| :--- | :---: | :---: | :---: |
+| **ĐẠT (Positive)** | **TP = 114** *(Đồng thuận Đạt)* | **FN = 14** *(AI từ chối thừa)* | 128 |
+| **CHƯA ĐẠT (Negative)** | **FP = 11** *(AI ảo tưởng / Sót lỗi)* | **TN = 11** *(Đồng thuận bắt lỗi)* | 22 |
+| **Tổng Cột (AI)** | 125 | 25 | **N = 150** |
+
+* **Phân rã 2 tiêu chí chấm điểm**:
+  - *Tiêu chí 1: Đáp án cuối cùng (Độ chính xác kết quả số học / công thức chốt)*:
+    - **Có RAG**: **96.67% (145/150)**
+    - **Không RAG**: **61.33% (92/150)** $\rightarrow$ Bật RAG giúp tăng **+35.34%** độ chính xác đáp án chốt.
+  - *Tiêu chí 2: Trình bày & Lập luận (Mạch lạc, logic, đúng chuẩn sư phạm GDPT 2018)*:
+    - **Có RAG**: **88.67% (133/150)**
+    - **Không RAG**: **74% (111/150)** $\rightarrow$ Bật RAG giúp tăng **+14.67%** chất lượng sư phạm.
+
+#### B. Bảng So Sánh Đối Đầu Trực Diện Hiệu Năng 2 Mô Hình Trên 150 Ca
+
+| Chỉ số đánh giá | Mô hình 1: Base (No-RAG) | Mô hình 2: STEM-RAG Guard | Chênh lệch cải tiến ($\Delta$) | Ý nghĩa GDPT 2018 |
 | :--- | :---: | :---: | :---: | :--- |
-| **Độ chính xác (Accuracy)** | **83.33%**<br>[76.55% – 88.45%] | **93.33%**<br>[88.16% – 96.34%] | **+10.00%** | Độ tin cậy tổng thể khi phục vụ học sinh THPT |
-| **Độ chuẩn xác (Precision)** | 91.20% | **96.09%** | **+4.89%** | Tránh đưa ra các lời giải sai lệch / ngụy biện |
-| **Độ nhạy / Thu hồi (Recall)** | 89.06% | **96.09%** | **+7.03%** | Không bỏ sót hoặc từ chối oan câu hỏi học sinh |
-| **Độ đặc hiệu (Specificity)** | 50.00% | **77.27%** | **+27.27%** | Khả năng phát hiện bẫy đề thi và ngộ nhận khái niệm |
-| **Điểm F1-Score** | 90.12% | **96.09%** | **+5.97%** | Điểm cân bằng hài hòa giữa Precision và Recall |
-| **Hệ số Cohen's Kappa ($\kappa$)** | 0.3697 | **0.7337** | **+0.3640** | Mức độ đồng thuận với chuẩn SGK ngoài yếu tố may rủi |
-| **Tỷ lệ đúng Đáp án cuối cùng** | 61.33% | **96.67%** | **+35.34%** | Số học, công thức và phương án chọn A/B/C/D |
-| **Tỷ lệ đúng Trình bày logic** | 74.00% | **88.67%** | **+14.67%** | Các bước suy luận và văn phong gợi mở Socratic |
+| **Độ chính xác (Accuracy)** | **83.33%**<br>[76.55% – 88.45%] | **93.33%**<br>[88.16% – 96.34%] | **+10.00%** | Tỷ lệ đồng thuận chung với chuẩn kiến thức SGK |
+| **Độ chuẩn xác (Precision)** | **91.2%** | **96.09%** | **+4.89%** | Giảm thiểu tối đa ảo tưởng kiến thức (Hallucination) |
+| **Độ nhạy / Thu hồi (Recall)** | **89.06%** | **96.09%** | **+7.03%** | Không từ chối nhầm câu hỏi chính đáng của học sinh |
+| **Độ đặc hiệu (Specificity)** | **50%** | **77.27%** | **+27.27%** | Năng lực phát hiện cạm bẫy và từ chối an toàn |
+| **F1-Score** | **90.12%**<br>*(Đạt: 90.12% / Chưa đạt: 46.81%)* | **96.09%**<br>*(Đạt: 96.09% / Chưa đạt: 77.27%)* | **+5.97%**<br>*(+30.46% ở lớp bắt bẫy)* | Cân bằng hài hòa giữa độ chuẩn xác và độ bao quát |
+| **Cohen's Kappa ($\kappa$)** | **0.3697** | **0.7337** | **+0.3640** | Đồng thuận thực chất loại trừ yếu tố may rủi ngẫu nhiên |
+| **Đúng Đáp án cuối cùng** | **61.33%** (92/150) | **96.67%** (145/150) | **+35.34%** | Đúng kết quả số học, công thức hoặc phương án A/B/C/D |
+| **Đúng Trình bày logic** | **74%** (111/150) | **88.67%** (133/150) | **+14.67%** | Mạch lạc, suy luận sư phạm, không giải hộ từ A đến Z |
 
-- **Bảng đối chứng 3 tầng kiến trúc (Quy tắc vs AI vs AI+RAG)**:
+#### C. Bảng Đối Chứng 3 Tầng Kiến Trúc (Quy Tắc vs AI Thuần Túy vs AI + RAG)
 
 | Tiêu chí đối chứng | Hệ quy tắc xác định (Rule-based) | AI thuần túy (Không RAG - Base) | Hệ thống đa tầng (Tích hợp AI + RAG) |
 | :--- | :---: | :---: | :---: |
@@ -100,11 +120,12 @@ Dữ liệu được trích xuất trực tiếp từ [reports/ablation/ml_vs_ru
 | **Khả năng hiểu Teencode / Văn tự do** | Thất bại (< 25%) | Rất tốt (> 90%) | Rất tốt (> 90%) |
 | **Khả năng dẫn nguồn SGK cụ thể** | Không có | Bịa nguồn / Không trích dẫn | Chính xác bài, trang SGK GDPT 2018 |
 
-- **Phân tích ranh giới kỹ thuật giữa Hệ quy tắc và Học máy (Yêu cầu 3 của BGK)**:
-  1. *Vì sao cần Hệ quy tắc xác định (Rule-based)*: Với các tác vụ có cấu trúc cố định và định luật chuẩn tắc (cân bằng phản ứng hóa học, định luật khúc xạ ánh sáng Snell, quy luật di truyền phân ly độc lập Mendel), thuật toán giải tích đạt độ chính xác tuyệt đối (>95%), độ trễ cực thấp (<5ms) và hoàn toàn không bị ảo giác. Hệ thống luôn ưu tiên định tuyến các tác vụ này cho động cơ chuyên dụng.
-  2. *Vì sao bắt buộc cần Trí tuệ nhân tạo (Học máy / LLM)*: Hệ quy tắc xác định hoàn toàn bất lực trước sự đa dạng vô tận của ngôn ngữ tự nhiên, lỗi chính tả, câu hỏi mở và cách viết tắt (teencode) của học sinh (`pt`, `nhiet do`, `suy ra`, `k/cách`). Chỉ có mô hình ngôn ngữ lớn (LLM) mới có thể hiểu trọn vẹn ngữ cảnh, phân loại ý định và giải thích sư phạm linh hoạt theo phương pháp Socratic.
-  3. *Vì sao bắt buộc phải có RAG Guard*: Khi hoạt động độc lập (Base No-RAG), mô hình LLM mắc lỗi ảo giác nghiêm trọng (11/22 ca cạm bẫy bị sót lỗi, đúng đáp án chỉ đạt 61.33%). Khi kích hoạt RAG Guard, ngữ cảnh SGK đóng vai trò chiếc mỏ neo chân lý, nâng độ đúng đáp án lên **96.67%**, triệt tiêu ảo giác (FP giảm từ 11 xuống 5 ca) và cung cấp minh chứng trích dẫn chính xác bài, trang sách giáo khoa.
-- **Minh chứng trực quan trên giao diện hệ thống**: Toàn bộ kết quả đối chứng Ma trận nhầm lẫn 150 ca được tích hợp trực tiếp trên Web Portal (`ai.stem-hub.top/danh-gia-chuyen-mon`), cho phép chuyển đổi tương tác giữa các chế độ: *Tập tổng hợp CÓ RAG*, *Tập tổng hợp KHÔNG CÓ RAG*, *So Sánh Đối Đầu*, và *Mẫu Thẩm Định Thực Tế Của Giáo Viên*.
+#### D. Phân Tích Ranh Giới Kỹ Thuật Giữa Hệ Quy Tắc, AI và RAG (Giải Trình Yêu Cầu 3)
+1. **Vì sao bài toán công thức dùng Rule-based**: Đối với các tác vụ có cấu trúc cố định và định luật chuẩn tắc (cân bằng phản ứng hóa học, định luật khúc xạ ánh sáng Snell, quy luật di truyền phân ly độc lập Mendel), thuật toán giải tích đạt độ chính xác gần như tuyệt đối (>95%), độ trễ cực thấp (<5ms) và hoàn toàn không bị ảo giác. Hệ thống luôn ưu tiên định tuyến các tác vụ này cho động cơ chuyên dụng.
+2. **Vì sao bắt buộc cần Trí tuệ nhân tạo (Học máy / LLM)**: Hệ quy tắc xác định hoàn toàn bất lực trước sự đa dạng vô tận của ngôn ngữ tự nhiên, lỗi chính tả, câu hỏi mở và cách viết tắt (teencode) của học sinh (`pt`, `nhiet do`, `suy ra`, `k/cách`). Chỉ có mô hình ngôn ngữ lớn (LLM) mới có thể hiểu trọn vẹn ngữ cảnh, phân loại ý định và giải thích sư phạm linh hoạt theo phương pháp Socratic.
+3. **Vì sao bắt buộc phải có RAG Guard**: Khi hoạt động độc lập (Base No-RAG), mô hình LLM mắc lỗi ảo giác nghiêm trọng: 11/22 ca cạm bẫy bị sót lỗi (FP = 11), đúng đáp án chỉ đạt **61.33%**, F1 lớp bắt lỗi chỉ đạt **46.81%**. Khi kích hoạt RAG Guard, ngữ cảnh SGK đóng vai trò chiếc mỏ neo chân lý, nâng độ đúng đáp án lên **96.67%** (tăng +35.34%), triệt tiêu 54.5% lỗi ảo giác (FP giảm từ 11 xuống 5 ca), nâng F1 lớp bắt bẫy lên **77.27%** (tăng +30.46%) và cung cấp minh chứng trích dẫn chính xác bài, trang sách giáo khoa GDPT 2018.
+
+* **Minh chứng trực quan trên giao diện hệ thống**: Toàn bộ kết quả đối chứng Ma trận nhầm lẫn 150 ca được tích hợp trực tiếp trên Web Portal (`ai.stem-hub.top/danh-gia-chuyen-mon`), hỗ trợ 4 chế độ xem động: *Tập tổng hợp CÓ RAG*, *Tập tổng hợp KHÔNG CÓ RAG*, *So Sánh Đối Đầu*, và *Mẫu Thẩm Định Thực Tế Của Giáo Viên*.
 
 ---
 
