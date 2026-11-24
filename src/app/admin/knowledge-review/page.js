@@ -393,6 +393,13 @@ export default function KnowledgeReviewAdminPage() {
     }
 
     return true;
+  }).sort((a, b) => {
+    // 🛡️ Ưu tiên hàng đầu: Các câu hỏi do học sinh gửi băn khoăn (student_flagged_for_teacher) luôn hiển thị đầu tiên
+    const aIsFlag = a.sourceType === 'student_flagged_for_teacher';
+    const bIsFlag = b.sourceType === 'student_flagged_for_teacher';
+    if (aIsFlag && !bIsFlag) return -1;
+    if (!aIsFlag && bIsFlag) return 1;
+    return 0;
   });
 
   // Đếm theo phân quyền môn của người dùng hiện tại
@@ -402,6 +409,13 @@ export default function KnowledgeReviewAdminPage() {
       return authorizedSubjects.includes(itemSubj);
     }
     return true;
+  }).sort((a, b) => {
+    // 🛡️ Ưu tiên hàng đầu: Các câu hỏi do học sinh gửi băn khoăn (student_flagged_for_teacher) luôn hiển thị đầu tiên
+    const aIsFlag = a.sourceType === 'student_flagged_for_teacher';
+    const bIsFlag = b.sourceType === 'student_flagged_for_teacher';
+    if (aIsFlag && !bIsFlag) return -1;
+    if (!aIsFlag && bIsFlag) return 1;
+    return 0;
   });
 
   const verifiedCount = visibleList.filter(i => i.status === 'verified_by_teacher' || i.teacherVerified === true).length;
@@ -566,18 +580,18 @@ export default function KnowledgeReviewAdminPage() {
             }}
             className="px-3 py-2 bg-[#08090d] border border-[#1f2235] focus:border-cyan-400 rounded-xl text-xs text-zinc-200 focus:outline-hidden font-mono shrink-0 cursor-pointer"
           >
-            {isAdmin && <option value="all">Tất cả môn (Toàn quyền Admin)</option>}
+            {isAdmin && <option value="all">Tất cả môn ({visibleList.length} câu - Toàn quyền Admin)</option>}
             {(!isTeacher || isAdmin || authorizedSubjects.includes('toan')) && (
-              <option value="toan">📐 Môn Toán học</option>
+              <option value="toan">📐 Môn Toán học ({visibleList.filter(i => (i.subject || '').toLowerCase() === 'toan').length} câu)</option>
             )}
             {(!isTeacher || isAdmin || authorizedSubjects.includes('ly')) && (
-              <option value="ly">⚡ Môn Vật lý</option>
+              <option value="ly">⚡ Môn Vật lý ({visibleList.filter(i => (i.subject || '').toLowerCase() === 'ly').length} câu)</option>
             )}
             {(!isTeacher || isAdmin || authorizedSubjects.includes('hoa')) && (
-              <option value="hoa">🧪 Môn Hóa học</option>
+              <option value="hoa">🧪 Môn Hóa học ({visibleList.filter(i => (i.subject || '').toLowerCase() === 'hoa').length} câu)</option>
             )}
             {(!isTeacher || isAdmin || authorizedSubjects.includes('sinh')) && (
-              <option value="sinh">🧬 Môn Sinh học</option>
+              <option value="sinh">🧬 Môn Sinh học ({visibleList.filter(i => (i.subject || '').toLowerCase() === 'sinh').length} câu)</option>
             )}
           </select>
         </div>

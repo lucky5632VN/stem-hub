@@ -3,7 +3,7 @@ import path from 'path';
 import { NextResponse } from 'next/server';
 import { getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
 import { verifyFirebaseIdToken, getFirebaseAdmin } from '@/lib/firebaseAdmin';
-import { sampleForReviewer, generateMathTeacherBlindReviewSet } from '@/lib/reviewSampler';
+import { sampleForReviewer, generateMathTeacherBlindReviewSet, buildUnifiedSamplePool } from '@/lib/reviewSampler';
 
 export async function OPTIONS(request) {
   return new NextResponse(null, { status: 204, headers: getCorsHeaders(request) });
@@ -74,7 +74,7 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const requestedSubject = (searchParams.get('subject') || 'toan').toLowerCase();
   const seed = parseInt(searchParams.get('seed') || '2026', 10);
-  const sampleSize = parseInt(searchParams.get('sampleSize') || '20', 10);
+  const sampleSize = parseInt(searchParams.get('sampleSize') || '999', 10);
 
   // QUY TẮC BẢO MẬT: Chặn chấm ngoài môn được phân công
   if (reviewerType === 'teacher' && subjects.length > 0 && !subjects.includes(requestedSubject)) {
@@ -87,39 +87,24 @@ export async function GET(request) {
     );
   }
 
-  // 4. Rút mẫu làm mù (Tách bạch rõ rệt giữa đầu ra Gemini thật và 150 ca benchmark tổng hợp)
-  const source = searchParams.get('source') || '';
-  const ablationSummaryPath = path.resolve(process.cwd(), 'reports/ablation/ablation_summary.json');
-  const hasLiveAblation = fs.existsSync(ablationSummaryPath);
-  const useRealGeminiOutput = (source === 'real' || source === 'live' || source === 'gemini_real') || 
-                              (requestedSubject === 'toan' && hasLiveAblation && source !== 'synthetic' && source !== 'benchmark_150');
+  // 4. Rút mẫu làm mù: Ưu tiên câu hỏi học sinh gửi lên đầu, hỗ trợ xem toàn bộ câu hỏi
+  let samplingResult = sampleForReviewer({
+    subject: requestedSubject,
+    seed,
+    sampleSize,
+    reviewerUid: uid
+  });
 
-  let samplingResult;
-  if (useRealGeminiOutput && requestedSubject === 'toan') {
-    const blindSet = generateMathTeacherBlindReviewSet({
-      seed,
-      mathQuestionsCount: Math.min(10, Math.floor(sampleSize / 2) || 10),
-      datasetFilePath: 'reports/ablation/ablation_dataset_100.v1.4.1.json',
-      ablationSummaryPath: 'reports/ablation/ablation_summary.json'
-    });
-    samplingResult = {
-      seed: blindSet.seed,
-      subject: 'toan',
-      sampleSize: blindSet.totalItems,
-      totalAvailable: blindSet.totalItems,
-      sourceType: 'gemini_real_output',
-      samples: blindSet.blindedSamplesForTeacher
-    };
-  } else {
-    samplingResult = sampleForReviewer({
-      subject: requestedSubject,
-      seed,
-      sampleSize,
-      reviewerUid: uid
-    });
-  }
+  // 5. Thống kê số lượng câu hỏi hiện có của tất cả các môn
+  const fullPool = buildUnifiedSamplePool(true);
+  const subjectCounts = {
+    toan: fullPool.filter(i => i.subject === 'toan').length,
+    ly: fullPool.filter(i => i.subject === 'ly').length,
+    hoa: fullPool.filter(i => i.subject === 'hoa').length,
+    sinh: fullPool.filter(i => i.subject === 'sinh').length
+  };
 
-  // 5. Tra cứu danh sách mẫu người này đã chấm (để hiển thị tiến độ trên UI)
+  // 6. Tra cứu danh sách mẫu người này đã chấm (để hiển thị tiến độ trên UI)
   let reviewedSampleIds = [];
   const admin = getFirebaseAdmin();
   if (admin) {
@@ -142,6 +127,8 @@ export async function GET(request) {
     seed: samplingResult.seed,
     sampleSize: samplingResult.sampleSize,
     totalAvailable: samplingResult.totalAvailable,
+    subjectCounts,
+    studentFlagsCount: samplingResult.studentFlagsCount || 0,
     reviewedCount: reviewedSampleIds.length,
     reviewedSampleIds,
     samples: samplingResult.samples

@@ -50,8 +50,8 @@ function loadRawDataset(filePath) {
   return null;
 }
 
-export function buildUnifiedSamplePool() {
-  if (cachedPool) return cachedPool;
+export function buildUnifiedSamplePool(forceReload = false) {
+  if (cachedPool && !forceReload) return cachedPool;
 
   const pool = [];
 
@@ -101,25 +101,30 @@ export function buildUnifiedSamplePool() {
     });
   }
 
-  // Nguồn 3: 45 tri thức đang cách ly (Quarantined Learned Knowledge)
+  // Nguồn 3: Tri thức học sinh gửi & tri thức tự học (Quarantined / Pending Learned Knowledge)
   const quarantinedData = loadRawDataset('src/data/global-learned-knowledge.json') || [];
   quarantinedData.forEach((item, index) => {
     let subj = (item.subject || 'stem').toLowerCase();
     if (subj === 'stem') subj = 'toan'; // Map mặc định nếu là liên môn
+    const isStudentFlag = item.sourceType === 'student_flagged_for_teacher';
     pool.push({
-      sampleId: `learned_${subj}_${String(item.id || index + 1).toLowerCase()}`,
+      sampleId: String(item.id || `learned_${subj}_${index + 1}`).toLowerCase(),
       subject: subj,
-      sourceType: 'quarantined_knowledge',
-      grade: null,
-      topic: item.topic || 'Tri thức tự học học sinh (Đang cách ly)',
+      sourceType: isStudentFlag ? 'student_flagged_for_teacher' : 'quarantined_knowledge',
+      studentNote: item.studentNote || '',
+      studentName: item.studentName || 'Học sinh',
+      isStudentFlag: isStudentFlag,
+      grade: item.grade || 12,
+      topic: item.topic || (isStudentFlag ? 'Học sinh băn khoăn gửi giáo viên kiểm tra' : 'Tri thức tự học học sinh'),
       difficulty: 'Thực tế',
       question: item.query || '',
       systemResponse: item.answer || item.content || '',
-      referenceAnswer: 'Học sinh đề xuất / Hệ thống ghi nhận tự động (Cần giáo viên đối chiếu SGK)',
-      sgkReference: 'Chưa thẩm định SGK chuẩn (Đang cách ly)',
+      referenceAnswer: item.referenceAnswer || (isStudentFlag ? 'Học sinh gửi yêu cầu giáo viên kiểm tra và hiệu đính' : 'Học sinh đề xuất / Hệ thống ghi nhận tự động (Cần giáo viên đối chiếu SGK)'),
+      sgkReference: item.sgkReference || 'Cần giáo viên đối chiếu SGK chuẩn và hiệu đính',
       rawMeta: {
-        quarantined: true,
-        quarantineReason: item.quarantineReason
+        isStudentFlag,
+        studentNote: item.studentNote,
+        quarantined: item.quarantined
       }
     });
   });
@@ -164,9 +169,9 @@ export function cleanSystemResponse(text) {
  * @param {string} params.reviewerUid - UID của người chấm (để xáo thứ tự chống order bias)
  * @returns {Object} { seed, subject, sampleSize, samples }
  */
-export function sampleForReviewer({ subject, seed = 2026, sampleSize = 20, reviewerUid = '' }) {
+export function sampleForReviewer({ subject, seed = 2026, sampleSize = 999, reviewerUid = '' }) {
   const normSubj = (subject || 'toan').toLowerCase();
-  const fullPool = buildUnifiedSamplePool();
+  const fullPool = buildUnifiedSamplePool(true);
 
   // Lọc theo môn học
   const subjectPool = fullPool.filter(item => item.subject === normSubj);
@@ -176,15 +181,20 @@ export function sampleForReviewer({ subject, seed = 2026, sampleSize = 20, revie
       subject: normSubj,
       sampleSize: 0,
       totalAvailable: 0,
+      studentFlagsCount: 0,
       samples: []
     };
   }
 
-  // Rút mẫu ngẫu nhiên bằng PRNG cố định seed
-  const prng = createPrng(seed);
-  const poolCopy = [...subjectPool];
+  // 🛡️ ƯU TIÊN HÀNG ĐẦU: Các câu hỏi do học sinh gửi băn khoăn (student_flagged_for_teacher)
+  const studentFlags = subjectPool.filter(item => item.isStudentFlag || item.sourceType === 'student_flagged_for_teacher');
+  const normalPool = subjectPool.filter(item => !item.isStudentFlag && item.sourceType !== 'student_flagged_for_teacher');
 
-  // Fisher-Yates xáo trộn tập mẫu
+  // Rút mẫu ngẫu nhiên bằng PRNG cố định seed cho tập câu hỏi thông thường
+  const prng = createPrng(seed);
+  const poolCopy = [...normalPool];
+
+  // Fisher-Yates xáo trộn tập mẫu thông thường
   for (let i = poolCopy.length - 1; i > 0; i--) {
     const j = Math.floor(prng() * (i + 1));
     const temp = poolCopy[i];
@@ -192,19 +202,22 @@ export function sampleForReviewer({ subject, seed = 2026, sampleSize = 20, revie
     poolCopy[j] = temp;
   }
 
-  // Cắt lấy số lượng yêu cầu (Math teacher mặc định 30 mẫu)
-  const actualCount = Math.min(Math.max(1, sampleSize), poolCopy.length);
-  const selected = poolCopy.slice(0, actualCount);
+  // Số lượng lấy (mặc định lấy hết toàn bộ câu hỏi của môn nếu không giới hạn)
+  const maxNormalCount = sampleSize >= 900 ? poolCopy.length : Math.max(0, sampleSize - studentFlags.length);
+  const selectedNormal = poolCopy.slice(0, maxNormalCount > 0 ? maxNormalCount : poolCopy.length);
 
-  // Xáo thứ tự riêng cho từng Reviewer (Order Bias Mitigation) bằng UID
+  // Xáo thứ tự riêng cho từng Reviewer trên tập bình thường
   const reviewerSeed = (Number(seed) ^ hashString(reviewerUid || 'default_user')) >>> 0;
   const reviewerPrng = createPrng(reviewerSeed);
-  for (let i = selected.length - 1; i > 0; i--) {
+  for (let i = selectedNormal.length - 1; i > 0; i--) {
     const j = Math.floor(reviewerPrng() * (i + 1));
-    const temp = selected[i];
-    selected[i] = selected[j];
-    selected[j] = temp;
+    const temp = selectedNormal[i];
+    selectedNormal[i] = selectedNormal[j];
+    selectedNormal[j] = temp;
   }
+
+  // GHÉP LẠI: Câu hỏi do học sinh gửi LUÔN ĐỨNG ĐẦU TIÊN
+  const selected = [...studentFlags, ...selectedNormal];
 
   // LÀM MÙ TOÀN BỘ (BLIND SANITIZATION):
   // 1. Ẩn model (không ghi Gemini, GPT, Claude, v.v.)
@@ -216,6 +229,9 @@ export function sampleForReviewer({ subject, seed = 2026, sampleSize = 20, revie
     displayOrder: idx + 1,
     subject: item.subject,
     sourceType: item.sourceType,
+    isStudentFlag: Boolean(item.isStudentFlag || item.sourceType === 'student_flagged_for_teacher'),
+    studentNote: item.studentNote || '',
+    studentName: item.studentName || 'Học sinh',
     grade: item.grade,
     topic: item.topic,
     difficulty: item.difficulty,
@@ -230,6 +246,7 @@ export function sampleForReviewer({ subject, seed = 2026, sampleSize = 20, revie
     subject: normSubj,
     sampleSize: blindedSamples.length,
     totalAvailable: subjectPool.length,
+    studentFlagsCount: studentFlags.length,
     samples: blindedSamples
   };
 }

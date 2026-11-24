@@ -135,13 +135,14 @@ export default function TeacherReviewPortalPage() {
 
   // Chế độ xem Ma trận nhầm lẫn: 'teacher' (Giáo viên thực tế) | 'bench150_rag' (Mô hình RAG 150 ca) | 'bench150_base' (Mô hình Base 150 ca) | 'bench150_compare' (So sánh đối đầu)
   const [confusionSource, setConfusionSource] = useState('bench150_rag');
+  const [subjectCounts, setSubjectCounts] = useState({ toan: 117, ly: 98, hoa: 102, sinh: 98 });
 
   // Phiếu đồng ý (Consent)
   const [consentData, setConsentData] = useState({ publicNameConsent: false, teacherDisplayName: '', institution: '', withdrawn: false });
   const [savingConsent, setSavingConsent] = useState(false);
 
-  // 1. Tải danh sách mẫu đã làm mù
-  const loadSamples = async (subj = selectedSubject, size = sampleSize) => {
+  // 1. Tải danh sách mẫu đã làm mù (mặc định lấy toàn bộ câu hỏi của môn, ưu tiên câu hỏi học sinh gửi)
+  const loadSamples = async (subj = selectedSubject) => {
     setLoading(true);
     setErrorMsg('');
     try {
@@ -155,7 +156,7 @@ export default function TeacherReviewPortalPage() {
       setIsAdmin(adminClaim);
 
       const token = await currentUser.getIdToken();
-      const res = await fetch(`/api/reviews/samples?subject=${subj}&seed=2026&sampleSize=${size}`, {
+      const res = await fetch(`/api/reviews/samples?subject=${subj}&seed=2026&sampleSize=999`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -173,6 +174,9 @@ export default function TeacherReviewPortalPage() {
       const isTeacher = data.reviewerType === 'teacher' || tokenResult.claims.role === 'teacher';
       setReviewerType(isTeacher ? 'teacher' : (adminClaim ? 'admin' : (data.reviewerType || 'team_self')));
       setAuthorizedSubjects(data.authorizedSubjects || ['toan']);
+      if (data.subjectCounts) {
+        setSubjectCounts(data.subjectCounts);
+      }
       setSamples(data.samples || []);
       setReviewedSampleIds(data.reviewedSampleIds || []);
       setCurrentIndex(0);
@@ -421,58 +425,43 @@ export default function TeacherReviewPortalPage() {
             </h1>
           </div>
 
-          {/* Chọn môn học (nếu có nhiều môn được cấp quyền) */}
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">Môn học:</span>
-              <div className="flex gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
-                {['toan', 'ly', 'hoa', 'sinh'].map(subj => {
-                  const isAllowed = isAdmin || (reviewerType === 'teacher' ? authorizedSubjects.includes(subj) : true);
-                  if (reviewerType === 'teacher' && !isAdmin && !isAllowed) return null; // Ẩn hoàn toàn môn không được cấp quyền cho giáo viên
-                  return (
-                    <button
-                      key={subj}
-                      disabled={!isAllowed}
-                      onClick={() => { setSelectedSubject(subj); loadSamples(subj, sampleSize); }}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                        selectedSubject === subj
-                          ? 'bg-cyan-600 text-white dark:bg-cyan-500 dark:text-slate-950 shadow-md shadow-cyan-500/20'
-                          : isAllowed
-                          ? 'text-slate-700 hover:text-slate-950 hover:bg-slate-200/80 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700/60'
-                          : 'text-slate-400 dark:text-slate-600 opacity-40 cursor-not-allowed'
-                      }`}
-                    >
-                      {subj === 'toan' ? 'Toán' : (subj === 'ly' ? 'Vật lý' : (subj === 'hoa' ? 'Hóa học' : 'Sinh'))}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Cấu hình số mục chấm (mặc định 20 mục ~40p, mở rộng 30 mục ~60p) */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">Số mục:</span>
-              <div className="flex gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
-                {[
-                  { size: 20, label: '20 mục (~40p)' },
-                  { size: 30, label: '30 mục (~60p)' }
-                ].map(opt => (
+          {/* Chọn môn học kèm số lượng câu hỏi hiện có của từng môn */}
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">Môn thẩm định:</span>
+            <div className="flex flex-wrap gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+              {[
+                { id: 'toan', name: 'Toán' },
+                { id: 'ly', name: 'Vật lý' },
+                { id: 'hoa', name: 'Hóa học' },
+                { id: 'sinh', name: 'Sinh học' }
+              ].map(({ id: subj, name }) => {
+                const isAllowed = isAdmin || (reviewerType === 'teacher' ? authorizedSubjects.includes(subj) : true);
+                if (reviewerType === 'teacher' && !isAdmin && !isAllowed) return null; // Ẩn hoàn toàn môn không được cấp quyền cho giáo viên
+                const count = subjectCounts[subj] || (selectedSubject === subj ? samples.length : 0);
+                return (
                   <button
-                    key={opt.size}
-                    onClick={() => {
-                      setSampleSize(opt.size);
-                      loadSamples(selectedSubject, opt.size);
-                    }}
-                    className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      sampleSize === opt.size
-                        ? 'bg-emerald-600 text-white dark:bg-emerald-500 dark:text-slate-950 shadow-md shadow-emerald-500/20'
-                        : 'text-slate-700 hover:text-slate-950 hover:bg-slate-200/80 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700/60'
+                    key={subj}
+                    disabled={!isAllowed}
+                    onClick={() => { setSelectedSubject(subj); loadSamples(subj); }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                      selectedSubject === subj
+                        ? 'bg-cyan-600 text-white dark:bg-cyan-500 dark:text-slate-950 shadow-md shadow-cyan-500/20'
+                        : isAllowed
+                        ? 'text-slate-700 hover:text-slate-950 hover:bg-slate-200/80 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700/60'
+                        : 'text-slate-400 dark:text-slate-600 opacity-40 cursor-not-allowed'
                     }`}
                   >
-                    {opt.label}
+                    <span>{name}</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
+                      selectedSubject === subj 
+                        ? 'bg-white/20 text-white dark:bg-slate-950/30 dark:text-slate-950' 
+                        : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                    }`}>
+                      {count} câu
+                    </span>
                   </button>
-                ))}
-              </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -588,77 +577,6 @@ export default function TeacherReviewPortalPage() {
               </div>
             ) : (
               <>
-                {/* KHỐI QUẢN TRỊ VIÊN: CẤP QUYỀN GIÁO VIÊN */}
-                {isAdmin && (
-                  <div className="bg-slate-900 border border-cyan-500/30 rounded-2xl p-5 space-y-3 shadow-lg">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <h3 className="text-sm font-black text-cyan-400 flex items-center gap-2">
-                        <ShieldCheck className="w-5 h-5 text-cyan-400" />
-                        🛠️ Bảng Phân Quyền Giáo Viên (Dành Cho Quản Trị Viên)
-                      </h3>
-                      <span className="text-[10px] bg-cyan-950 text-cyan-300 px-2.5 py-0.5 rounded-full border border-cyan-800 font-bold">
-                        Admin Controls
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-400">
-                      Cấp quyền Giáo viên thẩm định (Custom Claims: <code>role: teacher</code>) theo môn học cho bất kỳ tài khoản nào bằng UID:
-                    </p>
-                    <div className="flex flex-wrap items-center gap-3">
-                      <input
-                        type="text"
-                        placeholder="Nhập UID tài khoản cần cấp quyền GV (hoặc để trống để cấp cho tài khoản hiện tại)"
-                        value={adminGrantUid}
-                        onChange={(e) => setAdminGrantUid(e.target.value)}
-                        className="flex-1 min-w-[260px] bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
-                      />
-                      <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-700">
-                        {['toan', 'ly', 'hoa', 'sinh'].map(s => (
-                          <button
-                            key={s}
-                            type="button"
-                            onClick={() => {
-                              setAdminGrantSubjects(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
-                            }}
-                            className={`px-2 py-1 rounded text-[11px] font-bold transition-all ${
-                              adminGrantSubjects.includes(s)
-                                ? 'bg-cyan-600 text-white'
-                                : 'text-slate-400 hover:text-white'
-                            }`}
-                          >
-                            {s.toUpperCase()}
-                          </button>
-                        ))}
-                      </div>
-                      <button
-                        type="button"
-                        disabled={isGranting}
-                        onClick={() => handleGrantTeacherRole(adminGrantUid || firebaseUser?.uid)}
-                        className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold rounded-xl shadow-md disabled:opacity-50 flex items-center gap-1.5"
-                      >
-                        {isGranting ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />}
-                        Cấp Quyền Giáo Viên
-                      </button>
-                      {reviewerType !== 'teacher' && firebaseUser && (
-                        <button
-                          type="button"
-                          disabled={isGranting}
-                          onClick={() => handleGrantTeacherRole(firebaseUser.uid)}
-                          className="px-3 py-2 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold rounded-xl flex items-center gap-1.5"
-                        >
-                          <UserCheck className="w-3.5 h-3.5" />
-                          Cấp Quyền Cho Chính Tôi (Test)
-                        </button>
-                      )}
-                    </div>
-                    {grantMsg.text && (
-                      <div className={`p-2.5 rounded-lg text-xs font-medium ${
-                        grantMsg.type === 'success' ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-rose-950 text-rose-300 border border-rose-800'
-                      }`}>
-                        {grantMsg.text}
-                      </div>
-                    )}
-                  </div>
-                )}
                 {/* Thanh tiến độ */}
                 <div className="flex items-center justify-between text-xs text-slate-700 dark:text-slate-400 font-semibold">
                   <span>Tiến độ: Câu {currentIndex + 1} / {samples.length}</span>
@@ -697,6 +615,25 @@ export default function TeacherReviewPortalPage() {
                       <span>Chế độ Chấm Mù: Đã ẩn cấu hình công nghệ</span>
                     </div>
                   </div>
+
+                  {/* Cảnh báo ưu tiên câu hỏi do học sinh gửi băn khoăn */}
+                  {Boolean(currentSample?.isStudentFlag || currentSample?.sourceType === 'student_flagged_for_teacher') && (
+                    <div className="p-4 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-200 space-y-1.5 shadow-sm">
+                      <div className="flex items-center gap-2 font-bold text-amber-300 text-xs tracking-wide">
+                        <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 animate-pulse" />
+                        <span>HỌC SINH BĂN KHOĂN GỬI KIỂM TRA MÔN {selectedSubject.toUpperCase()} (ƯU TIÊN THẨM ĐỊNH)</span>
+                      </div>
+                      {currentSample?.studentNote ? (
+                        <p className="text-xs text-zinc-200 italic leading-relaxed">
+                          💬 Băn khoăn của học sinh: &quot;{currentSample.studentNote}&quot;
+                        </p>
+                      ) : (
+                        <p className="text-[11px] text-zinc-300 italic leading-relaxed">
+                          (Học sinh cảm thấy câu trả lời của AI chưa chính xác hoặc còn băn khoăn và đã bấm gửi giáo viên bộ môn kiểm tra)
+                        </p>
+                      )}
+                    </div>
+                  )}
 
                   {/* Nội dung câu hỏi */}
                   <div>
