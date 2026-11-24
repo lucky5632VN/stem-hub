@@ -1,7 +1,7 @@
 # 📑 NHẬT KÝ HUẤN LUYỆN & AUDIT TÁI LẬP SỐ LIỆU AI (TRAINING LOG)
-> **Trạng thái**: Tái lập tự động 100% khi thực thi `node src/ai-training/scripts/run-all-audits.js`  
-> **Git Commit Hash**: `bcd64dc`  
-> **Thời điểm xuất log**: `2026-11-08T09:58:50.089Z`  
+> **Trạng thái**: Tái lập tự động qua script khi thực thi `node src/ai-training/scripts/run-all-audits.js`  
+> **Git Commit Hash**: `b9fe3b0`  
+> **Thời điểm xuất log**: `2026-11-16T15:12:46.123Z`  
 > **Nguyên tắc**: Mọi con số trong nhật ký này được ghi **tự động** từ output thực tế của script train/eval. Không hard-code, không sửa số tay.
 
 ---
@@ -10,11 +10,11 @@
 
 | STT | Mô hình AI Tự Train | Tập Dữ Liệu Train / Test | Kích thước Mẫu ($n$) | Chỉ số Kiểm thử Thực tế | 95% Wilson Score CI | Ghi chú & Trạng thái |
 |---|---|---|---|---|---|---|
-| **1** | **ChemLab Risk Classifier** | `risk-dataset.json` + `independent_eval_135.json` (5-Fold CV) | Independent $n=135$ | **95.56%** 5-Fold Acc<br>(Macro F1: **95.58%**)<br>**95.00%** Edge Acc | **[90.6%, 98.0%]**<br>Edge: [76.4%, 99.1%] | **0 False Negatives**. Monotonic Trend (25.33% < 55.64% < 73.23%) $\rightarrow$ PASS. |
-| **2** | **Physics Diagnostic kNN** | `attempts.json` + `independent_eval_135.json` (5-Fold CV) | Independent $n=135$ | **96.30%** 5-Fold Acc<br>(Macro F1: **96.30%**)<br>**86.67%** Combo Acc | **[91.6%, 98.4%]**<br>Edge: [62.1%, 96.3%] | k-NN ($k=5$) Z-Score StandardScaler $\rightarrow$ PASS. |
-| **3** | **Javit Intent Classifier** | `intent-samples.json` + `independent_eval_140.json` (5-Fold CV) | Independent $n=140$ | **88.57%** 5-Fold Acc<br>(Macro F1: **88.33%**)<br>(97.50% Raw) | **[82.2%, 92.8%]** | 0% Overlap giữa Train & Unseen. Threshold = 0.65. Phủ đủ 7 lớp ý định (bao gồm Chitchat). |
+| **1** | **ChemLab Risk Classifier** | `risk-dataset.json` + `independent_eval_135.json` (5-Fold CV) | Tập tổng hợp thứ hai (nhiễu script, $n=135$) | **95.56%** 5-Fold Acc<br>(Macro F1: **95.58%**)<br>**95.00%** Edge Acc | **[90.6%, 98.0%]**<br>Edge: [76.4%, 99.1%] | **0 False Negatives**. Monotonic Trend (25.33% < 55.64% < 73.23%) $\rightarrow$ PASS. |
+| **2** | **Physics Diagnostic kNN** | `attempts.json` + `independent_eval_135.json` (5-Fold CV) | Tập tổng hợp thứ hai (nhiễu script, $n=135$) | **96.30%** 5-Fold Acc<br>(Macro F1: **96.30%**)<br>**86.67%** Combo Acc | **[91.6%, 98.4%]**<br>Edge: [62.1%, 96.3%] | k-NN ($k=5$) Z-Score StandardScaler $\rightarrow$ PASS. |
+| **3** | **Javit Intent Classifier** | `intent-samples.json` + `independent_eval_140.json` (5-Fold CV) | Tập tổng hợp thứ hai (nhiễu script, $n=140$) | **88.57%** 5-Fold Acc<br>(Macro F1: **88.33%**)<br>(97.50% Raw) | **[82.2%, 92.8%]** | Đánh giá 5-Fold CV trên tập tổng hợp thứ hai; ngưỡng tin cậy 0.65. |
 | **4** | **Math IRT Engine** | 10 Benchmark Items | Benchmark $n=10$ | **40.00%** Hits | [16.8%, 68.7%] | Vùng phát triển $P(\text{correct}) \in [60\%, 75\%]$. *Cỡ mẫu $n=10$ mang tính minh họa.* |
-| **5** | **Genetics Bayesian Reasoner** | 10 Benchmark Cases | Benchmark $n=10$ | **100.00%** Pass | [72.2%, 100.0%] | 100% Mendel Verification (10/10 cases). *Cỡ mẫu $n=10$ mang tính minh họa.* |
+| **5** | **Genetics Bayesian Reasoner** | 10 Benchmark Cases | Benchmark $n=10$ | **10/10** Pass | [72.2%, 100.0%] | 10/10 Mendel Verification cases. *Cỡ mẫu $n=10$ mang tính minh họa.* |
 | **6** | **Multilingual TF-IDF RAG** | `stem-corpus.json`<br>(303 Chunks, 9061 Tokens) | Query $n=32$ | **96.88%** Top-1 Acc<br>**96.88%** Top-3 Hit | [84.3%, 99.4%] | Mean Cosine Sim: **75.90%**. Phủ 4 môn THPT GDPT 2018. |
 
 ---
@@ -45,7 +45,7 @@
 
 ### 2.3 Module 3: Javit Intent Classifier (Naive Bayes + Text Normalizer)
 - **Tập Train**: 392 mẫu | **Tập Unseen Test**: 40 mẫu.
-- **Kiểm tra Trùng lặp (Train vs Unseen)**: **0 câu trùng** (Xác nhận tập Unseen độc lập 100%).
+- **Tập đánh giá tổng hợp**: Đánh giá 5-Fold CV trên tập tổng hợp thứ hai `independent_eval_140.json` (ghi nhận có một số mẫu tương đồng giữa tập train và tập test trong dữ liệu do nhóm biên soạn theo báo cáo audit).
 - **Chênh lệch trước và sau Normalization**:
   - Accuracy chưa chuẩn hóa (Raw Teencode): **97.50%** ($n=40, 95% CI: [87.1%, 99.6%])
   - Accuracy sau chuẩn hóa (Text Normalizer): **100.00%** ($n=40, 95% CI: [91.2%, 100.0%])
@@ -137,14 +137,14 @@ Toàn bộ script sẽ chạy lại toán học, xuất log tự động và c�
 
 ## 🔬 4. PHỤ LỤC AUDIT BỔ SUNG: STRATIFIED 5-FOLD CV & SO SÁNH SÒNG PHẲNG
 
-### 4.1 Bảng So Sánh Sòng Phẳng: Quy Tắc Xác Định vs Machine Learning vs Kiến Trúc Lai STEM HUB
-| Tiêu Chí So Sánh | Quy Tắc Xác Định (Rule-Based) | Học Máy Độc Lập (ML) | **Kiến Trúc Lai STEM HUB (Hybrid)** |
+### 4.1 Bảng So Sánh: Quy Tắc Xác Định vs Machine Learning vs Kiến Trúc Lai STEM HUB
+| Tiêu Chí So Sánh | Quy Tắc Xác Định (Rule-Based) | Học Máy (ML Thống Kê) | **Kiến Trúc Lai STEM HUB (Hybrid)** |
 |---|---|---|---|
 | **Bản chất giải quyết** | Giải quyết **Bài toán thuận** & danh mục cấm cố định. | Giải quyết **Bài toán suy diễn ngược** từ số liệu thực nghiệm có nhiễu thống kê và ngôn ngữ tự nhiên phi cấu trúc. | **Tầng 1 (Rule-Based ngắt cứng) + Tầng 2 (ML xác suất mềm) + Tầng 3 (LLM RAG Socratic).** |
-| **Độ chính xác thực tế** | **100% tuyệt đối** trong phạm vi luật định trước. | **89% - 96%** (phản ánh trung thực nhiễu đo đạc đời thường, không báo cáo 100% giả tạo). | **100% An toàn sinh mạng** (Circuit Breaker) + **>93% độ mượt sư phạm** (ML/RAG). |
+| **Độ chính xác thực tế** | Quyết định tất định theo ngưỡng thiết lập. | **89% - 96%** (phản ánh trung thực nhiễu đo đạc đời thường, không làm đẹp số). | Ngắt mạch bảo vệ (Circuit Breaker) kết hợp gợi mở sư phạm (ML/RAG). |
 | **Khả năng chịu nhiễu** | Kém / Dễ gãy nếu sai khác định dạng hoặc gặp ca chưa định nghĩa. | Tốt, tự động thích ứng qua hàm khoảng cách và phân phối xác suất. | Tối ưu: Bộ chuẩn hóa từ vựng + ML phân loại + Bộ ngắt khẩn cấp. |
 
-### 4.2 Chi Tiết Kết Quả Stratified 5-Fold Cross-Validation (Độc Lập, Không Data Leakage)
+### 4.2 Chi Tiết Kết Quả Stratified 5-Fold Cross-Validation (Tập tổng hợp thứ hai n=135, cùng hàm luật sinh nhãn)
 - **ChemLab Risk Classifier**: Fold Accuracies: [88.89%, 100%, 92.59%, 96.3%, 100%] | Trung bình: **95.56%** | Macro F1: **95.58%** | 95% Wilson CI: **[90.6%, 98.0%]** ($n=135$)
 - **Physics Diagnostic kNN**: Fold Accuracies: [96.3%, 96.3%, 100%, 92.59%, 96.3%] | Trung bình: **96.30%** | Macro F1: **96.30%** | 95% Wilson CI: **[91.6%, 98.4%]** ($n=135$)
 - **Javit Intent Classifier**: Fold Accuracies: [89.29%, 92.86%, 92.86%, 89.29%, 78.57%] | Trung bình: **88.57%** | Macro F1: **88.33%** | 95% Wilson CI: **[82.2%, 92.8%]** ($n=140$)
@@ -153,32 +153,62 @@ Toàn bộ script sẽ chạy lại toán học, xuất log tự động và c�
 
 ---
 
-## 📊 5. NGHIÊN CỨU ĐỐI CHỨNG "CÓ RAG vs. KHÔNG CÓ RAG" (THEO YÊU CẦU 5 CỦA BAN GIÁM KHẢO)
-> **Đề bài Giám khảo**: *"Cần so sánh kết quả có và không tra cứu sách giáo khoa, thử câu hỏi khó và ngoài phạm vi."*  
-> **Tập dữ liệu thực nghiệm**: 50 câu hỏi khó/bẫy theo chuẩn GDPT 2018 (Toán, Lý, Hóa, Sinh) + 30 câu hỏi ngoài phạm vi (Out-of-Scope: Học thuật ĐH, Giả khoa học, Đời sống). Tổng cộng $n=80$ trường hợp kiểm thử.  
+## 📊 5. NGHIÊN CỨU ĐỐI CHỨNG "CÓ RAG vs. KHÔNG CÓ RAG" (MÔ PHỎNG HEURISTIC, KHÔNG PHẢI ĐO TRÊN LLM THẬT)
+> ⚠️ **LƯU Ý MINH BẠCH**: Bảng đối chứng dưới đây là **kết quả mô phỏng suy nghiệm (heuristic simulation)** trên 80 ca kiểm thử mẫu, **KHÔNG PHẢI số liệu đo lường trực tiếp trên Gemini LLM thật** (chưa có log thô API request/response).  
+> **Điều kiện so sánh**: Điều kiện Không RAG (Vanilla LLM) không có cơ chế phát hiện từ chối tự nhiên; các mức chênh lệch được tính bằng **điểm phần trăm (pp)** thay vì phần trăm tăng trưởng tương đối.  
+> **Tập dữ liệu**: 50 câu hỏi khó/bẫy theo chuẩn GDPT 2018 + 30 câu hỏi ngoài phạm vi (Out-of-Scope). Tổng cộng $n=80$ ca.  
 > **File dữ liệu**: `src/ai-training/datasets/rag_ablation_benchmark.json`  
 > **Script tái lập**: `node src/ai-training/scripts/run_rag_ablation_experiment.js`
 
-### 5.1 Bảng Số Liệu Đối Chứng Thực Nghiệm Trực Diện
+### 5.1 Bảng Số Liệu Đối Chứng Mô Phỏng Suy Nghiệm
 
-| Chỉ Số Đánh Giá | Không Tra Cứu SGK<br>(No-RAG / Pure LLM) | Có Tra Cứu SGK<br>(STEM HUB RAG + Abstention) | Mức Độ Cải Thiện Minh Chứng | 95% Wilson Score CI (Có RAG vs Không RAG) |
+| Chỉ Số Đánh Giá | Không Tra Cứu Ngữ Liệu<br>(Mô phỏng Vanilla LLM) | Có Tra Cứu Ngữ Liệu<br>(Mô phỏng RAG + Abstention) | Chênh Lệch Điểm Phần Trăm (pp) | 95% Wilson Score CI (Có RAG vs Không RAG) |
 |---|:---:|:---:|:---:|:---:|
-| **(a) Độ chính xác thực tế (Scientific Correctness)**<br>*(Đánh giá trên 50 câu khó/bẫy GDPT 2018)* | **72%** (36/50) | **92%** (46/50) | 🟢 **Tăng +20%** độ chuẩn xác công thức & lý thuyết | Có RAG: **[81.2%, 96.8%]**<br>Không RAG: [58.3%, 82.5%] |
-| **(b) Tỷ lệ ảo giác (Hallucination Rate)**<br>*(Bịa công thức, nhầm SGK cũ 2006, sai hằng số)* | **28%** (14/50) | **4%** (2/50) | 🟢 **Giảm 7 lần** nguy cơ cung cấp kiến thức sai | Có RAG: **[1.1%, 13.5%]**<br>Không RAG: [17.5%, 41.7%] |
-| **(c) Tỷ lệ trích dẫn nguồn chuẩn (Citation Precision)**<br>*(Chỉ rõ môn, chương, bài, ID đoạn mã SGK)* | **10%** (5/50) | **94%** (47/50) | 🟢 **Tăng +84%** độ minh bạch học liệu sư phạm | Có RAG: **[83.8%, 97.9%]**<br>Không RAG: [4.3%, 21.4%] |
-| **(d) Tỷ lệ cảnh báo đúng ngoài phạm vi (Abstention Accuracy)**<br>*(Đánh giá trên 30 câu Out-of-Scope)* | **0%** (0/30)<br>*(Cố trả lời 100%, bịa đặt)* | **96.67%** (29/30)<br>*(Cảnh báo an toàn chuẩn xác)* | 🟢 **Bảo vệ học sinh tuyệt đối** trước thông tin ngoài SGK & giả khoa học | Có RAG: **[83.3%, 99.4%]**<br>Không RAG: [0%, 11.4%] |
+| **(a) Độ chuẩn xác nội dung**<br>*(Đánh giá trên 50 câu GDPT 2018)* | **72%** (36/50) | **92%** (46/50) | 🟢 **+20.0 pp** (Mô phỏng) | Có RAG: **[81.2%, 96.8%]**<br>Không RAG: [58.3%, 82.5%] |
+| **(b) Tỷ lệ ảo giác (Hallucination)**<br>*(Bịa công thức, sai hằng số)* | **28%** (14/50) | **4%** (2/50) | 🟢 **-24.0 pp** (Mô phỏng) | Có RAG: **[1.1%, 13.5%]**<br>Không RAG: [17.5%, 41.7%] |
+| **(c) Tỷ lệ trích dẫn ngữ liệu hệ thống**<br>*(Gắn mã ID đoạn ngữ liệu)* | **10%** (5/50) | **94%** (47/50) | 🟢 **+84.0 pp** (Mô phỏng) | Có RAG: **[83.8%, 97.9%]**<br>Không RAG: [4.3%, 21.4%] |
+| **(d) Tỷ lệ cảnh báo ngoài phạm vi (Abstention)**<br>*(Đánh giá trên 30 câu Out-of-Scope)* | **0%** (0/30)<br>*(Không có cơ chế từ chối)* | **96.67%** (29/30)<br>*(Cảnh báo ngoài phạm vi)* | Hệ quả trực tiếp của ngưỡng cosine 0.30 (Mô phỏng, không phải thành tích thuật toán) | Có RAG: **[83.3%, 99.4%]**<br>Không RAG: [0%, 11.4%] |
 
-### 5.2 Đồng Bộ Hóa Logic Toán Học & Ngưỡng Kích Hoạt Grounding Score
-Hệ thống giải quyết triệt để sự đồng bộ giữa công thức lý thuyết và hiện thực mã nguồn tại `src/lib/ragService.js`:
+### 5.2 Cơ Chế Tính Điểm Tương Quan Ngữ Liệu
+Hệ thống kết hợp tương đồng Cosine TF-IDF và bao phủ từ khóa tại `src/lib/ragService.js`:
+- **Ngưỡng kích hoạt**: $S_{\text{grounding}} \ge 0.30$ (tương ứng điểm Cosine TF-IDF thô $\ge 0.18$) nạp đoạn ngữ liệu vào prompt kèm nhãn `[sourceType: team_summary]`.
+- **Nếu $S_{\text{grounding}} < 0.30$**: Hệ thống hiển thị cảnh báo câu hỏi ngoài phạm vi kho ngữ liệu tóm tắt hiện có, tạm dừng trả lời tự động để tránh sai lệch thông tin.
 
-1. **Công thức tính điểm tương quan hỗn hợp (Hybrid Grounding Score):**
-   $$S_{\text{grounding}} = 0.6 \cdot \text{Norm\_TFIDF} + 0.4 \cdot \text{BM25\_Overlap}$$
-   - **Norm_TFIDF**: Điểm tương đồng Cosine trên không gian vector N-Gram TF-IDF của câu hỏi và đoạn tri thức, được chuẩn hóa theo tỷ lệ tuyến tính (ngưỡng thô $0.18$ tương ứng với giá trị chuẩn hóa $0.30$).
-   - **BM25_Overlap**: Tỷ lệ bao phủ từ khóa và N-gram cốt lõi theo phân phối bão hòa tần số BM25 giữa câu hỏi và đoạn văn bản SGK.
+---
 
-2. **Cơ chế kiểm soát an toàn (Strict Grounding Abstention Guard):**
-   - Khi học sinh hỏi một câu hỏi, hệ thống tính toán $S_{\text{grounding}}$ với toàn bộ 303 đoạn bài giảng SGK GDPT 2018.
-   - **Nếu $S_{\text{grounding}} \ge 0.30$**: Hệ thống nạp ngữ cảnh SGK chuẩn vào prompt, bắt buộc AI kèm nhãn dẫn chứng `[Nguồn dẫn chứng: SGK <Môn> - <Chương/Bài> - Đoạn mã <ID>]`.
-   - **Nếu $S_{\text{grounding}} < 0.30$** (tương đương ngưỡng Cosine TF-IDF thô $< 0.18$ khi không có trùng khớp từ khóa): Hệ thống lập tức ngắt suy luận tự do, hiển thị Hộp cảnh báo thiếu căn cứ:
-     `⚠️ Cảnh báo thiếu căn cứ: Câu hỏi nằm ngoài phạm vi kho ngữ liệu Sách giáo khoa chuẩn hiện có. Hệ thống tạm dừng trả lời tự động để tránh sai lệch kiến thức.`
-   - Cung cấp nút bấm `[Vẫn xem gợi ý tham khảo mở rộng từ AI]` để học sinh chủ động quyết định, đảm bảo tính sư phạm và an toàn tri thức tuyệt đối.
+## 🎯 6. ĐÁNH GIÁ CHUẨN XÁC RAG MỨC ĐỘ CHUNK VÀ CƠ CHẾ TỪ CHỐI (ABSTENTION EVALUATION)
+
+> 🔬 **Dữ liệu thực nghiệm thực tế**: Được sinh tự động từ script `src/ai-training/scripts/evaluate-rag-chunk-level.js`, đo đạc trên **Tập Dev (Dev Set)** gồm 60 câu In-Scope và 20 câu Out-of-Scope (SHA-256: `1ed59070c66731730e55775aa5316e57b4ab4cdf0dd07d6b47a068756fe94f5f`), lưu trữ kết quả tại `reports/rag_chunk_benchmark_results.json`.
+
+### 6.1 Hiệu Năng Truy Xuất Sau Cải Tiến Thuật Toán (Variant 2: Unaccented Auxiliary Matching)
+| Chỉ số Đo Đạc | Trước Cải Tiến (TF-IDF Thô) | Sau Cải Tiến (Variant 2) | Tỷ Lệ Hiện Tại (%) | Khoảng Tin Cậy 95% Wilson CI | Bản Chất Kỹ Thuật & Đánh Giá |
+|---|:---:|:---:|:---:|:---:|---|
+| **Recall@1** (In-Scope) | 16/60 (26.67%) | 20/60 | **33.33%** | [22.7%, 45.9%] | Chunk chuẩn nằm ở vị trí xếp hạng 1 (+6.66 pp) |
+| **Recall@3** (In-Scope) | 22/60 (36.67%) | 29/60 | **48.33%** | [36.2%, 60.7%] | Chunk chuẩn nằm trong Top-3 kết quả (+11.66 pp) |
+| **Recall@5** (In-Scope) | 26/60 (43.33%) | 34/60 | **56.67%** | [44.1%, 68.4%] | Chunk chuẩn nằm trong Top-5 kết quả (+13.34 pp) |
+| **Mean Reciprocal Rank (MRR)** | 0.3225 | **0.4164** | - | - | Điểm xếp hạng nghịch đảo trung bình (+0.0939) |
+
+### 6.2 Phân Phối 3 Tầng Căn Cứ & Cơ Chế Từ Chối (Tri-Band Grounding & Abstention)
+Hệ thống phân tầng mức độ tin cậy của căn cứ theo 3 dải điểm minh bạch:
+- **Có căn cứ vững chắc (Grounded)**: $S \ge 0.30$
+- **Căn cứ yếu (Weak Grounding)**: $0.15 \le S < 0.30$ (kèm khuyến cáo tra cứu thêm SGK)
+- **Không có căn cứ / Ngoài phạm vi (Ungrounded / Abstention)**: $S < 0.15$
+
+| Phân Nhóm Dữ Liệu | Grounded ($S \ge 0.30$) | Weak ($0.15 \le S < 0.30$) | Ungrounded ($S < 0.15$) | Tổng Số Mẫu | Tỷ Lệ Chấp Nhận Hợp Lệ (G + W) |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **In-Scope Queries** (GDPT 2018) | 14/60 (23.3%) | 44/60 (73.3%) | 2/60 (3.3%) | 60 | **58/60 (96.67%)** |
+| **Out-of-Scope Queries** (Ngoại biên) | **0/20 (0.0%)** | 9/20 (45.0%) | 11/20 (55.0%) | 20 | 9/20 (45.0%) |
+
+#### Hệ quả kỹ thuật thực tế (Thừa nhận trung thực):
+1. **73.3% (44/60) câu in-scope rơi vào nhóm "Căn cứ yếu"**: Do câu hỏi tự nhiên của học sinh (gõ không dấu, câu ngắn) chỉ khớp một phần thuật ngữ với ngữ liệu tóm tắt GDPT 2018, dẫn đến điểm tương quan chỉ đạt dải $[0.15, 0.30)$. Học sinh vẫn nhận được câu trả lời kèm khối khuyến cáo đối chiếu SGK.
+2. **45.0% (9/20) câu ngoài phạm vi (OOS) không bị chặn ở ngưỡng 0.15**: Do các câu hỏi ngoại biên (toán cao cấp, y học đời sống, đồ gia dụng điện) có chứa từ vựng khoa học trùng lặp (ví dụ "điện", "nước", "toán học", "ion"), điểm số đạt dải $[0.15, 0.30)$. Các câu này vẫn được hệ thống trả lời kèm huy hiệu cảnh báo `Căn cứ yếu`, chứ không bị ngắt hoàn toàn như khi ở ngưỡng nghiêm ngặt 0.30.
+
+### 6.3 So Sánh Tỷ Lệ Từ Chối Theo 2 Ngưỡng Quyết Định
+| Ngưỡng Đánh Giá | True Rejection (Out-of-Scope) [Wilson CI] | False Rejection (In-Scope) [Wilson CI] | Nhận Xét Kỹ Thuật |
+|---|:---:|:---:|---|
+| **Ngưỡng Tối Thiểu ($S = 0.15$)** | 11/20 = **55.00%** [34.2%, 74.2%] | 2/60 = **3.33%** [0.9%, 11.4%] | Giảm thiểu tối đa việc từ chối nhầm học sinh (In-Scope False Rejection chỉ 3.33%) |
+| **Ngưỡng Nghiêm Ngặt ($S = 0.30$)** | 20/20 = **100.00%** [83.9%, 100.0%] | 46/60 = **76.67%** [64.6%, 85.6%] | Chặn 20/20 câu ngoài phạm vi không bị gán nhãn "Có căn cứ" |
+
+### 6.4 Nguồn Gốc và Tính Độc Lập của Dữ Liệu
+1. **Nguồn gốc tập dữ liệu & Lựa chọn tham số**: Ngưỡng $0.15$ và tỷ lệ trọng số kết hợp $70/30$ ($70\%$ TF-IDF/BM25 $+ 30\%$ so khớp phụ không dấu) được chọn dựa trên kết quả thực nghiệm 7 biến thể truy xuất tại `src/ai-training/scripts/benchmark-retrieval-variants.js` **chạy trực tiếp trên Tập Dev (Dev Set)**. Hiện tại **chưa có tập Test độc lập** để kiểm chứng mù.
+2. **Kỷ luật Dev/Test**: Nhóm tuân thủ nghiêm ngặt quy tắc KHÔNG dùng tập Dev làm bài kiểm tra cuối cùng. Tài liệu hướng dẫn xây dựng tập Test độc lập mới đã được công bố tại `docs/viet-tap-test.md` kèm công cụ khóa mã hóa `scripts/lock-test-dataset.js`. Hiện tại **chưa có tập test độc lập mới của con người** (trạng thái: Đang biên soạn, từ chối dùng LLM tự sinh giả mạo).

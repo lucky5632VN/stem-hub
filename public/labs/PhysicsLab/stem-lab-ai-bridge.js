@@ -389,23 +389,14 @@
       localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
     } catch (_) {}
 
-    // 2. Đẩy lên Server API để lưu vĩnh viễn vào Firestore / file global-learned-knowledge.json
+    // 2. Chức năng gửi trực tiếp từ sandbox iframe đã được tắt để đảm bảo tính đóng an toàn (Fail-Closed).
+    // Iframe không giữ Bearer Token của học sinh; tránh phát sinh lỗi 401 Unauthorized và ngăn chặn đầu độc RAG (OWASP LLM03).
+    // Việc đóng góp tri thức chỉ diễn ra trên giao diện ứng dụng chính có xác thực người dùng.
+    /*
     try {
-      fetch('/api/learned-knowledge', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-internal-secret': 'stemhub_rag_internal_sig_2026'
-        },
-        body: JSON.stringify(payload)
-      }).then(res => {
-        if (res.ok) {
-          console.log(`🧠 [StemLabAIBridge] Đã nạp thành công câu hỏi mới vào Tri thức AI toàn hệ thống: "${cleanQ}"`);
-        }
-      }).catch(err => {
-        console.warn('[StemLabAIBridge] Lỗi gửi POST /api/learned-knowledge:', err.message);
-      });
+      // Disabled direct unauthenticated fetch from iframe
     } catch (_) {}
+    */
 
     // 3. Thông báo cho trang cha (nếu lab nằm trong Iframe)
     try {

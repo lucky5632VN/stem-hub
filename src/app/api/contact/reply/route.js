@@ -24,16 +24,36 @@ export async function POST(req) {
     );
   }
 
-  // 🛡️ BẢO VỆ CỔNG QUẢN TRỊ (OWASP API1 / Broken Object Level Auth): Yêu cầu chữ ký Admin
-  const ADMIN_SECRET = process.env.ADMIN_SECRET_KEY || (process.env.NODE_ENV !== 'production' ? 'stemhub_admin_secret_key_2026' : '');
-  const reqSecret = req.headers.get('x-admin-secret-key') || '';
+  // 🛡️ BẢO VỆ CỔNG QUẢN TRỊ (OWASP API1 / Broken Object Level Auth): Chỉ chấp nhận Bearer ID token có Claims Admin (Fail-Closed)
+  // Đã loại bỏ hoàn toàn kiểm tra khóa chia sẻ
   const authHeader = req.headers.get('authorization') || '';
-  const isAuthBearer = authHeader.startsWith('Bearer ') && authHeader.substring(7) === ADMIN_SECRET;
+  const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : '';
 
-  if (!ADMIN_SECRET || (reqSecret !== ADMIN_SECRET && !isAuthBearer)) {
+  if (!bearerToken) {
     return NextResponse.json(
-      { success: false, error: 'Unauthorized: Bạn không có quyền quản trị để gửi email phản hồi.' },
+      { success: false, error: 'Unauthorized: Cần Bearer ID token của Quản trị viên để gửi phản hồi.' },
       { status: 401, headers: corsHeaders }
+    );
+  }
+
+  const { verifyFirebaseIdToken } = await import('@/lib/firebaseAdmin');
+  const tokenResult = await verifyFirebaseIdToken(bearerToken);
+  if (!tokenResult.valid) {
+    return NextResponse.json(
+      { success: false, error: tokenResult.error || 'Unauthorized: Token xác thực không hợp lệ.' },
+      { status: 401, headers: corsHeaders }
+    );
+  }
+
+  const payload = tokenResult.decoded;
+  const uid = payload.user_id || payload.sub || payload.uid;
+  const adminUids = (process.env.ADMIN_UIDS || '').split(',').map(u => u.trim()).filter(Boolean);
+  const isAdmin = Boolean(payload.admin === true || payload.role === 'admin' || (uid && adminUids.includes(uid)));
+
+  if (!isAdmin) {
+    return NextResponse.json(
+      { success: false, error: 'Forbidden: Bạn không có quyền quản trị để gửi email phản hồi.' },
+      { status: 403, headers: corsHeaders }
     );
   }
 

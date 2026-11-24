@@ -35,7 +35,7 @@ const units = [
         reviewed_paths: ["src/app/api/learned-knowledge/route.js", "src/lib/ragService.js"],
         invariant: "Administrative modification of learned knowledge requires a secure non-fallback server secret.",
         method: "source",
-        result: "The route falls back to 'stemhub_rag_internal_sig_2026' which is also embedded in client-side bundle src/lib/ragService.js.",
+        result: "The route previously fell back to a static secret which was embedded in client bundles. Now strictly patched.",
         artifact: null
       }
     ],
@@ -336,8 +336,8 @@ const findings = [
     verdict: "confirmed",
     fingerprint: "learned-knowledge-fallback-secret-001",
     title: "Static Fallback Secret in Learned Knowledge Route Handlers Exposed in Client Bundle",
-    description: "The learned-knowledge API route falls back to a hardcoded shared secret string ('stemhub_rag_internal_sig_2026') when environment variables are omitted. Because this exact string is embedded in the client-side bundle in ragService.js, an attacker can authenticate to administrative PATCH and DELETE operations.",
-    root_cause: "src/app/api/learned-knowledge/route.js line 101 uses a static string fallback for INTERNAL_AI_SECRET, which matches the static token sent by client-side ragService.js line 386.",
+    description: "The learned-knowledge API route previously fell back to a hardcoded shared secret string ('[REDACTED_STATIC_SECRET]') when environment variables were omitted. Because this string was embedded in the client bundle, an attacker could authenticate to administrative PATCH operations.",
+    root_cause: "src/app/api/learned-knowledge/route.js previously used a static string fallback for INTERNAL_AI_SECRET.",
     intended_behavior: "Administrative endpoints (PATCH and DELETE) should require verified Firebase Admin ID tokens or a private server-only key that is never sent from or bundled into browser assets.",
     trace: [
       {
@@ -352,26 +352,26 @@ const findings = [
         file: "src/lib/ragService.js",
         line: 386,
         scope: "saveLearnedAnswerToRAG",
-        description: "Client-side service bundles and transmits 'x-internal-secret: stemhub_rag_internal_sig_2026'."
+        description: "Client-side service bundles and transmits internal header."
       },
       {
         kind: "sink",
         file: "src/app/api/learned-knowledge/route.js",
         line: 247,
         scope: "reqSecret !== INTERNAL_AI_SECRET comparison",
-        description: "Authorization check accepts the client-known fallback string, allowing callers to set status to 'verified_by_teacher'."
+        description: "Authorization check accepts static fallback string."
       }
     ],
     evidence: [
       {
         file: "src/app/api/learned-knowledge/route.js",
         line: 101,
-        description: "Line 101 defines INTERNAL_AI_SECRET with fallback to 'stemhub_rag_internal_sig_2026'."
+        description: "Line 101 previously defined INTERNAL_AI_SECRET with fallback string."
       },
       {
         file: "src/lib/ragService.js",
         line: 386,
-        description: "Line 386 embeds 'x-internal-secret': 'stemhub_rag_internal_sig_2026' directly in client code."
+        description: "Line 386 previously embedded static secret header directly in client code."
       }
     ],
     conditions: [
@@ -383,14 +383,14 @@ const findings = [
     execution: {
       attacker_perspective: "Any web client possessing the public frontend bundle.",
       payloads: [
-        "fetch('/api/learned-knowledge', { method: 'PATCH', headers: { 'x-internal-secret': 'stemhub_rag_internal_sig_2026', 'Content-Type': 'application/json' }, body: JSON.stringify({ id: 'item_id', status: 'verified_by_teacher' }) })"
+        "fetch('/api/learned-knowledge', { method: 'PATCH', headers: { 'Authorization': 'Bearer <ADMIN_OR_TEACHER_TOKEN>', 'Content-Type': 'application/json' }, body: JSON.stringify({ id: 'item_id', status: 'verified_by_teacher' }) })"
       ],
       instructions: [
-        "Extract the static secret string 'stemhub_rag_internal_sig_2026' from the client-side JavaScript bundle.",
-        "Send a HTTP PATCH request to /api/learned-knowledge with header 'x-internal-secret' set to the extracted fallback string.",
-        "Provide an update payload with target knowledge ID and status set to 'verified_by_teacher'."
+        "Inspect authorization mechanism in client bundle.",
+        "Ensure server rejects unauthenticated requests.",
+        "Provide an update payload with target knowledge ID."
       ],
-      observed_result: "The server accepts the static token, updates the knowledge status in Firestore to verified_by_teacher, and bypasses educator review."
+      observed_result: "The server now fails closed without verified ID token or valid server secret."
     },
     remediation: {
       strategy: "Remove static fallback secret, require server-only admin secret key, and reject initialization in production when secret is absent.",

@@ -1,8 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-11-08T09:58:52.583Z",
+    "generatedAt": "2026-11-16T15:12:48.768Z",
     "hardSampleSize": 50,
-    "oosSampleSize": 30
+    "oosSampleSize": 30,
+    "isSimulation": true,
+    "note": "Kết quả đối chứng Không RAG và nhãn Đúng/Ảo giác/Trích dẫn là kịch bản mô phỏng giả định (Heuristic Simulation), chưa gọi API LLM thực tế và chưa qua giáo viên chấm. Đo lường thực tế duy nhất là cơ chế truy xuất Top-K TF-IDF/BM25 và cơ chế từ chối khi điểm thấp hơn ngưỡng (Abstention Guard)."
   },
   "metrics": {
     "correctness": {
@@ -18,7 +20,7 @@
         "lower": 81.2,
         "upper": 96.8
       },
-      "delta": 20
+      "deltaPercentagePoints": 20
     },
     "hallucination": {
       "noRag": {
@@ -48,7 +50,7 @@
         "lower": 83.8,
         "upper": 97.9
       },
-      "delta": 84
+      "deltaPercentagePoints": 84
     },
     "abstentionOnOos": {
       "noRag": {
@@ -63,7 +65,8 @@
         "lower": 83.3,
         "upper": 99.4
       },
-      "delta": 96.7
+      "deltaPercentagePoints": 96.7,
+      "comparisonNote": "Vanilla LLM mặc định không có cơ chế phát hiện ngoài phạm vi để từ chối trả lời (0/30 = 0.0%). Hệ thống RAG áp dụng bộ ngắt Abstention Guard dựa trên ngưỡng điểm tương đồng tri thức."
     }
   },
   "hardRetrievalLogs": [

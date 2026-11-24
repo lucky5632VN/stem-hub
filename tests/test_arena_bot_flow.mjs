@@ -23,7 +23,8 @@ async function testArenaBotFlow() {
     // 1. Đăng nhập bằng tài khoản test1
     console.log("\n1. Đang đăng nhập tài khoản test1@gmail.com...");
     let userCredential = null;
-    for (const pwd of ['test1123', '123456', 'password123']) {
+    const candidatePasswords = [process.env.TEST_USER_PASSWORD, 'test1123', '123456', 'password123'].filter(Boolean);
+    for (const pwd of candidatePasswords) {
       try {
         userCredential = await signInWithEmailAndPassword(auth, "test1@gmail.com", pwd);
         break;
@@ -139,7 +140,7 @@ async function testArenaBotFlow() {
     await deleteDoc(roomRef);
     console.log("✅ Đã dọn dẹp phòng test thành công!");
 
-    console.log("\n🎉 === TẤT CẢ KIỂM THỬ ARENA BOT ĐÃ VƯỢT QUA 100% THÀNH CÔNG! ===");
+    console.log("\n🎉 === TẤT CẢ KIỂM THỬ ARENA BOT ĐÃ VƯỢT QUA THÀNH CÔNG! ===");
     process.exit(0);
   } catch (err) {
     console.error("🚨 KIỂM THỬ THẤT BẠI:", err);

@@ -7,11 +7,26 @@
  */
 
 export function getGeminiKeys() {
+  // 1. Nếu có biến chỉ định rõ khóa duy nhất cho ablation / thí nghiệm
+  if (process.env.SINGLE_GEMINI_API_KEY) {
+    const single = process.env.SINGLE_GEMINI_API_KEY.replace(/[^A-Za-z0-9_.-]/g, '').trim();
+    if (single.length >= 20 && (single.startsWith('AQ') || single.startsWith('AIza'))) {
+      return [single];
+    }
+  }
+
   const raw = process.env.GEMINI_API_KEY || "";
-  return raw
+  const allKeys = raw
     .split(/[\r\n,]+/)
     .map(k => k.replace(/[^A-Za-z0-9_.-]/g, '').trim())
-    .filter(k => k.length >= 20);
+    .filter(k => k.length >= 20 && (k.startsWith('AQ') || k.startsWith('AIza')));
+
+  // 2. Chế độ MỘT KHÓA duy nhất: Nếu có cờ tắt xoay vòng hoặc cấu hình 1 key -> Chọn khóa HỢP LỆ đầu tiên
+  if (process.env.DISABLE_KEY_ROTATION === 'true' || process.env.SINGLE_KEY_MODE === 'true') {
+    const firstValid = allKeys.find(k => k.length >= 20 && (k.startsWith('AQ') || k.startsWith('AIza')));
+    return firstValid ? [firstValid] : allKeys.slice(0, 1);
+  }
+  return allKeys;
 }
 
 // Dynamic proxy to preserve backwards compatibility with modules reading GEMINI_KEYS
@@ -51,9 +66,11 @@ export async function callResilientGemini({
   contents,
   temperature = 0.3,
   maxOutputTokens = 1500,
-  responseMimeType
+  responseMimeType,
+  apiKey,
+  fixedModel = null
 }) {
-  const keys = getGeminiKeys();
+  const keys = apiKey ? [apiKey.trim()] : getGeminiKeys();
   if (keys.length === 0) {
     throw new Error('Next.js Gateway: Chưa cấu hình biến môi trường GEMINI_API_KEY trong .env.local.');
   }
@@ -86,10 +103,10 @@ export async function callResilientGemini({
 
   let lastError = null;
   let attempts = 0;
-  const now = Date.now();
+  const modelsToTry = fixedModel ? [fixedModel] : RESILIENT_MODELS;
 
-  // Thử lần lượt các mô hình Flash theo thứ tự ưu tiên
-  for (const model of RESILIENT_MODELS) {
+  // Thử các mô hình Flash (hoặc duy nhất fixedModel nếu được chỉ định cho thí nghiệm khoa học)
+  for (const model of modelsToTry) {
     // Lấy điểm bắt đầu xoay vòng để các request song song không bị trùng key
     const startingOffset = (globalThis.__GEMINI_KEY_INDEX__++) % keys.length;
     const maxKeysToTry = Math.min(keys.length, 12);
@@ -102,13 +119,15 @@ export async function callResilientGemini({
       const cooldownKey = `${key}:${model}`;
 
       // Bỏ qua cặp (Key + Model) đang trong thời gian hạ nhiệt
+      const now = Date.now();
       const cooldownUntil = modelKeyCooldownMap.get(cooldownKey) || 0;
       if (now < cooldownUntil) {
+        lastError = lastError || new Error(`Khóa đang hạ nhiệt rate-limit (còn ${Math.ceil((cooldownUntil - now) / 1000)}s)`);
         continue;
       }
 
       try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
         const headers = {
           'Content-Type': 'application/json',
           'x-goog-api-key': key
@@ -133,7 +152,10 @@ export async function callResilientGemini({
           return {
             text: data.candidates[0].content.parts[0].text,
             model,
-            candidates: data.candidates
+            modelVersion: data.modelVersion || model,
+            candidates: data.candidates,
+            usageMetadata: data.usageMetadata || null,
+            httpStatus: resp.status
           };
         }
 
@@ -155,6 +177,7 @@ export async function callResilientGemini({
         if (resp.status === 429 || errMsg.includes('quota') || errMsg.includes('ResourceExhausted')) {
           const isDailyLimit = errMsg.includes('per day limit') || errMsg.includes('requests per day');
           const cooldownDuration = isDailyLimit ? 3600000 : 15000; // 1 giờ nếu hết quota ngày, 15s nếu 429 phút
+          lastError = new Error(`HTTP 429 Rate Limit (${isDailyLimit ? 'Hết quota ngày' : 'Vượt 15 RPM'}): ${errMsg}`);
           modelKeyCooldownMap.set(cooldownKey, Date.now() + cooldownDuration);
           continue;
         }

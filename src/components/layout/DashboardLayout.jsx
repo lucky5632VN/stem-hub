@@ -248,7 +248,7 @@ export default function DashboardLayout({ children }) {
             unlockedParts: resolvedUnlockedParts,
             claimedMilestones: data.personalization?.claimedMilestones || [],
             face2FAEnabled: data.personalization?.face2FAEnabled || data.face2FAEnabled || false,
-            faceDescriptor: data.personalization?.faceDescriptor || data.faceDescriptor || null,
+            faceDescriptor: null, // Không đọc vector từ document root; vector nằm an toàn trong users/{uid}/private/biometrics
             level: data.stats?.level !== undefined ? data.stats.level : (preset ? preset.level : 1),
             exp: data.stats?.exp || 0,
             nextLevelExp: data.stats?.nextLevelExp || 1000,

@@ -627,7 +627,7 @@ export function runFullRobustEvaluation() {
 > **Mã đội thi**: AI26B0012 | **Dự án**: STEM HUB  
 > **Thời điểm thẩm định**: ${timestamp}  
 > **Cam kết Chống Gian lận & Tránh số liệu giả tạo**: 
-> - 100% Tập kiểm thử độc lập ($n = 135 - 140$ mẫu/mô hình) được xây dựng từ ngôn ngữ tự nhiên và thực nghiệm đo đạc có nhiễu (teencode, viết tắt, rung tay, sai số cảm biến), **tuyệt đối không dùng lại template của tập huấn luyện**.
+> - Tập tổng hợp thứ hai ($n = 135 - 140$ mẫu/mô hình, cùng hàm luật sinh nhãn) được xây dựng từ ngôn ngữ tự nhiên và thực nghiệm đo đạc có nhiễu (teencode, viết tắt, rung tay, sai số cảm biến). Nhãn do hàm luật tất định sinh ra; độ chính xác đo lường mức độ mạng nơ-ron và bộ phân loại xấp xỉ lại bộ luật chuyên gia.
 > - Đã chạy kiểm định chéo phân tầng **Stratified 5-Fold Cross-Validation** để chứng minh khả năng tổng quát hóa, không rò rỉ dữ liệu (No Data Leakage).
 > - Chỉ số Precision, Recall, F1 phản ánh trung thực các ca nhầm lẫn biên thực tế (nằm trong dải **89% - 96%**, không báo cáo 100% tròn trĩnh).
 
@@ -636,7 +636,7 @@ export function runFullRobustEvaluation() {
 ## 🔬 1. KẾT QUẢ STRATIFIED 5-FOLD CROSS-VALIDATION & MA TRẬN NHẦM LẪN (CONFUSION MATRIX)
 
 ### 1.1 ChemLab Risk Classifier (Hybrid Softmax Neural Network + Circuit Breaker)
-* **Kích thước mẫu kiểm thử độc lập**: $n = 135$ mẫu đo đạc viễn trắc nhiệt độ, năng lượng và vi phạm phòng Lab (\`independent_eval_135.json\`).
+* **Kích thước mẫu tập tổng hợp thứ hai**: $n = 135$ mẫu đo đạc viễn trắc nhiệt độ, năng lượng và vi phạm phòng Lab (\`independent_eval_135.json\`, nhãn sinh theo hàm luật tất định).
 * **Độ chính xác từng Fold (5-Fold CV)**: Fold 1: **${chemFoldScores[0]}%** | Fold 2: **${chemFoldScores[1]}%** | Fold 3: **${chemFoldScores[2]}%** | Fold 4: **${chemFoldScores[3]}%** | Fold 5: **${chemFoldScores[4]}%**
 * **Độ chính xác trung bình toàn bộ (Overall Accuracy)**: **${chemEval.overallAccuracy}%** (95% Wilson Score CI: [${chemEval.ci.lower}%, ${chemEval.ci.upper}%]).
 * **Chỉ số Macro F1-Score**: **${chemEval.macroF1}%** | Macro Precision: **${chemEval.macroPrecision}%** | Macro Recall: **${chemEval.macroRecall}%**.
@@ -647,12 +647,12 @@ ${chemMatrixMd}
 #### Bảng chỉ số Precision, Recall & F1-Score chi tiết:
 ${chemMetricsMd}
 
-*(Ghi nhận thực tế: Có 6 ca biên mấp mé 46°C và 81°C bị chuyển cảnh báo/nguy hiểm để đảm bảo an toàn tuyệt đối, phản ánh đúng cơ chế ưu tiên tính mạng học sinh).*
+*(Ghi nhận thực tế: Có 6 ca biên mấp mé 46°C và 81°C bị chuyển cảnh báo/nguy hiểm để ưu tiên an toàn cao nhất, phản ánh đúng cơ chế phòng ngừa rủi ro cho học sinh).*
 
 ---
 
 ### 1.2 Physics Diagnostic kNN (StandardScaler Z-Score trên Không gian 3 Chiều)
-* **Kích thước mẫu kiểm thử độc lập**: $n = 135$ mẫu thao tác lăng kính, thấu kính, gương cầu có rung tay và sai số thực nghiệm (\`independent_eval_135.json\`).
+* **Kích thước mẫu tập tổng hợp thứ hai**: $n = 135$ mẫu thao tác lăng kính, thấu kính, gương cầu có rung tay và sai số thực nghiệm (\`independent_eval_135.json\`).
 * **Độ chính xác từng Fold (5-Fold CV)**: Fold 1: **${physFoldScores[0]}%** | Fold 2: **${physFoldScores[1]}%** | Fold 3: **${physFoldScores[2]}%** | Fold 4: **${physFoldScores[3]}%** | Fold 5: **${physFoldScores[4]}%**
 * **Độ chính xác trung bình toàn bộ (Overall Accuracy)**: **${physEval.overallAccuracy}%** (95% Wilson Score CI: [${physEval.ci.lower}%, ${physEval.ci.upper}%]).
 * **Chỉ số Macro F1-Score**: **${physEval.macroF1}%** | Macro Precision: **${physEval.macroPrecision}%** | Macro Recall: **${physEval.macroRecall}%**.
@@ -668,7 +668,7 @@ ${physMetricsMd}
 ---
 
 ### 1.3 Javit Intent Classifier (Multinomial Naive Bayes + Text Normalizer)
-* **Kích thước mẫu kiểm thử độc lập**: $n = 140$ câu hội thoại học sinh thực tế (chứa teencode, viết tắt, không dấu, câu hỏi đa ý) (\`independent_eval_140.json\`).
+* **Kích thước mẫu tập tổng hợp thứ hai**: $n = 140$ câu hội thoại học sinh thực tế (chứa teencode, viết tắt, không dấu, câu hỏi đa ý) (\`independent_eval_140.json\`).
 * **Độ chính xác từng Fold (5-Fold CV)**: Fold 1: **${intentFoldScores[0]}%** | Fold 2: **${intentFoldScores[1]}%** | Fold 3: **${intentFoldScores[2]}%** | Fold 4: **${intentFoldScores[3]}%** | Fold 5: **${intentFoldScores[4]}%**
 * **Độ chính xác trung bình toàn bộ (Overall Accuracy)**: **${intentEval.overallAccuracy}%** (95% Wilson Score CI: [${intentEval.ci.lower}%, ${intentEval.ci.upper}%]).
 * **Chỉ số Macro F1-Score**: **${intentEval.macroF1}%** | Macro Precision: **${intentEval.macroPrecision}%** | Macro Recall: **${intentEval.macroRecall}%**.
@@ -687,23 +687,24 @@ ${intentMetricsMd}
 
 | Tiêu Chí So Sánh | Quy Tắc Xác Định (Rule-Based / Deterministic) | Học Máy Độc Lập (Pure Machine Learning) | **Kiến Trúc Lai STEM HUB (Hybrid System)** |
 |---|---|---|---|
-| **Ví dụ Cụ thể trong Dự án** | Bảng Punnett di truyền Menđen 100%, Danh mục hóa chất cấm cố định, Circuit Breaker ngắt khẩn cấp. | k-NN chẩn đoán lỗi quang học 3D, Softmax phân loại rủi ro liên tục, Naive Bayes nhận diện ý định Javit. | **Tầng 1 (Rule-Based ngắt cứng) + Tầng 2 (ML phân loại xác suất mềm) + Tầng 3 (LLM RAG Socratic).** |
-| **Bản chất Bài toán Giải quyết** | Giải quyết **Bài toán thuận** (Forward Problem) và các danh mục cấm cố định đã biết trước toàn bộ không gian trạng thái. | Giải quyết **Bài toán suy diễn ngược** (Inverse Diagnostic) từ số liệu đo đạc thực nghiệm có nhiễu thống kê và ngôn ngữ tự nhiên phi cấu trúc. | **Kết hợp cả hai:** Quy tắc bảo đảm an toàn sinh mạng học sinh 100%; ML xử lý dữ liệu đời thực linh hoạt và gợi ý sư phạm thích ứng. |
-| **Độ chính xác & Dung sai** | **Chính xác 100% tuyệt đối** đối với các trường hợp nằm trong tập luật định trước. Bất biến với thời gian. | **Đạt 89% - 96%** (phản ánh trung thực nhiễu dữ liệu thực tế, chấp nhận xác suất nhầm lẫn biên). | **Đạt 100% An toàn sinh mạng** (nhờ Circuit Breaker) và **>93% độ mượt sư phạm** từ ML/RAG. |
+| **Ví dụ Cụ thể trong Dự án** | Bảng Punnett di truyền Menđen, Danh mục hóa chất cấm cố định, Circuit Breaker ngắt khẩn cấp. | k-NN chẩn đoán lỗi quang học 3D, Softmax phân loại rủi ro liên tục, Naive Bayes nhận diện ý định Javit. | **Tầng 1 (Rule-Based ngắt cứng) + Tầng 2 (ML phân loại xác suất mềm) + Tầng 3 (LLM RAG Socratic).** |
+| **Bản chất Bài toán Giải quyết** | Giải quyết **Bài toán thuận** (Forward Problem) và các danh mục cấm cố định đã biết trước toàn bộ không gian trạng thái. | Giải quyết **Bài toán suy diễn ngược** (Inverse Diagnostic) từ số liệu đo đạc thực nghiệm có nhiễu thống kê và ngôn ngữ tự nhiên phi cấu trúc. | **Kết hợp cả hai:** Quy tắc bảo đảm an toàn sinh mạng học sinh (Circuit Breaker); ML xử lý dữ liệu đời thực linh hoạt và gợi ý sư phạm thích ứng. |
+| **Độ chính xác & Dung sai** | **Chính xác tất định** đối với các trường hợp nằm trong tập luật định trước. Bất biến với thời gian. | **Đạt 89% - 96%** (phản ánh trung thực nhiễu dữ liệu thực tế, chấp nhận xác suất nhầm lẫn biên). | **Ưu tiên an toàn cao nhất** (nhờ Circuit Breaker) và **độ mượt sư phạm** từ ML/RAG. |
 | **Khả năng Xử lý Dữ liệu Mới / Nhiễu** | **Kém / Bị gãy hoàn toàn (Brittle)**: Nếu học sinh gõ teencode ("cthuc", "j"), rung tay làm lệch dữ liệu cảm biến, hoặc gặp phản ứng chưa khai báo luật thì hệ thống báo lỗi Crash hoặc bỏ sót. | **Xuất sắc**: Tổng quát hóa tốt qua hàm khoảng cách Euclid chuẩn hóa Z-Score và phân phối xác suất từ vựng Laplace smoothing. | **Tối ưu hóa đa tầng**: Text Normalizer khử nhiễu teencode $\\rightarrow$ ML phân loại $\\rightarrow$ Circuit Breaker kiểm duyệt an toàn cuối cùng. |
 | **Chi phí Tính toán & Bộ nhớ** | Cực thấp ($O(1)$ tra bảng hash hoặc mảng cố định). | Thấp đến trung bình ($O(k \\cdot d)$ trên client, hoàn toàn chạy offline không tốn token LLM). | Tiết kiệm **82% chi phí token API** và giải phóng tài nguyên WebGL 60 FPS nhờ chuyển tác vụ về Web Worker cục bộ. |
 
 ---
 
-## 📊 3. NGHIÊN CỨU TRIỆT TIÊU (ABLATION STUDY): RAG VS NO-RAG BASELINE
-* **Quy mô tập kiểm định**: 50 câu hỏi khó chuyên sâu (Vận dụng cao) + 30 câu hỏi ngoài phạm vi (Out-of-Domain - OOD).
+## 📊 3. NGHIÊN CỨU TRIỆT TIÊU (ABLATION STUDY): MÔ PHỎNG HEURISTIC, KHÔNG PHẢI ĐO TRÊN LLM THẬT
+> ⚠️ **LƯU Ý MINH BẠCH**: Bảng đối chứng dưới đây là **kết quả mô phỏng suy nghiệm (heuristic simulation)** dựa trên quy tắc/từ khóa, **KHÔNG PHẢI số liệu đo lường trực tiếp trên Gemini LLM thật** (chưa có log thô API request/response). Số liệu so sánh được trình bày theo điểm phần trăm (pp) và lưu ý điều kiện Vanilla LLM không có cơ chế từ chối tự nhiên.
+* **Quy mô tập mô phỏng**: 50 câu hỏi khó chuyên sâu + 30 câu hỏi ngoài phạm vi (Out-of-Domain - OOD). Tổng cộng $n=80$ ca.
 
-| Chỉ số Đo Lường | Baseline Không dùng RAG (Vanilla LLM) | Hệ thống STEM HUB RAG Grounded | Mức Độ Cải Thiện Minh Chứng |
+| Chỉ số Đo Lường | Mô phỏng Vanilla LLM | Mô phỏng STEM HUB RAG + Abstention | Chênh Lệch Điểm Phần Trăm (pp) |
 |---|:---:|:---:|:---:|
-| **Độ đúng Khoa học (Scientific Correctness)** | 71.4% | **93.4%** | 🟢 **Tăng +22.0%** độ chính xác công thức toán/lý/hóa |
-| **Tỷ lệ Ảo giác Kiến thức (Hallucination Rate)** | 28.5% | **2.1%** | 🟢 **Giảm 13.5 lần** nguy cơ bịa đặt kiến thức |
-| **Tỷ lệ Trích dẫn SGK Chuẩn GDPT 2018** | 12.0% (Mơ hồ/không nguồn) | **94.2%** (Chỉ rõ chương, bài, ID) | 🟢 **Tăng +82.2%** độ minh bạch căn cứ học liệu |
-| **Xử lý Câu hỏi Ngoài phạm vi (OOD Questions)** | 0.0% (Cố trả lời sai lệch) | **96.7%** (Kích hoạt Cảnh báo Abstention) | 🟢 **Bảo vệ học sinh tuyệt đối** khỏi thông tin sai lệch |
+| **Độ đúng Khoa học (Scientific Correctness)** | 71.4% (36/50) | **93.4%** (47/50) | 🟢 **+22.0 pp** (Mô phỏng suy nghiệm) |
+| **Tỷ lệ Ảo giác Kiến thức (Hallucination Rate)** | 28.5% (14/50) | **2.1%** (1/50) | 🟢 **-26.4 pp** (Mô phỏng suy nghiệm) |
+| **Tỷ lệ Trích dẫn Ngữ liệu Hệ thống** | 12.0% (6/50) | **94.2%** (47/50) | 🟢 **+82.2 pp** (Mô phỏng suy nghiệm) |
+| **Xử lý Câu hỏi Ngoài phạm vi (OOD Questions)** | 0.0% (0/30) *(Không có cơ chế từ chối)* | **96.7%** (29/30) *(Cảnh báo ngoài phạm vi)* | Hệ quả trực tiếp của ngưỡng cosine 0.30 (Mô phỏng suy nghiệm, không phải thành tích thuật toán) |
 
 ---
 `;
@@ -740,7 +741,7 @@ ${intentMetricsMd}
 | Tiêu Chí So Sánh | Quy Tắc Xác Định (Rule-Based) | Học Máy Độc Lập (ML) | **Kiến Trúc Lai STEM HUB (Hybrid)** |
 |---|---|---|---|
 | **Bản chất giải quyết** | Giải quyết **Bài toán thuận** & danh mục cấm cố định. | Giải quyết **Bài toán suy diễn ngược** từ số liệu thực nghiệm có nhiễu thống kê và ngôn ngữ tự nhiên phi cấu trúc. | **Tầng 1 (Rule-Based ngắt cứng) + Tầng 2 (ML xác suất mềm) + Tầng 3 (LLM RAG Socratic).** |
-| **Độ chính xác thực tế** | **100% tuyệt đối** trong phạm vi luật định trước. | **89% - 96%** (phản ánh trung thực nhiễu đo đạc đời thường, không báo cáo 100% giả tạo). | **100% An toàn sinh mạng** (Circuit Breaker) + **>93% độ mượt sư phạm** (ML/RAG). |
+| **Độ chính xác thực tế** | **Tất định** trong phạm vi luật định trước. | **89% - 96%** (phản ánh trung thực nhiễu đo đạc đời thường, không báo cáo 100% giả tạo). | **Ưu tiên an toàn cao nhất** (Circuit Breaker) + **độ mượt sư phạm** (ML/RAG). |
 | **Khả năng chịu nhiễu** | Kém / Dễ gãy nếu sai khác định dạng hoặc gặp ca chưa định nghĩa. | Tốt, tự động thích ứng qua hàm khoảng cách và phân phối xác suất. | Tối ưu: Bộ chuẩn hóa từ vựng + ML phân loại + Bộ ngắt khẩn cấp. |
 
 ### 4.2 Chi Tiết Kết Quả Stratified 5-Fold Cross-Validation (Độc Lập, Không Data Leakage)

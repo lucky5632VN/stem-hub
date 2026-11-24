@@ -1,4 +1,5 @@
 import ragData from '../data/rag-vectors.json' with { type: 'json' };
+import globalLearnedData from '../data/global-learned-knowledge.json' with { type: 'json' };
 import { db } from './firebase.js';
 import { collection, doc, setDoc, getDocs, query, orderBy, limit, serverTimestamp } from 'firebase/firestore';
 
@@ -48,6 +49,20 @@ const VIETNAMESE_STOP_WORDS = new Set([
 ]);
 
 /**
+ * Chuẩn hóa loại bỏ dấu tiếng Việt (Unaccented Auxiliary Normalizer)
+ */
+export function stripVietnamese(str = '') {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[đĐ]/g, 'd')
+    .toLowerCase()
+    .replace(/[^\w\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
  * Chuẩn hóa câu hỏi: Loại bỏ từ dừng, dấu câu, đưa về chữ thường NFC chuẩn hóa & đồng nhất hoá/hóa
  */
 export function normalizeQuery(text) {
@@ -81,8 +96,19 @@ export async function ensureGlobalCorpusLoaded() {
       if (data.success && Array.isArray(data.learnedDocs) && data.learnedDocs.length > 0) {
         const local = getDynamicCorpus();
         const map = new Map();
-        data.learnedDocs.forEach(item => map.set(item.id, item));
-        local.forEach(item => map.set(item.id, item));
+        // 🛡️ BẢO VỆ RAG: Lọc nghiêm ngặt chỉ lấy tri thức đã giáo viên duyệt thật, không bị cách ly, không phải demo
+        data.learnedDocs.forEach(item => {
+          const isVerified = (item.status === 'verified_by_teacher' || item.teacherVerified === true || item.isTeacherVerified === true) && !item.quarantined && !item.isDemo;
+          if (isVerified) {
+            map.set(item.id, item);
+          }
+        });
+        local.forEach(item => {
+          const isVerified = (item.status === 'verified_by_teacher' || item.teacherVerified === true || item.isTeacherVerified === true) && !item.quarantined && !item.isDemo;
+          if (isVerified) {
+            map.set(item.id, item);
+          }
+        });
         dynamicCorpusCache = Array.from(map.values());
       }
     }
@@ -97,10 +123,11 @@ export function getDynamicCorpus() {
     try {
       const raw = localStorage.getItem(DYNAMIC_KNOWLEDGE_KEY);
       const parsed = raw ? JSON.parse(raw) : [];
-      // Tự động thanh lọc mọi item có dính thông tin cá nhân
+      // Tự động thanh lọc mọi item chưa được giáo viên duyệt, bị cách ly, là dữ liệu DEMO hoặc dính thông tin cá nhân
       dynamicCorpusCache = (Array.isArray(parsed) ? parsed : []).filter(item => {
+        const isVerified = (item.status === 'verified_by_teacher' || item.teacherVerified === true || item.isTeacherVerified === true) && !item.quarantined && !item.isDemo;
         const full = ((item.query || '') + ' ' + (item.answer || '')).toLowerCase();
-        return !containsPersonalOrSystemInfo(full) && !isGreetingOrChitchat(item.query);
+        return isVerified && !containsPersonalOrSystemInfo(full) && !isGreetingOrChitchat(item.query);
       });
       // Kích hoạt đồng bộ nền từ API server để luôn có dữ liệu mới nhất
       ensureGlobalCorpusLoaded().catch(() => {});
@@ -108,14 +135,12 @@ export function getDynamicCorpus() {
       dynamicCorpusCache = [];
     }
   } else {
-    // Môi trường Server / Node runtime: Đọc trực tiếp từ file tri thức toàn cục
+    // Môi trường Server / Node runtime: Đọc trực tiếp từ tệp tri thức toàn cục đã import (chỉ lấy mục đã duyệt, không cách ly, không demo)
     try {
-      const fs = require('fs');
-      const path = require('path');
-      const p = path.join(process.cwd(), 'src', 'data', 'global-learned-knowledge.json');
-      if (fs.existsSync(p)) {
-        dynamicCorpusCache = JSON.parse(fs.readFileSync(p, 'utf8'));
-      }
+      const raw = Array.isArray(globalLearnedData) ? globalLearnedData : [];
+      dynamicCorpusCache = raw.filter(item =>
+        (item.status === 'verified_by_teacher' || item.teacherVerified === true || item.isTeacherVerified === true) && !item.quarantined && !item.isDemo
+      );
     } catch (_) {
       dynamicCorpusCache = [];
     }
@@ -127,8 +152,20 @@ export function getDynamicCorpus() {
  * Đồng bộ Tri thức tự học TRỰC TIẾP TỪ FIREBASE FIRESTORE (Collection: learned_knowledge)
  * Giúp TOÀN BỘ học sinh và máy tính trong hệ thống dùng chung 1 ngân hàng tri thức thời gian thực
  */
-export async function syncGlobalLearnedKnowledge() {
-  if (typeof window === 'undefined') return [];
+export async function syncGlobalLearnedKnowledge(directDocs = null) {
+  if (Array.isArray(directDocs)) {
+    const verifiedDocs = directDocs.filter(item => {
+      const isVerified = (item.status === 'verified_by_teacher' || item.teacherVerified === true) && !item.quarantined && !item.isDemo;
+      return isVerified;
+    }).map(d => ({
+      ...d,
+      normalizedQuery: d.normalizedQuery || normalizeQuery(d.query),
+      isLearned: true
+    }));
+    dynamicCorpusCache = verifiedDocs;
+    return dynamicCorpusCache;
+  }
+  if (typeof window === 'undefined') return dynamicCorpusCache || [];
   try {
     let firestoreDocs = [];
 
@@ -140,8 +177,8 @@ export async function syncGlobalLearnedKnowledge() {
         snapshot.forEach((docSnap) => {
           const data = docSnap.data();
           if (data && data.query && data.answer) {
-            // 🛡️ CHỈ LẤY CÁC MỤC ĐÃ ĐƯỢC GIÁO VIÊN PHÊ DUYỆT (YÊU CẦU 1)
-            const isVerified = data.status === 'verified_by_teacher' || data.teacherVerified === true;
+            // 🛡️ CHỈ LẤY CÁC MỤC ĐÃ ĐƯỢC GIÁO VIÊN PHÊ DUYỆT THẬT, KHÔNG BỊ CÁCH LY, KHÔNG PHẢI DEMO
+            const isVerified = (data.status === 'verified_by_teacher' || data.teacherVerified === true) && !data.quarantined && !data.isDemo;
             if (isVerified) {
               const full = (data.query + ' ' + data.answer).toLowerCase();
               if (!containsPersonalOrSystemInfo(full) && !isGreetingOrChitchat(data.query)) {
@@ -166,7 +203,7 @@ export async function syncGlobalLearnedKnowledge() {
         const data = await res.json();
         if (data.success && Array.isArray(data.learnedDocs)) {
           firestoreDocs = data.learnedDocs.filter(item => {
-            const isVerified = item.status === 'verified_by_teacher' || item.teacherVerified === true;
+            const isVerified = (item.status === 'verified_by_teacher' || item.teacherVerified === true) && !item.quarantined && !item.isDemo;
             const full = ((item.query || '') + ' ' + (item.answer || '')).toLowerCase();
             return isVerified && !containsPersonalOrSystemInfo(full) && !isGreetingOrChitchat(item.query);
           });
@@ -200,6 +237,11 @@ export async function syncGlobalLearnedKnowledge() {
         answer: item.answer ? (item.answer.length > 300 ? item.answer.slice(0, 300) + '...' : item.answer) : '',
         subject: item.subject ? item.subject.toLowerCase() : 'stem',
         topic: item.topic,
+        status: item.status,
+        teacherVerified: Boolean(item.teacherVerified),
+        isTeacherVerified: Boolean(item.isTeacherVerified),
+        quarantined: Boolean(item.quarantined),
+        isDemo: Boolean(item.isDemo),
         createdAt: item.createdAt,
         isLearned: true
       }));
@@ -280,7 +322,7 @@ export function cosineSimilarity(vecA, vecB) {
 
 /**
  * Chuẩn hóa & Loại bỏ triệt để lời chào, xưng hô cá nhân trước khi nạp vào Ngân hàng Tri thức RAG
- * Chỉ giữ lại phần kiến thức, định nghĩa, công thức khoa học trung tính 100%
+ * Chỉ giữ lại phần kiến thức, định nghĩa, công thức khoa học trung tính
  */
 export function sanitizeAnswerForStorage(answerText) {
   if (!answerText) return '';
@@ -366,30 +408,20 @@ export async function saveLearnedAnswerToRAG(query, answer, subject = 'stem', to
     answer: cleanA,
     subject: normSubject,
     topic: topic || 'Tri thức tự học AI toàn hệ thống',
-    content: `[Tự học AI toàn hệ thống] ${cleanQ}: ${cleanA}`,
+    content: `[Chờ giáo viên duyệt] ${cleanQ}: ${cleanA}`,
     queryTFIDF: queryTFIDF,
     tfidfVector: contentTFIDF,
     isLearned: true,
-    // 🛡️ TỰ ĐỘNG LƯU VÀ KÍCH HOẠT: Vì đã qua prompt Gemini chuẩn và bộ lọc PII, tri thức dùng được ngay cho học sinh khác
-    status: 'verified_by_teacher',
-    teacherVerified: true,
-    verifiedAt: new Date().toISOString(),
-    verifiedBy: 'AI STEM HUB Auto-Verified (Hội đồng Thẩm định Tự động)',
+    // 🛡️ BẢO VỆ RAG: Tri thức mới nạp mặc định pending, không vào RAG khi chưa được giáo viên duyệt
+    status: 'pending_review',
+    teacherVerified: false,
+    quarantined: false,
+    verifiedAt: null,
+    verifiedBy: null,
     createdAt: new Date().toISOString()
   };
 
-  if (existingIdx >= 0) {
-    currentDynamic[existingIdx] = newItem;
-  } else {
-    currentDynamic.unshift(newItem);
-  }
-
-  // Giới hạn tối đa 5000 chunk tri thức tự học trong bộ nhớ
-  if (currentDynamic.length > 5000) currentDynamic.pop();
-
-  dynamicCorpusCache = currentDynamic;
-
-  // 1. GHI TRỰC TIẾP LÊN FIREBASE FIRESTORE TOÀN HỆ THỐNG
+  // 1. GHI TRỰC TIẾP LÊN FIREBASE FIRESTORE VỚI TRẠNG THÁI PENDING (CHỜ GIÁO VIÊN THẨM ĐỊNH)
   try {
     if (db) {
       const docRef = doc(collection(db, 'learned_knowledge'), docId);
@@ -401,26 +433,30 @@ export async function saveLearnedAnswerToRAG(query, answer, subject = 'stem', to
         subject: normSubject,
         topic: topic || 'Tri thức tự học AI toàn hệ thống',
         isLearned: true,
-        status: 'verified_by_teacher',
-        teacherVerified: true,
-        verifiedAt: serverTimestamp(),
-        verifiedBy: 'AI STEM HUB Auto-Verified (Hội đồng Thẩm định Tự động)',
+        status: 'pending_review',
+        teacherVerified: false,
+        quarantined: false,
+        verifiedAt: null,
+        verifiedBy: null,
         createdAt: serverTimestamp()
       });
-      console.log(`🔥 [RAG FIRESTORE REALTIME] Đã ghi nạp tri thức (Tự động kích hoạt Cache): "${cleanQ}"`);
+      console.log(`⏳ [RAG FIRESTORE REALTIME] Đã ghi nạp tri thức mới (Chờ giáo viên thẩm định): "${cleanQ}"`);
     }
   } catch (err) {
     console.warn('[RAG FIRESTORE] Lỗi ghi trực tiếp Firestore:', err.message);
   }
 
-  // 2. GHI NẠP DỰ PHÒNG QUA SERVER API (KÈM CHỮ KÝ NỘI BỘ HỢP LỆ)
+  // 2. GHI NẠP DỰ PHÒNG QUA SERVER API
   try {
+    const { auth } = await import('./firebase.js');
+    const token = auth && auth.currentUser ? await auth.currentUser.getIdToken().catch(() => '') : '';
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
     fetch('/api/learned-knowledge', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-internal-secret': 'stemhub_rag_internal_sig_2026'
-      },
+      headers,
       body: JSON.stringify(newItem)
     }).catch(() => {});
   } catch (_) {}
@@ -449,8 +485,27 @@ export async function saveLearnedAnswerToRAG(query, answer, subject = 'stem', to
 export function detectQuerySubject(query) {
   if (!query) return null;
   const qLower = query.toLowerCase().replace(/hoá/g, 'hóa').replace(/vật lí/g, 'vật lý');
-  if (qLower.includes('hóa') || qLower.includes('hoá') || qLower.includes('este') || qLower.includes('axit') || qLower.includes('nguyên tử') || qLower.includes('dung dịch')) return 'hoa';
-  if (qLower.includes('lý') || qLower.includes('lí') || qLower.includes('vật lý') || qLower.includes('vật lí') || qLower.includes('sóng') || qLower.includes('dao động') || qLower.includes('điện')) return 'ly';
+
+  // 1. Chặn đứng các môn ngoài phạm vi STEM (Địa lí, Sử, Văn, Anh...)
+  const isNonStem = /địa\s*l[ýí]|lịch\s*sử|\bsử\b|ngữ\s*văn|văn\s*học|tiếng\s*anh|ngoại\s*ngữ|gdcd|kinh\s*tế\s*pháp\s*luật|triết\s*học/i.test(qLower);
+  if (isNonStem) return null;
+
+  // 2. Nhận diện các môn STEM chuẩn
+  if (qLower.includes('hóa') || qLower.includes('este') || qLower.includes('axit') || qLower.includes('nguyên tử') || qLower.includes('dung dịch')) return 'hoa';
+  if (
+    qLower.includes('vật lý') || 
+    qLower.includes('vật lí') || 
+    qLower.includes('môn lý') || 
+    qLower.includes('môn lí') || 
+    qLower.includes('bài tập lý') || 
+    qLower.includes('học lý') ||
+    qLower.includes('dao động') ||
+    qLower.includes('con lắc') ||
+    qLower.includes('sóng cơ') ||
+    qLower.includes('thấu kính') ||
+    qLower.includes('quang học') ||
+    (!/(địa|tâm|triết|quản|xử|chân|hợp|vô|pháp|đạo|lý\s*do)\s*l[ýí]/i.test(qLower) && (qLower.includes(' lý') || qLower.includes(' lí') || qLower.startsWith('lý') || qLower.startsWith('lí')))
+  ) return 'ly';
   if (qLower.includes('toán') || qLower.includes('hàm số') || qLower.includes('logarit') || qLower.includes('tích phân') || qLower.includes('đạo hàm')) return 'toan';
   if (qLower.includes('sinh') || qLower.includes('sinh học') || qLower.includes('adn') || qLower.includes('gen') || qLower.includes('tế bào') || qLower.includes('di truyền')) return 'sinh';
   return null;
@@ -542,9 +597,9 @@ export function checkRAGCacheHit(query, minScoreThreshold = 0.55) {
   const userQueryTFIDF = buildQueryTFIDFVector(tokenize(userNormQ));
   const dynamicDocs = getDynamicCorpus();
 
-  // Tổng hợp kho tìm kiếm: Tri thức tự học (chưa bị từ chối) + 303 chủ đề SGK chuẩn
+  // Tổng hợp kho tìm kiếm: Tri thức tự học (đã được giáo viên phê duyệt thật) + 303 chủ đề ngữ liệu chuẩn
   const candidates = [
-    ...dynamicDocs.filter(d => d.status !== 'rejected'),
+    ...dynamicDocs.filter(d => (d.status === 'verified_by_teacher' || d.teacherVerified === true) && !d.quarantined && !d.isDemo),
     ...corpus.map(c => ({
       query: c.topic,
       normalizedQuery: normalizeQuery(c.topic),
@@ -628,13 +683,23 @@ export function checkRAGCacheHit(query, minScoreThreshold = 0.55) {
   }
 
   if (bestMatch && maxScore >= minScoreThreshold) {
+    const isVerified = Boolean((bestMatch.isTeacherVerified || bestMatch.teacherVerified) && bestMatch.status === 'verified_by_teacher' && !bestMatch.quarantined && !bestMatch.isDemo);
     return {
       hit: true,
       score: Math.min(1.0, maxScore),
       cachedAnswer: bestMatch.answer || bestMatch.content,
       topic: bestMatch.topic || 'Tri thức tự học AI toàn hệ thống',
       subject: bestMatch.subject,
-      query: bestMatch.query || bestMatch.topic
+      query: bestMatch.query || bestMatch.topic,
+      isLearned: Boolean(bestMatch.isLearned),
+      isTeacherVerified: isVerified,
+      teacherVerified: isVerified,
+      verifiedBy: bestMatch.verifiedBy || (isVerified ? 'Giáo viên THPT' : null),
+      verifiedAt: bestMatch.verifiedAt || null,
+      reviewId: bestMatch.reviewId || null,
+      rubricScore: bestMatch.rubricScore || null,
+      expertReviewUrl: null,
+      sourceType: bestMatch.isLearned ? 'learned_knowledge' : (bestMatch.sourceType || 'team_summary')
     };
   }
 
@@ -653,9 +718,12 @@ export function retrieveTopK(query, k = 3) {
   if (Object.keys(queryTFIDF).length === 0) return [];
 
   const dynamicDocs = getDynamicCorpus();
-  // 🛡️ YÊU CẦU 1: Chỉ nạp vào ngữ cảnh RAG các tri thức tự học đã được giáo viên phê duyệt
-  const verifiedDynamic = dynamicDocs.filter(doc => doc.status === 'verified_by_teacher' || doc.teacherVerified === true);
+  // 🛡️ Chỉ nạp vào ngữ cảnh RAG các tri thức tự học đã được giáo viên phê duyệt thật, không bị cách ly, không phải demo
+  const verifiedDynamic = dynamicDocs.filter(doc => (doc.status === 'verified_by_teacher' || doc.teacherVerified === true) && !doc.quarantined && !doc.isDemo);
   const fullCorpus = [...verifiedDynamic, ...corpus];
+
+  const qUnaccent = stripVietnamese(query).split(/\s+/).filter(t => t.length > 1);
+  const isUnaccented = query.toLowerCase().trim() === stripVietnamese(query);
 
   const scored = fullCorpus.map((doc) => {
     const rawCos = cosineSimilarity(queryTFIDF, doc.tfidfVector || buildQueryTFIDFVector(tokenize(`${doc.query || ''} ${doc.answer || doc.content || ''}`)));
@@ -671,9 +739,22 @@ export function retrieveTopK(query, k = 3) {
     // Chuẩn hóa TF-IDF: Ngưỡng thô 0.18 quy đổi thành điểm chuẩn hóa 0.30 (hệ số tỉ lệ / 0.60)
     const normTFIDF = Math.min(1.0, rawCos / 0.60);
 
-    // 🛡️ CÔNG THỨC HYBRID GROUNDING SCORE (THỐNG NHẤT 100% VỚI HỒ SƠ MINH CHỨNG):
+    // 🛡️ CÔNG THỨC HYBRID GROUNDING SCORE (THỐNG NHẤT VỚI THỰC NGHIỆM RETRIEVAL BENCHMARK):
     // GroundingScore = 0.6 * Norm_TFIDF + 0.4 * BM25_Overlap
     let hybridScore = (0.6 * normTFIDF) + (0.4 * bm25Overlap);
+
+    // Bổ trợ so khớp phụ không dấu khi người dùng gõ không dấu / teencode (Variant 2)
+    if (isUnaccented) {
+      const docUnaccentStr = stripVietnamese(`${doc.topic || ''} ${doc.content || doc.answer || ''}`);
+      let unaccentMatches = 0;
+      for (const ut of qUnaccent) {
+        if (docUnaccentStr.includes(ut)) unaccentMatches++;
+      }
+      const unaccentScore = qUnaccent.length > 0 ? (unaccentMatches / qUnaccent.length) : 0;
+      if (unaccentScore > 0) {
+        hybridScore = (0.7 * hybridScore) + (0.3 * unaccentScore);
+      }
+    }
 
     // Thưởng điểm cho tài liệu tự học đã được kiểm duyệt
     if (doc.isLearned) hybridScore *= 1.4;
@@ -683,7 +764,7 @@ export function retrieveTopK(query, k = 3) {
     const docSubj = (doc.subject || '').toLowerCase();
     if (docSubj === 'hoa' && (qLower.includes('hóa') || qLower.includes('hoá') || qLower.includes('este') || qLower.includes('axit'))) {
       hybridScore *= 1.3;
-    } else if (docSubj === 'ly' && (qLower.includes('lý') || qLower.includes('lí') || qLower.includes('sóng') || qLower.includes('dao động'))) {
+    } else if (docSubj === 'ly' && (qLower.includes('vật lý') || (!/địa\s*l[ýí]/i.test(qLower) && (/\bl[ýí]\b/i.test(qLower) || qLower.includes('sóng') || qLower.includes('dao động'))))) {
       hybridScore *= 1.3;
     } else if (docSubj === 'toan' && (qLower.includes('toán') || qLower.includes('hàm số') || qLower.includes('tích phân'))) {
       hybridScore *= 1.3;
@@ -693,15 +774,26 @@ export function retrieveTopK(query, k = 3) {
 
     const finalScore = Math.min(1.0, hybridScore);
 
+    const isVerified = Boolean((doc.isTeacherVerified || doc.teacherVerified) && doc.status === 'verified_by_teacher' && !doc.quarantined && !doc.isDemo);
     return {
       id: doc.id,
+      sampleId: doc.sampleId,
       subject: doc.subject,
       topic: doc.topic,
+      sourceType: doc.isLearned ? 'learned_knowledge' : (doc.sourceType || 'team_summary'),
       content: doc.content || doc.answer,
       score: finalScore,
       rawTFIDF: rawCos,
       normTFIDF: normTFIDF,
-      bm25Score: bm25Overlap
+      bm25Score: bm25Overlap,
+      isLearned: Boolean(doc.isLearned),
+      isTeacherVerified: isVerified,
+      teacherVerified: isVerified,
+      verifiedBy: doc.verifiedBy || (isVerified ? 'Giáo viên THPT' : null),
+      verifiedAt: doc.verifiedAt || null,
+      reviewId: doc.reviewId || null,
+      rubricScore: doc.rubricScore || null,
+      expertReviewUrl: null
     };
   });
 
@@ -753,7 +845,7 @@ export async function retrieveTopKAsync(query, k = 3) {
     const queryTFIDF = buildQueryTFIDFVector(queryTokens);
     if (Object.keys(queryTFIDF).length === 0) return [];
 
-    const dynamicDocs = getDynamicCorpus();
+    const dynamicDocs = getDynamicCorpus().filter(doc => (doc.status === 'verified_by_teacher' || doc.teacherVerified === true) && !doc.quarantined && !doc.isDemo);
     const fullCorpus = [...dynamicDocs, ...corpus];
 
     return new Promise((resolve) => {

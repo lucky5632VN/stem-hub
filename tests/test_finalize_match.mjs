@@ -18,7 +18,8 @@ const db = getFirestore(app);
 
 async function testFinalize() {
   console.log("=== [TEST FINALIZE MATCH FLOW] ===");
-  const userCredential = await signInWithEmailAndPassword(auth, 'test1@gmail.com', 'test1123');
+  const testPassword = process.env.TEST_USER_PASSWORD || 'test1123';
+  const userCredential = await signInWithEmailAndPassword(auth, 'test1@gmail.com', testPassword);
   const user = userCredential.user;
   console.log("✅ Đăng nhập thành công:", user.uid);
 

@@ -1,15 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 
-// Generate 150 highly structured, scientifically rigorous benchmark test cases
+// Generate 150 structured benchmark test cases for technical verification
 // Covering Math (40), Physics (38), Chemistry (38), Biology (34) = 150 items.
-
-const teachers = {
-  toan: 'Thầy Lê Văn Hùng (Tổ trưởng Chuyên môn Toán - THPT Chuyên)',
-  ly: 'Cô Đặng Thị Bích Thủy (Giáo viên Cốt cán Vật lý - THPT Chuyên)',
-  hoa: 'Thầy Nguyễn Trọng Nghĩa (Tổ phó Chuyên môn Hóa học - THPT Chuyên)',
-  sinh: 'Cô Vũ Thị Hoàng Yến (Thạc sĩ Sinh học - Chuyên gia GDPT 2018)'
-};
+// Bộ đối chứng kỹ thuật tổng hợp (synthetic benchmark) do nhóm xây dựng, chưa qua chấm của giáo viên.
 
 const difficulties = ['Nhận biết', 'Thông hiểu', 'Vận dụng', 'Vận dụng cao'];
 

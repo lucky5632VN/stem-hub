@@ -26,16 +26,17 @@ export default function LienHePage() {
 
   const [subject, setSubject] = useState('Góp ý tính năng mới');
   const [message, setMessage] = useState('');
+  const [agreedConsent, setAgreedConsent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successStatus, setSuccessStatus] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [myMessages, setMyMessages] = useState([]);
 
-  // Kiểm tra tài khoản hiện tại có phải Admin không
+  // Kiểm tra tài khoản hiện tại có phải Admin không (dựa trên role hoặc Admin UID env, không dùng email whitelist)
+  const adminUids = (process.env.NEXT_PUBLIC_ADMIN_UIDS || '').split(',').map(u => u.trim()).filter(Boolean);
   const isAdmin = Boolean(
     user?.role === 'admin' || 
-    user?.email?.toLowerCase() === 'hohoanganh20092021@gmail.com' || 
-    user?.email?.toLowerCase() === 'admin123@gmail.com'
+    (user?.uid && adminUids.includes(user.uid))
   );
 
   // 1. Tải danh sách tin nhắn đã gửi từ localStorage
@@ -167,6 +168,11 @@ export default function LienHePage() {
       return;
     }
 
+    if (!agreedConsent) {
+      setErrorMessage('Vui lòng tích chọn đồng ý cho phép ghi nhận thông tin theo Chính sách bảo mật.');
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMessage('');
     setSuccessStatus(null);
@@ -224,6 +230,7 @@ export default function LienHePage() {
     setSuccessStatus(null);
     setErrorMessage('');
     setMessage('');
+    setAgreedConsent(false);
   };
 
   return (
@@ -376,6 +383,20 @@ export default function LienHePage() {
                   ⚠️ Vui lòng nhập thêm {5 - message.trim().length} ký tự nữa để có thể bấm gửi.
                 </p>
               )}
+            </div>
+
+            {/* Checkbox Đồng ý Chính sách bảo mật */}
+            <div className="flex items-start gap-2.5 text-left p-3.5 rounded-2xl bg-bg-tertiary/70 border border-border-theme text-xs shadow-xs">
+              <input
+                type="checkbox"
+                id="agreeContactConsent"
+                checked={agreedConsent}
+                onChange={(e) => setAgreedConsent(e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded text-accent-pink focus:ring-accent-pink/50 cursor-pointer shrink-0 accent-pink-500"
+              />
+              <label htmlFor="agreeContactConsent" className="text-text-secondary leading-snug cursor-pointer select-none">
+                Tôi đồng ý cho phép STEM HUB ghi nhận nội dung tin nhắn và thông tin tài khoản để Ban Quản trị xử lý hỗ trợ theo <Link href="/chinh-sach-bao-mat" target="_blank" className="text-accent-pink font-semibold hover:underline">Chính sách bảo mật</Link>.
+              </label>
             </div>
             
             {/* Nút gửi */}

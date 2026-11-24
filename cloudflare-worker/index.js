@@ -1782,8 +1782,11 @@ async function handleFaceAuthVerify(request, env) {
       return jsonResponse({ error: "Dữ liệu vector khuôn mặt không hợp lệ" }, 400);
     }
 
-    // Khóa bí mật bảo vệ chữ ký xác thực sinh trắc học Face 2FA
-    const secret = env.FACE_AUTH_SECRET || 'STEM_HUB_SECURE_FACE_2026';
+    // Khóa bí mật bảo vệ chữ ký xác thực sinh trắc học Face 2FA (Bắt buộc cấu hình qua Cloudflare Worker Secret)
+    const secret = env.FACE_AUTH_SECRET;
+    if (!secret) {
+      return jsonResponse({ error: "Máy chủ Worker chưa cấu hình FACE_AUTH_SECRET. Yêu cầu bị từ chối." }, 500);
+    }
     const signaturePayload = `${email || 'anonymous'}_${clientTimestamp || Date.now()}_${faceDescriptor.length}`;
     
     // Tạo HMAC-SHA256 Token xác thực serverless

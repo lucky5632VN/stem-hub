@@ -7,6 +7,34 @@
  * - URL Domain Whitelisting (Tiêu chí 9)
  */
 
+import crypto from 'crypto';
+
+/**
+ * So sánh an toàn hằng thời gian (constant-time comparison) chống timing attack
+ * Tiêu chí Fail-Closed:
+ * - Nếu expected secret thiếu hoặc quá ngắn (< minLength ký tự) -> từ chối (false) ngay
+ * - Nếu provided rỗng hoặc khác độ dài -> từ chối (false) ngay
+ * - Đảm bảo khi biến môi trường chưa cấu hình hoặc rỗng, header rỗng KHÔNG THỂ khớp!
+ * @param {string} provided - Chuỗi bí mật do client/request cung cấp
+ * @param {string} expected - Chuỗi bí mật cấu hình từ biến môi trường
+ * @param {number} minLength - Độ dài tối thiểu yêu cầu (mặc định 16)
+ * @returns {boolean}
+ */
+export function safeTimingEqual(provided, expected, minLength = 16) {
+  if (!expected || typeof expected !== 'string' || expected.length < minLength) {
+    return false;
+  }
+  if (!provided || typeof provided !== 'string') {
+    return false;
+  }
+  const bufExpected = Buffer.from(expected);
+  const bufProvided = Buffer.from(provided);
+  if (bufExpected.length !== bufProvided.length) {
+    return false;
+  }
+  return crypto.timingSafeEqual(bufProvided, bufExpected);
+}
+
 export const ALLOWED_ORIGINS = [
   'https://ai.stem-hub.top',
   'https://cuoc-thi-ai-e2044.web.app',
@@ -68,7 +96,7 @@ export function getClientIdentifier(req) {
 const rateLimitMap = new Map();
 
 if (typeof setInterval !== 'undefined') {
-  setInterval(() => {
+  const timer = setInterval(() => {
     const now = Date.now();
     for (const [key, record] of rateLimitMap.entries()) {
       if (now > record.resetAt) {
@@ -76,6 +104,9 @@ if (typeof setInterval !== 'undefined') {
       }
     }
   }, 5 * 60 * 1000);
+  if (timer && typeof timer.unref === 'function') {
+    timer.unref();
+  }
 }
 
 /**

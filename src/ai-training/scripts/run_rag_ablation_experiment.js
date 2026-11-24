@@ -20,7 +20,10 @@ export function wilsonInterval(successes, n, z = 1.96) {
 }
 
 export function runRagAblationExperiment() {
-  console.log('🔬 === KHỞI CHẠY THỰC NGHIỆM ĐỐI CHỨNG: CÓ RAG vs. KHÔNG CÓ RAG (AI26B0012) ===\n');
+  console.log('🔬 === MÔ PHỎNG ĐỐI CHỨNG GIẢ ĐỊNH: CÓ RAG vs. KHÔNG CÓ RAG (AI26B0012) ===');
+  console.log('⚠️ [MINH BẠCH KỸ THUẬT]: Bảng đối chứng dưới đây là kịch bản mô phỏng giả định (Heuristic Simulation),');
+  console.log('   CHƯA gọi trực tiếp Gemini API và CHƯA qua chấm độc lập của giáo viên.');
+  console.log('   Phần đo đạc thực tế duy nhất là cơ chế truy xuất Top-K TF-IDF/BM25 và ngưỡng từ chối (Abstention Guard).\n');
 
   const benchmarkPath = path.resolve('src/ai-training/datasets/rag_ablation_benchmark.json');
   if (!fs.existsSync(benchmarkPath)) {
@@ -163,13 +166,15 @@ export function runRagAblationExperiment() {
     metadata: {
       generatedAt: new Date().toISOString(),
       hardSampleSize: nHard,
-      oosSampleSize: nOos
+      oosSampleSize: nOos,
+      isSimulation: true,
+      note: "Kết quả đối chứng Không RAG và nhãn Đúng/Ảo giác/Trích dẫn là kịch bản mô phỏng giả định (Heuristic Simulation), chưa gọi API LLM thực tế và chưa qua giáo viên chấm. Đo lường thực tế duy nhất là cơ chế truy xuất Top-K TF-IDF/BM25 và cơ chế từ chối khi điểm thấp hơn ngưỡng (Abstention Guard)."
     },
     metrics: {
       correctness: {
         noRag: { count: noRagCorrect, ...ciNoRagCorrect },
         withRag: { count: ragCorrect, ...ciRagCorrect },
-        delta: parseFloat((ciRagCorrect.p - ciNoRagCorrect.p).toFixed(1))
+        deltaPercentagePoints: parseFloat((ciRagCorrect.p - ciNoRagCorrect.p).toFixed(1))
       },
       hallucination: {
         noRag: { count: noRagHallucinations, ...ciNoRagHallu },
@@ -179,12 +184,13 @@ export function runRagAblationExperiment() {
       citationPrecision: {
         noRag: { count: noRagCitations, ...ciNoRagCitation },
         withRag: { count: ragCitations, ...ciRagCitation },
-        delta: parseFloat((ciRagCitation.p - ciNoRagCitation.p).toFixed(1))
+        deltaPercentagePoints: parseFloat((ciRagCitation.p - ciNoRagCitation.p).toFixed(1))
       },
       abstentionOnOos: {
         noRag: { count: noRagAbstentions, ...ciNoRagAbstain },
         withRag: { count: ragAbstentions, ...ciRagAbstain },
-        delta: parseFloat((ciRagAbstain.p - ciNoRagAbstain.p).toFixed(1))
+        deltaPercentagePoints: parseFloat((ciRagAbstain.p - ciNoRagAbstain.p).toFixed(1)),
+        comparisonNote: "Vanilla LLM mặc định không có cơ chế phát hiện ngoài phạm vi để từ chối trả lời (0/30 = 0.0%). Hệ thống RAG áp dụng bộ ngắt Abstention Guard dựa trên ngưỡng điểm tương đồng tri thức."
       }
     },
     hardRetrievalLogs,
@@ -193,24 +199,24 @@ export function runRagAblationExperiment() {
 
   const resultsPath = path.resolve('src/ai-training/datasets/rag_ablation_results.json');
   fs.writeFileSync(resultsPath, JSON.stringify(results, null, 2), 'utf-8');
-  console.log(`\n💾 Đã lưu kết quả thực nghiệm chi tiết tại: ${resultsPath}`);
+  console.log(`\n💾 Đã lưu kết quả mô phỏng chi tiết tại: ${resultsPath}`);
 
-  // In bảng đối chứng đẹp
+  // In bảng đối chứng
   console.log('\n========================================================================================');
-  console.log('🏆 BẢNG TỔNG HỢP ĐỐI CHỨNG: KHÔNG RAG (PURE LLM) vs CÓ RAG (STEM HUB RAG + ABSTENTION)');
+  console.log('📊 BẢNG MÔ PHỎNG ĐỐI CHỨNG (HEURISTIC SIMULATION): KHÔNG RAG vs CÓ RAG');
   console.log('========================================================================================');
-  console.log(`1. Độ chính xác thực tế (n=50 câu khó):`);
-  console.log(`   - Không RAG: ${results.metrics.correctness.noRag.p}% [${results.metrics.correctness.noRag.lower}%, ${results.metrics.correctness.noRag.upper}%]`);
-  console.log(`   - Có RAG:    ${results.metrics.correctness.withRag.p}% [${results.metrics.correctness.withRag.lower}%, ${results.metrics.correctness.withRag.upper}%] (TĂNG +${results.metrics.correctness.delta}%)`);
+  console.log(`1. Độ chính xác mô phỏng (n=50 câu khó):`);
+  console.log(`   - Không RAG (giả định): ${results.metrics.correctness.noRag.p}% [${results.metrics.correctness.noRag.lower}%, ${results.metrics.correctness.noRag.upper}%]`);
+  console.log(`   - Có RAG:               ${results.metrics.correctness.withRag.p}% [${results.metrics.correctness.withRag.lower}%, ${results.metrics.correctness.withRag.upper}%] (tăng +${results.metrics.correctness.deltaPercentagePoints} điểm phần trăm / pp)`);
   console.log(`2. Tỷ lệ ảo giác (Hallucination Rate, n=50):`);
-  console.log(`   - Không RAG: ${results.metrics.hallucination.noRag.p}% [${results.metrics.hallucination.noRag.lower}%, ${results.metrics.hallucination.noRag.upper}%]`);
-  console.log(`   - Có RAG:    ${results.metrics.hallucination.withRag.p}% [${results.metrics.hallucination.withRag.lower}%, ${results.metrics.hallucination.withRag.upper}%] (GIẢM ${results.metrics.hallucination.factorReduced} LẦN)`);
-  console.log(`3. Tỷ lệ trích dẫn nguồn chuẩn SGK (n=50):`);
-  console.log(`   - Không RAG: ${results.metrics.citationPrecision.noRag.p}% [${results.metrics.citationPrecision.noRag.lower}%, ${results.metrics.citationPrecision.noRag.upper}%]`);
-  console.log(`   - Có RAG:    ${results.metrics.citationPrecision.withRag.p}% [${results.metrics.citationPrecision.withRag.lower}%, ${results.metrics.citationPrecision.withRag.upper}%] (TĂNG +${results.metrics.citationPrecision.delta}%)`);
-  console.log(`4. Tỷ lệ cảnh báo an toàn đúng trên Out-of-Scope (n=30):`);
-  console.log(`   - Không RAG: ${results.metrics.abstentionOnOos.noRag.p}% [${results.metrics.abstentionOnOos.noRag.lower}%, ${results.metrics.abstentionOnOos.noRag.upper}%]`);
-  console.log(`   - Có RAG:    ${results.metrics.abstentionOnOos.withRag.p}% [${results.metrics.abstentionOnOos.withRag.lower}%, ${results.metrics.abstentionOnOos.withRag.upper}%] (TĂNG +${results.metrics.abstentionOnOos.delta}%)`);
+  console.log(`   - Không RAG (giả định): ${results.metrics.hallucination.noRag.p}% [${results.metrics.hallucination.noRag.lower}%, ${results.metrics.hallucination.noRag.upper}%]`);
+  console.log(`   - Có RAG:               ${results.metrics.hallucination.withRag.p}% [${results.metrics.hallucination.withRag.lower}%, ${results.metrics.hallucination.withRag.upper}%] (giảm ${results.metrics.hallucination.factorReduced} lần)`);
+  console.log(`3. Tỷ lệ trích dẫn ngữ liệu hệ thống (n=50):`);
+  console.log(`   - Không RAG (giả định): ${results.metrics.citationPrecision.noRag.p}% [${results.metrics.citationPrecision.noRag.lower}%, ${results.metrics.citationPrecision.noRag.upper}%]`);
+  console.log(`   - Có RAG:               ${results.metrics.citationPrecision.withRag.p}% [${results.metrics.citationPrecision.withRag.lower}%, ${results.metrics.citationPrecision.withRag.upper}%] (tăng +${results.metrics.citationPrecision.deltaPercentagePoints} pp)`);
+  console.log(`4. Tỷ lệ cảnh báo an toàn từ chối trên Out-of-Scope (n=30):`);
+  console.log(`   - Không RAG (không có bộ ngắt từ chối): ${results.metrics.abstentionOnOos.noRag.p}% [${results.metrics.abstentionOnOos.noRag.lower}%, ${results.metrics.abstentionOnOos.noRag.upper}%]`);
+  console.log(`   - Có RAG (ngưỡng score < 0.30):         ${results.metrics.abstentionOnOos.withRag.p}% [${results.metrics.abstentionOnOos.withRag.lower}%, ${results.metrics.abstentionOnOos.withRag.upper}%] (tăng +${results.metrics.abstentionOnOos.deltaPercentagePoints} pp)`);
   console.log('========================================================================================\n');
 
   return results;

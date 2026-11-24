@@ -1909,9 +1909,12 @@ function DauTruongContent() {
                                  rawSubject === 'physics' ? 'Vật lý' :
                                  rawSubject === 'chemistry' ? 'Hóa học' : 'Sinh học';
 
+          const isBot = !!(roomData.isBotMatch || roomData.botUid || opp?.isBotAccount || opp?.uid?.startsWith('bot_') || opp?.name?.toLowerCase().includes('robot') || opp?.name?.toLowerCase().includes('bot'));
+
           return {
             id: roomData.id,
             opponent: opp?.name || 'Đối thủ ẩn danh',
+            isBot,
             subject: displaySubject,
             result,
             eloChange: isWin ? '+25' : (isDraw ? '0' : '-15'),
@@ -4697,6 +4700,11 @@ function DauTruongContent() {
                             <div>
                               <div className="flex items-center gap-2">
                                 <span className="text-xs font-bold text-text-primary">{log.opponent}</span>
+                                {log.isBot && (
+                                  <span className="text-[8px] px-1.5 py-0.5 bg-amber-500/15 border border-amber-500/30 text-amber-400 rounded-full font-mono font-bold uppercase">
+                                    🤖 BOT
+                                  </span>
+                                )}
                                 <span className="text-[8px] px-2 py-0.5 bg-pink-500/10 border border-pink-500/20 text-pink-300 rounded-full font-mono uppercase">
                                   {log.subject === 'math' ? 'Toán' : log.subject === 'physics' ? 'Vật lý' : log.subject === 'chemistry' ? 'Hóa học' : log.subject === 'biology' ? 'Sinh học' : log.subject}
                                 </span>
@@ -4716,7 +4724,7 @@ function DauTruongContent() {
                 </div>
 
                 <div className="text-[10px] text-text-secondary italic mt-3 text-center border-t border-border-theme pt-2.5">
-                  * Kết quả đấu hạng sẽ được cộng/trừ ELO và EXP trực tiếp vào Hồ sơ của bạn sau mỗi trận.
+                  * Kết quả đấu hạng sẽ được cộng/trừ ELO và EXP trực tiếp vào Hồ sơ của bạn sau mỗi trận. Lưu ý: Các trận đấu tập với Bot (khi hàng đợi quá 30s không có đối thủ người thật) được gắn nhãn [BOT] rõ ràng và vẫn áp dụng tính điểm ELO theo xếp hạng.
                 </div>
               </div>
             </div>
@@ -4853,8 +4861,13 @@ function DauTruongContent() {
                         {matchFoundData.opponent.level || 1}
                       </div>
                     </div>
-                    <h3 className="text-md font-bold text-text-primary font-mono uppercase tracking-wide truncate">
+                    <h3 className="text-md font-bold text-text-primary font-mono uppercase tracking-wide truncate flex items-center justify-center gap-1.5">
                       {matchFoundData.opponent.name || 'Đối thủ'}
+                      {(matchFoundData.opponent.isBot || matchFoundData.opponent.isBotAccount || roomData?.isBotMatch) && (
+                        <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase bg-purple-500/20 text-purple-400 border border-purple-500/40">
+                          BOT
+                        </span>
+                      )}
                     </h3>
                     <span className="text-[9px] font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2.5 py-0.5 rounded-full inline-block mt-2 font-mono uppercase tracking-wider">
                       {getTitleLabel(matchFoundData.opponent.activeTitle || 'apprentice')}
@@ -5944,7 +5957,14 @@ function DauTruongContent() {
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-text-primary font-bold text-sm leading-tight truncate">{arenaState.opponentInfo?.name || 'Đang chờ đối thủ...'}</h4>
+                    <h4 className="text-text-primary font-bold text-sm leading-tight truncate flex items-center gap-1.5">
+                      {arenaState.opponentInfo?.name || 'Đang chờ đối thủ...'}
+                      {(latestRoomDataRef.current?.isBotMatch || roomData?.isBotMatch || arenaState.opponentInfo?.isBot) && (
+                        <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase bg-purple-500/20 text-purple-400 border border-purple-500/40">
+                          BOT
+                        </span>
+                      )}
+                    </h4>
                     <span className="text-[9px] text-rose-400 font-mono font-bold px-1.5 py-0.5 bg-rose-500/10 rounded mt-1 inline-block uppercase">
                       {arenaState.opponentInfo?.title || 'Tập sự'}
                     </span>

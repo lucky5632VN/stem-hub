@@ -14,7 +14,7 @@
 - **3D & Interactive Visuals**: Three.js, `@react-three/fiber`, `@react-three/drei`, Canvas 2D Grapher Engine.
 - **Backend & Database**: Firebase Authentication, Cloud Firestore (Rule-secured), Firebase Cloud Storage.
 - **AI Gateway & Server Security**: Cloudflare Worker Gateway / Next.js Server API Routes (`/api/lab-toan/...`, `/api/ai/chat`) theo nguyên tắc Zero-Trust, cách ly toàn bộ API Key khỏi trình duyệt học sinh.
-- **Hệ thống AI Tự Huấn Luyện (Self-Trained AI Suite)**: 6 mô hình độc lập chạy 100% tại máy trạm / trình duyệt không phụ thuộc API bên ngoài.
+- **Hệ thống AI Tự Huấn Luyện (Self-Trained AI Suite)**: 6 mô hình độc lập chạy cục bộ tại máy trạm / trình duyệt không phụ thuộc API bên ngoài cho các tác vụ suy luận và giám sát an toàn.
 
 ---
 
@@ -47,12 +47,10 @@ cp .env.example .env.local
 | `GEMINI_API_KEY` | Khóa API Google Gemini dùng cho Next.js Server API Routes | Không bắt buộc nếu chỉ chạy 6 model AI tự train |
 | `NEXT_PUBLIC_API_PROXY_URL` | Địa chỉ Cloudflare Worker API Gateway (nếu đã deploy) | Tùy chọn |
 | `NEXT_PUBLIC_USE_EMULATOR` | Chạy cùng Firebase Local Emulator Suite (`true` / `false`) | Tùy chọn (Mặc định `false`) |
-| `ADMIN_SECRET_KEY` | Token xác thực nội bộ cho API kiểm toán Admin AI HUD | Tùy chọn |
-| `INTERNAL_AI_SECRET` | Khóa bảo mật ký số tri thức học liên tục (Continuous RAG) | Tùy chọn |
 | `SMTP_HOST`, `SMTP_PORT` | Cấu hình máy chủ gửi Email OTP (ví dụ `smtp.gmail.com:587`) | Tùy chọn |
 | `SMTP_USER`, `SMTP_PASS` | Tài khoản và mật khẩu ứng dụng SMTP | Tùy chọn |
 
-> **Lưu ý Quan Trọng**: Dự án đã được nhúng sẵn cấu hình kết nối Firebase Firestore Public SDK (được khóa an toàn 100% bằng bộ quy tắc `firestore.rules`). Giám khảo và người dùng **có thể khởi động và trải nghiệm đầy đủ tính năng ngay lập tức** mà không bắt buộc phải đăng ký tài khoản API bên ngoài.
+> **Lưu ý Quan Trọng**: Dự án đã được nhúng sẵn cấu hình kết nối Firebase Firestore Public SDK (được kiểm soát truy cập bằng bộ quy tắc `firestore.rules`). Giám khảo và người dùng **có thể khởi động và trải nghiệm đầy đủ tính năng ngay lập tức** mà không bắt buộc phải đăng ký tài khoản API bên ngoài.
 
 ### Bước 3: Khởi động máy chủ phát triển
 ```bash
@@ -69,7 +67,7 @@ npm run build
 
 ## 🔬 4. Tái Lập & Kiểm Chứng Hệ Thống 6 Mô Hình AI Tự Huấn Luyện
 
-Dự án STEM HUB cam kết tính minh bạch học thuật tuyệt đối. Toàn bộ 6 mô hình AI tự huấn luyện cục bộ có thể được thẩm định độc lập chỉ bằng một câu lệnh:
+Dự án STEM HUB cam kết tính minh bạch học thuật. Toàn bộ 6 mô hình AI tự huấn luyện cục bộ có thể được thẩm định độc lập chỉ bằng một câu lệnh:
 
 ```bash
 # Khởi chạy bộ kiểm toán độc lập trên toàn bộ dữ liệu đối chứng
@@ -77,15 +75,15 @@ npm run audit:ai
 ```
 *Lệnh tương đương:* `node src/ai-training/scripts/run-all-audits.js`
 
-### Bảng Chỉ Số 6 Mô Hình AI Tự Huấn Luyện Cục Bộ:
-| # | Mô Hình AI | Thuật Toán & Kiến Trúc | Tập Dữ Liệu Kiểm Thử | Độ Chính Xác (Accuracy) | Wilson 95% Confidence Interval |
+### Bảng Chỉ Số Bộ 6 Mô Hình Cục Bộ (Đã Kiểm Toán Thực Tế):
+| # | Mô Hình AI | Phân Loại & Thuật Toán | Tập Dữ Liệu Kiểm Thử | Độ Chính Xác (Accuracy) | Wilson 95% Confidence Interval |
 |---|---|---|---|:---:|:---:|
-| 1 | **ChemLab Risk Classifier** | Softmax Neural Network + Circuit Breaker | $n=135$ phản ứng hóa học (35 nguy hiểm) | **95.00%** | $[89.5\%, 97.7\%]$ (0 False Negatives) |
-| 2 | **Physics Error Diagnostic** | Multi-Label kNN + Z-Score Scaler | $n=135$ cấu hình đo mạch điện | **80.00%** | $[72.6\%, 85.8\%]$ (Đa nhãn đồng thời) |
-| 3 | **Javit Intent Classifier** | Multinomial Naive Bayes + Teencode Regex | $n=140$ câu hỏi học sinh (65 unseen) | **83.33%** | $[72.5\%, 90.5\%]$ (Tổng quát hóa cao) |
-| 4 | **Math Adaptive Difficulty** | 1-Parameter Logistic (1PL) Rasch IRT | $n=150$ thí sinh & ma trận câu hỏi | **P = 60% – 75%** | Vùng phát triển gần nhất (ZPD) |
-| 5 | **Genetics Bayesian Reasoner** | Suy luận xác suất Bayes & Định luật Mendel | $n=150$ bài toán di truyền tương tác gen | **98.00%** | $[94.3\%, 99.3\%]$ |
-| 6 | **RAG Knowledge Service** | Vector TF-IDF N-Gram (4,862 tokens) + Cosine | $n=80$ câu đối chứng (50 khó + 30 OOS) | **92.00%** | $[81.2\%, 96.8\%]$ (Ảo giác chỉ 4%) |
+| 1 | **ChemLab Risk Classifier** | *Thuật toán tất định* (Circuit Breaker) + Softmax Linear Risk Scoring (1 Dense layer, lr=0.2, GD 1000 epochs) | $n=50$ độc lập:<br>• Nhóm A (30 unseen mô phỏng): Công thức gốc 30/30, Luật 28/30, NN 28/30<br>• Nhóm B (20 ca biên viết tay): Công thức gốc 18/20, Luật 19/20, NN 12/20 | **Công thức tuyến tính gốc: 48/50 (96.00%)**<br>**Luật phân ngưỡng: 47/50 (94.00%)**<br>**Softmax NN: 40/50 (80.00%)**<br>Majority: **35/50 (70.00%)**<br>McNemar p=0.0654 (chưa đủ bằng chứng khác biệt ở $\alpha=0.05$) | $[86.5\%, 98.9\%]$ (Công thức)<br>$[83.8\%, 97.9\%]$ (Luật)<br>$[67.0\%, 88.8\%]$ (NN) |
+| 2 | **Physics Error Diagnostic** | *Mô hình học từ dữ liệu* (kNN, $k=5$) | $n=45$ độc lập:<br>• Nhóm A (30 unseen mô phỏng): Luật 30/30, k-NN 30/30<br>• Nhóm B (15 ca biên viết tay - phân tích định tính đa nhãn): Luật 5/15, k-NN 5/15, Majority 5/15 | **Cả bộ: 35/45 (77.78%)** (Luật)<br>**35/45 (77.78%)** (k-NN)<br>Majority: **15/45 (33.33%)**<br>McNemar p=1.0000 | $[63.7\%, 87.5\%]$ (Luật)<br>$[63.7\%, 87.5\%]$ (k-NN) |
+| 3 | **Javit Intent Classifier** | *Mô hình học từ dữ liệu* (Naive Bayes) | $n=65$ teencode/nhiễu (chưa độc lập hoàn toàn với train) | **59/65 (90.77%)** (Naive Bayes)<br>**45/65 (69.23%)** (Luật tử tế đã tinh chỉnh sau khi xem test)<br>McNemar $p=0.0043 < 0.01$ | $[81.3\%, 95.7\%]$ (NB)<br>$[57.2\%, 79.1\%]$ (Luật) |
+| 4 | **Math Adaptive Difficulty** | *Thuật toán tất định* (1PL Rasch Logit) | $n=10$ ca kiểm thử kỹ thuật | **4/10** ca trúng ZPD $[0.60, 0.75]$ | $[16.8\%, 68.7\%]$ |
+| 5 | **Genetics Reasoner** | *Thuật toán tất định* (Tổ hợp xác suất Punnett) | $n=10$ unit test lai độc lập | **10/10 passed** | $[72.2\%, 100.0\%]$ |
+| 6 | **RAG Knowledge Service** | *Thuật toán tất định & Thống kê ngữ liệu* (TF-IDF + Cosine) | $n=32$ queries tiêu đề (khớp môn)<br>$n=60$ chunk benchmark (+20 OOD)<br>*(Ablation $n=80$ là mô phỏng heuristic)* | Khớp môn Top-1: **96.88%** (31/32)<br>Recall@1: **26.67%** (16/60)<br>Recall@3: **36.67%** (22/60)<br>Recall@5: **43.33%** (26/60)<br>MRR: **0.3225** | Khớp môn: $[84.3\%, 99.4\%]$<br>Recall@1: $[17.1\%, 39.0\%]$<br>Recall@3: $[25.6\%, 49.3\%]$<br>Recall@5: $[31.6\%, 55.9\%]$<br>Loại trừ OOD: $[83.9\%, 100.0\%]$ |
 
 ---
 
@@ -101,11 +99,16 @@ Các phòng thí nghiệm nhúng đặt trong `public/labs/` được đóng gó
 
 ## ⚖️ 6. Giới Hạn Đã Biết & Cam Kết Minh Bạch (Transparency & Limitations)
 
-1. **Phạm vi Dữ liệu Huấn luyện**: Bộ ngữ liệu RAG cục bộ hiện tập trung vào chương trình môn Khoa học Tự nhiên & Toán cấp THPT theo khung chuẩn Chương trình Giáo dục Phổ thông (GDPT) 2018 của Bộ Giáo dục & Đào tạo.
-2. **Cơ chế Từ chối An toàn (Strict Grounding Abstention)**: Khi học sinh đặt câu hỏi nằm ngoài phạm vi SGK hoặc câu hỏi giả khoa học với điểm tương đồng ngữ nghĩa $S_{\text{grounding}} < 0.30$, hệ thống sẽ từ chối suy đoán tự do để ngăn chặn tuyệt đối hiện tượng ảo giác (Hallucination).
-3. **Phân định rõ ràng giữa Mô hình Tự Train và Mô hình Nền Tảng Ngoại vi**:
-   - 6 Mô hình phân loại nguy cơ, chẩn đoán lỗi, xác định ý định, tính năng lực IRT, suy luận Bayes di truyền và truy xuất RAG được đội ngũ tự huấn luyện và chạy 100% cục bộ.
-   - LLM bên ngoài (Google Gemini) chỉ đóng vai trò thứ cấp (BFF Worker Gateway) để làm mượt câu văn giải thích khi học sinh cần trò chuyện sư phạm mở rộng, và hoàn toàn không quyết định logic cốt lõi.
+1. **Phạm vi Dữ liệu Huấn luyện**: Bộ ngữ liệu RAG cục bộ hiện tập trung vào chương trình môn Khoa học Tự nhiên & Toán cấp THPT theo khung chuẩn Chương trình Giáo dục Phổ thông (GDPT) 2018 của Bộ Giáo dục & Đào tạo gồm 303 chunks do nhóm tự biên soạn.
+2. **Cơ chế Từ chối An toàn (Strict Grounding Abstention)**: Khi học sinh đặt câu hỏi nằm ngoài phạm vi SGK hoặc câu hỏi giả khoa học với điểm tương đồng ngữ nghĩa $S_{\text{grounding}} < 0.30$, hệ thống sẽ từ chối suy đoán tự do để giảm thiểu ảo giác (giảm từ 28% xuống 4%).
+3. **Phân định rõ ràng 3 loại thành phần trong hệ thống**:
+   - **(a) Mô hình học từ dữ liệu**: Model 2 (Physics k-NN chẩn đoán lỗi), Model 3 (Javit Naive Bayes nhận diện ý định).
+   - **(b) Thuật toán & công thức tất định**: Model 1 (Luật ngắt mạch hóa học + Softmax Danger Scoring), Model 4 (Công thức 1PL IRT Rasch tính ZPD), Model 5 (Tổ hợp xác suất di truyền Mendel), Model 6 (TF-IDF Vector Space Model & Thống kê corpus).
+   - **(c) Gọi LLM ngoại vi**: Google Gemini API qua Next.js BFF Worker Gateway để làm mượt câu văn giải thích Socratic và nhận diện đề toán hình học (Vision OCR).
+4. **Bộ đối chứng kỹ thuật tổng hợp 150 ca & Vòng học liên tục**:
+   - Bộ 150 ca là tập dữ liệu tổng hợp (Synthetic Benchmark) do nhóm lập trình xây dựng để chạy unit test, chưa qua chấm của giáo viên thật.
+   - Vòng học liên tục (`/api/learned-knowledge`) chỉ chấp nhận gửi tri thức từ Trợ lý AI chính trên giao diện chính thông qua Firebase Bearer ID Token của người dùng đã đăng nhập; toàn bộ các phòng lab nhúng (`public/labs/*/stem-lab-ai-bridge.js`) đã tắt tính năng gửi trực tiếp không xác thực. Mọi tri thức mới nạp mặc định ở trạng thái `pending_review` (chưa duyệt) và bắt buộc phải qua thẩm định của giáo viên/quản trị viên thật trên Teacher Review Portal trước khi được hòa nhập vào kho tri thức.
+5. **Lưu ý phương pháp luận dữ liệu đánh giá**: Các câu hỏi kiểm thử trích từ đề thi hoặc nguồn công khai có khả năng đã nằm trong dữ liệu tiền huấn luyện của các mô hình nền tảng lớn (Foundation Models), do đó điểm số có thể mang tính lạc quan. Ngoài ra, do các câu hỏi kiểm thử RAG được chọn lọc nằm đúng trong 101 chuyên đề thuộc kho 303 chunk, thực nghiệm RAG chỉ đo lường năng lực truy xuất và kiểm chứng trong phạm vi tri thức mục tiêu này.
 
 ---
 

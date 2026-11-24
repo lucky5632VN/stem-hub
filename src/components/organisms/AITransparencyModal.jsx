@@ -62,17 +62,17 @@ export default function AITransparencyModal({ isOpen, onClose }) {
       // NHÓM 2: LLM NỀN TẢNG BÊN NGOÀI
       { name: "Trợ Lý AI Chỉ Huy NOVA (Gemini 2.5/1.5 API)", purpose: "LLM Nền tảng bên ngoài đóng vai trò Language Synthesizer: Chỉ diễn đạt câu trả lời tự nhiên từ ngữ cảnh RAG đã trích xuất, không tự ra quyết định độc lập.", type: "Nhóm 2: LLM Nền Tảng (Gemini API)" },
       { name: "AI Giám Sát Phản Ứng Hóa Học (Gemini API Helper)", purpose: "Tổng hợp phản ứng thời gian thực diễn đạt câu từ cảnh báo cho học sinh trong lab.", type: "Nhóm 2: LLM Nền Tảng (Gemini API)" },
-      { name: "AI Tạo Mô Hình 3D & Cố Vấn Hình Học (Kiến Trúc 2 Tầng Lab Toán)", purpose: "Hệ thống sử dụng Kiến trúc 2 tầng: Tầng 1 dùng Gemini API để trích xuất tham số đề bài. Tầng 2 dùng Module Toán học do nhóm tự phát triển để tính toán chính xác 100% các đại lượng hình học và tọa độ 3D. Gemini chỉ đóng vai trò diễn giải lại các con số này.", type: "Nhóm 2: LLM Nền Tảng + Module Toán Tự Phát Triển" },
+      { name: "AI Tạo Mô Hình 3D & Cố Vấn Hình Học (Kiến Trúc 2 Tầng Lab Toán)", purpose: "Hệ thống sử dụng Kiến trúc 2 tầng: Tầng 1 dùng Gemini API để trích xuất tham số đề bài. Tầng 2 dùng Module Toán học do nhóm tự phát triển để tính toán các đại lượng hình học và tọa độ 3D theo công thức giải tích. Gemini chỉ đóng vai trò diễn giải lại các con số này.", type: "Nhóm 2: LLM Nền Tảng + Module Toán Tự Phát Triển" },
 
       // NHÓM 3: THƯ VIỆN AI PRETRAINED CÓ SẴN (KHÔNG TỰ TRAIN)
-      { name: "Bảo Mật Sinh Học AI Face 2FA (@vladmandic/face-api ResNet-34)", purpose: "[CHÚ THÍCH MINH BẠCH]: Tính năng bảo mật sử dụng thư viện nhận diện khuôn mặt có sẵn (@vladmandic/face-api ResNet-34 & TinyFaceDetector qua TensorFlow.js), KHÔNG thuộc phạm vi 6 mô hình AI tự train của dự án.", type: "Nhóm 3: Thư Viện Pretrained Có Sẵn" }
+      { name: "Phát hiện khuôn mặt trước camera (@vladmandic/face-api ResNet-34)", purpose: "[CHÚ THÍCH MINH BẠCH]: Tính năng phát hiện khuôn mặt và trích xuất vector 128-D sử dụng thư viện pretrained có sẵn (@vladmandic/face-api ResNet-34 & TinyFaceDetector qua TensorFlow.js), hỗ trợ giám sát phòng thi, KHÔNG thuộc phạm vi 6 mô hình AI tự huấn luyện của dự án. Hệ thống chỉ lưu mảng số 128-D, tuyệt đối không lưu ảnh hay video học sinh.", type: "Nhóm 3: Thư Viện Pretrained Có Sẵn" }
     ],
     novaEvolution: [
       { step: "Giai đoạn 1: Khởi nguồn Trợ lý Chatbot Văn bản", detail: "Ban đầu NOVA chỉ là khung hội thoại văn bản tĩnh phản hồi các câu hỏi đơn giản." },
       { step: "Giai đoạn 2: Nâng cấp Cửa sổ Nổi Chỉ huy Agentic HUD (phím tắt Alt+U)", detail: "Chuyển đổi thành Cửa sổ Nổi kéo thả linh hoạt, truy cập nhanh tức thì qua phím tắt Alt+U." },
       { step: "Giai đoạn 3: Tích hợp Giọng nói Tiếng Việt & Cơ chế Hạ nhạc nền Tự động", detail: "Nhận dạng giọng nói Tiếng Việt (Web Speech STT) kết hợp cơ chế tự động hạ nhỏ nhạc nền khi người dùng nói." },
       { step: "Giai đoạn 4: Hệ Thống Tự Động Điều Hướng & Trích xuất Liên kết Tra cứu", detail: "NOVA tự động phát lệnh điều hướng [[NAV:/phong-thi]], [[NAV:/dau-truong]], [[TOGGLE_THEME]] khi học sinh yêu cầu và tự tạo nút Tra cứu Google kèm liên kết bài học." },
-      { step: "Giai đoạn 5: Bổ sung Màng lọc AI An toàn Có trách nhiệm & Xác thực Sinh học Khuôn mặt AI Face 2FA", detail: "Tích hợp bộ lọc an toàn chống can thiệp xấu (Prompt Injection), bảo mật sinh học ResNet-34 68 điểm mốc khuôn mặt và bảo vệ tối đa quyền riêng tư học sinh." }
+      { step: "Giai đoạn 5: Bổ sung Màng lọc AI An toàn Có trách nhiệm & Phát hiện khuôn mặt hỗ trợ giám sát thi", detail: "Tích hợp bộ lọc an toàn chống can thiệp xấu (Prompt Injection), phát hiện khuôn mặt qua 68 điểm mốc và bảo vệ quyền riêng tư học sinh (chỉ lưu vector số 128-D, không lưu ảnh/video thô)." }
     ],
     systemPrompts: [
       {
@@ -119,20 +119,20 @@ Nhiệm vụ:
       },
       {
         id: "FACE_AUTH_AI_PROMPT",
-        title: "System Prompt 5: AI Biometric Face Authenticator (Bảo Mật Sinh Học Khuôn Mặt 2FA - ResNet-34)",
-        content: `Bạn là Mạng Nơ-ron Sâu AI Biometric Face Authenticator (ResNet-34 Deep Learning & TinyFaceDetector qua TensorFlow.js).
+        title: "System Prompt 5: AI Face Presence & Embedding Extractor (Phát Hiện Khuôn Mặt & Trích Xuất Vector 128-D - ResNet-34)",
+        content: `Bạn là Mạng Nơ-ron AI Hỗ trợ Giám sát Phòng thi (ResNet-34 & TinyFaceDetector qua TensorFlow.js).
 Nhiệm vụ chính:
-1. Phát hiện và khoanh vùng khuôn mặt người dùng thời gian thực (Real-time Face Detection).
-2. Nhận diện và vẽ chính xác 68 điểm mốc sinh học (68 Facial Landmarks) màu xanh Cyan Neon phủ lên Canvas webcam.
-3. Trích xuất Vector đặc trưng AI 128 chiều (128-D Deep Face Embedding Vector) mã hóa nét mặt duy nhất của người dùng.
-4. Tính toán khoảng cách Euclidean (Euclidean Distance Metric) giữa Vector thời gian thực và mẫu đăng ký ban đầu để xác thực bảo mật 2FA 2 bước.
-5. Kích hoạt cơ chế tự phục hồi (Self-Healing Fallback) chuyển sang Email OTP khi webcam bị che hoặc ánh sáng quá yếu.`
+1. Phát hiện và khoanh vùng khuôn mặt thí sinh thời gian thực (Real-time Face Detection).
+2. Vẽ 68 điểm mốc khuôn mặt (68 Facial Landmarks) màu xanh Cyan Neon phủ lên Canvas webcam.
+3. Trích xuất Vector đặc trưng số 128 chiều (128-D Face Embedding Vector) phục vụ đối chiếu sự hiện diện.
+4. Tính khoảng cách Euclidean giữa vector thời gian thực và vector mẫu đã đăng ký.
+5. Tuyệt đối không lưu ảnh hay video thô; chuyển sang phương thức dự phòng khi ánh sáng yếu.`
       },
       {
         id: "GEOMETRY_3D_QA_PROMPT",
         title: "System Prompt 6: AI Chuyên Gia Hình Học Không Gian 3D (Kiến Trúc 2 Tầng Lab Toán)",
         content: `Bạn là Trợ lý AI Chuyên gia Hình học Không gian 3D của hệ thống STEM HUB.
-Dưới đây là dữ liệu ĐÃ ĐƯỢC HỆ THỐNG TÍNH TOÁN CHUẨN XÁC 100% TỪ TẦNG 2 (Deterministic Math Engine):
+Dưới đây là dữ liệu ĐÃ ĐƯỢC HỆ THỐNG TÍNH TOÁN TẤT ĐỊNH TỪ TẦNG 2 (Deterministic Math Engine):
 - Tên khối hình: [shapeName]
 - Các tham số đầu vào: [parameters]
 - Các đại lượng hình học: S_đáy, S_xq, S_tp, V, h, d, l...
@@ -921,8 +921,8 @@ ${t.details.map(d => `- ${d}`).join('\n')}
                     <p className="text-[10px] text-zinc-400 mt-0.5">Khoảng Tin Cậy Wilson (n &le; 30)</p>
                   </div>
                   <div className="p-3 bg-[#181a24] rounded-lg border border-zinc-800">
-                    <span className="text-lg font-bold text-pink-400 font-sans">100% Đạt Chuẩn</span>
-                    <p className="text-[10px] text-zinc-400 mt-0.5">Mendel &amp; Tra Cứu Tri Thức RAG</p>
+                    <span className="text-lg font-bold text-pink-400 font-sans">10/10 passed</span>
+                    <p className="text-[10px] text-zinc-400 mt-0.5">10 Phép Lai Mendel (Tất Định)</p>
                   </div>
                 </div>
 
@@ -1005,14 +1005,14 @@ ${t.details.map(d => `- ${d}`).join('\n')}
 
                       <div className="p-3 bg-[#181a24] rounded-lg border border-zinc-800 space-y-1">
                         <span className="font-bold text-emerald-400 text-xs">5. Genetics Bayesian Reasoner</span>
-                        <div className="text-white font-bold">100.00% Đạt Chuẩn <span className="text-[10px] text-zinc-500 font-normal">(10/10 kịch bản)</span></div>
-                        <p className="text-[11px] text-zinc-400">Khoảng tin cậy 95%: [72.2%, 100%]. Kiểm thử toán học đạt chuẩn xác 100% trên cả 10 phép lai di truyền Mendel đơn gen &amp; đa gen.</p>
+                        <div className="text-white font-bold">10/10 passed <span className="text-[10px] text-zinc-500 font-normal">(10/10 kịch bản tổ hợp)</span></div>
+                        <p className="text-[11px] text-zinc-400">Khoảng tin cậy Wilson 95%: [72.2%, 100.0%]. Thuật toán tất định tính xác suất theo tổ hợp phân ly độc lập Mendel trên 10 phép lai.</p>
                       </div>
 
                       <div className="p-3 bg-[#181a24] rounded-lg border border-zinc-800 space-y-1">
                         <span className="font-bold text-purple-400 text-xs">6. Multilingual RAG TF-IDF</span>
-                        <div className="text-white font-bold">96.88% Khớp Đúng Bài Giảng Top-1 <span className="text-[10px] text-zinc-500 font-normal">(n=32 queries, 303 Chunks)</span></div>
-                        <p className="text-[11px] text-zinc-400">Độ tương đồng Cosine thô trung bình đạt 43.19%. Tỷ lệ tìm đúng bài giảng Top-3 đạt 100.00% trên bộ từ vựng 9,061 N-Gram tokens.</p>
+                        <div className="text-white font-bold">96.88% (31/32) Nhận diện môn học Top-1 <span className="text-[10px] text-zinc-500 font-normal">(32 queries nhóm soạn từ tiêu đề, có nguy cơ rò rỉ; không phải độ chính xác tìm đúng chunk)</span></div>
+                        <p className="text-[11px] text-zinc-400">Benchmark chunk-level độc lập (n=60 queries học sinh + 20 OOD): Recall@1: 26.67% (16/60), Recall@3: 36.67% (22/60), Recall@5: 43.33% (26/60), MRR: 0.3225, Loại trừ đúng OOD: 20/20 (100.00%).</p>
                       </div>
                     </div>
                   </div>

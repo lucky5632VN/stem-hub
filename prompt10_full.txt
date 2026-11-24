@@ -1,0 +1,47 @@
+<USER_REQUEST>
+Áp dụng toàn bộ QUY TẮC TRUNG THỰC ở Prompt 0. Hạn nộp 23:59 26/11/2026. Mọi mục kèm lệnh và output thật.
+
+MỤC TIÊU
+Tìm ít nhất 40 câu ứng viên (để chọn 30 câu số học chính thức và 10 câu dự phòng) từ nguồn chính thức do Bộ GD&ĐT công bố, kèm đáp án chính thức, để thay hoặc đối chiếu với nhóm in_scope_numerical hiện tại của bộ 100 câu ablation.
+
+NGUYÊN TẮC BẮT BUỘC
+1. Nguồn ưu tiên: (a) trang của Bộ GD&ĐT (moet.gov.vn) và các cổng của Bộ: đề minh họa, đề thi chính thức và đáp án chính thức kỳ thi tốt nghiệp THPT các năm 2025 và 2026; (b) nếu bản chính thức trên trang Bộ không truy cập được, dùng các báo lớn đăng lại đáp án do Bộ công bố làm nguồn thứ cấp (VietNamNet, VOV, Tuổi Trẻ, Thanh Niên, Dân Trí...), ghi rõ là "nguồn thứ cấp", và cố gắng đối chiếu thêm với bản của Bộ. Khởi điểm cho 2026: các trang VietNamNet của từng môn (Toán, Lý, Hóa, Sinh) đăng đáp án chính thức Bộ công bố ngày 19/06/2026: vietnamnet.vn/dap-an-chinh-thuc-mon-toan-thi-tot-nghiep-thpt-nam-2026-cua-bo-gd-dt-2527484.html, .../dap-an-chinh-thuc-mon-vat-ly-...-2527498.html, .../dap-an-chinh-thuc-mon-hoa-hoc-...-2527509.html, .../dap-an-chinh-thuc-mon-sinh-hoc-...-2527494.html, đề Toán: .../de-thi-mon-toan-thi-tot-nghiep-thpt-nam-2026-2524242.html.
+2. KHÔNG dùng website luyện thi, trung tâm, sách tham khảo thương mại, bộ đề tự soạn, diễn đàn.
+3. KHÔNG tạo câu hỏi hay đáp án từ trí nhớ của mô hình. Mọi câu và đáp án phải chép lại từ trang nguồn. Nếu không tìm được hoặc không đọc được, ghi "KHÔNG TÌM ĐƯỢC" cho mục đó; không đoán, không điền.
+4. Nếu đáp án chính thức là ảnh hoặc PDF quét: đọc bằng thị giác/OCR, ghi ocrConfidence (cao/trung bình/thấp), lưu ảnh chụp đúng phần bảng đáp án vào reports/ablation/evidence/official_pages/ (đã gitignore và nằm trong exclusion list của gói nộp) để tôi đối chiếu bằng mắt. Đáp án nào không chắc, đánh dấu "CẦN NGƯỜI XEM LẠI".
+5. Không nhờ trang nào "giải" hộ rồi coi là đáp án chính thức; đáp án chính thức là bảng đáp án Bộ công bố.
+6. Không mô phỏng trình duyệt hay bịa URL; chỉ ghi URL bạn đã thực sự mở. Nếu môi trường của bạn không có trình duyệt hoặc mạng, dừng lại và nói rõ, không tạo dữ liệu.
+7. Không tích [x] trong docs/ablation-answer-key-review.md; không sửa reports/ablation/ablation_dataset_100.json (đang khóa hash); chỉ tạo tệp ứng viên MỚI.
+
+TIÊU CHÍ CHỌN CÂU
+a. Phạm vi: Toán 8, Vật lý 8, Hóa học 8, Sinh học 6 câu cho nhóm số học, chọn thêm 10 câu dự phòng phân bổ tương tự.
+b. Câu phải có kết quả xác định bằng số hoặc một lựa chọn trắc nghiệm có đáp số cụ thể (ưu tiên dạng trả lời ngắn và trắc nghiệm có đáp số); loại câu cần hình vẽ, bảng, sơ đồ hoặc đồ thị không thể mô tả bằng chữ; loại câu đúng/sai nhiều ý nếu không tách được thành một đáp án duy nhất.
+c. Thuộc phạm vi kho 303 chunk: với mỗi câu, tìm chuyên đề tương ứng trong 101 chuyên đề của kho (ghi topicId/tên chuyên đề). Kiểm tra độ phủ bằng hàm truy xuất cục bộ (top-5) VÀ đọc tay chunk: nếu kho không chứa kiến thức cần để giải thì loại khỏi nhóm in_scope và ghi "ngoài kho".
+d. Nội dung câu hỏi chép nguyên văn, ngắn gọn; nếu phải bỏ hình hoặc dữ kiện, ghi rõ phần đã bỏ. Chỉ lưu những câu thật sự dùng; không sao chép cả đề.
+
+THÔNG TIN BẮT BUỘC CHO MỖI CÂU
+id nội bộ; môn; chuyên đề (kho); tên đề (ví dụ "Đề thi tốt nghiệp THPT 2026"), mã đề, số câu; phần/dạng câu; câu hỏi chép lại; đáp án chính thức (đúng như bảng của Bộ, kể cả chữ cái lựa chọn và nội dung lựa chọn); URL trang nguồn; ngày truy cập; loại nguồn (Bộ GD&ĐT / báo đăng lại đáp án của Bộ); tệp ảnh chụp đáp án; ocrConfidence; trạng thái kiểm chứng tính toán; ghi chú.
+
+KIỂM CHỨNG BẰNG TÍNH TOÁN
+Với từng câu có thể tính bằng code, viết hàm tính độc lập (sympy hoặc Python chuẩn; công thức Lý/Hóa/Sinh ghi rõ nguồn công thức) và so với đáp án chính thức. Báo cáo: khớp / lệch / không tính được bằng code. Nếu lệch: KHÔNG sửa đáp án chính thức, chỉ ghi chú; có thể đã chép sai hoặc đọc sai ảnh, đánh dấu "CẦN NGƯỜI XEM LẠI".
+
+KIỂM TOÁN NHÓM in_scope_numerical HIỆN TẠI
+Phân loại từng trong 30 câu hiện có: số học / khái niệm / khác (ví dụ ABL_IN_NUM_01 và 02 dường như là khái niệm). Lập bảng: id, môn, loại thực tế, có tính được bằng code không, có nguồn chưa. Đề xuất câu nào cần thay bằng ứng viên chính thức, câu nào giữ.
+
+ĐẦU RA
+1. docs/official-question-candidates.md và reports/ablation/official_candidates.json (nhiều hơn mức cần để dự phòng).
+2. docs/phieu-doi-chieu-nguon-chinh-thuc.md: bảng cho tôi tự đối chiếu, mỗi dòng: id, môn, URL, mã đề, số câu, đáp án chép lại, ảnh chụp trang đáp án, cột "Tôi đã đối chiếu [ ]" để trống. Sắp xếp để mỗi câu đối chiếu trong khoảng 1–2 phút.
+3. scripts/verify_official_candidates.py (hoặc .mjs) chạy được, in k/n khớp.
+4. KHÔNG ghi đè answer key hiện tại. Tạo docs/ablation-answer-key-official-DRAFT.md: bản nháp thay thế đề xuất (câu, đáp án, nguồn, loại nguồn); ghi rõ chưa người kiểm, chưa tích. Kèm changelog đề xuất v1.4.0 (câu nào thay, vì sao). Chỉ khi tôi xác nhận mới cập nhật dataset và khóa hash mới.
+5. Mục "rủi ro rò rỉ": ghi rõ đề thi công khai có thể đã nằm trong dữ liệu huấn luyện của Gemini nên kết quả "không RAG" có thể lạc quan.
+6. Báo cáo từng đợt: sau mỗi môn gửi bảng ngắn (số câu tìm được / số câu đạt tiêu chí / số câu cần xem lại) để tôi duyệt sớm; làm theo thứ tự Toán, Hóa, Vật lý, Sinh.
+
+Báo cáo cuối: lệnh + output thật, phần không tìm được, phần chưa làm, câu hỏi cần xác nhận. Không dùng "100%", "hoàn hảo", "tuyệt đối".
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-11-21T21:08:32+07:00.
+
+The user's current state is as follows:
+Active Document: e:\project\cuoc_thi_AI\jsconfig.json (LANGUAGE_UNSPECIFIED)
+Cursor is on line: 1
+</ADDITIONAL_METADATA>

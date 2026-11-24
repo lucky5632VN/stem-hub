@@ -28,6 +28,14 @@ next-env.d.ts
 serviceAccount*.json
 *-adminsdk-*.json
 credentials*.json
+reports/*gitleaks*.json
+!reports/gitleaks_classification_masked.json
+reports/ablation/raw/
+reports/ablation/pilot/
+reports/ablation/secret_mapping/
+reports/ablation/evidence/*.csv
+reports/ablation/evidence/official_pages/
+*.EXAMPLE.csv
 
 # Logs, cache, temp
 *.log

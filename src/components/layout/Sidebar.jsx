@@ -95,6 +95,13 @@ export default function Sidebar() {
           <div className="text-[11px] font-bold text-text-primary">STEM HUB v4.5</div>
           <div className="text-[9px] text-text-secondary font-mono mt-0.5">THPT Quỳnh Lưu 4</div>
         </div>
+        <Link 
+          href="/chinh-sach-bao-mat" 
+          prefetch={false}
+          className="text-[10px] text-text-secondary hover:text-accent-pink transition-colors underline block mt-2 select-none"
+        >
+          Chính sách bảo mật & Điều khoản
+        </Link>
       </div>
     </aside>
   );

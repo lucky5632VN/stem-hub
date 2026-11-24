@@ -389,7 +389,7 @@ Trong buổi phỏng vấn trực tiếp (10 - 15 phút), BGK gồm có:
 
 #### 19. "Dự án đã kiểm thử an ninh như thế nào trước khi đưa ra sử dụng?"
 * **Trả lời:**  
-  *"Dạ, dự án đã xây dựng bộ kiểm thử tự động gồm **48 bài test an ninh bảo mật** (`scripts/test-rules-suite.js`) và **21 bài test chống gian lận vật lý**. Tất cả các tình huống cố ý sửa đề thi, sửa điểm số, xóa lén dữ liệu đều đã được chạy kiểm tra và đạt kết quả Pass 100% ạ."*
+  *"Dạ, dự án đã xây dựng bộ kiểm thử tự động gồm **27 bài test an ninh bảo mật chạy trực tiếp trên Firestore Emulator chính thức** (`tests/firestore.rules.test.js`) và **21 bài test chống gian lận vật lý**. Tất cả các tình huống cố ý leo thang vai trò, sửa điểm số, xóa nhật ký quản trị, đọc dữ liệu tri thức chưa duyệt đều đã được kiểm tra và chặn đứng hoàn toàn (27/27 test passed trên Emulator)."*
 
 #### 20. "Giá trị lớn nhất mà dự án STEM HUB mang lại cho giáo dục là gì?"
 * **Trả lời:**  

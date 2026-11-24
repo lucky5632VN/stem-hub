@@ -12,7 +12,7 @@ test.describe('E2E Real User - 09: Cá nhân hóa Hồ sơ & Thẩm định Tri 
 
     if (await emailInput.isVisible({ timeout: 3000 }).catch(() => false)) {
       await emailInput.fill('test1@gmail.com');
-      await passwordInput.fill('test1123');
+      await passwordInput.fill(process.env.TEST_USER_PASSWORD || 'test1123');
       await submitBtn.click();
       await page.waitForTimeout(2500);
     }
@@ -36,7 +36,7 @@ test.describe('E2E Real User - 09: Cá nhân hóa Hồ sơ & Thẩm định Tri 
 
     if (await emailInput.isVisible({ timeout: 3000 }).catch(() => false)) {
       await emailInput.fill('test1@gmail.com');
-      await passwordInput.fill('test1123');
+      await passwordInput.fill(process.env.TEST_USER_PASSWORD || 'test1123');
       await submitBtn.click();
       await page.waitForTimeout(2500);
     }
@@ -72,7 +72,7 @@ test.describe('E2E Real User - 09: Cá nhân hóa Hồ sơ & Thẩm định Tri 
 
     if (await emailInput.isVisible({ timeout: 3000 }).catch(() => false)) {
       await emailInput.fill('test1@gmail.com');
-      await passwordInput.fill('test1123');
+      await passwordInput.fill(process.env.TEST_USER_PASSWORD || 'test1123');
       await submitBtn.click();
       await page.waitForTimeout(2500);
     }

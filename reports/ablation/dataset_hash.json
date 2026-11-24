@@ -1,0 +1,177 @@
+{
+  "version": "v1.5.0",
+  "status": "NHÁP (chưa đủ 30 câu số học có nguồn & người kiểm: 0/30)",
+  "sha256": "4cf0e5e3ae5f9381a47debbea763ae38f414933d62d24a385a2eea83885eae77",
+  "locked_at": "2026-11-21T15:13:40.419Z",
+  "file": "reports/ablation/ablation_dataset_100.json",
+  "total_cases": 100,
+  "verified_numerical_cases": 0,
+  "verified_questions_list": [],
+  "strata": {
+    "in_scope_concept": 40,
+    "in_scope_numerical": 30,
+    "out_of_scope": 30
+  },
+  "author": "Nhóm nghiên cứu / Thẩm định viên",
+  "notes": "Cập nhật và khóa bộ đáp án chuẩn",
+  "detailed_changelog": "Khóa hash cập nhật bảng đối soát nguồn xác nhận v1.4.0",
+  "changelog": [
+    {
+      "version": "v1.4.1-locked",
+      "status": "CHÍNH THỨC (Đã khóa v1.4.1 theo lệnh người dùng)",
+      "sha256": "7073358d7396609e2ab7805877aa9bda908862aadba63abccd6107183cc7b0c1",
+      "locked_at": "2026-11-23T05:09:44.273991+00:00",
+      "file": "reports/ablation/ablation_dataset_100.v1.4.1.json",
+      "total_cases": 100,
+      "numeric_gate": 24,
+      "strata_3_tiers": {
+        "tang_A_kho_du_de_giai": 4,
+        "tang_B_chu_de_lien_quan_chua_du_de_giai": 16,
+        "tang_C_ngoai_kho": 4,
+        "in_scope_concept": 40,
+        "out_of_scope_concept": 36
+      },
+      "corpus_freeze_statement": "kho không được bổ sung sau khi xem đề",
+      "notes": "Đã khóa chính thức theo lệnh người dùng 'khóa v1.4.1' và 'chốt ngưỡng 100'. Làm rõ định danh: 100 là tổng số câu của bộ dữ liệu (total_cases), numeric_gate = 24 là số câu số học CAND_* chính thức đã được người dùng tích trên phiếu đối chiếu.",
+      "detailed_changelog": "Khóa v1.4.1: Phân tầng chính thức 3 mức đối với 24 câu số học: Tầng A (4 câu), Tầng B (16 câu), Tầng C (4 câu). total_cases = 100; numeric_gate = 24. Bản này giữ nguyên trạng thái khóa chính thức cho đến khi người dùng gửi lệnh 'khóa v1.4.2'."
+    },
+    {
+      "version": "v1.4.0-locked",
+      "status": "CHÍNH THỨC (Khôi phục trạng thái LOCKED_OFFICIAL theo lệnh 'khóa v1.4.0' lúc 2026-11-23T03:29:26Z)",
+      "sha256": "0a80f4cbfbafbf0423a18c288f8c197bc7d5ab6d0e5f4b2233bfc7f3acbff233",
+      "locked_at": "2026-11-23T03:38:19.659728+00:00",
+      "file": "reports/ablation/ablation_dataset_100.v1.4.0.json",
+      "total_cases": 100,
+      "strata_v140": {
+        "main_in_scope_numerical": 20,
+        "out_of_scope_numerical": 4,
+        "in_scope_concept": 40,
+        "out_of_scope_concept": 36
+      },
+      "notes": "Bộ dữ liệu v1.4.0 giữ nguyên trạng thái khóa chính thức có căn cứ lệnh từ người dùng ('khóa v1.4.0' lúc 2026-11-23T03:29:26Z).",
+      "detailed_changelog": "Phân tách rõ ràng: 20 câu số học trong kho (12 đủ giải + 8 kiến thức nền) và 4 câu số học ngoài kho (CAND_MATH_02, CAND_CHEM_01, CAND_PHYS_03, CAND_PHYS_04); báo cáo độc lập từng nhóm, không gộp chung điểm số."
+    },
+    {
+      "version": "v1.5.0",
+      "status": "NHÁP (chưa đủ 30 câu số học có nguồn & người kiểm: 0/30)",
+      "sha256": "4cf0e5e3ae5f9381a47debbea763ae38f414933d62d24a385a2eea83885eae77",
+      "locked_at": "2026-11-21T15:13:40.419Z",
+      "file": "reports/ablation/ablation_dataset_100.json",
+      "author": "Nhóm nghiên cứu / Thẩm định viên",
+      "total_cases": 100,
+      "verified_numerical_cases": 0,
+      "verified_questions_list": [],
+      "strata": {
+        "in_scope_concept": 40,
+        "in_scope_numerical": 30,
+        "out_of_scope": 30
+      },
+      "notes": "Cập nhật và khóa bộ đáp án chuẩn",
+      "detailed_changelog": "Khóa hash cập nhật bảng đối soát nguồn xác nhận v1.4.0"
+    },
+    {
+      "version": "v1.4.0",
+      "status": "NHÁP (chưa đủ 30 câu số học có nguồn & người kiểm: 0/30)",
+      "sha256": "4cf0e5e3ae5f9381a47debbea763ae38f414933d62d24a385a2eea83885eae77",
+      "locked_at": "2026-11-21T13:02:07.629Z",
+      "file": "reports/ablation/ablation_dataset_100.json",
+      "author": "Nhóm nghiên cứu / Thẩm định viên",
+      "total_cases": 100,
+      "verified_numerical_cases": 0,
+      "strata": {
+        "in_scope_concept": 40,
+        "in_scope_numerical": 30,
+        "out_of_scope": 30
+      },
+      "notes": "Cập nhật bảng đối soát nguồn v1.4.0",
+      "detailed_changelog": "Mở rộng cột Nguồn xác nhận và Loại nguồn cho 100 câu; giữ nguyên đáp án nháp chờ giáo viên/người dùng thẩm định"
+    },
+    {
+      "version": "v1.3.0",
+      "status": "NHÁP (chưa người kiểm)",
+      "sha256": "4cf0e5e3ae5f9381a47debbea763ae38f414933d62d24a385a2eea83885eae77",
+      "locked_at": "2026-11-21T12:15:24.826Z",
+      "file": "reports/ablation/ablation_dataset_100.json",
+      "author": "Nhóm nghiên cứu / Thẩm định viên",
+      "total_cases": 100,
+      "verified_numerical_cases": 0,
+      "strata": {
+        "in_scope_concept": 40,
+        "in_scope_numerical": 30,
+        "out_of_scope": 30
+      },
+      "notes": "Cập nhật và khóa bộ đáp án chuẩn"
+    },
+    {
+      "version": "v1.2.0",
+      "sha256": "4cf0e5e3ae5f9381a47debbea763ae38f414933d62d24a385a2eea83885eae77",
+      "locked_at": "2026-11-21T08:26:39.189Z",
+      "file": "reports/ablation/ablation_dataset_100.json",
+      "author": "Nhóm nghiên cứu / Thẩm định viên",
+      "total_cases": 100,
+      "verified_numerical_cases": 0,
+      "strata": {
+        "in_scope_concept": 40,
+        "in_scope_numerical": 30,
+        "out_of_scope": 30
+      },
+      "notes": "Cập nhật và khóa bộ đáp án chuẩn"
+    },
+    {
+      "version": "v1.1.0",
+      "sha256": "4cf0e5e3ae5f9381a47debbea763ae38f414933d62d24a385a2eea83885eae77",
+      "locked_at": "2026-11-21T08:26:18.725Z",
+      "file": "reports/ablation/ablation_dataset_100.json",
+      "author": "Nhóm nghiên cứu / Thẩm định viên",
+      "total_cases": 2,
+      "verified_numerical_cases": 0,
+      "strata": {},
+      "notes": "Cập nhật và khóa bộ đáp án chuẩn"
+    },
+    {
+      "version": "v1.0.0",
+      "sha256": "4cf0e5e3ae5f9381a47debbea763ae38f414933d62d24a385a2eea83885eae77",
+      "locked_at": "2026-11-21T06:39:13.602Z",
+      "author": "Khởi tạo ban đầu",
+      "notes": "Khóa hash tập ablation ban đầu"
+    }
+  ],
+  "v1_4_0_official": {
+    "file": "reports/ablation/ablation_dataset_100.v1.4.0.json",
+    "sha256": "0a80f4cbfbafbf0423a18c288f8c197bc7d5ab6d0e5f4b2233bfc7f3acbff233",
+    "locked_at": "2026-11-23T03:38:19.659728+00:00",
+    "status": "LOCKED_OFFICIAL (Khôi phục chính thức theo lệnh 'khóa v1.4.0')"
+  },
+  "pre_run_grading_rules": {
+    "document": "docs/quy-tac-cham-ablation.md",
+    "sha256": "41e7b9bcffd0cdccf77475df2239993c04f782e373be02fea1b07502bae3b0a3",
+    "registered_at": "2026-11-23T17:05:00+07:00",
+    "previous_sha256": "23c8d3e45067fcf57d46a2db356db70b4825b06c0396d3dad11a8d9cc1c8b6f0",
+    "rules_summary": [
+      "Câu bị bộ lọc từ chối tính là sai (isCorrect: false, isAbstained: true)",
+      "Tỉ lệ từ chối báo riêng biệt thành cột độc lập",
+      "Chấm tự động chỉ áp dụng cho từ chối và đáp số cuối (số học)",
+      "Bổ sung tiền định (pre-run addendum): chuẩn hóa dấu phẩy, loại bỏ đơn vị, chấp nhận 3 dạng trắc nghiệm, chuỗi 4 chữ số",
+      "Câu khái niệm bắt buộc người chấm (human-in-the-loop)",
+      "Khóa quy tắc trước khi chạy, không đổi quy tắc sau khi thấy kết quả"
+    ]
+  },
+  "v1_4_1_official": {
+    "file": "reports/ablation/ablation_dataset_100.v1.4.1.json",
+    "sha256": "7073358d7396609e2ab7805877aa9bda908862aadba63abccd6107183cc7b0c1",
+    "locked_at": "2026-11-23T05:09:44.273991+00:00",
+    "status": "LOCKED_OFFICIAL",
+    "total_cases": 100,
+    "numeric_gate": 24,
+    "notes": "100 là tổng số câu của bộ dữ liệu (total_cases), numeric_gate = 24 là số câu CAND_* chính thức đã được người dùng tích trên phiếu đối chiếu. Bản v1.4.1 giữ nguyên trạng thái khóa cho đến khi người dùng gửi lệnh 'khóa v1.4.2'."
+  },
+  "v1_4_2_draft": {
+    "file": "reports/ablation/ablation_dataset_100.v1.4.2.json",
+    "sha256": "8d7b890475778ffe57f18edc5f41167a4e71ce707e90e595d8e72352b1a9b5e2",
+    "created_at": "2026-11-23T16:57:00+07:00",
+    "status": "DRAFT (CHƯA KHÓA - Chờ lệnh tường minh 'khóa v1.4.2' từ người dùng)",
+    "total_cases": 100,
+    "numeric_gate": 24,
+    "notes": "Bản nháp khắc phục ánh xạ ID 24 câu số học sang CAND_* chính thức (khớp từng ký tự văn bản); tách 6 câu bổ trợ không chấm; giữ 30 câu OOS đo từ chối. v1.4.1 chỉ chuyển sang SUPERSEDED sau khi người dùng gửi 'khóa v1.4.2'."
+  }
+}

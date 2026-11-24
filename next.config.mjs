@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   trailingSlash: false,
-  cleanDistDir: false,
+  cleanDistDir: true,
   images: {
     unoptimized: true,
   },
@@ -17,6 +17,14 @@ const nextConfig = {
   poweredByHeader: false, // 🛡️ OWASP: Tắt X-Powered-By chống nhận diện máy chủ (Server Fingerprinting)
   turbopack: {}, // Cấu hình turbopack rỗng cho Next.js 16
   compress: true, // ⚡ Nén Gzip/Brotli tối đa băng thông và tăng tốc FCP
+  env: {
+    // 🛡️ Nguồn cấu hình duy nhất: Mặc định tắt (true) ở production, chỉ bật khi đặt rõ ràng 'false'
+    NEXT_PUBLIC_DISABLE_AI_REASONING_LOG: String(
+      process.env.NODE_ENV === 'production'
+        ? process.env.DISABLE_AI_REASONING_LOG !== 'false'
+        : (process.env.DISABLE_AI_REASONING_LOG === 'true' || process.env.NEXT_PUBLIC_DISABLE_AI_REASONING_LOG === 'true')
+    ),
+  },
   async headers() {
     return [
       {

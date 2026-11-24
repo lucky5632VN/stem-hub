@@ -2,7 +2,7 @@
  * RAG Web Worker: Background Thread Cosine Similarity Calculator
  * 
  * Mục đích: Chạy ngầm thuật toán tìm kiếm vector TF-IDF trong luồng nền (Web Worker).
- * Giải phóng Main Thread, ngăn chặn 100% hiện tượng đơ/khựng (UI Freezing) trên máy tính học đường.
+ * Giải phóng Main Thread, ngăn chặn hiện tượng đơ/khựng (UI Freezing) trên máy tính học đường.
  */
 
 self.onmessage = function(e) {
@@ -47,7 +47,7 @@ self.onmessage = function(e) {
         const docSubj = (doc.subject || '').toLowerCase();
         if (docSubj === 'hoa' && (qLower.includes('hóa') || qLower.includes('hoá') || qLower.includes('este') || qLower.includes('axit'))) {
           score *= 1.3;
-        } else if (docSubj === 'ly' && (qLower.includes('lý') || qLower.includes('lí') || qLower.includes('sóng') || qLower.includes('dao động'))) {
+        } else if (docSubj === 'ly' && (qLower.includes('vật lý') || (!/địa\s*l[ýí]|tâm\s*l[ýí]|triết\s*l[ýí]/i.test(qLower) && (/\bl[ýí]\b/i.test(qLower) || qLower.includes('sóng') || qLower.includes('dao động'))))) {
           score *= 1.3;
         } else if (docSubj === 'toan' && (qLower.includes('toán') || qLower.includes('hàm số') || qLower.includes('tích phân'))) {
           score *= 1.3;

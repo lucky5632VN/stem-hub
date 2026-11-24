@@ -14,7 +14,7 @@ export function diagnosePhysicsAttempt(userParams, targetParams) {
   if (angleDiff <= 1.0 && posOffset <= 2.0 && indexDiff <= 0.05) {
     return {
       isCorrect: true,
-      diagnostic: "Thao tác hoàn hảo! Tia laser truyền đúng đường đi thiết kế.",
+      diagnostic: "Thao tác chuẩn xác! Tia laser truyền đúng đường đi thiết kế.",
       errorType: null
     };
   }

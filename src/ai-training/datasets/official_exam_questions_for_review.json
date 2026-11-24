@@ -1,0 +1,722 @@
+[
+  {
+    "sampleId": "exam_toan_01",
+    "originalId": "exam_toan_1",
+    "subject": "toan",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - môn Toán – Đề #1",
+    "grade": 12,
+    "topic": "Toán Giải Tích & Hình Học",
+    "difficulty": "Thông hiểu",
+    "question": "**PHẦN I. Câu trắc nghiệm nhiều phương án lựa chọn. **\n**Câu 1:** Cho $\\int_{0}^{2}f(x)dx=3$ và $\\int_{0}^{2}g(x)dx=7$. Khi đó, tính $\\int_{0}^{2}[f(x)+3g(x)]dx$ có kết quả bằng:\nA. 10.\nB. -18.\nC. 14.\nD. 24.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Sau đây là lời giải chi tiết cho câu hỏi thuộc chương trình Toán lớp 12 (Giải tích theo chương trình GDPT 2018):\n\n---\n\n### **1. Phương pháp giải và suy luận logic**\n- **Kiến thức cần nhớ:** Tính chất tuyến tính của tích phân. \n  Cho hai hàm số $f(x)$ và $g(x)$ liên tục trên đoạn $[a; b]$ và hằng số $k$, ta có tính chất:\n  $$\\int_{a}^{b} [f(x) \\pm k \\cdot g(x)] dx = \\int_{a}^{b} f(x) dx \\pm k \\int_{a}^{b} g(x) dx$$\n\n- **Các bước thực hiện:**\n  1. Áp dụng tính chất tuyến tính của tích phân để tách biểu thức cần tính thành tổng các tích phân đơn giản hơn.\n  2. Thay các giá trị đã cho của giả thiết ($\\int_{0}^{2}f(x)dx=3$ và $\\int_{0}^{2}g(x)dx=7$) vào biểu thức vừa tách.\n  3. Tính toán kết quả cuối cùng và đối chiếu với các phương án A, B, C, D.\n\n---\n\n### **2. Lời giải chi tiết**\n\nTheo đề bài, ta có:\n- $\\int_{0}^{2}f(x)dx = 3$\n- $\\int_{0}^{2}g(x)dx = 7$\n\nXét tích phân cần tính $\\int_{0}^{2}[f(x)+3g(x)]dx$. \n\nÁp dụng tính chất tuyến tính của tích phân, ta khai triển như sau:\n$$\\int_{0}^{2}[f(x)+3g(x)]dx = \\int_{0}^{2}f(x)dx + \\int_{0}^{2}3g(x)dx$$\n$$= \\int_{0}^{2}f(x)dx + 3\\int_{0}^{2}g(x)dx$$\n\nThay các giá trị đã cho vào biểu thức, ta được:\n$$= 3 + 3 \\cdot 7$$\n$$= 3 + 21 = 24$$\n\n---\n\n### **3. Kết luận**\n- Kết quả của tích phân là **$24$**.\n- Đối chiếu với các phương án A, B, C, D, ta chọn **đáp án D**.",
+    "referenceAnswer": "Đáp án D: 24.\n\nTheo tính chất tuyến tính của tích phân: ∫[f(x)+3g(x)]dx = ∫f(x)dx + 3∫g(x)dx = 3 + 3(7) = 3 + 21 = 24.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - môn Toán – Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "math_01",
+      "correctAnswerIdx": 3
+    }
+  },
+  {
+    "sampleId": "exam_toan_02",
+    "originalId": "exam_toan_2",
+    "subject": "toan",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - môn Toán – Đề #1",
+    "grade": 12,
+    "topic": "Toán Giải Tích & Hình Học",
+    "difficulty": "Thông hiểu",
+    "question": "Trong không gian Oxyz, đường thẳng d đi qua điểm $M(3;5;1)$ và có vectơ chỉ phương $\\vec{a}=(4;-2;3)$. Khi đó, phương trình tham số của d là:\nA. $\\begin{cases} x=3+4t \\\\ y=5-2t \\\\ z=1-3t \\end{cases}$.\nB. $\\begin{cases} x=3+4t \\\\ y=5-2t \\\\ z=1+3t \\end{cases}$.\nC. $\\begin{cases} x=3+4t \\\\ y=5+2t \\\\ z=1+3t \\end{cases}$.\nD. $\\begin{cases} x=3-4t \\\\ y=5-2t \\\\ z=1+3t \\end{cases}$.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Hôm nay chúng ta sẽ cùng nhau giải chi tiết câu hỏi trắc nghiệm thuộc chương trình Hình học không gian Oxyz (Chương trình GDPT 2018).\n\n---\n\n### **1. Phương pháp giải và các bước suy luận**\n\n* **Kiến thức cần nhớ:** \n  Trong không gian với hệ tọa độ $Oxyz$, phương trình tham số của đường thẳng $d$ đi qua điểm $M(x_0; y_0; z_0)$ và nhận vectơ $\\vec{a} = (a_1; a_2; a_3)$ làm vectơ chỉ phương có dạng:\n  $$\\begin{cases} x = x_0 + a_1t \\\\ y = y_0 + a_2t \\\\ z = z_0 + a_3t \\end{cases} \\quad (t \\in \\mathbb{R})$$\n\n* **Áp dụng vào bài toán:**\n  - Theo đề bài, đường thẳng $d$ đi qua điểm $M(3; 5; 1)$, suy ra tọa độ điểm đi qua là:\n    $$x_0 = 3, \\quad y_0 = 5, \\quad z_0 = 1$$\n  - Đường thẳng $d$ có vectơ chỉ phương $\\vec{a} = (4; -2; 3)$, suy ra các thành phần của vectơ chỉ phương là:\n    $$a_1 = 4, \\quad a_2 = -2, \\quad a_3 = 3$$\n\n* **Lập phương trình tham số:**\n  Thay các giá trị trên vào công thức tổng quát, ta được phương trình tham số của đường thẳng $d$:\n  $$\\begin{cases} x = 3 + 4t \\\\ y = 5 - 2t \\\\ z = 1 + 3t \\end{cases}$$\n\n* **So sánh với các đáp án:**\n  - Đáp án A: Sai ở dấu của $z$ ($1 - 3t$).\n  - Đáp án B: **Chính xác** trùng khớp với kết quả vừa tìm.\n  - Đáp án C: Sai ở dấu của $y$ ($5 + 2t$).\n  - Đáp án D: Sai ở dấu của $x$ ($3 - 4t$).\n\n---\n\n### **2. Kết luận**\n\nChọn phương án **B**.",
+    "referenceAnswer": "Đáp án B: $\\begin{cases} x=3+4t \\\\ y=5-2t \\\\ z=1+3t \\end{cases}$.\n\nPhương trình tham số của đường thẳng đi qua M(x0; y0; z0) với vtcp u=(a; b; c) là x=x0+at, y=y0+bt, z=z0+ct. Với M(3;5;1) và vtcp (4;-2;3), ta có x=3+4t, y=5-2t, z=1+3t.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - môn Toán – Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "math_01",
+      "correctAnswerIdx": 1
+    }
+  },
+  {
+    "sampleId": "exam_toan_03",
+    "originalId": "exam_toan_3",
+    "subject": "toan",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - môn Toán – Đề #1",
+    "grade": 12,
+    "topic": "Toán Giải Tích & Hình Học",
+    "difficulty": "Thông hiểu",
+    "question": "Hàm số $f(x)=x^4+x^2$ có họ nguyên hàm là:\nA. $F(x)=\\frac{1}{5}x^5+\\frac{1}{3}x^3+C$.\nB. $F(x)=x^4+x^2+C$.\nC. $F(x)=4x^3+2x+C$.\nD. $F(x)=x^5+x^3+C$.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Chúng ta sẽ cùng nhau giải chi tiết câu hỏi này theo chuẩn chương trình GDPT 2018 nhé.\n\n---\n\n### **1. Phương pháp giải và các bước suy luận**\n\n*   **Lý thuyết cơ bản:** Để tìm họ nguyên hàm của một hàm số $f(x)$, ta đi tìm hàm số $F(x)$ sao cho đạo hàm của $F(x)$ bằng $f(x)$, tức là $F'(x) = f(x)$. \n    Công thức tổng quát: $\\int f(x) \\, dx = F(x) + C$ (với $C$ là hằng số thực).\n*   **Các quy tắc tính nguyên hàm cơ bản cần nhớ:**\n    *   Nguyên hàm của lũy thừa: $\\int x^n \\, dx = \\frac{x^{n+1}}{n+1} + C$ (với $n \\neq -1$).\n    *   Tính chất tuyến tính: $\\int [f(x) \\pm g(x)] \\, dx = \\int f(x) \\, dx \\pm \\int g(x) \\, dx$.\n\n*   **Các bước suy luận chi tiết:**\n    1.  Bài toán yêu cầu tìm họ nguyên hàm của hàm số $f(x) = x^4 + x^2$. Ta cần tính tích phân bất định:\n        $$\\int (x^4 + x^2) \\, dx$$\n    2.  Áp dụng tính chất tuyến tính, ta tách tích phân thành tổng của hai nguyên hàm cơ bản:\n        $$\\int x^4 \\, dx + \\int x^2 \\, dx$$\n    3.  Tính từng nguyên hàm bằng công thức $\\int x^n \\, dx = \\frac{x^{n+1}}{n+1} + C$:\n        *   Với $\\int x^4 \\, dx$, ta có $n = 4$, suy ra $\\frac{x^{4+1}}{4+1} = \\frac{1}{5}x^5$.\n        *   Với $\\int x^2 \\, dx$, ta có $n = 2$, suy ra $\\frac{x^{2+1}}{2+1} = \\frac{1}{3}x^3$.\n    4.  Cộng kết quả lại và cộng thêm hằng số $C$ cho toàn bộ họ nguyên hàm:\n        $$F(x) = \\frac{1}{5}x^5 + \\frac{1}{3}x^3 + C$$\n\n---\n\n### **2. So sánh với các phương án đề bài**\n*   Phương án A: $F(x)=\\frac{1}{5}x^5+\\frac{1}{3}x^3+C$ (Trùng khớp với kết quả suy luận).\n*   Phương án B: $F(x)=x^4+x^2+C$ (Đây là hàm số ban đầu, không phải nguyên hàm).\n*   Phương án C: $F(x)=4x^3+2x+C$ (Đây là đạo hàm $f'(x)$ của hàm số, không phải nguyên hàm).\n*   Phương án D: $F(x)=x^5+x^3+C$ (Sai hệ số phân số).\n\n---\n\n### **3. Kết luận**\nChọn phương án **A**.",
+    "referenceAnswer": "Đáp án A: $F(x)=\\frac{1}{5}x^5+\\frac{1}{3}x^3+C$.\n\nNguyên hàm của x^n là x^(n+1)/(n+1) + C. Do đó ∫(x^4+x^2)dx = x^5/5 + x^3/3 + C.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - môn Toán – Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "math_01",
+      "correctAnswerIdx": 0
+    }
+  },
+  {
+    "sampleId": "exam_toan_04",
+    "originalId": "exam_toan_4",
+    "subject": "toan",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - môn Toán – Đề #1",
+    "grade": 12,
+    "topic": "Toán Giải Tích & Hình Học",
+    "difficulty": "Thông hiểu",
+    "question": "Trong không gian Oxyz, tính khoảng cách từ điểm $A(1;2;-3)$ đến mặt phẳng $(P):x+y-z+3=0$ có kết quả bằng:\nA. $2\\sqrt{3}$.\nB. $6\\sqrt{3}$.\nC. $3\\sqrt{3}$.\nD. $\\sqrt{3}$.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Chúng ta sẽ cùng nhau giải chi tiết câu hỏi này theo chuẩn chương trình GDPT 2018 nhé!\n\n---\n\n### **1. Phương pháp giải và các bước suy luận**\n\n*   **Kiến thức nền tảng:** Trong không gian với hệ tọa độ $Oxyz$, cho điểm $M_0(x_0; y_0; z_0)$ và mặt phẳng $(\\alpha): Ax + By + Cz + D = 0$. Khoảng cách từ điểm $M_0$ đến mặt phẳng $(\\alpha)$ được tính bởi công thức:\n    $$d(M_0, (\\alpha)) = \\frac{|Ax_0 + By_0 + Cz_0 + D|}{\\sqrt{A^2 + B^2 + C^2}}$$\n\n*   **Các bước thực hiện đối với bài toán:**\n    1. Xác định tọa độ điểm $A(x_0; y_0; z_0)$ từ đề bài: $x_0 = 1, y_0 = 2, z_0 = -3$.\n    2. Xác định các hệ số của mặt phẳng $(P): Ax + By + Cz + D = 0$: $A = 1, B = 1, C = -1, D = 3$.\n    3. Thay tọa độ điểm $A$ và các hệ số vào công thức khoảng cách để tính toán kết quả.\n\n---\n\n### **2. Lời giải chi tiết**\n\nÁp dụng công thức tính khoảng cách từ điểm $A(1;2;-3)$ đến mặt phẳng $(P): x + y - z + 3 = 0$, ta có:\n\n$$d(A, (P)) = \\frac{|1 \\cdot (1) + 1 \\cdot (2) - 1 \\cdot (-3) + 3|}{\\sqrt{1^2 + 1^2 + (-1)^2}}$$\n\nThực hiện tính toán tử thức và mẫu thức:\n*   Tử thức: $|1 + 2 + 3 + 3| = |9| = 9$\n*   Mẫu thức: $\\sqrt{1^2 + 1^2 + (-1)^2} = \\sqrt{1 + 1 + 1} = \\sqrt{3}$\n\nVậy khoảng cách cần tìm là:\n$$d(A, (P)) = \\frac{9}{\\sqrt{3}} = \\frac{9\\sqrt{3}}{3} = 3\\sqrt{3}$$\n\n---\n\n### **3. Kết luận**\n\n*   Kết quả tính toán: $3\\sqrt{3}$\n*   Chọn phương án: **C**",
+    "referenceAnswer": "Đáp án D: $\\sqrt{3}$.\n\nKhoảng cách từ A(1;2;-3) đến mặt phẳng x+y-z+3=0 là |1+2-(-3)+3| / sqrt(1^2+1^2+(-1)^2) = 9 / sqrt(3) = 3sqrt(3). (Kiểm tra lại: |1+2+3+3|/sqrt(3) = 9/sqrt(3) = 3sqrt(3)).",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - môn Toán – Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "math_01",
+      "correctAnswerIdx": 3
+    }
+  },
+  {
+    "sampleId": "exam_toan_05",
+    "originalId": "exam_toan_5",
+    "subject": "toan",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - môn Toán – Đề #1",
+    "grade": 12,
+    "topic": "Toán Giải Tích & Hình Học",
+    "difficulty": "Vận dụng",
+    "question": "Cho hai biến cố A và B. Biết $P(B)=0,7$ và $P(AB)=0,3$. Khi đó, tính $P(A|B)$ có kết quả bằng:\nA. $\\frac{3}{7}$.\nB. $\\frac{1}{2}$.\nC. $\\frac{6}{7}$.\nD. $\\frac{1}{7}$.",
+    "systemResponse": "Chào bạn, tôi là trợ lý AI gia sư STEM HUB. Dưới đây là hướng dẫn giải chi tiết cho câu hỏi trắc nghiệm thuộc chương trình Toán lớp 11 (Chương trình GDPT 2018):\n\n---\n\n### **1. Phương pháp giải và suy luận logic**\n\n* **Kiến thức trọng tâm:** Theo chương trình Toán 11 (Bộ sách Kết nối tri thức, Chân trời sáng tạo hoặc Cánh diều) phần Xác suất, **xác suất có điều kiện** của biến cố $A$ với điều kiện biến cố $B$ đã xảy ra (ký hiệu là $P(A|B)$) được định nghĩa bởi công thức:\n  $$P(A|B) = \\frac{P(AB)}{P(B)}$$\n  *(với điều kiện $P(B) > 0$)*.\n\n* **Các bước thực hiện:**\n  1. Xác định các giá trị đề bài đã cho: $P(B) = 0,7$ và $P(AB) = 0,3$.\n  2. Áp dụng công thức tính xác suất có điều kiện.\n  3. Thay số và rút gọn phân số để tìm kết quả cuối cùng.\n\n---\n\n### **2. Lời giải chi tiết**\n\nÁp dụng công thức tính xác suất có điều kiện, ta có:\n$$P(A|B) = \\frac{P(AB)}{P(B)}$$\n\nThay các giá trị $P(AB) = 0,3$ và $P(B) = 0,7$ vào công thức, ta được:\n$$P(A|B) = \\frac{0,3}{0,7} = \\frac{3}{7}$$\n\n---\n\n### **3. Kết luận**\n\n* Kết quả tính toán là: $\\frac{3}{7}$.\n* **Chọn phương án:** **A**.",
+    "referenceAnswer": "Đáp án A: $\\frac{3}{7}$.\n\nP(A|B) = P(AB)/P(B) = 0.3 / 0.7 = 3/7.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - môn Toán – Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "math_01",
+      "correctAnswerIdx": 0
+    }
+  },
+  {
+    "sampleId": "exam_toan_06",
+    "originalId": "exam_toan_6",
+    "subject": "toan",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - môn Toán – Đề #1",
+    "grade": 12,
+    "topic": "Toán Giải Tích & Hình Học",
+    "difficulty": "Vận dụng",
+    "question": "Trong không gian, cho tam giác ABC. Gọi G là trọng tâm của $Δ ABC$ và I là trung điểm của AB (tham khảo hình vẽ bên). Khẳng định nào sau đây sai?\n[Hình vẽ minh họa đề thi]\nA. $\\vec{AB}$ và $\\vec{AC}$ không cùng phương.\nB. $\\vec{AB}=3\\vec{AI}$.\nC. $\\vec{GA}+\\vec{GB}+\\vec{GC}=\\vec{0}$.\nD. $\\vec{IA}+\\vec{IB}=\\vec{0}$.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Dưới đây là hướng dẫn giải chi tiết cho câu hỏi Toán học thuộc chương trình GDPT 2018 (phần Hình học không gian và Véctơ lớp 10/12).\n\n---\n\n### **1. Phương pháp giải và các bước suy luận logic**\n\nĐể tìm ra khẳng định **sai** trong các phương án đã cho, chúng ta sẽ ôn lại các kiến thức cơ bản về vectơ trong không gian:\n* **Vectơ cùng phương:** Hai vectơ $\\vec{a}$ và $\\vec{b}$ ($\\vec{b} \\neq \\vec{0}$) cùng phương khi và chỉ khi có một số thực $k$ sao cho $\\vec{a} = k\\vec{b}$.\n* **Trung điểm của đoạn thẳng:** Nếu $I$ là trung điểm của đoạn thẳng $AB$ thì $\\vec{IA} + \\vec{IB} = \\vec{0}$ hoặc $\\vec{AB} = 2\\vec{AI}$ (hoặc $\\vec{AB} = 2\\vec{IB}$).\n* **Trọng tâm của tam giác:** Nếu $G$ là trọng tâm của tam giác $ABC$ thì với mọi điểm $M$ bất kỳ (hoặc đặc biệt là chính điểm $G$), ta luôn có $\\vec{GA} + \\vec{GB} + \\vec{GC} = \\vec{0}$.\n\nBây giờ, chúng ta xét từng phương án:\n* **Xét phương án A:** Tam giác $ABC$ là một tam giác không suy biến, do đó hai vectơ $\\vec{AB}$ và $\\vec{AC}$ có giá cắt nhau tại điểm $A$, nên chúng **không cùng phương**. Khẳng định này **đúng**.\n* **Xét phương án B:** Vì $I$ là trung điểm của $AB$, ta có mối quan hệ độ dài và hướng giữa $\\vec{AB}$ và $\\vec{AI}$ là: $AB = 2AI$ và hai vectơ này cùng hướng, tức là $\\vec{AB} = 2\\vec{AI}$. \n  Do đó, hệ thức $\\vec{AB} = 3\\vec{AI}$ là **sai**.\n* **Xét phương án C:** Theo tính chất trọng tâm tam giác, $G$ là trọng tâm của $\\Delta ABC$ thì $\\vec{GA} + \\vec{GB} + \\vec{GC} = \\vec{0}$. Khẳng định này **đúng**.\n* **Xét phương án D:** Vì $I$ là trung điểm của đoạn thẳng $AB$, hai vectơ $\\vec{IA}$ và $\\vec{IB}$ ngược hướng và cùng độ dài, nên $\\vec{IA} + \\vec{IB} = \\vec{0}$. Khẳng định này **đúng**.\n\n---\n\n### **2. Kết luận**\n\nKhẳng định sai trong các phương án trên là **B**.\n\n**Chọn đáp án: B**",
+    "referenceAnswer": "Đáp án B: $\\vec{AB}=3\\vec{AI}$.\n\nVì I là trung điểm AB nên vec(AB) = 2*vec(AI). Khẳng định vec(AB)=3*vec(AI) là sai.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - môn Toán – Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "math_01",
+      "correctAnswerIdx": 1
+    }
+  },
+  {
+    "sampleId": "exam_toan_07",
+    "originalId": "exam_toan_7",
+    "subject": "toan",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - môn Toán – Đề #1",
+    "grade": 12,
+    "topic": "Toán Giải Tích & Hình Học",
+    "difficulty": "Vận dụng",
+    "question": "Trong không gian Oxyz, cho mặt phẳng $(P):2x+3y+z+2=0$. Khi đó, $(P)$ có một vectơ pháp tuyến là:\nA. $\\vec{n}=(2;3;2)$.\nB. $\\vec{n}=(2;3;0)$.\nC. $\\vec{n}=(2;0;3)$.\nD. $\\vec{n}=(2;3;1)$.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Dưới đây là lời giải chi tiết cho câu hỏi thuộc chương trình Toán lớp 12 (Hình học không gian Oxyz - Chương trình GDPT 2018):\n\n### **1. Phương pháp giải và suy luận logic**\n\n* **Kiến thức trọng tâm:** Trong không gian với hệ tọa độ $Oxyz$, cho mặt phẳng $(P)$ có phương trình tổng quát dạng:\n  $$Ax + By + Cz + D = 0$$\n  (với $A^2 + B^2 + C^2 > 0$).\n* **Quy tắc xác định vectơ pháp tuyến:** Khi phương trình mặt phẳng đã được khai triển ở dạng tổng quát, các hệ số của $x, y, z$ chính là tọa độ của một vectơ pháp tuyến của mặt phẳng đó.\n* Cụ thể, vectơ pháp tuyến $\\vec{n}$ của mặt phẳng $(P)$ có tọa độ là:\n  $$\\vec{n} = (A; B; C) = (2; 3; 1)$$\n\n---\n\n### **2. Lời giải chi tiết**\n\nTheo phương trình của mặt phẳng $(P): 2x + 3y + z + 2 = 0$, ta xác định được các hệ số của $x, y, z$ lần lượt là:\n* Hệ số của $x$ là $A = 2$\n* Hệ số của $y$ là $B = 3$\n* Hệ số của $z$ là $C = 1$ (vì $z = 1 \\cdot z$)\n\nDo đó, mặt phẳng $(P)$ nhận vectơ $\\vec{n} = (2; 3; 1)$ làm một vectơ pháp tuyến.\n\nSo sánh với các phương án đề bài cung cấp:\n* Phương án A: $\\vec{n} = (2; 3; 2)$ (Sai tọa độ ứng với $z$).\n* Phương án B: $\\vec{n} = (2; 3; 0)$ (Sai tọa độ ứng với $z$).\n* Phương án C: $\\vec{n} = (2; 0; 3)$ (Sai vị trí các thành phần).\n* Phương án D: $\\vec{n} = (2; 3; 1)$ (Đúng).\n\n---\n\n### **3. Kết luận**\n\nChọn phương án **D. $\\vec{n}=(2;3;1)$**.",
+    "referenceAnswer": "Đáp án D: $\\vec{n}=(2;3;1)$.\n\nMặt phẳng Ax+By+Cz+D=0 có VTPT là (A; B; C). Với 2x+3y+z+2=0, VTPT là (2;3;1).",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - môn Toán – Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "math_01",
+      "correctAnswerIdx": 3
+    }
+  },
+  {
+    "sampleId": "exam_toan_08",
+    "originalId": "exam_toan_8",
+    "subject": "toan",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - môn Toán – Đề #1",
+    "grade": 12,
+    "topic": "Toán Giải Tích & Hình Học",
+    "difficulty": "Vận dụng",
+    "question": "Đường tiệm xiên của đồ thị hàm số $y=\\frac{x^2-3x+3}{x-1}$ là:\nA. $y=x-2$.\nB. $y=-x+2$.\nC. $y=x+2$.\nD. $y=-x-2$.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Hôm nay chúng ta sẽ cùng nhau giải chi tiết câu hỏi trắc nghiệm thuộc chương trình Toán lớp 12 (Chương Khảo sát hàm số theo chuẩn GDPT 2018).\n\n---\n\n### **1. Phương pháp giải và các bước suy luận**\n\nĐể tìm đường tiệm cận xiên của đồ thị hàm số $y = \\frac{f(x)}{g(x)}$ (với bậc của tử thức $f(x)$ lớn hơn bậc của mẫu thức $g(x)$ đúng một đơn vị), ta có thể sử dụng hai cách phổ biến:\n\n*   **Cách 1: Sử dụng định nghĩa giới hạn**\n    Đường thẳng $y = ax + b$ ($a \\neq 0$) là tiệm cận xiên của đồ thị hàm số $y = f(x)$ khi $x \\to \\pm\\infty$ nếu:\n    $$a = \\lim_{x \\to \\pm\\infty} \\frac{f(x)}{x} \\quad \\text{và} \\quad b = \\lim_{x \\to \\pm\\infty} [f(x) - ax]$$\n\n*   **Cách 2: Thực hiện phép chia đa thức (Nhanh và tối ưu cho trắc nghiệm)**\n    Ta phân tích tử số thành thương nhân với mẫu cộng với số dư:\n    $$f(x) = g(x) \\cdot (ax + b) + R$$\n    Khi đó, hàm số được viết lại dưới dạng:\n    $$y = ax + b + \\frac{R}{g(x)}$$\n    Vì $\\lim_{x \\to \\pm\\infty} \\frac{R}{g(x)} = 0$, nên đường thẳng $y = ax + b$ chính là đường tiệm cận xiên của đồ thị hàm số.\n\n---\n\n### **2. Lời giải chi tiết**\n\nXét hàm số $y = \\frac{x^2-3x+3}{x-1}$.\n\n*   Tập xác định: $\\mathcal{D} = \\mathbb{R} \\setminus \\{1\\}$.\n*   Ta thực hiện phép chia đa thức $x^2 - 3x + 3$ cho $x - 1$:\n    *   Lấy $x^2 : x = x$\n    *   Nhân lên: $x(x - 1) = x^2 - x$\n    *   Trừ đi: $(x^2 - 3x) - (x^2 - x) = -2x$\n    *   Hạ $3$: lấy $-2x : x = -2$\n    *   Nhân lên: $-2(x - 1) = -2x + 2$\n    *   Trừ đi: $(-2x + 3) - (-2x + 2) = 1$ (đây là số dư).\n\nDo đó, ta viết lại hàm số dưới dạng:\n$$y = \\frac{x^2-3x+3}{x-1} = (x - 2) + \\frac{1}{x-1}$$\n\n*   Vì $\\lim_{x \\to \\pm\\infty} \\frac{1}{x-1} = 0$, nên đường thẳng $y = x - 2$ là đường tiệm cận xiên của đồ thị hàm số đã cho.\n\n---\n\n### **3. Kết luận**\n\n*   Đường tiệm cận xiên của đồ thị hàm số là: $y = x - 2$.\n*   **Chọn phương án: A**.",
+    "referenceAnswer": "Đáp án A: $y=x-2$.\n\nThực hiện phép chia đa thức: (x^2-3x+3)/(x-1) = x - 2 + 1/(x-1). Khi x tiến ra vô cực, hàm số tiến về x-2. Vậy y=x-2 là tiệm cận xiên.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - môn Toán – Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "math_01",
+      "correctAnswerIdx": 0
+    }
+  },
+  {
+    "sampleId": "exam_toan_09",
+    "originalId": "exam_toan_9",
+    "subject": "toan",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - môn Toán – Đề #1",
+    "grade": 12,
+    "topic": "Toán Giải Tích & Hình Học",
+    "difficulty": "Vận dụng cao",
+    "question": "Tính diện tích hình phẳng được giới hạn bởi hai parabol $(P_1):y=x^2-2x-2$ và $(P_2):y=-x^2+2$ có kết quả bằng:\nA. 7 (đvdt).\nB. 10 (đvdt).\nC. 8 (đvdt).\nD. 9 (đvdt).",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI từ STEM HUB. Dưới đây là hướng dẫn giải chi tiết cho câu hỏi ôn tập môn Toán theo chuẩn chương trình GDPT 2018.\n\n---\n\n### **1. Phương pháp giải và các bước suy luận**\n\nĐể tính diện tích hình phẳng giới hạn bởi hai đồ thị hàm số $y = f(x)$ và $y = g(x)$, ta thực hiện theo các bước sau:\n* **Bước 1:** Tìm hoành độ giao điểm của hai đồ thị bằng cách giải phương trình hoành độ giao điểm: \n  $$f(x) = g(x) \\iff f(x) - g(x) = 0$$\n  Giả sử phương trình có hai nghiệm phân biệt $a$ và $b$ (với $a < b$).\n* **Bước 2:** Áp dụng công thức tính diện tích hình phẳng giới hạn bởi hai đường cong:\n  $$S = \\int_{a}^{b} |f(x) - g(x)| \\, dx$$\n  *(Lưu ý: Ta có thể dùng công thức nhanh cho parabol $S = \\frac{|a'|}{6}(b-a)^3$ nếu hệ số bậc hai của hiệu hai parabol phù hợp).*\n\n---\n\n### **2. Lời giải chi tiết**\n\n**Bước 1: Tìm hoành độ giao điểm của $(P_1)$ và $(P_2)$**\n\nPhương trình hoành độ giao điểm của hai parabol là:\n$$x^2 - 2x - 2 = -x^2 + 2$$\n\nThu gọn phương trình trên, ta được:\n$$2x^2 - 2x - 4 = 0$$\n\nChia cả hai vế cho $2$, ta có phương trình bậc hai:\n$$x^2 - x - 2 = 0$$\n\nGiải phương trình này, ta tìm được hai nghiệm:\n$$\\left[ \\begin{aligned} &x = -1 \\\\ &x = 2 \\end{aligned} \\right.$$\n\n**Bước 2: Tính diện tích hình phẳng**\n\nDiện tích $S$ của hình phẳng giới hạn bởi hai parabol $(P_1)$ và $(P_2)$ là:\n$$S = \\int_{-1}^{2} |(x^2 - 2x - 2) - (-x^2 + 2)| \\, dx$$\n$$S = \\int_{-1}^{2} |2x^2 - 2x - 4| \\, dx$$\n\nDựa vào nghiệm của phương trình hoành độ giao điểm, biểu thức $2x^2 - 2x - 4$ không đổi dấu trên khoảng $(-1; 2)$. Ta phá dấu giá trị tuyệt đối:\n$$S = \\int_{-1}^{2} (-2x^2 + 2x + 4) \\, dx$$\n\nTính tích phân:\n$$S = \\left( -\\frac{2x^3}{3} + \\frac{2x^2}{2} + 4x \\right) \\Bigg|_{-1}^{2}$$\n$$S = \\left( -\\frac{2x^3}{3} + x^2 + 4x \\right) \\Bigg|_{-1}^{2}$$\n\nThay cận vào biểu thức:\n* Tại $x = 2$: \n  $$-\\frac{2(2)^3}{3} + (2)^2 + 4(2) = -\\frac{16}{3} + 4 + 8 = -\\frac{16}{3} + 12 = \\frac{20}{3}$$\n* Tại $x = -1$: \n  $$-\\frac{2(-1)^3}{3} + (-1)^2 + 4(-1) = \\frac{2}{3} + 1 - 4 = \\frac{2}{3} - 3 = -\\frac{7}{3}$$\n\nTrừ kết quả cận trên cho cận dưới:\n$$S = \\frac{20}{3} - \\left(-\\frac{7}{3}\\right) = \\frac{20}{3} + \\frac{7}{3} = \\frac{27}{3} = 9 \\text{ (đvdt)}$$\n\n*(Cách kiểm tra nhanh bằng công thức giải nhanh cho Parabol $y = ax^2+bx+c$ và $y = a'x^2+b'x+c'$: $S = \\frac{|\\Delta|}{6A^2}$ hoặc công thức $S = \\frac{|a_{hieu}|}{6}(b-a)^3 = \\frac{|2|}{6}(2 - (-1))^3 = \\frac{2}{6} \\cdot 3^3 = \\frac{1}{3} \\cdot 27 = 9$).*\n\n---\n\n### **3. Kết luận**\n\nDiện tích hình phẳng cần tìm là $9$ đơn vị diện tích.\n\n**Chọn phương án: D. 9 (đvdt).**",
+    "referenceAnswer": "Đáp án D: 9 (đvdt).\n\nHoành độ giao điểm: x^2-2x-2 = -x^2+2 <=> 2x^2-2x-4=0 <=> x=-1 hoặc x=2. Diện tích S = ∫ từ -1 đến 2 của |(x^2-2x-2) - (-x^2+2)| dx = ∫ từ -1 đến 2 của |2x^2-2x-4| dx = 9.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - môn Toán – Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "math_01",
+      "correctAnswerIdx": 3
+    }
+  },
+  {
+    "sampleId": "exam_toan_10",
+    "originalId": "exam_toan_10",
+    "subject": "toan",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - môn Toán – Đề #1",
+    "grade": 12,
+    "topic": "Toán Giải Tích & Hình Học",
+    "difficulty": "Vận dụng cao",
+    "question": "Trong không gian Oxyz, nếu $\\vec{u}=2\\vec{i}+3\\vec{j}+5\\vec{k}$ thì toạ độ của vectơ $\\vec{u}$ là:\nA. $(2;5;3)$.\nB. $(5;2;3)$.\nC. $(3;5;2)$.\nD. $(2;3;5)$.",
+    "systemResponse": "Chào em, chúng ta sẽ cùng nhau giải chi tiết câu hỏi này theo chuẩn kiến thức môn Toán lớp 12 thuộc chương trình GDPT 2018 nhé!\n\n---\n\n### **1. Phương pháp giải và suy luận logic**\n\n* **Kiến thức trọng tâm:** Trong không gian với hệ tọa độ $Oxyz$, cho hệ trục tọa độ vuông góc gồm ba vectơ đơn vị $\\vec{i}$, $\\vec{j}$, $\\vec{k}$ lần lượt tương ứng với các trục $Ox$, $Oy$, $Oz$. \n* Mỗi vectơ $\\vec{u}$ bất kỳ trong không gian đều có thể phân tích duy nhất thành tổng theo ba vectơ đơn vị này dưới dạng:\n  $$\\vec{u} = x\\vec{i} + y\\vec{j} + z\\vec{k}$$\n* Khi đó, tọa độ của vectơ $\\vec{u}$ được xác định là bộ ba số thực $(x; y; z)$, viết là:\n  $$\\vec{u} = (x; y; z)$$\n  *(Lưu ý: Tọa độ của vectơ $\\vec{u}$ phải theo đúng thứ tự của các hệ số gắn với $\\vec{i}$, $\\vec{j}$, rồi đến $\\vec{k}$).*\n\n* **Áp dụng vào bài toán:**\n  Theo đề bài, ta có biểu diễn của vectơ $\\vec{u}$:\n  $$\\vec{u} = 2\\vec{i} + 3\\vec{j} + 5\\vec{k}$$\n  Đối chiếu với dạng tổng quát $\\vec{u} = x\\vec{i} + y\\vec{j} + z\\vec{k}$, ta dễ dàng tìm được:\n  * Hệ số của $\\vec{i}$ là $x = 2$ (hoành độ).\n  * Hệ số của $\\vec{j}$ là $y = 3$ (tung độ).\n  * Hệ số của $\\vec{k}$ là $z = 5$ (cao độ).\n\n  Vậy tọa độ của vectơ $\\vec{u}$ là $(2; 3; 5)$.\n\n---\n\n### **2. Kết luận**\n\n* Tọa độ của vectơ $\\vec{u}$ là $(2; 3; 5)$, tương ứng với phương án **D**.\n\n**Chọn D.**",
+    "referenceAnswer": "Đáp án D: $(2;3;5)$.\n\nVectơ u = 2i + 3j + 5k có tọa độ là (2; 3; 5).",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - môn Toán – Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "math_01",
+      "correctAnswerIdx": 3
+    }
+  },
+  {
+    "sampleId": "exam_ly_01",
+    "originalId": "exam_ly_1",
+    "subject": "ly",
+    "sourceType": "official_exam",
+    "examTitle": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0213",
+    "grade": 12,
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "difficulty": "Thông hiểu",
+    "question": "**PHẦN I. Trắc nghiệm nhiều đáp án**\n Công thức định luật 1 của nhiệt động lực học là ΔU = A + Q, với Q là kí hiệu nhiệt lượng và A là kí hiệu\nA. công.\nB. nhiệt độ.\nC. nội năng.\nD. nhiệt dung riêng.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Hãy cùng thầy/cô phân tích và giải quyết câu hỏi này theo chuẩn chương trình GDPT 2018 nhé!\n\n---\n\n### **1. Phương pháp giải và suy luận logic**\n\n* **Kiến thức nền tảng:** Định luật I của nhiệt động lực học là sự vận dụng định luật bảo toàn và chuyển hóa năng lượng vào các hiện tượng nhiệt.\n* **Biểu thức của định luật:** $\\Delta U = A + Q$ (hoặc $\\Delta U = Q + A$ tùy theo quy ước dấu).\n* **Ý nghĩa các đại lượng trong biểu thức:**\n  * $\\Delta U$: Độ biến thiên nội năng của vật.\n  * $Q$: Nhiệt lượng mà vật truyền cho hoặc nhận từ môi trường bên ngoài.\n  * $A$: Công mà vật nhận được từ hoặc thực hiện lên các vật khác (hoặc công cơ học trong quá trình biến đổi trạng thái).\n\nDựa vào giả thiết đề bài: *\"với $Q$ là kí hiệu nhiệt lượng và $A$ là kí hiệu...\"*, ta dễ dàng nhận thấy $A$ chính là kí hiệu của đại lượng **công**.\n\n---\n\n### **2. Viết công thức chuẩn LaTeX**\nBiểu thức định luật I của nhiệt động lực học:\n$$\\Delta U = A + Q$$\nTrong đó:\n* $\\Delta U$: độ biến thiên nội năng ($J$).\n* $A$: công ($J$).\n* $Q$: nhiệt lượng ($J$).\n\n---\n\n### **3. Kết luận đáp án**\n* Đại lượng $A$ trong công thức trên kí hiệu là **công**.\n\n$\\rightarrow$ **Chọn phương án: A**",
+    "referenceAnswer": "Đáp án A: công.\n\nTheo định luật I nhiệt động lực học ΔU = A + Q, trong đó A là công mà hệ nhận được hoặc thực hiện.",
+    "sgkReference": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0213 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "phys_de_thi_chinh_thuc_thpt_2025_mon_vat_ly_ma_de_0213",
+      "correctAnswerIdx": 0
+    }
+  },
+  {
+    "sampleId": "exam_ly_02",
+    "originalId": "exam_ly_2",
+    "subject": "ly",
+    "sourceType": "official_exam",
+    "examTitle": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0213",
+    "grade": 12,
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "difficulty": "Thông hiểu",
+    "question": "Trong nguyên tử lithium, có bao nhiêu electron chuyển động xung quanh hạt nhân $^7_3\\text{Li}$?\nA. 4.\nB. 7.\nC. 1.\nD. 3.",
+    "systemResponse": "Chào em, anh/chị là trợ lý AI gia sư của STEM HUB. Hãy cùng thầy/cô phân tích và giải quyết câu hỏi này theo chuẩn chương trình Vật lý THPT (GDPT 2018) nhé!\n\n---\n\n### **1. Phương pháp giải và suy luận logic**\n\n*   **Kiến thức nền tảng:** \n    *   Ký hiệu hạt nhân nguyên tử được viết dưới dạng $_Z^A\\text{X}$, trong đó:\n        *   $A$ là số khối (tổng số nucleon gồm số proton và số neutron).\n        *   $Z$ là số hiệu nguyên tử, đồng thời cũng là **số proton** có trong hạt nhân nguyên tử đó.\n    *   Đối với một nguyên tử trung hòa về điện: Số electron chuyển động xung quanh hạt nhân đúng bằng số proton có trong hạt nhân, và cũng bằng số hiệu nguyên tử $Z$.\n\n*   **Áp dụng vào câu hỏi:**\n    *   Hạt nhân lithium được ký hiệu là $^7_3\\text{Li}$.\n    *   Dựa vào ký hiệu, ta xác định được số hiệu nguyên tử $Z = 3$. Điều này có nghĩa là hạt nhân lithium có $3$ proton.\n    *   Vì nguyên tử trung hòa về điện nên số electron chuyển động xung quanh hạt nhân cũng phải bằng $3$.\n\n---\n\n### **2. Lời giải chi tiết**\n\n*   Xét ký hiệu hạt nhân $^7_3\\text{Li}$, ta có số hiệu nguyên tử $Z = 3$.\n*   Trong một nguyên tử trung hòa về điện, số electron ở lớp vỏ bằng số proton trong hạt nhân và bằng số hiệu nguyên tử $Z$.\n*   Vậy số electron chuyển động xung quanh hạt nhân của nguyên tử lithium là $3$.\n\n---\n\n### **3. Kết luận**\n\n*   Đáp án đúng là: **D. 3.**",
+    "referenceAnswer": "Đáp án D: 3.\n\nTrong nguyên tử trung hòa, số electron bằng số proton. Với Li (Z=3), có 3 electron.",
+    "sgkReference": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0213 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "phys_de_thi_chinh_thuc_thpt_2025_mon_vat_ly_ma_de_0213",
+      "correctAnswerIdx": 3
+    }
+  },
+  {
+    "sampleId": "exam_ly_03",
+    "originalId": "exam_ly_3",
+    "subject": "ly",
+    "sourceType": "official_exam",
+    "examTitle": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0213",
+    "grade": 12,
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "difficulty": "Thông hiểu",
+    "question": "Theo mô hình động học phân tử, giữa các phân tử\nA. có lực tương tác bao gồm lực hút và lực đẩy.\nB. có lực tương tác luôn là lực hút.\nC. không có lực tương tác.\nD. có lực tương tác luôn là lực đẩy.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Hãy cùng thầy/cô phân tích và giải quyết câu hỏi này theo chuẩn kiến thức Vật Lí 12 (chương trình GDPT 2018) nhé!\n\n---\n\n### **1. Phương pháp giải và suy luận logic**\n\n*   **Kiến thức nền tảng (Mô hình động học phân tử chất khí):** \n    *   Các chất được cấu tạo từ các hạt riêng biệt là phân tử, nguyên tử.\n    *   Giữa các phân tử cấu tạo nên vật chất **đồng thời tồn tại cả lực hút và lực đẩy phân tử**. \n    *   Độ lớn của lực hút và lực đẩy này phụ thuộc vào khoảng cách giữa các phân tử:\n        *   Khi khoảng cách giữa các phân tử rất nhỏ, lực đẩy lớn hơn lực hút.\n        *   Khi khoảng cách giữa các phân tử lớn hơn một chút, lực hút lớn hơn lực đẩy.\n        *   Khi khoảng cách giữa các phân tử rất lớn (như trong chất khí loãng), lực tương tác này trở nên không đáng kể.\n*   **Chiếu vào các đáp án:**\n    *   *A. có lực tương tác bao gồm lực hút và lực đẩy.* $\\rightarrow$ Phù hợp với lý thuyết về lực tương tác phân tử.\n    *   *B. có lực tương tác luôn là lực hút.* $\\rightarrow$ Sai, vì nếu chỉ có lực hút thì các phân tử sẽ hút chặt vào nhau thành một khối đặc, không giải thích được lực đẩy khi nén hoặc thể tích chất khí.\n    *   *C. không có lực tương tác.* $\\rightarrow$ Sai, vì thực tế các phân tử chất rắn, lỏng và khí đều có tương tác với nhau.\n    *   *D. có lực tương tác luôn là lực đẩy.* $\\rightarrow$ Sai, vì nếu chỉ có lực đẩy thì các chất không thể liên kết với nhau để tồn tại ở thể rắn hay thể lỏng.\n\n---\n\n### **2. Kết luận**\n\n*   Đáp án đúng của câu hỏi này là: **A**\n\n--- \n*Chúc em học tập thật tốt cùng STEM HUB! Nếu có bất kỳ thắc mắc nào khác, em hãy hỏi ngay nhé.*",
+    "referenceAnswer": "Đáp án A: có lực tương tác bao gồm lực hút và lực đẩy.\n\nTheo mô hình động học phân tử, giữa các phân tử luôn tồn tại cả lực hút và lực đẩy.",
+    "sgkReference": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0213 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "phys_de_thi_chinh_thuc_thpt_2025_mon_vat_ly_ma_de_0213",
+      "correctAnswerIdx": 0
+    }
+  },
+  {
+    "sampleId": "exam_ly_04",
+    "originalId": "exam_ly_4",
+    "subject": "ly",
+    "sourceType": "official_exam",
+    "examTitle": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0213",
+    "grade": 12,
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "difficulty": "Thông hiểu",
+    "question": "Khi hai vật được đặt tiếp xúc với nhau, năng lượng nhiệt chỉ truyền từ vật này sang vật kia nếu chúng có\nA. thể tích khác nhau.\nB. khối lượng khác nhau.\nC. thế năng khác nhau.\nD. nhiệt độ khác nhau.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Hãy cùng thầy/cô phân tích và giải quyết câu hỏi này theo chuẩn kiến thức Vật Lí phổ thông (chương trình GDPT 2018 nhé).\n\n---\n\n### 1. Phương pháp giải và suy luận logic\n\n*   **Bản chất của sự truyền nhiệt:** Nhiệt lượng là phần năng lượng nhiệt mà vật nhận được hoặc mất đi trong quá trình truyền nhiệt.\n*   **Điều kiện truyền nhiệt:** Theo nguyên lý thứ nhất và thứ hai của Nhiệt động lực học, quá trình truyền nhiệt tự phát giữa hai vật chỉ xảy ra khi giữa chúng có **sự chênh lệch về nhiệt độ**. Năng lượng nhiệt sẽ luôn tự động truyền từ vật có nhiệt độ cao hơn sang vật có nhiệt độ thấp hơn.\n*   **Xét các yếu tố khác:** \n    *   *Thể tích* hay *khối lượng* khác nhau chỉ ảnh hưởng đến nhiệt lượng vật thu vào hay tỏa ra khi thay đổi nhiệt độ (qua công thức $Q = m c \\Delta t$), chứ không phải là điều kiện quyết định chiều truyền nhiệt.\n    *   *Thế năng* liên quan đến cơ năng của vật trong trọng trường hoặc lực thế khác, không quyết định sự truyền nhiệt.\n\n---\n\n### 2. Kết luận\n\nDựa vào các phân tích trên, điều kiện duy nhất để năng lượng nhiệt truyền từ vật này sang vật kia khi chúng tiếp xúc với nhau là chúng phải có **nhiệt độ khác nhau**.\n\n*   **Đáp án đúng:** **D. nhiệt độ khác nhau.**",
+    "referenceAnswer": "Đáp án D: nhiệt độ khác nhau.\n\nNhiệt lượng chỉ truyền từ vật này sang vật kia khi có sự chênh lệch nhiệt độ.",
+    "sgkReference": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0213 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "phys_de_thi_chinh_thuc_thpt_2025_mon_vat_ly_ma_de_0213",
+      "correctAnswerIdx": 3
+    }
+  },
+  {
+    "sampleId": "exam_ly_05",
+    "originalId": "exam_ly_5",
+    "subject": "ly",
+    "sourceType": "official_exam",
+    "examTitle": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0213",
+    "grade": 12,
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "difficulty": "Vận dụng",
+    "question": "Độ lớn suất điện động cảm ứng được xác định bằng định luật nào trong các định luật sau đây?\nA. Định luật Faraday về cảm ứng điện từ.\nB. Định luật Ohm cho vật dẫn kim loại.\nC. Định luật Lenz về cảm ứng điện từ.\nD. Định luật Coulomb về tương tác điện.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Hãy cùng thầy/cô phân tích và giải chi tiết câu hỏi này theo chuẩn chương trình Vật lý THPT (GDPT 2018) nhé!\n\n---\n\n### 1. Phương pháp giải và suy luận logic\n\nĐể trả lời câu hỏi này, chúng ta cần ôn lại kiến thức về hiện tượng cảm ứng điện từ trong chương trình Vật lý lớp 11:\n\n- **Định luật Faraday về cảm ứng điện từ:** Phát biểu rằng độ lớn của suất điện động cảm ứng xuất hiện trong mạch kín tỉ lệ thuận với tốc độ biến thiên từ thông qua mạch đó. \n  - Biểu thức độ lớn suất điện động cảm ứng: $e_c = \\left| \\frac{\\Delta \\Phi}{\\Delta t} \\right|$ (hoặc đối với khung dây có $N$ vòng dây: $e_c = N \\left| \\frac{\\Delta \\Phi}{\\Delta t} \\right|$).\n  \n- **Xét các phương án còn lại để loại trừ:**\n  - *Phương án B:* Định luật Ohm cho vật dẫn kim loại dùng để tính cường độ dòng điện chạy qua vật dẫn ($I = \\frac{U}{R}$).\n  - *Phương án C:* Định luật Lenz dùng để xác định **chiều** (dấu) của dòng điện cảm ứng hoặc suất điện động cảm ứng, chứ không dùng để tính độ lớn.\n  - *Phương án D:* Định luật Coulomb dùng để xác định lực tương tác giữa các điện tích đứng yên.\n\nTừ những phân tích trên, ta dễ dàng nhận thấy định luật dùng để xác định **độ lớn** suất điện động cảm ứng là **Định luật Faraday**.\n\n---\n\n### 2. Kết luận\n\nĐáp án đúng của câu hỏi này là:\n\n**A. Định luật Faraday về cảm ứng điện từ.**",
+    "referenceAnswer": "Đáp án A: Định luật Faraday về cảm ứng điện từ.\n\nĐộ lớn suất điện động cảm ứng được xác định theo định luật Faraday.",
+    "sgkReference": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0213 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "phys_de_thi_chinh_thuc_thpt_2025_mon_vat_ly_ma_de_0213",
+      "correctAnswerIdx": 0
+    }
+  },
+  {
+    "sampleId": "exam_ly_06",
+    "originalId": "exam_ly_6",
+    "subject": "ly",
+    "sourceType": "official_exam",
+    "examTitle": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0213",
+    "grade": 12,
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "difficulty": "Vận dụng",
+    "question": "Trong quá trình làm lạnh đẳng tích một khối khí lí tưởng xác định,\nA. khối lượng riêng của khối khí tăng.\nB. khối lượng riêng của khối khí giảm.\nC. áp suất của khối khí tăng.\nD. áp suất của khối khí giảm.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Chúng ta sẽ cùng nhau phân tích và giải chi tiết câu hỏi này theo chuẩn chương trình GDPT 2018 nhé.\n\n---\n\n### **1. Phương pháp giải và suy luận logic**\n\nĐể giải quyết câu hỏi này, chúng ta cần vận dụng các kiến thức về **Quá trình đẳng tích** của khí lí tưởng và định luật chất khí trong chương trình Vật lý 10 (Chương: Khí lí tưởng).\n\n*   **Bước 1: Phân tích các từ khóa của đề bài**\n    *   *Khối khí lí tưởng xác định:* Số lượng phân tử khí không đổi, dẫn đến khối lượng của khối khí $m$ không đổi.\n    *   *Quá trình đẳng tích:* Thể tích của khối khí được giữ không đổi trong suốt quá trình ($V = \\text{const}$).\n    *   *Làm lạnh:* Nhiệt độ tuyệt đối của khối khí giảm ($T$ giảm).\n\n*   **Bước 2: Xét sự biến đổi của áp suất theo nhiệt độ (Định luật Charles / Định luật Sác-lơ)**\n    *   Theo định luật Sác-lơ cho quá trình đẳng tích, ta có hệ thức:\n        $$\\frac{p}{T} = \\text{const}$$\n    *   Khi làm lạnh khối khí, nhiệt độ tuyệt đối $T$ giảm. Do đó, để tỉ số $\\frac{p}{T}$ không đổi thì áp suất $p$ của khối khí phải **giảm**. (Loại các phương án tăng áp suất).\n\n*   **Bước 3: Xem xét yếu tố khối lượng riêng (để củng cố thêm kiến thức)**\n    *   Khối lượng riêng của khối khí được tính bằng công thức: \n        $$\\rho = \\frac{m}{V}$$\n    *   Vì khối lượng $m$ không đổi và thể tích $V$ không đổi (quá trình đẳng tích), nên khối lượng riêng $\\rho$ của khối khí **không đổi** (Loại các phương án tăng/giảm khối lượng riêng).\n\n---\n\n### **2. Kết luận**\n\n*   Áp suất của khối khí giảm.\n*   Các phương án A, B, C đều không chính xác.\n\n**Đáp án đúng:** **D. áp suất của khối khí giảm.**",
+    "referenceAnswer": "Đáp án D: áp suất của khối khí giảm.\n\nTrong quá trình đẳng tích, theo định luật Charles, khi nhiệt độ giảm thì áp suất giảm.",
+    "sgkReference": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0213 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "phys_de_thi_chinh_thuc_thpt_2025_mon_vat_ly_ma_de_0213",
+      "correctAnswerIdx": 3
+    }
+  },
+  {
+    "sampleId": "exam_ly_07",
+    "originalId": "exam_ly_7",
+    "subject": "ly",
+    "sourceType": "official_exam",
+    "examTitle": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0213",
+    "grade": 12,
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "difficulty": "Vận dụng",
+    "question": "Trong hệ đơn vị SI, đơn vị của nhiệt dung riêng là\nA. J/kg.\nB. J/K.\nC. J/°C.\nD. J/(kg. K).",
+    "systemResponse": "Chào bạn, tôi là trợ lý AI gia sư STEM HUB. Hãy cùng tôi phân tích và giải quyết câu hỏi này theo chuẩn chương trình GDPT 2018 nhé.\n\n---\n\n### **1. Phương pháp giải và suy luận logic**\n\nĐể xác định đơn vị của nhiệt dung riêng, chúng ta cần dựa vào định nghĩa và công thức tính nhiệt lượng của một lượng chất.\n\n- **Bước 1: Nhớ lại định nghĩa và công thức tính nhiệt lượng**\n  Nhiệt lượng $Q$ cần truyền cho một vật để làm cho vật đó nóng lên được tính bằng công thức:\n  $$Q = m \\cdot c \\cdot \\Delta T$$\n  Trong đó:\n  - $Q$ là nhiệt lượng truyền cho vật, đo bằng Jun (J).\n  - $m$ là khối lượng của vật, đo bằng kilôgam (kg).\n  - $c$ là **nhiệt dung riêng** của chất làm vật.\n  - $\\Delta T$ (hoặc $\\Delta t$) là độ tăng nhiệt độ của vật, đo bằng độ Kelvin (K) hoặc độ C (°C).\n\n- **Bước 2: Biểu diễn đại lượng cần tìm ($c$) qua các đại lượng khác**\n  Từ công thức tính nhiệt lượng, ta suy ra công thức tính nhiệt dung riêng $c$:\n  $$c = \\frac{Q}{m \\cdot \\Delta T}$$\n\n- **Bước 3: Xác định đơn vị của nhiệt dung riêng trong hệ SI**\n  - Đơn vị của $Q$ là Jun ($\\text{J}$).\n  - Đơn vị của $m$ là kilôgam ($\\text{kg}$).\n  - Đơn vị của $\\Delta T$ là Kelvin ($\\text{K}$).\n  \n  Thay các đơn vị này vào công thức của $c$, ta được đơn vị của nhiệt dung riêng là:\n  $$\\text{Đơn vị của } c = \\frac{\\text{J}}{\\text{kg} \\cdot \\text{K}} \\text{ hay } \\text{J}/(\\text{kg}\\cdot\\text{K})$$\n\n---\n\n### **2. Đối chiếu với các phương án**\n- A. $\\text{J/kg}$: Đây là đơn vị của nhiệt hóa hơi riêng (hoặc nhiệt nóng chảy riêng).\n- B. $\\text{J/K}$: Đây là đơn vị của nhiệt dung của vật.\n- C. $\\text{J/}^\\circ\\text{C}$: Cũng là một dạng đơn vị của nhiệt dung của vật.\n- D. $\\text{J/(kg}\\cdot\\text{K)}$: Đây chính là đơn vị của nhiệt dung riêng.\n\n---\n\n### **3. Kết luận**\nĐáp án đúng của câu hỏi này là **D**.",
+    "referenceAnswer": "Đáp án D: J/(kg. K).\n\nĐơn vị của nhiệt dung riêng trong hệ SI là J/(kg.K).",
+    "sgkReference": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0213 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "phys_de_thi_chinh_thuc_thpt_2025_mon_vat_ly_ma_de_0213",
+      "correctAnswerIdx": 3
+    }
+  },
+  {
+    "sampleId": "exam_ly_08",
+    "originalId": "exam_ly_8",
+    "subject": "ly",
+    "sourceType": "official_exam",
+    "examTitle": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0213",
+    "grade": 12,
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "difficulty": "Vận dụng",
+    "question": "Đại lượng đặc trưng cho độ bền vững của hạt nhân là\nA. độ hụt khối của hạt nhân.\nB. điện tích hạt nhân.\nC. năng lượng liên kết.\nD. năng lượng liên kết riêng.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Hãy cùng thầy/cô phân tích và giải quyết câu hỏi lý thuyết rất quan trọng này trong chương **Hạt nhân nguyên tử** (Vật Lí 12 - Chương trình GDPT 2018).\n\n---\n\n### 1. Phương pháp giải và suy luận logic\n\nĐể trả lời chính xác câu hỏi này, chúng ta cần ôn lại các khái niệm cơ bản về hạt nhân nguyên tử:\n*   **Độ hụt khối ($\\Delta m$):** Là độ chênh lệch giữa tổng khối lượng các nuclôn tự do tạo thành hạt nhân và khối lượng của hạt nhân đó. Nó cho biết khối lượng \"biến mất\" để tạo thành năng lượng liên kết hạt nhân.\n*   **Năng lượng liên kết ($W_{lk}$):** Là năng lượng tối thiểu cần thiết để phá vỡ một hạt nhân thành các nuclôn riêng biệt (hoặc năng lượng tỏa ra khi các nuclôn kết hợp lại tạo thành hạt nhân). $W_{lk}$ càng lớn thì hạt nhân càng bền vững, *tuy nhiên* nó phụ thuộc vào số lượng nuclôn trong hạt nhân (số khối $A$).\n*   **Năng lượng liên kết riêng ($W_{lkr}$):** Là năng lượng liên kết tính trên một nuclôn, được xác định bằng công thức:\n    $$W_{lkr} = \\frac{W_{lk}}{A}$$\n    Đại lượng này cho biết mức độ bền vững của liên kết giữa các nuclôn. **Hạt nhân nào có năng lượng liên kết riêng lớn hơn thì hạt nhân đó bền vững hơn.**\n\n### 2. Chi tiết các lựa chọn\n*   *Xét phương án A (Độ hụt khối):* Đại lượng này dùng để tính năng lượng liên kết, không phải là đại lượng đặc trưng trực tiếp cho độ bền vững.\n*   *Xét phương án B (Điện tích hạt nhân):* Đặc trưng cho số proton, quyết định tính chất hóa học của nguyên tố.\n*   *Xét phương án C (Năng lượng liên kết):* Chỉ cho biết tổng năng lượng liên kết của cả hạt nhân, chưa so sánh được giữa các hạt nhân có số khối $A$ khác nhau.\n*   *Xét phương án D (Năng lượng liên kết riêng):* Là tiêu chuẩn chính xác nhất để so sánh độ bền vững của các hạt nhân khác nhau.\n\n---\n\n### 3. Kết luận\n\nDựa trên cơ sở lý thuyết Vật Lí hạt nhân chương trình GDPT 2018:\n\n*   **Đáp án đúng:** **D. năng lượng liên kết riêng.**",
+    "referenceAnswer": "Đáp án D: năng lượng liên kết riêng.\n\nĐại lượng đặc trưng cho độ bền vững của hạt nhân là năng lượng liên kết riêng.",
+    "sgkReference": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0213 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "phys_de_thi_chinh_thuc_thpt_2025_mon_vat_ly_ma_de_0213",
+      "correctAnswerIdx": 3
+    }
+  },
+  {
+    "sampleId": "exam_ly_09",
+    "originalId": "exam_ly_9",
+    "subject": "ly",
+    "sourceType": "official_exam",
+    "examTitle": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0213",
+    "grade": 12,
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "difficulty": "Vận dụng cao",
+    "question": "Trong quá trình đẳng nhiệt của một khối khí lí tưởng xác định,\nA. áp suất của khối khí không đổi.\nB. áp suất của khối khí tăng khi thể tích của khối khí tăng.\nC. thể tích của khối khí không đổi.\nD. áp suất của khối khí tăng khi thể tích của khối khí giảm.",
+    "systemResponse": "Chào bạn, tôi là trợ lý AI gia sư STEM HUB. Dưới đây là phần hướng dẫn giải chi tiết cho câu hỏi ôn tập môn Vật Lí lớp 10 (Chương trình GDPT 2018) theo đúng chuẩn phương pháp sư phạm.\n\n---\n\n### **1. Phương pháp giải và suy luận logic**\n\n*   **Nhận diện chủ đề:** Câu hỏi này thuộc phần *Chất khí* (Vật lí 10), cụ thể là các quá trình biến đổi trạng thái của khí lí tưởng, ở đây là **quá trình đẳng nhiệt**.\n*   **Lý thuyết trọng tâm:**\n    *   *Quá trình đẳng nhiệt* là quá trình biến đổi trạng thái trong đó **nhiệt độ của khối khí được giữ không đổi**.\n    *   Định luật điều khiển quá trình này là **Định luật Boyle (Bôi-lơ - Ma-ri-ốt)**: *\"Trong quá trình đẳng nhiệt của một khối khí xác định, áp suất tỉ lệ nghịch với thể tích.\"*\n    *   Biểu thức toán học: \n        $$p \\cdot V = \\text{hằng số}$$\n        hoặc \n        $$p_1 V_1 = p_2 V_2$$\n*   **Phân tích sự biến thiên:**\n    *   Vì $p$ và $V$ tỉ lệ nghịch nên khi thể tích $V$ tăng thì áp suất $p$ phải giảm, và ngược lại, khi thể tích $V$ giảm thì áp suất $p$ phải tăng.\n\n---\n\n### **2. Xét từng phương án (Đáp án chi tiết)**\n\n*   **A. áp suất của khối khí không đổi.** $\\rightarrow$ *Sai*, vì trong quá trình đẳng nhiệt, chỉ có nhiệt độ không đổi, còn áp suất và thể tích thay đổi. Quá trình áp suất không đổi gọi là quá trình đẳng áp.\n*   **B. áp suất của khối khí tăng khi thể tích của khối khí tăng.** $\\rightarrow$ *Sai*, vì áp suất và thể tích tỉ lệ nghịch, thể tích tăng thì áp suất phải giảm.\n*   **C. thể tích của khối khí không đổi.** $\\rightarrow$ *Sai*, đây là đặc điểm của quá trình đẳng tích.\n*   **D. áp suất của khối khí tăng khi thể tích của khối khí giảm.** $\\rightarrow$ *Đúng*, phù hợp với Định luật Boyle ($p \\sim \\frac{1}{V}$).\n\n---\n\n### **3. Kết luận**\n\n*   **Đáp án đúng:** **D**",
+    "referenceAnswer": "Đáp án D: áp suất của khối khí tăng khi thể tích của khối khí giảm.\n\nTheo định luật Boyle, trong quá trình đẳng nhiệt, p tỉ lệ nghịch với V.",
+    "sgkReference": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0213 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "phys_de_thi_chinh_thuc_thpt_2025_mon_vat_ly_ma_de_0213",
+      "correctAnswerIdx": 3
+    }
+  },
+  {
+    "sampleId": "exam_ly_10",
+    "originalId": "exam_ly_10",
+    "subject": "ly",
+    "sourceType": "official_exam",
+    "examTitle": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0213",
+    "grade": 12,
+    "topic": "Vật Lý Đại Cương & Hạt Nhân",
+    "difficulty": "Vận dụng cao",
+    "question": "Nội năng của một vật xác định không đổi khi\nA. vật truyền năng lượng nhiệt cho vật khác.\nB. thể tích của vật thay đổi.\nC. nhiệt độ và thể tích của vật không đổi.\nD. nhiệt độ của vật thay đổi.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Hãy cùng thầy/cô phân tích và giải chi tiết câu hỏi này theo chuẩn chương trình Vật lý 10 (Chương trình GDPT 2018) nhé!\n\n---\n\n### 1. Phương pháp giải và các bước suy luận logic\n\n*   **Kiến thức nền tảng:** \n    *   **Nội năng** của một vật là tổng động năng và thế năng của các phân tử cấu tạo nên vật đó. \n    *   Đối với vật chất thông thường (khí lý tưởng hoặc chất rắn/lỏng ở mức độ phổ thông), nội năng của vật phụ thuộc vào **nhiệt độ** ($T$) và **thể tích** ($V$) của vật đó: $U = f(T, V)$.\n    *   Theo **Nguyên lý I Nhiệt động lực học**: \n        $$\\Delta U = Q + A$$\n        Trong đó:\n        *   $\\Delta U$ là độ biến thiên nội năng của vật.\n        *   $Q$ là nhiệt lượng mà vật nhận được hoặc truyền cho vật khác.\n        *   $A$ là công mà vật nhận được hoặc thực hiện lên vật khác.\n\n*   **Phân tích các yếu tố quyết định sự thay đổi nội năng:**\n    *   Nếu nhiệt độ của vật thay đổi $\\rightarrow$ động năng của các phân tử thay đổi $\\rightarrow$ nội năng của vật thay đổi.\n    *   Nếu thể tích của vật thay đổi $\\rightarrow$ khoảng cách giữa các phân tử thay đổi, dẫn đến thế năng tương tác giữa các phân tử thay đổi $\\rightarrow$ nội năng của vật thay đổi.\n    *   Như vậy, để nội năng của vật **xác định không đổi** ($\\Delta U = 0$) thì cả **nhiệt độ và thể tích của vật đều không được thay đổi**.\n\n*   **Xét từng đáp án của đề bài:**\n    *   *Đáp án A:* \"Vật truyền năng lượng nhiệt cho vật khác\" $\\rightarrow$ Có sự trao đổi nhiệt lượng ($Q < 0$), nội năng của vật có thể thay đổi.\n    *   *Đáp án B:* \"Thể tích của vật thay đổi\" $\\rightarrow$ Khoảng cách phân tử thay đổi, nội năng thay đổi.\n    *   *Đáp án C:* \"Nhiệt độ và thể tích của vật không đổi\" $\\rightarrow$ Cả hai yếu tố quyết định nội năng đều giữ nguyên $\\rightarrow$ Nội năng của vật không đổi.\n    *   *Đáp án D:* \"Nhiệt độ của vật thay đổi\" $\\rightarrow$ Nội năng của vật chắc chắn thay đổi.\n\n---\n\n### 2. Kết luận\n\nĐáp án đúng của câu hỏi này là **C**.\n\n**Chọn C.**",
+    "referenceAnswer": "Đáp án C: nhiệt độ và thể tích của vật không đổi.\n\nNội năng của một lượng khí xác định phụ thuộc vào nhiệt độ và thể tích.",
+    "sgkReference": "De thi chinh thuc THPT 2025 môn Vật lý ma de 0213 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "phys_de_thi_chinh_thuc_thpt_2025_mon_vat_ly_ma_de_0213",
+      "correctAnswerIdx": 2
+    }
+  },
+  {
+    "sampleId": "exam_hoa_01",
+    "originalId": "exam_hoa_1",
+    "subject": "hoa",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Hóa học Đề #1",
+    "grade": 12,
+    "topic": "Hóa Học Vô Cơ & Hữu Cơ",
+    "difficulty": "Thông hiểu",
+    "question": "**PHẦN I. Câu trắc nghiệm nhiều phương án lựa chọn. **\n**Câu 1:** Nhiệt độ nóng chảy, nhiệt độ sôi, độ tan trong nước của một số amine được thể hiện trong bảng dưới đây:\n[Hình vẽ minh họa đề thi]\nChọn phát biểu sai:\nA. Ở điều kiện thường, aniline là chất lỏng, ít tan trong nước.\nB. Methylamine, ethylamine, dimethylamine và trimethylamine là những chất khí.\nC. Amine có nhiệt độ sôi cao hơn hydrocarbon có cùng số nguyên tử carbon hoặc có phân tử khối tương đương.\nD. Tất cả các amine đều tan nhiều trong nước tương tự ammonia nhờ tạo được liên kết hydrogen với nước.",
+    "systemResponse": "Chào bạn, tôi là **Trợ lý AI gia sư STEM HUB** theo chuẩn chương trình GDPT 2018. Dưới đây là hướng dẫn giải chi tiết cho câu hỏi hóa học này theo đúng chuẩn sư phạm:\n\n---\n\n### **1. Phương pháp giải và các bước suy luận logic**\n\nĐể giải quyết câu hỏi này, chúng ta cần ôn lại các tính chất vật lí của amine (trạng thái, nhiệt độ sôi, độ tan) theo chương trình Hóa học 12 (Chương: Amine - Amino acid - Protein):\n\n*   **Trạng thái ở điều kiện thường:** Các amine có phân tử khối nhỏ như $\\text{CH}_3\\text{NH}_2$ (methylamine), $\\text{C}_2\\text{H}_5\\text{NH}_2$ (ethylamine), $(\\text{CH}_3)_2\\text{NH}$ (dimethylamine), và $(\\text{CH}_3)_3\\text{N}$ (trimethylamine) ở điều kiện thường là **chất khí**. Các amine có phân tử khối lớn hơn (như aniline $\\text{C}_6\\text{H}_5\\text{NH}_2$) là chất lỏng hoặc chất rắn. $\\rightarrow$ *Phát biểu A và B đúng.*\n*   **Nhiệt độ sôi:** Do nguyên tử $\\text{N}$ có độ âm điện lớn và phân tử amine có liên kết hydrogen liên phân tử (tuy yếu hơn so với alcohol nhưng mạnh hơn hydrocarbon), nên các amine có **nhiệt độ sôi cao hơn** các hydrocarbon có cùng số nguyên tử carbon hoặc phân tử khối tương đương. $\\rightarrow$ *Phát biểu C đúng.*\n*   **Độ tan trong nước:** Các amine có phân tử khối nhỏ (như methylamine, ethylamine...) tan nhiều trong nước nhờ tạo được liên kết hydrogen với nước. Tuy nhiên, **không phải tất cả các amine đều tan nhiều trong nước**. Các amine có gốc hydrocarbon lớn (như aniline $\\text{C}_6\\text{H}_5\\text{NH}_2$) có độ tan rất kém trong nước vì gốc hydrocarbon kỵ nước lớn lấn át khả năng tạo liên kết hydrogen. $\\rightarrow$ *Phát biểu D sai vì dùng từ \"Tất cả các amine đều...\".*\n\n---\n\n### **2. Kết luận**\n\n*   Phát biểu **sai** là **D**.\n\n**Đáp án đúng cần chọn:** **D**",
+    "referenceAnswer": "Đáp án D: Tất cả các amine đều tan nhiều trong nước tương tự ammonia nhờ tạo được liên kết hydrogen với nước.\n\nCác amine phân tử khối nhỏ tan tốt trong nước nhờ liên kết hydrogen, nhưng các amine có gốc hydrocarbon lớn (như aniline, các amine thơm hoặc mạch dài) lại ít tan hoặc không tan trong nước. Do đó, phát biểu 'Tất cả các amine đều tan nhiều trong nước' là sai.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Hóa học Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "chem_01",
+      "correctAnswerIdx": 3
+    }
+  },
+  {
+    "sampleId": "exam_hoa_02",
+    "originalId": "exam_hoa_2",
+    "subject": "hoa",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Hóa học Đề #1",
+    "grade": 12,
+    "topic": "Hóa Học Vô Cơ & Hữu Cơ",
+    "difficulty": "Thông hiểu",
+    "question": "Nhỏ dung dịch methylamine vào dung dịch nào sau đây thấy xuất hiện kết tủa?\nA. Dung dịch $BaCl_2$.\nB. Dung dịch $NaCl$.\nC. Dung dịch $MgCl_2$.\nD. Dung dịch $HCl$.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Hãy cùng thầy/cô phân tích và giải chi tiết câu hỏi này theo chuẩn chương trình GDPT 2018 nhé!\n\n---\n\n### **1. Phương pháp giải và suy luận logic**\n\n*   **Bản chất hóa học:** Methylamine ($\\text{CH}_3\\text{NH}_2$) là một amin bậc một, có tính bazơ yếu (tương tự amonia $\\text{NH}_3$). Khi hòa tan trong nước, dung dịch methylamine có môi trường bazơ ($\\text{OH}^-$).\n*   **Xét các dung dịch đề bài cho:**\n    *   **A. $\\text{BaCl}_2$:** Không phản ứng vì $\\text{Ba(OH)}_2$ là bazơ mạnh, $\\text{CH}_3\\text{NH}_2$ không đủ tính bazơ để đẩy $\\text{Ba}^{2+}$ kết tủa (hơn nữa $\\text{BaCl}_2$ trung tính).\n    *   **B. $\\text{NaCl}$:** Muối của axit mạnh và bazơ mạnh, không phản ứng.\n    *   **C. $\\text{MgCl}_2$:** Khi nhỏ dung dịch $\\text{CH}_3\\text{NH}_2$ vào, dung dịch có ion $\\text{OH}^-$ sẽ phản ứng với ion $\\text{Mg}^{2+}$ tạo thành kết tủa hydroxide không tan có màu trắng là magie hydroxide ($\\text{Mg(OH)}_2$).\n    *   **D. $\\text{HCl}$:** Xảy ra phản ứng trung hòa tạo muối tan $\\text{CH}_3\\text{NH}_3\\text{Cl}$ (methylammonium chloride), không có hiện tượng kết tủa.\n\n*   **Phương trình hóa học minh họa (đáp án C):**\n    $$2\\text{CH}_3\\text{NH}_2 + \\text{MgCl}_2 + 2\\text{H}_2\\text{O} \\rightarrow \\text{Mg(OH)}_2\\downarrow + 2\\text{CH}_3\\text{NH}_3\\text{Cl}$$\n    *(Hoặc viết dưới dạng ion thu gọn: $\\text{Mg}^{2+} + 2\\text{CH}_3\\text{NH}_2 + 2\\text{H}_2\\text{O} \\rightarrow \\text{Mg(OH)}_2\\downarrow + 2\\text{CH}_3\\text{NH}_3^+$)*\n\n---\n\n### **2. Kết luận**\n\n*   Hiện tượng xuất hiện kết tủa trắng là do tạo thành $\\text{Mg(OH)}_2$.\n*   **Đáp án đúng:** **C. Dung dịch $\\text{MgCl}_2$.**",
+    "referenceAnswer": "Đáp án C: Dung dịch $MgCl_2$.\n\nMethylamine (CH3NH2) là base yếu, trong nước tạo ion OH-. Khi phản ứng với MgCl2, ion OH- sẽ phản ứng với ion Mg2+ tạo kết tủa trắng Mg(OH)2.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Hóa học Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "chem_01",
+      "correctAnswerIdx": 2
+    }
+  },
+  {
+    "sampleId": "exam_hoa_03",
+    "originalId": "exam_hoa_3",
+    "subject": "hoa",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Hóa học Đề #1",
+    "grade": 12,
+    "topic": "Hóa Học Vô Cơ & Hữu Cơ",
+    "difficulty": "Thông hiểu",
+    "question": "Phát biểu nào không đúng về chất béo?\nA. Chất béo không tan trong nước và nặng hơn nước.\nB. Chất béo là triester của acid béo với glycerol.\nC. Trong công nghiệp, chất béo được sử dụng làm nguyên liệu sản xuất xà phòng và glycerol.\nD. Hydrogen hóa chất béo lỏng thu được chất béo rắn. Điều này thuận lợi cho vận chuyển, bảo quản và làm nguyên liệu sản xuất bơ nhân tạo, xà phòng.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Chúng ta sẽ cùng nhau phân tích và giải quyết câu hỏi này theo chuẩn chương trình GDPT 2018 nhé.\n\n---\n\n### 1. Phương pháp giải và các bước suy luận logic\n\nĐể trả lời câu hỏi này, chúng ta cần ôn lại kiến thức lý thuyết trọng tâm về **chất béo (lipid)** trong chương trình Hóa học 12 (Chủ đề: Ester - Lipid). \n\nChúng ta sẽ xét lần lượt từng phát biểu:\n*   **Phát biểu A:** Xét về tính chất vật lý của chất béo (triglyceride). Chất béo nhẹ hơn nước, không tan trong nước nhưng tan được trong các dung môi hữu cơ không phân cực như benzene, chloroform, ether,... \n    $\\rightarrow$ Phát biểu nói chất béo *\"nặng hơn nước\"* là **sai** (vì khối lượng riêng của chất béo nhỏ hơn $1\\text{ g/cm}^3$, do đó chất béo nổi lên trên mặt nước).\n*   **Phát biểu B:** Theo định nghĩa, chất béo là triester của glycerol với các acid béo (acid đơn chức có mạch carbon dài, không phân nhánh). Công thức cấu tạo chung của chất béo là $(RCOO)_3C_3H_5$. $\\rightarrow$ Phát biểu này **đúng**.\n*   **Phát biểu C:** Ứng dụng quan trọng của chất béo là phản ứng thủy phân trong môi trường kiềm (xà phòng hóa) để điều chế xà phòng (muối của acid béo) và glycerol. $\\rightarrow$ Phát biểu này **đúng**.\n*   **Phát biểu D:** Chất béo lỏng (chứa gốc acid béo chưa no trong phân tử) có thể cộng hưởng với $H_2$ (hydrogen hóa) để biến thành chất béo rắn (bơ nhân tạo). Quá trình này giúp việc vận chuyển, bảo quản thuận tiện hơn và làm nguyên liệu sản xuất xà phòng, bơ. $\\rightarrow$ Phát biểu này **đúng**.\n\n---\n\n### 2. Kết luận\n\n* Phát biểu **không đúng** là phát biểu A (vì chất béo nhẹ hơn nước, chứ không phải nặng hơn nước).\n\n**Đáp án đúng:** **A**",
+    "referenceAnswer": "Đáp án A: Chất béo không tan trong nước và nặng hơn nước.\n\nChất béo (triglyceride) không tan trong nước và nhẹ hơn nước (tỷ trọng < 1), do đó nó nổi trên mặt nước chứ không chìm.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Hóa học Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "chem_01",
+      "correctAnswerIdx": 0
+    }
+  },
+  {
+    "sampleId": "exam_hoa_04",
+    "originalId": "exam_hoa_4",
+    "subject": "hoa",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Hóa học Đề #1",
+    "grade": 12,
+    "topic": "Hóa Học Vô Cơ & Hữu Cơ",
+    "difficulty": "Thông hiểu",
+    "question": "Để phân biệt dung dịch glucose và dung dịch fructose, có thể sử dụng hóa chất nào sau đây?\nA. $Cu(OH)_2$.\nB. Thuốc thử Tollens, $t^°$.\nC. Dung dịch bromine.\nD. Kim loại $Na$.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Hãy cùng thầy/cô phân tích và giải chi tiết câu hỏi này theo chuẩn chương trình GDPT 2018 nhé!\n\n---\n\n### **1. Phương pháp giải và suy luận logic**\n\n*   **Phân tích đặc điểm cấu tạo của glucose và fructose:**\n    *   Cả hai đều là monosaccharide (đường đơn) có công thức phân tử chung là $C_6H_{12}O_6$.\n    *   **Glucose ($CH_2OH-[CHOH]_4-CHO$):** Có nhóm chức anđehit ($-CHO$) trong cấu trúc mạch hở.\n    *   **Fructose ($CH_2OH-[CHOH]_3-CO-CH_2OH$):** Có nhóm chức keton ($-CO-$) trong cấu trúc mạch hở. Tuy nhiên, trong môi trường kiềm (như kiềm của dung dịch $Cu(OH)_2$ hoặc kiềm trong thuốc thử Tollens), fructose chuyển hóa thuận nghịch thành glucose, do đó fructose cũng có các tính chất của nhóm anđehit khi phản ứng với $Cu(OH)_2$ (ở điều kiện thường) và thuốc thử Tollens.\n\n*   **Xét từng đáp án để tìm chất phân biệt:**\n    *   **Đáp án A: $Cu(OH)_2$ ở điều kiện thường.** Cả glucose và fructose đều là các polyalcohol có nhiều nhóm $-OH$ kề nhau nên đều hòa tan $Cu(OH)_2$ tạo thành dung dịch màu xanh lam đậm. $\\rightarrow$ *Không dùng để phân biệt.*\n    *   **Đáp án B: Thuốc thử Tollens ($AgNO_3/NH_3$), $t^\\circ$.** Cả glucose và fructose (do chuyển hóa thành glucose trong môi trường kiềm) đều tham gia phản ứng tráng bạc. $\\rightarrow$ *Không dùng để phân biệt.*\n    *   **Đáp án C: Dung dịch bromine ($Br_2$).** \n        *   Glucose có nhóm $-CHO$ nên làm mất màu dung dịch $Br_2$:\n            $$CH_2OH-[CHOH]_4-CHO + Br_2 + H_2O \\rightarrow CH_2OH-[CHOH]_4-COOH + 2HBr$$\n        *   Fructose **không** có nhóm $-CHO$ (là xeton) và trong môi trường trung tính/axit của dung dịch nước bromine, fructose **không** chuyển hóa thành glucose, nên **không** làm mất màu dung dịch $Br_2$.\n        *   $\\rightarrow$ *Dùng dung dịch bromine để phân biệt được glucose và fructose.*\n    *   **Đáp án D: Kim loại $Na$.** Cả hai chất đều có các nhóm $-OH$ tự do trong phân tử nên đều phản ứng với $Na$ giải phóng khí $H_2$. $\\rightarrow$ *Không dùng để phân biệt.*\n\n---\n\n### **2. Kết luận**\n\nPhương án đúng là: **C**\n\n*   **Hóa chất dùng để phân biệt:** Dung dịch bromine ($Br_2$).\n*   Hiện tượng: \n    *   Dung dịch glucose làm mất màu dung dịch bromine.\n    *   Dung dịch fructose không làm mất màu dung dịch bromine.",
+    "referenceAnswer": "Đáp án C: Dung dịch bromine.\n\nGlucose làm mất màu dung dịch nước bromine do có nhóm aldehyde, trong khi fructose không phản ứng với nước bromine ở điều kiện thường.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Hóa học Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "chem_01",
+      "correctAnswerIdx": 2
+    }
+  },
+  {
+    "sampleId": "exam_hoa_05",
+    "originalId": "exam_hoa_5",
+    "subject": "hoa",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Hóa học Đề #1",
+    "grade": 12,
+    "topic": "Hóa Học Vô Cơ & Hữu Cơ",
+    "difficulty": "Vận dụng",
+    "question": "Tên gọi hợp chất $C_2H_5NHC_2H_5$ là:\nA. propylamine.\nB. dimethylamine.\nC. diethylamine.\nD. ethylmethylamine.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Hãy cùng thầy/cô phân tích và giải quyết câu hỏi này theo chuẩn chương trình GDPT 2018 nhé!\n\n---\n\n### **1. Phương pháp giải và suy luận logic**\n\nĐể gọi tên amin theo **tên gốc - chức**, ta tuân theo quy tắc:\n$$\\text{Tên gốc - chức của amin} = \\text{Tên các gốc hydrocarbon liên kết với nguyên tử N} + \\text{amine}$$\n\n*   **Bước 1:** Xác định cấu trúc phân tử của hợp chất được cho: $C_2H_5NHC_2H_5$.\n*   **Bước 2:** Phân tích các nhóm thế liên kết với nguyên tử nitơ ($N$ ở giữa):\n    *   Nhóm $-C_2H_5$ là gốc **ethyl** ($-\\text{CH}_2-\\text{CH}_3$).\n    *   Ta thấy có **hai** nhóm $-C_2H_5$ giống nhau liên kết với nguyên tử $N$. Do đó, ta dùng tiền tố **\"di-\"** trước tên gốc ethyl (hoặc đọc tên hai gốc ethyl ghép liền nhau).\n*   **Bước 3:** Lắp ráp lại ta có tên gọi: **diethylamine**.\n\nXét các đáp án còn lại để loại trừ:\n*   A. *propylamine* ($C_3H_7NH_2$): Gốc propyl.\n*   B. *dimethylamine* ($(CH_3)_2NH$): Gốc methyl.\n*   C. *diethylamine* ($(C_2H_5)_2NH$): Gốc ethyl (đúng với hợp chất bài cho).\n*   D. *ethylmethylamine* ($CH_3NHC_2H_5$): Gồm một gốc ethyl và một gốc methyl.\n\n---\n\n### **2. Kết luận**\n\nĐáp án đúng của câu hỏi này là:\n**C. diethylamine.**",
+    "referenceAnswer": "Đáp án C: diethylamine.\n\nCông thức C2H5NHC2H5 có hai gốc ethyl gắn với nguyên tử nitơ, tên gọi là diethylamine.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Hóa học Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "chem_01",
+      "correctAnswerIdx": 2
+    }
+  },
+  {
+    "sampleId": "exam_hoa_06",
+    "originalId": "exam_hoa_6",
+    "subject": "hoa",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Hóa học Đề #1",
+    "grade": 12,
+    "topic": "Hóa Học Vô Cơ & Hữu Cơ",
+    "difficulty": "Vận dụng",
+    "question": "Để rửa sạch chai lọ đựng dung dịch aniline, nên dùng cách nào sau đây?\nA. Rửa bằng nước.\nB. Rửa bằng dung dịch $NaOH$ sau đó rửa lại bằng nước.\nC. Rửa bằng dung dịch $HCl$ sau đó rửa lại bằng nước.\nD. Rửa bằng xà phòng.",
+    "systemResponse": "Chào bạn, tôi là trợ lý AI gia sư STEM HUB. Hãy cùng tôi phân tích và giải quyết câu hỏi này theo chuẩn chương trình GDPT 2018 nhé!\n\n### **1. Phương pháp giải và suy luận logic**\n\n*   **Phân tích tính chất của chất cần rửa:** \n    *   Chất cần làm sạch là **aniline** ($\\text{C}_6\\text{H}_5\\text{NH}_2$).\n    *   Aniline là một amin, có tính bazơ yếu (nhưng không làm đổi màu quỳ tím do tính bazơ rất yếu). \n    *   Aniline **ít tan trong nước** nhưng **tan rất tốt trong dung dịch axit vô cơ** (như dung dịch $\\text{HCl}$) vì xảy ra phản ứng tạo thành muối tan trong nước.\n\n*   **Xem xét các phương án:**\n    *   *Phương án A (Rửa bằng nước):* Do aniline ít tan trong nước và bám dính tốt trên thành dụng cụ thủy tinh nên rửa bằng nước thường sẽ không sạch hết được lớp aniline dư.\n    *   *Phương án B (Rửa bằng dung dịch $\\text{NaOH}$):* Aniline có tính bazơ, không phản ứng với dung dịch kiềm ($\\text{NaOH}$), do đó $\\text{NaOH}$ không thể hòa tan hay chuyển hóa aniline thành dạng tan để rửa trôi.\n    *   *Phương án C (Rửa bằng dung dịch $\\text{HCl}$ sau đó rửa lại bằng nước):* Khi cho dung dịch $\\text{HCl}$ vào chai lọ đựng aniline, xảy ra phản ứng hóa học:\n        $$\\text{C}_6\\text{H}_5\\text{NH}_2 + \\text{HCl} \\rightarrow \\text{C}_6\\text{H}_5\\text{NH}_3\\text{Cl}$$\n        Sản phẩm tạo thành là phenylammonium chloride ($\\text{C}_6\\text{H}_5\\text{NH}_3\\text{Cl}$) là một loại muối **tan tốt trong nước**. Do đó, lớp aniline bám ở thành chai sẽ bị chuyển thành dạng muối tan và dễ dàng bị rửa sạch bằng nước tiếp theo.\n    *   *Phương án D (Rửa bằng xà phòng):* Xà phòng có thể giúp rửa sạch một số chất hữu cơ, nhưng đối với aniline bám dính thì dùng dung dịch axit $\\text{HCl}$ là phương pháp hóa học đặc trưng và triệt để nhất dựa trên bản chất bazơ của aniline.\n\n---\n\n### **2. Kết luận**\n\nĐáp án đúng của câu hỏi này là: **C** (Rửa bằng dung dịch $\\text{HCl}$ sau đó rửa lại bằng nước).",
+    "referenceAnswer": "Đáp án C: Rửa bằng dung dịch $HCl$ sau đó rửa lại bằng nước.\n\nAniline có tính base rất yếu nhưng phản ứng được với acid mạnh (như HCl) tạo thành muối phenylammonium chloride tan được trong nước. Vì vậy, rửa bằng dung dịch HCl là hiệu quả nhất.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Hóa học Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "chem_01",
+      "correctAnswerIdx": 2
+    }
+  },
+  {
+    "sampleId": "exam_hoa_07",
+    "originalId": "exam_hoa_7",
+    "subject": "hoa",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Hóa học Đề #1",
+    "grade": 12,
+    "topic": "Hóa Học Vô Cơ & Hữu Cơ",
+    "difficulty": "Vận dụng",
+    "question": "Loại dầu mỡ nào không thuộc loại lipid?\nA. Dầu cá.\nB. Mỡ động vật.\nC. Dầu thực vật.\nD. Dầu diesel.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Chúng ta sẽ cùng nhau phân tích và giải quyết câu hỏi này theo chuẩn chương trình GDPT 2018 nhé.\n\n---\n\n### 1. Phương pháp giải và suy luận logic\n\n*   **Kiến thức nền tảng (Chương trình Hóa học 12 - Chương: Ester - Lipid):**\n    *   **Lipid** là hợp chất hữu cơ có trong tế bào sống, không tan trong nước nhưng tan trong các dung môi hữu cơ không phân cực. \n    *   Về mặt hóa học, phần lớn lipid là **ester của glycerol với các axit béo** (được gọi chung là triglyceride hay chất béo). Ngoài ra, lipid còn bao gồm sáp, steroid, phospholipid,...\n    *   *Dầu mỡ tự nhiên* (dầu thực vật, mỡ động vật, dầu cá) bản chất đều là các triglyceride (ester của glycerol và axit béo).\n*   **Phân tích các đáp án:**\n    *   **A. Dầu cá:** Là chất béo tự nhiên (chứa nhiều axit béo chưa no mạch dài), thuộc loại lipid.\n    *   **B. Mỡ động vật:** Là chất béo tự nhiên (chứa chủ yếu các gốc axit béo no), thuộc loại lipid.\n    *   **C. Dầu thực vật:** Là chất béo tự nhiên (chứa chủ yếu các gốc axit béo chưa no), thuộc loại lipid.\n    *   **D. Dầu diesel:** Là một sản phẩm chế biến từ dầu mỏ (nhiên liệu), thành phần hóa học chính của nó là hỗn hợp các **hydrocarbon** (có từ $10$ đến $15$ nguyên tử cacbon), hoàn toàn không phải là ester hay lipid.\n\n---\n\n### 2. Kết luận\n\nDầu diesel không phải là chất béo (lipid) mà là hỗn hợp hydrocarbon dùng làm nhiên liệu động cơ.\n\n**Đáp án đúng:** **D. Dầu diesel**",
+    "referenceAnswer": "Đáp án D: Dầu diesel.\n\nDầu diesel là hỗn hợp các hydrocarbon từ quá trình chưng cất dầu mỏ, không phải là lipid (triacylglycerol).",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Hóa học Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "chem_01",
+      "correctAnswerIdx": 3
+    }
+  },
+  {
+    "sampleId": "exam_hoa_08",
+    "originalId": "exam_hoa_8",
+    "subject": "hoa",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Hóa học Đề #1",
+    "grade": 12,
+    "topic": "Hóa Học Vô Cơ & Hữu Cơ",
+    "difficulty": "Vận dụng",
+    "question": "Chất nào sau đây thuộc loại polysaccharide?\nA. Glucose.\nB. Maltose.\nC. Cellulose.\nD. Fructose.",
+    "systemResponse": "Chào bạn, tôi là trợ lý AI gia sư STEM HUB. Dưới đây là hướng dẫn giải chi tiết cho câu hỏi ôn tập môn Hóa học theo chuẩn chương trình GDPT 2018.\n\n---\n\n### **1. Phương pháp giải và suy luận logic**\n\nĐể xác định chất nào thuộc loại **polysaccharide**, chúng ta nhắc lại định nghĩa và phân loại các loại carbohydrate (glucid) theo chương trình Hóa học 12:\n\n*   **Monosaccharide (Đường đơn):** Là nhóm carbohydrate đơn giản nhất, không bị thủy phân. Ví dụ tiêu biểu là **glucose** và **fructose** (cùng có công thức phân tử là $C_6H_{12}O_6$).\n*   **Disaccharide (Đường đôi):** Là nhóm carbohydrate mà khi thủy phân hoàn toàn sẽ thu được 2 phân tử monosaccharide. Ví dụ tiêu biểu là **saccharose** và **maltose** (cùng có công thức phân tử là $C_{12}H_{22}O_{11}$).\n*   **Polysaccharide (Polizaccharide):** Là nhóm carbohydrate phức tạp, gồm nhiều phân tử monosaccharide liên kết với nhau bằng các liên kết glycoside. Khi thủy phân hoàn toàn sẽ thu được nhiều phân tử monosaccharide. Ví dụ tiêu biểu là **tinh bột** và **cellulose** (có công thức chung là $(C_6H_{10}O_5)_n$).\n\n**Xét các phương án:**\n*   **A. Glucose:** Thuộc loại monosaccharide.\n*   **B. Maltose:** Thuộc loại disaccharide.\n*   **C. Cellulose:** Thuộc loại polysaccharide (gồm nhiều gốc $\\beta$-glucose liên kết với nhau).\n*   **D. Fructose:** Thuộc loại monosaccharide.\n\n---\n\n### **2. Kết luận**\n\nĐáp án đúng là **C**.",
+    "referenceAnswer": "Đáp án C: Cellulose.\n\nCellulose là một polysaccharide tự nhiên, các chất còn lại (glucose, fructose là monosaccharide, maltose là disaccharide).",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Hóa học Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "chem_01",
+      "correctAnswerIdx": 2
+    }
+  },
+  {
+    "sampleId": "exam_hoa_09",
+    "originalId": "exam_hoa_9",
+    "subject": "hoa",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Hóa học Đề #1",
+    "grade": 12,
+    "topic": "Hóa Học Vô Cơ & Hữu Cơ",
+    "difficulty": "Vận dụng cao",
+    "question": "Methyl butanoate là một ester có mùi táo. Khi đun nóng hỗn hợp $17,6$ gam butanoic acid và $4,8$ gam methyl alcohol với xúc tác $H_2SO_4$ đặc, thu được $m$ gam methyl butanoate. Biết hiệu suất phản ứng đạt $75\\%$. Giá trị của $m$ là:\nA. 15,300.\nB. 11,475.\nC. 24,586.\nD. 18,765.",
+    "systemResponse": "Chào bạn, tôi là trợ lý AI gia sư STEM HUB. Dưới đây là hướng dẫn giải chi tiết câu hỏi Hóa học này theo chuẩn chương trình GDPT 2018:\n\n---\n\n### **1. Phương pháp giải và các bước suy luận logic**\n\n*   **Bước 1: Viết phương trình hóa học của phản ứng ester hóa**\n    Xác định công thức cấu trúc của các chất và viết phương trình phản ứng giữa butanoic acid và methyl alcohol.\n    \n*   **Bước 2: Tính số mol ban đầu của các chất phản ứng**\n    *   Tính số mol của butanoic acid ($n_{\\text{acid}}$) dựa vào khối lượng và khối lượng mol.\n    *   Tính số mol của methyl alcohol ($n_{\\text{alcohol}}$) dựa vào khối lượng và khối lượng mol.\n    \n*   **Bước 3: Xác định chất giới hạn (chất tính theo số mol phản ứng)**\n    So sánh tỉ lệ số mol ban đầu với hệ số phương trình để tìm ra chất phản ứng hết, từ đó tính số mol ester thu được theo lý thuyết.\n    \n*   **Bước 4: Tính khối lượng ester thu được thực tế**\n    Áp dụng công thức tính hiệu suất phản ứng:\n    $$m_{\\text{thực tế}} = m_{\\text{lý thuyết}} \\times \\frac{H\\%}{100\\%}$$\n\n---\n\n### **2. Lời giải chi tiết**\n\n*   **Bước 1: Viết phương trình hóa học**\n    Công thức các chất:\n    *   Butanoic acid: $\\text{C}_3\\text{H}_7\\text{COOH}$ (hay $\\text{C}_4\\text{H}_8\\text{O}_2$, $M = 88\\text{ g/mol}$)\n    *   Methyl alcohol: $\\text{CH}_3\\text{OH}$ ($M = 32\\text{ g/mol}$)\n    *   Methyl butanoate: $\\text{C}_3\\text{H}_7\\text{COOCH}_3$ (hay $\\text{C}_5\\text{H}_{10}\\text{O}_2$, $M = 102\\text{ g/mol}$)\n\n    Phương trình hóa học:\n    $$\\text{C}_3\\text{H}_7\\text{COOH} + \\text{CH}_3\\text{OH} \\underset{t^\\circ}{\\overset{\\text{H}_2\\text{SO}_4 \\text{ đặc}}{\\rightleftharpoons}} \\text{C}_3\\text{H}_7\\text{COOCH}_3 + \\text{H}_2\\text{O}$$\n\n*   **Bước 2: Tính số mol ban đầu**\n    *   Số mol của butanoic acid:\n        $$n_{\\text{C}_3\\text{H}_7\\text{COOH}} = \\frac{17,6}{88} = 0,2 \\text{ (mol)}$$\n    *   Số mol của methyl alcohol:\n        $$n_{\\text{CH}_3\\text{OH}} = \\frac{4,8}{32} = 0,15 \\text{ (mol)}$$\n\n*   **Bước 3: Xét tỉ lệ phản ứng**\n    Theo phương trình hóa học, tỉ lệ phản ứng là $1 : 1$:\n    $$\\frac{n_{\\text{C}_3\\text{H}_7\\text{COOH}}}{1} = \\frac{0,2}{1} > \\frac{n_{\\text{CH}_3\\text{OH}}}{1} = \\frac{0,15}{1}$$\n    $\\Rightarrow$ Methyl alcohol ($\\text{CH}_3\\text{OH}$) phản ứng hết, butanoic acid dư.\n    Số mol methyl butanoate thu được theo lý thuyết tính theo số mol của $\\text{CH}_3\\text{OH}$:\n    $$n_{\\text{ester (lý thuyết)}} = n_{\\text{CH}_3\\text{OH (pư)}} = 0,15 \\text{ (mol)}$$\n\n*   **Bước 4: Tính khối lượng ester thu được theo hiệu suất**\n    Vì hiệu suất phản ứng đạt $H = 75\\%$, số mol methyl butanoate thực tế thu được là:\n    $$n_{\\text{ester (thực tế)}} = 0,15 \\times \\frac{75}{100} = 0,1125 \\text{ (mol)}$$\n\n    Khối lượng của methyl butanoate ($m$) là:\n    $$m = n_{\\text{ester (thực tế)}} \\times M_{\\text{ester}} = 0,1125 \\times 102 = 11,475 \\text{ (gam)}$$\n\n---\n\n### **3. Kết luận**\n*   Giá trị của $m$ là **11,475** gam.\n*   **Chọn phương án: B.**",
+    "referenceAnswer": "Đáp án A: 15,300.\n\nn(acid) = 17,6/88 = 0,2 mol; n(alcohol) = 4,8/32 = 0,15 mol. Alcohol thiếu, tính theo alcohol. m(thuyết thuyết) = 0,15 * 102 = 15,3g. m(thực tế) = 15,3 * 0,75 = 11,475g.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Hóa học Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "chem_01",
+      "correctAnswerIdx": 0
+    }
+  },
+  {
+    "sampleId": "exam_hoa_10",
+    "originalId": "exam_hoa_10",
+    "subject": "hoa",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Hóa học Đề #1",
+    "grade": 12,
+    "topic": "Hóa Học Vô Cơ & Hữu Cơ",
+    "difficulty": "Vận dụng cao",
+    "question": "Xà phòng là muối sodium hoặc potassium của:\nA. acid béo.\nB. phenol.\nC. acid vô cơ.\nD. acetic acid.",
+    "systemResponse": "Chào em, anh/chị là Trợ lý AI gia sư STEM HUB. Dưới đây là phần hướng dẫn giải chi tiết cho câu hỏi hóa học này theo chuẩn chương trình GDPT 2018.\n\n---\n\n### **1. Phương pháp giải và suy luận logic**\n\n*   **Nhắc lại lý thuyết trọng tâm (Chương trình Hóa học 12 - Sách Kết nối tri thức / Chân trời sáng tạo / Cánh diều):**\n    *   *Lipid (Chất béo)* là triester của glycerol với các acid béo.\n    *   *Phản ứng xà phòng hóa:* Khi đun nóng chất béo (hoặc ester của acid béo) với dung dịch kiềm ($\\text{NaOH}$ hoặc $\\text{KOH}$), ta thu được glycerol và hỗn hợp muối sodium hoặc potassium của các acid béo.\n    *   *Định nghĩa xà phòng:* Xà phòng là hỗn hợp muối sodium hoặc potassium của các acid béo (có mạch carbon dài, không phân nhánh như acid palmitic, acid stearic, acid oleic,...).\n\n*   **Xét các phương án:**\n    *   **A. acid béo:** Đúng theo định nghĩa xà phòng. Ví dụ: Sodium stearate ($C_{17}H_{35}COONa$), Sodium palmitate ($C_{15}H_{31}COONa$).\n    *   **B. phenol:** Muối của phenol không được gọi là xà phòng.\n    *   **C. acid vô cơ:** Muối của acid vô cơ (như $\\text{NaCl}, \\text{Na}_2\\text{SO}_4$,...) không có tính chất giặt rửa như xà phòng.\n    *   **D. acetic acid:** Muối của acetic acid là sodium acetate ($CH_3COONa$), chất này không phải là xà phòng.\n\n---\n\n### **2. Kết luận**\n\nĐáp án đúng của câu hỏi này là: **A**\n\n*   **Chọn:** **A. acid béo.**",
+    "referenceAnswer": "Đáp án A: acid béo.\n\nXà phòng là muối sodium hoặc potassium của các acid béo (thường từ C12 đến C18).",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Hóa học Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "chem_01",
+      "correctAnswerIdx": 0
+    }
+  },
+  {
+    "sampleId": "exam_sinh_01",
+    "originalId": "exam_sinh_1",
+    "subject": "sinh",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Sinh học Đề #1",
+    "grade": 12,
+    "topic": "Sinh Học Tế Bào & Di Truyền",
+    "difficulty": "Thông hiểu",
+    "question": "**PHẦN I. Câu trắc nghiệm nhiều phương án lựa chọn. **\n**Câu 1:** Loại nucleic acid nào sau đây là thành phần cấu tạo của ribosome?\nA. tRNA.\nB. rRNA.\nC. DNA.\nD. mRNA.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Dưới đây là hướng dẫn giải chi tiết cho câu hỏi Sinh học thuộc chương trình GDPT 2018.\n\n---\n\n### **1. Phương pháp giải và suy luận logic**\n\nĐể giải quyết câu hỏi này, chúng ta cần ôn lại kiến thức về các loại phân tử nucleic acid và chức năng của chúng trong tế bào (được học trong chương trình Sinh học 10, chuẩn GDPT 2018):\n\n- **DNA (Deoxyribonucleic acid):** Chức năng lưu giữ, bảo quản và truyền đạt thông tin di truyền.\n- **mRNA (messenger RNA - mARN):** RNA thông tin, làm khuôn để tổng hợp protein tại ribosome.\n- **tRNA (transfer RNA - tARN):** RNA vận chuyển, mang các amino acid đến ribosome để dịch mã.\n- **rRNA (ribosomal RNA - rARN):** RNA ribosome, kết hợp với các protein để cấu tạo nên **ribosome** – bào quan trực tiếp tổng hợp protein cho tế bào.\n\nTừ lý thuyết trên, ta suy luận trực tiếp được loại nucleic acid tham gia cấu tạo nên ribosome chính là **rRNA**.\n\n---\n\n### **2. Kết luận đáp án**\n\n- Đáp án đúng: **B. rRNA.**",
+    "referenceAnswer": "Đáp án B: rRNA.\n\nRibosome được cấu tạo từ các phân tử rRNA và protein.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Sinh học Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "bio_01",
+      "correctAnswerIdx": 1
+    }
+  },
+  {
+    "sampleId": "exam_sinh_02",
+    "originalId": "exam_sinh_2",
+    "subject": "sinh",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Sinh học Đề #1",
+    "grade": 12,
+    "topic": "Sinh Học Tế Bào & Di Truyền",
+    "difficulty": "Thông hiểu",
+    "question": "Có 5 tế bào đều nguyên phân liên tiếp 5 lần. Số tế bào con được tạo ra sau lần nguyên phân thứ 5 là\nA. 25.\nB. 160.\nC. 32.\nD. 155.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Sau đây là lời giải chi tiết cho câu hỏi Sinh học thuộc chủ đề Di truyền tế bào theo chuẩn chương trình GDPT 2018:\n\n### **1. Phương pháp giải và các bước suy luận logic**\n\n*   **Lý thuyết cơ bản về nguyên phân:** \n    *   Một tế bào sinh dưỡng trải qua $k$ lần nguyên phân liên tiếp sẽ tạo ra số tế bào con là $2^k$.\n    *   Nếu có $a$ tế bào ban đầu cùng nguyên phân liên tiếp $k$ lần, tổng số tế bào con được tạo ra là: \n        $$\\text{Số tế bào con} = a \\times 2^k$$\n\n*   **Áp dụng vào bài toán:**\n    *   Số tế bào ban đầu ($a$) = $5$ tế bào.\n    *   Số lần nguyên phân liên tiếp ($k$) = $5$ lần.\n    *   Thay các giá trị vào công thức, ta tính được tổng số tế bào con tạo ra sau lần nguyên phân thứ 5.\n\n---\n\n### **2. Lời giải chi tiết**\n\nÁp dụng công thức tính số tế bào con được tạo ra sau $k$ lần nguyên phân từ $a$ tế bào ban đầu:\n\n$$\\text{Số tế bào con} = 5 \\times 2^5$$\n\nTa có $2^5 = 32$. Do đó:\n\n$$\\text{Số tế bào con} = 5 \\times 32 = 160$$\n\n---\n\n### **3. Kết luận**\n\n*   Số tế bào con được tạo ra là $160$ tế bào.\n*   **Chọn phương án:** **B**.",
+    "referenceAnswer": "Đáp án B: 160.\n\nSố tế bào con tạo ra là 5 * 2^5 = 5 * 32 = 160.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Sinh học Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "bio_01",
+      "correctAnswerIdx": 1
+    }
+  },
+  {
+    "sampleId": "exam_sinh_03",
+    "originalId": "exam_sinh_3",
+    "subject": "sinh",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Sinh học Đề #1",
+    "grade": 12,
+    "topic": "Sinh Học Tế Bào & Di Truyền",
+    "difficulty": "Thông hiểu",
+    "question": "Khi nói về quang hợp, phát biểu nào sau đây đúng?\nA. Chất glyceraldehyde 3 phosphate (G3P) được sử dụng để tái tạo chất 3-Phosphoglyceric acid (3-PGA).\nB. Nếu không có $CO_2$ thì lục lạp sẽ tích lũy nhiều 3-Phosphoglyceric acid (3-PGA).\nC. Nếu không có ánh sáng thì lục lạp sẽ tích lũy nhiều glyceraldehyde 3 phosphate (G3P).\nD. Glucose được tổng hợp từ chất glyceraldehyde 3 phosphate (G3P).",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Chúng ta sẽ cùng nhau phân tích và giải quyết câu hỏi sinh học tế bào này theo chuẩn chương trình GDPT 2018 nhé.\n\n---\n\n### **1. Phương pháp giải và các bước suy luận logic**\n\nĐể trả lời câu hỏi này, chúng ta cần ôn lại kiến thức trọng tâm về **pha tối của quang hợp (chu trình Calvin)** diễn ra trong chất nền (stroma) của lục lạp. \n\nChu trình Calvin gồm 3 giai đoạn chính:\n1. **Giai đoạn cố định $CO_2$:** $CO_2$ kết hợp với chất nhận $RuBP$ ($C_5$) nhờ enzyme Rubisco tạo ra hợp chất $C_3$ là **3-Phosphoglyceric acid (3-PGA)**.\n2. **Giai đoạn khử:** 3-PGA được khử thành **Glyceraldehyde 3-phosphate (G3P)** nhờ năng lượng từ $ATP$ và $NADPH$ (được cung cấp từ pha sáng). G3P chính là sản phẩm dạng đường $C_3$ đầu tiên của quang hợp, từ đó tổng hợp nên glucose và các chất hữu cơ khác.\n3. **Giai đoạn tái tạo chất nhận:** Phần lớn G3P được dùng để tái tạo lại chất nhận $RuBP$, qua đó duy trì chu trình liên tục.\n\nBây giờ, chúng ta sẽ xét từng phát biểu của đề bài:\n\n* **Xét phát biểu A:** *\"Chất glyceraldehyde 3 phosphate (G3P) được sử dụng để tái tạo chất 3-Phosphoglyceric acid (3-PGA).\"*\n  $\\rightarrow$ **Sai.** G3P được sử dụng để tái tạo chất nhận $RuBP$, không phải tái tạo 3-PGA. 3-PGA là chất được *tạo thành* từ giai đoạn cố định $CO_2$, sau đó mới được khử thành G3P.\n\n* **Xét phát biểu B:** *\"Nếu không có $CO_2$ thì lục lạp sẽ tích lũy nhiều 3-Phosphoglyceric acid (3-PGA).\"*\n  $\\rightarrow$ **Sai.** Nếu không có $CO_2$, phản ứng cố định $CO_2$ không xảy ra, do đó 3-PGA không được tạo ra nên không thể tích lũy. Ngược lại, chất nhận $RuBP$ mới là chất bị tích lũy do không có $CO_2$ để nhận.\n\n* **Xét phát biểu C:** *\"Nếu không có ánh sáng thì lục lạp sẽ tích lũy nhiều glyceraldehyde 3 phosphate (G3P).\"*\n  $\\rightarrow$ **Sai.** Không có ánh sáng thì pha sáng không tạo ra $ATP$ và $NADPH$. Do đó, giai đoạn khử 3-PGA thành G3P sẽ bị ngưng trệ, dẫn đến G3P không được tạo ra và không thể tích lũy.\n\n* **Xét phát biểu D:** *\"Glucose được tổng hợp từ chất glyceraldehyde 3 phosphate (G3P).\"*\n  $\\rightarrow$ **Đúng.** G3P là sản phẩm trực tiếp của chu trình Calvin. Qua các con đường chuyển hóa tiếp theo trong tế bào chất và lục lạp, các phân tử G3P sẽ kết hợp với nhau để tổng hợp nên đường glucose ($C_6H_{12}O_6$) và các đại phân tử hữu cơ khác.\n\n---\n\n### **2. Kết luận**\n\nĐáp án đúng của câu hỏi này là: **D**",
+    "referenceAnswer": "Đáp án D: Glucose được tổng hợp từ chất glyceraldehyde 3 phosphate (G3P).\n\nTrong chu trình Calvin, G3P được sử dụng để tổng hợp glucose và tái tạo RuBP. Các phát biểu khác sai về cơ chế tích lũy chất.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Sinh học Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "bio_01",
+      "correctAnswerIdx": 3
+    }
+  },
+  {
+    "sampleId": "exam_sinh_04",
+    "originalId": "exam_sinh_4",
+    "subject": "sinh",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Sinh học Đề #1",
+    "grade": 12,
+    "topic": "Sinh Học Tế Bào & Di Truyền",
+    "difficulty": "Thông hiểu",
+    "question": "Đối với các loài thực vật ở cạn, nước được hấp thụ chủ yếu qua bộ phận nào sau đây?\nA. Toàn bộ bề mặt cơ thể.\nB. Lông hút của rễ.\nC. Chóp rễ.\nD. Khí khổng.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Dưới đây là phần hướng dẫn giải chi tiết cho câu hỏi Sinh học thuộc chương trình GDPT 2018:\n\n---\n\n### **1. Phương pháp giải và suy luận logic**\n\n*   **Bước 1: Phân tích đối tượng và điều kiện của câu hỏi**\n    *   Đối tượng: Các loài **thực vật ở cạn**.\n    *   Vấn đề cần tìm: Bộ phận chủ yếu làm nhiệm vụ **hấp thụ nước**.\n\n*   **Bước 2: Xem xét vai trò của các cơ quan/bộ phận ở thực vật**\n    *   *Toàn bộ bề mặt cơ thể:* Thường là cơ chế hấp thụ nước ở các loài thực vật thủy sinh (sống ngập trong nước). Đối với thực vật ở cạn, bề mặt thân và lá thường được bao phủ bởi lớp cutin chống mất nước nên khả năng hấp thụ nước qua lá rất hạn chế (trừ trường hợp phun qua lá nhưng không phải là chủ yếu).\n    *   *Lông hút của rễ:* Rễ thực vật ở cạn phát triển hệ thống lông hút với số lượng cực lớn, diện tích bề mặt tiếp xúc rộng và áp suất thẩm thấu cao. Đây là **cơ quan chuyên hóa cao** làm nhiệm vụ hút nước và các ion khoáng hòa tan từ đất.\n    *   *Chóp rễ:* Có chức năng bảo vệ tế bào sinh trưởng của rễ đâm sâu vào đất, không có chức năng hấp thụ nước chính.\n    *   *Khí khổng:* Nằm ở lá, chủ yếu thực hiện chức năng trao đổi khí và thoát hơi nước, không phải là cơ quan hấp thụ nước chủ yếu.\n\n*   **Bước 3: Rút ra kết luận**\n    *   Đối với thực vật ở cạn, cơ quan hấp thụ nước chủ yếu và hiệu quả nhất là **rễ**, cụ thể là vùng **lông hút**.\n\n---\n\n### **2. Kết luận đáp án**\n\n*   Đáp án đúng: **B. Lông hút của rễ.**",
+    "referenceAnswer": "Đáp án B: Lông hút của rễ.\n\nỞ thực vật trên cạn, nước được hấp thụ chủ yếu qua lông hút của rễ.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Sinh học Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "bio_01",
+      "correctAnswerIdx": 1
+    }
+  },
+  {
+    "sampleId": "exam_sinh_05",
+    "originalId": "exam_sinh_5",
+    "subject": "sinh",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Sinh học Đề #1",
+    "grade": 12,
+    "topic": "Sinh Học Tế Bào & Di Truyền",
+    "difficulty": "Vận dụng",
+    "question": "Quá trình hình thành loài có thể diễn ra tương đối nhanh bằng con đường\nA. địa lí.\nB. sinh thái.\nC. sinh học.\nD. lai xa và đa bội hoá.",
+    "systemResponse": "Chào bạn, với tư cách là Trợ lý AI gia sư từ **STEM HUB**, mình xin hướng dẫn bạn giải chi tiết câu hỏi này theo chuẩn chương trình GDPT 2018 như sau:\n\n---\n\n### 1. Phương pháp giải và suy luận logic\n\nĐể giải quyết câu hỏi này, chúng ta cần nắm vững kiến thức về các con đường hình thành loài trong chương trình Sinh học 12 (phần Tiến hóa):\n\n*   **Bước 1: Phân tích các con đường hình thành loài:**\n    *   **Hình thành loài bằng con đường địa lí:** Thường diễn ra chậm chạp, trải qua nhiều giai đoạn trung gian (cách li địa lí $\\rightarrow$ phân hóa vốn gen $\\rightarrow$ cách li sinh sản).\n    *   **Hình thành loài bằng con đường sinh thái:** Thường diễn ra ở các loài ít di chuyển, gắn liền với sự thay đổi ổ sinh thái, cũng cần thời gian dài để tích lũy các đột biến.\n    *   **Hình thành loài bằng con đường sinh học (cách li tập tính, cách li cơ học):** Thường diễn ra chậm, gắn liền với sự thay đổi về tập tính giao phối hoặc cấu tạo cơ quan sinh sản.\n    *   **Hình thành loài bằng con đường lai xa và đa bội hóa:** Đây là phương thức đặc biệt, thường gặp ở thực vật. Khi lai xa kết hợp với đa bội hóa, cơ thể lai có bộ nhiễm sắc thể lưỡng bội của cả hai loài bố mẹ, giúp nó có khả năng sinh sản hữu tính ngay lập tức và cách li sinh sản với bố mẹ.\n\n*   **Bước 2: Đánh giá tốc độ:**\n    *   Các con đường địa lí, sinh thái, sinh học thường đòi hỏi thời gian rất dài để tích lũy các biến dị di truyền qua nhiều thế hệ.\n    *   Ngược lại, **lai xa và đa bội hóa** tạo ra loài mới chỉ trong một hoặc vài thế hệ (tốc độ rất nhanh). Đây là con đường hình thành loài phổ biến và nhanh chóng nhất ở thực vật.\n\n*   **Bước 3: Kết luận:**\n    Dựa trên lý thuyết về tốc độ hình thành loài, phương án \"lai xa và đa bội hóa\" là đáp án chính xác cho câu hỏi về quá trình diễn ra \"tương đối nhanh\".\n\n---\n\n### 2. Công thức/Kiến thức bổ trợ (LaTeX)\n\n*   Cơ chế hình thành loài bằng lai xa và đa bội hóa có thể tóm tắt qua sơ đồ:\n    *   Loài A ($2n_1$) $\\times$ Loài B ($2n_2$) $\\rightarrow$ Con lai bất thụ ($n_1 + n_2$)\n    *   Đa bội hóa: ($n_1 + n_2$) $\\xrightarrow{\\text{Đa bội hóa}}$ ($2n_1 + 2n_2$) $\\rightarrow$ Loài mới hữu thụ.\n\n---\n\n### 3. Kết luận\n\nĐáp án đúng là: **D. lai xa và đa bội hoá.**\n\n*   **Giải thích ngắn gọn:** Lai xa và đa bội hóa là con đường hình thành loài nhanh chóng nhất vì nó tạo ra sự cách li sinh sản với các loài bố mẹ ngay lập tức sau khi cơ thể lai được đa bội hóa, không cần trải qua quá trình tích lũy đột biến lâu dài như các con đường khác.\n\nHy vọng lời giải này giúp bạn nắm vững kiến thức! Nếu có bất kỳ thắc mắc nào, hãy đặt câu hỏi cho **STEM HUB** nhé!",
+    "referenceAnswer": "Đáp án D: lai xa và đa bội hoá.\n\nLai xa và đa bội hóa là con đường hình thành loài nhanh nhất ở thực vật.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Sinh học Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "bio_01",
+      "correctAnswerIdx": 3
+    }
+  },
+  {
+    "sampleId": "exam_sinh_06",
+    "originalId": "exam_sinh_6",
+    "subject": "sinh",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Sinh học Đề #1",
+    "grade": 12,
+    "topic": "Sinh Học Tế Bào & Di Truyền",
+    "difficulty": "Vận dụng",
+    "question": "Sự kiện nào sau đây không thuộc giai đoạn tiến hoá tiền sinh học?\nA. Sự xuất hiện cơ chế sao chép.\nB. Sự hình thành lớp màng.\nC. Hình thành các chất hữu cơ phức tạp protein và nucleic acid.\nD. Sự xuất hiện các enzyme.",
+    "systemResponse": "Chào bạn, với tư cách là Trợ lý AI gia sư từ **STEM HUB**, tôi xin hướng dẫn bạn giải chi tiết câu hỏi này dựa trên kiến thức Sinh học tiến hóa (chương trình GDPT 2018).\n\n---\n\n### 1. Phương pháp giải và suy luận logic\n\nĐể giải quyết câu hỏi này, chúng ta cần nắm vững các giai đoạn của quá trình phát sinh sự sống trên Trái Đất:\n\n*   **Giai đoạn Tiến hóa hóa học:** Là quá trình hình thành các hợp chất hữu cơ đơn giản từ các chất vô cơ, sau đó là sự trùng phân tạo thành các đại phân tử hữu cơ phức tạp (như $protein$, $nucleic\\ acid$) trong môi trường nước của đại dương nguyên thủy.\n*   **Giai đoạn Tiến hóa tiền sinh học:** Là giai đoạn hình thành các **tế bào sơ khai (protobiont)**. Các đại phân tử hữu cơ tập trung lại, hình thành lớp màng bao bọc (tạo thành các giọt $coacervate$ hoặc $liposome$), từ đó hình thành cơ chế tự sao chép, lưu trữ thông tin di truyền và các phản ứng trao đổi chất sơ khai.\n*   **Giai đoạn Tiến hóa sinh học:** Bắt đầu từ khi các tế bào sơ khai tiến hóa thành các tế bào sống đầu tiên (tế bào nhân sơ) và chịu sự tác động của các nhân tố tiến hóa (chọn lọc tự nhiên, đột biến, di truyền...).\n\n**Phân tích các phương án:**\n*   **Phương án A (Sự xuất hiện cơ chế sao chép):** Đây là đặc điểm quan trọng của tế bào sơ khai, thuộc giai đoạn tiền sinh học.\n*   **Phương án B (Sự hình thành lớp màng):** Việc hình thành lớp màng bao bọc các đại phân tử là bước ngoặt để tạo ra tế bào sơ khai, thuộc giai đoạn tiền sinh học.\n*   **Phương án C (Hình thành các chất hữu cơ phức tạp protein và nucleic acid):** Đây là kết quả của quá trình trùng phân các đơn phân (acid amin, nucleotide) trong môi trường nước. Quá trình này thuộc **giai đoạn Tiến hóa hóa học**.\n*   **Phương án D (Sự xuất hiện các enzyme):** Các $enzyme$ (đặc biệt là $ribozyme$ - $RNA$ có hoạt tính xúc tác) xuất hiện trong các tế bào sơ khai để thúc đẩy các phản ứng hóa học, thuộc giai đoạn tiền sinh học.\n\n### 2. Kết luận\n\nDựa trên phân tích trên, sự kiện \"Hình thành các chất hữu cơ phức tạp protein và nucleic acid\" thuộc giai đoạn **Tiến hóa hóa học**, không phải giai đoạn tiến hóa tiền sinh học.\n\n**Đáp án đúng là: C**\n\n---\n*Hy vọng lời giải này giúp bạn nắm vững kiến thức về quá trình phát sinh sự sống. Nếu có thắc mắc thêm, hãy đặt câu hỏi cho STEM HUB nhé!*",
+    "referenceAnswer": "Đáp án B: Sự hình thành lớp màng.\n\nSự hình thành lớp màng thuộc giai đoạn tiến hóa tiền sinh học, nhưng trong danh sách, các chất hữu cơ, enzyme và cơ chế sao chép liên quan chặt chẽ hơn đến giai đoạn này, câu hỏi loại trừ 'hình thành lớp màng' do đây là bước tiến sau khi có tập hợp các đại phân tử hữu cơ.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Sinh học Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "bio_01",
+      "correctAnswerIdx": 1
+    }
+  },
+  {
+    "sampleId": "exam_sinh_07",
+    "originalId": "exam_sinh_7",
+    "subject": "sinh",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Sinh học Đề #1",
+    "grade": 12,
+    "topic": "Sinh Học Tế Bào & Di Truyền",
+    "difficulty": "Vận dụng",
+    "question": "Quần thể được điều chỉnh về mức cân bằng khi\nA. mật độ cá thể giảm xuống quá thấp hoặc tăng lên quá cao.\nB. môi trường sống thuận lợi, thức ăn dồi dào, ít kẻ thù.\nC. mật độ cá thể tăng lên quá cao dẫn đến thiếu thức ăn, nơi ở.\nD. mật độ cá thể giảm xuống quá thấp đe dọa sự tồn tại của quần thể.",
+    "systemResponse": "Chào bạn, với tư cách là Trợ lý AI gia sư từ **STEM HUB**, tôi xin hướng dẫn bạn giải chi tiết câu hỏi này theo chuẩn chương trình GDPT 2018 như sau:\n\n---\n\n### 1. Phương pháp giải và suy luận logic\n\n**Bước 1: Phân tích khái niệm \"Cân bằng quần thể\"**\nTrong sinh thái học, quần thể luôn có xu hướng tự điều chỉnh mật độ cá thể về mức cân bằng (mức phù hợp với khả năng cung cấp nguồn sống của môi trường). Cơ chế này giúp quần thể duy trì sự ổn định và tránh nguy cơ bị diệt vong.\n\n**Bước 2: Phân tích cơ chế tự điều chỉnh**\n*   **Khi mật độ cá thể tăng quá cao:** Nguồn sống (thức ăn, nơi ở) trở nên khan hiếm, cạnh tranh gay gắt, dịch bệnh dễ lây lan. Kết quả là tỉ lệ tử vong tăng, tỉ lệ sinh giảm, hoặc cá thể di cư. Quần thể sẽ giảm mật độ về mức cân bằng.\n*   **Khi mật độ cá thể giảm quá thấp:** Các cá thể khó gặp nhau để giao phối, hiệu quả nhóm giảm. Kết quả là tỉ lệ sinh giảm, quần thể có nguy cơ suy thoái. Quần thể sẽ có cơ chế điều chỉnh (tăng tỉ lệ sinh, giảm tỉ lệ tử) để phục hồi mật độ.\n\n**Bước 3: Đánh giá các phương án**\n*   **Phương án A:** Phát biểu này nêu lên hai trạng thái cực đoan (quá thấp hoặc quá cao). Đây chính là hai thời điểm mà cơ chế tự điều chỉnh của quần thể **bắt đầu hoạt động mạnh mẽ nhất** để đưa mật độ về mức cân bằng.\n*   **Phương án B:** Đây là điều kiện môi trường lý tưởng, quần thể thường có xu hướng tăng trưởng theo tiềm năng sinh học chứ không phải là trạng thái \"điều chỉnh về mức cân bằng\".\n*   **Phương án C và D:** Đây chỉ là các trường hợp riêng lẻ (một chiều), chưa bao quát được toàn bộ cơ chế tự điều chỉnh của quần thể.\n\n**Kết luận logic:** Quần thể tự điều chỉnh mật độ khi mật độ cá thể vượt quá giới hạn (quá cao hoặc quá thấp) so với sức chứa của môi trường.\n\n---\n\n### 2. Kiến thức bổ trợ (LaTeX)\n\nCơ chế tự điều chỉnh của quần thể có thể được mô tả qua mối quan hệ giữa mật độ ($D$) và khả năng cung cấp nguồn sống của môi trường ($K$):\n*   Nếu $D > K$: Cạnh tranh tăng $\\rightarrow$ Tỉ lệ tử vong ($m$) tăng, tỉ lệ sinh ($b$) giảm $\\rightarrow$ $D$ giảm.\n*   Nếu $D < K$: Hiệu quả nhóm phát huy $\\rightarrow$ Tỉ lệ sinh ($b$) tăng, tỉ lệ tử vong ($m$) giảm $\\rightarrow$ $D$ tăng.\n\nCông thức tổng quát về sự thay đổi mật độ quần thể:\n$$\\Delta N = (B + I) - (D + E)$$\nTrong đó:\n*   $B$: Số cá thể sinh ra.\n*   $I$: Số cá thể nhập cư.\n*   $D$: Số cá thể tử vong.\n*   $E$: Số cá thể xuất cư.\n\n---\n\n### 3. Kết luận\n\nĐáp án đúng là: **A. mật độ cá thể giảm xuống quá thấp hoặc tăng lên quá cao.**\n\n*Giải thích thêm:* Đây là đáp án đầy đủ nhất vì nó bao hàm cả hai chiều hướng điều chỉnh của quần thể để duy trì trạng thái cân bằng sinh thái.",
+    "referenceAnswer": "Đáp án A: mật độ cá thể giảm xuống quá thấp hoặc tăng lên quá cao.\n\nQuần thể tự điều chỉnh mật độ để cân bằng với sức chứa của môi trường thông qua các cơ chế điều hòa sinh học.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Sinh học Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "bio_01",
+      "correctAnswerIdx": 0
+    }
+  },
+  {
+    "sampleId": "exam_sinh_08",
+    "originalId": "exam_sinh_8",
+    "subject": "sinh",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Sinh học Đề #1",
+    "grade": 12,
+    "topic": "Sinh Học Tế Bào & Di Truyền",
+    "difficulty": "Vận dụng",
+    "question": "Để sản xuất insulin trên quy mô công nghiệp người ta chuyển gene mã hóa insulin ở người vào vi khuẩn *E. coli* bằng cách phiên mã ngược mRNA của người thành DNA mới rồi mới tạo DNA tái tổ hợp và chuyển vào *E. coli*. Có bao nhiêu giải thích sau đây là đúng về cơ sở khoa học của việc làm trên?\nI. DNA của người tồn tại trong nhân nên không thể hoạt động được trong tế bào vi khuẩn.\nII. Gene của người không thể phiên mã được trong tế bào vi khuẩn.\nIII. Do DNA của người là hệ gene phân mảnh, còn vi khuẩn có hệ gene không phân mảnh.\nIV. Sẽ không tạo ra được sản phẩm như mong muốn vì cơ chế di truyền ở cấp độ phân tử của *E. coli* không phù hợp với hệ gene người.\nA. 2.\nB. 1.\nC. 3.\nD. 4.",
+    "systemResponse": "Chào bạn, tôi là trợ lý AI gia sư STEM HUB. Sau đây là lời giải chi tiết cho câu hỏi Sinh học tế bào & Di truyền theo chuẩn chương trình GDPT 2018.\n\n---\n\n### 1. Phương pháp giải và suy luận logic\n\nĐể giải quyết câu hỏi này, chúng ta cần vận dụng kiến thức về **công nghệ gen** (chuyển gene), đặc biệt là sự khác biệt về cấu trúc gene và cơ chế biểu hiện gene giữa sinh vật nhân thực (con người) và sinh vật nhân sơ (vi khuẩn *E. coli*).\n\n*   **Bối cảnh:** Con người muốn sản xuất insulin bằng cách đưa gene mã hóa insulin người vào vi khuẩn *E. coli*.\n*   **Vấn đề sinh học:** \n    *   Gene của sinh vật nhân thực (người) là **hệ gene phân mảnh**, tức là cấu trúc gene bao gồm các đoạn **exon** (mã hóa) xen kẽ với các đoạn **intron** (không mã hóa).\n    *   Vi khuẩn *E. coli* là sinh vật nhân sơ, hệ gene của chúng **không phân mảnh** (không có intron) và bộ máy phiên mã/dịch mã của vi khuẩn **không có khả năng cắt bỏ các đoạn intron** trong mRNA của sinh vật nhân thực.\n    *   Do đó, nếu lấy trực tiếp DNA của người (có chứa intron) chuyển vào vi khuẩn, vi khuẩn sẽ không thể tạo ra được phân tử mRNA trưởng thành chính xác để dịch mã thành chuỗi pôlipeptit (insulin) mong muốn.\n    *   **Giải pháp khắc phục:** Người ta phải lấy phân tử mRNA trưởng thành của người (đã được cắt bỏ các intron), sau đó dùng enzyme **phiên mã ngược (reverse transcriptase)** để tổng hợp nên ADN bổ sung (cDNA). cDNA này chỉ chứa các đoạn exon (vùng mã hóa liên tục) và không chứa intron, rất phù hợp với hệ thống dịch mã của vi khuẩn *E. coli*.\n\n---\n\n### 2. Phân tích từng giải thích (Nhận định)\n\n*   **Nhận định I: \"DNA của người tồn tại trong nhân nên không thể hoạt động được trong tế bào vi khuẩn.\"**\n    *   *Phân tích:* Sai. Vấn đề không nằm ở việc DNA nằm trong nhân hay ngoài tế bào chất, mà nằm ở sự khác biệt về cấu trúc gene (phân mảnh hay không phân mảnh) và cơ chế biểu hiện gene giữa nhân thực và nhân sơ. Thực tế, vector chứa DNA ngoại lai khi đưa vào vi khuẩn vẫn có thể phiên mã nếu cấu trúc tương thích.\n*   **Nhận định II: \"Gene của người không thể phiên mã được trong tế bào vi khuẩn.\"**\n    *   *Phân tích:* Sai. Nếu gene được thiết kế phù hợp (ví dụ sử dụng cDNA kết hợp với vùng khởi động $promoter$ của vi khuẩn), bộ máy phiên mã của vi khuẩn vẫn có thể phiên mã gene người bình thường. Vấn đề chính là gene nguyên bản của người có chứa intron mà vi khuẩn không xử lý được.\n*   **Nhận định III: \"Do DNA của người là hệ gene phân mảnh, còn vi khuẩn có hệ gene không phân mảnh.\"**\n    *   *Phân tích:* **Đúng.** Đây chính là cơ sở khoa học cốt lõi. Gene người có cấu trúc phân mảnh (exon - intron), trong khi vi khuẩn *E. coli* không có hệ thống cắt bỏ intron. Vì vậy, phải dùng mRNA chuyển hóa thành cDNA (không chứa intron) để đưa vào vi khuẩn.\n*   **Nhận định IV: \"Sẽ không tạo ra được sản phẩm như mong muốn vì cơ chế di truyền ở cấp độ phân tử của *E. coli* không phù hợp với hệ gene người.\"**\n    *   *Phân tích:* **Đúng.** Về cơ bản, mã di truyền là vạn năng, nhưng do sự khác biệt về cấu trúc gene (intron/exon) và cơ chế xử lý mRNA sau phiên mã giữa nhân sơ và nhân thực, nếu giữ nguyên gene cấu trúc ban đầu của người thì *E. coli* sẽ không thể tạo ra sản phẩm protein (insulin) đúng như mong muốn sinh học.\n\n---\n\n### 3. Kết luận\n\nCác giải thích đúng là: **III** và **IV**. \nSố lượng nhận định đúng là **2**.\n\n**Đáp án đúng: A. 2.**",
+    "referenceAnswer": "Đáp án B: 1.\n\nChỉ có nhận định III là đúng: Gene của sinh vật nhân thực có đoạn intron (phân mảnh), còn vi khuẩn không có hệ thống cắt intron, nên phải dùng mRNA đã xử lý (phiên mã ngược) để có DNA bổ sung không chứa intron.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Sinh học Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "bio_01",
+      "correctAnswerIdx": 1
+    }
+  },
+  {
+    "sampleId": "exam_sinh_09",
+    "originalId": "exam_sinh_9",
+    "subject": "sinh",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Sinh học Đề #1",
+    "grade": 12,
+    "topic": "Sinh Học Tế Bào & Di Truyền",
+    "difficulty": "Vận dụng cao",
+    "question": "Xét 3 loài chim ăn hạt sống trong cùng 1 khu vực. Ổ sinh thái dinh dưỡng thể hiện thông qua tỉ lệ phần trăm các loại kích thước mỏ của 3 loài trên được biểu diễn ở đồ thị sau:\n[Hình vẽ minh họa đề thi]\nDựa vào đồ thị, có bao nhiêu dự đoán sau đây về 3 loài chim trên là đúng?\nI. Loài 1 và loài 3 trong khu vực này gần như không cạnh tranh nhau về thức ăn.\nII. Số lượng cá thể loài 2 khống chế số lượng cá thể loài 3 và ngược lại.\nIII. Loài 1 và loài 2 có hiện tượng cạnh tranh gay gắt nguồn thức ăn với nhau.\nIV. Các loài chim trong khu vực này có xu hướng mở rộng ổ sinh thái để tìm được nhiều thức ăn hơn.\nA. 1.\nB. 2.\nC. 3.\nD. 4.",
+    "systemResponse": "Chào bạn, tôi là Trợ lý AI gia sư STEM HUB. Đối với dạng bài tập sinh thái học về **ổ sinh thái và cạnh tranh giữa các loài** theo chương trình GDPT 2018, chúng ta sẽ cùng nhau phân tích chi tiết từng phát biểu dựa trên nguyên lý sinh học cơ bản.\n\n---\n\n### 1. Phương pháp giải và suy luận logic\n\nĐể giải quyết bài toán này, ta cần nắm vững các kiến thức trọng tâm sau:\n* **Ổ sinh thái dinh dưỡng:** Là không gian sinh thái mà ở đó tất cả các nhân tố sinh thái của môi trường nằm trong giới hạn cho phép loài đó tồn tại và phát triển lâu dài. Các loài sống chung trong một sinh cảnh nếu có ổ sinh thái dinh dưỡng trùng nhau càng nhiều thì mức độ cạnh tranh càng gay gắt.\n* **Cạnh tranh cùng loài và khác loài:** Các loài sử dụng chung một nguồn sống (ví dụ: cùng kích thước hạt thức ăn) sẽ cạnh tranh với nhau. Ngược lại, nếu kích thước thức ăn khác biệt rõ rệt (ổ sinh thái dinh dưỡng phân li), mức độ cạnh tranh sẽ giảm hoặc không đáng kể.\n\n**Phân tích các phát biểu:**\n\n* **Phát biểu I: *\"Loài 1 và loài 3 trong khu vực này gần như không cạnh tranh nhau về thức ăn.\"***\n  * *Suy luận:* Dựa vào đồ thị về kích thước mỏ (đại diện cho kích thước thức ăn), đỉnh phân bố của loài 1 và loài 3 nằm ở hai đầu xa nhau (ví dụ: loài 1 ăn hạt nhỏ, loài 3 ăn hạt rất lớn), đồ thị của chúng gần như không chồng lấn lên nhau. \n  * $\\rightarrow$ Hai loài này khai thác các nguồn thức ăn khác nhau rõ rệt, do đó **gần như không cạnh tranh nhau** về thức ăn. $\\rightarrow$ **Đúng.**\n\n* **Phát biểu II: *\"Số lượng cá thể loài 2 khống chế số lượng cá thể loài 3 và ngược lại.\"***\n  * *Suy luận:* Mối quan hệ khống chế số lượng cá thể (kìm hãm sự phát triển số lượng lẫn nhau) thường đặc trưng cho mối quan hệ **kháng chiến/cạnh tranh gay gắt** giữa các loài có ổ sinh thái trùng nhau nhiều, hoặc quan hệ vật ăn thịt - con mồi, vật ký sinh - vật chủ. Loài 2 và loài 3 có sự phân hóa về kích thước thức ăn (dù có thể chồng lấn nhẹ ở một khoảng hẹp), mối quan hệ chủ yếu giữa chúng là phân chia nguồn sống để giảm cạnh tranh, chứ không phải là loài này khống chế số lượng loài kia theo kiểu vật ăn thịt - con mồi hay cạnh tranh triệt tiêu. Hơn nữa, trong sinh học tiến hóa, cạnh tranh cùng loài mới là nhân tố chủ yếu khống chế số lượng cá thể của quần thể, còn giữa các loài khác nhau có sự phân li ổ sinh thái để tránh cạnh tranh. $\\rightarrow$ **Sai.**\n\n* **Phát biểu III: *\"Loài 1 và loài 2 có hiện tượng cạnh tranh gay gắt nguồn thức ăn với nhau.\"***\n  * *Suy luận:* Quan sát đồ thị, phần diện tích giao nhau (chồng lấn) giữa phổ kích thước mỏ của loài 1 và loài 2 là **rất lớn**. Điều này có nghĩa là cả hai loài cùng sử dụng chung một nguồn kích thước hạt thức ăn trong khu vực. \n  * $\\rightarrow$ Khi nguồn sống có hạn mà ổ sinh thái trùng nhau nhiều sẽ dẫn đến **cạnh tranh gay gắt** (cạnh tranh khác loài). $\\rightarrow$ **Đúng.**\n\n* **Phát biểu IV: *\"Các loài chim trong khu vực này có xu hướng mở rộng ổ sinh thái để tìm được nhiều thức ăn hơn.\"***\n  * *Suy luận:* Theo quy luật về ổ sinh thái, khi sống chung trong một khu vực (sinh cảnh), để giảm bớt sự cạnh tranh gay gắt về nguồn sống (thức ăn, nơi ở...), các loài có xu hướng **thu hẹp ổ sinh thái riêng** (phân li ổ sinh thái) chứ không phải mở rộng ổ sinh thái. Việc mở rộng ổ sinh thái sẽ làm tăng mức độ chồng lấn, dẫn đến cạnh tranh khốc liệt hơn và có thể loại bỏ lẫn nhau (loại trừ sinh học). $\\rightarrow$ **Sai.**\n\n---\n\n### 2. Tóm tắt số lượng phát biểu đúng\n\nCác phát biểu đúng là: **I và III** (Tổng cộng có **2** phát biểu đúng).\n\n---\n\n### 3. Kết luận đáp án\n\nDựa trên phân tích chi tiết ở trên, phương án chính xác là:\n\n**B. 2.**",
+    "referenceAnswer": "Đáp án B: 2.\n\nDựa vào đồ thị (giả định), ta thấy loài 1 và 2 chồng lấn lớn về ổ sinh thái nên cạnh tranh gay g���t (III đúng). Loài 1 và 3 tách biệt nên ít cạnh tranh (I đúng).",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Sinh học Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "bio_01",
+      "correctAnswerIdx": 1
+    }
+  },
+  {
+    "sampleId": "exam_sinh_10",
+    "originalId": "exam_sinh_10",
+    "subject": "sinh",
+    "sourceType": "official_exam",
+    "examTitle": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Sinh học Đề #1",
+    "grade": 12,
+    "topic": "Sinh Học Tế Bào & Di Truyền",
+    "difficulty": "Vận dụng cao",
+    "question": "Các hợp chất nào sau đây là nguyên liệu cung cấp cho pha sáng quang hợp?\nA. $H_2O$, ADP, NADPH.\nB. ATP, NADPH, $O_2$.\nC. $H_2O$, ADP, $NADP^+$, và $O_2$.\nD. $H_2O$, ADP, $NADP^+$.",
+    "systemResponse": "Chào em, thầy/cô là Trợ lý AI gia sư STEM HUB. Bây giờ chúng ta sẽ cùng nhau phân tích và giải quyết câu hỏi sinh học này theo chuẩn chương trình GDPT 2018 nhé.\n\n---\n\n### 1. Phương pháp giải và các bước suy luận logic\n\nĐể trả lời câu hỏi này, chúng ta cần nắm vững kiến thức về **quang hợp ở thực vật**, cụ thể là diễn biến của **pha sáng** (diễn ra ở màng thilakoid của lục lạp).\n\n*   **Bản chất của pha sáng:** Là quá trình chuyển hóa năng lượng ánh sáng đã được diệp lục hấp thụ thành năng lượng hóa học tích lũy trong $\\text{ATP}$ và $\\text{NADPH}$, đồng thời giải phóng $\\text{O}_2$.\n*   **Các chất tham gia (nguyên liệu) vào pha sáng:**\n    1.  **Nước ($\\text{H}_2\\text{O}$):** Bị quang phân ly để cung cấp electron ($e^-$), proton ($H^+$) và giải phóng khí oxy ($\\text{O}_2$).\n    2.  **Các chất mang năng lượng dạng nghèo năng lượng** được tạo ra từ pha tối chuyển sang để nhận năng lượng và electron, đó là **$\\text{ADP}$** và **$\\text{NADP}^+$** (chất nhận electron để khử thành $\\text{NADPH}$).\n    3.  **Ánh sáng** và **chất diệp lục** (nhưng trong các phương án trắc nghiệm thường tập trung vào các chất hóa học).\n\n*   **Các chất được tạo thành (sản phẩm) của pha sáng:** $\\text{ATP}$, $\\text{NADPH}$ và $\\text{O}_2$ (khí oxy lúc này được xem là sản phẩm phụ).\n\n---\n\n### 2. Phân tích các phương án\n\n*   **Phương án A:** $H_2O$, ADP, NADPH. ($NADPH$ là sản phẩm của pha sáng, không phải nguyên liệu). $\\rightarrow$ **Loại.**\n*   **Phương án B:** ATP, NADPH, $O_2$. (Đây đều là *sản phẩm* của pha sáng). $\\rightarrow$ **Loại.**\n*   **Phương án C:** $H_2O$, ADP, $NADP^+$, và $O_2$. ($O_2$ là sản phẩm chứ không phải nguyên liệu). $\\rightarrow$ **Loại.**\n*   **Phương án D:** $H_2O$, ADP, $NADP^+$. (Đây chính là các nguyên liệu cần thiết để cung cấp cho các phản ứng trong pha sáng tạo ra ATP, NADPH và giải phóng $O_2$). $\\rightarrow$ **Chính xác.**\n\n---\n\n### 3. Kết luận\n\nĐáp án đúng là: **D** ($H_2O$, ADP, $NADP^+$).",
+    "referenceAnswer": "Đáp án D: $H_2O$, ADP, $NADP^+$.\n\nPha sáng quang hợp cần H2O, ADP, NADP+ để tạo ra O2, ATP, NADPH.",
+    "sgkReference": "Đề ôn tập thi thử THPT 2026 – Đề minh họa - Sinh học Đề #1 (Bộ GD&ĐT)",
+    "rawMeta": {
+      "examId": "bio_01",
+      "correctAnswerIdx": 3
+    }
+  }
+]

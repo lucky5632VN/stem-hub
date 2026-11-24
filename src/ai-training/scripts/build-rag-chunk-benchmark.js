@@ -1,0 +1,627 @@
+import fs from 'fs';
+import path from 'path';
+import crypto from 'crypto';
+
+const corpusPath = path.resolve('src/ai-training/datasets/rag-knowledge/stem-corpus.json');
+const corpus = JSON.parse(fs.readFileSync(corpusPath, 'utf8'));
+
+// Helper kiểm tra chunkId có tồn tại trong corpus
+const corpusIds = new Set(corpus.map(c => c.id));
+
+const benchmarkQueries = [
+  // =========================================================================
+  // PHẦN 1: HÓA HỌC (15 câu hỏi độc lập, ngôn ngữ tự nhiên học sinh, không dấu/viết tắt)
+  // =========================================================================
+  {
+    id: 'chunk-q-01',
+    subject: 'hoa',
+    query: 'hat nhan nguyen tu gom nhung hat nao va hat nao mang dien',
+    expectedChunkIds: ['hoa-10-001', 'hoa-10-002', 'hoa-10-003'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-02',
+    subject: 'hoa',
+    query: 'cau hinh e cua khi hiem co gi dac biet ma ben vung',
+    expectedChunkIds: ['hoa-10-004', 'hoa-10-005', 'hoa-10-006'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-03',
+    subject: 'hoa',
+    query: 'cac nguyen to phi kim thuong nam o nhom nao trong bang tuan hoan',
+    expectedChunkIds: ['hoa-10-007', 'hoa-10-008', 'hoa-10-009'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-04',
+    subject: 'hoa',
+    query: 'lien ket ion duoc hinh thanh giua nhung loai nguyen tu nao',
+    expectedChunkIds: ['hoa-10-010', 'hoa-10-011', 'hoa-10-012'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-05',
+    subject: 'hoa',
+    query: 'phan ung giua axit axetic va ancol etylic can chat xuc tac gi',
+    expectedChunkIds: ['hoa-11-061', 'hoa-11-062', 'hoa-11-063', 'hoa-12-064'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-06',
+    subject: 'hoa',
+    query: 'tai sao dun ruou voi axit huu co lai ngui thay mui thom cua este',
+    expectedChunkIds: ['hoa-11-063', 'hoa-12-064', 'hoa-12-065'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-07',
+    subject: 'hoa',
+    query: 'thuy phan chat beo trong moi truong kiem thu duoc xa phong va glixerol the nao',
+    expectedChunkIds: ['hoa-12-064', 'hoa-12-065', 'hoa-12-066'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-08',
+    subject: 'hoa',
+    query: 'axit sunfuric dac nong tac dung kim loai dong sinh ra khi gi mui hac',
+    expectedChunkIds: ['hoa-10-025', 'hoa-10-026', 'hoa-10-027'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-09',
+    subject: 'hoa',
+    query: 'nguyen ly le chatelier ve su chuyen dich can bang khi tang nhiet do',
+    expectedChunkIds: ['hoa-11-030'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-10',
+    subject: 'hoa',
+    query: 'glucozo va saccarozo chat nao tham gia phan ung trang bac',
+    expectedChunkIds: ['hoa-12-067', 'hoa-12-068', 'hoa-12-069'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-11',
+    subject: 'hoa',
+    query: 'amin bac 1 va amin bac 2 phan biet nhau theo so goc hidrocacbon ra sao',
+    expectedChunkIds: ['hoa-12-070', 'hoa-12-071', 'hoa-12-072'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-12',
+    subject: 'hoa',
+    query: 'an mon dien hoa cua kim loai sat trong khong khi can nhung dieu kien gi',
+    expectedChunkIds: ['hoa-12-085', 'hoa-12-086', 'hoa-12-087'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-13',
+    subject: 'hoa',
+    query: 'trong day dien hoa kim loai nao co tinh khu manh nhat dung dau',
+    expectedChunkIds: ['hoa-12-082', 'hoa-12-083', 'hoa-12-084'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-14',
+    subject: 'hoa',
+    query: 'phan ung cong cua anken voi nuoc brom lam mat mau dung dich',
+    expectedChunkIds: ['hoa-11-040', 'hoa-11-041', 'hoa-11-042'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-15',
+    subject: 'hoa',
+    query: 'chat luong tinh vua tac dung axit vua tac dung bazo vi du la gi',
+    expectedChunkIds: ['hoa-11-031', 'hoa-11-032', 'hoa-11-033'],
+    type: 'in_scope'
+  },
+
+  // =========================================================================
+  // PHẦN 2: VẬT LÝ (15 câu hỏi độc lập)
+  // =========================================================================
+  {
+    id: 'chunk-q-16',
+    subject: 'ly',
+    query: 'cong thuc van toc va quang duong roi tu do theo gia toc trong truong g',
+    expectedChunkIds: ['ly-10-091', 'ly-10-092', 'ly-10-093'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-17',
+    subject: 'ly',
+    query: 'dinh luat hai newton f bang m nhan a ap dung the nao',
+    expectedChunkIds: ['ly-10-094', 'ly-10-095', 'ly-10-096'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-18',
+    subject: 'ly',
+    query: 'luc ma sat truot khac luc ma sat nghi o diem nao tren mat phang',
+    expectedChunkIds: ['ly-10-097', 'ly-10-098', 'ly-10-099'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-19',
+    subject: 'ly',
+    query: 'chu ki dao dong con lac don t phu thuoc vao chieu dai day l the nao',
+    expectedChunkIds: ['ly-12-136', 'ly-12-137'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-20',
+    subject: 'ly',
+    query: 'co nang cua con lac lo xo co bien doi theo thoi gian khong',
+    expectedChunkIds: ['ly-12-138', 'ly-12-139'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-21',
+    subject: 'ly',
+    query: 'khoang cach giua hai nut song hoac hai bung song lien tiep la bao nhieu buoc song',
+    expectedChunkIds: ['ly-12-142', 'ly-12-143', 'ly-12-144'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-22',
+    subject: 'ly',
+    query: 'mach dien xoay chieu rlc xay ra cong huong khi zL bang zC co dung khong',
+    expectedChunkIds: ['ly-12-148', 'ly-12-149', 'ly-12-150'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-23',
+    subject: 'ly',
+    query: 'thau kinh hoi tu cho anh that khi vat dat ngoai khoang tieu cu',
+    expectedChunkIds: ['ly-11-125', 'ly-11-126', 'ly-11-127'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-24',
+    subject: 'ly',
+    query: 'dinh luat len xo ve chieu dong dien cam ung chong lai su bien thien tu thong',
+    expectedChunkIds: ['ly-11-121', 'ly-11-122', 'ly-11-123'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-25',
+    subject: 'ly',
+    query: 'luc cu long giua hai dien tich diem ti le nghich voi binh phuong khoang cach',
+    expectedChunkIds: ['ly-11-112', 'ly-11-113', 'ly-11-114'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-26',
+    subject: 'ly',
+    query: 'thuyet luong tu anh sang cua planck hat photon co mang dien khong',
+    expectedChunkIds: ['ly-12-154', 'ly-12-155'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-27',
+    subject: 'ly',
+    query: 'dieu kien xay ra hien tuong quang dien ngoai ve buoc song gio han quang dien',
+    expectedChunkIds: ['ly-12-154', 'ly-12-155', 'ly-12-156'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-28',
+    subject: 'ly',
+    query: 'ban chat cua tia phong xa gamma la song dien tu buoc song rat ngan',
+    expectedChunkIds: ['ly-12-160', 'ly-12-161', 'ly-12-162'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-29',
+    subject: 'ly',
+    query: 'nang luong lien ket cua hat nhan ti le voi do hut khoi the nao',
+    expectedChunkIds: ['ly-12-158', 'ly-12-159'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-30',
+    subject: 'ly',
+    query: 'song dien tu la song ngang va truyen duoc trong chan khong voi van toc anh sang',
+    expectedChunkIds: ['ly-12-151', 'ly-12-152', 'ly-12-153'],
+    type: 'in_scope'
+  },
+
+  // =========================================================================
+  // PHẦN 3: TOÁN HỌC (15 câu hỏi độc lập)
+  // =========================================================================
+  {
+    id: 'chunk-q-31',
+    subject: 'toan',
+    query: 'giao va hop cua hai tap hop lay nhung phan tu nao trong toan 10',
+    expectedChunkIds: ['toan-10-166', 'toan-10-167', 'toan-10-168'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-32',
+    subject: 'toan',
+    query: 'cach tim toa do dinh parabol va truc doi xung cua ham bac hai',
+    expectedChunkIds: ['toan-10-172', 'toan-10-173', 'toan-10-174'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-33',
+    subject: 'toan',
+    query: 'hai vecto cung phuong hoac vuong goc khi nao trong mat phang oxy',
+    expectedChunkIds: ['toan-10-175', 'toan-10-176', 'toan-10-177'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-34',
+    subject: 'toan',
+    query: 'so hang tong quat un cua cap so cong tinh bang u1 cong n tru 1 nhan d',
+    expectedChunkIds: ['toan-11-196', 'toan-11-197', 'toan-11-198'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-35',
+    subject: 'toan',
+    query: 'tong n so hang dau tien cua cap so nhan cong boi q khac 1',
+    expectedChunkIds: ['toan-11-196', 'toan-11-197', 'toan-11-198'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-36',
+    subject: 'toan',
+    query: 'dao ham cua ham so luong giac sin x bang cos x va cos x bang tru sin x',
+    expectedChunkIds: ['toan-11-194', 'toan-11-195'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-37',
+    subject: 'toan',
+    query: 'dau hieu tim diem cuc dai va cuc tieu cua ham so dua vao dao ham cap mot va hai',
+    expectedChunkIds: ['toan-12-211', 'toan-12-212', 'toan-12-213'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-38',
+    subject: 'toan',
+    query: 'tim duong tiem can dung va tiem can ngang cua do thi ham phan thuc bac nhat',
+    expectedChunkIds: ['toan-12-214', 'toan-12-215', 'toan-12-216'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-39',
+    subject: 'toan',
+    query: 'nguyen ham cua mot chia x la ln tri tuyet doi cua x cong c',
+    expectedChunkIds: ['toan-12-212', 'toan-12-213', 'toan-12-214'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-40',
+    subject: 'toan',
+    query: 'tinh dien tich hinh phang gioi han boi do thi ham so f x va truc hoanh bang tich phan',
+    expectedChunkIds: ['toan-12-215', 'toan-12-216'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-41',
+    subject: 'toan',
+    query: 'phuong trinh mat cau tam I ban kinh R trong he toa do oxyz',
+    expectedChunkIds: ['toan-12-220', 'toan-12-221'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-42',
+    subject: 'toan',
+    query: 'viet phuong trinh mat phang di qua mot diem co vecto phap tuyen n a b c',
+    expectedChunkIds: ['toan-12-222', 'toan-12-223'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-43',
+    subject: 'toan',
+    query: 'so phuc z bang a cong bi thi phan thuc phan ao va so phuc lien hop la gi',
+    expectedChunkIds: ['toan-12-226', 'toan-12-227'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-44',
+    subject: 'toan',
+    query: 'cach tinh modun cua so phuc va bieu dien hinh hoc diem M tren mat phang phuc',
+    expectedChunkIds: ['toan-12-226', 'toan-12-227', 'toan-12-228'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-45',
+    subject: 'toan',
+    query: 'dieu kien xac dinh cua phuong trinh logarit co so a lon hon 0 va khac 1',
+    expectedChunkIds: ['toan-11-198', 'toan-11-199', 'toan-11-200'],
+    type: 'in_scope'
+  },
+
+  // =========================================================================
+  // PHẦN 4: SINH HỌC (15 câu hỏi độc lập)
+  // =========================================================================
+  {
+    id: 'chunk-q-46',
+    subject: 'sinh',
+    query: 'vai tro cua duong don glucozo va tinh bot trong te bao sinh hoc 10',
+    expectedChunkIds: ['sinh-10-238', 'sinh-10-239', 'sinh-10-240'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-47',
+    subject: 'sinh',
+    query: 'bon bac cau truc cua phan tu protein va hien tuong bien tinh la gi',
+    expectedChunkIds: ['sinh-10-241', 'sinh-10-242', 'sinh-10-243'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-48',
+    subject: 'sinh',
+    query: 'nguyen tac bo sung giua cac bazo a lien ket voi t va g lien ket voi x tren adn',
+    expectedChunkIds: ['sinh-10-244', 'sinh-10-245', 'sinh-10-246'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-49',
+    subject: 'sinh',
+    query: 'te bao vi khuan nhan so chua co mang nhan bao boc co dung khong',
+    expectedChunkIds: ['sinh-10-247', 'sinh-10-248', 'sinh-10-249'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-50',
+    subject: 'sinh',
+    query: 'ti the la nha may tao nang luong atp cho hoat dong song cua te bao',
+    expectedChunkIds: ['sinh-10-249', 'sinh-10-257'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-51',
+    subject: 'sinh',
+    query: 'pha sang cua quang hop o thuc vat dien ra tren mang tilacoid cua luc lap',
+    expectedChunkIds: ['sinh-11-265', 'sinh-11-266', 'sinh-11-267'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-52',
+    subject: 'sinh',
+    query: 'ket qua cua qua trinh nguyen phan tu mot te bao me me tao hai te bao con bo nst',
+    expectedChunkIds: ['sinh-10-259', 'sinh-10-260', 'sinh-10-261'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-53',
+    subject: 'sinh',
+    query: 'giam phan dien ra o te bao sinh duc chin de tao ra giao tu mang bo nst don boi',
+    expectedChunkIds: ['sinh-12-294'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-54',
+    subject: 'sinh',
+    query: 'ti le phan li kieu hinh 3 troi 1 lan o the he f2 trong thi nghiem cua men đen',
+    expectedChunkIds: ['sinh-12-292', 'sinh-12-293', 'sinh-12-294'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-55',
+    subject: 'sinh',
+    query: 'quy luat phan li doc lap giai thich su xuat hien bien di to hop o f2 nhu the nao',
+    expectedChunkIds: ['sinh-12-292', 'sinh-12-293'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-56',
+    subject: 'sinh',
+    query: 'cac dang dot bien diem tren gen gom thay the them va mat mot cap nucleotit',
+    expectedChunkIds: ['sinh-12-289', 'sinh-12-290', 'sinh-12-291'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-57',
+    subject: 'sinh',
+    query: 'qua trinh dich ma tong hop chuoi polipeptit tren riboxom nho marn va tarn',
+    expectedChunkIds: ['sinh-12-286', 'sinh-12-287', 'sinh-12-288'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-58',
+    subject: 'sinh',
+    query: 'mo hinh dieu hoa hoat dong operon lac o e coli gom gen khoi dong van hanh va cau truc',
+    expectedChunkIds: ['sinh-12-286', 'sinh-12-287'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-59',
+    subject: 'sinh',
+    query: 'dinh luat hac di van bec ve trang thai can bang di truyen cua quan the ngau phoi',
+    expectedChunkIds: ['sinh-12-286', 'sinh-12-287'],
+    type: 'in_scope'
+  },
+  {
+    id: 'chunk-q-60',
+    subject: 'sinh',
+    query: 'he sinh thai bao gom quan xa sinh vat va sinh canh tuong tac qua chuoi thuc an',
+    expectedChunkIds: ['sinh-12-298', 'sinh-12-299', 'sinh-12-300'],
+    type: 'in_scope'
+  },
+
+  // =========================================================================
+  // PHẦN 5: CÂU HỎI NGOÀI PHẠM VI - OUT OF SCOPE (20 câu hỏi kiểm tra bộ ngắt từ chối)
+  // =========================================================================
+  {
+    id: 'chunk-oos-01',
+    subject: 'oos',
+    query: 'cach lam mon thit kho tau ngon dung vi mien nam can nguyen lieu gi',
+    expectedChunkIds: [],
+    type: 'out_of_scope'
+  },
+  {
+    id: 'chunk-oos-02',
+    subject: 'oos',
+    query: 'doi tuyen bong da nao vo dich world cup 2022 tai qatar',
+    expectedChunkIds: [],
+    type: 'out_of_scope'
+  },
+  {
+    id: 'chunk-oos-03',
+    subject: 'oos',
+    query: 'gia dong bitcoin hom nay tren san binance la bao nhieu do la',
+    expectedChunkIds: [],
+    type: 'out_of_scope'
+  },
+  {
+    id: 'chunk-oos-04',
+    subject: 'oos',
+    query: 'cung hoang dao kim nguu hop voi cung nao trong tinh yeu nam nu',
+    expectedChunkIds: [],
+    type: 'out_of_scope'
+  },
+  {
+    id: 'chunk-oos-05',
+    subject: 'oos',
+    query: 'dien vien dong vai nguoi nhen trong bo phim no way home ten gi',
+    expectedChunkIds: [],
+    type: 'out_of_scope'
+  },
+  {
+    id: 'chunk-oos-06',
+    subject: 'oos',
+    query: 'meo chua dau bung bang thuoc dan gian la tia to va gung tuoi',
+    expectedChunkIds: [],
+    type: 'out_of_scope'
+  },
+  {
+    id: 'chunk-oos-07',
+    subject: 'oos',
+    query: 'khong gian topo compact Hausdorff va dinh ly Tychonoff trong toan hoc dai hoc',
+    expectedChunkIds: [],
+    type: 'out_of_scope'
+  },
+  {
+    id: 'chunk-oos-08',
+    subject: 'oos',
+    query: 'dia diem du lich noi tieng o da lat mua hoa da quy no thang may',
+    expectedChunkIds: [],
+    type: 'out_of_scope'
+  },
+  {
+    id: 'chunk-oos-09',
+    subject: 'oos',
+    query: 'bai hat nao vua dat mot ty luot xem tren youtube nam nay',
+    expectedChunkIds: [],
+    type: 'out_of_scope'
+  },
+  {
+    id: 'chunk-oos-10',
+    subject: 'oos',
+    query: 'huong dan cach lap trinh game flappy bird bang ngon ngu python pygame',
+    expectedChunkIds: [],
+    type: 'out_of_scope'
+  },
+  {
+    id: 'chunk-oos-11',
+    subject: 'oos',
+    query: 'uong nuoc kiem ion hoa co the chua duoc benh ung thu khong',
+    expectedChunkIds: [],
+    type: 'out_of_scope'
+  },
+  {
+    id: 'chunk-oos-12',
+    subject: 'oos',
+    query: 'xe may dien chay duoc bao nhieu km cho mot lan sac day pin',
+    expectedChunkIds: [],
+    type: 'out_of_scope'
+  },
+  {
+    id: 'chunk-oos-13',
+    subject: 'oos',
+    query: 'thu do cua nuoc uc la sydney hay canberra va nam o dau',
+    expectedChunkIds: [],
+    type: 'out_of_scope'
+  },
+  {
+    id: 'chunk-oos-14',
+    subject: 'oos',
+    query: 'cach tri mun trung ca hieu qua bang kem danh rang co nen dung khong',
+    expectedChunkIds: [],
+    type: 'out_of_scope'
+  },
+  {
+    id: 'chunk-oos-15',
+    subject: 'oos',
+    query: 'dien thoai iphone 16 pro max co may camera va gia khoang bao nhieu',
+    expectedChunkIds: [],
+    type: 'out_of_scope'
+  },
+  {
+    id: 'chunk-oos-16',
+    subject: 'oos',
+    query: 'van hoa doc sach va cach ren luyen thoi quen doc sach moi ngay',
+    expectedChunkIds: [],
+    type: 'out_of_scope'
+  },
+  {
+    id: 'chunk-oos-17',
+    subject: 'oos',
+    query: 'thoi tiet ngay mai tai ha noi co mua va khong khi lanh tran ve khong',
+    expectedChunkIds: [],
+    type: 'out_of_scope'
+  },
+  {
+    id: 'chunk-oos-18',
+    subject: 'oos',
+    query: 'chuan doan benh viem loet da day theo tay y dung phuong phap noi soi',
+    expectedChunkIds: [],
+    type: 'out_of_scope'
+  },
+  {
+    id: 'chunk-oos-19',
+    subject: 'oos',
+    query: 'ly thuyet tro choi can bang nash trong kinh te hoc vi mo bac cao',
+    expectedChunkIds: [],
+    type: 'out_of_scope'
+  },
+  {
+    id: 'chunk-oos-20',
+    subject: 'oos',
+    query: 'cach pha tra sua tran chau duong den tai nha uong ngon khong bi beo',
+    expectedChunkIds: [],
+    type: 'out_of_scope'
+  }
+];
+
+// Kiểm tra toàn vẹn expectedChunkIds
+benchmarkQueries.forEach(q => {
+  if (q.type === 'in_scope') {
+    q.expectedChunkIds.forEach(id => {
+      if (!corpusIds.has(id)) {
+        console.warn(`⚠️ Cảnh báo: ChunkId ${id} không tồn tại trong stem-corpus.json!`);
+      }
+    });
+  }
+});
+
+const benchmarkPayload = {
+  metadata: {
+    datasetName: "STEM HUB RAG Chunk-Level Evaluation Benchmark (60 In-Scope + 20 Out-of-Scope)",
+    totalQueries: benchmarkQueries.length,
+    inScopeQueries: 60,
+    outOfScopeQueries: 20,
+    authorSource: "Do nhóm phát triển biên soạn thủ công độc lập (viết tay, không dùng LLM sinh câu hỏi, không sao chép tiêu đề bài giảng trong corpus)",
+    purpose: "Đánh giá chính xác khả năng truy xuất đúng đoạn văn bản (Chunk-level) thay vì chỉ phân loại môn học; đo độ nhạy của bộ ngắt từ chối (Abstention Guard)",
+    lockedAt: new Date().toISOString()
+  },
+  queries: benchmarkQueries
+};
+
+// Tính toán SHA-256 Hash để khóa cứng bộ dữ liệu
+const contentString = JSON.stringify(benchmarkQueries);
+const sha256Hash = crypto.createHash('sha256').update(contentString).digest('hex');
+benchmarkPayload.metadata.datasetSha256 = sha256Hash;
+
+const outputPath = path.resolve('src/ai-training/datasets/rag_chunk_benchmark_60.json');
+fs.writeFileSync(outputPath, JSON.stringify(benchmarkPayload, null, 2), 'utf8');
+
+console.log(`✅ Đã tạo thành công bộ Benchmark 80 câu đo mức Chunk tại: ${outputPath}`);
+console.log(`🔒 Mã băm SHA-256 khóa cứng dữ liệu: ${sha256Hash}`);
+console.log(`📊 Quy mô: ${benchmarkPayload.metadata.inScopeQueries} câu hỏi chuyên môn + ${benchmarkPayload.metadata.outOfScopeQueries} câu hỏi ngoài phạm vi.`);

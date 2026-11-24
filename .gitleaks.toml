@@ -1,0 +1,8 @@
+title = "gitleaks config"
+
+[allowlist]
+description = "Allowlist specific dependency directories and sanitized report files"
+paths = [
+  '''node_modules''',
+  '''reports/gitleaks-report.json'''
+]

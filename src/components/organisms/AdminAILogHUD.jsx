@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useAppStore } from '@/store/useAppStore';
-import { db } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
 import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Terminal, X, Play, Pause, Trash2, Search, RefreshCw, Copy, Check, ShieldAlert, Sparkles, Filter, Database, Cpu } from 'lucide-react';
@@ -86,8 +86,16 @@ export default function AdminAILogHUD() {
     // 2. Polling API fallback for local memory logs
     const fetchApiLogs = async () => {
       try {
+        let token = null;
+        try {
+          if (auth?.currentUser) {
+            token = await auth.currentUser.getIdToken();
+          }
+        } catch (_) {}
         const res = await fetch(`/api/ai-reasoning-log?t=${Date.now()}`, {
-          headers: { 'x-admin-secret-key': 'stemhub_admin_secret_key_2026' }
+          headers: {
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          }
         });
         const data = await res.json();
         if (data.success && Array.isArray(data.logs) && data.logs.length > 0) {

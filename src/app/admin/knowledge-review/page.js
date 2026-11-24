@@ -7,7 +7,8 @@ import {
 } from 'lucide-react';
 import { playSound } from '@/lib/sound';
 import { formatMathText } from '@/lib/mathFormatter';
-import { db } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
+import { useAuth } from '@/hooks/useAuth';
 import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
 
 function formatDisplayDate(val, id) {
@@ -36,6 +37,7 @@ function formatDisplayDate(val, id) {
 }
 
 export default function KnowledgeReviewAdminPage() {
+  const { currentUser } = useAuth();
   const [knowledgeList, setKnowledgeList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('pending'); // 'pending' | 'verified' | 'rejected' | 'all'
@@ -43,23 +45,57 @@ export default function KnowledgeReviewAdminPage() {
   const [selectedSubject, setSelectedSubject] = useState('all');
   const [editingItem, setEditingItem] = useState(null);
   const [editAnswerText, setEditAnswerText] = useState('');
-  const [teacherName, setTeacherName] = useState('Thầy Nguyễn Trọng Nghĩa (Tổ phó Chuyên môn)');
   const [actionLoading, setActionLoading] = useState(null);
   const [batchLoading, setBatchLoading] = useState(false);
+
+  // 🛡️ Phân quyền môn học: Giáo viên chỉ xem được môn được cấp quyền, Admin xem được tất cả
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isTeacher, setIsTeacher] = useState(false);
+  const [authorizedSubjects, setAuthorizedSubjects] = useState([]);
+
+  useEffect(() => {
+    async function checkRoleAndPermissions() {
+      if (!currentUser) return;
+      try {
+        const idTokenResult = await currentUser.getIdTokenResult();
+        const claims = idTokenResult.claims || {};
+        const adminClaim = Boolean(claims.admin || claims.role === 'admin');
+        const teacherClaim = Boolean(claims.role === 'teacher' || claims.reviewerType === 'teacher');
+        const subs = Array.isArray(claims.subjects) ? claims.subjects.map(s => String(s).toLowerCase().trim()) : [];
+
+        setIsAdmin(adminClaim);
+        setIsTeacher(teacherClaim);
+        setAuthorizedSubjects(subs);
+
+        // Nếu là giáo viên (không phải admin) và có môn được phân công
+        if (!adminClaim && teacherClaim && subs.length > 0) {
+          setSelectedSubject(subs[0]);
+        }
+      } catch (err) {
+        console.warn('[ReviewAdmin] Lỗi kiểm tra claims:', err);
+      }
+    }
+    checkRoleAndPermissions();
+  }, [currentUser]);
 
   const fetchKnowledge = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/learned-knowledge?all=true&t=${Date.now()}`);
+      let token = null;
+      try {
+        if (auth?.currentUser) {
+          token = await auth.currentUser.getIdToken();
+        }
+      } catch (_) {}
+
+      const headers = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`/api/learned-knowledge?all=true&t=${Date.now()}`, { headers });
       if (res.ok) {
         const data = await res.json();
         if (data.success && Array.isArray(data.learnedDocs)) {
-          // Nếu dữ liệu rỗng, nạp sẵn các mẫu tri thức học thuật ban đầu phục vụ thẩm định
-          if (data.learnedDocs.length === 0) {
-            seedSampleKnowledge();
-          } else {
-            setKnowledgeList(data.learnedDocs);
-          }
+          setKnowledgeList(data.learnedDocs);
         }
       }
     } catch (err) {
@@ -78,7 +114,10 @@ export default function KnowledgeReviewAdminPage() {
         subject: 'hoa',
         topic: 'Este - Lipit Lớp 12',
         status: 'pending_review',
-        teacherVerified: false
+        teacherVerified: false,
+        verifiedAt: null,
+        verifiedBy: null,
+        isDemo: true
       },
       {
         id: 'sample_ly_1',
@@ -86,10 +125,11 @@ export default function KnowledgeReviewAdminPage() {
         answer: 'Hiện tượng cộng hưởng điện xảy ra khi tần số góc của dòng điện bằng tần số góc riêng của mạch: ω = 1 / sqrt(LC) hay Z_L = Z_C. Khi đó tổng trở Z đạt giá trị nhỏ nhất (Z = R) và cường độ dòng điện hiệu dụng đạt cực đại I_max = U / R.',
         subject: 'ly',
         topic: 'Dòng điện xoay chiều Lớp 12',
-        status: 'verified_by_teacher',
-        teacherVerified: true,
-        verifiedAt: new Date(Date.now() - 3600000).toISOString(),
-        verifiedBy: 'Cô Đặng Thị Bích Thủy (Tổ Chuyên môn Vật lý)'
+        status: 'pending_review',
+        teacherVerified: false,
+        verifiedAt: null,
+        verifiedBy: null,
+        isDemo: true
       },
       {
         id: 'sample_toan_1',
@@ -98,7 +138,10 @@ export default function KnowledgeReviewAdminPage() {
         subject: 'toan',
         topic: 'Hình học Không gian Lớp 12',
         status: 'pending_review',
-        teacherVerified: false
+        teacherVerified: false,
+        verifiedAt: null,
+        verifiedBy: null,
+        isDemo: true
       },
       {
         id: 'sample_sinh_1',
@@ -106,21 +149,28 @@ export default function KnowledgeReviewAdminPage() {
         answer: 'Nguyên tắc bổ sung: A liên kết với T bằng 2 liên kết hiđro (A = T), G liên kết với X bằng 3 liên kết hiđro (G ≡ X). Điều này đảm bảo đường kính xoắn kép luôn cố định 20 Å.',
         subject: 'sinh',
         topic: 'Cơ chế di truyền và biến dị Lớp 12',
-        status: 'verified_by_teacher',
-        teacherVerified: true,
-        verifiedAt: new Date(Date.now() - 7200000).toISOString(),
-        verifiedBy: 'Cô Vũ Thị Hoàng Yến (Thạc sĩ Sinh học)'
+        status: 'pending_review',
+        teacherVerified: false,
+        verifiedAt: null,
+        verifiedBy: null,
+        isDemo: true
       }
     ];
 
     setKnowledgeList(samples);
 
     for (const s of samples) {
+      let token = null;
+      try {
+        if (auth?.currentUser) {
+          token = await auth.currentUser.getIdToken();
+        }
+      } catch (_) {}
       await fetch('/api/learned-knowledge', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-secret-key': 'stemhub_admin_secret_key_2026'
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         body: JSON.stringify(s)
       }).catch(() => {});
@@ -132,6 +182,14 @@ export default function KnowledgeReviewAdminPage() {
   }, []);
 
   const handleAction = async (id, action, updatedAnswer = null) => {
+    let token = null;
+    try {
+      if (auth?.currentUser) {
+        token = await auth.currentUser.getIdToken();
+      }
+    } catch (_) {}
+
+    const currentTeacher = currentUser?.displayName || currentUser?.email || 'Giáo viên Thẩm định';
     setActionLoading(id);
     playSound.success();
     // Cập nhật trạng thái trực tiếp trên màn hình ngay lập tức (Optimistic UI)
@@ -141,8 +199,12 @@ export default function KnowledgeReviewAdminPage() {
           ...item,
           status: action === 'verify' ? 'verified_by_teacher' : (action === 'reject' ? 'rejected' : 'verified_by_teacher'),
           teacherVerified: action !== 'reject',
-          verifiedBy: teacherName,
-          verifiedAt: new Date().toISOString(),
+          quarantined: action === 'reject',
+          sourceType: (action === 'edit' || action === 'verify') ? 'teacher_verified_stem' : item.sourceType,
+          verifiedBy: action !== 'reject' ? currentTeacher : null,
+          rejectedBy: action === 'reject' ? currentTeacher : null,
+          verifiedAt: action !== 'reject' ? new Date().toISOString() : null,
+          rejectedAt: action === 'reject' ? new Date().toISOString() : null,
           ...(action === 'edit' && updatedAnswer ? { answer: updatedAnswer } : {})
         };
       }
@@ -158,8 +220,11 @@ export default function KnowledgeReviewAdminPage() {
           await updateDoc(docRef, {
             status: action === 'verify' ? 'verified_by_teacher' : (action === 'reject' ? 'rejected' : 'verified_by_teacher'),
             teacherVerified: action !== 'reject',
-            verifiedBy: teacherName,
-            verifiedAt: new Date().toISOString(),
+            quarantined: action === 'reject',
+            verifiedBy: action !== 'reject' ? currentTeacher : null,
+            rejectedBy: action === 'reject' ? currentTeacher : null,
+            verifiedAt: action !== 'reject' ? new Date().toISOString() : null,
+            rejectedAt: action === 'reject' ? new Date().toISOString() : null,
             ...(action === 'edit' && updatedAnswer ? { answer: updatedAnswer } : {})
           });
         } catch (dbErr) {
@@ -167,17 +232,21 @@ export default function KnowledgeReviewAdminPage() {
         }
       }
 
-      // 2. Gọi Server API PATCH
+      // 2. Gọi Server API PATCH kèm Bearer token xác thực giáo viên
+      const patchHeaders = { 
+        'Content-Type': 'application/json'
+      };
+      if (token) {
+        patchHeaders['Authorization'] = `Bearer ${token}`;
+      }
+
       await fetch('/api/learned-knowledge', {
         method: 'PATCH',
-        headers: { 
-          'Content-Type': 'application/json',
-          'x-admin-secret-key': 'stemhub_admin_secret_key_2026'
-        },
+        headers: patchHeaders,
         body: JSON.stringify({
           id,
           action,
-          teacherName,
+          teacherName: currentTeacher,
           updatedAnswer
         })
       });
@@ -198,10 +267,16 @@ export default function KnowledgeReviewAdminPage() {
           await deleteDoc(doc(db, 'learned_knowledge', id));
         } catch (_) {}
       }
+      let token = null;
+      try {
+        if (auth?.currentUser) {
+          token = await auth.currentUser.getIdToken();
+        }
+      } catch (_) {}
       await fetch(`/api/learned-knowledge?id=${encodeURIComponent(id)}`, {
         method: 'DELETE',
         headers: {
-          'x-admin-secret-key': 'stemhub_admin_secret_key_2026'
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         }
       });
     } catch (err) {
@@ -214,6 +289,14 @@ export default function KnowledgeReviewAdminPage() {
       alert('Tất cả các bản ghi tri thức đều đã được phê duyệt và lưu vào Active Cache!');
       return;
     }
+    let token = null;
+    try {
+      if (auth?.currentUser) {
+        token = await auth.currentUser.getIdToken();
+      }
+    } catch (_) {}
+
+    const currentTeacher = currentUser?.displayName || currentUser?.email || 'Giáo viên Thẩm định';
     setBatchLoading(true);
     playSound.success();
     const now = new Date().toISOString();
@@ -223,7 +306,8 @@ export default function KnowledgeReviewAdminPage() {
         ...item,
         status: 'verified_by_teacher',
         teacherVerified: true,
-        verifiedBy: teacherName,
+        quarantined: false,
+        verifiedBy: currentTeacher,
         verifiedAt: item.verifiedAt || now
       };
     }));
@@ -242,7 +326,8 @@ export default function KnowledgeReviewAdminPage() {
               promises.push(updateDoc(d.ref, {
                 status: 'verified_by_teacher',
                 teacherVerified: true,
-                verifiedBy: teacherName,
+                quarantined: false,
+                verifiedBy: currentTeacher,
                 verifiedAt: now
               }));
             }
@@ -253,16 +338,20 @@ export default function KnowledgeReviewAdminPage() {
         }
       }
 
-      // 2. Gọi Server API PATCH
+      // 2. Gọi Server API PATCH kèm Authorization Bearer token
+      const patchHeaders = {
+        'Content-Type': 'application/json'
+      };
+      if (token) {
+        patchHeaders['Authorization'] = `Bearer ${token}`;
+      }
+
       await fetch('/api/learned-knowledge', {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-secret-key': 'stemhub_admin_secret_key_2026'
-        },
+        headers: patchHeaders,
         body: JSON.stringify({
           action: 'verify_all',
-          teacherName
+          teacherName: currentTeacher
         })
       });
     } catch (err) {
@@ -277,6 +366,14 @@ export default function KnowledgeReviewAdminPage() {
     const isVerified = item.status === 'verified_by_teacher' || item.teacherVerified === true;
     const isRejected = item.status === 'rejected';
     const isPending = !isVerified && !isRejected;
+
+    // 🛡️ PHÂN QUYỀN MÔN (RBAC): Trừ Admin, Giáo viên nào được cấp quyền môn nào thì chỉ thấy câu hỏi ở môn đó thôi
+    if (!isAdmin && isTeacher && authorizedSubjects.length > 0) {
+      const itemSubj = (item.subject || '').toLowerCase();
+      if (!authorizedSubjects.includes(itemSubj)) {
+        return false;
+      }
+    }
 
     // Filter tab
     if (activeTab === 'pending' && !isPending) return false;
@@ -298,9 +395,18 @@ export default function KnowledgeReviewAdminPage() {
     return true;
   });
 
-  const verifiedCount = knowledgeList.filter(i => i.status === 'verified_by_teacher' || i.teacherVerified === true).length;
-  const rejectedCount = knowledgeList.filter(i => i.status === 'rejected').length;
-  const pendingCount = knowledgeList.filter(i => !i.status || (i.status !== 'verified_by_teacher' && i.status !== 'rejected' && !i.teacherVerified)).length;
+  // Đếm theo phân quyền môn của người dùng hiện tại
+  const visibleList = knowledgeList.filter(item => {
+    if (!isAdmin && isTeacher && authorizedSubjects.length > 0) {
+      const itemSubj = (item.subject || '').toLowerCase();
+      return authorizedSubjects.includes(itemSubj);
+    }
+    return true;
+  });
+
+  const verifiedCount = visibleList.filter(i => i.status === 'verified_by_teacher' || i.teacherVerified === true).length;
+  const rejectedCount = visibleList.filter(i => i.status === 'rejected').length;
+  const pendingCount = visibleList.filter(i => !i.status || (i.status !== 'verified_by_teacher' && i.status !== 'rejected' && !i.teacherVerified)).length;
 
   return (
     <div className="space-y-6 text-zinc-300 font-sans select-none">
@@ -314,20 +420,37 @@ export default function KnowledgeReviewAdminPage() {
               <span>Cơ chế AI Tự Vận Hành & Thầy Cô Giám Sát Tối Cao (Human-in-the-Loop)</span>
             </div>
             <h1 className="text-xl lg:text-2xl font-black text-white tracking-tight font-mono uppercase">
-              Hội Đồng Thẩm Định & Phê Duyệt Tri Thức AI
+              Bảng Điều Khiển Thẩm Định & Phê Duyệt Tri Thức AI
             </h1>
             <p className="text-xs text-zinc-400 mt-1.5 max-w-3xl leading-relaxed">
-              Mọi câu hỏi và đáp án từ học sinh được <strong className="text-cyan-300">bộ lọc thẩm định AI</strong> tự động ghi nhớ và kích hoạt Cache Hit để phản hồi tức thì. Màn hình này cung cấp cho Thầy/Cô quyền <strong className="text-emerald-300">kiểm soát sư phạm tối cao</strong> (Phê duyệt, Hiệu đính, Từ chối) làm minh chứng chất lượng chuẩn mực tuyệt đối trước Ban Giám Khảo.
+              Mọi câu hỏi và đáp án mới từ học sinh được tiếp nhận ở trạng thái <strong className="text-amber-300">chờ duyệt</strong> và cách ly khỏi bộ nhớ RAG. Màn hình này cung cấp cho Thầy/Cô quyền <strong className="text-emerald-300">kiểm soát sư phạm</strong> (Phê duyệt, Hiệu đính, Từ chối) trước khi tri thức được chính thức đưa vào hệ thống học tập.
             </p>
           </div>
 
-          <div className="shrink-0 flex items-center gap-2.5">
+          <div className="shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+            <div className="flex items-center gap-2 bg-[#08090d] border border-cyan-500/40 rounded-xl px-3 py-2 shadow-inner">
+              <UserCheck className="w-4 h-4 text-cyan-400 shrink-0" />
+              <div>
+                <div className="text-xs font-mono font-bold text-white truncate max-w-[200px]">
+                  {currentUser?.displayName || currentUser?.email || 'Tài khoản Giám sát'}
+                </div>
+                <div className="text-[10px] font-mono text-cyan-400">
+                  {isAdmin
+                    ? 'Quản trị viên (Toàn quyền tất cả các môn)'
+                    : (isTeacher && authorizedSubjects.length > 0
+                        ? `Giáo viên phụ trách môn: ${authorizedSubjects.map(s => s.toUpperCase()).join(', ')}`
+                        : (currentUser ? 'Thẩm định viên' : 'Đang tải phiên...'))
+                  }
+                </div>
+              </div>
+            </div>
+
             {pendingCount > 0 && (
               <button
                 type="button"
                 onClick={handleVerifyAll}
                 disabled={batchLoading}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-black text-xs font-mono font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.35)] disabled:opacity-50"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-black text-xs font-mono font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.35)] disabled:opacity-50"
               >
                 <Zap className={`w-3.5 h-3.5 shrink-0 ${batchLoading ? 'animate-spin' : ''}`} />
                 <span>{batchLoading ? 'Đang duyệt...' : `⚡ Duyệt toàn bộ (${pendingCount})`}</span>
@@ -337,7 +460,7 @@ export default function KnowledgeReviewAdminPage() {
             <button
               type="button"
               onClick={fetchKnowledge}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-800/90 hover:bg-zinc-700 border border-zinc-700/80 text-zinc-100 text-xs font-mono font-semibold transition-all cursor-pointer whitespace-nowrap active:scale-95 shadow-xs"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-800/90 hover:bg-zinc-700 border border-zinc-700/80 text-zinc-100 text-xs font-mono font-semibold transition-all cursor-pointer whitespace-nowrap active:scale-95 shadow-xs"
             >
               <RefreshCw className={`w-3.5 h-3.5 shrink-0 ${loading ? 'animate-spin text-cyan-400' : 'text-zinc-300'}`} />
               <span>Làm mới</span>
@@ -434,14 +557,28 @@ export default function KnowledgeReviewAdminPage() {
 
           <select
             value={selectedSubject}
-            onChange={(e) => setSelectedSubject(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (!isAdmin && isTeacher && authorizedSubjects.length > 0 && val !== 'all' && !authorizedSubjects.includes(val)) {
+                return;
+              }
+              setSelectedSubject(val);
+            }}
             className="px-3 py-2 bg-[#08090d] border border-[#1f2235] focus:border-cyan-400 rounded-xl text-xs text-zinc-200 focus:outline-hidden font-mono shrink-0 cursor-pointer"
           >
-            <option value="all">Tất cả môn</option>
-            <option value="toan">Toán học</option>
-            <option value="ly">Vật lý</option>
-            <option value="hoa">Hóa học</option>
-            <option value="sinh">Sinh học</option>
+            {isAdmin && <option value="all">Tất cả môn (Toàn quyền Admin)</option>}
+            {(!isTeacher || isAdmin || authorizedSubjects.includes('toan')) && (
+              <option value="toan">📐 Môn Toán học</option>
+            )}
+            {(!isTeacher || isAdmin || authorizedSubjects.includes('ly')) && (
+              <option value="ly">⚡ Môn Vật lý</option>
+            )}
+            {(!isTeacher || isAdmin || authorizedSubjects.includes('hoa')) && (
+              <option value="hoa">🧪 Môn Hóa học</option>
+            )}
+            {(!isTeacher || isAdmin || authorizedSubjects.includes('sinh')) && (
+              <option value="sinh">🧬 Môn Sinh học</option>
+            )}
           </select>
         </div>
       </div>
@@ -519,6 +656,25 @@ export default function KnowledgeReviewAdminPage() {
                     )}
                   </div>
                 </div>
+
+                {/* 🧑‍🏫 HỌC SINH GỬI YÊU CẦU KIỂM TRA */}
+                {item.sourceType === 'student_flagged_for_teacher' && (
+                  <div className="mb-3 p-3 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-200 text-xs">
+                    <div className="flex items-center gap-2 font-bold text-amber-300 mb-1">
+                      <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400" />
+                      <span>HỌC SINH BĂN KHOĂN GỬI KIỂM TRA MÔN {(badge.label || 'STEM').toUpperCase()}</span>
+                    </div>
+                    {item.studentNote ? (
+                      <p className="text-[11px] text-zinc-300 italic">
+                        💬 Băn khoăn của học sinh: &quot;{item.studentNote}&quot;
+                      </p>
+                    ) : (
+                      <p className="text-[11px] text-zinc-400 italic">
+                        (Học sinh cảm thấy câu trả lời của AI chưa chính xác hoặc còn băn khoăn và gửi giáo viên bộ môn hiệu đính)
+                      </p>
+                    )}
+                  </div>
+                )}
 
                 {/* Question */}
                 <div className="mb-3">

@@ -20,16 +20,17 @@ service cloud.firestore {
     // Sử dụng hàm get(key, default) chuẩn của rules.Map để triệt tiêu 100% lỗi Null Reference & Crash Simulator
     function isAdmin() {
       return isAuthenticated() && (
-        (
-          request.auth.token.get('email', '').lower() == 'admin123@gmail.com' ||
-          request.auth.token.get('email', '').lower() == 'admin@stemhub.edu.vn' ||
-          request.auth.token.get('email', '').lower() == 'admin@gmail.com' ||
-          request.auth.token.get('email', '').lower() == 'hohoanganh20092021@gmail.com'
-        ) ||
-        request.auth.token.get('role', '') == 'admin' ||
         request.auth.token.get('admin', false) == true ||
-        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'admin')
+        request.auth.token.get('role', '') == 'admin'
+      );
+    }
+
+    // 3.1 Phân quyền Giáo viên (Teacher / Admin RBAC)
+    function isTeacher() {
+      return isAuthenticated() && (
+        isAdmin() ||
+        request.auth.token.get('role', '') in ['admin', 'teacher'] ||
+        request.auth.token.get('reviewerType', '') == 'teacher'
       );
     }
 
@@ -52,17 +53,17 @@ service cloud.firestore {
     // CHẶN NGHIÊM NGẶT: Học sinh không được tự ý sửa role, stats, elo, personalization (pha lê, danh hiệu)
     // inventory & pendingExtraSlot: cho phép client tự trừ thẻ chiêu khi xác nhận trang bị trận đấu
     function hasNoPrivilegeEscalation() {
-      let forbiddenKeys = ['role', 'elo', 'level', 'crystals', 'crystal', 'stats', 'isAdmin'];
+      let forbiddenKeys = ['role', 'reviewerType', 'subjects', 'isTeamMember', 'elo', 'level', 'crystals', 'crystal', 'stats', 'isAdmin', 'faceDescriptor'];
       return !request.resource.data.diff(resource.data).affectedKeys().hasAny(forbiddenKeys) &&
              (!('personalization' in request.resource.data) || 
               !('personalization' in resource.data) ||
-              !request.resource.data.personalization.diff(resource.data.personalization).affectedKeys().hasAny(['crystals', 'crystal']));
+              !request.resource.data.personalization.diff(resource.data.personalization).affectedKeys().hasAny(['crystals', 'crystal', 'faceDescriptor']));
     }
 
     function isAllowedUserUpdate() {
       let allowedKeys = [
         'displayName', 'bio', 'photoURL', 'avatar', 'avatarUrl', 'bgImage', 'phoneNumber',
-        'school', 'grade', 'class', 'faceDescriptor', 'faceEnrolled',
+        'school', 'grade', 'class',
         'friends', 'incomingRequests', 'outgoingRequests', 'lastActive',
         'status', 'updatedAt', 'isDeleted',
         'inventory', 'pendingExtraSlot', 'personalization'
@@ -103,12 +104,20 @@ service cloud.firestore {
     // - Học sinh mới tạo tài khoản chỉ được gán role là student/user (cấm tự phong admin).
     // - Khóa quyền xóa cứng của Admin/Hacker bị lộ tài khoản trên người khác: Chỉ chủ tài khoản hoặc Soft Delete
     match /users/{userId} {
-      // Cho phép đọc danh sách hồ sơ công khai (phục vụ Bảng xếp hạng ELO toàn cầu, Đấu trường 1v1 và Khán giả theo dõi)
-      allow read: if true;
+      // Cho phép đọc danh sách hồ sơ (chỉ người dùng đã đăng nhập)
+      allow read: if isAuthenticated();
       allow create: if isAuthenticated() && request.auth.uid == userId && 
-                    (!('role' in request.resource.data) || request.resource.data.role == 'student' || request.resource.data.role == 'user');
+                    !request.resource.data.keys().hasAny(['role', 'reviewerType', 'subjects', 'isTeamMember', 'faceDescriptor']) &&
+                    (!('personalization' in request.resource.data) || !('faceDescriptor' in request.resource.data.personalization));
       allow update: if isAdmin() || (isOwner(userId) && isAllowedUserUpdate()) || isFriendInteraction();
       allow delete: if isOwner(userId) || isAdmin();
+
+      // Subcollection dữ liệu sinh trắc học và thông tin riêng tư (Private Subcollection)
+      // CHỈ chủ sở hữu tài khoản (isOwner(userId)) mới có quyền đọc, ghi, cập nhật, xóa.
+      // Admin và Teacher tuyệt đối KHÔNG có quyền truy cập dữ liệu này.
+      match /private/{docId} {
+        allow read, write, delete: if isOwner(userId);
+      }
 
       // Bộ nhớ cá nhân của học sinh (ai memories)
       match /memories/{memId} {
@@ -206,18 +215,31 @@ service cloud.firestore {
     // =========================================================================
     // 3. CƠ SỞ TRI THỨC TỰ HỌC RAG (learned_knowledge)
     // =========================================================================
-    // - Cho phép đọc công khai để trợ lý AI tra cứu kiến thức 4 môn học.
-    // - Học sinh chỉ được tạo (đóng góp tri thức tự học) nếu dữ liệu đúng định dạng & giới hạn độ dài.
-    // - Chỉ Admin mới có quyền cập nhật hoặc xóa tri thức để đảm bảo độ tin cậy khoa học.
+    // - Chỉ cho phép đọc các tri thức đã được giáo viên thẩm định, không bị cách ly và không phải demo.
+    // - Học sinh chỉ được tạo (đóng góp tri thức tự học) ở trạng thái pending_review, cấm tự phê duyệt (Anti-RAG-Poisoning).
+    // - Chỉ Admin hoặc Giáo viên mới có quyền cập nhật hoặc xóa tri thức để đảm bảo độ tin cậy khoa học.
     match /learned_knowledge/{docId} {
-      allow read: if true;
-      allow create: if isAdmin() || (isAuthenticated() && 
-                      request.resource.data.query is string && 
-                      request.resource.data.query.size() >= 3 && 
-                      request.resource.data.query.size() <= 500 && 
-                      request.resource.data.answer is string && 
-                      request.resource.data.answer.size() <= 5000);
-      allow update, delete: if isAdmin();
+      allow read: if isAdmin() || (
+        resource.data.status == 'verified_by_teacher' && 
+        resource.data.teacherVerified == true && 
+        resource.data.get('quarantined', false) == false && 
+        resource.data.get('isDemo', false) == false
+      );
+      allow create: if isAdmin() || (
+        isAuthenticated() && 
+        request.resource.data.query is string && 
+        request.resource.data.query.size() >= 3 && 
+        request.resource.data.query.size() <= 500 && 
+        request.resource.data.answer is string && 
+        request.resource.data.answer.size() >= 10 && 
+        request.resource.data.answer.size() <= 5000 && 
+        request.resource.data.status == 'pending_review' && 
+        request.resource.data.teacherVerified == false && 
+        request.resource.data.get('quarantined', false) == false && 
+        request.resource.data.get('isDemo', false) == false && 
+        (!('verifiedBy' in request.resource.data) || request.resource.data.verifiedBy == null)
+      );
+      allow update, delete: if isAdmin() || isTeacher();
     }
 
     // =========================================================================
@@ -373,6 +395,48 @@ service cloud.firestore {
                     request.resource.data.message is string &&
                     request.resource.data.message.size() > 0 &&
                     request.resource.data.message.size() <= 3000;
+    }
+
+    // =========================================================================
+    // 11. THẨM ĐỊNH CHUYÊN MÔN GIÁO VIÊN (expert_reviews, teacher_consents)
+    // =========================================================================
+    // Phiếu đánh giá chuyên môn: Bất biến (chống sửa/xóa), phân quyền chặt theo môn & vai trò
+    match /expert_reviews/{reviewId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        request.auth.uid == request.resource.data.reviewerUid &&
+        request.resource.data.reviewerType in ['teacher', 'team_self'] &&
+        request.resource.data.subject in ['toan', 'ly', 'hoa', 'sinh', 'stem'] &&
+        // If teacher: must have teacher claim and authorized subject, cannot be team member
+        (
+          (request.resource.data.reviewerType == 'teacher' && 
+           (request.auth.token.get('reviewerType', '') == 'teacher' || request.auth.token.get('role', '') == 'teacher') &&
+           request.resource.data.subject in request.auth.token.get('subjects', []) &&
+           request.auth.token.get('isTeamMember', false) == false)
+          ||
+          (request.resource.data.reviewerType == 'team_self' &&
+           (request.auth.token.get('reviewerType', '') == 'team_self' || request.auth.token.get('role', '') == 'team_self' || isAdmin()))
+        ) &&
+        // Validation of rubric
+        (
+          (request.resource.data.get('skipped', false) == false &&
+           request.resource.data.scores.knowledge in [0, 1, 2] &&
+           request.resource.data.scores.grounding in [0, 1, 2] &&
+           request.resource.data.scores.pedagogy in [0, 1, 2] &&
+           request.resource.data.scores.safety in [0, 1, 2] &&
+           request.resource.data.primaryError in ['none', 'sai_kien_thuc', 'thieu_nguon', 'nguon_khong_lien_quan', 'sai_don_vi', 'dien_dat', 'khac'])
+          ||
+          (request.resource.data.get('skipped', false) == true &&
+           request.resource.data.skipReason is string && request.resource.data.skipReason.size() > 0)
+        );
+      allow update, delete: if false; // IMMUTABLE
+    }
+
+    // Phiếu đồng ý tham gia thẩm định của giáo viên (tách riêng thông tin danh tính với phiếu chấm)
+    match /teacher_consents/{teacherUid} {
+      allow read: if isAuthenticated() && (request.auth.uid == teacherUid || isAdmin());
+      allow create, update: if isAuthenticated() && (request.auth.uid == teacherUid || isAdmin());
+      allow delete: if isAdmin();
     }
   }
 }

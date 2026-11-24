@@ -15,7 +15,9 @@ const protectKaTeXVietnamese = (latex) => {
     textBlocks.push(`\\${cmd}{${content}}`);
     return `⟦SAFE_TEXT_${idx}⟧`;
   });
-  s = s.replace(/([àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđĐ]+)/g, '\\text{$1}');
+  // Bảo vệ toàn bộ từ/cụm từ tiếng Việt có dấu (cả hoa và thường) trong math mode
+  const vnPattern = /([a-zA-Z0-9_]*[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ][a-zA-Z0-9_àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ]*)/g;
+  s = s.replace(vnPattern, '\\text{$1}');
   textBlocks.forEach((tb, idx) => {
     s = s.split(`⟦SAFE_TEXT_${idx}⟧`).join(tb);
   });
@@ -235,12 +237,87 @@ export const formatMathText = (text) => {
   formatted = formatted.replace(/(?<!\\)\bcdot\b/g, '\\cdot');
   formatted = formatted.replace(/(?<!\\)\bDelta\b/g, '\\Delta');
 
-  formatted = formatted.replace(/^((?:[A-Za-z0-9'_]+|V|S|A'G)\s*=\s*[\s\S]+?)$/gm, (line) => {
+  // 1.3 Chuẩn hóa công thức shorthand STEM cho cả 4 môn Toán, Lý, Hóa, Sinh
+  // a. Ký hiệu Hy Lạp thông dụng
+  formatted = formatted
+    .replace(/\b2pi\b/g, '2\\pi ')
+    .replace(/(?<![a-zA-Z\\])pi\b/g, '\\pi ')
+    .replace(/(?<![a-zA-Z\\])omega\b/g, '\\omega ')
+    .replace(/(?<![a-zA-Z\\])lambda\b/g, '\\lambda ')
+    .replace(/(?<![a-zA-Z\\])alpha\b/g, '\\alpha ')
+    .replace(/(?<![a-zA-Z\\])beta\b/g, '\\beta ')
+    .replace(/(?<![a-zA-Z\\])gamma\b/g, '\\gamma ')
+    .replace(/(?<![a-zA-Z\\])epsilon\b/g, '\\varepsilon ')
+    .replace(/(?<![a-zA-Z\\])Delta_([a-zA-Z0-9]+)/g, '\\Delta $1')
+    .replace(/(?<![a-zA-Z\\])Delta\b/g, '\\Delta ');
+
+  // b. Tích phân (Toán & Vật lý): int_a^b, int_{a}^{b}, int_0^pi, int_1^3 (f(x)) dx
+  formatted = formatted.replace(/(?<!\\)\bint(?:_\{([^}]+)\}|_([a-zA-Z0-9\\]+))(?:(?:\^\{([^}]+)\}|\^([a-zA-Z0-9\\]+|\([^()]+\))))?/g, (_m, sub1, sub2, sup1, sup2) => {
+    const a = sub1 || sub2 || '';
+    const b = sup1 || sup2 || '';
+    const cleanA = a.replace(/\\/g, '');
+    const cleanB = b.replace(/\\/g, '');
+    const latexA = cleanA === 'pi' ? '\\pi' : cleanA;
+    let latexB = cleanB === 'pi' ? '\\pi' : cleanB;
+    if (latexB === '(pi/2)' || latexB === 'pi/2') latexB = '\\frac{\\pi}{2}';
+    if (latexB) {
+      return `\\int_{${latexA}}^{${latexB}} `;
+    }
+    return `\\int_{${latexA}} `;
+  });
+  formatted = formatted.replace(/(?<!\\)\bint\b(?!\w)/g, '\\int ');
+  formatted = formatted.replace(/(\)|[0-9a-zA-Z^]+)\s*d([txyzu])\b/g, '$1\\,d$2');
+
+  // c. Căn thức sqrt(...)
+  let prevSqrt = '';
+  while (prevSqrt !== formatted && /sqrt\s*\(/i.test(formatted)) {
+    prevSqrt = formatted;
+    formatted = formatted.replace(/(?<!\\)sqrt\s*\(([^()]+)\)/gi, (_m, inside) => {
+      let cleanInside = inside;
+      if (/^[a-zA-Z0-9\^]+\s*\/\s*[a-zA-Z0-9\^]+$/.test(inside.trim())) {
+        const [num, den] = inside.trim().split(/\s*\/\s*/);
+        const cleanDen = den === 'pi^2' ? '\\pi^2' : den;
+        cleanInside = `\\frac{${num}}{${cleanDen}}`;
+      }
+      return `\\sqrt{${cleanInside}}`;
+    });
+  }
+
+  // d. Phân số chứa căn: a^3*sqrt(6)/6 -> \frac{a^3\sqrt{6}}{6}
+  formatted = formatted.replace(/([a-zA-Z0-9\^]+)\s*\*\s*\\?sqrt\{([^}]+)\}\s*\/\s*(\d+)/g, '\\frac{$1\\sqrt{$2}}{$3}');
+  formatted = formatted.replace(/\\?sqrt\{([^}]+)\}\s*\/\s*(\d+)/g, '\\frac{\\sqrt{$1}}{$2}');
+  formatted = formatted.replace(/([a-zA-Z0-9\^]+)\s*\/\s*\\?sqrt\{([^}]+)\}/g, '\\frac{$1}{\\sqrt{$2}}');
+  formatted = formatted.replace(/([a-zA-Z0-9\^]+)\s*\*\s*\\?sqrt\{([^}]+)\}/g, '$1\\sqrt{$2}');
+
+  // e. Phép nhân số học và lũy thừa 10 (Lý, Hóa, Sinh)
+  formatted = formatted.replace(/(\d+)\s*\*\s*\\pi\b/g, '$1\\pi');
+  formatted = formatted.replace(/(\d+(?:\.\d+)?)\s*\*\s*10\^\(?([\+\-]?\d+)\)?/g, '$1 \\times 10^{$2}');
+
+  // f. Đơn vị đo trong biểu thức số
+  formatted = formatted.replace(/(\d+(?:\.\d+)?)\s*(m\/s\^2|m\/s|cm\/s\^2|cm\/s|rad\/s|m|cm|mm|km|kg|g|J\.s|J|kJ|kcal|N|W|V|A|Hz|dB|mol|s)\b/g, '$1\\text{ $2}');
+
+  // g. Hóa học & Sinh học
+  formatted = formatted.replace(/\[H\+\]/g, '[\\text{H}^+]')
+    .replace(/\[OH\-\]/g, '[\\text{OH}^-]');
+
+  // 1.4 Xử lý dòng chứa công thức toán / lý / hóa / sinh độc lập
+  formatted = formatted.replace(/^((?:[A-Za-z0-9'_]+|V|S|A'G|T|s|v|a|f|p|H\d*)\s*=\s*[\s\S]+?)$/gm, (line) => {
     const trimmed = line.trim();
     if (trimmed.startsWith('$') || trimmed.startsWith('$$') || trimmed.startsWith('<') || trimmed.startsWith('#') || trimmed.startsWith('*') || trimmed.startsWith('-')) {
       return line;
     }
-    if (/(\\frac|\\sqrt|\\cdot|·|\^|=|\\Delta|Δ)/.test(trimmed)) {
+    // Nếu dòng chứa văn bản tiếng Việt dài, không bọc $$ toàn bộ để tránh lỗi font KaTeX
+    if (/[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ]/i.test(trimmed)) {
+      // Tách phần công thức đứng trước dấu chấm đầu tiên nếu có
+      const dotIdx = trimmed.indexOf('.');
+      if (dotIdx > 0 && /^[A-Za-z0-9'_\s=\\+\-*\/^()0-9\.,\\text{}]+$/.test(trimmed.slice(0, dotIdx))) {
+        const formulaPart = trimmed.slice(0, dotIdx);
+        const restPart = trimmed.slice(dotIdx);
+        return `$${formulaPart}$${restPart}`;
+      }
+      return line;
+    }
+    if (/(\\frac|\\sqrt|\\cdot|·|\^|=|\\Delta|Δ|\\int|\\pi|\\varepsilon)/.test(trimmed)) {
       return `$$${trimmed}$$`;
     }
     return line;

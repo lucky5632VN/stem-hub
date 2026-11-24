@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { X, User, Lock, Mail, Phone, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { auth, db } from '@/lib/firebase';
@@ -36,6 +37,7 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [agreedPolicy, setAgreedPolicy] = useState(false);
 
   // Face 2FA Verification State
   const [face2faPending, setFace2faPending] = useState(null);
@@ -49,6 +51,7 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
       setPassword('');
       setConfirmPassword('');
       setFullName('');
+      setAgreedPolicy(false);
       setFace2faPending(null);
     }
   }, [isOpen, initialView]);
@@ -193,7 +196,16 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
         if (userDoc.exists()) {
           const uData = userDoc.data();
           const isFaceEnabled = uData?.personalization?.face2FAEnabled || uData?.face2FAEnabled;
-          let descriptor = uData?.personalization?.faceDescriptor || uData?.faceDescriptor;
+          let descriptor = null;
+
+          if (isFaceEnabled) {
+            try {
+              const bioDoc = await getDoc(doc(db, "users", user.uid, "private", "biometrics"));
+              if (bioDoc.exists()) {
+                descriptor = bioDoc.data()?.faceDescriptor;
+              }
+            } catch (_) {}
+          }
 
           if (descriptor && typeof descriptor === 'object' && !Array.isArray(descriptor)) {
             descriptor = Object.keys(descriptor)
@@ -255,6 +267,10 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
     if (password !== confirmPassword) return setError('Mật khẩu xác nhận không khớp!');
     if (password.length < 6) return setError('Mật khẩu phải có ít nhất 6 ký tự!');
 
+    if (!agreedPolicy) {
+      return setError('Vui lòng đọc và tích chọn đồng ý với Điều khoản dịch vụ & Chính sách bảo mật dữ liệu.');
+    }
+
     setLoading(true);
     setError('');
     setSuccessMessage('');
@@ -273,13 +289,15 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
         console.warn("Lỗi gửi email xác thực khi đăng ký:", e);
       }
 
-      // 4. Tạo record cấu trúc đầy đủ trong Firestore
+      // 4. Tạo record cấu trúc đầy đủ trong Firestore (không ghi trường role từ client)
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         email: user.email,
         displayName: fullName,
         createdAt: new Date().toISOString(),
-        role: 'student',
+        dataConsentAgreed: true,
+        dataConsentTimestamp: new Date().toISOString(),
+        dataConsentVersion: 'v2026.02',
         unlockedLabs: [],
         personalization: {
           avatarFrame: 'default',
@@ -658,7 +676,23 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
                 </div>
               </div>
 
-              <div className="max-w-sm mx-auto mt-8">
+              {/* Checkbox Đồng ý Chính sách bảo mật & Điều khoản */}
+              <div className="max-w-lg mx-auto mt-6">
+                <div className="flex items-start gap-2.5 text-left p-3.5 rounded-2xl bg-bg-tertiary/80 border border-border-theme text-xs shadow-xs">
+                  <input
+                    type="checkbox"
+                    id="agreePolicyRegister"
+                    checked={agreedPolicy}
+                    onChange={(e) => setAgreedPolicy(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded text-accent-pink focus:ring-accent-pink/50 cursor-pointer shrink-0 accent-pink-500"
+                  />
+                  <label htmlFor="agreePolicyRegister" className="text-text-secondary leading-snug cursor-pointer select-none">
+                    Tôi đồng ý với <Link href="/chinh-sach-bao-mat" target="_blank" className="text-accent-pink font-semibold hover:underline">Điều khoản dịch vụ & Chính sách bảo mật</Link> để lưu trữ tiến độ học tập và điểm số.
+                  </label>
+                </div>
+              </div>
+
+              <div className="max-w-sm mx-auto mt-6">
                 <button disabled={loading} type="submit" className="w-full py-3.5 flex justify-center items-center gap-2 bg-accent-pink hover:bg-accent-pink/90 text-white font-bold rounded-xl shadow-lg shadow-accent-pink/20 transition-all active:scale-95 text-lg disabled:opacity-70 disabled:cursor-not-allowed">
                   {loading && <Loader2 className="w-5 h-5 animate-spin" />}
                   Đăng ký tài khoản

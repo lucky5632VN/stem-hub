@@ -17,7 +17,8 @@ const db = getFirestore(app);
 
 async function testPermissions() {
   console.log("=== [TEST MATCHMAKER & EQUIPMENT PERMISSIONS] ===");
-  const userCredential = await signInWithEmailAndPassword(auth, 'test1@gmail.com', 'test1123');
+  const testPassword = process.env.TEST_USER_PASSWORD || 'test1123';
+  const userCredential = await signInWithEmailAndPassword(auth, 'test1@gmail.com', testPassword);
   const user = userCredential.user;
   console.log("✅ Logged in as:", user.uid);
 

@@ -1,0 +1,15 @@
+[
+  {
+    "timestamp": "2026-11-16T15:10:22.762Z",
+    "action": "admin_delete_knowledge",
+    "operator": "admin",
+    "itemId": "learned_1792123679625_hup5"
+  },
+  {
+    "timestamp": "2026-11-15T14:02:26.088Z",
+    "action": "batch_quarantine_legacy_knowledge",
+    "operator": "STEM_HUB_HONESTY_AUDIT",
+    "reason": "Thực thi Quy tắc trung thực: Cách ly toàn bộ 46 mục tri thức nạp tự động chưa có giáo viên thật thẩm định",
+    "affectedCount": 46
+  }
+]

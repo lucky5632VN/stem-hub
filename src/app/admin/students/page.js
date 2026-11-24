@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { db } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
 import { collection, getDocs, doc, updateDoc, deleteDoc, query, where, getDoc } from 'firebase/firestore';
 import { 
-  Search, SlidersHorizontal, ShieldAlert, ShieldCheck, 
+  Search, SlidersHorizontal, ShieldAlert, ShieldCheck, Shield,
   Trash2, X, Trophy, Star, ChevronLeft, ChevronRight, User, Mail, Calendar, Eye,
-  Sparkles, Award, Download, Loader2, AlertTriangle, CheckCircle
+  Sparkles, Award, Download, Loader2, AlertTriangle, CheckCircle, UserCheck
 } from 'lucide-react';
 import { AvatarFrame } from '@/components/atoms/AvatarFrame';
 import STEMAvatarSVG from '@/components/atoms/STEMAvatarSVG';
@@ -36,6 +36,15 @@ export default function StudentManagement() {
 
   // Crystal modification state
   const [crystalAmount, setCrystalAmount] = useState('50');
+
+  // Role Granting states (Cấp quyền & Phân vai trò)
+  const [roleModalUser, setRoleModalUser] = useState(null);
+  const [selectedRole, setSelectedRole] = useState('student');
+  const [selectedSubjects, setSelectedSubjects] = useState(['toan']);
+  const [isSavingRole, setIsSavingRole] = useState(false);
+  const [roleSuccessMsg, setRoleSuccessMsg] = useState('');
+  const [roleErrorMsg, setRoleErrorMsg] = useState('');
+  const [filterRole, setFilterRole] = useState('all');
 
   // Excel Export Handler
   const exportToExcel = () => {
@@ -119,19 +128,100 @@ export default function StudentManagement() {
       const studentList = [];
       querySnapshot.forEach((docSnap) => {
         const data = docSnap.data();
-        // Loại bỏ tài khoản Admin
-        if (data.role !== 'admin' && data.email?.toLowerCase() !== 'admin123@gmail.com' && docSnap.id !== 'admin') {
-          studentList.push({
-            id: docSnap.id,
-            ...data
-          });
-        }
+        studentList.push({
+          id: docSnap.id,
+          ...data,
+          role: data.role || data.reviewerType || 'student',
+          subjects: data.subjects || data.reviewSubjects || []
+        });
       });
       setStudents(studentList);
     } catch (err) {
       console.error("Lỗi khi tải danh sách học sinh:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Mở modal phân quyền
+  const handleOpenRoleModal = (student) => {
+    setRoleModalUser(student);
+    const currentRole = (student.role === 'teacher' || student.reviewerType === 'teacher')
+      ? 'teacher'
+      : (student.role === 'admin' || student.admin ? 'admin' : 'student');
+    setSelectedRole(currentRole);
+    setSelectedSubjects(student.subjects && student.subjects.length > 0 ? student.subjects : ['toan']);
+    setRoleSuccessMsg('');
+    setRoleErrorMsg('');
+  };
+
+  // Lưu phân quyền qua API
+  const handleSaveRole = async () => {
+    if (!roleModalUser) return;
+    setIsSavingRole(true);
+    setRoleSuccessMsg('');
+    setRoleErrorMsg('');
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) throw new Error('Cần đăng nhập tài khoản Quản trị viên.');
+      const token = await currentUser.getIdToken();
+
+      const res = await fetch('/api/admin/reviewer-roles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          targetUid: roleModalUser.id,
+          targetEmail: roleModalUser.email,
+          role: selectedRole,
+          reviewerType: selectedRole === 'teacher' ? 'teacher' : undefined,
+          subjects: selectedSubjects,
+          isTeamMember: false
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Lỗi khi cập nhật vai trò.');
+
+      playSound.success();
+      setRoleSuccessMsg(`Đã cập nhật vai trò [${selectedRole.toUpperCase()}] thành công!`);
+
+      // Cập nhật state danh sách học sinh ngay lập tức
+      setStudents(prev => prev.map(s => {
+        if (s.id === roleModalUser.id) {
+          return {
+            ...s,
+            role: selectedRole,
+            reviewerType: selectedRole === 'teacher' ? 'teacher' : undefined,
+            subjects: selectedRole === 'teacher' ? selectedSubjects : [],
+            admin: selectedRole === 'admin'
+          };
+        }
+        return s;
+      }));
+
+      // Nếu đang mở modal chi tiết thì cập nhật luôn
+      if (selectedStudent && selectedStudent.id === roleModalUser.id) {
+        setSelectedStudent(prev => ({
+          ...prev,
+          role: selectedRole,
+          reviewerType: selectedRole === 'teacher' ? 'teacher' : undefined,
+          subjects: selectedRole === 'teacher' ? selectedSubjects : [],
+          admin: selectedRole === 'admin'
+        }));
+      }
+
+      setTimeout(() => {
+        setRoleModalUser(null);
+        setRoleSuccessMsg('');
+      }, 1400);
+    } catch (err) {
+      playSound.error();
+      setRoleErrorMsg(err.message);
+    } finally {
+      setIsSavingRole(false);
     }
   };
 
@@ -316,13 +406,20 @@ export default function StudentManagement() {
     }
   };
 
-  // Bộ lọc Tìm kiếm & Sắp xếp
+  // Bộ lọc Tìm kiếm, Lọc vai trò & Sắp xếp
   const filteredStudents = students.filter(student => {
     const search = searchTerm.toLowerCase();
-    return (
+    const matchesSearch = (
       (student.displayName || '').toLowerCase().includes(search) ||
-      (student.email || '').toLowerCase().includes(search)
+      (student.email || '').toLowerCase().includes(search) ||
+      (student.id || '').toLowerCase().includes(search)
     );
+    if (!matchesSearch) return false;
+    if (filterRole === 'all') return true;
+    if (filterRole === 'teacher') return student.role === 'teacher' || student.reviewerType === 'teacher';
+    if (filterRole === 'admin') return student.role === 'admin' || student.admin === true;
+    if (filterRole === 'student') return student.role !== 'teacher' && student.reviewerType !== 'teacher' && student.role !== 'admin' && !student.admin;
+    return true;
   });
 
   const sortedStudents = [...filteredStudents].sort((a, b) => {
@@ -393,8 +490,23 @@ export default function StudentManagement() {
           />
         </div>
 
-        {/* Sort Select & Export Excel */}
+        {/* Sort Select, Role Filter & Export Excel */}
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto shrink-0 justify-end">
+          {/* Lọc theo vai trò */}
+          <select
+            value={filterRole}
+            onChange={(e) => {
+              setFilterRole(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="bg-[#08090d] border border-[#1f2235] focus:border-cyan-500/50 rounded-xl py-2.5 px-3 text-xs font-bold text-cyan-300 focus:outline-none transition-all cursor-pointer font-mono"
+          >
+            <option value="all">Tất cả vai trò</option>
+            <option value="student">Chỉ Học sinh</option>
+            <option value="teacher">Chỉ Giáo viên</option>
+            <option value="admin">Chỉ Quản trị viên</option>
+          </select>
+
           <SlidersHorizontal className="w-4 h-4 text-zinc-500 hidden sm:block" />
           <select
             value={sortBy}
@@ -445,6 +557,7 @@ export default function StudentManagement() {
                 <tr className="border-b border-[#1f2235] bg-[#0c0d14]/50 select-none font-mono text-[10px] font-black text-zinc-550 uppercase tracking-widest">
                   <th className="py-4.5 px-6">Học sinh</th>
                   <th className="py-4.5 px-6">Email</th>
+                  <th className="py-4.5 px-6 text-center">Vai trò</th>
                   <th className="py-4.5 px-6 text-center">Xếp hạng (ELO)</th>
                   <th className="py-4.5 px-6 text-center">Cấp độ (EXP)</th>
                   <th className="py-4.5 px-6 text-center">Ngày tham gia</th>
@@ -493,6 +606,33 @@ export default function StudentManagement() {
                     {/* Email Cell */}
                     <td className="py-4 px-6 font-mono text-zinc-400 text-xs">
                       {student.email || 'Ẩn danh'}
+                    </td>
+
+                    {/* Role Cell */}
+                    <td className="py-4 px-6 text-center">
+                      {student.role === 'admin' || student.admin ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-purple-500/15 text-purple-300 border border-purple-500/30">
+                          <ShieldAlert className="w-3 h-3 text-purple-400" />
+                          Admin
+                        </span>
+                      ) : (student.role === 'teacher' || student.reviewerType === 'teacher') ? (
+                        <div className="inline-flex flex-col items-center">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                            <Award className="w-3 h-3 text-emerald-400" />
+                            Giáo viên
+                          </span>
+                          {student.subjects && student.subjects.length > 0 && (
+                            <span className="text-[8.5px] text-emerald-400/80 font-mono mt-0.5 max-w-28 truncate" title={student.subjects.join(', ')}>
+                              {student.subjects.map(s => s === 'toan' ? 'Toán' : (s === 'ly' ? 'Lý' : (s === 'hoa' ? 'Hóa' : 'Sinh'))).join(', ')}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-zinc-800 text-zinc-400 border border-zinc-750">
+                          <User className="w-3 h-3 text-zinc-500" />
+                          Học sinh
+                        </span>
+                      )}
                     </td>
 
                     {/* ELO Cell */}
@@ -551,6 +691,15 @@ export default function StudentManagement() {
                           }`}
                         >
                           {student.isBanned ? <ShieldCheck className="w-3.5 h-3.5" /> : <ShieldAlert className="w-3.5 h-3.5" />}
+                        </button>
+
+                        {/* Role Grant Button */}
+                        <button
+                          onClick={() => handleOpenRoleModal(student)}
+                          title="Cấp quyền & Đổi vai trò (Giáo viên / Admin / Học sinh)"
+                          className="p-1.5 bg-[#141622] hover:bg-cyan-500/20 border border-[#1f2235] hover:border-cyan-500/40 text-cyan-400 hover:text-cyan-300 rounded-lg transition-all cursor-pointer active:scale-90"
+                        >
+                          <UserCheck className="w-3.5 h-3.5" />
                         </button>
 
                         {/* Delete Button */}
@@ -694,13 +843,24 @@ export default function StudentManagement() {
 
                   {/* Right Column: Details list */}
                   <div className="md:col-span-2 space-y-4 flex flex-col justify-center">
-                    <div>
-                      <h4 className="text-white text-lg font-black font-mono tracking-wide">
-                        {selectedStudent.displayName || 'Chưa đặt tên'}
-                      </h4>
-                      <p className="text-[9.5px] text-zinc-500 font-mono font-bold mt-0.5">
-                        ID: {selectedStudent.id}
-                      </p>
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1f2235]/40 pb-3">
+                      <div>
+                        <h4 className="text-white text-lg font-black font-mono tracking-wide">
+                          {selectedStudent.displayName || 'Chưa đặt tên'}
+                        </h4>
+                        <p className="text-[9.5px] text-zinc-500 font-mono font-bold mt-0.5">
+                          ID: {selectedStudent.id}
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleOpenRoleModal(selectedStudent)}
+                        className="px-3 py-1.5 bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-300 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 font-mono cursor-pointer active:scale-95"
+                      >
+                        <UserCheck className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Cấp / Đổi Vai Trò</span>
+                      </button>
                     </div>
                     
                     {/* Information Grid */}
@@ -1031,6 +1191,199 @@ export default function StudentManagement() {
           </div>
         );
       })()}
+
+      {/* ROLE GRANTING MODAL (Phân quyền vai trò: Học sinh / Giáo viên / Admin) */}
+      {roleModalUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div 
+            className="w-full max-w-lg bg-[#0c0d14] border border-[#1f2235] rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] relative flex flex-col p-6 space-y-5 animate-in zoom-in-95 duration-200 text-zinc-300 font-sans"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-[#1f2235] pb-4">
+              <div className="flex items-center gap-2.5">
+                <ShieldCheck className="w-5 h-5 text-cyan-400" />
+                <h3 className="text-base font-black text-white uppercase tracking-wider font-mono">
+                  Phân Quyền Vai Trò Người Dùng
+                </h3>
+              </div>
+              <button
+                onClick={() => setRoleModalUser(null)}
+                className="p-1.5 hover:bg-white/5 rounded-xl border border-transparent hover:border-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Target User Info */}
+            <div className="bg-[#0f1017] p-4 rounded-2xl border border-[#1f2235] flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 font-black font-mono">
+                {(roleModalUser.displayName || roleModalUser.name || 'U').charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-white font-bold text-sm truncate font-mono">
+                  {roleModalUser.displayName || roleModalUser.name || 'Chưa đặt tên'}
+                </div>
+                <div className="text-xs text-zinc-400 truncate font-mono">
+                  {roleModalUser.email || 'Không có email'}
+                </div>
+                <div className="text-[10px] text-zinc-500 font-mono mt-0.5">
+                  UID: {roleModalUser.id}
+                </div>
+              </div>
+            </div>
+
+            {/* Role Selection */}
+            <div className="space-y-3">
+              <label className="text-xs font-bold text-zinc-300 font-mono uppercase tracking-wider block">
+                Chọn Vai Trò Mục Tiêu:
+              </label>
+              
+              <div className="grid grid-cols-3 gap-2.5">
+                {[
+                  { key: 'student', label: 'Học sinh', desc: 'Quyền cơ bản', icon: User, color: 'text-zinc-300 border-zinc-700 bg-zinc-900/60' },
+                  { key: 'teacher', label: 'Giáo viên', desc: 'Thẩm định GDPT', icon: Award, color: 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10' },
+                  { key: 'admin', label: 'Quản trị viên', desc: 'Toàn quyền Admin', icon: ShieldAlert, color: 'text-purple-400 border-purple-500/40 bg-purple-500/10' }
+                ].map(r => {
+                  const Icon = r.icon;
+                  const isSelected = selectedRole === r.key;
+                  return (
+                    <button
+                      key={r.key}
+                      type="button"
+                      onClick={() => setSelectedRole(r.key)}
+                      className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                        isSelected 
+                          ? `ring-2 ring-cyan-500 shadow-md ${r.color}`
+                          : 'bg-[#0f1017]/60 border-[#1f2235] text-zinc-400 hover:border-zinc-700 hover:bg-[#141622]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <Icon className="w-4 h-4" />
+                        {isSelected && <CheckCircle className="w-3.5 h-3.5 text-cyan-400" />}
+                      </div>
+                      <div className="font-bold text-xs text-white mt-1">{r.label}</div>
+                      <div className="text-[10px] text-zinc-500">{r.desc}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Subject Selection if Teacher */}
+            {selectedRole === 'teacher' && (
+              <div className="bg-[#0f1017] p-4 rounded-2xl border border-[#1f2235] space-y-3 animate-in fade-in">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-emerald-400 font-mono uppercase">
+                    Phân Công Môn Thẩm Định:
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (selectedSubjects.length === 4) setSelectedSubjects(['toan']);
+                      else setSelectedSubjects(['toan', 'ly', 'hoa', 'sinh']);
+                    }}
+                    className="text-[10px] text-cyan-400 hover:underline font-mono"
+                  >
+                    {selectedSubjects.length === 4 ? 'Chọn chỉ môn Toán' : 'Chọn tất cả môn'}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[
+                    { id: 'toan', label: 'Toán học' },
+                    { id: 'ly', label: 'Vật lý' },
+                    { id: 'hoa', label: 'Hóa học' },
+                    { id: 'sinh', label: 'Sinh học' }
+                  ].map(subj => {
+                    const checked = selectedSubjects.includes(subj.id);
+                    return (
+                      <button
+                        key={subj.id}
+                        type="button"
+                        onClick={() => {
+                          if (checked) {
+                            if (selectedSubjects.length > 1) {
+                              setSelectedSubjects(prev => prev.filter(s => s !== subj.id));
+                            }
+                          } else {
+                            setSelectedSubjects(prev => [...prev, subj.id]);
+                          }
+                        }}
+                        className={`p-2.5 rounded-xl border text-xs font-bold font-mono transition-all flex items-center justify-center gap-1.5 ${
+                          checked
+                            ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
+                            : 'bg-[#08090d] border-[#1f2235] text-zinc-500 hover:text-zinc-300'
+                        }`}
+                      >
+                        <CheckCircle className={`w-3.5 h-3.5 ${checked ? 'text-emerald-400' : 'opacity-0'}`} />
+                        {subj.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-[10px] text-zinc-500">
+                  * Giáo viên chỉ được chấm các câu hỏi thuộc môn được phân công trong phân hệ `/danh-gia-chuyen-mon`.
+                </p>
+              </div>
+            )}
+
+            {/* Admin role warning */}
+            {selectedRole === 'admin' && (
+              <div className="bg-purple-950/20 border border-purple-500/30 p-3.5 rounded-2xl flex items-start gap-2.5 text-xs text-purple-300">
+                <AlertTriangle className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                <p className="text-[11px] leading-relaxed">
+                  <strong>Cảnh báo phân quyền:</strong> Vai trò Quản trị viên (Admin) cho phép người dùng xem tất cả logs, can thiệp dữ liệu học sinh, và cấp quyền cho người khác.
+                </p>
+              </div>
+            )}
+
+            {/* Messages */}
+            {roleSuccessMsg && (
+              <div className="p-3 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 rounded-xl text-xs font-mono flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                {roleSuccessMsg}
+              </div>
+            )}
+            {roleErrorMsg && (
+              <div className="p-3 bg-rose-500/15 border border-rose-500/30 text-rose-300 rounded-xl text-xs font-mono flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                {roleErrorMsg}
+              </div>
+            )}
+
+            {/* Footer Buttons */}
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-[#1f2235]">
+              <button
+                type="button"
+                onClick={() => setRoleModalUser(null)}
+                className="px-4 py-2 bg-[#141622] hover:bg-[#1b1e30] border border-[#1f2235] text-zinc-300 text-xs font-bold rounded-xl transition-all font-mono"
+              >
+                Hủy bỏ
+              </button>
+
+              <button
+                type="button"
+                disabled={isSavingRole}
+                onClick={handleSaveRole}
+                className="px-5 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-md shadow-cyan-500/20 flex items-center gap-2 disabled:opacity-50 transition-all font-mono"
+              >
+                {isSavingRole ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Đang phân quyền...
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck className="w-4 h-4" />
+                    Lưu Phân Quyền
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

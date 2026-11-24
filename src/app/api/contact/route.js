@@ -4,7 +4,7 @@ import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import nodemailer from 'nodemailer';
 import { getCorsHeaders, getClientIp, getClientIdentifier, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
 
-const TARGET_ADMIN_EMAIL = 'hohoanganh20092021@gmail.com';
+const TARGET_ADMIN_EMAIL = process.env.ADMIN_CONTACT_EMAIL || null;
 
 export async function OPTIONS(req) {
   return new NextResponse(null, { status: 204, headers: getCorsHeaders(req) });
@@ -69,7 +69,7 @@ export async function POST(req) {
       }
     }
 
-    // 2. Tự động gửi Email thông báo tới hohoanganh20092021@gmail.com
+    // 2. Tự động gửi Email thông báo tới Ban Quản Trị Hệ Thống
     const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
     const smtpPort = parseInt(process.env.SMTP_PORT || '587');
     const smtpUser = process.env.SMTP_USER || process.env.EMAIL_USER;

@@ -63,7 +63,8 @@ test.describe('E2E Real User - 02: Hệ Thống Xác Thực Học Sinh (Login / 
       await emailInput.fill('');
       await emailInput.pressSequentially('test1@gmail.com', { delay: 30 });
       await passwordInput.fill('');
-      await passwordInput.pressSequentially('test1123', { delay: 30 });
+      const testPassword = process.env.TEST_USER_PASSWORD || 'test1123';
+      await passwordInput.pressSequentially(testPassword, { delay: 30 });
 
       console.log('[02.4] Đã điền thông tin test1@gmail.com. Đang gửi yêu cầu đăng nhập lên Firebase...');
       await submitBtn.click();

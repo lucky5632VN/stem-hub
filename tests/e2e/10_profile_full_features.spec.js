@@ -10,7 +10,7 @@ test.describe('E2E Real User - 10: Toàn bộ Tính năng Hồ sơ, Chibi Maker,
 
     if (await emailInput.isVisible({ timeout: 6000 }).catch(() => false)) {
       await emailInput.fill('test1@gmail.com');
-      await passwordInput.fill('test1123');
+      await passwordInput.fill(process.env.TEST_USER_PASSWORD || 'test1123');
       await submitBtn.click();
       await page.waitForURL(url => !url.pathname.includes('/login'), { timeout: 8000 }).catch(() => {});
       await page.waitForTimeout(2000);

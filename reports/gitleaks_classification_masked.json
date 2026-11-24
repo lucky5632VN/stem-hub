@@ -1,0 +1,832 @@
+{
+  "real_secrets_need_rotation": [
+    {
+      "rule": "gcp-api-key",
+      "file": "scripts/clean_emails_in_firestore_logs.cjs",
+      "line": 6,
+      "commit": "22b525b1",
+      "secretMask": "AIza...EOE (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "public/labs/lab-ktra15p/dist/assets/index-DbqG5P_q.js",
+      "line": 2,
+      "commit": "896c273c",
+      "secretMask": "AIza...Ar4 (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "scratch/put_secret.mjs",
+      "line": 32,
+      "commit": "896c273c",
+      "secretMask": "AIza...kic (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "scratch/put_secret.mjs",
+      "line": 33,
+      "commit": "896c273c",
+      "secretMask": "AIza...e8I (len: 39)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "scripts/test_speed.cjs",
+      "line": 1,
+      "commit": "896c273c",
+      "secretMask": "AQ.A...M9A (len: 53)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "scripts/test_models.cjs",
+      "line": 1,
+      "commit": "896c273c",
+      "secretMask": "AQ.A...9iQ (len: 53)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "public/labs/PhysicsLab/js/physics-ai-chatbot.js",
+      "line": 7,
+      "commit": "309fede8",
+      "secretMask": "AQ.A...wng (len: 53)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "src/components/organisms/GlobalAIAssistant.jsx",
+      "line": 19,
+      "commit": "309fede8",
+      "secretMask": "AQ.A...98A (len: 53)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 6,
+      "commit": "309fede8",
+      "secretMask": "wQFW...A== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 17,
+      "commit": "309fede8",
+      "secretMask": "cjtH...g== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 28,
+      "commit": "309fede8",
+      "secretMask": "qXR3...w== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 39,
+      "commit": "309fede8",
+      "secretMask": "zxne...g== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 61,
+      "commit": "309fede8",
+      "secretMask": "0ZMs...A== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 72,
+      "commit": "309fede8",
+      "secretMask": "9VPC...A== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 83,
+      "commit": "309fede8",
+      "secretMask": "acSq...A== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 94,
+      "commit": "309fede8",
+      "secretMask": "Uv0o...Q== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 105,
+      "commit": "309fede8",
+      "secretMask": "kKKu...Q== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 116,
+      "commit": "309fede8",
+      "secretMask": "As/i...w== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 127,
+      "commit": "309fede8",
+      "secretMask": "pwwr...Q== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 138,
+      "commit": "309fede8",
+      "secretMask": "Pmsb...A== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 149,
+      "commit": "309fede8",
+      "secretMask": "NosC...Q== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 160,
+      "commit": "309fede8",
+      "secretMask": "aC9z...w== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 171,
+      "commit": "309fede8",
+      "secretMask": "jHDE...A== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 182,
+      "commit": "309fede8",
+      "secretMask": "xM4n...Q== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 193,
+      "commit": "309fede8",
+      "secretMask": "Ja0b...g== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 204,
+      "commit": "309fede8",
+      "secretMask": "uc2u...g== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 215,
+      "commit": "309fede8",
+      "secretMask": "7iVq...Q== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 226,
+      "commit": "309fede8",
+      "secretMask": "ZM11...w== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 237,
+      "commit": "309fede8",
+      "secretMask": "aoaA...w== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 248,
+      "commit": "309fede8",
+      "secretMask": "heLN...Q== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 259,
+      "commit": "309fede8",
+      "secretMask": "lwaS...Q== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 270,
+      "commit": "309fede8",
+      "secretMask": "cpTS...w== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 281,
+      "commit": "309fede8",
+      "secretMask": "kEuG...Q== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 303,
+      "commit": "309fede8",
+      "secretMask": "JiOO...w== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 314,
+      "commit": "309fede8",
+      "secretMask": "g9aY...A== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 325,
+      "commit": "309fede8",
+      "secretMask": "6zpM...w== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 336,
+      "commit": "309fede8",
+      "secretMask": "3DMe...g== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 347,
+      "commit": "309fede8",
+      "secretMask": "ceQs...A== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 358,
+      "commit": "309fede8",
+      "secretMask": "9Ezt...w== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 369,
+      "commit": "309fede8",
+      "secretMask": "aWOD...Q== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 380,
+      "commit": "309fede8",
+      "secretMask": "DEuu...w== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 391,
+      "commit": "309fede8",
+      "secretMask": "c+Db...g== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 402,
+      "commit": "309fede8",
+      "secretMask": "ZcXk...g== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "temp_auth_users.json",
+      "line": 413,
+      "commit": "309fede8",
+      "secretMask": "DxO8...A== (len: 88)"
+    }
+  ],
+  "public_client_by_design": [
+    {
+      "rule": "generic-api-key",
+      "file": "scripts/reseed_firestore.js",
+      "line": 11,
+      "commit": "309fede8",
+      "secretMask": "AIza...EOE (len: 38)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "scripts/migrate_old_to_new_firebase.js",
+      "line": 10,
+      "commit": "309fede8",
+      "secretMask": "AIza...98Y (len: 39)"
+    }
+  ],
+  "false_positives_and_docs": [
+    {
+      "rule": "curl-auth-header",
+      "file": ".agents/cloudflare/references/argo-smart-routing/README.md",
+      "line": 13,
+      "commit": "896c273c",
+      "secretMask": "YOUR...KEN (len: 14)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".agents/skills/workers-best-practices/references/configuration.md",
+      "line": 82,
+      "commit": "896c273c",
+      "secretMask": "sk-l...... (len: 17)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".chrome_cdp_test_profile/Default/Extensions/fheoggkfdfchfphceeifdbepaooicaho/8.1.0.9909_0/manifest.json",
+      "line": 38,
+      "commit": "896c273c",
+      "secretMask": "MIGf...QAB (len: 216)"
+    },
+    {
+      "rule": "aws-access-token",
+      "file": ".chrome_cdp_test_profile/Default/Extensions/fheoggkfdfchfphceeifdbepaooicaho/8.1.0.9909_0/background.js",
+      "line": 23,
+      "commit": "896c273c",
+      "secretMask": "AKIA...77A (len: 20)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".chrome_cdp_test_profile/Default/Extensions/fheoggkfdfchfphceeifdbepaooicaho/8.1.0.9909_0/background.js",
+      "line": 23,
+      "commit": "896c273c",
+      "secretMask": "e-ba...com (len: 23)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".chrome_cdp_test_profile/Default/Extensions/fheoggkfdfchfphceeifdbepaooicaho/8.1.0.9909_0/background.js",
+      "line": 23,
+      "commit": "896c273c",
+      "secretMask": "4xwe...com (len: 13)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".chrome_cdp_test_profile/Default/Extensions/fheoggkfdfchfphceeifdbepaooicaho/8.1.0.9909_0/background.js",
+      "line": 23,
+      "commit": "896c273c",
+      "secretMask": "ujgG...zY= (len: 44)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".chrome_cdp_test_profile/Default/Extensions/fheoggkfdfchfphceeifdbepaooicaho/8.1.0.9909_0/background.js",
+      "line": 23,
+      "commit": "896c273c",
+      "secretMask": "hh4F...rx0 (len: 40)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".chrome_cdp_test_profile/Default/Extensions/fheoggkfdfchfphceeifdbepaooicaho/8.1.0.9909_0/background.js",
+      "line": 23,
+      "commit": "896c273c",
+      "secretMask": "x3Gg...y2b (len: 40)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".chrome_cdp_test_profile/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.109.1_0/manifest.json",
+      "line": 24,
+      "commit": "896c273c",
+      "secretMask": "MIIB...QAB (len: 392)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".chrome_cdp_test_profile/Default/Secure Preferences",
+      "line": 1,
+      "commit": "896c273c",
+      "secretMask": "10A6...AB3 (len: 64)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".chrome_cdp_test_profile/Default/Secure Preferences",
+      "line": 1,
+      "commit": "896c273c",
+      "secretMask": "djEw...Ro/ (len: 84)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".chrome_cdp_test_profile/Default/Secure Preferences",
+      "line": 1,
+      "commit": "896c273c",
+      "secretMask": "3708...AF8 (len: 64)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".chrome_cdp_test_profile/Default/Secure Preferences",
+      "line": 1,
+      "commit": "896c273c",
+      "secretMask": "djEw...OC0 (len: 84)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".chrome_cdp_test_profile/Default/Preferences",
+      "line": 1,
+      "commit": "896c273c",
+      "secretMask": "QcMl...Q== (len: 88)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".chrome_cdp_test_profile/Default/Preferences",
+      "line": 1,
+      "commit": "896c273c",
+      "secretMask": "NgAg...AI= (len: 56)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".chrome_cdp_test_profile/Local State",
+      "line": 1,
+      "commit": "896c273c",
+      "secretMask": "RFBB...8A= (len: 392)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "public/labs/lab_sinh/dist/external/native/root-absorption/root-absorption.js",
+      "line": 1,
+      "commit": "fd6d5875",
+      "secretMask": "Ah2B...AJg (len: 36)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "public/labs/lab_sinh/dist/external/native/root-absorption/root-absorption.js",
+      "line": 1,
+      "commit": "fd6d5875",
+      "secretMask": "ABtA...AFg (len: 56)"
+    },
+    {
+      "rule": "private-key",
+      "file": "VERCEL_DEPLOYMENT_GUIDE.md",
+      "line": 25,
+      "commit": "17d69b31",
+      "secretMask": "----...--- (len: 111)"
+    }
+  ],
+  "duplicates": [
+    {
+      "rule": "gcp-api-key",
+      "file": "scratch/check_firestore_learned.mjs",
+      "line": 5,
+      "commit": "6b11e133",
+      "secretMask": "AIza...EOE (len: 39)",
+      "duplicateOf": "AIza...EOE (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "scratch/purge_personal_knowledge.mjs",
+      "line": 7,
+      "commit": "6b11e133",
+      "secretMask": "AIza...EOE (len: 39)",
+      "duplicateOf": "AIza...EOE (len: 39)"
+    },
+    {
+      "rule": "curl-auth-header",
+      "file": ".agents/cloudflare/references/argo-smart-routing/api.md",
+      "line": 27,
+      "commit": "896c273c",
+      "secretMask": "YOUR...KEN (len: 14)",
+      "duplicateOf": "YOUR...KEN (len: 14)"
+    },
+    {
+      "rule": "curl-auth-header",
+      "file": ".agents/cloudflare/references/argo-smart-routing/api.md",
+      "line": 84,
+      "commit": "896c273c",
+      "secretMask": "YOUR...KEN (len: 14)",
+      "duplicateOf": "YOUR...KEN (len: 14)"
+    },
+    {
+      "rule": "curl-auth-header",
+      "file": ".agents/skills/cloudflare/references/argo-smart-routing/README.md",
+      "line": 13,
+      "commit": "896c273c",
+      "secretMask": "YOUR...KEN (len: 14)",
+      "duplicateOf": "YOUR...KEN (len: 14)"
+    },
+    {
+      "rule": "curl-auth-header",
+      "file": ".agents/skills/cloudflare/references/argo-smart-routing/api.md",
+      "line": 27,
+      "commit": "896c273c",
+      "secretMask": "YOUR...KEN (len: 14)",
+      "duplicateOf": "YOUR...KEN (len: 14)"
+    },
+    {
+      "rule": "curl-auth-header",
+      "file": ".agents/skills/cloudflare/references/argo-smart-routing/api.md",
+      "line": 84,
+      "commit": "896c273c",
+      "secretMask": "YOUR...KEN (len: 14)",
+      "duplicateOf": "YOUR...KEN (len: 14)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".agents/workers-best-practices/references/configuration.md",
+      "line": 82,
+      "commit": "896c273c",
+      "secretMask": "sk-l...... (len: 17)",
+      "duplicateOf": "sk-l...... (len: 17)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".chrome_cdp_test_profile/Default/Extensions/nmmhkkegccagdldgiimedpiccmgmieda/1.0.0.6_0/manifest.json",
+      "line": 15,
+      "commit": "896c273c",
+      "secretMask": "MIGf...QAB (len: 216)",
+      "duplicateOf": "MIGf...QAB (len: 216)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".chrome_cdp_test_profile/Default/Secure Preferences",
+      "line": 1,
+      "commit": "896c273c",
+      "secretMask": "MIGf...QAB (len: 216)",
+      "duplicateOf": "MIGf...QAB (len: 216)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".chrome_cdp_test_profile/Default/Secure Preferences",
+      "line": 1,
+      "commit": "896c273c",
+      "secretMask": "MIIB...QAB (len: 392)",
+      "duplicateOf": "MIIB...QAB (len: 392)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".chrome_cdp_test_profile/Default/Secure Preferences",
+      "line": 1,
+      "commit": "896c273c",
+      "secretMask": "MIIB...QAB (len: 392)",
+      "duplicateOf": "MIIB...QAB (len: 392)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".chrome_cdp_test_profile/Default/Secure Preferences",
+      "line": 1,
+      "commit": "896c273c",
+      "secretMask": "MIGf...QAB (len: 216)",
+      "duplicateOf": "MIGf...QAB (len: 216)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".chrome_cdp_test_profile/Default/Secure Preferences",
+      "line": 1,
+      "commit": "896c273c",
+      "secretMask": "MIGf...QAB (len: 216)",
+      "duplicateOf": "MIGf...QAB (len: 216)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": ".chrome_cdp_test_profile/Default/Secure Preferences",
+      "line": 1,
+      "commit": "896c273c",
+      "secretMask": "MIGf...QAB (len: 216)",
+      "duplicateOf": "MIGf...QAB (len: 216)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "preview_chunk.js",
+      "line": 5178,
+      "commit": "896c273c",
+      "secretMask": "AIza...Ar4 (len: 39)",
+      "duplicateOf": "AIza...Ar4 (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "scratch/put_secret.mjs",
+      "line": 31,
+      "commit": "896c273c",
+      "secretMask": "AIza...Ar4 (len: 39)",
+      "duplicateOf": "AIza...Ar4 (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "scratch/test_gemini_api.cjs",
+      "line": 5,
+      "commit": "896c273c",
+      "secretMask": "AIza...Ar4 (len: 39)",
+      "duplicateOf": "AIza...Ar4 (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "scripts/check_admin_firebase.cjs",
+      "line": 6,
+      "commit": "896c273c",
+      "secretMask": "AIza...EOE (len: 39)",
+      "duplicateOf": "AIza...EOE (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "scripts/cleanup_duplicate_ai_logs.js",
+      "line": 8,
+      "commit": "896c273c",
+      "secretMask": "AIza...EOE (len: 39)",
+      "duplicateOf": "AIza...EOE (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "scripts/cleanup_duplicate_ai_logs.mjs",
+      "line": 8,
+      "commit": "896c273c",
+      "secretMask": "AIza...EOE (len: 39)",
+      "duplicateOf": "AIza...EOE (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "scripts/test_assign_bot.cjs",
+      "line": 6,
+      "commit": "896c273c",
+      "secretMask": "AIza...EOE (len: 39)",
+      "duplicateOf": "AIza...EOE (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "scripts/test_resilient_call.cjs",
+      "line": 27,
+      "commit": "896c273c",
+      "secretMask": "AIza...Ar4 (len: 39)",
+      "duplicateOf": "AIza...Ar4 (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "scripts/test_resilient_call.cjs",
+      "line": 28,
+      "commit": "896c273c",
+      "secretMask": "AIza...kic (len: 39)",
+      "duplicateOf": "AIza...kic (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "scripts/test_resilient_call.cjs",
+      "line": 29,
+      "commit": "896c273c",
+      "secretMask": "AIza...e8I (len: 39)",
+      "duplicateOf": "AIza...e8I (len: 39)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "scripts/test_other_models.cjs",
+      "line": 1,
+      "commit": "896c273c",
+      "secretMask": "AQ.A...M9A (len: 53)",
+      "duplicateOf": "AQ.A...M9A (len: 53)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "tests/test_finalize_match.mjs",
+      "line": 7,
+      "commit": "896c273c",
+      "secretMask": "AIza...EOE (len: 39)",
+      "duplicateOf": "AIza...EOE (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "tests/test_inspect_matchmaker.mjs",
+      "line": 6,
+      "commit": "896c273c",
+      "secretMask": "AIza...EOE (len: 39)",
+      "duplicateOf": "AIza...EOE (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "tests/test_arena_bot_flow.mjs",
+      "line": 7,
+      "commit": "896c273c",
+      "secretMask": "AIza...EOE (len: 39)",
+      "duplicateOf": "AIza...EOE (len: 39)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "scripts/find_valid_key.js",
+      "line": 1,
+      "commit": "309fede8",
+      "secretMask": "AIza...EOE (len: 38)",
+      "duplicateOf": "AIza...EOE (len: 38)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "scripts/test_auth_api.js",
+      "line": 1,
+      "commit": "309fede8",
+      "secretMask": "AIza...EOE (len: 38)",
+      "duplicateOf": "AIza...EOE (len: 38)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "scripts/update_user_password.js",
+      "line": 6,
+      "commit": "309fede8",
+      "secretMask": "AIza...EOE (len: 39)",
+      "duplicateOf": "AIza...EOE (len: 39)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "scripts/migrate_old_to_new_firebase.js",
+      "line": 19,
+      "commit": "309fede8",
+      "secretMask": "AIza...EOE (len: 38)",
+      "duplicateOf": "AIza...EOE (len: 38)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "scripts/seed_auth_users.js",
+      "line": 9,
+      "commit": "309fede8",
+      "secretMask": "AIza...EOE (len: 39)",
+      "duplicateOf": "AIza...EOE (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "scripts/migrate_ALL_collections.js",
+      "line": 9,
+      "commit": "309fede8",
+      "secretMask": "AIza...98Y (len: 39)",
+      "duplicateOf": "AIza...98Y (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "scripts/migrate_ALL_collections.js",
+      "line": 18,
+      "commit": "309fede8",
+      "secretMask": "AIza...EOE (len: 39)",
+      "duplicateOf": "AIza...EOE (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "src/lib/firebase.js",
+      "line": 8,
+      "commit": "309fede8",
+      "secretMask": "AIza...EOE (len: 39)",
+      "duplicateOf": "AIza...EOE (len: 39)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "public/labs/lab_sinh/public/external/native/root-absorption/root-absorption.js",
+      "line": 1,
+      "commit": "fd6d5875",
+      "secretMask": "Ah2B...AJg (len: 36)",
+      "duplicateOf": "Ah2B...AJg (len: 36)"
+    },
+    {
+      "rule": "generic-api-key",
+      "file": "public/labs/lab_sinh/public/external/native/root-absorption/root-absorption.js",
+      "line": 1,
+      "commit": "fd6d5875",
+      "secretMask": "ABtA...AFg (len: 56)",
+      "duplicateOf": "ABtA...AFg (len: 56)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "scripts/check_firestore_exams.js",
+      "line": 7,
+      "commit": "17d69b31",
+      "secretMask": "AIza...98Y (len: 39)",
+      "duplicateOf": "AIza...98Y (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "scripts/clean_firestore_categories.js",
+      "line": 7,
+      "commit": "17d69b31",
+      "secretMask": "AIza...98Y (len: 39)",
+      "duplicateOf": "AIza...98Y (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "scripts/seedActionLogs.js",
+      "line": 10,
+      "commit": "17d69b31",
+      "secretMask": "AIza...98Y (len: 39)",
+      "duplicateOf": "AIza...98Y (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "scripts/reseed_firestore.js",
+      "line": 11,
+      "commit": "17d69b31",
+      "secretMask": "AIza...98Y (len: 39)",
+      "duplicateOf": "AIza...98Y (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "scripts/update_firestore_difficulty.js",
+      "line": 7,
+      "commit": "17d69b31",
+      "secretMask": "AIza...98Y (len: 39)",
+      "duplicateOf": "AIza...98Y (len: 39)"
+    },
+    {
+      "rule": "gcp-api-key",
+      "file": "src/lib/firebase.js",
+      "line": 9,
+      "commit": "17d69b31",
+      "secretMask": "AIza...98Y (len: 39)",
+      "duplicateOf": "AIza...98Y (len: 39)"
+    }
+  ]
+}

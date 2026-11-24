@@ -30,13 +30,18 @@ export default function AdminLayout({ children }) {
 
       setStatusMsg('Đang xác thực quyền Admin...');
       
-      // Kiểm tra thuộc tính role: 'admin' từ Firestore
+      // Kiểm tra quyền Admin qua Role Firestore, Custom Claims hoặc Biến môi trường Admin UID (KHÔNG dùng email whitelist)
       try {
         const userDocRef = doc(db, 'users', firebaseUser.uid);
         const docSnap = await getDoc(userDocRef);
         const role = docSnap.exists() ? docSnap.data().role : null;
-        const emailLower = firebaseUser.email?.toLowerCase() || '';
-        if (role === 'admin' || emailLower === 'admin123@gmail.com' || emailLower === 'hohoanganh20092021@gmail.com') {
+        
+        const adminUids = (process.env.NEXT_PUBLIC_ADMIN_UIDS || '').split(',').map(u => u.trim()).filter(Boolean);
+        const idTokenResult = await firebaseUser.getIdTokenResult().catch(() => null);
+        const hasAdminClaim = Boolean(idTokenResult?.claims?.admin === true || idTokenResult?.claims?.role === 'admin');
+        const isUidWhitelisted = adminUids.includes(firebaseUser.uid);
+
+        if (role === 'admin' || hasAdminClaim || isUidWhitelisted) {
           playSound.success();
           setIsAdmin(true);
         } else {

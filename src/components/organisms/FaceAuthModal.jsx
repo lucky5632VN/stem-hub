@@ -220,7 +220,7 @@ export default function FaceAuthModal({
 }) {
   const { personalization, setPersonalization, soundEnabled } = useAppStore();
   const storeUserEmail = useAppStore((state) => state.user?.email);
-  const targetEmail = userEmail || auth.currentUser?.email || storeUserEmail || 'hohoanganh20092021@gmail.com';
+  const targetEmail = userEmail || auth.currentUser?.email || storeUserEmail || 'student@stem-hub.top';
 
   const [activeMode, setActiveMode] = useState(mode);
 
@@ -639,7 +639,7 @@ export default function FaceAuthModal({
 
         if (detection && detection.descriptor) {
           currentDescriptor = Array.from(detection.descriptor).map(v => Number(v.toFixed(6)));
-          console.log('✅ [AI Engine] Trích xuất thành công ResNet-34 Deep AI 128-D Vector:', currentDescriptor.slice(0, 5));
+          console.log('✅ [AI Engine] Trích xuất thành công ResNet-34 Deep AI 128-D Vector (ẩn giá trị bảo mật)');
         }
       } catch (aiErr) {
         console.warn('⚠️ Lỗi trích xuất ResNet-34 Deep AI Descriptor, tự động chuyển sang Biometric Sampling Mesh:', aiErr);
@@ -676,16 +676,24 @@ export default function FaceAuthModal({
             setFace2FASession(auth.currentUser.uid);
             window.dispatchEvent(new CustomEvent('face2fa-verified'));
           }
+          // LƯU TRỮ AN TOÀN: Chuyển dữ liệu sinh trắc học sang subcollection riêng tư users/{uid}/private/biometrics
+          const biometricsRef = doc(db, 'users', auth.currentUser.uid, 'private', 'biometrics');
+          await setDoc(biometricsRef, {
+            faceDescriptor: currentDescriptor,
+            enrolledAt: new Date().toISOString(),
+            model: '@vladmandic/face-api@1.7.12 (ResNet-34 FaceNet 128-D)'
+          }, { merge: true });
+
+          // Tài liệu users/{uid} gốc chỉ lưu cờ trạng thái boolean, TUYỆT ĐỐI không lưu vector
           const userRef = doc(db, 'users', auth.currentUser.uid);
           await setDoc(userRef, {
             face2FAEnabled: true,
             personalization: {
-              face2FAEnabled: true,
-              faceDescriptor: currentDescriptor
+              face2FAEnabled: true
             }
           }, { merge: true });
         } catch (err) {
-          console.error('Lỗi khi lưu face descriptor lên Firestore:', err);
+          console.error('Lỗi khi lưu face descriptor lên subcollection bảo mật:', err);
         }
       }
 
@@ -704,7 +712,16 @@ export default function FaceAuthModal({
         return;
       }
 
-      const storedVecRaw = targetDescriptor || personalization.faceDescriptor;
+      let storedVecRaw = targetDescriptor || personalization.faceDescriptor;
+      if (!storedVecRaw && auth.currentUser) {
+        try {
+          const { getDoc } = await import('firebase/firestore');
+          const bioSnap = await getDoc(doc(db, 'users', auth.currentUser.uid, 'private', 'biometrics'));
+          if (bioSnap.exists()) {
+            storedVecRaw = bioSnap.data()?.faceDescriptor;
+          }
+        } catch (_) {}
+      }
       let storedVec = null;
 
       if (Array.isArray(storedVecRaw)) {
@@ -882,10 +899,10 @@ export default function FaceAuthModal({
             </div>
             <div>
               <h3 className="text-base font-black text-white tracking-wide uppercase font-sans flex items-center gap-2">
-                {activeMode === 'ENROLL' ? 'Đăng Ký Khuôn Mặt AI' : 'Xác Thực AI Face 2FA'}
+                {activeMode === 'ENROLL' ? 'Đăng Ký Sinh Trắc Học Khuôn Mặt (128-D)' : 'Xác Thực Sinh Trắc Học Khuôn Mặt (So Khớp 1:1)'}
               </h3>
               <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest block">
-                {activeMode === 'ENROLL' ? 'Đăng ký sinh học bảo mật AI' : 'Xác thực 2 bước bằng Mạng Nơ-ron AI'}
+                {activeMode === 'ENROLL' ? 'ResNet-34 FaceNet • Trích xuất vector 128-D (Không lưu ảnh)' : 'ResNet-34 FaceNet • So khớp 1:1 với vector đã lưu'}
               </span>
             </div>
           </div>
@@ -1024,7 +1041,7 @@ export default function FaceAuthModal({
             <div className="flex items-center justify-center">
               <span className="text-[10px] font-mono text-cyan-400 flex items-center gap-1.5 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20 shadow-sm">
                 <Cpu className="w-3.5 h-3.5 text-cyan-300 animate-spin" />
-                <span>Mô hình AI: Mạng Nơ-ron ResNet-34 (68 Điểm mốc sinh học)</span>
+                <span>Mô hình: ResNet-34 / TinyFace (68 điểm mốc khuôn mặt)</span>
               </span>
             </div>
 
@@ -1077,12 +1094,12 @@ export default function FaceAuthModal({
             </div>
             <div>
               <h4 className="text-lg font-black text-white font-sans uppercase">
-                {activeMode === 'ENROLL' ? 'Đã Đăng Ký Khuôn Mặt Mẫu!' : 'Xác Thực 2FA Thành Công!'}
+                {activeMode === 'ENROLL' ? 'Đã Lưu Vector Khuôn Mặt Mẫu!' : 'Đối Chiếu Khuôn Mặt Hợp Lệ!'}
               </h4>
               <p className="text-xs text-emerald-300 mt-1 font-sans">
                 {activeMode === 'ENROLL' 
-                  ? 'Đã trích xuất và lưu bảo mật Vector đặc trưng AI 128 chiều.' 
-                  : 'Sóng sinh học hoàn toàn khớp với hồ sơ cá nhân.'
+                  ? 'Đã trích xuất và lưu bảo mật Vector đặc trưng 128 chiều.' 
+                  : 'Đặc trưng khuôn mặt khớp với hồ sơ đã đăng ký.'
                 }
               </p>
             </div>

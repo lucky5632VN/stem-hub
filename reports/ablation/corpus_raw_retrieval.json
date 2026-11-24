@@ -1,0 +1,642 @@
+[
+  {
+    "id": "CAND_MATH_01",
+    "subject": "toan",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 1",
+    "top5": [
+      "toan-12-228",
+      "toan-12-226",
+      "toan-12-227",
+      "toan-10-169",
+      "toan-10-178"
+    ],
+    "top1_chunk": "toan-12-228",
+    "top1_topic": "Ứng dụng Tích phân Tính Diện tích và Thể tích (Phần 3)",
+    "top1_content": "Thể tích khối tròn xoay tạo thành khi quay hình phẳng giới hạn bởi y = f(x), trục Ox, x = a, x = b quanh trục Ox tính theo V = pi * int_a^b [f(x)]^2 dx."
+  },
+  {
+    "id": "CAND_MATH_02",
+    "subject": "toan",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 2",
+    "top5": [
+      "toan-10-169",
+      "toan-11-196",
+      "toan-11-207",
+      "toan-11-210",
+      "toan-10-170"
+    ],
+    "top1_chunk": "toan-10-169",
+    "top1_topic": "Bất phương trình Bậc nhất Hai ẩn (Phần 1)",
+    "top1_content": "Bất phương trình bậc nhất hai ẩn x, y có dạng ax + by < c (hoặc <=, >, >=) trong đó a, b không đồng thời bằng 0. Mỗi cặp (x0, y0) làm bất phương trình đúng là một nghiệm."
+  },
+  {
+    "id": "CAND_MATH_03",
+    "subject": "toan",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 4",
+    "top5": [
+      "toan-11-210",
+      "toan-11-208",
+      "toan-12-215",
+      "toan-10-166",
+      "toan-11-209"
+    ],
+    "top1_chunk": "toan-11-210",
+    "top1_topic": "Tổ hợp, Nhị thức Newton và Xác suất (Phần 3)",
+    "top1_content": "Xác suất của biến cố A là P(A) = n(A) / n(Omega) với n(A) là số kết quả thuận lợi cho A và n(Omega) là tổng số kết quả đồng khả năng của không gian mẫu."
+  },
+  {
+    "id": "CAND_MATH_04",
+    "subject": "toan",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 5",
+    "top5": [
+      "toan-12-233",
+      "toan-10-175",
+      "toan-10-186",
+      "toan-12-232",
+      "toan-12-234"
+    ],
+    "top1_chunk": "toan-12-233",
+    "top1_topic": "Hình học Oxyz - Mặt phẳng và Đường thẳng (Phần 2)",
+    "top1_content": "Khoảng cách từ điểm M(x1, y1, z1) đến mặt phẳng (P): ax + by + cz + d = 0 tính theo công thức d(M, P) = |a*x1 + b*y1 + c*z1 + d| / sqrt(a^2 + b^2 + c^2)."
+  },
+  {
+    "id": "CAND_MATH_05",
+    "subject": "toan",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 6",
+    "top5": [
+      "toan-12-211",
+      "toan-12-213",
+      "toan-12-216",
+      "toan-10-169",
+      "toan-10-172"
+    ],
+    "top1_chunk": "toan-12-211",
+    "top1_topic": "Tính Đơn biến và Cực trị Hàm số (Phần 1)",
+    "top1_content": "Hàm số y = f(x) đồng biến trên khoảng K nếu f'(x) >= 0 với mọi x thuộc K (dấu bằng xảy ra tại hữu hạn điểm). Hàm số nghịch biến nếu f'(x) <= 0 trên K."
+  },
+  {
+    "id": "CAND_MATH_06",
+    "subject": "toan",
+    "question_part": "Phần I (Trắc nghiệm)",
+    "question_number": "Phần I - Câu 2",
+    "top5": [
+      "toan-10-169",
+      "toan-10-170",
+      "toan-12-231",
+      "toan-10-171",
+      "toan-10-172"
+    ],
+    "top1_chunk": "toan-10-169",
+    "top1_topic": "Bất phương trình Bậc nhất Hai ẩn (Phần 1)",
+    "top1_content": "Bất phương trình bậc nhất hai ẩn x, y có dạng ax + by < c (hoặc <=, >, >=) trong đó a, b không đồng thời bằng 0. Mỗi cặp (x0, y0) làm bất phương trình đúng là một nghiệm."
+  },
+  {
+    "id": "CAND_MATH_07",
+    "subject": "toan",
+    "question_part": "Phần I (Trắc nghiệm)",
+    "question_number": "Phần I - Câu 4",
+    "top5": [
+      "toan-10-172",
+      "toan-10-182",
+      "toan-12-213",
+      "toan-12-216",
+      "toan-12-231"
+    ],
+    "top1_chunk": "toan-10-172",
+    "top1_topic": "Hàm số Bậc hai và Parabol (Phần 1)",
+    "top1_content": "Hàm số bậc hai có dạng y = ax^2 + bx + c (a != 0) có tập xác định R. Đồ thị hàm số bậc hai là một đường Parabol có đỉnh I(-b/(2a), -Delta/(4a)) và trục đối xứng x = -b/(2a)."
+  },
+  {
+    "id": "CAND_MATH_08",
+    "subject": "toan",
+    "question_part": "Phần I (Trắc nghiệm)",
+    "question_number": "Phần I - Câu 5",
+    "top5": [
+      "toan-11-210",
+      "toan-11-209",
+      "toan-12-213",
+      "toan-10-172",
+      "toan-11-208"
+    ],
+    "top1_chunk": "toan-11-210",
+    "top1_topic": "Tổ hợp, Nhị thức Newton và Xác suất (Phần 3)",
+    "top1_content": "Xác suất của biến cố A là P(A) = n(A) / n(Omega) với n(A) là số kết quả thuận lợi cho A và n(Omega) là tổng số kết quả đồng khả năng của không gian mẫu."
+  },
+  {
+    "id": "CAND_MATH_09",
+    "subject": "toan",
+    "question_part": "Phần I (Trắc nghiệm)",
+    "question_number": "Phần I - Câu 7",
+    "top5": [
+      "toan-10-179",
+      "toan-12-231",
+      "toan-12-232",
+      "toan-10-178",
+      "toan-10-175"
+    ],
+    "top1_chunk": "toan-10-179",
+    "top1_topic": "Tích vô hướng và Tọa độ Vectơ (Phần 2)",
+    "top1_content": "Trong hệ tọa độ Oxy với hai vectơ đơn vị i, j: vectơ u = (x, y) nghĩa là u = x*i + y*j. Độ dài vectơ |u| = sqrt(x^2 + y^2). Tọa độ AB = (xB - xA, yB - yA)."
+  },
+  {
+    "id": "CAND_MATH_10",
+    "subject": "toan",
+    "question_part": "Phần I (Trắc nghiệm)",
+    "question_number": "Phần I - Câu 12",
+    "top5": [
+      "toan-11-196",
+      "toan-11-197",
+      "toan-11-198",
+      "toan-12-216",
+      "toan-12-213"
+    ],
+    "top1_chunk": "toan-11-196",
+    "top1_topic": "Dãy số, Cấp số Cộng và Cấp số Nhân (Phần 1)",
+    "top1_content": "Cấp số cộng là dãy số mà kể từ số hạng thứ hai, mỗi số hạng bằng số hạng đứng ngay trước nó cộng với số d không đổi: u_{n+1} = u_n + d. Số hạng tổng quát u_n = u1 + (n-1)*d."
+  },
+  {
+    "id": "CAND_MATH_11",
+    "subject": "toan",
+    "question_part": "Phần I (Trắc nghiệm)",
+    "question_number": "Phần I - Câu 9",
+    "top5": [
+      "toan-10-176",
+      "toan-12-230",
+      "toan-12-231",
+      "toan-12-234",
+      "toan-12-232"
+    ],
+    "top1_chunk": "toan-10-176",
+    "top1_topic": "Vectơ và Phép toán Vectơ (Phần 2)",
+    "top1_content": "Phép cộng vectơ tuân theo quy tắc ba điểm: AB + BC = AC và quy tắc hình bình hành với hai vectơ chung gốc: AB + AD = AC (với ABCD là hình bình hành)."
+  },
+  {
+    "id": "CAND_CHEM_01",
+    "subject": "hoa",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 1",
+    "top5": [
+      "hoa-10-003",
+      "hoa-10-006",
+      "hoa-10-013",
+      "hoa-10-017",
+      "hoa-12-082"
+    ],
+    "top1_chunk": "hoa-10-003",
+    "top1_topic": "Cấu tạo Nguyên tử và Điện tích Hạt nhân (Phần 3)",
+    "top1_content": "Các nguyên tố hóa học gồm những nguyên tử có cùng số hiệu nguyên tử Z. Những nguyên tử có cùng số prôtôn Z nhưng khác số nơtrôn N được gọi là các đồng vị của cùng một nguyên tố. Khối lượng nguyên tử trung bình được tính dựa trên phần trăm số lượng của các đồng vị trong tự nhiên."
+  },
+  {
+    "id": "CAND_CHEM_02",
+    "subject": "hoa",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 2",
+    "top5": [
+      "hoa-10-020",
+      "hoa-10-021",
+      "hoa-11-039",
+      "hoa-10-023",
+      "hoa-10-015"
+    ],
+    "top1_chunk": "hoa-10-020",
+    "top1_topic": "Biến thiên Enthalpy Phản ứng Hóa học (Phần 2)",
+    "top1_content": "Phản ứng thu nhiệt có Delta_r H° > 0 cần hấp thụ nhiệt năng từ môi trường để diễn ra. Enthalpy tạo thành chuẩn Delta_f H°_298 của một chất là biến thiên enthalpy của phản ứng tạo thành 1 mol chất đó từ các đơn chất bền nhất."
+  },
+  {
+    "id": "CAND_CHEM_03",
+    "subject": "hoa",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 3",
+    "top5": [
+      "hoa-10-004",
+      "hoa-10-007",
+      "hoa-10-008",
+      "hoa-12-064",
+      "hoa-10-015"
+    ],
+    "top1_chunk": "hoa-10-004",
+    "top1_topic": "Vỏ Electron và Cấu hình Electron (Phần 1)",
+    "top1_content": "Các êlectron ở vỏ nguyên tử được sắp xếp vào các lớp K, L, M, N tương ứng với số thứ tự lớp n từ 1 đến 4. Trong mỗi lớp, các êlectron lại phân bố vào các phân lớp s, p, d, f với số êlectron tối đa lần lượt là 2, 6, 10 và 14."
+  },
+  {
+    "id": "CAND_CHEM_04",
+    "subject": "hoa",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 4",
+    "top5": [
+      "hoa-12-084",
+      "hoa-12-083",
+      "hoa-10-017",
+      "hoa-12-082",
+      "hoa-10-003"
+    ],
+    "top1_chunk": "hoa-12-084",
+    "top1_topic": "Đại cương Kim loại và Dãy Điện hóa (Phần 3)",
+    "top1_content": "Dãy điện hóa xếp các cặp oxi hóa - khử theo chiều tăng tính oxi hóa của cation và giảm tính khử của kim loại. Theo quy tắc alpha, chất oxi hóa mạnh hơn sẽ phản ứng với chất khử mạnh hơn tạo chất oxi hóa yếu hơn và chất khử yếu hơn."
+  },
+  {
+    "id": "CAND_CHEM_05",
+    "subject": "hoa",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 5",
+    "top5": [
+      "hoa-10-003",
+      "hoa-10-008",
+      "hoa-11-031",
+      "hoa-10-004",
+      "hoa-10-006"
+    ],
+    "top1_chunk": "hoa-10-003",
+    "top1_topic": "Cấu tạo Nguyên tử và Điện tích Hạt nhân (Phần 3)",
+    "top1_content": "Các nguyên tố hóa học gồm những nguyên tử có cùng số hiệu nguyên tử Z. Những nguyên tử có cùng số prôtôn Z nhưng khác số nơtrôn N được gọi là các đồng vị của cùng một nguyên tố. Khối lượng nguyên tử trung bình được tính dựa trên phần trăm số lượng của các đồng vị trong tự nhiên."
+  },
+  {
+    "id": "CAND_CHEM_06",
+    "subject": "hoa",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 6",
+    "top5": [
+      "hoa-10-004",
+      "hoa-10-005",
+      "hoa-10-006",
+      "hoa-10-017",
+      "hoa-11-039"
+    ],
+    "top1_chunk": "hoa-10-004",
+    "top1_topic": "Vỏ Electron và Cấu hình Electron (Phần 1)",
+    "top1_content": "Các êlectron ở vỏ nguyên tử được sắp xếp vào các lớp K, L, M, N tương ứng với số thứ tự lớp n từ 1 đến 4. Trong mỗi lớp, các êlectron lại phân bố vào các phân lớp s, p, d, f với số êlectron tối đa lần lượt là 2, 6, 10 và 14."
+  },
+  {
+    "id": "CAND_CHEM_07",
+    "subject": "hoa",
+    "question_part": "Phần I (Trắc nghiệm)",
+    "question_number": "Phần I - Câu 13",
+    "top5": [
+      "hoa-11-033",
+      "hoa-10-019",
+      "hoa-11-031",
+      "hoa-10-003",
+      "hoa-10-004"
+    ],
+    "top1_chunk": "hoa-11-033",
+    "top1_topic": "Sự Điện ly và Axit - Bazơ (Phần 3)",
+    "top1_content": "Chỉ số pH = -log[H+] được sử dụng để đo độ axit hoặc độ bazơ của dung dịch. Môi trường trung tính có pH = 7, môi trường axit có pH < 7, môi trường bazơ có pH > 7. Chất chỉ thị màu như quỳ tím hoặc phenolphthalein giúp nhận biết khoảng pH."
+  },
+  {
+    "id": "CAND_CHEM_08",
+    "subject": "hoa",
+    "question_part": "Phần I (Trắc nghiệm)",
+    "question_number": "Phần I - Câu 17",
+    "top5": [
+      "hoa-10-003",
+      "hoa-10-008",
+      "hoa-10-007",
+      "hoa-10-001",
+      "hoa-10-006"
+    ],
+    "top1_chunk": "hoa-10-003",
+    "top1_topic": "Cấu tạo Nguyên tử và Điện tích Hạt nhân (Phần 3)",
+    "top1_content": "Các nguyên tố hóa học gồm những nguyên tử có cùng số hiệu nguyên tử Z. Những nguyên tử có cùng số prôtôn Z nhưng khác số nơtrôn N được gọi là các đồng vị của cùng một nguyên tố. Khối lượng nguyên tử trung bình được tính dựa trên phần trăm số lượng của các đồng vị trong tự nhiên."
+  },
+  {
+    "id": "CAND_CHEM_09",
+    "subject": "hoa",
+    "question_part": "Phần I (Trắc nghiệm)",
+    "question_number": "Phần I - Câu 18",
+    "top5": [
+      "hoa-12-083",
+      "hoa-11-042",
+      "hoa-12-082",
+      "hoa-10-012",
+      "hoa-12-084"
+    ],
+    "top1_chunk": "hoa-12-083",
+    "top1_topic": "Đại cương Kim loại và Dãy Điện hóa (Phần 2)",
+    "top1_content": "Tính chất hóa học đặc trưng của kim loại là tính khử (nguyên tử kim loại dễ nhường êlectron để trở thành cation dương). Kim loại tác dụng với phi kim, axit, dung dịch muối và nước."
+  },
+  {
+    "id": "CAND_CHEM_10",
+    "subject": "hoa",
+    "question_part": "Phần I (Trắc nghiệm)",
+    "question_number": "Phần I - Câu 2",
+    "top5": [
+      "hoa-12-081",
+      "hoa-11-050",
+      "hoa-10-008",
+      "hoa-11-028",
+      "hoa-11-051"
+    ],
+    "top1_chunk": "hoa-12-081",
+    "top1_topic": "Peptit, Protein và Polime (Phần 3)",
+    "top1_content": "Polime là những hợp chất có khối lượng phân tử rất lớn gồm nhiều mắt xích liên kết với nhau. Tơ nilon-6,6 được điều chế bằng phản ứng trùng ngưng hexamethylenediamine và axit adipic."
+  },
+  {
+    "id": "CAND_PHYS_01",
+    "subject": "ly",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 1",
+    "top5": [
+      "ly-12-165",
+      "ly-12-161",
+      "ly-12-164",
+      "ly-10-106",
+      "ly-11-124"
+    ],
+    "top1_chunk": "ly-12-165",
+    "top1_topic": "Vật lý Hạt nhân và Phóng xạ (Phần 3)",
+    "top1_content": "Phóng xạ là quá trình hạt nhân không bền vững tự phân rã phát ra các tia phóng xạ alpha, beta, gamma và biến đổi thành hạt nhân khác. Số hạt còn lại N(t) = N0 * 2^(-t/T) với T là chu kỳ bán rã."
+  },
+  {
+    "id": "CAND_PHYS_02",
+    "subject": "ly",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 2",
+    "top5": [
+      "ly-12-165",
+      "ly-12-164",
+      "ly-12-161",
+      "ly-12-163",
+      "ly-10-106"
+    ],
+    "top1_chunk": "ly-12-165",
+    "top1_topic": "Vật lý Hạt nhân và Phóng xạ (Phần 3)",
+    "top1_content": "Phóng xạ là quá trình hạt nhân không bền vững tự phân rã phát ra các tia phóng xạ alpha, beta, gamma và biến đổi thành hạt nhân khác. Số hạt còn lại N(t) = N0 * 2^(-t/T) với T là chu kỳ bán rã."
+  },
+  {
+    "id": "CAND_PHYS_03",
+    "subject": "ly",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 3",
+    "top5": [
+      "ly-10-092",
+      "ly-10-103",
+      "ly-10-105",
+      "ly-11-112",
+      "ly-11-118"
+    ],
+    "top1_chunk": "ly-10-092",
+    "top1_topic": "Chuyển động Thẳng biến đổi Đều (Phần 2)",
+    "top1_content": "Phương trình vận tốc v = v0 + a*t. Phương trình tọa độ x = x0 + v0*t + 0.5*a*t^2. Quãng đường đi được s = v0*t + 0.5*a*t^2. Công thức liên hệ giữa v, a, s không phụ thuộc t: v^2 - v0^2 = 2*a*s."
+  },
+  {
+    "id": "CAND_PHYS_04",
+    "subject": "ly",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 4",
+    "top5": [
+      "ly-10-105",
+      "ly-10-106",
+      "ly-11-117",
+      "ly-12-144",
+      "ly-10-098"
+    ],
+    "top1_chunk": "ly-10-105",
+    "top1_topic": "Công và Công suất Cơ học (Phần 3)",
+    "top1_content": "Công suất P = A / t đo tốc độ thực hiện công trong một đơn vị thời gian. Đơn vị của công suất là Oát (W). Công suất cũng được tính bằng P = F * v khi lực F cùng hướng với vận tốc v."
+  },
+  {
+    "id": "CAND_PHYS_05",
+    "subject": "ly",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 5",
+    "top5": [
+      "ly-10-100",
+      "ly-11-128",
+      "ly-10-097",
+      "ly-10-099",
+      "ly-11-123"
+    ],
+    "top1_chunk": "ly-10-100",
+    "top1_topic": "Chuyển động Tròn đều và Lực Hướng tâm (Phần 1)",
+    "top1_content": "Chuyển động tròn đều là chuyển động có quỹ đạo tròn và tốc độ độ lớn không đổi. Tốc độ góc omega = Delta alpha / Delta t (rad/s). Tốc độ dài v = omega * r. Chu kỳ T = 2*pi / omega, tần số f = 1 / T."
+  },
+  {
+    "id": "CAND_PHYS_06",
+    "subject": "ly",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 6",
+    "top5": [
+      "ly-11-128",
+      "ly-10-100",
+      "ly-11-124",
+      "ly-11-127",
+      "ly-11-118"
+    ],
+    "top1_chunk": "ly-11-128",
+    "top1_topic": "Hiện tượng Cảm ứng Điện từ (Phần 2)",
+    "top1_content": "Khi từ thông qua một mạch kín biến thiên theo thời gian thì trong mạch xuất hiện dòng điện cảm ứng. Suất điện động cảm ứng e_c = - dPhi / dt tỉ lệ với tốc độ biến thiên từ thông qua mạch."
+  },
+  {
+    "id": "CAND_PHYS_07",
+    "subject": "ly",
+    "question_part": "Phần I (Trắc nghiệm)",
+    "question_number": "Phần I - Câu 2",
+    "top5": [
+      "ly-12-145",
+      "ly-10-104",
+      "ly-11-116",
+      "ly-12-141",
+      "ly-10-096"
+    ],
+    "top1_chunk": "ly-12-145",
+    "top1_topic": "Sóng Cơ học và Phương trình Sóng (Phần 1)",
+    "top1_content": "Sóng cơ là sự lan truyền dao động cơ trong môi trường vật chất. Sóng ngang có phương dao động vuông góc với phương truyền sóng (truyền trong chất rắn và bề mặt chất lỏng). Sóng dọc có phương dao động trùng phương truyền sóng."
+  },
+  {
+    "id": "CAND_PHYS_08",
+    "subject": "ly",
+    "question_part": "Phần I (Trắc nghiệm)",
+    "question_number": "Phần I - Câu 4",
+    "top5": [
+      "ly-10-096",
+      "ly-10-091",
+      "ly-10-093",
+      "ly-10-103",
+      "ly-10-111"
+    ],
+    "top1_chunk": "ly-10-096",
+    "top1_topic": "Các Định luật Newton về Cơ học (Phần 3)",
+    "top1_content": "Định luật 3 Newton: Trong mọi trường hợp, khi vật A tác dụng lên vật B một lực thì vật B cũng tác dụng lại vật A một lực. Hai lực này là hai lực trực đối: cùng phương, cùng độ lớn nhưng ngược chiều và xuất hiện đồng thời."
+  },
+  {
+    "id": "CAND_PHYS_09",
+    "subject": "ly",
+    "question_part": "Phần I (Trắc nghiệm)",
+    "question_number": "Phần I - Câu 5",
+    "top5": [
+      "ly-11-129",
+      "ly-11-128",
+      "ly-12-158",
+      "ly-11-123",
+      "ly-10-096"
+    ],
+    "top1_chunk": "ly-11-129",
+    "top1_topic": "Hiện tượng Cảm ứng Điện từ (Phần 3)",
+    "top1_content": "Định luật Lenz: Dòng điện cảm ứng xuất hiện trong mạch kín có chiều sao cho từ trường do nó sinh ra chống lại sự biến thiên của từ thông sinh ra nó."
+  },
+  {
+    "id": "CAND_PHYS_10",
+    "subject": "ly",
+    "question_part": "Phần I (Trắc nghiệm)",
+    "question_number": "Phần I - Câu 7",
+    "top5": [
+      "ly-12-153",
+      "ly-11-128",
+      "ly-12-151",
+      "ly-11-118",
+      "ly-10-106"
+    ],
+    "top1_chunk": "ly-12-153",
+    "top1_topic": "Dòng điện Xoay chiều Mạch RLC (Phần 3)",
+    "top1_content": "Hiện tượng cộng hưởng điện xảy ra khi Z_L = Z_C (omega^2 * L * C = 1). Lúc này tổng trở mạch Z_min = R, cường độ dòng điện hiệu dụng đạt cực đại I_max = U / R và hệ số công suất cos(phi) = 1."
+  },
+  {
+    "id": "CAND_BIO_01",
+    "subject": "sinh",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 1",
+    "top5": [
+      "sinh-12-301",
+      "sinh-12-299",
+      "hoa-10-004",
+      "sinh-10-259",
+      "hoa-10-003"
+    ],
+    "top1_chunk": "sinh-12-301",
+    "top1_topic": "Sinh thái học và Chu trình Sinh Địa hóa (Phần 1)",
+    "top1_content": "Quần xã sinh vật gồm nhiều quần thể khác loài cùng sống trong một không gian thời gian. Diễn thế sinh thái là quá trình biến đổi tuần tự của quần xã qua các giai đoạn."
+  },
+  {
+    "id": "CAND_BIO_02",
+    "subject": "sinh",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 2",
+    "top5": [
+      "sinh-12-299",
+      "sinh-12-301",
+      "sinh-10-254",
+      "sinh-12-281",
+      "sinh-12-293"
+    ],
+    "top1_chunk": "sinh-12-299",
+    "top1_topic": "Bằng chứng Tiến hóa và Thuyết Tổng hợp (Phần 2)",
+    "top1_content": "Tiến hóa nhỏ là quá trình biến đổi tần số alen và thành phần kiểu gen của quần thể dẫn đến hình thành loài mới dưới tác động của các nhân tố tiến hóa."
+  },
+  {
+    "id": "CAND_BIO_03",
+    "subject": "sinh",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 3",
+    "top5": [
+      "sinh-12-292",
+      "sinh-12-293",
+      "sinh-12-294",
+      "sinh-12-280",
+      "sinh-12-288"
+    ],
+    "top1_chunk": "sinh-12-292",
+    "top1_topic": "Quy luật Di truyền Mendel và Liên kết Gen (Phần 1)",
+    "top1_content": "Định luật phân ly Mendel: Lai dị hợp Aa x Aa cho tỉ lệ kiểu hình 3 trội : 1 lặn, tỉ lệ kiểu gen 1AA : 2Aa : 1aa. Mỗi tính trạng do một cặp alen quy định."
+  },
+  {
+    "id": "CAND_BIO_04",
+    "subject": "sinh",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 4",
+    "top5": [
+      "sinh-12-301",
+      "sinh-10-259",
+      "sinh-11-271",
+      "sinh-11-272",
+      "hoa-11-028"
+    ],
+    "top1_chunk": "sinh-12-301",
+    "top1_topic": "Sinh thái học và Chu trình Sinh Địa hóa (Phần 1)",
+    "top1_content": "Quần xã sinh vật gồm nhiều quần thể khác loài cùng sống trong một không gian thời gian. Diễn thế sinh thái là quá trình biến đổi tuần tự của quần xã qua các giai đoạn."
+  },
+  {
+    "id": "CAND_BIO_05",
+    "subject": "sinh",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 5",
+    "top5": [
+      "sinh-10-247",
+      "sinh-10-249",
+      "sinh-10-248",
+      "hoa-10-004",
+      "sinh-10-241"
+    ],
+    "top1_chunk": "sinh-10-247",
+    "top1_topic": "Cấu trúc Tế bào Nhân sơ và Nhân thực (Phần 1)",
+    "top1_content": "Tế bào nhân sơ (vi khuẩn) chưa có nhân hoàn chỉnh (chỉ có vùng nhân chứa ADN dạng vòng), không có màng nhân và các bào quan có màng bao bọc. Kích thước tế bào nhỏ giúp trao đổi chất nhanh."
+  },
+  {
+    "id": "CAND_BIO_06",
+    "subject": "sinh",
+    "question_part": "Phần III (Trả lời ngắn)",
+    "question_number": "Phần III - Câu 6",
+    "top5": [
+      "sinh-12-301",
+      "sinh-12-289",
+      "sinh-12-299",
+      "sinh-12-302",
+      "sinh-12-303"
+    ],
+    "top1_chunk": "sinh-12-301",
+    "top1_topic": "Sinh thái học và Chu trình Sinh Địa hóa (Phần 1)",
+    "top1_content": "Quần xã sinh vật gồm nhiều quần thể khác loài cùng sống trong một không gian thời gian. Diễn thế sinh thái là quá trình biến đổi tuần tự của quần xã qua các giai đoạn."
+  },
+  {
+    "id": "CAND_BIO_07",
+    "subject": "sinh",
+    "question_part": "Phần I (Trắc nghiệm)",
+    "question_number": "Phần I - Câu 10",
+    "top5": [
+      "sinh-11-269",
+      "sinh-10-249",
+      "sinh-10-257",
+      "sinh-10-256",
+      "sinh-10-258"
+    ],
+    "top1_chunk": "sinh-11-269",
+    "top1_topic": "Hô hấp và Hô hấp Sáng Thực vật (Phần 2)",
+    "top1_content": "Hô hấp sáng là quá trình hấp thụ O2 và giải phóng CO2 ở ngoài ánh sáng diễn ra tại 3 bào quan: Lục lạp, peroxixom và ti thể ở thực vật C3 khi cường độ ánh sáng mạnh."
+  },
+  {
+    "id": "CAND_PHYS_11",
+    "subject": "ly",
+    "question_part": "Phần I (Trắc nghiệm)",
+    "question_number": "Phần I - Câu 8",
+    "top5": [
+      "ly-12-164",
+      "ly-12-163",
+      "ly-10-106",
+      "ly-12-165",
+      "ly-11-117"
+    ],
+    "top1_chunk": "ly-12-164",
+    "top1_topic": "Vật lý Hạt nhân và Phóng xạ (Phần 2)",
+    "top1_content": "Năng lượng liên kết riêng E_lkr = E_lk / A đo mức độ bền vững của hạt nhân. Hạt nhân càng bền vững khi có năng lượng liên kết riêng càng lớn (các hạt nhân trung bình có A từ 50 đến 95 bền vững nhất)."
+  },
+  {
+    "id": "CAND_BIO_09",
+    "subject": "sinh",
+    "question_part": "Phần I (Trắc nghiệm)",
+    "question_number": "Phần I - Câu 5",
+    "top5": [
+      "sinh-11-271",
+      "sinh-11-268",
+      "sinh-12-299",
+      "sinh-12-301",
+      "sinh-12-302"
+    ],
+    "top1_chunk": "sinh-11-271",
+    "top1_topic": "Tiêu hóa và Trao đổi Khí Động vật (Phần 1)",
+    "top1_content": "Tiêu hóa ở động vật gồm tiêu hóa cơ học (xé, nghiền thức ăn) và tiêu hóa hóa học (nhờ enzyme tiêu hóa phân giải các đại phân tử thành các chất dinh dưỡng đơn giản)."
+  }
+]

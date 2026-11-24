@@ -26,7 +26,7 @@ test.describe('E2E Real User - 04: Trợ Lý AI NOVA & RAG Matching Engine', () 
 
     if (await emailInput.isVisible({ timeout: 4000 }).catch(() => false)) {
       await emailInput.fill('test1@gmail.com');
-      await passwordInput.fill('test1123');
+      await passwordInput.fill(process.env.TEST_USER_PASSWORD || 'test1123');
       await submitBtn.click();
       await page.waitForTimeout(2500);
     }
@@ -55,7 +55,7 @@ test.describe('E2E Real User - 04: Trợ Lý AI NOVA & RAG Matching Engine', () 
 
     if (await emailInput.isVisible({ timeout: 4000 }).catch(() => false)) {
       await emailInput.fill('test1@gmail.com');
-      await passwordInput.fill('test1123');
+      await passwordInput.fill(process.env.TEST_USER_PASSWORD || 'test1123');
       await submitBtn.click();
       await page.waitForTimeout(2000);
     }

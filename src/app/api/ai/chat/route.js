@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { callResilientGemini } from '@/lib/geminiCaller';
 import { getCorsHeaders, getClientIdentifier, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
+import { verifyResponseGrounding } from '@/lib/responseVerifier';
 
 export async function OPTIONS(req) {
   return new NextResponse(null, { status: 204, headers: getCorsHeaders(req) });
@@ -124,11 +125,20 @@ export async function POST(req) {
       responseMimeType
     });
 
+    // 🛡️ Hậu kiểm suy nghiệm (Heuristic Verifier) câu trả lời đối chiếu với ngữ liệu RAG
+    const verifier = verifyResponseGrounding({
+      answerText: result.text,
+      citedChunkIds: body.citedChunkIds || [],
+      retrievedChunks: body.retrievedChunks || [],
+      deterministicFacts: body.deterministicFacts || []
+    });
+
     return NextResponse.json(
       {
         success: true,
         text: result.text,
         model: result.model,
+        verifier,
         candidates: result.candidates || [
           {
             content: { parts: [{ text: result.text }] },

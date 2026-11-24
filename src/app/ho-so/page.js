@@ -460,6 +460,8 @@ export default function ProfilePage() {
   const [sendingChallenge, setSendingChallenge] = useState(false);
   const [challengeSentMsg, setChallengeSentMsg] = useState('');  
   const [isFaceAuthModalOpen, setIsFaceAuthModalOpen] = useState(false);
+  const [isFaceConsentModalOpen, setIsFaceConsentModalOpen] = useState(false);
+  const [faceConsentChecked, setFaceConsentChecked] = useState(false);
   // Hologram Card 3D tilt refs & states
   const cardRef = useRef(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
@@ -2260,10 +2262,38 @@ Vui lòng nhấn 'Mua trọn bộ đang thử' hoặc đổi về trang phục �
         }, { merge: true });
         setSettingsMessage({
           type: 'success',
-          text: 'Đã tắt tính năng Xác thực 2 bước bằng Khuôn mặt AI thành công.'
+          text: 'Đã tạm tắt tính năng so khớp khuôn mặt.'
         });
       } catch (err) {
-        console.error('Lỗi khi tắt Face 2FA:', err);
+        console.error('Lỗi khi tắt tính năng khuôn mặt:', err);
+      }
+    }
+  };
+
+  const handleDeleteFaceData = async () => {
+    playSound.click();
+    if (!confirm('Bạn có chắc chắn muốn xóa vĩnh viễn vector đặc trưng khuôn mặt (128-D) đã lưu? Sau khi xóa, bạn sẽ cần đăng ký lại nếu muốn sử dụng tính năng này.')) {
+      return;
+    }
+    setPersonalization({ face2FAEnabled: false, faceDescriptor: null });
+    if (auth.currentUser) {
+      try {
+        const { updateDoc, deleteField, deleteDoc } = await import('firebase/firestore');
+        // 1. Xóa tài liệu biometrics trong subcollection riêng tư
+        await deleteDoc(doc(db, 'users', auth.currentUser.uid, 'private', 'biometrics'));
+
+        // 2. Cập nhật cờ trạng thái trên user doc gốc
+        const userRef = doc(db, 'users', auth.currentUser.uid);
+        await updateDoc(userRef, {
+          face2FAEnabled: false,
+          'personalization.face2FAEnabled': false
+        });
+        setSettingsMessage({
+          type: 'success',
+          text: 'Đã xóa vĩnh viễn dữ liệu vector đặc trưng khuôn mặt khỏi tài khoản.'
+        });
+      } catch (err) {
+        console.error('Lỗi khi xóa dữ liệu khuôn mặt:', err);
       }
     }
   };
@@ -5117,57 +5147,80 @@ Vui lòng nhấn 'Mua trọn bộ đang thử' hoặc đổi về trang phục �
               <p className="text-xs text-text-secondary mt-1">Quản lý trạng thái xác minh, mật khẩu bảo mật và thay đổi thông tin liên lạc.</p>
             </div>
 
-            {/* 0. Xác thực 2 bước bằng Khuôn mặt AI (AI Face 2FA) */}
+            {/* 0. Xử lý dữ liệu sinh trắc học khuôn mặt (So khớp 1:1 phục vụ giám sát phòng thi) */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 bg-gradient-to-r from-bg-tertiary via-bg-tertiary to-pink-500/5 border border-pink-500/20 rounded-2xl relative z-10">
-              <div className="space-y-1">
+              <div className="space-y-1 max-w-xl">
                 <div className="flex items-center gap-2">
                   <h4 className="text-sm font-bold text-text-primary flex items-center gap-2">
-                    <ShieldCheck className="w-4.5 h-4.5 text-pink-400" /> Xác thực 2 bước bằng Khuôn mặt AI (Face 2FA)
+                    <ShieldCheck className="w-4.5 h-4.5 text-pink-400" /> Xử lý dữ liệu sinh trắc học khuôn mặt (So khớp 1:1)
                   </h4>
                   {personalization.face2FAEnabled ? (
                     <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/15 flex items-center gap-1">
-                      <CheckCircle className="w-3.5 h-3.5" /> Đã bật
+                      <CheckCircle className="w-3.5 h-3.5" /> Đã kích hoạt
                     </span>
                   ) : (
                     <span className="text-[10px] font-bold text-text-secondary bg-bg-primary px-2.5 py-0.5 rounded-full border border-border-theme">
-                      Tùy chọn (Chưa bật)
+                      Mặc định tắt (Cần sự đồng ý)
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-text-secondary">
-                  Trích xuất mảng Vector AI 128D trên trình duyệt để đối chiếu 1-vs-1 khi đăng nhập.
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  Sử dụng mô hình mạng nơ-ron ResNet-34 FaceNet (<code className="text-pink-400 font-mono text-[11px]">@vladmandic/face-api@1.7.12</code>) chạy trực tiếp trên trình duyệt để trích xuất và lưu mảng vector số thực 128 chiều tại subcollection riêng tư bảo mật (<code className="text-cyan-400 font-mono text-[11px]">users/{'{uid}'}/private/biometrics</code>) phục vụ so khớp danh tính 1:1 khi thi đấu và làm bài. <strong>Hệ thống hoàn toàn KHÔNG lưu trữ ảnh chụp hay video từ webcam.</strong>
                 </p>
-                <p className="text-[10px] text-text-secondary">
-                  {personalization.face2FAEnabled 
-                    ? 'Tài khoản của bạn đã được bảo vệ bằng lớp quét sinh trắc học AI.'
-                    : 'Tăng cường bảo mật tài khoản với công nghệ nhận diện đặc trưng khuôn mặt AI.'
-                  }
-                </p>
+                <div className="space-y-1.5 mt-1.5">
+                  <p className="text-[11px] text-amber-400/90 bg-amber-500/10 border border-amber-500/20 p-2 rounded-xl">
+                    ⚠️ <strong>Lưu ý quyền riêng tư</strong>: Đối với học sinh chưa đủ 18 tuổi, việc thu thập và xử lý vector đặc trưng sinh trắc học này bắt buộc phải có sự đồng ý của cha mẹ hoặc người giám hộ hợp pháp.
+                  </p>
+                  <p className="text-[11px] text-emerald-400/90 bg-emerald-500/10 border border-emerald-500/20 p-2 rounded-xl">
+                    🛡️ <strong>Không bắt buộc để thi</strong>: Tính năng khuôn mặt hoàn toàn tùy chọn. Nếu học sinh từ chối, hệ thống áp dụng phương án thay thế (giám sát thủ công bởi giám thị hoặc mã xác thực OTP) và tuyệt đối không chặn học sinh vào phòng thi.
+                  </p>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
                 {personalization.face2FAEnabled ? (
                   <>
                     <button
                       onClick={() => { playSound.click(); setIsFaceAuthModalOpen(true); }}
-                      className="px-4 py-2.5 bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 border border-pink-500/30 text-xs font-bold rounded-xl transition-all active:scale-95 flex items-center gap-1.5"
+                      className="px-3.5 py-2 bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 border border-pink-500/30 text-xs font-bold rounded-xl transition-all active:scale-95 flex items-center justify-center gap-1.5"
                     >
-                      <Camera className="w-3.5 h-3.5" /> Quét lại khuôn mặt
+                      <Camera className="w-3.5 h-3.5" /> Quét lại
                     </button>
                     <button
                       onClick={handleDisableFace2FA}
-                      className="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold rounded-xl transition-all active:scale-95"
+                      className="px-3.5 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold rounded-xl transition-all active:scale-95"
                     >
                       Tắt
                     </button>
+                    <button
+                      onClick={handleDeleteFaceData}
+                      className="px-3.5 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold rounded-xl transition-all active:scale-95"
+                      title="Xóa vĩnh viễn vector 128-D khỏi Firestore"
+                    >
+                      Xóa dữ liệu
+                    </button>
                   </>
                 ) : (
-                  <button
-                    onClick={() => { playSound.click(); setIsFaceAuthModalOpen(true); }}
-                    className="px-5 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-lg shadow-pink-500/20 transition-all active:scale-95 flex items-center gap-1.5"
-                  >
-                    <Camera className="w-3.5 h-3.5" /> Kích hoạt Face 2FA
-                  </button>
+                  <>
+                    <button
+                      onClick={() => { 
+                        playSound.click(); 
+                        setFaceConsentChecked(false);
+                        setIsFaceConsentModalOpen(true); 
+                      }}
+                      className="px-4 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-lg shadow-pink-500/20 transition-all active:scale-95 flex items-center justify-center gap-1.5"
+                    >
+                      <Camera className="w-3.5 h-3.5" /> Kích hoạt khuôn mặt
+                    </button>
+                    {personalization.faceDescriptor && (
+                      <button
+                        onClick={handleDeleteFaceData}
+                        className="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold rounded-xl transition-all active:scale-95"
+                      >
+                        Xóa dữ liệu cũ
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -6558,7 +6611,123 @@ Vui lòng nhấn 'Mua trọn bộ đang thử' hoặc đổi về trang phục �
         document.body
       )}
 
-      {/* Modal Đăng ký Face 2FA bằng AI */}
+      {/* Modal Thông báo & Xin đồng ý Xử lý Dữ liệu Sinh trắc học */}
+      {isFaceConsentModalOpen && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg bg-[#141622] border border-pink-500/30 rounded-3xl p-6 shadow-[0_0_50px_rgba(236,72,153,0.2)] text-left overflow-hidden">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-pink-500/10 border border-pink-500/30 flex items-center justify-center text-pink-400">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-white uppercase font-sans">
+                    Xác nhận đồng ý xử lý dữ liệu sinh trắc học
+                  </h3>
+                  <span className="text-[10px] font-mono text-pink-400 uppercase tracking-widest block">
+                    ResNet-34 FaceNet • 128-D Vector • So khớp 1:1
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsFaceConsentModalOpen(false)}
+                className="p-1.5 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs text-zinc-300 leading-relaxed max-h-[60vh] overflow-y-auto pr-1">
+              <div className="p-3 bg-white/5 border border-white/10 rounded-2xl space-y-2">
+                <p className="font-bold text-white flex items-center gap-1.5">
+                  <Cpu className="w-4 h-4 text-cyan-400" /> Bản chất xử lý kỹ thuật:
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-zinc-300 text-[11px]">
+                  <li>Hệ thống sử dụng mô hình trí tuệ nhân tạo <strong className="text-white">@vladmandic/face-api@1.7.12</strong> (ResNet-34 FaceNet) chạy trực tiếp tại trình duyệt người dùng.</li>
+                  <li>Mô hình tính toán và trích xuất một mảng gồm <strong>128 số thực (Vector đặc trưng)</strong> từ khuôn mặt xuất hiện trước webcam.</li>
+                  <li>Vector 128 chiều này được lưu trữ tại subcollection riêng tư cô lập (<code className="text-cyan-400 font-mono text-[10px]">users/{'{uid}'}/private/biometrics</code>) trên Firestore; chỉ duy nhất chủ tài khoản được đọc/ghi.</li>
+                  <li><strong>Hệ thống KHÔNG lưu trữ, không tải lên và không truyền hình ảnh hoặc video webcam thô của người dùng.</strong></li>
+                  <li><strong>Không bắt buộc để thi:</strong> Nếu từ chối, học sinh được giám sát bằng phương án thay thế (giáo viên giám sát thủ công hoặc OTP) và không bị chặn vào phòng thi.</li>
+                </ul>
+              </div>
+
+              <div className="p-3 bg-amber-500/10 border border-amber-500/25 rounded-2xl text-[11px] text-amber-200 space-y-1.5">
+                <p className="font-bold text-amber-300 flex items-center gap-1.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-400" /> Lưu ý quan trọng cho học sinh dưới 18 tuổi:
+                </p>
+                <p>
+                  Theo quy định về bảo vệ dữ liệu cá nhân, việc xử lý dữ liệu đặc trưng sinh trắc học của trẻ em/học sinh dưới 18 tuổi <strong>bắt buộc phải có sự đồng ý của cha mẹ hoặc người giám hộ hợp pháp</strong>.
+                </p>
+                <p>
+                  Dữ liệu vector có thể xóa bất kỳ lúc nào bằng nút <em>"Xóa dữ liệu"</em> trong trang Hồ sơ.
+                </p>
+              </div>
+
+              <label className="flex items-start gap-2.5 p-3 bg-pink-500/10 border border-pink-500/20 rounded-2xl cursor-pointer hover:bg-pink-500/15 transition-all select-none">
+                <input
+                  type="checkbox"
+                  checked={faceConsentChecked}
+                  onChange={(e) => setFaceConsentChecked(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-pink-500 rounded cursor-pointer"
+                />
+                <span className="text-[11px] text-white">
+                  Tôi (hoặc cha mẹ/người giám hộ) tự xác nhận đã có sự đồng ý của phụ huynh (học sinh tự xác nhận đã có đồng ý của phụ huynh, chưa được xác minh) cho phép hệ thống trích xuất và lưu trữ vector đặc trưng khuôn mặt (128-D) phục vụ giám sát phòng thi trực tuyến (tự nguyện, không bắt buộc để vào thi).
+                </span>
+              </label>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-white/10 mt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  playSound.click();
+                  setIsFaceConsentModalOpen(false);
+                }}
+                className="px-4 py-2.5 rounded-xl border border-white/10 text-zinc-400 hover:text-white hover:bg-white/5 text-xs font-bold transition-all"
+              >
+                Từ chối / Để sau
+              </button>
+              <button
+                type="button"
+                disabled={!faceConsentChecked}
+                onClick={async () => {
+                  playSound.click();
+                  if (auth.currentUser) {
+                    try {
+                      const { setDoc } = await import('firebase/firestore');
+                      await setDoc(doc(db, 'users', auth.currentUser.uid, 'private', 'consent'), {
+                        consentVersion: '1.0',
+                        agreedAt: new Date().toISOString(),
+                        agreedByUid: auth.currentUser.uid,
+                        agreedByEmail: auth.currentUser.email,
+                        parentalConsentStatus: 'self_reported_unverified',
+                        parentalConsentAcknowledged: true,
+                        note: 'học sinh tự xác nhận đã có đồng ý của phụ huynh (chưa được xác minh)',
+                        faceVerificationOptional: true,
+                        alternativeSupervision: 'manual_teacher_supervision'
+                      }, { merge: true });
+                    } catch (e) {
+                      console.warn('Lỗi ghi consent:', e);
+                    }
+                  }
+                  setIsFaceConsentModalOpen(false);
+                  setIsFaceAuthModalOpen(true);
+                }}
+                className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-lg ${
+                  faceConsentChecked
+                    ? 'bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white shadow-pink-500/25 active:scale-95 cursor-pointer'
+                    : 'bg-zinc-800 text-zinc-500 border border-zinc-700 cursor-not-allowed opacity-60'
+                }`}
+              >
+                <Camera className="w-3.5 h-3.5" /> Xác nhận & Bắt đầu quét
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Modal Đăng ký Giám sát Khuôn mặt */}
       <FaceAuthModal
         isOpen={isFaceAuthModalOpen}
         onClose={() => setIsFaceAuthModalOpen(false)}
@@ -6566,7 +6735,7 @@ Vui lòng nhấn 'Mua trọn bộ đang thử' hoặc đổi về trang phục �
         onSuccess={() => {
           setSettingsMessage({
             type: 'success',
-            text: 'Đã bảo vệ tài khoản của bạn thành công bằng AI Face 2FA!'
+            text: 'Đã lưu vector đặc trưng khuôn mặt hỗ trợ giám sát phòng thi thành công!'
           });
         }}
       />

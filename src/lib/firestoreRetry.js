@@ -9,7 +9,7 @@ import { db } from './firebase';
  * Đảm bảo kết nối mạng cho Firestore luôn sẵn sàng bằng cách kích hoạt lại network
  */
 export const ensureFirestoreOnline = async (maxAttempts = 3, delayMs = 1000) => {
-  // Vì cơ sở dữ liệu đã hoạt động hoàn hảo và Rules đã mở rộng, 
+  // Cơ sở dữ liệu và Rules đã được cấu hình chuẩn xác, 
   // chúng ta nhường quyền quản lý kết nối tự động cho SDK của Firebase.
   // Việc gọi enableNetwork liên tục không còn cần thiết và sẽ tránh được cảnh báo "Target ID already exists".
   return true;

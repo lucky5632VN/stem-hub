@@ -3,13 +3,7 @@ import path from 'path';
 
 // Script to build the complete 150 Benchmark Cases across 4 subjects
 // Math: 40 | Physics: 38 | Chemistry: 38 | Biology: 34 = Exactly 150 items.
-
-const teachers = {
-  toan: 'Thầy Lê Văn Hùng (Tổ trưởng Chuyên môn Toán - THPT Chuyên)',
-  ly: 'Cô Đặng Thị Bích Thủy (Giáo viên Cốt cán Vật lý - THPT Chuyên)',
-  hoa: 'Thầy Nguyễn Trọng Nghĩa (Tổ phó Chuyên môn Hóa học - THPT Chuyên)',
-  sinh: 'Cô Vũ Thị Hoàng Yến (Thạc sĩ Sinh học - Chuyên gia GDPT 2018)'
-};
+// BỘ ĐỐI CHỨNG KỸ THUẬT TỔNG HỢP (SYNTHETIC BENCHMARK) DO NHÓM XÂY DỰNG, CHƯA QUA CHẤM CỦA GIÁO VIÊN
 
 // We will construct the array of 150 objects
 const all150Cases = [];
@@ -79,12 +73,15 @@ mathTopics.forEach((t, i) => {
     ground_truth: t.gt,
     sgk_reference: t.sgk,
     gemini_response: `Phân tích theo SGK GDPT 2018: ${t.gt}`,
-    score_correctness: t.c,
-    score_sgk_grounding: t.g,
-    score_pedagogy: t.p,
-    weighted_score: Number((0.45 * t.c + 0.30 * t.g + 0.25 * t.p).toFixed(2)),
-    teacher_validator: teachers.toan,
-    status: 'verified_by_teacher'
+    preset_not_for_reporting: {
+      score_correctness: t.c,
+      score_sgk_grounding: t.g,
+      score_pedagogy: t.p,
+      weighted_score: Number((0.45 * t.c + 0.30 * t.g + 0.25 * t.p).toFixed(2))
+    },
+    teacher_validator: null,
+    status: 'synthetic_unverified',
+    benchmark_note: 'Bộ đối chứng kỹ thuật tổng hợp (synthetic benchmark) do nhóm xây dựng, chưa qua chấm của giáo viên'
   });
 });
 
@@ -142,12 +139,15 @@ physicsTopics.forEach((t, i) => {
     ground_truth: t.gt,
     sgk_reference: t.sgk,
     gemini_response: `Phân tích theo SGK Vật lý GDPT 2018: ${t.gt}`,
-    score_correctness: t.c,
-    score_sgk_grounding: t.g,
-    score_pedagogy: t.p,
-    weighted_score: Number((0.45 * t.c + 0.30 * t.g + 0.25 * t.p).toFixed(2)),
-    teacher_validator: teachers.ly,
-    status: 'verified_by_teacher'
+    preset_not_for_reporting: {
+      score_correctness: t.c,
+      score_sgk_grounding: t.g,
+      score_pedagogy: t.p,
+      weighted_score: Number((0.45 * t.c + 0.30 * t.g + 0.25 * t.p).toFixed(2))
+    },
+    teacher_validator: null,
+    status: 'synthetic_unverified',
+    benchmark_note: 'Bộ đối chứng kỹ thuật tổng hợp (synthetic benchmark) do nhóm xây dựng, chưa qua chấm của giáo viên'
   });
 });
 
@@ -205,12 +205,15 @@ chemTopics.forEach((t, i) => {
     ground_truth: t.gt,
     sgk_reference: t.sgk,
     gemini_response: `Phân tích theo SGK Hóa học GDPT 2018: ${t.gt}`,
-    score_correctness: t.c,
-    score_sgk_grounding: t.g,
-    score_pedagogy: t.p,
-    weighted_score: Number((0.45 * t.c + 0.30 * t.g + 0.25 * t.p).toFixed(2)),
-    teacher_validator: teachers.hoa,
-    status: 'verified_by_teacher'
+    preset_not_for_reporting: {
+      score_correctness: t.c,
+      score_sgk_grounding: t.g,
+      score_pedagogy: t.p,
+      weighted_score: Number((0.45 * t.c + 0.30 * t.g + 0.25 * t.p).toFixed(2))
+    },
+    teacher_validator: null,
+    status: 'synthetic_unverified',
+    benchmark_note: 'Bộ đối chứng kỹ thuật tổng hợp (synthetic benchmark) do nhóm xây dựng, chưa qua chấm của giáo viên'
   });
 });
 
@@ -264,12 +267,15 @@ bioTopics.forEach((t, i) => {
     ground_truth: t.gt,
     sgk_reference: t.sgk,
     gemini_response: `Phân tích theo SGK Sinh học GDPT 2018: ${t.gt}`,
-    score_correctness: t.c,
-    score_sgk_grounding: t.g,
-    score_pedagogy: t.p,
-    weighted_score: Number((0.45 * t.c + 0.30 * t.g + 0.25 * t.p).toFixed(2)),
-    teacher_validator: teachers.sinh,
-    status: 'verified_by_teacher'
+    preset_not_for_reporting: {
+      score_correctness: t.c,
+      score_sgk_grounding: t.g,
+      score_pedagogy: t.p,
+      weighted_score: Number((0.45 * t.c + 0.30 * t.g + 0.25 * t.p).toFixed(2))
+    },
+    teacher_validator: null,
+    status: 'synthetic_unverified',
+    benchmark_note: 'Bộ đối chứng kỹ thuật tổng hợp (synthetic benchmark) do nhóm xây dựng, chưa qua chấm của giáo viên'
   });
 });
 
@@ -279,18 +285,10 @@ console.log(`- Lý: ${all150Cases.filter(c => c.subject === 'ly').length} ca`);
 console.log(`- Hóa: ${all150Cases.filter(c => c.subject === 'hoa').length} ca`);
 console.log(`- Sinh: ${all150Cases.filter(c => c.subject === 'sinh').length} ca`);
 
-// Calculate overall statistics
-const avgCorrectness = all150Cases.reduce((sum, c) => sum + c.score_correctness, 0) / all150Cases.length;
-const avgGrounding = all150Cases.reduce((sum, c) => sum + c.score_sgk_grounding, 0) / all150Cases.length;
-const avgPedagogy = all150Cases.reduce((sum, c) => sum + c.score_pedagogy, 0) / all150Cases.length;
-const overallWeighted = all150Cases.reduce((sum, c) => sum + c.weighted_score, 0) / all150Cases.length;
-const overallPct = (overallWeighted * 10).toFixed(2);
-
-console.log(`\n📊 KẾT QUẢ ĐÁNH GIÁ 150 CA BENCHMARK:`);
-console.log(`- Điểm Độ Đúng Khoa Học (45%): ${(avgCorrectness * 10).toFixed(2)}% (${avgCorrectness.toFixed(2)}/10)`);
-console.log(`- Điểm Căn Cứ Dẫn Chứng SGK (30%): ${(avgGrounding * 10).toFixed(2)}% (${avgGrounding.toFixed(2)}/10)`);
-console.log(`- Điểm Sư Phạm & Gợi Mở (25%): ${(avgPedagogy * 10).toFixed(2)}% (${avgPedagogy.toFixed(2)}/10)`);
-console.log(`- CHỈ SỐ TỔNG HỢP TOÀN BỘ: ${overallPct}% (${overallWeighted.toFixed(2)}/10) -> ĐÁP ỨNG TIÊU CHUẨN > 92%`);
+// Thống kê phân bố kỹ thuật
+console.log(`\n📊 THỐNG KÊ KỸ THUẬT 150 CA BENCHMARK:`);
+console.log(`- Trạng thái thẩm định: synthetic_unverified (150/150 ca)`);
+console.log(`- Mọi trường điểm số ban đầu đã được đóng gói thành 'preset_not_for_reporting' và KHÔNG dùng để báo cáo`);
 
 // Save JSON file
 const outDir = path.resolve('src/ai-training/datasets');
@@ -299,8 +297,8 @@ const jsonPath = path.join(outDir, 'benchmark_150_cases.json');
 fs.writeFileSync(jsonPath, JSON.stringify(all150Cases, null, 2), 'utf-8');
 console.log(`\n💾 Đã lưu JSON: ${jsonPath}`);
 
-// Generate CSV for Google Sheets
-const csvHeaders = 'STT,Mã Câu Hỏi,Môn Học,Lớp,Mức Độ Nhận Thức,Chủ Đề Kiến Thức,Câu Hỏi Đánh Giá,Đáp Án Chuẩn (Ground Truth),Nguồn Trích Dẫn SGK GDPT 2018,Độ Đúng (45%),Dẫn Chứng SGK (30%),Sư Phạm (25%),Điểm Tổng Hợp,Giáo Viên Thẩm Định,Trạng Thái\n';
+// Generate CSV for Synthetic Benchmark Inspection
+const csvHeaders = 'STT,Mã Câu Hỏi,Môn Học,Lớp,Mức Độ Nhận Thức,Chủ Đề Kiến Thức,Câu Hỏi Đánh Giá,Đáp Án Chuẩn (Ground Truth),Nguồn Trích Dẫn SGK GDPT 2018,Trạng Thái Thẩm Định,Ghi Chú Kỹ Thuật\n';
 const csvRows = all150Cases.map((c, idx) => {
   const sanitize = str => `"${(str || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`;
   return [
@@ -313,56 +311,51 @@ const csvRows = all150Cases.map((c, idx) => {
     sanitize(c.question),
     sanitize(c.ground_truth),
     sanitize(c.sgk_reference),
-    c.score_correctness,
-    c.score_sgk_grounding,
-    c.score_pedagogy,
-    c.weighted_score,
-    sanitize(c.teacher_validator),
-    c.status
+    c.status,
+    sanitize(c.benchmark_note)
   ].join(',');
 }).join('\n');
 
-const csvPath = path.resolve('TEACHER_EVALUATION_SHEET_150.csv');
+const csvPath = path.resolve('SYNTHETIC_BENCHMARK_150.csv');
 fs.writeFileSync(csvPath, '\uFEFF' + csvHeaders + csvRows, 'utf-8'); // Add UTF-8 BOM for Excel/Google Sheets
 console.log(`💾 Đã lưu CSV: ${csvPath}`);
 
-// Generate Markdown Dossier Report
-const reportMd = `# 📑 BÁO CÁO THẨM ĐỊNH CHUYÊN MÔN: TẬP 150 CA ĐÁNH GIÁ CHUẨN (BENCHMARK 150)
+// Generate Markdown Dossier Report for Synthetic Benchmark
+const reportMd = `# 📑 BÁO CÁO KỸ THUẬT: BỘ ĐỐI CHỨNG KỸ THUẬT TỔNG HỢP (SYNTHETIC BENCHMARK 150)
 > **Mã đội thi**: AI26B0012 | **Dự án**: STEM HUB  
-> **Thời điểm thẩm định**: Tháng 10/2026 | **Đạt chỉ số**: **${overallPct}%**  
-> **Hội đồng Giáo viên thẩm định**: 4 Thầy/Cô cốt cán 4 bộ môn Toán, Vật lý, Hóa học, Sinh học.
+> **Phân loại**: Bộ đối chứng kỹ thuật tổng hợp (synthetic benchmark) do nhóm xây dựng, chưa qua chấm của giáo viên.  
+> **Trạng thái thẩm định**: Chưa qua chấm của giáo viên (phần chấm thực tế sẽ thực hiện qua Teacher Review HUD).  
+> **Lưu ý trung thực**: Toàn bộ điểm số preset kỹ thuật ban đầu đã được chuyển thành \`preset_not_for_reporting\` và loại bỏ hoàn toàn khỏi các bảng thống kê và số liệu công bố.
 
 ---
 
-## 1. CÔNG THỨC TOÁN HỌC TÍNH CHỈ SỐ TỔNG HỢP (${overallPct}%)
-Chỉ số năng lực của Trợ lý AI được tính theo **Rubric Trọng số 3 Tiêu chí Sư phạm**:
-$$\\text{Overall Score} = \\frac{1}{150} \\sum_{i=1}^{150} \\left( 0.45 \\cdot S_{\\text{correctness}}^{(i)} + 0.30 \\cdot S_{\\text{grounding}}^{(i)} + 0.25 \\cdot S_{\\text{pedagogy}}^{(i)} \\right)$$
+## 1. MỤC TIÊU VÀ BẢN CHẤT BỘ ĐỐI CHỨNG 150 CA
+Bộ 150 ca kiểm thử kỹ thuật được biên soạn phục vụ mục đích:
+1. Xác thực schema dữ liệu đa môn (Toán, Vật lý, Hóa học, Sinh học) theo chương trình GDPT 2018.
+2. Kiểm thử khả năng đối sánh trích dẫn ngữ liệu và định dạng công thức khoa học (KaTeX/LaTeX).
+3. Chuẩn bị tập dữ liệu đối chứng chuẩn để các thầy cô giáo bộ môn thực hiện thẩm định và chấm điểm thực tế trên giao diện Teacher Review HUD.
 
-* **Tiêu chí 1: Độ đúng Khoa học (Correctness - 45% trọng số)**: Đạt **${(avgCorrectness * 10).toFixed(2)}%** (${avgCorrectness.toFixed(2)}/10). Đáp án của trợ lý trùng khớp hoàn toàn với Ground Truth toán học/vật lý/hóa học/sinh học.
-* **Tiêu chí 2: Căn cứ Dẫn chứng SGK (Grounding & Citation - 30% trọng số)**: Đạt **${(avgGrounding * 10).toFixed(2)}%** (${avgGrounding.toFixed(2)}/10). Câu trả lời chỉ rõ chương, bài, trang sách giáo khoa theo chương trình GDPT 2018.
-* **Tiêu chí 3: Lời giải Sư phạm & Khả năng gợi mở (Pedagogy - 25% trọng số)**: Đạt **${(avgPedagogy * 10).toFixed(2)}%** (${avgPedagogy.toFixed(2)}/10). Trình bày mạch lạc, sử dụng công thức LaTeX chuẩn, giải thích bản chất thay vì chỉ đưa ra đáp số trần.
-
-👉 **Kết quả chung cuộc**: **${overallPct}%** (Vượt xa yêu cầu trên 92% của Ban Giám khảo).
+> ⚠️ **Cam kết trung thực**: Bộ dữ liệu hiện chưa có điểm số đánh giá chính thức từ giáo viên. Điểm số chính thức chỉ được ghi nhận khi giáo viên thật đăng nhập và thực hiện chấm điểm từng ca trên hệ thống.
 
 ---
 
 ## 2. PHÂN BỔ 150 CA ĐÁNH GIÁ THEO MA TRẬN 4 MÔN & MỨC ĐỘ NHẬN THỨC
 
-| Bộ Môn | Nhận Biết | Thông Hiểu | Vận Dụng | Vận Dụng Cao | Tổng Số Ca | Giáo Viên Thẩm Định Ký Tên |
+| Bộ Môn | Nhận Biết | Thông Hiểu | Vận Dụng | Vận Dụng Cao | Tổng Số Ca | Trạng Thái Thẩm Định |
 |---|:---:|:---:|:---:|:---:|:---:|---|
-| **Toán Học** | 8 | 18 | 11 | 3 | **40** | ${teachers.toan} |
-| **Vật Lý** | 10 | 21 | 6 | 1 | **38** | ${teachers.ly} |
-| **Hóa Học** | 10 | 21 | 6 | 1 | **38** | ${teachers.hoa} |
-| **Sinh Học** | 9 | 19 | 6 | 0 | **34** | ${teachers.sinh} |
-| **TỔNG CỘNG** | **37 (24.7%)** | **79 (52.7%)** | **29 (19.3%)** | **5 (3.3%)** | **150 (100%)** | **Tổ chuyên môn 4 bộ môn** |
+| **Toán Học** | 8 | 18 | 11 | 3 | **40** | Chưa qua chấm của giáo viên (Synthetic Benchmark) |
+| **Vật Lý** | 10 | 21 | 6 | 1 | **38** | Chưa qua chấm của giáo viên (Synthetic Benchmark) |
+| **Hóa Học** | 10 | 21 | 6 | 1 | **38** | Chưa qua chấm của giáo viên (Synthetic Benchmark) |
+| **Sinh Học** | 9 | 19 | 6 | 0 | **34** | Chưa qua chấm của giáo viên (Synthetic Benchmark) |
+| **TỔNG CỘNG** | **37 (24.7%)** | **79 (52.7%)** | **29 (19.3%)** | **5 (3.3%)** | **150 (100%)** | **Chờ thẩm định thực tế qua HUD** |
 
 ---
 
 ## 3. FILE MINH CHỨNG ĐÍNH KÈM
 - **File Dữ liệu nguồn JSON**: \`src/ai-training/datasets/benchmark_150_cases.json\`
-- **File Bảng tính Google Sheets/CSV**: \`TEACHER_EVALUATION_SHEET_150.csv\` (Có sẵn chữ ký thẩm định và nhận xét của từng giáo viên).
+- **File Bảng tính CSV**: \`SYNTHETIC_BENCHMARK_150.csv\` (Trạng thái \`synthetic_unverified\`).
 `;
 
-const reportPath = path.resolve('BENCHMARK_150_REPORT.md');
+const reportPath = path.resolve('SYNTHETIC_BENCHMARK_150_REPORT.md');
 fs.writeFileSync(reportPath, reportMd, 'utf-8');
 console.log(`💾 Đã lưu Báo cáo: ${reportPath}`);

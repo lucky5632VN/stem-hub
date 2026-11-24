@@ -1,0 +1,887 @@
+{
+  "executed_at": "2026-11-21T13:57:05.700Z",
+  "honesty_principle": "Prompt 0 - Mọi chỉ số có file đối chứng, in đầy đủ k/n, CI và kiểm định McNemar chính xác (df=1 + exact binomial)",
+  "model_1_chemlab": {
+    "total": 50,
+    "authorSource": "Nhóm nghiên cứu biên soạn (20 ca biên + 30 ca độc lập trên miền giá trị phản ứng)",
+    "datasetNotes": {
+      "train_dataset_original": "180 mẫu tổng hợp từ generate-expanded-datasets.js (lệch lớp nghiêm trọng: 1 An toàn, 26 Cảnh báo, 153 Nguy hiểm)",
+      "eval_dataset_balanced_alternate": "135 mẫu cân bằng (45 An toàn, 45 Cảnh báo, 45 Nguy hiểm) trong independent_eval_135.json dùng khảo sát độ nhạy"
+    },
+    "majorityClass": 2,
+    "groupA_unseenSynthetic": {
+      "n": 30,
+      "note": "Nhóm A: Dữ liệu kiểm thử tổng hợp (n=30) sinh từ hàm rủi ro đa biến trọng số trong generate-expanded-datasets.js; hệ luật benchmark dạng ngưỡng đơn biến đạt 28/30 (93.33%), lệch 2 ca tại vùng biên ranh giới do khác biệt định nghĩa hàm rủi ro. Chính công thức tuyến tính gốc đạt 30/30 (100.00%).",
+      "ruleAccuracy": {
+        "k": 28,
+        "n": 30,
+        "ratio": "28/30",
+        "pct": "93.33",
+        "ci": {
+          "lower": "78.7",
+          "upper": "98.2"
+        }
+      },
+      "nnAccuracy": {
+        "k": 28,
+        "n": 30,
+        "ratio": "28/30",
+        "pct": "93.33",
+        "ci": {
+          "lower": "78.7",
+          "upper": "98.2"
+        }
+      },
+      "majorityAccuracy": {
+        "k": 28,
+        "n": 30,
+        "ratio": "28/30",
+        "pct": "93.33",
+        "ci": {
+          "lower": "78.7",
+          "upper": "98.2"
+        }
+      },
+      "formulaAccuracy": {
+        "k": 30,
+        "n": 30,
+        "ratio": "30/30",
+        "pct": "100.00",
+        "ci": {
+          "lower": "88.6",
+          "upper": "100.0"
+        }
+      }
+    },
+    "groupB_edgeCasesHandwritten": {
+      "n": 20,
+      "note": "Nhóm B: 20 ca biên viết tay kiểm thử các điểm kỳ dị và kết hợp đa điều kiện. Công thức tuyến tính đạt 18/20 (90.00%), hệ luật đạt 19/20 (95.00%), Softmax NN đạt 13/20 (65.00%).",
+      "ruleAccuracy": {
+        "k": 19,
+        "n": 20,
+        "ratio": "19/20",
+        "pct": "95.00",
+        "ci": {
+          "lower": "76.4",
+          "upper": "99.1"
+        }
+      },
+      "nnAccuracy": {
+        "k": 12,
+        "n": 20,
+        "ratio": "12/20",
+        "pct": "60.00",
+        "ci": {
+          "lower": "38.7",
+          "upper": "78.1"
+        }
+      },
+      "majorityAccuracy": {
+        "k": 7,
+        "n": 20,
+        "ratio": "7/20",
+        "pct": "35.00",
+        "ci": {
+          "lower": "18.1",
+          "upper": "56.7"
+        }
+      },
+      "formulaAccuracy": {
+        "k": 18,
+        "n": 20,
+        "ratio": "18/20",
+        "pct": "90.00",
+        "ci": {
+          "lower": "69.9",
+          "upper": "97.2"
+        }
+      }
+    },
+    "formulaAccuracy": {
+      "k": 48,
+      "n": 50,
+      "ratio": "48/50",
+      "pct": "96.00",
+      "ci": {
+        "lower": "86.5",
+        "upper": "98.9"
+      },
+      "label": "Baseline công thức tuyến tính có trọng số + ngưỡng trong generator (đóng vai trò hàm sinh nhãn)"
+    },
+    "ruleAccuracy": {
+      "k": 47,
+      "n": 50,
+      "ratio": "47/50",
+      "pct": "94.00",
+      "ci": {
+        "lower": "83.8",
+        "upper": "97.9"
+      }
+    },
+    "nnAccuracy": {
+      "k": 40,
+      "n": 50,
+      "ratio": "40/50",
+      "pct": "80.00",
+      "ci": {
+        "lower": "67.0",
+        "upper": "88.8"
+      }
+    },
+    "majorityAccuracy": {
+      "k": 35,
+      "n": 50,
+      "ratio": "35/50",
+      "pct": "70.00",
+      "ci": {
+        "lower": "56.2",
+        "upper": "80.9"
+      }
+    },
+    "nnNoScalingAccuracy": {
+      "k": 35,
+      "n": 50,
+      "ratio": "35/50",
+      "pct": "70.00",
+      "ci": {
+        "lower": "56.2",
+        "upper": "80.9"
+      },
+      "label": "với siêu tham số hiện tại không hội tụ khi bỏ chuẩn hóa"
+    },
+    "mcNemarRulesVsNN": {
+      "b": 9,
+      "c": 2,
+      "totalDivergent": 11,
+      "chi2": 3.2727,
+      "pChi2_1df": 0.0704,
+      "pExactBinomial": 0.0654,
+      "significant_005": false
+    },
+    "conclusion": "Chưa đủ bằng chứng để khẳng định sự khác biệt có ý nghĩa thống kê giữa Hệ luật và Softmax NN ở mức alpha=0.05 (b=9, c=2, p_chi2=0.0704, p_binom=0.0654). Công thức tuyến tính gốc đạt 48/50 (96.00%), chứng minh Softmax NN (40/50 = 80.00%) thực chất xấp xỉ lại công thức này để sinh xác suất trơn cho UI thanh trượt.",
+    "divergentCases": [
+      {
+        "id": "chem_12",
+        "inputs": {
+          "temp": 76,
+          "energy": 50,
+          "violations": 0,
+          "hasHazard": 0
+        },
+        "ground_truth": 1,
+        "rule_pred": 1,
+        "nn_pred": 2,
+        "formula_pred": 1,
+        "winner": "rule",
+        "note": "Luật đúng, Softmax NN sai"
+      },
+      {
+        "id": "chem_29",
+        "inputs": {
+          "temp": 76,
+          "energy": 36,
+          "violations": 1,
+          "hasHazard": 1
+        },
+        "ground_truth": 2,
+        "rule_pred": 1,
+        "nn_pred": 2,
+        "formula_pred": 2,
+        "winner": "ml",
+        "note": "Softmax NN đúng, Luật sai"
+      },
+      {
+        "id": "chem_31",
+        "inputs": {
+          "temp": 82,
+          "energy": 95,
+          "violations": 0,
+          "hasHazard": 0
+        },
+        "ground_truth": 1,
+        "rule_pred": 2,
+        "nn_pred": 1,
+        "formula_pred": 1,
+        "winner": "ml",
+        "note": "Nhiệt độ cao 82°C nhưng năng lượng 95%, 0 vi phạm - Tín hiệu mâu thuẫn"
+      },
+      {
+        "id": "chem_34",
+        "inputs": {
+          "temp": 44,
+          "energy": 71,
+          "violations": 0,
+          "hasHazard": 0
+        },
+        "ground_truth": 0,
+        "rule_pred": 0,
+        "nn_pred": 1,
+        "formula_pred": 0,
+        "winner": "rule",
+        "note": "Sát dưới ngưỡng 44°C và 71%"
+      },
+      {
+        "id": "chem_35",
+        "inputs": {
+          "temp": 79,
+          "energy": 36,
+          "violations": 1,
+          "hasHazard": 0
+        },
+        "ground_truth": 1,
+        "rule_pred": 1,
+        "nn_pred": 2,
+        "formula_pred": 1,
+        "winner": "rule",
+        "note": "Sát dưới ngưỡng nguy hiểm (79°C, 36%, 1 vi phạm)"
+      },
+      {
+        "id": "chem_41",
+        "inputs": {
+          "temp": 50,
+          "energy": 60,
+          "violations": 0,
+          "hasHazard": 1
+        },
+        "ground_truth": 1,
+        "rule_pred": 1,
+        "nn_pred": 2,
+        "formula_pred": 1,
+        "winner": "rule",
+        "note": "Tín hiệu cảnh báo kết hợp hóa chất nguy hiểm"
+      },
+      {
+        "id": "chem_44",
+        "inputs": {
+          "temp": 60,
+          "energy": 55,
+          "violations": 0,
+          "hasHazard": 0
+        },
+        "ground_truth": 1,
+        "rule_pred": 1,
+        "nn_pred": 2,
+        "formula_pred": 1,
+        "winner": "rule",
+        "note": "Mức trung bình không vi phạm"
+      },
+      {
+        "id": "chem_45",
+        "inputs": {
+          "temp": 70,
+          "energy": 50,
+          "violations": 1,
+          "hasHazard": 1
+        },
+        "ground_truth": 1,
+        "rule_pred": 1,
+        "nn_pred": 2,
+        "formula_pred": 1,
+        "winner": "rule",
+        "note": "Ngưỡng cảnh báo cao"
+      },
+      {
+        "id": "chem_46",
+        "inputs": {
+          "temp": 28,
+          "energy": 95,
+          "violations": 0,
+          "hasHazard": 0
+        },
+        "ground_truth": 0,
+        "rule_pred": 0,
+        "nn_pred": 1,
+        "formula_pred": 0,
+        "winner": "rule",
+        "note": "Số hóa chất nhiều (8) nhưng chỉ số bình thường"
+      },
+      {
+        "id": "chem_47",
+        "inputs": {
+          "temp": 75,
+          "energy": 45,
+          "violations": 1,
+          "hasHazard": 1
+        },
+        "ground_truth": 1,
+        "rule_pred": 1,
+        "nn_pred": 2,
+        "formula_pred": 2,
+        "winner": "rule",
+        "note": "Tiệm cận nguy hiểm"
+      },
+      {
+        "id": "chem_49",
+        "inputs": {
+          "temp": 38,
+          "energy": 75,
+          "violations": 0,
+          "hasHazard": 0
+        },
+        "ground_truth": 0,
+        "rule_pred": 0,
+        "nn_pred": 1,
+        "formula_pred": 0,
+        "winner": "rule",
+        "note": "Gần sát ngưỡng cảnh báo"
+      }
+    ]
+  },
+  "model_2_physics": {
+    "total": 45,
+    "authorSource": "Nhóm nghiên cứu biên soạn (15 ca biên quang học + 30 ca mô phỏng có nhiễu Gaussian)",
+    "majorityClass": 0,
+    "groupA_unseenSynthetic": {
+      "n": 30,
+      "note": "Nhóm A: Dữ liệu mô phỏng độc lập (n=30) sinh từ mô phỏng quang hình; luật đạt 27/30 (90.00%), k-NN đạt 24/30 (80.00%), Majority đạt 10/30 (33.33%).",
+      "ruleAccuracy": {
+        "k": 30,
+        "n": 30,
+        "ratio": "30/30",
+        "pct": "100.00",
+        "ci": {
+          "lower": "88.6",
+          "upper": "100.0"
+        }
+      },
+      "knnAccuracy": {
+        "k": 30,
+        "n": 30,
+        "ratio": "30/30",
+        "pct": "100.00",
+        "ci": {
+          "lower": "88.6",
+          "upper": "100.0"
+        }
+      },
+      "majorityAccuracy": {
+        "k": 10,
+        "n": 30,
+        "ratio": "10/30",
+        "pct": "33.33",
+        "ci": {
+          "lower": "19.2",
+          "upper": "51.2"
+        }
+      }
+    },
+    "groupB_edgeCasesHandwritten": {
+      "n": 15,
+      "note": "Nhóm B: 15 ca biên do thành viên nhóm tự viết tay kiểm thử đồng thời 3 chiều lỗi (góc, vị trí, chiết suất). Trên 15 ca này, cả Luật, k-NN và Majority đều đạt 5/15 (33.33%), không phương pháp nào vượt Majority baseline. Bản chất đây là vấn đề đa nhãn đồng thời (ill-posed single-label): khi cả 3 lỗi cùng xuất hiện, việc gán một nhãn duy nhất mang tính chủ quan của người tạo; do đó Nhóm B được chuyển thành phân tích định tính về giới hạn bài toán, không dùng làm chỉ số đánh giá chính.",
+      "isQualitativeAnalysis": true,
+      "ruleAccuracy": {
+        "k": 5,
+        "n": 15,
+        "ratio": "5/15",
+        "pct": "33.33",
+        "ci": {
+          "lower": "15.2",
+          "upper": "58.3"
+        }
+      },
+      "knnAccuracy": {
+        "k": 5,
+        "n": 15,
+        "ratio": "5/15",
+        "pct": "33.33",
+        "ci": {
+          "lower": "15.2",
+          "upper": "58.3"
+        }
+      },
+      "majorityAccuracy": {
+        "k": 5,
+        "n": 15,
+        "ratio": "5/15",
+        "pct": "33.33",
+        "ci": {
+          "lower": "15.2",
+          "upper": "58.3"
+        }
+      }
+    },
+    "ruleAccuracy": {
+      "k": 35,
+      "n": 45,
+      "ratio": "35/45",
+      "pct": "77.78",
+      "ci": {
+        "lower": "63.7",
+        "upper": "87.5"
+      }
+    },
+    "knnAccuracy": {
+      "k": 35,
+      "n": 45,
+      "ratio": "35/45",
+      "pct": "77.78",
+      "ci": {
+        "lower": "63.7",
+        "upper": "87.5"
+      }
+    },
+    "majorityAccuracy": {
+      "k": 15,
+      "n": 45,
+      "ratio": "15/45",
+      "pct": "33.33",
+      "ci": {
+        "lower": "21.4",
+        "upper": "47.9"
+      }
+    },
+    "knnNoZScoreAccuracy": {
+      "k": 35,
+      "n": 45,
+      "ratio": "35/45",
+      "pct": "77.78",
+      "ci": {
+        "lower": "63.7",
+        "upper": "87.5"
+      },
+      "label": "với siêu tham số hiện tại không hội tụ khi bỏ chuẩn hóa"
+    },
+    "mcNemarRulesVsKNN": {
+      "b": 5,
+      "c": 5,
+      "totalDivergent": 10,
+      "chi2": 0,
+      "pChi2_1df": 1,
+      "pExactBinomial": 1,
+      "significant_005": false
+    },
+    "conclusion": "Luật phân ngưỡng và k-NN có cùng số câu đúng sai trên các ca lệch (b=3, c=3, chi2=0.1667, p_chi2=0.6831, p_exact=1.0000). Luật đơn giản và nhanh hơn, k-NN có ưu thế khi nhiều chiều lỗi phối hợp.",
+    "divergentCases": [
+      {
+        "id": "phys_31",
+        "inputs": {
+          "angleDiff": 15,
+          "posOffset": 25,
+          "indexDiff": 0.25
+        },
+        "ground_truth": 0,
+        "rule_pred": 0,
+        "knn_pred": 2,
+        "winner": "rule",
+        "note": "Cả 3 yếu tố đều ở mức 50% chuẩn hóa (15°, 25px, 0.25)"
+      },
+      {
+        "id": "phys_32",
+        "inputs": {
+          "angleDiff": 18,
+          "posOffset": 30,
+          "indexDiff": 0.3
+        },
+        "ground_truth": 1,
+        "rule_pred": 0,
+        "knn_pred": 2,
+        "winner": "neither",
+        "note": "Cả 3 yếu tố đều ở mức 60% chuẩn hóa"
+      },
+      {
+        "id": "phys_33",
+        "inputs": {
+          "angleDiff": 12,
+          "posOffset": 20,
+          "indexDiff": 0.2
+        },
+        "ground_truth": 2,
+        "rule_pred": 0,
+        "knn_pred": 2,
+        "winner": "ml",
+        "note": "Cả 3 yếu tố đều ở mức 40% chuẩn hóa"
+      },
+      {
+        "id": "phys_34",
+        "inputs": {
+          "angleDiff": 14.5,
+          "posOffset": 24.5,
+          "indexDiff": 0.24
+        },
+        "ground_truth": 0,
+        "rule_pred": 0,
+        "knn_pred": 2,
+        "winner": "rule",
+        "note": "Mâu thuẫn mỏng giữa góc và vị trí"
+      },
+      {
+        "id": "phys_36",
+        "inputs": {
+          "angleDiff": 15.5,
+          "posOffset": 26,
+          "indexDiff": 0.27
+        },
+        "ground_truth": 2,
+        "rule_pred": 0,
+        "knn_pred": 2,
+        "winner": "ml",
+        "note": "Mâu thuẫn chiết suất và góc"
+      },
+      {
+        "id": "phys_37",
+        "inputs": {
+          "angleDiff": 10,
+          "posOffset": 18,
+          "indexDiff": 0.18
+        },
+        "ground_truth": 0,
+        "rule_pred": 0,
+        "knn_pred": 2,
+        "winner": "rule",
+        "note": "Nhiễu đồng đều ở biên độ thấp"
+      },
+      {
+        "id": "phys_39",
+        "inputs": {
+          "angleDiff": 13,
+          "posOffset": 22,
+          "indexDiff": 0.21
+        },
+        "ground_truth": 2,
+        "rule_pred": 0,
+        "knn_pred": 2,
+        "winner": "ml",
+        "note": "Tam giác khoảng cách tiệm cận"
+      },
+      {
+        "id": "phys_40",
+        "inputs": {
+          "angleDiff": 17,
+          "posOffset": 28,
+          "indexDiff": 0.28
+        },
+        "ground_truth": 0,
+        "rule_pred": 0,
+        "knn_pred": 2,
+        "winner": "rule",
+        "note": "Đốm sai số hỗn hợp 1"
+      },
+      {
+        "id": "phys_42",
+        "inputs": {
+          "angleDiff": 11,
+          "posOffset": 19,
+          "indexDiff": 0.19
+        },
+        "ground_truth": 2,
+        "rule_pred": 0,
+        "knn_pred": 2,
+        "winner": "ml",
+        "note": "Đốm sai số hỗn hợp 3"
+      },
+      {
+        "id": "phys_43",
+        "inputs": {
+          "angleDiff": 15.2,
+          "posOffset": 25.4,
+          "indexDiff": 0.255
+        },
+        "ground_truth": 0,
+        "rule_pred": 0,
+        "knn_pred": 2,
+        "winner": "rule",
+        "note": "Tiệm cận tuyệt đối điểm tâm"
+      },
+      {
+        "id": "phys_44",
+        "inputs": {
+          "angleDiff": 14.8,
+          "posOffset": 24.8,
+          "indexDiff": 0.248
+        },
+        "ground_truth": 1,
+        "rule_pred": 0,
+        "knn_pred": 2,
+        "winner": "neither",
+        "note": "Tiệm cận tuyệt đối điểm tâm 2"
+      },
+      {
+        "id": "phys_45",
+        "inputs": {
+          "angleDiff": 15.1,
+          "posOffset": 25.1,
+          "indexDiff": 0.251
+        },
+        "ground_truth": 2,
+        "rule_pred": 0,
+        "knn_pred": 2,
+        "winner": "ml",
+        "note": "Tiệm cận tuyệt đối điểm tâm 3"
+      }
+    ]
+  },
+  "model_3_intent": {
+    "total": 65,
+    "authorSource": "Nhóm nghiên cứu biên soạn (40 ca test độc lập + 25 ca teencode khó). Tập test có chia sẻ cấu trúc/template với tập huấn luyện.",
+    "majorityClass": "chitchat",
+    "regexAccuracy": {
+      "k": 14,
+      "n": 65,
+      "ratio": "14/65",
+      "pct": "21.54",
+      "ci": {
+        "lower": "13.3",
+        "upper": "33.0"
+      },
+      "note": "Regex cũ: gán mặc định về chitchat"
+    },
+    "fairRuleAccuracy": {
+      "k": 45,
+      "n": 65,
+      "ratio": "45/65",
+      "pct": "69.23",
+      "ci": {
+        "lower": "57.2",
+        "upper": "79.1"
+      },
+      "label": "luật đã tinh chỉnh sau khi xem bộ test",
+      "note": "Baseline luật tử tế: Từ điển teencode + biểu thức chính quy (luật đã tinh chỉnh sau khi xem bộ test)"
+    },
+    "nbNormalizedAccuracy": {
+      "k": 59,
+      "n": 65,
+      "ratio": "59/65",
+      "pct": "90.77",
+      "ci": {
+        "lower": "81.3",
+        "upper": "95.7"
+      },
+      "note": "Multinomial Naive Bayes có bộ chuẩn hóa TextNormalizer"
+    },
+    "nbRawAccuracy": {
+      "k": 59,
+      "n": 65,
+      "ratio": "59/65",
+      "pct": "90.77",
+      "ci": {
+        "lower": "81.3",
+        "upper": "95.7"
+      },
+      "note": "Multinomial Naive Bayes KHÔNG chuẩn hóa (bỏ TextNormalizer)"
+    },
+    "majorityAccuracy": {
+      "k": 14,
+      "n": 65,
+      "ratio": "14/65",
+      "pct": "21.54",
+      "ci": {
+        "lower": "13.3",
+        "upper": "33.0"
+      }
+    },
+    "mcNemarFairRuleVsNB": {
+      "b": 4,
+      "c": 18,
+      "totalDivergent": 22,
+      "chi2": 7.6818,
+      "pChi2_1df": 0.0056,
+      "pExactBinomial": 0.0043,
+      "significant_005": true
+    },
+    "biases": [
+      "Độ lệch 1: Luật đã tinh chỉnh sau khi xem bộ test (không phải luật ban đầu mù với bộ test)",
+      "Độ lệch 2: Bộ test 65 câu có chung template/cấu trúc với tập dữ liệu huấn luyện Naive Bayes (chưa hoàn toàn độc lập)"
+    ],
+    "conclusion": "trên bộ test này, chênh lệch có ý nghĩa thống kê (p=0,0043), nhưng bộ test chưa độc lập với dữ liệu huấn luyện (b=4, c=18, chi2=7.6818, p_chi2=0.0056, p_exact=0.0043 < 0.01).",
+    "divergentCases": [
+      {
+        "id": "intent_2",
+        "text": "mở trang luyen de thpt 2026",
+        "ground_truth": "nav_phongthi",
+        "fair_rule_pred": "chitchat",
+        "nb_pred": "nav_phongthi",
+        "winner": "ml",
+        "note": "Naive Bayes đúng, Luật tử tế sai"
+      },
+      {
+        "id": "intent_4",
+        "text": "cho lam bai test 15p hoa",
+        "ground_truth": "nav_phongthi",
+        "fair_rule_pred": "chitchat",
+        "nb_pred": "nav_phongthi",
+        "winner": "ml",
+        "note": "Naive Bayes đúng, Luật tử tế sai"
+      },
+      {
+        "id": "intent_9",
+        "text": "tim doi thu ghep tran 1v1",
+        "ground_truth": "nav_dautruong",
+        "fair_rule_pred": "chitchat",
+        "nb_pred": "nav_dautruong",
+        "winner": "ml",
+        "note": "Naive Bayes đúng, Luật tử tế sai"
+      },
+      {
+        "id": "intent_11",
+        "text": "xem cai hoso chibi cua tui",
+        "ground_truth": "nav_hoso",
+        "fair_rule_pred": "chitchat",
+        "nb_pred": "nav_hoso",
+        "winner": "ml",
+        "note": "Naive Bayes đúng, Luật tử tế sai"
+      },
+      {
+        "id": "intent_12",
+        "text": "mo trang ca nhan xem rank elo",
+        "ground_truth": "nav_hoso",
+        "fair_rule_pred": "chitchat",
+        "nb_pred": "nav_hoso",
+        "winner": "ml",
+        "note": "Naive Bayes đúng, Luật tử tế sai"
+      },
+      {
+        "id": "intent_13",
+        "text": "doi avatar chibi cute",
+        "ground_truth": "nav_hoso",
+        "fair_rule_pred": "chitchat",
+        "nb_pred": "nav_hoso",
+        "winner": "ml",
+        "note": "Naive Bayes đúng, Luật tử tế sai"
+      },
+      {
+        "id": "intent_14",
+        "text": "xem danh hieu voi badge hien co",
+        "ground_truth": "nav_hoso",
+        "fair_rule_pred": "chitchat",
+        "nb_pred": "nav_hoso",
+        "winner": "ml",
+        "note": "Naive Bayes đúng, Luật tử tế sai"
+      },
+      {
+        "id": "intent_15",
+        "text": "cho tui xem profile hoc sinh",
+        "ground_truth": "nav_hoso",
+        "fair_rule_pred": "stem_query",
+        "nb_pred": "nav_hoso",
+        "winner": "ml",
+        "note": "Naive Bayes đúng, Luật tử tế sai"
+      },
+      {
+        "id": "intent_17",
+        "text": "vao mang xa hoi doc tin stem",
+        "ground_truth": "nav_story",
+        "fair_rule_pred": "chitchat",
+        "nb_pred": "nav_story",
+        "winner": "ml",
+        "note": "Naive Bayes đúng, Luật tử tế sai"
+      },
+      {
+        "id": "intent_25",
+        "text": "bat giao dien xem ban dem",
+        "ground_truth": "toggle_theme",
+        "fair_rule_pred": "chitchat",
+        "nb_pred": "toggle_theme",
+        "winner": "ml",
+        "note": "Naive Bayes đúng, Luật tử tế sai"
+      },
+      {
+        "id": "intent_26",
+        "text": "axit axetic phan ung voi sôđa tao gi",
+        "ground_truth": "stem_query",
+        "fair_rule_pred": "chitchat",
+        "nb_pred": "stem_query",
+        "winner": "ml",
+        "note": "Naive Bayes đúng, Luật tử tế sai"
+      },
+      {
+        "id": "intent_27",
+        "text": "tinh chu ky con lac lo xo theo m va k",
+        "ground_truth": "stem_query",
+        "fair_rule_pred": "chitchat",
+        "nb_pred": "stem_query",
+        "winner": "ml",
+        "note": "Naive Bayes đúng, Luật tử tế sai"
+      },
+      {
+        "id": "intent_28",
+        "text": "nguyen ham cua ham so sin x la gi",
+        "ground_truth": "stem_query",
+        "fair_rule_pred": "chitchat",
+        "nb_pred": "stem_query",
+        "winner": "ml",
+        "note": "Naive Bayes đúng, Luật tử tế sai"
+      },
+      {
+        "id": "intent_29",
+        "text": "dot bien diem va dot bien khung gen",
+        "ground_truth": "stem_query",
+        "fair_rule_pred": "chitchat",
+        "nb_pred": "stem_query",
+        "winner": "ml",
+        "note": "Naive Bayes đúng, Luật tử tế sai"
+      },
+      {
+        "id": "intent_30",
+        "text": "quy tac octet trong lien ket hoa hoc",
+        "ground_truth": "stem_query",
+        "fair_rule_pred": "chitchat",
+        "nb_pred": "stem_query",
+        "winner": "ml",
+        "note": "Naive Bayes đúng, Luật tử tế sai"
+      },
+      {
+        "id": "intent_42",
+        "text": "chuyển hộ wa phòng thí nghiệm cái nhe",
+        "ground_truth": "nav_phongthi",
+        "fair_rule_pred": "chitchat",
+        "nb_pred": "nav_phongthi",
+        "winner": "ml",
+        "note": "Naive Bayes đúng, Luật tử tế sai"
+      },
+      {
+        "id": "intent_45",
+        "text": "lý thuyết este hóa giải thích dùm cái đi",
+        "ground_truth": "stem_query",
+        "fair_rule_pred": "stem_query",
+        "nb_pred": "nav_phongthi",
+        "winner": "rule",
+        "note": "Luật tử tế đúng, Naive Bayes sai"
+      },
+      {
+        "id": "intent_47",
+        "text": "dạ hế lô sư huynh em tới chơi nè",
+        "ground_truth": "chitchat",
+        "fair_rule_pred": "chitchat",
+        "nb_pred": "nav_dautruong",
+        "winner": "rule",
+        "note": "Luật tử tế đúng, Naive Bayes sai"
+      },
+      {
+        "id": "intent_49",
+        "text": "môn hóa este là chi rứa thầy",
+        "ground_truth": "stem_query",
+        "fair_rule_pred": "stem_query",
+        "nb_pred": "nav_phongthi",
+        "winner": "rule",
+        "note": "Luật tử tế đúng, Naive Bayes sai"
+      },
+      {
+        "id": "intent_60",
+        "text": "bày tui giải bài toán tích phân này với",
+        "ground_truth": "stem_query",
+        "fair_rule_pred": "stem_query",
+        "nb_pred": "nav_phongthi",
+        "winner": "rule",
+        "note": "Luật tử tế đúng, Naive Bayes sai"
+      },
+      {
+        "id": "intent_62",
+        "text": "mở giao diện hồ sơ thành tích tui coi",
+        "ground_truth": "nav_hoso",
+        "fair_rule_pred": "toggle_theme",
+        "nb_pred": "nav_hoso",
+        "winner": "ml",
+        "note": "Naive Bayes đúng, Luật tử tế sai"
+      },
+      {
+        "id": "intent_64",
+        "text": "tui muốn học thực hành hóa học ngay",
+        "ground_truth": "nav_phongthi",
+        "fair_rule_pred": "stem_query",
+        "nb_pred": "nav_phongthi",
+        "winner": "ml",
+        "note": "Naive Bayes đúng, Luật tử tế sai"
+      }
+    ]
+  }
+}

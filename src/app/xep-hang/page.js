@@ -471,8 +471,13 @@ export default function LeaderboardPage() {
 
                       {/* Tên hiển thị & Danh hiệu */}
                       <div className="flex flex-col min-w-0">
-                        <span className={`text-sm font-bold truncate max-w-[150px] sm:max-w-[220px] leading-tight ${isMe ? 'text-accent-pink' : 'text-text-primary'}`}>
+                        <span className={`text-sm font-bold truncate max-w-[150px] sm:max-w-[220px] leading-tight flex items-center gap-1.5 ${isMe ? 'text-accent-pink' : 'text-text-primary'}`}>
                           {player.displayName}
+                          {(player.isBotAccount || player.isBot || player.role === 'bot') && (
+                            <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase bg-purple-500/20 text-purple-400 border border-purple-500/40">
+                              BOT
+                            </span>
+                          )}
                         </span>
                         <div className="flex items-center gap-1.5 mt-0.5">
                           <span className="text-[8px] px-1.5 py-0.5 rounded font-bold uppercase truncate max-w-[110px] bg-accent-pink/10 border border-accent-pink/20 text-accent-pink">

@@ -1,4 +1,4 @@
-import modelData from '../data/models/intent-classifier.json';
+import modelData from '../data/models/intent-classifier.json' with { type: 'json' };
 import { normalizeText } from './textNormalizer.js';
 
 function tokenize(text) {
@@ -117,10 +117,37 @@ export function predictUserIntent(text) {
   // Detect subject
   let detectedSubject = null;
   const qLower = text.toLowerCase().replace(/hoá/g, 'hóa').replace(/vật lí/g, 'vật lý');
-  if (qLower.includes('hóa') || qLower.includes('hoá') || qLower.includes('este') || qLower.includes('axit') || qLower.includes('gluco') || qLower.includes('chất')) detectedSubject = 'hoa';
-  else if (qLower.includes('lý') || qLower.includes('lí') || qLower.includes('sóng') || qLower.includes('dao động') || qLower.includes('mạch') || qLower.includes('quang')) detectedSubject = 'ly';
-  else if (qLower.includes('toán') || qLower.includes('đạo hàm') || qLower.includes('tích phân') || qLower.includes('bậc hai') || qLower.includes('hàm số')) detectedSubject = 'toan';
-  else if (qLower.includes('sinh') || qLower.includes('adn') || qLower.includes('gen') || qLower.includes('màng') || qLower.includes('tế bào')) detectedSubject = 'sinh';
+
+  // 1. Kiểm tra các môn ngoài phạm vi STEM (Địa lí, Lịch sử, Văn, Anh...) để chặn nhận diện nhầm
+  const isNonStemSubject = /địa\s*l[ýí]|lịch\s*sử|\bsử\b|ngữ\s*văn|văn\s*học|tiếng\s*anh|ngoại\s*ngữ|gdcd|kinh\s*tế\s*pháp\s*luật|triết\s*học/i.test(qLower);
+  if (isNonStemSubject) {
+    return {
+      intent: 'out_of_scope_subject',
+      subject: null,
+      command,
+      confidenceProb: 0.95,
+      isLowConfidence: false
+    };
+  }
+
+  // 2. Nhận diện các môn STEM chuẩn (loại trừ các từ ghép thông dụng của chữ "lý/lí")
+  if (qLower.includes('hóa') || qLower.includes('este') || qLower.includes('axit') || qLower.includes('gluco') || qLower.includes('chất')) {
+    detectedSubject = 'hoa';
+  } else if (
+    qLower.includes('vật lý') || 
+    qLower.includes('vật lí') || 
+    qLower.includes('môn lý') || 
+    qLower.includes('môn lí') || 
+    qLower.includes('bài tập lý') || 
+    qLower.includes('học lý') ||
+    (!/(địa|tâm|triết|quản|xử|chân|hợp|vô|pháp|đạo|lý\s*do)\s*l[ýí]/i.test(qLower) && (qLower.includes(' lý') || qLower.includes(' lí') || qLower.startsWith('lý') || qLower.startsWith('lí')))
+  ) {
+    detectedSubject = 'ly';
+  } else if (qLower.includes('toán') || qLower.includes('đạo hàm') || qLower.includes('tích phân') || qLower.includes('bậc hai') || qLower.includes('hàm số')) {
+    detectedSubject = 'toan';
+  } else if (qLower.includes('sinh') || qLower.includes('adn') || qLower.includes('gen') || qLower.includes('màng') || qLower.includes('tế bào')) {
+    detectedSubject = 'sinh';
+  }
 
   return {
     intent: bestIntent,

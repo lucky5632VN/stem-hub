@@ -1,7 +1,7 @@
 {
   "metadata": {
     "modelName": "Physics Optics Multi-Label Diagnostic kNN",
-    "trainedAt": "2026-11-08T09:58:50.167Z",
+    "trainedAt": "2026-11-16T15:12:46.204Z",
     "datasetTotal": 120,
     "trainSize": 96,
     "testSize": 24,

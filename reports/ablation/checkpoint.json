@@ -1,0 +1,10 @@
+{
+  "lastCompletedCaseId": "ABL_IN_CONCEPT_13",
+  "caseIndex": 13,
+  "totalCases": 100,
+  "lastRun": 1,
+  "totalRunsPerCase": 3,
+  "cumulativeTokensUsed": 5529,
+  "observedModelVersion": "gemini-3.5-flash-lite",
+  "timestamp": "2026-11-23T16:43:19.790Z"
+}

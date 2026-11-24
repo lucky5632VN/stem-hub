@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { db } from '@/lib/firebase';
 import { collection, doc, setDoc, serverTimestamp, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
+import { verifyFirebaseIdToken } from '@/lib/firebaseAdmin';
+import { getReasoningLogConfig } from '@/lib/systemConfig';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,32 +17,47 @@ if (!globalThis.__AI_REASONING_LOGS__) {
   globalThis.__AI_REASONING_LOGS__ = [];
 }
 
-const ADMIN_SECRET = process.env.ADMIN_SECRET_KEY || process.env.INTERNAL_API_SECRET || 'stemhub_admin_secret_key_2026';
-
-function maskEmail(email) {
-  if (!email || typeof email !== 'string') return '';
-  const parts = email.split('@');
-  if (parts.length !== 2) return '***';
-  const name = parts[0];
-  const domain = parts[1];
-  if (name.length <= 2) {
-    return `${name[0] || '*'}***@${domain}`;
-  }
-  return `${name[0]}***${name[name.length - 1]}@${domain}`;
+/**
+ * Tạo mã băm UID có muối để ẩn danh hoàn toàn người dùng (Data Minimization)
+ * Bắt buộc từ biến môi trường UID_SALT. Nếu thiếu -> trả về 'anonymous' (Không dùng fallback cố định)
+ */
+function computeUserHash(uid) {
+  if (!process.env.UID_SALT || !uid || typeof uid !== 'string') return 'anonymous';
+  return crypto.createHash('sha256').update(uid + process.env.UID_SALT).digest('hex').substring(0, 16);
 }
 
 export async function GET(request) {
   const corsHeaders = getCorsHeaders(request);
   
-  // 🛡️ BẢO VỆ NHẬT KÝ HỆ THỐNG: Yêu cầu Header x-admin-secret-key hoặc Token Admin
-  const reqSecret = request.headers.get('x-admin-secret-key') || '';
+  // 🛡️ BẢO VỆ NHẬT KÝ HỆ THỐNG: Chỉ chấp nhận Bearer ID token có Claims Admin (Fail-Closed)
+  // Đã loại bỏ hoàn toàn kiểm tra khóa chia sẻ
   const authHeader = request.headers.get('authorization') || '';
-  const isAuthBearer = authHeader.startsWith('Bearer ') && authHeader.substring(7) === ADMIN_SECRET;
+  const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : '';
 
-  if (reqSecret !== ADMIN_SECRET && !isAuthBearer) {
+  if (!bearerToken) {
     return NextResponse.json(
-      { success: false, error: 'Unauthorized: Bạn không có quyền truy cập nhật ký trò chuyện hệ thống.' },
+      { success: false, error: 'Unauthorized: Cần Bearer ID token của Quản trị viên để xem nhật ký.' },
       { status: 401, headers: corsHeaders }
+    );
+  }
+
+  const tokenResult = await verifyFirebaseIdToken(bearerToken);
+  if (!tokenResult.valid) {
+    return NextResponse.json(
+      { success: false, error: tokenResult.error || 'Unauthorized: Token xác thực không hợp lệ.' },
+      { status: 401, headers: corsHeaders }
+    );
+  }
+
+  const payload = tokenResult.decoded;
+  const uid = payload.user_id || payload.sub || payload.uid;
+  const adminUids = (process.env.ADMIN_UIDS || '').split(',').map(u => u.trim()).filter(Boolean);
+  const isAdmin = Boolean(payload.admin === true || payload.role === 'admin' || (uid && adminUids.includes(uid)));
+
+  if (!isAdmin) {
+    return NextResponse.json(
+      { success: false, error: 'Forbidden: Bạn không có quyền quản trị để truy cập nhật ký trò chuyện hệ thống.' },
+      { status: 403, headers: corsHeaders }
     );
   }
 
@@ -65,15 +83,17 @@ export async function GET(request) {
       }
     }
 
-    // 🛡️ DATA MASKING (Ẩn danh PII): Che giấu email và số điện thoại trước khi trả về
-    const maskedLogs = logs.map(log => ({
-      ...log,
-      userEmail: maskEmail(log.userEmail),
-      userDisplayName: log.userDisplayName ? String(log.userDisplayName).replace(/\b\d{9,11}\b/g, '***') : 'Học sinh'
-    }));
+    // 🛡️ DATA MINIMIZATION: Loại bỏ hoàn toàn userEmail và userDisplayName; chỉ giữ userHash ẩn danh
+    const sanitizedLogs = logs.map(log => {
+      const { userEmail, userDisplayName, ...rest } = log;
+      return {
+        ...rest,
+        userHash: log.userHash || (log.userEmail ? computeUserHash(log.userEmail) : 'anonymous')
+      };
+    });
 
     return NextResponse.json(
-      { success: true, logs: maskedLogs },
+      { success: true, logs: sanitizedLogs },
       { headers: { ...corsHeaders, 'Cache-Control': 'no-store, max-age=0' } }
     );
   } catch (error) {
@@ -87,6 +107,17 @@ export async function GET(request) {
 export async function POST(request) {
   const corsHeaders = getCorsHeaders(request);
   try {
+    // 🛡️ BẢO VỆ RIÊNG TƯ & TỐI THIỂU HÓA:
+    // Nguồn cấu hình duy nhất từ getReasoningLogConfig (Mặc định tắt ở Production)
+    const { isLogDisabled } = getReasoningLogConfig();
+
+    if (isLogDisabled) {
+      return NextResponse.json(
+        { success: true, disabled: true, message: 'AI Reasoning Log is disabled by configuration.' },
+        { status: 200, headers: corsHeaders }
+      );
+    }
+
     const ip = getClientIp(request);
     // Rate limit: Tối đa 60 logs / phút trên mỗi IP
     const rateCheck = checkRateLimit(`ai-log:${ip}`, 60, 60 * 1000);
@@ -99,9 +130,9 @@ export async function POST(request) {
 
     const body = await request.json().catch(() => ({}));
     const {
-      query: userQuery,
-      userDisplayName,
-      userEmail,
+      query: rawQuery,
+      uid,
+      userId,
       currentPage,
       intent,
       subject,
@@ -109,20 +140,30 @@ export async function POST(request) {
       ragScore,
       tfjsProb,
       isCacheHit,
-      aiResponseText,
+      aiResponseText: rawResponse,
       actionTriggered
     } = body;
+
+    // 🛡️ TỐI THIỂU HÓA DỮ LIỆU (DATA MINIMIZATION):
+    // 1. Cắt query <= 120 ký tự
+    const userQuery = (rawQuery || '').slice(0, 120);
+    // 2. Cắt response <= 150 ký tự
+    const aiResponseText = (rawResponse || '').slice(0, 150);
+    // 3. TUYỆT ĐỐI không lưu userEmail, userDisplayName; thay bằng mã băm UID có muối
+    const userHash = computeUserHash(uid || userId);
+    // 4. Thời hạn lưu trữ TTL: 7 ngày (Firestore TTL Policy)
+    const expireAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
     const timestamp = Date.now();
     const timeStr = new Date(timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const logId = 'log_' + timestamp + '_' + Math.random().toString(36).substring(2, 7);
     const subjectName = (subject || 'tổng hợp').toUpperCase();
 
-    // Console output mimicking local CMD terminal
+    // Console output mimicking local CMD terminal (Không in thông tin định danh cá nhân)
     console.log('\n' + '─'.repeat(75));
     console.log(`🤖 [STEM HUB AI REASONING ENGINE — LOG REALTIME SERVER — ${timeStr}]`);
-    console.log(`👤 Học sinh: ${userDisplayName || 'Học sinh'} | Vị trí: ${currentPage || 'Trang chủ'}`);
-    console.log(`📥 Câu hỏi: "${userQuery || ''}"`);
+    console.log(`👤 Định danh: [Hash: ${userHash}] | Vị trí: ${currentPage || 'Trang chủ'}`);
+    console.log(`📥 Câu hỏi (≤120 ký tự): "${userQuery}"`);
     console.log(`🎯 1/3 Intent & Môn học: Intent '${intent || 'stem_query'}' -> Môn: ${subjectName}`);
 
     if (isCacheHit) {
@@ -145,21 +186,21 @@ export async function POST(request) {
       console.log(`⚡ Tầng 1 Gemini LLM Engine: Tổng hợp câu trả lời & NẠP TỰ ĐỘNG VÀO DỮ LIỆU AI TỰ HỌC`);
     }
     if (aiResponseText) {
-      console.log(`💬 Phản hồi AI: "${aiResponseText.slice(0, 100)}..."`);
+      console.log(`💬 Phản hồi AI (≤150 ký tự): "${aiResponseText}"`);
     }
     console.log('─'.repeat(75) + '\n');
 
     const terminalLines = [
       `🤖 [STEM HUB AI REASONING ENGINE — LOG REALTIME — ${timeStr}]`,
-      `👤 Học sinh: ${userDisplayName || 'Học sinh'} | Vị trí: ${currentPage || 'Trang chủ'}`,
-      `📥 Câu hỏi: "${userQuery || ''}"`,
+      `👤 Định danh: [Hash: ${userHash}] | Vị trí: ${currentPage || 'Trang chủ'}`,
+      `📥 Câu hỏi: "${userQuery}"`,
       `🎯 1/3 Intent & Môn học: Intent '${intent || 'stem_query'}' -> Môn: ${subjectName}`,
       isCacheHit
         ? `⚡ [CACHE HIT - DỮ LIỆU TỰ HỌC] Tìm thấy câu trả lời trong Tri thức AI (Độ tương quan: ${Math.round((ragScore || 0) * 100)}%)`
         : (ragTopTopic ? `📚 2/3 Tầng 2 Vector RAG: Chunk '${ragTopTopic}' (Độ tương quan: ${Math.round((ragScore || 0) * 100)}%)` : `📚 2/3 Tầng 2 Vector RAG: Khai phá tri thức tự do & bài học tương quan`),
       tfjsProb !== null ? `🧠 3/3 Tầng 3 TF.js Online: Dự đoán xác suất = ${(tfjsProb * 100).toFixed(1)}% -> Fit & lưu trọng số` : `🧠 3/3 Tầng 3 TF.js Online: Kích hoạt bộ nhớ tương tác client-side`,
       isCacheHit ? `⚡ TRẢ LỜI TRỰC TIẾP TỪ TRÍ THỨC TỰ HỌC (BỎ QUA GEMINI APIKEY)` : `⚡ Tầng 1 Gemini LLM Engine: Phản hồi & Nạp tự động vào Tri thức AI`,
-      aiResponseText ? `💬 AI Phản hồi: "${aiResponseText.slice(0, 120)}..."` : '',
+      aiResponseText ? `💬 AI Phản hồi: "${aiResponseText}"` : '',
       actionTriggered ? `⚡ Lệnh kích hoạt: ${actionTriggered}` : ''
     ].filter(Boolean);
 
@@ -167,18 +208,18 @@ export async function POST(request) {
       id: logId,
       timestamp,
       timeStr,
-      userDisplayName: userDisplayName || 'Học sinh',
-      userEmail: userEmail || '',
+      userHash,
       currentPage: currentPage || 'Trang chủ',
-      query: userQuery || '',
+      query: userQuery,
       intent: intent || 'stem_query',
       subject: subjectName,
       ragTopTopic: ragTopTopic || null,
       ragScore: ragScore || 0,
       tfjsProb: tfjsProb !== undefined ? tfjsProb : null,
       isCacheHit: !!isCacheHit,
-      aiResponseText: aiResponseText || '',
+      aiResponseText,
       actionTriggered: actionTriggered || null,
+      expireAt,
       terminalLines
     };
 

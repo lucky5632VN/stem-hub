@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { db } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
 import { collection, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { 
   Mail, MessageSquare, Search, Trash2, CheckCircle, Clock, 
@@ -116,7 +116,7 @@ export default function AdminContactMessagesPage() {
 
     const cleanReply = replyText.trim();
     const replyTimestamp = Date.now();
-    const adminEmail = currentUser?.email || 'hohoanganh20092021@gmail.com';
+    const adminEmail = currentUser?.email || 'admin@stem-hub.top';
 
     try {
       playSound.click();
@@ -171,12 +171,14 @@ export default function AdminContactMessagesPage() {
       // 4. Gọi API gửi Email thông báo tới học sinh nếu có email
       let emailSent = false;
       try {
+        const token = auth.currentUser ? await auth.currentUser.getIdToken() : '';
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
         const res = await fetch('/api/contact/reply', {
           method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'x-internal-secret': 'stemhub_rag_internal_sig_2026'
-          },
+          headers,
           body: JSON.stringify({
             messageId: selectedMessage.id,
             replyText: cleanReply,

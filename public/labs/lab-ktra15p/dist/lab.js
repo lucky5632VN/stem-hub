@@ -6,26 +6,29 @@
 const AudioSystem = {
   _alertAudio: null,
   _shatterAudio: null,
-  _isMuted: false,
-  _volume: 0.7,
+  _explosionAudio: null,
+  _isMuted: true, // Mặc định tắt âm thanh cảnh báo để tránh ồn và đảm bảo an toàn
+  _volume: 0.5,
 
   init() {
     try {
       this._alertAudio = new Audio('music/alert.mp3');
-      this._alertAudio.preload = 'auto';
+      this._alertAudio.preload = 'none';
       this._alertAudio.volume = this._volume;
+      this._alertAudio.onerror = () => { /* Fallback im lặng */ };
 
       this._shatterAudio = new Audio('music/shatter.mp3');
-      this._shatterAudio.preload = 'auto';
+      this._shatterAudio.preload = 'none';
       this._shatterAudio.volume = this._volume;
+      this._shatterAudio.onerror = () => { /* Fallback im lặng */ };
 
       this._explosionAudio = new Audio('music/explosion.mp3');
-      this._explosionAudio.preload = 'auto';
+      this._explosionAudio.preload = 'none';
       this._explosionAudio.volume = this._volume;
-      console.log('[AudioSystem] 🔊 Hệ thống âm thanh đã khởi tạo.');
-    } catch(e) {
-      console.error('[AudioSystem] ❌ Lỗi khởi tạo âm thanh:', e);
-    }
+      this._explosionAudio.onerror = () => { /* Fallback im lặng */ };
+      console.log('[AudioSystem] 🔊 Hệ thống âm thanh sẵn sàng (chế độ không phụ thuộc file MP3).');
+    } catch(e) {}
+  },
   },
 
   /**
@@ -3769,23 +3772,19 @@ function toggleAlertSound() {
 window.toggleAlertSound = toggleAlertSound;
 
 // ——— MUSIC SYSTEM ———
+// ——— MUSIC SYSTEM ———
 const MusicSystem = {
   _ctx: null,
   _gainNode: null,
   _oscillators: [],
-  _isMuted: false,
+  _isMuted: true, // Mặc định tắt nhạc nền
   _isPlaying: false,
-  _currentTrack: 'science',
-  _volume: 0.8,
+  _currentTrack: 'concentration',
+  _volume: 0.5,
   _arpTimer: null,
   _audioElement: null,
 
   _tracks: {
-    'science': 'music/science.mp3',
-    'ly_keo_chai': 'music/ly_keo_chai.mp3',
-    'da_lab_album': 'music/da_lab_instrumental.mp3',
-    'son_tung': 'music/son_tung_remix.mp3',
-    'thanh_xuan': 'music/thanh_xuan.mp3',
     'concentration': 'synthesized'
   },
 
@@ -3795,20 +3794,20 @@ const MusicSystem = {
       this._audioElement = new Audio();
       this._audioElement.loop = true;
       
-      this._audioElement.onplay = () => addLog('info', '🔊 Nhạc đang phát (Trực tiếp)...');
-      this._audioElement.onerror = (e) => {
-        const error = this._audioElement.error;
-        let msg = 'Lỗi không xác định';
-        if (error) {
-          switch(error.code) {
-            case 1: msg = 'Người dùng hủy'; break;
-            case 2: msg = 'Lỗi file / Mạng'; break;
-            case 3: msg = 'Lỗi giải mã'; break;
-            case 4: msg = 'Không thấy file music/'; break;
-          }
-        }
-        addLog('danger', `❌ Lỗi Audio: ${msg}`);
+      this._audioElement.onerror = () => {
+        // Fallback im lặng khi không có file MP3
       };
+
+      // AudioContext dành cho Drone synthesized
+      try {
+        this._ctx = new (window.AudioContext || window.webkitAudioContext)();
+        this._gainNode = this._ctx.createGain();
+        this._gainNode.connect(this._ctx.destination);
+      } catch(e) {}
+    } catch(e) {
+      console.warn('[MusicSystem] Init error:', e);
+    }
+  },
 
       // AudioContext dành cho Drone
       try {

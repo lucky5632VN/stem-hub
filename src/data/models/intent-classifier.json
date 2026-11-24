@@ -1,7 +1,7 @@
 {
   "metadata": {
     "modelName": "Multinomial Naive Bayes Intent & Subject Classifier",
-    "trainedAt": "2026-11-08T09:58:50.179Z",
+    "trainedAt": "2026-11-16T15:12:46.215Z",
     "datasetTotal": 392,
     "unseenSampleSize": 40,
     "exactOverlapCount": 0,
