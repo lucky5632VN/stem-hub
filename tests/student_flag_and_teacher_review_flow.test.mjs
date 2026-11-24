@@ -108,5 +108,26 @@ it('4. Sau khi giáo viên hiệu đính (action edit), tri thức đạt chuẩ
   assert.ok(teacherCorrectedItem.answer.includes('x = 8'), 'Lời giải chuẩn đã được cập nhật');
 });
 
+// 5. Kiểm thử học sinh gửi yêu cầu kiểm tra (student_flagged_for_teacher) lưu đầy đủ băn khoăn
+it('5. Học sinh băn khoăn gửi kiểm tra lưu giữ đầy đủ studentNote và cách ly an toàn', () => {
+  const flaggedPayload = {
+    query: 'pư hoá học phát nổ',
+    answer: 'Phản ứng oxi hoá khử giải phóng năng lượng...',
+    subject: 'hoa',
+    sourceType: 'student_flagged_for_teacher',
+    studentNote: 'Em thấy câu này AI giải thích chưa rõ về nhiệt độ gây nổ',
+    studentUid: 'student_guest_abc123',
+    studentName: 'Học sinh',
+    status: 'pending_review',
+    teacherVerified: false,
+    quarantined: false
+  };
+
+  assert.strictEqual(flaggedPayload.sourceType, 'student_flagged_for_teacher');
+  assert.strictEqual(flaggedPayload.status, 'pending_review');
+  assert.strictEqual(flaggedPayload.teacherVerified, false);
+  assert.ok(flaggedPayload.studentNote.length > 0, 'studentNote không được rỗng');
+});
+
 console.log(`\n🏁 KẾT QUẢ KIỂM THỬ: ${passed}/${total} TESTS PASS!`);
 

@@ -4,7 +4,7 @@ import path from 'path';
 import { db } from '@/lib/firebase';
 import { collection, doc, setDoc, deleteDoc, getDocs, serverTimestamp } from 'firebase/firestore';
 import { ALLOWED_HOSTS, getCorsHeaders, getClientIp, getClientIdentifier, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
-import { verifyFirebaseIdToken } from '@/lib/firebaseAdmin';
+import { verifyFirebaseIdToken, getFirebaseAdmin } from '@/lib/firebaseAdmin';
 
 export async function OPTIONS(request) {
   return new NextResponse(null, { status: 204, headers: getCorsHeaders(request) });
@@ -179,31 +179,41 @@ export async function POST(request) {
       );
     }
 
-    // 🛡️ CHẶN ĐẦU ĐỘC RAG (OWASP LLM03): Chỉ chấp nhận người dùng đã đăng nhập có Firebase Bearer ID Token hợp lệ
-    // Đã loại bỏ hoàn toàn việc dùng khóa chia sẻ (Fail-Closed)
+    const body = await request.json().catch(() => ({}));
+    const { id, query, normalizedQuery, answer, subject, topic, queryTFIDF, tfidfVector, createdAt } = body;
+
+    // 🛡️ CHẶN ĐẦU ĐỘC RAG (OWASP LLM03) & HỖ TRỢ HỌC SINH GỬI GIÁO VIÊN:
+    // 1. Nếu là học sinh gửi câu hỏi/lời giải băn khoăn cho giáo viên (student_flagged_for_teacher):
+    //    Cho phép học sinh gửi (kể cả khách vãng lai, được định danh an toàn theo IP & rate limit) vì bản ghi này
+    //    LUÔN bị cách ly ở trạng thái pending_review, KHÔNG BAO GIỜ lọt vào RAG cho đến khi giáo viên thẩm định.
+    // 2. Nếu là các nguồn khác (tự nạp, cấu hình...), bắt buộc phải có Firebase Bearer ID Token hợp lệ.
     const authHeader = request.headers.get('authorization') || '';
     const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : '';
 
-    if (!bearerToken) {
+    let userPayload = null;
+    let authenticatedUid = null;
+
+    if (bearerToken) {
+      const tokenResult = await verifyFirebaseIdToken(bearerToken);
+      if (tokenResult.valid) {
+        userPayload = tokenResult.decoded || {};
+        authenticatedUid = userPayload.user_id || userPayload.sub || userPayload.uid;
+      }
+    }
+
+    const isStudentFlag = body?.sourceType === 'student_flagged_for_teacher';
+
+    if (!authenticatedUid && !isStudentFlag) {
       return NextResponse.json(
         { success: false, error: 'Từ chối quyền truy cập: Yêu cầu đăng nhập với Firebase Bearer ID Token hợp lệ.' },
         { status: 401, headers: corsHeaders }
       );
     }
 
-    const tokenResult = await verifyFirebaseIdToken(bearerToken);
-    if (!tokenResult.valid) {
-      return NextResponse.json(
-        { success: false, error: tokenResult.error || 'Từ chối quyền truy cập: Token xác thực không hợp lệ.' },
-        { status: 401, headers: corsHeaders }
-      );
+    if (!authenticatedUid) {
+      // Định danh an toàn cho học sinh khách (không lộ PII, dựa trên hash client)
+      authenticatedUid = 'student_guest_' + (clientId || 'anon').replace(/[^a-zA-Z0-9]/g, '').slice(0, 12);
     }
-
-    const userPayload = tokenResult.decoded || {};
-    const authenticatedUid = userPayload.user_id || userPayload.sub || userPayload.uid || 'authenticated_user';
-
-    const body = await request.json().catch(() => ({}));
-    const { id, query, normalizedQuery, answer, subject, topic, queryTFIDF, tfidfVector, createdAt } = body;
 
     if (!query || !answer || typeof query !== 'string' || typeof answer !== 'string') {
       return NextResponse.json({ success: false, error: 'Dữ liệu tri thức không hợp lệ' }, { status: 400, headers: corsHeaders });
@@ -239,6 +249,10 @@ export async function POST(request) {
       subject: cleanSubject,
       topic: cleanTopic,
       sourceType: body.sourceType || 'student_query',
+      studentNote: (body.studentNote || '').slice(0, 1000),
+      studentUid: body.studentUid || authenticatedUid || 'student_guest',
+      studentName: body.studentName || (userPayload?.name || (userPayload?.email ? userPayload.email.split('@')[0] : 'Học sinh')),
+      studentEmail: userPayload?.email || null,
       isDemo: isDemoRecord,
       content: `[Chờ giáo viên duyệt] ${cleanQuery}: ${cleanAnswer}`,
       queryTFIDF: queryTFIDF || {},
@@ -268,7 +282,7 @@ export async function POST(request) {
 
     // Ghi nhận Audit Log cho tri thức mới nộp
     appendAuditLog({
-      action: 'student_submit_knowledge',
+      action: isStudentFlag ? 'student_flag_for_teacher' : 'student_submit_knowledge',
       itemId: cleanId,
       subject: cleanSubject,
       querySnippet: cleanQuery.substring(0, 80),
@@ -276,14 +290,18 @@ export async function POST(request) {
       status: 'pending_review'
     });
 
-    // Đồng bộ lên Firestore với trạng thái pending
-    if (db) {
-      try {
+    // Đồng bộ lên Firestore với trạng thái pending (ưu tiên Admin SDK để không bị chặn bởi rules khi chạy phía server)
+    try {
+      const admin = getFirebaseAdmin();
+      if (admin) {
+        const adminDb = admin.firestore();
+        await adminDb.collection('learned_knowledge').doc(cleanId).set(newItem, { merge: true });
+      } else if (db) {
         const docRef = doc(collection(db, 'learned_knowledge'), cleanId);
         await setDoc(docRef, newItem, { merge: true });
-      } catch (dbErr) {
-        console.warn('[POST Firestore Sync] Warning:', dbErr.message);
       }
+    } catch (dbErr) {
+      console.warn('[POST Firestore Sync] Warning:', dbErr.message);
     }
 
     return NextResponse.json({ success: true, item: newItem }, { status: 200, headers: corsHeaders });
@@ -504,26 +522,35 @@ export async function PATCH(request) {
     }
     writeGlobalKnowledge(list);
 
-    // Đồng bộ lên Firestore
-    if (db) {
-      try {
+    // Đồng bộ lên Firestore (ưu tiên Admin SDK để không bị chặn bởi rules khi chạy phía server)
+    try {
+      const patchData = {
+        id,
+        status: targetItem.status,
+        teacherVerified: targetItem.teacherVerified,
+        quarantined: targetItem.quarantined || false,
+        verifiedAt: targetItem.verifiedAt || new Date().toISOString(),
+        verifiedBy: approver,
+        verifiedByUid: reviewer.uid,
+        verifiedByEmail: reviewer.email,
+        ...(targetItem.rejectedAt ? { rejectedAt: targetItem.rejectedAt } : {}),
+        ...(targetItem.rejectedBy ? { rejectedBy: targetItem.rejectedBy } : {}),
+        ...(action === 'edit' && updatedAnswer ? { answer: targetItem.answer, content: targetItem.content } : {})
+      };
+
+      const admin = getFirebaseAdmin();
+      if (admin) {
+        const adminDb = admin.firestore();
+        await adminDb.collection('learned_knowledge').doc(id).set(patchData, { merge: true });
+      } else if (db) {
         const docRef = doc(collection(db, 'learned_knowledge'), id);
         await setDoc(docRef, {
-          id,
-          status: targetItem.status,
-          teacherVerified: targetItem.teacherVerified,
-          quarantined: targetItem.quarantined || false,
-          verifiedAt: targetItem.verifiedAt || serverTimestamp(),
-          verifiedBy: approver,
-          verifiedByUid: reviewer.uid,
-          verifiedByEmail: reviewer.email,
-          ...(targetItem.rejectedAt ? { rejectedAt: targetItem.rejectedAt } : {}),
-          ...(targetItem.rejectedBy ? { rejectedBy: targetItem.rejectedBy } : {}),
-          ...(action === 'edit' && updatedAnswer ? { answer: targetItem.answer, content: targetItem.content } : {})
+          ...patchData,
+          verifiedAt: serverTimestamp()
         }, { merge: true });
-      } catch (dbErr) {
-        console.warn('[PATCH Firestore Sync] Warning:', dbErr.message);
       }
+    } catch (dbErr) {
+      console.warn('[PATCH Firestore Sync] Warning:', dbErr.message);
     }
 
     return NextResponse.json({ success: true, item: targetItem }, { status: 200, headers: corsHeaders });
@@ -561,13 +588,18 @@ export async function DELETE(request) {
       itemId: id
     });
 
-    if (db) {
-      try {
+    // Đồng bộ xóa trên Firestore
+    try {
+      const admin = getFirebaseAdmin();
+      if (admin) {
+        const adminDb = admin.firestore();
+        await adminDb.collection('learned_knowledge').doc(id).delete();
+      } else if (db) {
         const docRef = doc(collection(db, 'learned_knowledge'), id);
         await deleteDoc(docRef);
-      } catch (dbErr) {
-        console.warn('[DELETE Firestore Sync] Warning:', dbErr.message);
       }
+    } catch (dbErr) {
+      console.warn('[DELETE Firestore Sync] Warning:', dbErr.message);
     }
 
     return NextResponse.json({ success: true, message: `Đã xóa tri thức ID ${id}` }, { status: 200, headers: corsHeaders });

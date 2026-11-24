@@ -802,7 +802,8 @@ export default function GlobalAIAssistant() {
         setFlagSuccessToast(`Đã chuyển câu hỏi & lời giải đến Giáo viên môn ${getSubjectDisplayName(subject)}! Thầy/Cô sẽ kiểm tra và hiệu đính sớm.`);
         setTimeout(() => setFlagSuccessToast(null), 5000);
       } else {
-        alert('Có lỗi khi gửi yêu cầu, vui lòng thử lại.');
+        const errData = await res.json().catch(() => ({}));
+        alert(errData.error || 'Có lỗi khi gửi yêu cầu, vui lòng thử lại.');
       }
     } catch (err) {
       console.error('Lỗi gửi cho giáo viên:', err);
