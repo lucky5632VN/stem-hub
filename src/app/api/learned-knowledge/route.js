@@ -83,26 +83,41 @@ export async function GET(request) {
     const all = searchParams.get('all') === 'true';
     const limitCount = parseInt(searchParams.get('limit') || '100', 10);
 
-    // Đồng bộ thêm dữ liệu tri thức từ Firestore nếu có
-    if (db) {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'learned_knowledge'));
-        const firestoreDocs = [];
+    // Đồng bộ thêm dữ liệu tri thức từ Firestore (ưu tiên Admin SDK để không bị chặn bởi rules)
+    try {
+      const admin = getFirebaseAdmin();
+      let firestoreDocs = [];
+      if (admin) {
+        const adminDb = admin.firestore();
+        const snap = await adminDb.collection('learned_knowledge').get();
+        snap.forEach(docSnap => {
+          const d = docSnap.data();
+          if (d && d.id) firestoreDocs.push(d);
+        });
+      } else if (db) {
+        const { query, where } = await import('firebase/firestore');
+        const q = query(
+          collection(db, 'learned_knowledge'),
+          where('status', '==', 'verified_by_teacher'),
+          where('teacherVerified', '==', true)
+        );
+        const querySnapshot = await getDocs(q);
         querySnapshot.forEach(docSnap => {
           const d = docSnap.data();
           if (d && d.id) firestoreDocs.push(d);
         });
-        if (firestoreDocs.length > 0) {
-          const map = new Map();
-          firestoreDocs.forEach(item => map.set(item.id, item));
-          list.forEach(item => {
-            if (!map.has(item.id)) map.set(item.id, item);
-          });
-          list = Array.from(map.values());
-        }
-      } catch (e) {
-        console.warn('[API learned-knowledge] Firestore sync warning:', e.message);
       }
+
+      if (firestoreDocs.length > 0) {
+        const map = new Map();
+        firestoreDocs.forEach(item => map.set(item.id, item));
+        list.forEach(item => {
+          if (!map.has(item.id)) map.set(item.id, item);
+        });
+        list = Array.from(map.values());
+      }
+    } catch (_) {
+      // Bỏ qua cảnh báo quyền khi chạy môi trường local fallback
     }
 
     let filtered = list;
@@ -269,7 +284,9 @@ export async function POST(request) {
     };
 
     const list = readGlobalKnowledge();
-    const existingIdx = list.findIndex(item => item.id === cleanId || item.normalizedQuery === cleanNormQ);
+    const existingIdx = isStudentFlag
+      ? -1 // Học sinh gửi câu hỏi băn khoăn tạo một phiếu thẩm định mới độc lập, không đè lên tri thức chuẩn hiện có
+      : list.findIndex(item => item.id === cleanId || item.normalizedQuery === cleanNormQ);
 
     if (existingIdx >= 0) {
       list[existingIdx] = newItem;

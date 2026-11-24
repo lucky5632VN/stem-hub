@@ -27,7 +27,27 @@ const protectKaTeXVietnamese = (latex) => {
 // Safe KaTeX renderer wrapper with auto-sanitization for Vietnamese letters in math mode
 const renderKaTeXSafe = (latex, displayMode = false) => {
   if (!latex || !latex.trim()) return '';
+
+  // Tạm thời chặn console.warn/error khi KaTeX render ký tự Unicode tiếng Việt không có font metrics (như ạ, ọ, ụ...)
+  const originalWarn = typeof console !== 'undefined' ? console.warn : null;
+  const originalError = typeof console !== 'undefined' ? console.error : null;
+
   try {
+    if (originalWarn) {
+      console.warn = (...args) => {
+        const msg = typeof args[0] === 'string' ? args[0] : '';
+        if (msg.includes('No character metrics for')) return;
+        originalWarn.apply(console, args);
+      };
+    }
+    if (originalError) {
+      console.error = (...args) => {
+        const msg = typeof args[0] === 'string' ? args[0] : '';
+        if (msg.includes('No character metrics for')) return;
+        originalError.apply(console, args);
+      };
+    }
+
     let clean = latex.trim();
     // Tự động sửa các lỗi gõ macro phổ biến của AI
     clean = clean
@@ -49,6 +69,9 @@ const renderKaTeXSafe = (latex, displayMode = false) => {
     });
   } catch (e) {
     return latex;
+  } finally {
+    if (originalWarn) console.warn = originalWarn;
+    if (originalError) console.error = originalError;
   }
 };
 

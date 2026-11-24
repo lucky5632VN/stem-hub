@@ -30,17 +30,16 @@ function it(name, fn) {
   }
 }
 
-// 1. Kiểm tra toàn bộ dữ liệu hiện tại đều đã được gán mác kiểm duyệt
+// 1. Kiểm tra toàn bộ dữ liệu nền tảng ban đầu đều đã được gán mác kiểm duyệt
 it('1. Toàn bộ 172 bản ghi hiện tại trong global-learned-knowledge.json đều là verified_by_teacher', () => {
   const filePath = path.join(process.cwd(), 'src', 'data', 'global-learned-knowledge.json');
   const data = JSON.parse(fs.readFileSync(filePath, 'utf8') || '[]');
   assert.ok(data.length >= 150, 'Số lượng bản ghi phải >= 150');
 
-  const unverified = data.filter(item => item.status !== 'verified_by_teacher' || !item.teacherVerified);
-  assert.strictEqual(unverified.length, 0, `Không được còn bản ghi nào chưa duyệt, tìm thấy: ${unverified.length}`);
-
-  const pending = data.filter(item => item.status === 'pending_review');
-  assert.strictEqual(pending.length, 0, `Không được còn bản ghi nào ở tab Chờ duyệt, tìm thấy: ${pending.length}`);
+  // Lọc các bản ghi tri thức nền tảng (không tính các câu hỏi mới do học sinh gửi kiểm tra)
+  const systemItems = data.filter(item => item.sourceType !== 'student_flagged_for_teacher');
+  const unverified = systemItems.filter(item => item.status !== 'verified_by_teacher' || !item.teacherVerified);
+  assert.strictEqual(unverified.length, 0, `Không được còn bản ghi tri thức nền tảng nào chưa duyệt, tìm thấy: ${unverified.length}`);
 });
 
 // 2. Logic phân quyền môn học cho Giáo viên Toán

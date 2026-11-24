@@ -491,7 +491,24 @@ export function detectQuerySubject(query) {
   if (isNonStem) return null;
 
   // 2. Nhận diện các môn STEM chuẩn
-  if (qLower.includes('hóa') || qLower.includes('este') || qLower.includes('axit') || qLower.includes('nguyên tử') || qLower.includes('dung dịch')) return 'hoa';
+  if (
+    qLower.includes('hóa') || 
+    qLower.includes('este') || 
+    qLower.includes('axit') || 
+    qLower.includes('nguyên tử') || 
+    qLower.includes('dung dịch') ||
+    qLower.includes('phản ứng') ||
+    qLower.includes('oxi hóa') ||
+    qLower.includes('oxit') ||
+    qLower.includes('polime') ||
+    qLower.includes('ancol') ||
+    qLower.includes('phenol') ||
+    qLower.includes('amino axit') ||
+    qLower.includes('glucoz') ||
+    qLower.includes('saccaroz') ||
+    qLower.includes('kết tủa')
+  ) return 'hoa';
+
   if (
     qLower.includes('vật lý') || 
     qLower.includes('vật lí') || 
@@ -504,10 +521,59 @@ export function detectQuerySubject(query) {
     qLower.includes('sóng cơ') ||
     qLower.includes('thấu kính') ||
     qLower.includes('quang học') ||
+    qLower.includes('điện từ') ||
+    qLower.includes('cảm ứng từ') ||
+    qLower.includes('quang điện') ||
+    qLower.includes('phóng xạ') ||
+    qLower.includes('hạt nhân') ||
     (!/(địa|tâm|triết|quản|xử|chân|hợp|vô|pháp|đạo|lý\s*do)\s*l[ýí]/i.test(qLower) && (qLower.includes(' lý') || qLower.includes(' lí') || qLower.startsWith('lý') || qLower.startsWith('lí')))
   ) return 'ly';
-  if (qLower.includes('toán') || qLower.includes('hàm số') || qLower.includes('logarit') || qLower.includes('tích phân') || qLower.includes('đạo hàm')) return 'toan';
-  if (qLower.includes('sinh') || qLower.includes('sinh học') || qLower.includes('adn') || qLower.includes('gen') || qLower.includes('tế bào') || qLower.includes('di truyền')) return 'sinh';
+
+  if (
+    qLower.includes('sinh') || 
+    qLower.includes('sinh học') || 
+    qLower.includes('adn') || 
+    qLower.includes('dna') || 
+    qLower.includes('arn') || 
+    qLower.includes('rna') || 
+    qLower.includes('gen') || 
+    qLower.includes('tế bào') || 
+    qLower.includes('di truyền') ||
+    qLower.includes('nhiễm sắc thể') ||
+    qLower.includes('axit nucleic') ||
+    qLower.includes('đột biến') ||
+    qLower.includes('quang hợp') ||
+    qLower.includes('nguyên phân') ||
+    qLower.includes('giảm phân') ||
+    qLower.includes('menđen') ||
+    qLower.includes('quần thể') ||
+    qLower.includes('hệ sinh thái')
+  ) return 'sinh';
+
+  if (
+    qLower.includes('tin học') || 
+    qLower.includes('lập trình') || 
+    qLower.includes('thuật toán') || 
+    qLower.includes('python') || 
+    qLower.includes('c++') || 
+    qLower.includes('pascal') || 
+    qLower.includes('mạng máy tính') || 
+    qLower.includes('cơ sở dữ liệu') || 
+    qLower.includes('sql')
+  ) return 'tin';
+
+  if (
+    (!qLower.includes('thuật toán') && qLower.includes('toán')) || 
+    qLower.includes('hàm số') || 
+    qLower.includes('logarit') || 
+    qLower.includes('tích phân') || 
+    qLower.includes('đạo hàm') ||
+    qLower.includes('hình học') ||
+    qLower.includes('vecto') ||
+    qLower.includes('xác suất') ||
+    qLower.includes('cấp số')
+  ) return 'toan';
+
   return null;
 }
 

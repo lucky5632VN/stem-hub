@@ -39,11 +39,25 @@ if (typeof window !== 'undefined') {
         msg.includes('QuotaExceededError') ||
         msg.includes('b815') ||
         msg.includes('firestore_online_state') ||
-        msg.includes('INTERNAL ASSERTION FAILED')
+        msg.includes('INTERNAL ASSERTION FAILED') ||
+        msg.includes('No character metrics for') ||
+        msg.includes("Can't perform a React state update on a component that hasn't mounted yet")
       ) {
         return;
       }
       originalError.apply(console, args);
+    };
+
+    const originalWarn = console.warn;
+    console.warn = (...args) => {
+      const msg = typeof args[0] === 'string' ? args[0] : (args[0]?.message || '');
+      if (
+        msg.includes('No character metrics for') ||
+        msg.includes('Firestore sync warning')
+      ) {
+        return;
+      }
+      originalWarn.apply(console, args);
     };
   }
 }

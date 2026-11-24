@@ -36,6 +36,8 @@ it('1. Tự động nhận diện môn học khi học sinh hỏi câu hỏi STE
   assert.strictEqual(detectQuerySubject('Tính chu kỳ dao động điều hòa của con lắc lò xo'), 'ly');
   assert.strictEqual(detectQuerySubject('Este no đơn chức mạch hở tác dụng với NaOH'), 'hoa');
   assert.strictEqual(detectQuerySubject('Cơ chế đột biến gen và nguyên tắc bổ sung ADN'), 'sinh');
+  assert.strictEqual(detectQuerySubject('chuỗi DNA'), 'sinh', 'chuỗi DNA phải nhận diện môn Sinh');
+  assert.strictEqual(detectQuerySubject('Thuật toán tìm kiếm nhị phân bằng python'), 'tin');
 });
 
 // 2. Kiểm tra nhãn nguồn chi tiết của các loại tài liệu
