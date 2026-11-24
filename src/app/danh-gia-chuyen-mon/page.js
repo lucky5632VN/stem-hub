@@ -13,7 +13,6 @@ import {
   ArrowLeft, 
   RefreshCw, 
   Lock, 
-  FileText, 
   EyeOff, 
   Sparkles,
   BarChart3,
@@ -136,6 +135,7 @@ export default function TeacherReviewPortalPage() {
   // Chế độ xem Ma trận nhầm lẫn: 'teacher' (Giáo viên thực tế) | 'bench150_rag' (Mô hình RAG 150 ca) | 'bench150_base' (Mô hình Base 150 ca) | 'bench150_compare' (So sánh đối đầu)
   const [confusionSource, setConfusionSource] = useState('bench150_rag');
   const [subjectCounts, setSubjectCounts] = useState({ toan: 117, ly: 98, hoa: 102, sinh: 98 });
+  const [reviewedCountsBySubject, setReviewedCountsBySubject] = useState({ toan: 0, ly: 0, hoa: 0, sinh: 0 });
 
   // Phiếu đồng ý (Consent)
   const [consentData, setConsentData] = useState({ publicNameConsent: false, teacherDisplayName: '', institution: '', withdrawn: false });
@@ -172,14 +172,21 @@ export default function TeacherReviewPortalPage() {
       }
 
       const isTeacher = data.reviewerType === 'teacher' || tokenResult.claims.role === 'teacher';
-      setReviewerType(isTeacher ? 'teacher' : (adminClaim ? 'admin' : (data.reviewerType || 'team_self')));
+      setReviewerType(isTeacher ? 'teacher' : (adminClaim ? 'admin' : (data.reviewerType || 'teacher')));
       setAuthorizedSubjects(data.authorizedSubjects || ['toan']);
       if (data.subjectCounts) {
         setSubjectCounts(data.subjectCounts);
       }
+      if (data.reviewedCountsBySubject) {
+        setReviewedCountsBySubject(data.reviewedCountsBySubject);
+      }
       setSamples(data.samples || []);
       setReviewedSampleIds(data.reviewedSampleIds || []);
-      setCurrentIndex(0);
+      
+      // Tự động nhảy tới câu hỏi đầu tiên chưa được chấm
+      const reviewedSet = new Set(data.reviewedSampleIds || []);
+      const firstUnreviewedIdx = (data.samples || []).findIndex(s => !reviewedSet.has(s.sampleId));
+      setCurrentIndex(firstUnreviewedIdx >= 0 ? firstUnreviewedIdx : 0);
       resetForm();
     } catch (err) {
       setErrorMsg(err.message);
@@ -298,6 +305,10 @@ export default function TeacherReviewPortalPage() {
       playSound.success();
       setSuccessMsg(`Đã ghi nhận phiếu thẩm định (${data.reviewerCode})!`);
       setReviewedSampleIds(prev => [...prev, currentSample.sampleId]);
+      setReviewedCountsBySubject(prev => ({
+        ...prev,
+        [selectedSubject]: (prev[selectedSubject] || 0) + 1
+      }));
 
       // Tự động chuyển câu tiếp theo nếu chưa phải câu cuối
       if (currentIndex < samples.length - 1) {
@@ -390,42 +401,30 @@ export default function TeacherReviewPortalPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
 
-        {/* 1. BIỂU NGỮ CỐ ĐỊNH THEO VAI TRÒ (REQUIREMENT 2) */}
-        {reviewerType === 'team_self' ? (
-          <div className="bg-amber-100/90 border-2 border-amber-500 text-amber-950 dark:bg-amber-500/15 dark:border-amber-500/80 dark:text-amber-300 rounded-2xl p-4 text-center shadow-md dark:shadow-lg dark:shadow-amber-500/10">
-            <div className="inline-flex items-center gap-2 text-amber-900 dark:text-amber-300 font-extrabold text-base md:text-lg uppercase tracking-wide">
-              <AlertTriangle className="w-5 h-5 animate-pulse text-amber-600 dark:text-amber-400" />
-              Đánh giá nội bộ của nhóm — không phải đánh giá độc lập
-            </div>
-            <p className="text-xs md:text-sm text-amber-800 dark:text-amber-200/80 mt-1 font-medium">
-              Phân hệ tự kiểm tra chất lượng kỹ thuật dành cho thành viên phát triển STEM HUB. Điểm số này được tách biệt hoàn toàn, không gộp vào điểm số của giáo viên.
-            </p>
+        {/* 1. BIỂU NGỮ CỐ ĐỊNH THEO VAI TRÒ */}
+        <div className="bg-emerald-100/90 border-2 border-emerald-500 text-emerald-950 dark:bg-emerald-500/15 dark:border-emerald-500/70 dark:text-emerald-300 rounded-2xl p-4 text-center shadow-md dark:shadow-lg dark:shadow-emerald-500/10">
+          <div className="inline-flex items-center gap-2 text-emerald-900 dark:text-emerald-300 font-extrabold text-base md:text-lg uppercase tracking-wide">
+            <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+            Cổng Thẩm Định Chuyên Môn Giáo Viên — Chuẩn GDPT 2018
           </div>
-        ) : (
-          <div className="bg-emerald-100/90 border-2 border-emerald-500 text-emerald-950 dark:bg-emerald-500/15 dark:border-emerald-500/70 dark:text-emerald-300 rounded-2xl p-4 text-center shadow-md dark:shadow-lg dark:shadow-emerald-500/10">
-            <div className="inline-flex items-center gap-2 text-emerald-900 dark:text-emerald-300 font-extrabold text-base md:text-lg uppercase tracking-wide">
-              <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-              Cổng Thẩm Định Chuyên Môn Giáo Viên — Chuẩn GDPT 2018
-            </div>
-            <p className="text-xs md:text-sm text-emerald-800 dark:text-emerald-200/80 mt-1 font-medium">
-              Đánh giá độc lập của Thầy/Cô được mã hóa ẩn danh (mặc định) nhằm bảo vệ quyền riêng tư và đảm bảo tính khách quan khoa học.
-            </p>
-          </div>
-        )}
+          <p className="text-xs md:text-sm text-emerald-800 dark:text-emerald-200/80 mt-1 font-medium">
+            Đánh giá độc lập của Thầy/Cô được mã hóa ẩn danh (mặc định) nhằm bảo vệ quyền riêng tư và đảm bảo tính khách quan khoa học.
+          </p>
+        </div>
 
         {/* 2. HEADER & NAVIGATION TABS */}
         <div className="bg-white/95 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4 shadow-sm dark:shadow-none">
           <div>
             <div className="flex items-center gap-2 text-xs font-bold text-cyan-700 dark:text-cyan-400 uppercase tracking-wider">
               <Award className="w-4 h-4" />
-              {reviewerType === 'teacher' ? 'Thẩm Định Viên Chuyên Môn' : 'Thành Viên Phát Triển (Tự Chấm)'}
+              Thẩm Định Viên Chuyên Môn
             </div>
             <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white mt-1">
               Hệ Thống Thẩm Định Câu Trả Lời Trợ Lý AI
             </h1>
           </div>
 
-          {/* Chọn môn học kèm số lượng câu hỏi hiện có của từng môn */}
+          {/* Chọn môn học kèm số lượng câu hỏi còn lại của từng môn */}
           <div className="flex flex-wrap items-center gap-3">
             <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">Môn thẩm định:</span>
             <div className="flex flex-wrap gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
@@ -437,7 +436,9 @@ export default function TeacherReviewPortalPage() {
               ].map(({ id: subj, name }) => {
                 const isAllowed = isAdmin || (reviewerType === 'teacher' ? authorizedSubjects.includes(subj) : true);
                 if (reviewerType === 'teacher' && !isAdmin && !isAllowed) return null; // Ẩn hoàn toàn môn không được cấp quyền cho giáo viên
-                const count = subjectCounts[subj] || (selectedSubject === subj ? samples.length : 0);
+                const totalForSubj = subjectCounts[subj] || (selectedSubject === subj ? samples.length : 0);
+                const reviewedForSubj = selectedSubject === subj ? reviewedSampleIds.length : (reviewedCountsBySubject[subj] || 0);
+                const remainingForSubj = Math.max(0, totalForSubj - reviewedForSubj);
                 return (
                   <button
                     key={subj}
@@ -457,7 +458,7 @@ export default function TeacherReviewPortalPage() {
                         ? 'bg-white/20 text-white dark:bg-slate-950/30 dark:text-slate-950' 
                         : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                     }`}>
-                      {count} câu
+                      {remainingForSubj} câu
                     </span>
                   </button>
                 );
@@ -477,7 +478,7 @@ export default function TeacherReviewPortalPage() {
             }`}
           >
             <BookOpen className="w-4 h-4" />
-            Chấm Mẫu ({samples.length > 0 ? `${reviewedSampleIds.length}/${samples.length}` : `0/${sampleSize}`})
+            Chấm Mẫu ({Math.max(0, (subjectCounts[selectedSubject] || samples.length) - reviewedSampleIds.length)} câu còn lại)
           </button>
 
           <button
@@ -503,14 +504,6 @@ export default function TeacherReviewPortalPage() {
             <UserCheck className="w-4 h-4" />
             Cam Kết & Quyền Riêng Tư
           </button>
-
-          <Link
-            href="/danh-gia-chuyen-mon/kiem-dap-an"
-            className="pb-3 px-2 flex items-center gap-2 border-b-2 border-transparent text-slate-600 hover:text-emerald-700 dark:text-slate-400 dark:hover:text-emerald-300 transition-all ml-auto"
-          >
-            <FileText className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-            Kiểm Tra Đáp Án Toán (Bản In / Online)
-          </Link>
         </div>
 
         {/* THÔNG BÁO TRẠNG THÁI */}
@@ -577,21 +570,6 @@ export default function TeacherReviewPortalPage() {
               </div>
             ) : (
               <>
-                {/* Thanh tiến độ */}
-                <div className="flex items-center justify-between text-xs text-slate-700 dark:text-slate-400 font-semibold">
-                  <span>Tiến độ: Câu {currentIndex + 1} / {samples.length}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 dark:bg-emerald-400 inline-block"></span>
-                    <span>Đã chấm: {reviewedSampleIds.length}</span>
-                  </div>
-                </div>
-                <div className="w-full bg-slate-200 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden shadow-inner">
-                  <div 
-                    className="bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-500 dark:to-blue-500 h-full transition-all duration-300"
-                    style={{ width: `${((currentIndex + 1) / samples.length) * 100}%` }}
-                  ></div>
-                </div>
-
                 {/* THẺ CÂU HỎI & CÂU TRẢ LỜI CỦA HỆ THỐNG */}
                 <div className="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-6 shadow-sm dark:shadow-xl">
                   {/* Metadata mẫu (Đã làm mù Model & RAG status) */}
@@ -963,7 +941,6 @@ export default function TeacherReviewPortalPage() {
                     <tr>
                       <th className="p-3">Môn học</th>
                       <th className="p-3">Giáo viên chấm (k/n, số GV)</th>
-                      <th className="p-3">Nhóm tự chấm (k/n) [Nội bộ]</th>
                       <th className="p-3">Điểm theo mục (ĐK/CC/SP/AT)</th>
                       <th className="p-3">Lỗi chính phổ biến</th>
                     </tr>
@@ -982,12 +959,6 @@ export default function TeacherReviewPortalPage() {
                           )}
                         </td>
 
-                        {/* Nhóm tự chấm */}
-                        <td className="p-3">
-                          <div className="text-amber-700 dark:text-amber-400 font-bold">{row.teamStats.text}</div>
-                          <div className="text-[10px] text-amber-600/80 dark:text-amber-300/60 italic">*Đánh giá nội bộ</div>
-                        </td>
-
                         {/* Điểm theo mục */}
                         <td className="p-3">
                           {row.teacherStats.hasData && row.teacherStats.averages ? (
@@ -997,15 +968,8 @@ export default function TeacherReviewPortalPage() {
                               </span>
                               <div className="text-[10px] text-slate-500">(Tổng: {row.teacherStats.averages.total}/8)</div>
                             </div>
-                          ) : row.teamStats.hasData && row.teamStats.averages ? (
-                            <div className="space-y-0.5">
-                              <span className="text-amber-700 dark:text-amber-300 font-mono font-bold">
-                                {row.teamStats.averages.knowledge} / {row.teamStats.averages.grounding} / {row.teamStats.averages.pedagogy} / {row.teamStats.averages.safety}
-                              </span>
-                              <div className="text-[10px] text-slate-500">(Nhóm tự chấm: {row.teamStats.averages.total}/8)</div>
-                            </div>
                           ) : (
-                            <span className="text-slate-500">N/A</span>
+                            <span className="text-slate-500 italic">Chưa có đánh giá</span>
                           )}
                         </td>
 
@@ -1013,10 +977,8 @@ export default function TeacherReviewPortalPage() {
                         <td className="p-3 text-slate-600 dark:text-slate-400">
                           {row.teacherStats.hasData ? (
                             formatTopError(row.teacherStats.errorDistribution)
-                          ) : row.teamStats.hasData ? (
-                            formatTopError(row.teamStats.errorDistribution) + ' (nhóm)'
                           ) : (
-                            'N/A'
+                            <span className="text-slate-500 italic">N/A</span>
                           )}
                         </td>
                       </tr>
@@ -1029,24 +991,17 @@ export default function TeacherReviewPortalPage() {
               <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800 space-y-3">
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <Award className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
-                  Độ Đồng Thuận Nội Bộ (Cohen's Kappa & % Agreement)
+                  Độ Đồng Thuận Đánh Giá Giáo Viên (Cohen's Kappa & % Agreement)
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-400">
-                  Tính toán độc lập trong từng nhóm đối tượng khi có ≥ 2 người cùng loại chấm trên cùng mẫu. <strong>Tuyệt đối không ghép Kappa giữa giáo viên và nhóm.</strong>
+                  Tính toán độc lập giữa các giáo viên khi có ≥ 2 thầy/cô cùng chuyên môn chấm trên cùng mẫu để đảm bảo độ tin cậy khoa học.
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                <div className="pt-2">
                   <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
                     <div className="text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-2">Đồng thuận giữa các Giáo viên:</div>
                     <div className="text-xs text-slate-500 dark:text-slate-400 italic">
                       Hiện tại chưa có đủ ≥ 2 giáo viên cùng chấm một môn để tính toán hệ số Cohen's Kappa.
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
-                    <div className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-2">Đồng thuận giữa Thành viên Nhóm (Nội bộ):</div>
-                    <div className="text-xs text-slate-600 dark:text-slate-400">
-                      Đang thu thập dữ liệu tự chấm từ các thành viên để tính Kappa nội bộ phục vụ kiểm toán kỹ thuật.
                     </div>
                   </div>
                 </div>

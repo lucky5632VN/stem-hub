@@ -104,16 +104,24 @@ export async function GET(request) {
     sinh: fullPool.filter(i => i.subject === 'sinh').length
   };
 
-  // 6. Tra cứu danh sách mẫu người này đã chấm (để hiển thị tiến độ trên UI)
+  // 6. Tra cứu danh sách mẫu người này đã chấm (để tính số lượng còn lại cho từng môn)
   let reviewedSampleIds = [];
+  const reviewedCountsBySubject = { toan: 0, ly: 0, hoa: 0, sinh: 0 };
   const admin = getFirebaseAdmin();
   if (admin) {
     try {
       const existingSnap = await admin.firestore().collection('expert_reviews')
         .where('reviewerUid', '==', uid)
-        .where('subject', '==', requestedSubject)
         .get();
-      reviewedSampleIds = existingSnap.docs.map(d => d.data().sampleId);
+      existingSnap.docs.forEach(doc => {
+        const d = doc.data();
+        if (d.subject && reviewedCountsBySubject[d.subject] !== undefined) {
+          reviewedCountsBySubject[d.subject]++;
+        }
+        if (d.subject === requestedSubject) {
+          reviewedSampleIds.push(d.sampleId);
+        }
+      });
     } catch (err) {
       console.warn('[ReviewSamples] Không thể đọc tiến độ chấm cũ:', err.message);
     }
@@ -128,6 +136,7 @@ export async function GET(request) {
     sampleSize: samplingResult.sampleSize,
     totalAvailable: samplingResult.totalAvailable,
     subjectCounts,
+    reviewedCountsBySubject,
     studentFlagsCount: samplingResult.studentFlagsCount || 0,
     reviewedCount: reviewedSampleIds.length,
     reviewedSampleIds,
