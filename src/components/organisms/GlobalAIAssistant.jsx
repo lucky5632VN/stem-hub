@@ -403,173 +403,110 @@ function formatEvidenceDate(val) {
   return 'Gần đây';
 }
 
-// 🛡️ Khối Căn Cứ & Kiểm Chứng AI Chi Tiết (Theo yêu cầu trực tiếp của Ban Giám Khảo & Giáo viên)
+// 🛡️ Khối Căn Cứ Trích Dẫn SGK & Học Liệu Tinh Gọn (Theo định dạng chuẩn chấm chuyên môn)
 function GroundingEvidenceBox({ evidence, isDark = true }) {
-  const [showFullContext, setShowFullContext] = useState(false);
+  const [showSnippet, setShowSnippet] = useState(false);
 
   if (!evidence) return null;
 
-  // 🛡️ BẮT BUỘC (Mục 4): Khối căn cứ chỉ do hệ thống tạo từ dữ liệu có cấu trúc qua GroundingEvidenceBox; ẩn khi WEAK/UNGROUNDED hoặc khi trả lời từ chối
+  // 🛡️ BẮT BUỘC: Khối căn cứ chỉ do hệ thống tạo từ dữ liệu có cấu trúc; ẩn khi WEAK/UNGROUNDED hoặc khi trả lời từ chối
   if (evidence.status === 'weak' || evidence.status === 'ungrounded') return null;
   if (evidence.isRefusal || evidence.isOutOfScope) return null;
   if (typeof evidence.score === 'number' && evidence.score < 0.30) return null;
-  if (!evidence.snippet && !evidence.fullContent) return null;
+  if (!evidence.snippet && !evidence.fullContent && !evidence.topic && !evidence.chunkId) return null;
 
-  const { status, score, snippet, fullContent, chunkId, topic, subject, sourceType, warningMessage, verifier, isTeacherVerified, verifiedBy, verifiedAt, rubricScore, expertReviewUrl } = evidence;
+  const { chunkId, topic, sourceType, isTeacherVerified, verifiedTeacherCount, verifiedTeachers, snippet, sgkReference } = evidence;
 
-  let statusBadge = {
-    text: 'Có căn cứ',
-    bg: isDark ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300' : 'bg-emerald-50 border-emerald-300 text-emerald-700',
-    icon: '🟢'
-  };
+  const isLearned = chunkId?.startsWith('learned_') || sourceType === 'teacher_verified_stem' || sourceType === 'student_query';
 
-  if (status === 'weak') {
-    statusBadge = {
-      text: 'Căn cứ yếu',
-      bg: isDark ? 'bg-amber-500/15 border-amber-500/40 text-amber-300' : 'bg-amber-50 border-amber-300 text-amber-700',
-      icon: '🟡'
-    };
-  } else if (status === 'ungrounded') {
-    statusBadge = {
-      text: 'Không có căn cứ',
-      bg: isDark ? 'bg-rose-500/15 border-rose-500/40 text-rose-300' : 'bg-rose-50 border-rose-300 text-rose-700',
-      icon: '🔴'
-    };
+  // Định dạng nguồn trích dẫn ngắn gọn chuẩn mực như trong chỗ chấm của giáo viên
+  let citationText = sgkReference || '';
+  if (!citationText) {
+    if (chunkId) {
+      const match = chunkId.match(/^([a-z]+)-(\d+)-/i);
+      if (match) {
+        const rawSubj = match[1].toLowerCase();
+        const grade = match[2];
+        const subjMap = {
+          toan: 'Toán học',
+          ly: 'Vật lí',
+          phys: 'Vật lí',
+          hoa: 'Hóa học',
+          chem: 'Hóa học',
+          sinh: 'Sinh học',
+          bio: 'Sinh học',
+          tin: 'Tin học'
+        };
+        const subjName = subjMap[rawSubj] || 'Khoa học';
+        citationText = `SGK ${subjName} ${grade}${topic ? `, ${topic}` : ''}`;
+      }
+    }
   }
 
-  const sourceName = getSourceTypeLabel(sourceType);
-  const scorePercent = typeof score === 'number' ? `${Math.round(score * 100)}%` : 'N/A';
+  if (!citationText) {
+    if (isLearned) {
+      citationText = topic && topic !== 'Tri thức tự học AI từ tương tác học sinh'
+        ? `Tri thức bổ trợ của học sinh (đã qua giáo viên duyệt) — ${topic}`
+        : 'Tri thức bổ trợ của học sinh (đã qua giáo viên duyệt)';
+    } else {
+      citationText = topic || 'Sách giáo khoa Chương trình GDPT 2018';
+    }
+  }
+
+  // Mác / Huy hiệu kiểm duyệt rõ ràng
+  const teacherCount = verifiedTeacherCount || (Array.isArray(verifiedTeachers) ? verifiedTeachers.length : 1);
+  const showTeacherBadge = isTeacherVerified || isLearned;
 
   return (
-    <div className={`mt-3 pt-2.5 border-t rounded-xl p-3 text-xs transition-all ${
+    <div className={`mt-2.5 pt-2 border-t rounded-xl p-2.5 text-xs transition-all ${
       isDark 
-        ? 'bg-[#0f131f]/90 border-cyan-500/25 text-zinc-300' 
-        : 'bg-white/95 border-purple-200 text-zinc-700 shadow-2xs'
+        ? 'bg-blue-950/25 border-blue-500/25 text-slate-200' 
+        : 'bg-blue-50/80 border-blue-200 text-slate-800'
     }`}>
-      {/* Header: Khối Căn Cứ & Trạng thái */}
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-        <div className="flex items-center gap-1.5 font-semibold text-[11px] tracking-wide uppercase text-cyan-400">
-          <span>📚 Căn Cứ Học Liệu & Kiểm Định Chuyên Môn</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border flex items-center gap-1 ${statusBadge.bg}`}>
-            <span>{statusBadge.icon}</span>
-            <span>{statusBadge.text}</span>
-          </span>
-          <span className={`text-[10px] px-1.5 py-0.5 rounded ${isDark ? 'bg-zinc-800 text-zinc-400' : 'bg-zinc-100 text-zinc-600'}`}>
-            Độ tương quan: {scorePercent}
-          </span>
-        </div>
-      </div>
+      <div className="flex flex-wrap items-center justify-between gap-1.5 mb-1">
+        <strong className={`font-semibold text-[11px] flex items-center gap-1.5 ${
+          isDark ? 'text-blue-300' : 'text-blue-900'
+        }`}>
+          <span>📖</span>
+          <span>{isLearned ? 'Nguồn học liệu tham chiếu:' : 'Nguồn trích dẫn SGK:'}</span>
+        </strong>
 
-      {/* Thông tin chi tiết nguồn gốc & kiểm định chuyên môn */}
-      <div className="space-y-1.5 mb-2.5 bg-zinc-900/60 p-2.5 rounded-xl border border-zinc-800/80">
-        <div className="flex flex-wrap items-start justify-between text-[11px] gap-1">
-          <span className="font-semibold text-zinc-400 shrink-0">Học liệu nguồn:</span>
-          <span className="text-zinc-200 font-medium text-right flex-1 truncate max-w-[280px]">
-            {topic || 'Sách giáo khoa Chương trình GDPT 2018'}
-          </span>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between text-[11px] gap-1">
-          <span className="font-semibold text-zinc-400 shrink-0">Phân loại nguồn:</span>
-          <span className={`${sourceType === 'teacher_verified_stem' ? 'text-emerald-300 font-bold' : (sourceType === 'team_summary' ? 'text-cyan-300' : 'text-zinc-200')} font-medium text-right`}>
-            {sourceName}
-          </span>
-        </div>
-
-        {chunkId && (
-          <div className="flex flex-wrap items-center justify-between text-[10px] text-zinc-400 gap-1 font-mono">
-            <span>Mã ngữ liệu (Chunk ID):</span>
-            <span className="text-cyan-400">{chunkId}</span>
-          </div>
-        )}
-
-        {verifiedBy && (
-          <div className="flex flex-wrap items-center justify-between text-[10px] text-zinc-400 gap-1">
-            <span>Giáo viên hiệu đính / thẩm định:</span>
-            <span className="text-emerald-300 font-medium">{verifiedBy}</span>
-          </div>
-        )}
-
-        {/* Huy hiệu bảo đảm 100% học liệu đã được giáo viên thẩm định */}
-        <div className="mt-1.5 pt-1.5 border-t border-zinc-800/60 flex items-center justify-between gap-1 text-[10px]">
-          <span className="text-emerald-400 font-semibold flex items-center gap-1">
+        {showTeacherBadge ? (
+          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full">
             <span>🛡️</span>
-            <span>ĐÃ ĐƯỢC GIÁO VIÊN KIỂM DUYỆT 100%</span>
+            <span>{teacherCount >= 2 ? `Đã được giáo viên xem xét (${teacherCount} giáo viên)` : 'Đã được giáo viên kiểm duyệt'}</span>
           </span>
-          <span className="text-zinc-500 font-mono">
-            {formatEvidenceDate(verifiedAt)}
+        ) : (
+          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 rounded-full">
+            <span>📘</span>
+            <span>SGK Chuẩn GDPT 2018</span>
           </span>
-        </div>
+        )}
       </div>
 
-      {/* 🛡️ HUY HIỆU GIÁO VIÊN XEM XÉT (CHỈ KÍCH HOẠT KHI CÓ ÍT NHẤT 2 GIÁO VIÊN ĐỒNG THUẬN) */}
-      {isTeacherVerified && (evidence.verifiedTeacherCount >= 2 || (Array.isArray(evidence.verifiedTeachers) && evidence.verifiedTeachers.length >= 2)) && (
-        <div className={`my-2 p-2.5 rounded-xl border flex items-start gap-2.5 ${
-          isDark 
-            ? 'bg-gradient-to-r from-emerald-950/50 to-teal-950/40 border-emerald-500/50 text-emerald-200' 
-            : 'bg-emerald-50/90 border-emerald-300 text-emerald-900'
-        }`}>
-          <span className="text-lg shrink-0 mt-0.5">🛡️</span>
-          <div className="flex-1 text-[11px] leading-relaxed">
-            <div className="flex flex-wrap items-center justify-between gap-1">
-              <span className="font-bold text-emerald-400 flex items-center gap-1">
-                <span>Đã được giáo viên xem xét ({evidence.verifiedTeacherCount || evidence.verifiedTeachers?.length || 2} giáo viên)</span>
-              </span>
-            </div>
-            <p className={`text-[10px] mt-1 ${isDark ? 'text-zinc-300' : 'text-zinc-600'}`}>
-              Nội dung câu hỏi và hướng dẫn giải đã được các giáo viên THPT độc lập xem xét.
-            </p>
-          </div>
-        </div>
-      )}
+      <p className={`text-[11px] leading-relaxed mt-0.5 ${
+        isDark ? 'text-slate-300' : 'text-slate-700'
+      }`}>
+        {citationText}
+      </p>
 
-      {/* Đoạn trích đối chiếu (Snippet) */}
+      {/* Tùy chọn xem đoạn trích ngắn gọn khi cần đối chiếu */}
       {snippet && (
-        <div className={`p-2 rounded-lg my-1.5 text-[11px] italic leading-relaxed border ${
-          isDark ? 'bg-zinc-900/60 border-zinc-700/50 text-zinc-300' : 'bg-zinc-50 border-zinc-200 text-zinc-600'
-        }`}>
-          <div className="flex items-center justify-between text-[10px] font-semibold text-zinc-400 not-italic mb-1">
-            <span>Đoạn trích đối chiếu {chunkId ? `(${chunkId})` : ''}:</span>
-            {fullContent && (
-              <button
-                type="button"
-                onClick={() => setShowFullContext(!showFullContext)}
-                className="text-cyan-400 hover:text-cyan-300 underline cursor-pointer text-[10px]"
-              >
-                {showFullContext ? 'Thu gọn' : 'Xem ngữ cảnh'}
-              </button>
-            )}
-          </div>
-          <p>{showFullContext ? fullContent : snippet}</p>
-        </div>
-      )}
-
-      {/* Cảnh báo nổi bật khi căn cứ yếu hoặc không có căn cứ */}
-      {(status === 'weak' || status === 'ungrounded') && (
-        <div className={`mt-2 p-2 rounded-lg border flex items-start gap-2 ${
-          isDark 
-            ? 'bg-rose-950/40 border-rose-500/40 text-rose-300' 
-            : 'bg-rose-50 border-rose-300 text-rose-800'
-        }`}>
-          <span className="text-base shrink-0">⚠️</span>
-          <div className="text-[11px] leading-relaxed">
-            <span className="font-bold">Cảnh báo: </span>
-            Chưa tìm thấy căn cứ trong kho tài liệu. Hãy đối chiếu sách giáo khoa hoặc hỏi giáo viên.
-          </div>
-        </div>
-      )}
-
-      {/* Cảnh báo hậu kiểm suy nghiệm */}
-      {verifier && verifier.warningMessage && (
-        <div className={`mt-2 p-2 rounded-lg border text-[11px] leading-relaxed ${
-          isDark 
-            ? 'bg-amber-950/30 border-amber-500/30 text-amber-300' 
-            : 'bg-amber-50 border-amber-300 text-amber-800'
-        }`}>
-          <p className="font-semibold">{verifier.warningMessage}</p>
-          <p className="text-[10px] opacity-80 mt-0.5">*(Kiểm tra suy nghiệm heuristic, không bảo đảm tính toàn vẹn tuyệt đối)*</p>
+        <div className="mt-1">
+          <button
+            type="button"
+            onClick={() => setShowSnippet(!showSnippet)}
+            className="text-[10px] text-cyan-400 hover:text-cyan-300 underline cursor-pointer"
+          >
+            {showSnippet ? '▲ Ẩn đoạn trích đối chiếu' : '▼ Xem đoạn trích đối chiếu'}
+          </button>
+          {showSnippet && (
+            <div className={`mt-1 p-2 rounded-lg text-[10px] italic leading-relaxed border ${
+              isDark ? 'bg-black/40 border-zinc-700/50 text-zinc-300' : 'bg-white/80 border-zinc-200 text-zinc-600'
+            }`}>
+              {snippet}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -1819,6 +1756,8 @@ CuO (đen) + H₂ -t°→ Cu (đỏ) + H₂O
           fullContent: cacheResult.cachedAnswer,
           topic: cacheResult.topic,
           subject: cacheResult.subject,
+          chunkId: cacheResult.id || null,
+          sgkReference: cacheResult.sgkReference || null,
           sourceType: cacheResult.sourceType || 'teacher_verified_stem',
           isTeacherVerified: cacheResult.isTeacherVerified,
           verifiedBy: cacheResult.verifiedBy,
@@ -2169,6 +2108,7 @@ ${conciseInstruction}
       fullContent: (!isRefusalResponse && topChunk) ? topChunk.content : null,
       chunkId: (!isRefusalResponse && topChunk) ? topChunk.id : null,
       topic: (!isRefusalResponse && topChunk) ? topChunk.topic : null,
+      sgkReference: (!isRefusalResponse && topChunk) ? (topChunk.sgkReference || topChunk.sourceCitation || null) : null,
       sourceType: (!isRefusalResponse && topChunk) ? (topChunk.sourceType || 'team_summary') : 'unknown',
       isRefusal: isRefusalResponse,
       isOutOfScope: Boolean(isNonStemQuery),
