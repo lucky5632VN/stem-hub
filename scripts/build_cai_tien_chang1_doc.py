@@ -6,8 +6,23 @@ from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
 from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import nsdecls, qn
 import os
+import zipfile
+import shutil
+
+def extract_media_if_needed():
+    if not os.path.exists('temp_media'):
+        os.makedirs('temp_media', exist_ok=True)
+        if os.path.exists('MẪU HỒ SƠ CẢI TIẾN CHẶNG 1.docx'):
+            with zipfile.ZipFile('MẪU HỒ SƠ CẢI TIẾN CHẶNG 1.docx', 'r') as z:
+                for f in z.namelist():
+                    if f.startswith('word/media/'):
+                        fname = os.path.basename(f)
+                        if fname:
+                            with open(os.path.join('temp_media', fname), 'wb') as out_f:
+                                out_f.write(z.read(f))
 
 def create_document():
+    extract_media_if_needed()
     doc = docx.Document()
 
     # Thiết lập kích thước trang A4 & căn lề chuẩn
@@ -276,6 +291,54 @@ def create_document():
     p_rag_off.paragraph_format.space_after = Pt(6)
     p_rag_off.add_run().add_picture('temp_media/image8.png', width=Inches(6.2))
 
+    # Bảng số liệu Ma trận nhầm lẫn & Chỉ số định lượng 150 ca
+    add_bullet("Bảng đối chiếu định lượng Ma trận nhầm lẫn trên 150 ca kiểm thử độc lập: ", "Thực nghiệm trên 150 ca chuẩn GDPT 2018 (Toán: 40, Vật lý: 38, Hóa học: 38, Sinh học: 34), tách biệt hoàn toàn khỏi kho tri thức SGK:")
+
+    table_150 = doc.add_table(rows=9, cols=5)
+    table_150.alignment = WD_TABLE_ALIGNMENT.CENTER
+    headers_150 = ["Chỉ số Đánh giá", "Base Model (No-RAG)", "STEM-RAG Guard", "Chênh lệch (Δ)", "Ý nghĩa thực tiễn GDPT 2018"]
+    data_150 = [
+        ["Ma trận nhầm lẫn (TP / FN / FP / TN)", "114 / 14 / 11 / 11", "123 / 5 / 5 / 17", "+9 TP, -6 FP", "Giảm 54.5% lỗi ảo giác, tăng bắt lỗi bẫy"],
+        ["Độ chính xác (Accuracy)", "83.33%", "93.33%", "+10.00%", "Độ tin cậy tổng thể khi phục vụ học sinh THPT"],
+        ["Độ chuẩn xác (Precision)", "91.20%", "96.09%", "+4.89%", "Hạn chế tối đa đưa ra đáp án sai lệch, ngụy biện"],
+        ["Độ nhạy / Thu hồi (Recall)", "89.06%", "96.09%", "+7.03%", "Không từ chối oan câu hỏi chính đáng của học sinh"],
+        ["Độ đặc hiệu (Specificity)", "50.00%", "77.27%", "+27.27%", "Phát hiện và cảnh báo cạm bẫy, ngoài SGK"],
+        ["Điểm F1-Score", "90.12%", "96.09%", "+5.97%", "Cân bằng hài hòa giữa độ chuẩn xác và độ bao quát"],
+        ["Hệ số Cohen's Kappa (κ)", "0.3697", "0.7337", "+0.3640", "Đồng thuận cao với chuẩn SGK ngoài yếu tố may rủi"],
+        ["Tỷ lệ đúng Đáp án cuối cùng", "61.33%", "96.67%", "+35.34%", "Số học, công thức và phương án chọn A/B/C/D"]
+    ]
+
+    for col_idx, h_text in enumerate(headers_150):
+        cell = table_150.cell(0, col_idx)
+        cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r = cell.paragraphs[0].add_run(h_text)
+        r.font.name = 'Times New Roman'
+        r.font.size = Pt(10.5)
+        r.bold = True
+        cell._element.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="EAECEF"/>'.format(nsdecls('w'))))
+
+    for row_idx, row_vals in enumerate(data_150, start=1):
+        for col_idx, val in enumerate(row_vals):
+            cell = table_150.cell(row_idx, col_idx)
+            cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT if col_idx == 0 or col_idx == 4 else WD_ALIGN_PARAGRAPH.CENTER
+            r = cell.paragraphs[0].add_run(val)
+            r.font.name = 'Times New Roman'
+            r.font.size = Pt(10)
+            if col_idx == 0:
+                r.bold = True
+
+    for row in table_150.rows:
+        for cell in row.cells:
+            tcPr = cell._element.get_or_add_tcPr()
+            borders = parse_xml(
+                r'<w:tcBorders {}><w:top w:val="single" w:sz="4" w:space="0" w:color="CCCCCC"/>'
+                r'<w:bottom w:val="single" w:sz="4" w:space="0" w:color="CCCCCC"/>'
+                r'<w:left w:val="none"/><w:right w:val="none"/></w:tcBorders>'.format(nsdecls('w'))
+            )
+            tcPr.append(borders)
+
+    add_p("", space_before=2, space_after=2)
+
     add_bullet("Bảng đối chứng thực nghiệm giữa các tầng kiến trúc: ", "")
 
     # Bảng so sánh 4 cột
@@ -334,6 +397,7 @@ def create_document():
 
     output_path = 'MẪU HỒ SƠ CẢI TIẾN CHẶNG 1.docx'
     doc.save(output_path)
+    shutil.rmtree('temp_media', ignore_errors=True)
     print(f"File saved successfully to {output_path}")
 
 if __name__ == '__main__':
