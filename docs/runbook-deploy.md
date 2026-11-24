@@ -34,11 +34,11 @@ flowchart TD
 
 1. **Chạy kiểm tra thử nghiệm (Dry-Run)**:
    ```powershell
-   # Kiểm tra tài khoản admin chính
-   node scripts/grant_admin_role.cjs --uid=7jmOy8lyr1hsmrflTMvdoXOJmew1
+   # Kiểm tra tài khoản admin chính (thay thế bằng UID thật của bạn khi chạy thực tế)
+   node scripts/grant_admin_role.cjs --uid=<YOUR_ADMIN_UID_1>
 
    # Kiểm tra tài khoản admin dự phòng (nếu có)
-   node scripts/grant_admin_role.cjs --uid=T5O0uVvKPpeS82oGSp7fxr0pGVf1
+   node scripts/grant_admin_role.cjs --uid=<YOUR_ADMIN_UID_2>
    ```
    *Kết quả Dry-Run:* In UID che (`7jmO***mew1`), email che, trạng thái Auth và claims hiện tại. Không thay đổi dữ liệu.
 
@@ -47,8 +47,8 @@ flowchart TD
 
 3. **Thực thi cấp quyền chính thức**:
    ```powershell
-   node scripts/grant_admin_role.cjs --uid=7jmOy8lyr1hsmrflTMvdoXOJmew1 --execute
-   node scripts/grant_admin_role.cjs --uid=T5O0uVvKPpeS82oGSp7fxr0pGVf1 --execute
+   node scripts/grant_admin_role.cjs --uid=<YOUR_ADMIN_UID_1> --execute
+   node scripts/grant_admin_role.cjs --uid=<YOUR_ADMIN_UID_2> --execute
    ```
 
 4. **Làm mới phiên đăng nhập (Bắt buộc)**:
@@ -184,5 +184,3 @@ Nếu xảy ra sự cố nghiêm trọng ở Bước 3 hoặc Bước 4, lập t
 | `FIREBASE_PRIVATE_KEY` | **Secret** | Private Key giải mã token JWT | Firebase Admin SDK (`firebaseAdmin.js`) |
 | `ADMIN_UIDS` | **Secret** | Danh sách UID quản trị viên backend | Server API Routes (`/api/learned-knowledge`,...) |
 | `NEXT_PUBLIC_ADMIN_UIDS` | **Config** | Danh sách UID hiển thị nút Admin | Giao diện Client (`layout.js`, `lien-he`) |
-| `CRON_SECRET` | **Secret** | Khóa bảo vệ API Cron Job dọn dẹp log | API dọn dẹp hệ thống |
-| `ADMIN_SECRET_KEY` | **Secret** | Chuỗi token ngẫu nhiên bảo mật nội bộ | Chữ ký API nội bộ |

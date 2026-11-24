@@ -16,12 +16,8 @@ async function runTest(name, fn) {
   }
 }
 
-// Logic mô phỏng kiểm tra token phía server (giống authenticateReviewer trong route.js)
-function verifyTokenReviewer(authHeader, secretKey) {
-  const ADMIN_SECRET = process.env.ADMIN_SECRET_KEY || 'mock_test_secret_for_unit_tests';
-  if (secretKey && secretKey === ADMIN_SECRET) {
-    return { authorized: true, role: 'admin', uid: 'system_admin_key' };
-  }
+// Logic mô phỏng kiểm tra token phía server (giống authenticateReviewer trong route.js - Token RBAC Only)
+function verifyTokenReviewer(authHeader) {
   const bearerToken = authHeader && authHeader.startsWith('Bearer ') ? authHeader.substring(7) : '';
   if (!bearerToken) {
     return { authorized: false, error: 'Thiếu token xác thực' };

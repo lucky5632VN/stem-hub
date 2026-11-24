@@ -132,8 +132,10 @@ export default function TeacherReviewPortalPage() {
 
   const [sampleSize, setSampleSize] = useState(20);
 
-  // Chế độ xem Ma trận nhầm lẫn: 'teacher' (Giáo viên thực tế) | 'bench150_rag' (Mô hình RAG 150 ca) | 'bench150_base' (Mô hình Base 150 ca) | 'bench150_compare' (So sánh đối đầu)
-  const [confusionSource, setConfusionSource] = useState('bench150_rag');
+  // Chế độ xem Ma trận nhầm lẫn: 'teacher' (Giáo viên thực tế - MẶC ĐỊNH TRUNG THỰC)
+  // Các tab tổng hợp 150 ca giả lập chỉ hiển thị khi có cờ NEXT_PUBLIC_ENABLE_SYNTHETIC_BENCHMARK === 'true'
+  const enableSynthetic = process.env.NEXT_PUBLIC_ENABLE_SYNTHETIC_BENCHMARK === 'true';
+  const [confusionSource, setConfusionSource] = useState('teacher');
   const [subjectCounts, setSubjectCounts] = useState({ toan: 117, ly: 98, hoa: 102, sinh: 98 });
   const [reviewedCountsBySubject, setReviewedCountsBySubject] = useState({ toan: 0, ly: 0, hoa: 0, sinh: 0 });
 
@@ -1026,42 +1028,6 @@ export default function TeacherReviewPortalPage() {
                   <div className="flex flex-wrap items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
                     <button
                       type="button"
-                      onClick={() => setConfusionSource('bench150_rag')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                        confusionSource === 'bench150_rag'
-                          ? 'bg-indigo-600 text-white shadow-md'
-                          : 'text-slate-600 dark:text-slate-300 hover:text-white'
-                      }`}
-                    >
-                      Tập tổng hợp: CÓ RAG (Truy xuất SGK - Điểm đặt trước)
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setConfusionSource('bench150_base')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                        confusionSource === 'bench150_base'
-                          ? 'bg-amber-600 text-white shadow-md'
-                          : 'text-slate-600 dark:text-slate-300 hover:text-white'
-                      }`}
-                    >
-                      Tập tổng hợp: KHÔNG CÓ RAG (Base - Điểm đặt trước)
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setConfusionSource('bench150_compare')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                        confusionSource === 'bench150_compare'
-                          ? 'bg-cyan-600 text-white shadow-md'
-                          : 'text-slate-600 dark:text-slate-300 hover:text-white'
-                      }`}
-                    >
-                      So Sánh Đối Đầu: Có RAG vs Không RAG (150 Ca)
-                    </button>
-
-                    <button
-                      type="button"
                       onClick={() => setConfusionSource('teacher')}
                       className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                         confusionSource === 'teacher'
@@ -1071,6 +1037,46 @@ export default function TeacherReviewPortalPage() {
                     >
                       Giáo Viên Chấm Thực Tế ({reportData?.confusionMatrix?.totalSamples || 0} mẫu)
                     </button>
+
+                    {enableSynthetic && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setConfusionSource('bench150_rag')}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                            confusionSource === 'bench150_rag'
+                              ? 'bg-indigo-600 text-white shadow-md'
+                              : 'text-slate-600 dark:text-slate-300 hover:text-white'
+                          }`}
+                        >
+                          Tập tổng hợp: CÓ RAG (Truy xuất SGK - Điểm đặt trước)
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setConfusionSource('bench150_base')}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                            confusionSource === 'bench150_base'
+                              ? 'bg-amber-600 text-white shadow-md'
+                              : 'text-slate-600 dark:text-slate-300 hover:text-white'
+                          }`}
+                        >
+                          Tập tổng hợp: KHÔNG CÓ RAG (Base - Điểm đặt trước)
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setConfusionSource('bench150_compare')}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                            confusionSource === 'bench150_compare'
+                              ? 'bg-cyan-600 text-white shadow-md'
+                              : 'text-slate-600 dark:text-slate-300 hover:text-white'
+                          }`}
+                        >
+                          So Sánh Đối Đầu: Có RAG vs Không RAG (150 Ca)
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
 

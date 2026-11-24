@@ -852,7 +852,8 @@ export default function DashboardLayout({ children }) {
           <div className="flex-1 flex relative overflow-hidden bg-[#0c0d14]">
             <iframe 
               src={(() => {
-                const url = activeLab.launchUrl || activeLab.link || '';
+                const rawUrl = activeLab.launchUrl || activeLab.link || '';
+                const url = rawUrl.replace(/lab[ₛ\u209b][ᵢ\u1d62][ₙ\u2099]h/g, 'lab_sinh');
                 const [path, query] = url.split('?');
                 const normalizedPath = path.endsWith('/') ? `${path}index.html` : (path.endsWith('.html') ? path : `${path}/index.html`);
                 return query ? `${normalizedPath}?${query}` : normalizedPath;

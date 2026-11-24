@@ -1,7 +1,7 @@
 {
   "version": "v1.4.2",
-  "status": "DRAFT (CHƯA KHÓA - Chờ lệnh tường minh 'khóa v1.4.2' từ người dùng)",
-  "created_at": "2026-11-23T09:57:13.706770+00:00",
+  "status": "LOCKED - ĐÃ KHÓA CHÍNH THỨC",
+  "created_at": "2026-11-24T12:43:05.394800+00:00",
   "description": "Bộ dữ liệu đánh giá 100 câu v1.4.2 DRAFT: Ánh xạ chuẩn xác 24 câu số học chính thức (CAND_*) vào 3 tầng A:4, B:16, C:4; Tách riêng 6 câu bổ trợ không chấm; Giữ nguyên 30 câu ngoài phạm vi đo từ chối.",
   "strata_summary": {
     "scored_cases_total": 94,
@@ -2568,5 +2568,7 @@
       "user_ticked": false,
       "notes": "6 câu bài toán số học do AI tự soạn để dự phòng; loại khỏi nhóm đo từ chối và tập chấm chính thức."
     }
-  ]
+  ],
+  "locked_at": "2026-11-24T12:44:16.227415+00:00",
+  "user_lock_command": "khóa v1.4.2"
 }

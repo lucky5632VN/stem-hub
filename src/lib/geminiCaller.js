@@ -133,8 +133,9 @@ export async function callResilientGemini({
           'x-goog-api-key': key
         };
 
+        const timeoutMs = process.env.GEMINI_TIMEOUT_MS ? parseInt(process.env.GEMINI_TIMEOUT_MS, 10) : 30000;
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6500); // 6.5s timeout cho mỗi lượt gọi
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs); // 30s timeout chuẩn cho LLM generation
 
         const resp = await fetch(url, {
           method: 'POST',
@@ -178,6 +179,14 @@ export async function callResilientGemini({
           const isDailyLimit = errMsg.includes('per day limit') || errMsg.includes('requests per day');
           const cooldownDuration = isDailyLimit ? 3600000 : 15000; // 1 giờ nếu hết quota ngày, 15s nếu 429 phút
           lastError = new Error(`HTTP 429 Rate Limit (${isDailyLimit ? 'Hết quota ngày' : 'Vượt 15 RPM'}): ${errMsg}`);
+          modelKeyCooldownMap.set(cooldownKey, Date.now() + cooldownDuration);
+          continue;
+        }
+
+        // 503 Service Unavailable / High Demand -> Đưa riêng cặp (Key + Model) này vào hạ nhiệt
+        if (resp.status === 503 || errMsg.includes('high demand') || errMsg.includes('overloaded') || errMsg.includes('Spikes in demand')) {
+          const cooldownDuration = 15000;
+          lastError = new Error(`HTTP 503 High Demand: ${errMsg}`);
           modelKeyCooldownMap.set(cooldownKey, Date.now() + cooldownDuration);
           continue;
         }

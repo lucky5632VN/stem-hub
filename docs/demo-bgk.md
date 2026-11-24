@@ -16,6 +16,7 @@ Kịch bản demo được thiết kế nhằm giải quyết trực tiếp 3 y�
 |---|---|---|---|
 | **Học sinh (Student)** | `hocsinh.demo@stemhub.edu.vn` | `StemHub@2026` | Trải nghiệm hỏi đáp trợ lý NOVA, phòng lab, làm bài tập |
 | **Giáo viên (Teacher/Admin)** | `giaovien.demo@stemhub.edu.vn` | `TeacherHub@2026` | Quyền duyệt tri thức tại `/admin/knowledge-review` |
+| **Ban Giám Khảo (Judge Demo)** | `giamkhao_demo@stemhub.edu.vn` | `JudgeHub@2026` | Trải nghiệm toàn diện: Mở khóa 4 Lab 3D, 500 ELO Đấu trường, Trợ lý NOVA |
 
 ---
 

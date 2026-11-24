@@ -25,21 +25,21 @@ const BENIGN_NUMBERS = new Set(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10
  */
 export function getSourceTypeLabel(sourceType) {
   if (sourceType === 'teacher_verified_stem') {
-    return 'Lời giải chuẩn của Giáo viên THPT (Đã hiệu đính & kiểm định 100%)';
+    return 'Lời giải chuẩn của Giáo viên THPT';
   }
   if (sourceType === 'team_summary') {
     return 'Bản tóm tắt do nhóm biên soạn theo chương trình GDPT 2018';
   }
   if (sourceType === 'textbook_excerpt') {
-    return 'Trích đoạn SGK Chuẩn GDPT 2018 (Hội đồng Thẩm định Quốc gia)';
+    return 'Trích đoạn SGK';
   }
   if (sourceType === 'learned_knowledge') {
     return 'Tri thức bổ trợ của học sinh (đã qua giáo viên duyệt)';
   }
   if (sourceType === 'student_flagged_for_teacher') {
-    return 'Học sinh băn khoăn gửi Giáo viên bộ môn kiểm tra & hiệu đính';
+    return 'Học sinh băn khoăn gửi giáo viên';
   }
-  return 'Nguồn tài liệu học thuật chuẩn';
+  return 'Nguồn chưa xác định';
 }
 
 /**

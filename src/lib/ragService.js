@@ -31,11 +31,12 @@ export function isGreetingOrChitchat(text) {
   if (!text) return true;
   const t = text.trim().toLowerCase();
   if (t.length <= 2) return true;
-  const greetingRegex = /^(xin\s+)?(chào|chao|hello|hi|hey|alo|halo)(\s+(bạn|ban|thầy|thay|cô|co|nova|bot|ad|admin|ê))?[!.,?~]*$/i;
+  const greetingRegex = /^(xin\s+)?(chào|chao|hello|hi|hey|alo|halo)(\s+(bạn|ban|bn|thầy|thay|cô|co|nova|bot|ad|admin|ê|em))?[!.,?~]*$/i;
   if (greetingRegex.test(t)) return true;
   if (t.includes('bạn là ai') || t.includes('tôi là ai') || t.includes('nhớ gì về tôi')) return true;
   if (t.includes('bạn có thể làm') || t.includes('bạn cs thể làm') || t.includes('làm đc cái gì')) return true;
   if (t.startsWith('đưa tôi qua') || t.startsWith('qua lab') || t.startsWith('mở lab')) return true;
+  if (t.includes('tin tức') || t.includes('thời tiết') || t.includes('hôm nay có gì') || t.includes('hôm nay cs') || t.includes('ăn gì') || t.includes('ở đâu')) return true;
   return false;
 }
 
@@ -135,12 +136,14 @@ export function getDynamicCorpus() {
       dynamicCorpusCache = [];
     }
   } else {
-    // Môi trường Server / Node runtime: Đọc trực tiếp từ tệp tri thức toàn cục đã import (chỉ lấy mục đã duyệt, không cách ly, không demo)
+    // Môi trường Server / Node runtime: Đọc trực tiếp từ tệp tri thức toàn cục đã import (chỉ lấy mục đã duyệt, không cách ly, không demo, loại bỏ thông tin cá nhân/chitchat)
     try {
       const raw = Array.isArray(globalLearnedData) ? globalLearnedData : [];
-      dynamicCorpusCache = raw.filter(item =>
-        (item.status === 'verified_by_teacher' || item.teacherVerified === true || item.isTeacherVerified === true) && !item.quarantined && !item.isDemo
-      );
+      dynamicCorpusCache = raw.filter(item => {
+        const isVerified = (item.status === 'verified_by_teacher' || item.teacherVerified === true || item.isTeacherVerified === true) && !item.quarantined && !item.isDemo;
+        const full = ((item.query || '') + ' ' + (item.answer || '')).toLowerCase();
+        return isVerified && !containsPersonalOrSystemInfo(full) && !isGreetingOrChitchat(item.query);
+      });
     } catch (_) {
       dynamicCorpusCache = [];
     }
@@ -775,7 +778,7 @@ export function checkRAGCacheHit(query, minScoreThreshold = 0.55) {
 /**
  * Trích xuất Top-K thông tin từ cả Tập tri thức tĩnh + Tập tri thức tự học
  */
-export function retrieveTopK(query, k = 3) {
+export function retrieveTopK(query, k = 3, options = {}) {
   if (!query || typeof query !== 'string') return [];
 
   const queryTokens = tokenize(query);
@@ -783,10 +786,23 @@ export function retrieveTopK(query, k = 3) {
 
   if (Object.keys(queryTFIDF).length === 0) return [];
 
-  const dynamicDocs = getDynamicCorpus();
-  // 🛡️ Chỉ nạp vào ngữ cảnh RAG các tri thức tự học đã được giáo viên phê duyệt thật, không bị cách ly, không phải demo
-  const verifiedDynamic = dynamicDocs.filter(doc => (doc.status === 'verified_by_teacher' || doc.teacherVerified === true) && !doc.quarantined && !doc.isDemo);
-  const fullCorpus = [...verifiedDynamic, ...corpus];
+  const isStaticOnly = Boolean(options.staticOnly || options.ablationMode || process.env.ABLATION_MODE === 'true');
+  const allowedChunkIds = options.allowedChunkIds || null;
+
+  let fullCorpus;
+  if (isStaticOnly) {
+    fullCorpus = corpus;
+  } else {
+    const dynamicDocs = getDynamicCorpus();
+    // 🛡️ Chỉ nạp vào ngữ cảnh RAG các tri thức tự học đã được giáo viên phê duyệt thật, không bị cách ly, không phải demo
+    const verifiedDynamic = dynamicDocs.filter(doc => (doc.status === 'verified_by_teacher' || doc.teacherVerified === true) && !doc.quarantined && !doc.isDemo);
+    fullCorpus = [...verifiedDynamic, ...corpus];
+  }
+
+  // 🛡️ CHẾ ĐỘ ABLATION GUARD: Nếu chỉ định allowedChunkIds, lọc nghiêm ngặt và chặn mọi chunk ngoài danh sách
+  if (allowedChunkIds) {
+    fullCorpus = fullCorpus.filter(doc => allowedChunkIds.has(doc.id));
+  }
 
   const qUnaccent = stripVietnamese(query).split(/\s+/).filter(t => t.length > 1);
   const isUnaccented = query.toLowerCase().trim() === stripVietnamese(query);
@@ -821,9 +837,6 @@ export function retrieveTopK(query, k = 3) {
         hybridScore = (0.7 * hybridScore) + (0.3 * unaccentScore);
       }
     }
-
-    // Thưởng điểm cho tài liệu tự học đã được kiểm duyệt
-    if (doc.isLearned) hybridScore *= 1.4;
 
     // Subject boost for explicit subject keywords
     const qLower = query.toLowerCase().replace(/hoá/g, 'hóa').replace(/vật lí/g, 'vật lý');
@@ -864,7 +877,21 @@ export function retrieveTopK(query, k = 3) {
   });
 
   scored.sort((a, b) => b.score - a.score);
-  return scored.slice(0, k).filter(doc => doc.score > 0.05);
+  const topHits = scored.slice(0, k).filter(doc => doc.score > 0.05);
+
+  // 🛡️ CHẶN RÒ RỈ TRI THỨC TRONG ABLATION (QUY TẮC TRUNG THỰC):
+  // Nếu ở chế độ staticOnly hoặc ablationMode có danh sách chunk cố định,
+  // kiểm tra từng chunkId được đưa vào ngữ cảnh. Nếu gặp bất kỳ chunkId nào ngoài allowedChunkIds
+  // hoặc có tiền tố 'bench_verified_*' thì lập tức dừng ngay và ném lỗi.
+  if (isStaticOnly && allowedChunkIds) {
+    for (const hit of topHits) {
+      if (!allowedChunkIds.has(hit.id) || String(hit.id).startsWith('bench_verified_')) {
+        throw new Error(`[ABLATION CORRUPTION DETECTED] Chunk ID '${hit.id}' is outside the frozen 303 stem-corpus chunks! Aborting.`);
+      }
+    }
+  }
+
+  return topHits;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

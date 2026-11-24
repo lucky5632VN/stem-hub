@@ -13,7 +13,7 @@ import { useAudioStore } from '@/store/useAudioStore';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { db } from '@/lib/firebase';
-import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { playSound } from '@/lib/sound';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -52,6 +52,7 @@ const GEMINI_MODELS = [
 
 const LOCAL_STORAGE_KEY = 'stem_hub_global_ai_history';
 const LOCAL_STORAGE_SESSIONS = 'stem_hub_global_ai_sessions';
+const getSessionStorageKey = (uid) => uid ? `stem_hub_global_ai_sessions_${uid}` : 'stem_hub_global_ai_sessions_guest';
 
 // Component định dạng văn bản câu trả lời AI đẹp mắt, sạch ký tự thô & tạo nút link tổng kiến thức + link tra cứu web
 function FormattedAIMessage({ text, onNavigate, onTriggerExpandedAI, isDark = true }) {
@@ -113,7 +114,9 @@ function FormattedAIMessage({ text, onNavigate, onTriggerExpandedAI, isDark = tr
   let cleanContent = text;
 
   while ((match = linkRegex.exec(text)) !== null) {
-    linkMatches.push({ title: match[1].trim(), url: match[2].trim() });
+    let rawUrl = match[2].trim();
+    let cleanUrl = rawUrl.replace(/lab[ₛ\u209b][ᵢ\u1d62][ₙ\u2099]h/g, 'lab_sinh');
+    linkMatches.push({ title: match[1].trim(), url: cleanUrl });
   }
   cleanContent = cleanContent.replace(/\[\[LINK:.*?:.*?\]\]/g, '').trim();
   cleanContent = cleanContent.replace(/\[\[NAV:.*?\]\]/g, '').replace(/\[\[TOGGLE_THEME\]\]/g, '').trim();
@@ -131,13 +134,13 @@ function FormattedAIMessage({ text, onNavigate, onTriggerExpandedAI, isDark = tr
   if (linkMatches.length === 0) {
     const lower = text.toLowerCase();
     if (lower.includes('hóa') || lower.includes('este') || lower.includes('cacbohidrat') || lower.includes('amin') || lower.includes('polime') || lower.includes('kim loại')) {
-      linkMatches.push({ title: 'Thư viện & Lab Tổng kiến thức Hóa học THPT', url: '/labs/lab-ktra15p/dist/index.html' });
+      linkMatches.push({ title: 'Thư viện & Lab Tổng kiến thức Hóa học THPT', url: '/phong-lab/hoa' });
     } else if (lower.includes('vật lý') || lower.includes('vật lí') || lower.includes('dao động') || lower.includes('sóng') || lower.includes('quang')) {
-      linkMatches.push({ title: 'Thư viện & Lab Tổng kiến thức Vật lý THPT', url: '/labs/PhysicsLab/index.html' });
+      linkMatches.push({ title: 'Thư viện & Lab Tổng kiến thức Vật lý THPT', url: '/phong-lab/ly' });
     } else if (lower.includes('sinh học') || lower.includes('adn') || lower.includes('di truyền') || lower.includes('tế bào')) {
-      linkMatches.push({ title: 'Thư viện & Lab Tổng kiến thức Sinh học THPT', url: '/labs/lab_sinh/dist/index.html' });
+      linkMatches.push({ title: 'Thư viện & Lab Tổng kiến thức Sinh học THPT', url: '/phong-lab/sinh' });
     } else if (lower.includes('toán học') || lower.includes('hàm số') || lower.includes('tích phân') || lower.includes('hình học')) {
-      linkMatches.push({ title: 'Thư viện & Lab Tổng kiến thức Toán học THPT', url: '/labs/toan/frontend/dist/index.html' });
+      linkMatches.push({ title: 'Thư viện & Lab Tổng kiến thức Toán học THPT', url: '/phong-lab/toan' });
     } else if (lower.includes('phòng thi') || lower.includes('luyện đề') || lower.includes('thpt')) {
       linkMatches.push({ title: 'Ngân hàng Đề thi THPT Quốc Gia 2025', url: '/phong-thi' });
     }
@@ -733,6 +736,39 @@ export default function GlobalAIAssistant() {
   const [isSubmittingFlag, setIsSubmittingFlag] = useState(false);
   const [flagSuccessToast, setFlagSuccessToast] = useState(null);
 
+  // 🚀 Điều hướng thông minh: Tự động chuẩn hóa link, đóng popup chat và chuyển tới route phòng lab chính thức
+  const handleSmartNavigation = (rawUrl) => {
+    if (!rawUrl) return;
+    // 1. Chuẩn hóa link, khử triệt để ký tự unicode subscript/typo (như labₛᵢₙh -> lab_sinh)
+    let cleanUrl = rawUrl.replace(/lab[ₛ\u209b][ᵢ\u1d62][ₙ\u2099]h/g, 'lab_sinh');
+
+    // 2. Tự động đóng cửa sổ trợ lý chat NOVA HUD để không che khuất màn hình trải nghiệm của học sinh
+    setIsOpen(false);
+
+    // 3. Phân luồng điều hướng tới đúng route Next.js của phòng Lab
+    if (cleanUrl.includes('lab_sinh') || cleanUrl.includes('/sinh')) {
+      setActiveLab(null);
+      router.push('/phong-lab/sinh');
+    } else if (cleanUrl.includes('PhysicsLab') || cleanUrl.includes('/ly')) {
+      setActiveLab(null);
+      router.push('/phong-lab/ly');
+    } else if (cleanUrl.includes('/toan/') || cleanUrl.includes('lab_toan') || cleanUrl.includes('/toan')) {
+      setActiveLab(null);
+      router.push('/phong-lab/toan');
+    } else if (cleanUrl.includes('lab-ktra15p') || cleanUrl.includes('lab-hoa') || cleanUrl.includes('/hoa')) {
+      setActiveLab(null);
+      router.push('/phong-lab/hoa');
+    } else if (cleanUrl.includes('/labs/')) {
+      setActiveLab({ link: cleanUrl, name: 'Phòng lab ảo' });
+      if (pathname !== '/') {
+        router.push('/');
+      }
+    } else {
+      setActiveLab(null);
+      router.push(cleanUrl);
+    }
+  };
+
   const handleOpenTeacherFlagModal = (botMsg, msgIndex) => {
     let userQuestion = botMsg.query || '';
     if (!userQuestion) {
@@ -960,20 +996,74 @@ export default function GlobalAIAssistant() {
     }
   }, [isOpen, showHistoryDrawer, scrollToBottom]);
 
-  // Khôi phục danh sách các phiên chat cũ (Sessions) từ localStorage
+  // Khôi phục danh sách 10 phiên chat cũ (Sessions) từ LocalStorage và Cloud Firestore riêng theo từng tài khoản
   useEffect(() => {
+    const effectiveUid = currentUser?.uid || user?.uid || null;
+    const storageKey = getSessionStorageKey(effectiveUid);
+
+    // 1. Nạp tức thì từ LocalStorage để hiển thị giao diện ngay lập tức
     try {
-      const savedSessions = localStorage.getItem(LOCAL_STORAGE_SESSIONS);
-      if (savedSessions) {
-        const parsed = JSON.parse(savedSessions);
-        if (Array.isArray(parsed)) {
-          setSessions(parsed);
+      let localData = localStorage.getItem(storageKey);
+      // Di chuyển dữ liệu cũ từ key chung sang key tài khoản nếu có
+      if (!localData && effectiveUid) {
+        const legacyData = localStorage.getItem(LOCAL_STORAGE_SESSIONS);
+        if (legacyData) {
+          localData = legacyData;
+          try {
+            localStorage.setItem(storageKey, legacyData);
+          } catch (_) {}
         }
       }
+
+      if (localData) {
+        const parsed = JSON.parse(localData);
+        if (Array.isArray(parsed)) {
+          setSessions(parsed.slice(0, 10));
+        }
+      } else {
+        setSessions([]);
+      }
     } catch (err) {
-      console.warn('Lỗi tải danh sách phiên chat:', err);
+      console.warn('Lỗi tải danh sách phiên chat local:', err);
     }
-  }, []);
+
+    // 2. Nếu đã đăng nhập, tự động đồng bộ 10 cuộc trò chuyện gần nhất từ Cloud Firestore
+    if (effectiveUid && db) {
+      const chatDocRef = doc(db, 'users', effectiveUid, 'private', 'chat_sessions');
+      getDoc(chatDocRef)
+        .then((snap) => {
+          if (snap.exists()) {
+            const data = snap.data();
+            if (Array.isArray(data?.sessions)) {
+              const remoteSessions = data.sessions.slice(0, 10);
+              setSessions(remoteSessions);
+              try {
+                localStorage.setItem(storageKey, JSON.stringify(remoteSessions));
+              } catch (_) {}
+            }
+          } else {
+            // Nếu Firestore chưa có bản ghi nhưng LocalStorage có dữ liệu (ví dụ vừa đăng nhập lần đầu)
+            // thì tự động đồng bộ 10 phiên hiện tại lên Firestore cho tài khoản này
+            const existingLocal = localStorage.getItem(storageKey);
+            if (existingLocal) {
+              try {
+                const parsed = JSON.parse(existingLocal);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                  setDoc(chatDocRef, {
+                    sessions: parsed.slice(0, 10),
+                    updatedAt: serverTimestamp(),
+                    totalSessions: Math.min(parsed.length, 10)
+                  }, { merge: true }).catch(() => {});
+                }
+              } catch (_) {}
+            }
+          }
+        })
+        .catch((err) => {
+          console.warn('Lỗi đồng bộ lịch sử chat từ Firestore:', err);
+        });
+    }
+  }, [currentUser?.uid, user?.uid]);
 
   // Khi RESET / TẢI LẠI TRANG: Tự động khởi tạo phiên Chat Mới
   useEffect(() => {
@@ -1012,7 +1102,7 @@ export default function GlobalAIAssistant() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, handleOpenHUD]);
 
-  // Lưu phiên chat hiện tại vào bộ nhớ danh sách các phiên (Sessions)
+  // Lưu phiên chat hiện tại vào bộ nhớ danh sách các phiên (Sessions) - Giữ đúng 10 phiên gần nhất
   const saveCurrentSession = useCallback((newMessages, sessionId = currentSessionId) => {
     try {
       const userMsgs = newMessages.filter(m => m.sender === 'user');
@@ -1024,13 +1114,20 @@ export default function GlobalAIAssistant() {
         hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' 
       });
 
+      // Tối ưu hóa: mỗi phiên giữ tối đa 30 tin nhắn gần nhất để không vượt dung lượng Firestore
+      const trimmedMessages = newMessages.length > 30 ? newMessages.slice(newMessages.length - 30) : newMessages;
+
+      const effectiveUid = currentUser?.uid || user?.uid || null;
+      const storageKey = getSessionStorageKey(effectiveUid);
+
       setSessions((prevSessions) => {
         const existingIdx = prevSessions.findIndex(s => s.id === sessionId);
         const sessionObj = {
           id: sessionId,
           title: title,
           date: dateStr,
-          messages: newMessages
+          messages: trimmedMessages,
+          updatedAt: Date.now()
         };
 
         let nextSessions = [...prevSessions];
@@ -1040,18 +1137,31 @@ export default function GlobalAIAssistant() {
           nextSessions.unshift(sessionObj);
         }
 
-        if (nextSessions.length > 25) nextSessions = nextSessions.slice(0, 25);
+        // 🛡️ BẮT BUỘC CHỈ LƯU ĐÚNG 10 CUỘC TRÒ CHUYỆN GẦN NHẤT
+        if (nextSessions.length > 10) nextSessions = nextSessions.slice(0, 10);
 
         try {
-          localStorage.setItem(LOCAL_STORAGE_SESSIONS, JSON.stringify(nextSessions));
+          localStorage.setItem(storageKey, JSON.stringify(nextSessions));
         } catch (_) {}
+
+        // Đồng bộ lưu trữ vĩnh viễn trên Cloud Firestore theo từng tài khoản
+        if (effectiveUid && db) {
+          const chatDocRef = doc(db, 'users', effectiveUid, 'private', 'chat_sessions');
+          setDoc(chatDocRef, {
+            sessions: nextSessions,
+            updatedAt: serverTimestamp(),
+            totalSessions: nextSessions.length
+          }, { merge: true }).catch((err) => {
+            console.warn('Lỗi lưu lịch sử chat lên Firestore:', err);
+          });
+        }
 
         return nextSessions;
       });
     } catch (err) {
       console.warn('Lỗi lưu phiên chat:', err);
     }
-  }, [currentSessionId]);
+  }, [currentSessionId, currentUser?.uid, user?.uid]);
 
   // Tạo đoạn chat mới (+ Chat mới)
   const handleStartNewChat = () => {
@@ -1088,11 +1198,27 @@ export default function GlobalAIAssistant() {
     e.stopPropagation();
     try { playSound.click(); } catch (_) {}
 
+    const effectiveUid = currentUser?.uid || user?.uid || null;
+    const storageKey = getSessionStorageKey(effectiveUid);
+
     setSessions((prev) => {
       const filtered = prev.filter(s => s.id !== sessionId);
       try {
-        localStorage.setItem(LOCAL_STORAGE_SESSIONS, JSON.stringify(filtered));
+        localStorage.setItem(storageKey, JSON.stringify(filtered));
       } catch (_) {}
+
+      // Đồng bộ xóa trên Cloud Firestore theo từng tài khoản
+      if (effectiveUid && db) {
+        const chatDocRef = doc(db, 'users', effectiveUid, 'private', 'chat_sessions');
+        setDoc(chatDocRef, {
+          sessions: filtered,
+          updatedAt: serverTimestamp(),
+          totalSessions: filtered.length
+        }, { merge: true }).catch((err) => {
+          console.warn('Lỗi cập nhật xóa phiên chat trên Firestore:', err);
+        });
+      }
+
       return filtered;
     });
 
@@ -1222,15 +1348,7 @@ export default function GlobalAIAssistant() {
       cleanText = cleanText.replace(/\[\[NAV:.*?\]\]/g, '');
       
       setTimeout(() => {
-        if (targetUrl.includes('/labs/')) {
-          setActiveLab({ link: targetUrl, name: 'Phòng lab ảo' });
-          if (pathname !== '/') {
-            router.push('/');
-          }
-        } else {
-          setActiveLab(null);
-          router.push(targetUrl);
-        }
+        handleSmartNavigation(targetUrl);
       }, 50);
     }
 
@@ -2221,8 +2339,8 @@ ${conciseInstruction}
                     🧑‍🏫
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold">Gửi Giáo Viên Bộ Môn Kiểm Tra</h3>
-                    <p className="text-[10px] text-zinc-400">Hiệu đính & giải đáp băn khoăn học thuật</p>
+                    <h3 className="text-sm font-bold">Lưu Để Giáo Viên Xem Xét Sau (Chưa Có GV Nhận)</h3>
+                    <p className="text-[10px] text-zinc-400">Ghi nhận câu hỏi băn khoăn vào danh sách chờ duyệt</p>
                   </div>
                 </div>
                 <button
@@ -2536,7 +2654,7 @@ ${conciseInstruction}
                     <div className="flex items-center justify-between pb-3 border-b border-zinc-800 mb-3">
                       <div className="flex items-center gap-2">
                         <History className="w-4 h-4 text-cyan-400" />
-                        <span className="text-xs font-bold font-mono uppercase tracking-wider text-cyan-300">Lịch sử trò chuyện ({sessions.length})</span>
+                        <span className="text-xs font-bold font-mono uppercase tracking-wider text-cyan-300">Lịch sử trò chuyện ({sessions.length}/10)</span>
                       </div>
                       <button
                         onClick={() => setShowHistoryDrawer(false)}
@@ -2625,17 +2743,7 @@ ${conciseInstruction}
                           <>
                             <FormattedAIMessage
                               text={m.text}
-                              onNavigate={(url) => {
-                                if (url.includes('/labs/')) {
-                                  setActiveLab({ link: url, name: 'Phòng lab ảo' });
-                                  if (pathname !== '/') {
-                                    router.push('/');
-                                  }
-                                } else {
-                                  setActiveLab(null);
-                                  router.push(url);
-                                }
-                              }}
+                              onNavigate={(url) => handleSmartNavigation(url)}
                               onTriggerExpandedAI={(q) => handleSend(q, true)}
                               isDark={isDark}
                             />
@@ -2680,17 +2788,17 @@ ${conciseInstruction}
                               {/* 🧑‍🏫 Nút gửi cho giáo viên kiểm tra khi học sinh băn khoăn / thấy sai */}
                               {m.flaggedForTeacher ? (
                                 <span className="inline-flex items-center gap-1 text-[9px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-                                  ✓ Đã gửi GV môn {getSubjectDisplayName(m.flaggedSubject)}
+                                  ✓ Đã lưu để GV xem xét sau (môn {getSubjectDisplayName(m.flaggedSubject)})
                                 </span>
                               ) : (
                                 <button
                                   type="button"
                                   onClick={() => handleOpenTeacherFlagModal(m, index)}
                                   className="inline-flex items-center gap-1 text-[10px] font-medium text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 px-2.5 py-0.5 rounded-full transition-all cursor-pointer shadow-2xs"
-                                  title="Nếu bạn thấy câu trả lời của AI chưa chính xác hoặc còn băn khoăn, hãy bấm để gửi giáo viên bộ môn kiểm tra và hiệu đính"
+                                  title="Lưu câu hỏi và câu trả lời vào danh sách chờ để giáo viên xem xét sau (hiện tại chưa có giáo viên nhận trực tuyến)."
                                 >
                                   <span>🧑‍🏫</span>
-                                  <span>Gửi GV kiểm tra</span>
+                                  <span>Lưu để giáo viên xem xét sau (chưa có giáo viên nhận)</span>
                                 </button>
                               )}
                             </div>

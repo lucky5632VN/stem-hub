@@ -37,19 +37,40 @@ const reportsDir = path.resolve('reports/ablation');
 const rawDir = path.join(reportsDir, 'raw');
 const evidenceDir = path.join(reportsDir, 'evidence');
 
+// 🛡️ ĐÓNG BĂNG KHO THÍ NGHIỆM: Chỉ cho phép đúng 303 chunk từ stem-corpus.json (Ghi nhận hash SHA-256)
+const stemCorpusPath = path.resolve('src/ai-training/datasets/rag-knowledge/stem-corpus.json');
+if (!fs.existsSync(stemCorpusPath)) {
+  console.error(`❌ Không tìm thấy tệp stem-corpus.json tại ${stemCorpusPath}`);
+  process.exit(1);
+}
+const stemCorpusRaw = fs.readFileSync(stemCorpusPath);
+const stemCorpusHash = crypto.createHash('sha256').update(stemCorpusRaw).digest('hex');
+const expectedCorpusHash = '28f7b3382697954fd92f9c09971469d6f9d2c897e5c506fc838b800603ac2cc0';
+if (stemCorpusHash !== expectedCorpusHash) {
+  console.error(`❌ Hash của stem-corpus.json không khớp: ${stemCorpusHash} !== ${expectedCorpusHash}`);
+  process.exit(1);
+}
+const stemCorpusChunks = JSON.parse(stemCorpusRaw.toString('utf8'));
+const FROZEN_303_CHUNK_IDS = new Set(stemCorpusChunks.map(c => c.id));
+if (FROZEN_303_CHUNK_IDS.size !== 303) {
+  console.error(`❌ Số lượng chunk trong stem-corpus.json không đúng 303 (tìm thấy ${FROZEN_303_CHUNK_IDS.size})`);
+  process.exit(1);
+}
+console.log(`🔒 [FROZEN CORPUS GUARD] Đã nạp thành công ${FROZEN_303_CHUNK_IDS.size} chunks từ stem-corpus.json (SHA-256: ${stemCorpusHash.slice(0, 16)}...)`);
+
 const isPilotArg = process.argv.includes('--pilot') || process.argv.some(a => a.startsWith('--pilot='));
 const isV140 = process.argv.includes('--v140') || process.argv.includes('--dataset=v140');
-const isV142 = process.argv.includes('--v142') || process.argv.includes('--dataset=v142');
-const isV141 = process.argv.includes('--v141') || process.argv.includes('--dataset=v141') || (!isV140 && !isV142); // Mặc định là v1.4.1 (bản khóa hiện hành)
+const isV141 = process.argv.includes('--v141') || process.argv.includes('--dataset=v141');
+const isV142 = process.argv.includes('--v142') || process.argv.includes('--dataset=v142') || (!isV140 && !isV141); // Mặc định là v1.4.2 (bản đã khóa chính thức)
 
-let datasetFileName = 'ablation_dataset_100.v1.4.1.json';
-export let currentDatasetVersion = 'v1.4.1';
+let datasetFileName = 'ablation_dataset_100.v1.4.2.json';
+export let currentDatasetVersion = 'v1.4.2';
 if (isV140) {
   datasetFileName = 'ablation_dataset_100.v1.4.0.json';
   currentDatasetVersion = 'v1.4.0';
-} else if (isV142) {
-  datasetFileName = 'ablation_dataset_100.v1.4.2.json';
-  currentDatasetVersion = 'v1.4.2';
+} else if (isV141) {
+  datasetFileName = 'ablation_dataset_100.v1.4.1.json';
+  currentDatasetVersion = 'v1.4.1';
 }
 
 const datasetPath = path.join(reportsDir, datasetFileName);
@@ -77,9 +98,9 @@ const dataset = JSON.parse(fs.readFileSync(datasetPath, 'utf8'));
 const hashInfo = JSON.parse(fs.readFileSync(hashPath, 'utf8'));
 const expectedHash = isV140
   ? (hashInfo.v1_4_0_official?.sha256 || '0a80f4cbfbafbf0423a18c288f8c197bc7d5ab6d0e5f4b2233bfc7f3acbff233')
-  : (isV142
-      ? (hashInfo.v1_4_2_draft?.sha256 || '8d7b890475778ffe57f18edc5f41167a4e71ce707e90e595d8e72352b1a9b5e2')
-      : (hashInfo.v1_4_1_official?.sha256 || '7073358d7396609e2ab7805877aa9bda908862aadba63abccd6107183cc7b0c1'));
+  : (isV141
+      ? (hashInfo.v1_4_1_official?.sha256 || '7073358d7396609e2ab7805877aa9bda908862aadba63abccd6107183cc7b0c1')
+      : (hashInfo.v1_4_2_official?.sha256 || 'cefc6ce343f01692dc4b9e83b9ac257ed833f70bb7c3d366d05259057c2c65c6'));
 
 // Load cache
 let callCache = {};
@@ -142,10 +163,13 @@ if (ABLATION_SINGLE_KEY) {
 }
 
 // Configuration - Cố định mô hình thí nghiệm bằng chuỗi phiên bản cụ thể (không dùng bí danh -latest)
+const kArg = process.argv.find(a => a.startsWith('--k='));
+const configuredK = kArg ? parseInt(kArg.split('=')[1], 10) : (process.argv.includes('--k1') ? 1 : 3);
+
 export const RUN_CONFIG = {
   model: 'gemini-3.5-flash-lite',
   temperature: 0,
-  k_runs: 3,
+  k_runs: configuredK,
   token_spending_cap: 5000000,
   dataset_sha256: expectedHash,
   total_cases: dataset.cases.length,
@@ -340,7 +364,8 @@ async function executeCachedCall({ keyId, prompt, systemInstruction, temperature
   let lastError = null;
   const tStart = performance.now();
 
-  while (attempts < 6) {
+  const maxAttempts = 30;
+  while (attempts < maxAttempts) {
     attempts++;
     try {
       const res = await callResilientGemini({
@@ -395,14 +420,27 @@ async function executeCachedCall({ keyId, prompt, systemInstruction, temperature
       if (err.message && err.message.includes('Google API chặn khu vực')) {
         throw err;
       }
-      const isRateLimit = err.message && (err.message.includes('429') || err.message.includes('Rate Limit') || err.message.includes('hạ nhiệt') || err.message.includes('quota') || err.message.includes('ResourceExhausted'));
-      const backoffTime = isRateLimit ? (16000 + attempts * 3000) : (attempts * 2000);
-      console.warn(`⏳ [Rate Limit / Retry] Lần thử ${attempts}/6: Chờ ${Math.round(backoffTime / 1000)}s rồi gọi lại...`);
+      const isRateLimitOrBusy = err.message && (
+        err.message.includes('429') || 
+        err.message.includes('Rate Limit') || 
+        err.message.includes('hạ nhiệt') || 
+        err.message.includes('quota') || 
+        err.message.includes('ResourceExhausted') ||
+        err.message.includes('high demand') ||
+        err.message.includes('503') ||
+        err.message.includes('bận') ||
+        err.message.includes('spikes') ||
+        err.message.includes('overloaded') ||
+        err.message.includes('aborted') ||
+        err.message.includes('timeout')
+      );
+      const backoffTime = isRateLimitOrBusy ? Math.min(60000, 15000 + attempts * 3000) : (attempts * 2000);
+      console.warn(`⏳ [Rate Limit / Busy Retry] Lần thử ${attempts}/${maxAttempts}: Chờ ${Math.round(backoffTime / 1000)}s rồi gọi lại...`);
       await delay(backoffTime);
     }
   }
 
-  throw new Error(`Failed after 6 attempts: ${lastError?.message}`);
+  throw new Error(`Failed after ${maxAttempts} attempts: ${lastError?.message}`);
 }
 
 /**
@@ -438,7 +476,7 @@ export async function runAblationStudy({ execute = false, pilot = null } = {}) {
   console.log(`TỔNG SỐ LỆNH GỌI: ${estimation.totalCalls} calls`);
   console.log(`TỔNG TOKEN DỰ KIẾN: ~${estimation.estimatedTokensTotal.toLocaleString()} tokens (~${estimation.estimatedTokensWithBuffer.toLocaleString()} gồm 20% dự phòng)`);
   console.log(`TỈ LỆ TRÊN TRẦN CHI TIÊU: ${estimation.percentOfSpendingCapBase} (cơ sở) / ${estimation.percentOfSpendingCapBuffered} (dự phòng) (an toàn dưới 5 triệu)`);
-  const cachedCount = Object.keys(callCache).length;
+  const cachedCount = Object.keys(callCache).filter(k => k.includes(`_${currentDatasetVersion}_`)).length;
   const uncachedCalls = Math.max(0, estimation.totalCalls - cachedCount);
   // Thời gian ước tính khi cache trống: 630 calls x 4.100 ms = 2.583 giây (~43.1 phút)
   const estSeconds = Math.round(uncachedCalls * 4.1);
@@ -543,8 +581,21 @@ export async function runAblationStudy({ execute = false, pilot = null } = {}) {
     const item = casesToRun[cIdx];
     console.log(`[${cIdx + 1}/${casesToRun.length}] Evaluating: ${item.id} (${item.stratum})`);
 
-    // Retrieval once per question
-    const retrievedChunks = retrieveTopK(item.question, 2);
+    // 🛡️ CHẶN RÒ RỈ TRI THỨC TRONG ABLATION: Chỉ nạp từ đúng 303 chunk đã đóng băng
+    const retrievedChunks = retrieveTopK(item.question, 2, {
+      staticOnly: true,
+      allowedChunkIds: FROZEN_303_CHUNK_IDS
+    });
+
+    // Kiểm tra và ghi nhận từng chunkId đưa vào ngữ cảnh
+    const chunkIdsInContext = retrievedChunks.map(c => c.id);
+    for (const cid of chunkIdsInContext) {
+      if (!FROZEN_303_CHUNK_IDS.has(cid) || String(cid).startsWith('bench_verified_')) {
+        console.error(`🚨 [PHÁT HIỆN RÒ RỈ TRI THỨC] Chunk '${cid}' không thuộc 303 chunk thí nghiệm đã đóng băng!`);
+        throw new Error(`[ABLATION HALT] Vi phạm kho thí nghiệm: Gặp chunk '${cid}' ngoài 303 mã chunk chuẩn.`);
+      }
+    }
+
     const topChunk = retrievedChunks[0] || null;
     const topScore = topChunk ? topChunk.score : 0;
     const isRetrieved = topScore >= 0.30; // Cosine grounding threshold
@@ -650,7 +701,13 @@ export async function runAblationStudy({ execute = false, pilot = null } = {}) {
         case_id: item.id,
         run: r,
         no_rag: { latency: noRagRes.latencyMs, tokens: noRagRes.totalTokens, correct: gradeNoRag.isCorrect },
-        rag: { latency: ragRes.latencyMs, tokens: ragRes.totalTokens, correct: gradeRag.isCorrect, verifier: verifierRes }
+        rag: { 
+          latency: ragRes.latencyMs, 
+          tokens: ragRes.totalTokens, 
+          correct: gradeRag.isCorrect, 
+          verifier: verifierRes,
+          retrieved_chunk_ids: chunkIdsInContext
+        }
       }) + '\n');
 
       // 💾 Lưu checkpoint tiến trình sau mỗi lần gọi để sẵn sàng phục hồi nếu bị gián đoạn
@@ -690,7 +747,7 @@ export async function runAblationStudy({ execute = false, pilot = null } = {}) {
       const testBlind = generateMathTeacherBlindReviewSet({
         seed: 2026,
         mathQuestionsCount: 1, // 1 câu x 2 điều kiện = 2 mục
-        datasetFilePath: 'reports/ablation/ablation_dataset_100.json',
+        datasetFilePath: datasetPath,
         ablationSummaryPath: pilotSummaryPath,
         secretMappingDir: path.join(targetRawDir, 'temp_secret_mapping')
       });

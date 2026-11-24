@@ -37,41 +37,27 @@ if (excludeFileArg) {
 }
 
 const envLocalPath = path.resolve('.env.local');
-let clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-let privateKey = process.env.FIREBASE_PRIVATE_KEY;
-let projectId = process.env.FIREBASE_PROJECT_ID || 'stem-hub-43e96';
-
+let clientEmail, privateKey, projectId;
 if (fs.existsSync(envLocalPath)) {
   const envContent = fs.readFileSync(envLocalPath, 'utf8');
   for (const line of envContent.split('\n')) {
-    const match = line.match(/^\s*([A-Za-z0-9_]+)\s*=\s*(.*)$/);
-    if (match) {
-      const k = match[1];
-      let v = match[2].trim();
-      if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) v = v.slice(1, -1);
-      if (k === 'FIREBASE_CLIENT_EMAIL' && !clientEmail) clientEmail = v;
-      if (k === 'FIREBASE_PRIVATE_KEY' && !privateKey) privateKey = v;
-      if (k === 'FIREBASE_PROJECT_ID' && !projectId) projectId = v;
+    const m = line.trim().match(/^([A-Za-z0-9_]+)\s*=\s*(.*)$/);
+    if (m) {
+      let [_, k, v] = m;
+      v = v.replace(/^['"]|['"]$/g, '').trim();
+      if (k === 'FIREBASE_CLIENT_EMAIL') clientEmail = v;
+      if (k === 'FIREBASE_PRIVATE_KEY') privateKey = v.replace(/\\n/g, '\n');
+      if (k === 'FIREBASE_PROJECT_ID') projectId = v;
     }
   }
 }
 
-let cleanKey = (privateKey || '').replace(/\\r/g, '').replace(/\r/g, '').replace(/\\n/g, '\n').trim();
-let normalizedPem = cleanKey;
-try {
-  const lines = cleanKey.split('\n').map(l => l.trim()).filter(Boolean);
-  const b64 = lines.slice(1, -1).join('');
-  const buf = Buffer.from(b64, 'base64');
-  const k = crypto.createPrivateKey({ key: buf, format: 'der', type: 'pkcs8' });
-  normalizedPem = k.export({ type: 'pkcs8', format: 'pem' });
-} catch (e) {}
-
 const app = !getApps().length
   ? initializeApp({
       credential: cert({
-        projectId,
+        projectId: projectId || 'cuoc-thi-ai-e2044',
         clientEmail,
-        privateKey: normalizedPem
+        privateKey
       })
     })
   : getApps()[0];

@@ -1,5 +1,23 @@
 [
   {
+    "timestamp": "2026-11-24T07:30:57.706Z",
+    "action": "student_submit_knowledge",
+    "itemId": "learned_1795505455863_j5xn",
+    "subject": "toan",
+    "querySnippet": "Bạn là một nhà toán học hàng đầu. Hãy chứng minh bằng lập luận toán học chặt chẽ",
+    "operator": "7jmOy8lyr1hsmrflTMvdoXOJmew1",
+    "status": "pending_review"
+  },
+  {
+    "timestamp": "2026-11-24T04:29:24.337Z",
+    "action": "student_submit_knowledge",
+    "itemId": "learned_1795494562772_hjtk",
+    "subject": "stem",
+    "querySnippet": "chuỗi DNA",
+    "operator": "7jmOy8lyr1hsmrflTMvdoXOJmew1",
+    "status": "pending_review"
+  },
+  {
     "timestamp": "2026-11-16T15:10:22.762Z",
     "action": "admin_delete_knowledge",
     "operator": "admin",

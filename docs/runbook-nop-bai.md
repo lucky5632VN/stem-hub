@@ -53,19 +53,27 @@ Thực hiện đặt lại mật khẩu ngẫu nhiên cho các tài khoản bot/
 ```powershell
 node scripts/remediate_test_accounts.cjs --execute
 ```
+*Trạng thái*: ✅ **ĐÃ HOÀN TẤT** (25 tài khoản bot/test đã được đặt mật khẩu ngẫu nhiên bảo mật và thu hồi refresh token).
 
 ### Bước 5: Khởi tạo tài khoản trải nghiệm cho Ban Giám Khảo
 Khởi tạo tài khoản demo sạch có sẵn dữ liệu và phân quyền:
 ```powershell
 node scripts/create_judge_demo_account.cjs --execute
 ```
+*Trạng thái*: ✅ **ĐÃ HOÀN TẤT**  
+*Thông tin đăng nhập*:
+- **Email**: `giamkhao_demo@stemhub.edu.vn`
+- **Mật khẩu**: `JudgeHub@2026`
+- **Tên hiển thị**: `Ban Giám Khảo`
+- **Phân quyền**: `{ reviewerType: 'judge', isJudge: true }` (Mở khóa 4 Lab 3D, 500 điểm ELO Đấu trường).
 
 ### Bước 6: Kiểm tra đóng gói thử nghiệm (Dry-Run Packaging)
 Chạy script đóng gói thử nghiệm để quét kiểm toán độ sạch của gói nộp:
 ```powershell
 node scripts/package_submission.mjs
 ```
-*Yêu cầu*: Tệp zip thử nghiệm được giải nén và quét sạch 100% PII, email và khóa bảo mật.
+*Yêu cầu*: Tệp zip thử nghiệm được giải nén và quét sạch 100% PII, email và khóa bảo mật.  
+*Trạng thái*: ✅ **ĐÃ HOÀN TẤT & ĐẠT 100% PASS** (1,593 tệp, 81.81 MB, 0 file cấm, 0 leak, 0 email/UID thật).
 
 ### Bước 7: Xuất hồ sơ văn bản và đóng gói nộp chính thức
 1. Tạo các tài liệu Word / PDF:

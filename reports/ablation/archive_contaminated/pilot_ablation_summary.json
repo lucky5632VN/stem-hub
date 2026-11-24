@@ -1,0 +1,116 @@
+{
+  "metadata": {
+    "model": "gemini-3.5-flash-lite",
+    "temperature": 0,
+    "k_runs": 1,
+    "dataset_sha256": "7073358d7396609e2ab7805877aa9bda908862aadba63abccd6107183cc7b0c1",
+    "started_at": "2026-11-23T12:46:32.354Z",
+    "pilot": 5,
+    "completed_at": "2026-11-23T12:47:28.517Z",
+    "total_tokens_consumed": 3959
+  },
+  "condition_1_no_rag": {
+    "total": 5,
+    "accuracyPct": 80,
+    "inScopeTotal": 4,
+    "inScopeAccuracyPct": 75,
+    "inScopeRefusalCount": 0,
+    "inScopeRefusalRatePct": 0,
+    "oosTotal": 1,
+    "oosAbstentionRatePct": 100,
+    "medianLatencyMs": 1772,
+    "p95LatencyMs": 2187,
+    "strata_3_tiers": {
+      "tang_A": {
+        "total": 0,
+        "correct": 0,
+        "refused": 0,
+        "fraction": "0/0",
+        "accuracyPct": 0,
+        "refusalRatePct": 0
+      },
+      "tang_B": {
+        "total": 1,
+        "correct": 0,
+        "refused": 0,
+        "fraction": "0/1",
+        "accuracyPct": 0,
+        "refusalRatePct": 0
+      },
+      "tang_C": {
+        "total": 1,
+        "correct": 1,
+        "refused": 0,
+        "fraction": "1/1",
+        "accuracyPct": 100,
+        "refusalRatePct": 0
+      },
+      "concept": {
+        "total": 2,
+        "correct": 2,
+        "refused": 0,
+        "fraction": "2/2",
+        "accuracyPct": 100,
+        "refusalRatePct": 0,
+        "note": "Câu khái niệm cần người chấm tay theo quy tắc đóng băng docs/quy-tac-cham-ablation.md"
+      }
+    }
+  },
+  "condition_2_rag_guard": {
+    "total": 5,
+    "accuracyPct": 60,
+    "inScopeTotal": 4,
+    "inScopeAccuracyPct": 50,
+    "inScopeRefusalCount": 0,
+    "inScopeRefusalRatePct": 0,
+    "oosTotal": 1,
+    "oosAbstentionRatePct": 100,
+    "medianLatencyMs": 1072,
+    "p95LatencyMs": 1678,
+    "strata_3_tiers": {
+      "tang_A": {
+        "total": 0,
+        "correct": 0,
+        "refused": 0,
+        "fraction": "0/0",
+        "accuracyPct": 0,
+        "refusalRatePct": 0
+      },
+      "tang_B": {
+        "total": 1,
+        "correct": 0,
+        "refused": 0,
+        "fraction": "0/1",
+        "accuracyPct": 0,
+        "refusalRatePct": 0
+      },
+      "tang_C": {
+        "total": 1,
+        "correct": 1,
+        "refused": 0,
+        "fraction": "1/1",
+        "accuracyPct": 100,
+        "refusalRatePct": 0
+      },
+      "concept": {
+        "total": 2,
+        "correct": 1,
+        "refused": 0,
+        "fraction": "1/2",
+        "accuracyPct": 50,
+        "refusalRatePct": 0,
+        "note": "Câu khái niệm cần người chấm tay theo quy tắc đóng băng docs/quy-tac-cham-ablation.md"
+      }
+    }
+  },
+  "delta": {
+    "inScopeDiff": "-25.00 pp",
+    "oosAbstentionDiff": "0.00 pp"
+  },
+  "retrieval_only_accuracy": 80,
+  "response_verifier": {
+    "total_evaluations": 5,
+    "warningRatePct": "0.00%",
+    "falseAlarmRatePct": "0.00%"
+  }
+}

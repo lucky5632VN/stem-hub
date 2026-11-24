@@ -165,6 +165,15 @@
     "numeric_gate": 24,
     "notes": "100 là tổng số câu của bộ dữ liệu (total_cases), numeric_gate = 24 là số câu CAND_* chính thức đã được người dùng tích trên phiếu đối chiếu. Bản v1.4.1 giữ nguyên trạng thái khóa cho đến khi người dùng gửi lệnh 'khóa v1.4.2'."
   },
+  "v1_4_2_official": {
+    "file": "reports/ablation/ablation_dataset_100.v1.4.2.json",
+    "sha256": "cefc6ce343f01692dc4b9e83b9ac257ed833f70bb7c3d366d05259057c2c65c6",
+    "locked_at": "2026-11-24T12:44:16.227415+00:00",
+    "status": "LOCKED_OFFICIAL (Khóa chính thức theo lệnh 'khóa v1.4.2')",
+    "total_cases": 100,
+    "numeric_gate": 24,
+    "notes": "Đã khóa chính thức theo lệnh người dùng 'khóa v1.4.2'. 24 câu số học khớp 100% với official_candidates.json."
+  },
   "v1_4_2_draft": {
     "file": "reports/ablation/ablation_dataset_100.v1.4.2.json",
     "sha256": "8d7b890475778ffe57f18edc5f41167a4e71ce707e90e595d8e72352b1a9b5e2",

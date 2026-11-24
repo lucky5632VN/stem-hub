@@ -413,6 +413,11 @@ export async function PATCH(request) {
       let updatedCount = 0;
 
       list.forEach(item => {
+        const creatorUid = item.studentUid || item.creatorUid || item.authorUid || item.userId;
+        // 🛡️ Bỏ qua không tự phê duyệt bản ghi do chính người duyệt đăng tải (Quy tắc trung thực)
+        if (creatorUid && creatorUid === reviewer.uid) {
+          return;
+        }
         if (item.status !== 'rejected') {
           item.status = 'verified_by_teacher';
           item.teacherVerified = true;
@@ -475,6 +480,19 @@ export async function PATCH(request) {
 
     const itemIdx = list.findIndex(item => item.id === id);
     let targetItem = itemIdx >= 0 ? list[itemIdx] : { id };
+
+    // 🛡️ BẢO VỆ THẨM ĐỊNH ĐỘC LẬP (QUY TẮC TRUNG THỰC):
+    // Giáo viên hoặc Quản trị viên TUYỆT ĐỐI KHÔNG ĐƯỢC tự duyệt tri thức do chính mình đăng tải.
+    const itemCreatorUid = targetItem.studentUid || targetItem.creatorUid || targetItem.authorUid || targetItem.userId;
+    if (itemCreatorUid && itemCreatorUid === reviewer.uid) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Quy tắc trung thực: Không được tự thẩm định tri thức do chính mình đăng tải (cần tài khoản giáo viên khác thẩm định độc lập).'
+        },
+        { status: 403, headers: corsHeaders }
+      );
+    }
 
     const beforeState = {
       status: targetItem.status || 'pending_review',

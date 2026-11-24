@@ -210,10 +210,12 @@ export async function GET(request) {
   const confusionMatrix = computeTeacherAiConfusionMatrix(pairedForConfusion);
 
   // 4. TÍNH TOÁN MA TRẬN NHẦM LẪN TRÊN TOÀN BỘ 150 CA BENCHMARK (ĐỐI ĐẦU 2 MÔ HÌNH)
+  // 🛡️ QUY TẮC TRUNG THỰC: Chỉ xuất dữ liệu tổng hợp giả lập khi có cờ cấu hình tường minh
   let confusionMatrix150 = null;
+  const enableSynthetic = process.env.NEXT_PUBLIC_ENABLE_SYNTHETIC_BENCHMARK === 'true' || process.env.ENABLE_SYNTHETIC_BENCHMARK === 'true';
   try {
     const bench150Path = path.resolve(process.cwd(), 'src/ai-training/datasets/benchmark_150_cases.json');
-    if (fs.existsSync(bench150Path)) {
+    if (enableSynthetic && fs.existsSync(bench150Path)) {
       const b150 = JSON.parse(fs.readFileSync(bench150Path, 'utf8'));
       
       const evalModel150 = (isBase) => {
