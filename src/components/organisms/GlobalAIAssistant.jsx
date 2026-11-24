@@ -2036,7 +2036,7 @@ ${conciseInstruction}
       if (aiSuccess) break;
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 12000);
+        const timeoutId = setTimeout(() => controller.abort(), 25000);
 
         const response = await fetch(endpoint, {
           method: 'POST',
@@ -2656,7 +2656,7 @@ ${conciseInstruction}
                 ref={scrollContainerRef}
                 className="flex-1 p-4 overflow-y-auto space-y-3.5 custom-cyber-scrollbar"
               >
-                {messages.map((m) => {
+                {messages.map((m, index) => {
                   const isBot = m.sender === 'bot';
                   return (
                     <div
