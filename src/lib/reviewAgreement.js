@@ -420,10 +420,49 @@ export function computeTeacherAiConfusionMatrix(pairedList = []) {
   };
 }
 
+/**
+ * Kiểm tra quyền hiển thị 3 tab đối chiếu tập tổng hợp 150 ca đặt trước (preset) trong Ma Trận Nhầm Lẫn.
+ * - Admin và Ban Giám Khảo (judge): được phép xem để trình diễn và đối chiếu kỹ thuật (giữ nguyên nhãn preset minh bạch).
+ * - Giáo viên (teacher thuần, không phải admin/judge): chỉ xem phần "Giáo Viên Chấm Thực Tế".
+ * - Khách / chưa đăng nhập / học sinh: mặc định ẩn (chỉ mở nếu bật cờ synthetic env).
+ * @param {Object|null} callerClaims - Decoded Firebase ID token claims
+ * @param {boolean} [enableSyntheticEnv=false] - Cờ môi trường synthetic
+ */
+export function evaluateReportComparisonAccess(callerClaims = null, enableSyntheticEnv = false) {
+  if (!callerClaims || typeof callerClaims !== 'object') {
+    return {
+      isAdmin: false,
+      isJudge: false,
+      isTeacherOnly: false,
+      canViewComparisonTabs: Boolean(enableSyntheticEnv)
+    };
+  }
+
+  const isAdmin = Boolean(callerClaims.admin === true || callerClaims.role === 'admin');
+  const isJudge = Boolean(callerClaims.reviewerType === 'judge' || callerClaims.isJudge === true);
+  const isTeacherOnly = Boolean(
+    !isAdmin &&
+    !isJudge &&
+    (callerClaims.reviewerType === 'teacher' || callerClaims.role === 'teacher')
+  );
+
+  const canViewComparisonTabs = isTeacherOnly
+    ? false
+    : Boolean(isAdmin || isJudge || enableSyntheticEnv);
+
+  return {
+    isAdmin,
+    isJudge,
+    isTeacherOnly,
+    canViewComparisonTabs
+  };
+}
+
 export default {
   wilsonInterval,
   computeCohenKappa,
   computeCohortAgreement,
   aggregateReviewsBySubjectAndCohort,
-  computeTeacherAiConfusionMatrix
+  computeTeacherAiConfusionMatrix,
+  evaluateReportComparisonAccess
 };

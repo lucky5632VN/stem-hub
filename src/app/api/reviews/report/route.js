@@ -2,12 +2,13 @@ import fs from 'fs';
 import path from 'path';
 import { NextResponse } from 'next/server';
 import { getCorsHeaders, getClientIp, checkRateLimit } from '@/lib/serverSecurity';
-import { getFirebaseAdmin } from '@/lib/firebaseAdmin';
+import { getFirebaseAdmin, verifyFirebaseIdToken } from '@/lib/firebaseAdmin';
 import { 
   aggregateReviewsBySubjectAndCohort, 
   computeCohortAgreement, 
   wilsonInterval,
-  computeTeacherAiConfusionMatrix
+  computeTeacherAiConfusionMatrix,
+  evaluateReportComparisonAccess
 } from '@/lib/reviewAgreement';
 import { buildUnifiedSamplePool } from '@/lib/reviewSampler';
 
@@ -33,6 +34,19 @@ export async function GET(request) {
 
   const { searchParams } = new URL(request.url);
   const filterSubject = searchParams.get('subject') ? searchParams.get('subject').toLowerCase() : null;
+
+  // Xác thực tùy chọn Bearer token để phân quyền xem 3 chế độ đối chiếu 150 ca cho Admin / Ban Giám Khảo
+  let callerClaims = null;
+  const authHeader = request.headers.get('authorization');
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const idToken = authHeader.slice(7).trim();
+    const tokenCheck = await verifyFirebaseIdToken(idToken, {
+      host: request.headers.get('host') || ''
+    });
+    if (tokenCheck.valid && tokenCheck.decoded) {
+      callerClaims = tokenCheck.decoded;
+    }
+  }
 
   const admin = getFirebaseAdmin();
   if (!admin) {
@@ -210,12 +224,13 @@ export async function GET(request) {
   const confusionMatrix = computeTeacherAiConfusionMatrix(pairedForConfusion);
 
   // 4. TÍNH TOÁN MA TRẬN NHẦM LẪN TRÊN TOÀN BỘ 150 CA BENCHMARK (ĐỐI ĐẦU 2 MÔ HÌNH)
-  // 🛡️ QUY TẮC TRUNG THỰC: Chỉ xuất dữ liệu tổng hợp giả lập khi có cờ cấu hình tường minh
+  // 🛡️ QUY TẮC TRUNG THỰC: Mặc định ẩn khỏi giáo viên / công khai; mở cho Admin và Ban Giám Khảo trình diễn kỹ thuật với nhãn preset rõ ràng
   let confusionMatrix150 = null;
   const enableSynthetic = process.env.NEXT_PUBLIC_ENABLE_SYNTHETIC_BENCHMARK === 'true' || process.env.ENABLE_SYNTHETIC_BENCHMARK === 'true';
+  const reportAccess = evaluateReportComparisonAccess(callerClaims, enableSynthetic);
   try {
     const bench150Path = path.resolve(process.cwd(), 'src/ai-training/datasets/benchmark_150_cases.json');
-    if (enableSynthetic && fs.existsSync(bench150Path)) {
+    if (reportAccess.canViewComparisonTabs && fs.existsSync(bench150Path)) {
       const b150 = JSON.parse(fs.readFileSync(bench150Path, 'utf8'));
       
       const evalModel150 = (isBase) => {
@@ -331,6 +346,7 @@ export async function GET(request) {
     success: true,
     filterSubject,
     timestamp: new Date().toISOString(),
+    canViewComparisonTabs: reportAccess.canViewComparisonTabs,
     tableRows,
     confusionMatrix,
     confusionMatrix150,
@@ -338,5 +354,10 @@ export async function GET(request) {
     demoDataCount: allReviews.filter(r => r.isDemo).length,
     rawBySubject: aggregated,
     agreements
-  }, { headers: getCorsHeaders(request) });
+  }, {
+    headers: {
+      ...getCorsHeaders(request),
+      'Cache-Control': 'no-store'
+    }
+  });
 }

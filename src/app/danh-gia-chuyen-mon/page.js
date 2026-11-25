@@ -134,7 +134,7 @@ export default function TeacherReviewPortalPage() {
   const [sampleSize, setSampleSize] = useState(20);
 
   // Chế độ xem Ma trận nhầm lẫn: 'teacher' (Giáo viên thực tế - MẶC ĐỊNH TRUNG THỰC)
-  // Các tab tổng hợp 150 ca giả lập chỉ hiển thị khi có cờ NEXT_PUBLIC_ENABLE_SYNTHETIC_BENCHMARK === 'true'
+  // 3 tab đối chiếu tập 150 ca đặt trước chỉ mở cho Admin / Ban Giám Khảo (hoặc cờ env); Giáo viên chỉ xem phần của giáo viên chấm.
   const enableSynthetic = process.env.NEXT_PUBLIC_ENABLE_SYNTHETIC_BENCHMARK === 'true';
   const [confusionSource, setConfusionSource] = useState('teacher');
   const [subjectCounts, setSubjectCounts] = useState({ toan: 117, ly: 98, hoa: 102, sinh: 98 });
@@ -143,6 +143,20 @@ export default function TeacherReviewPortalPage() {
   // Phiếu đồng ý (Consent)
   const [consentData, setConsentData] = useState({ publicNameConsent: false, teacherDisplayName: '', institution: '', withdrawn: false });
   const [savingConsent, setSavingConsent] = useState(false);
+
+  const isTeacherOnly = !isAdmin && reviewerType === 'teacher';
+  const canViewComparisonTabs = Boolean(
+    !isTeacherOnly &&
+    (isAdmin || reviewerType === 'judge' || enableSynthetic) &&
+    reportData?.canViewComparisonTabs &&
+    reportData?.confusionMatrix150
+  );
+
+  useEffect(() => {
+    if (!canViewComparisonTabs && confusionSource !== 'teacher') {
+      setConfusionSource('teacher');
+    }
+  }, [canViewComparisonTabs, confusionSource]);
 
   // 1. Tải danh sách mẫu đã làm mù (mặc định lấy toàn bộ câu hỏi của môn, ưu tiên câu hỏi học sinh gửi)
   const loadSamples = async (subj = selectedSubject) => {
@@ -199,11 +213,17 @@ export default function TeacherReviewPortalPage() {
     }
   };
 
-  // 2. Tải báo cáo độc lập
+  // 2. Tải báo cáo độc lập (đính kèm token nếu đã đăng nhập để mở tab đối chiếu 150 ca cho Admin / Ban Giám Khảo)
   const loadReport = async () => {
     setLoadingReport(true);
     try {
-      const res = await fetch('/api/reviews/report');
+      const currentUser = auth.currentUser || firebaseUser;
+      const headers = {};
+      if (currentUser) {
+        const token = await currentUser.getIdToken();
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      const res = await fetch('/api/reviews/report', { headers });
       const data = await res.json();
       if (res.ok) {
         setReportData(data);
@@ -1075,7 +1095,7 @@ export default function TeacherReviewPortalPage() {
                       Giáo Viên Chấm Thực Tế ({reportData?.confusionMatrix?.totalSamples || 0} mẫu)
                     </button>
 
-                    {enableSynthetic && (
+                    {canViewComparisonTabs && (
                       <>
                         <button
                           type="button"
@@ -1110,7 +1130,7 @@ export default function TeacherReviewPortalPage() {
                               : 'text-slate-600 dark:text-slate-300 hover:text-white'
                           }`}
                         >
-                          So Sánh Đối Đầu: Có RAG vs Không RAG (150 Ca)
+                          So Sánh Đối Đầu: Có RAG vs Không RAG (150 Ca - Đặt trước)
                         </button>
                       </>
                     )}
@@ -1124,11 +1144,11 @@ export default function TeacherReviewPortalPage() {
                     <span>
                       {confusionSource === 'teacher' 
                         ? 'Đang xem: Kết quả thẩm định trực tiếp của Giáo viên THPT trên các câu hỏi đã làm mù.'
-                        : 'Đang xem: Tập tổng hợp 150 ca thuật toán với điểm đặt trước (preset), chưa qua giáo viên thẩm định độc lập.'}
+                        : 'Đang xem: Tập tổng hợp 150 ca thuật toán với điểm đặt trước (preset), chưa qua giáo viên thẩm định độc lập (chỉ mở cho Admin / Ban Giám Khảo trình diễn).'}
                     </span>
                   </div>
                   <span className="font-mono font-bold text-[10px] bg-blue-100 dark:bg-blue-900/60 px-2 py-0.5 rounded">
-                    {confusionSource === 'teacher' ? 'Dữ liệu: Mẫu thẩm định giáo viên' : 'Dữ liệu: Tập tổng hợp thuật toán'}
+                    {confusionSource === 'teacher' ? 'Dữ liệu: Mẫu thẩm định giáo viên' : 'Dữ liệu: Tập tổng hợp thuật toán (Preset)'}
                   </span>
                 </div>
 
@@ -1137,7 +1157,7 @@ export default function TeacherReviewPortalPage() {
                   <div className="bg-slate-50 dark:bg-slate-950 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
                     <div className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-cyan-500" />
-                      Bảng So Sánh Đối Đầu Trực Diện Hiệu Năng 2 Mô Hình Trên 150 Ca
+                      Bảng So Sánh Đối Đầu 2 Mô Hình Trên 150 Ca Thuật Toán (Điểm Đặt Trước / Preset)
                     </div>
 
                     <div className="overflow-x-auto">
@@ -1492,12 +1512,13 @@ export default function TeacherReviewPortalPage() {
 
             <div className="space-y-4 max-w-xl">
               <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
-                <label className="flex items-start gap-3 cursor-pointer">
+                <label className={`flex items-start gap-3 ${isReadOnlyJudge ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'}`}>
                   <input
                     type="checkbox"
+                    disabled={isReadOnlyJudge}
                     checked={consentData.publicNameConsent}
                     onChange={(e) => setConsentData(prev => ({ ...prev, publicNameConsent: e.target.checked }))}
-                    className="mt-1 w-4 h-4 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-cyan-600 focus:ring-0"
+                    className="mt-1 w-4 h-4 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-cyan-600 focus:ring-0 disabled:cursor-not-allowed"
                   />
                   <div className="text-xs">
                     <span className="font-bold text-slate-800 dark:text-slate-200">Đồng ý công khai họ tên trên danh mục Thẩm định viên chuyên môn</span>
@@ -1513,20 +1534,22 @@ export default function TeacherReviewPortalPage() {
                       <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block mb-1">Họ và tên Thầy/Cô:</label>
                       <input
                         type="text"
+                        disabled={isReadOnlyJudge}
                         value={consentData.teacherDisplayName || ''}
                         onChange={(e) => setConsentData(prev => ({ ...prev, teacherDisplayName: e.target.value }))}
                         placeholder="Thầy/Cô Nguyễn Văn A..."
-                        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500 disabled:opacity-60 disabled:cursor-not-allowed"
                       />
                     </div>
                     <div>
                       <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block mb-1">Đơn vị công tác / Trường THPT:</label>
                       <input
                         type="text"
+                        disabled={isReadOnlyJudge}
                         value={consentData.institution || ''}
                         onChange={(e) => setConsentData(prev => ({ ...prev, institution: e.target.value }))}
                         placeholder="Trường THPT Chuyên..."
-                        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500 disabled:opacity-60 disabled:cursor-not-allowed"
                       />
                     </div>
                   </div>
@@ -1535,12 +1558,13 @@ export default function TeacherReviewPortalPage() {
 
               {/* Rút khỏi thẩm định */}
               <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2">
-                <label className="flex items-center gap-3 cursor-pointer">
+                <label className={`flex items-center gap-3 ${isReadOnlyJudge ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'}`}>
                   <input
                     type="checkbox"
+                    disabled={isReadOnlyJudge}
                     checked={consentData.withdrawn}
                     onChange={(e) => setConsentData(prev => ({ ...prev, withdrawn: e.target.checked }))}
-                    className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-rose-600 focus:ring-0"
+                    className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-rose-600 focus:ring-0 disabled:cursor-not-allowed"
                   />
                   <span className="text-xs font-bold text-rose-700 dark:text-rose-300">Yêu cầu rút khỏi thẩm định và hủy quyền sử dụng dữ liệu</span>
                 </label>
