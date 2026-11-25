@@ -176,9 +176,9 @@ export async function callResilientGemini({
 
         // 429 Quota Exceeded -> Đưa riêng cặp (Key + Model) này vào hạ nhiệt
         if (resp.status === 429 || errMsg.includes('quota') || errMsg.includes('ResourceExhausted')) {
-          const isDailyLimit = errMsg.includes('per day limit') || errMsg.includes('requests per day');
-          const cooldownDuration = isDailyLimit ? 3600000 : 15000; // 1 giờ nếu hết quota ngày, 15s nếu 429 phút
-          lastError = new Error(`HTTP 429 Rate Limit (${isDailyLimit ? 'Hết quota ngày' : 'Vượt 15 RPM'}): ${errMsg}`);
+          const isDailyLimit = errMsg.includes('per day limit') || (errMsg.includes('requests per day') && !errMsg.includes('requests per minute'));
+          const cooldownDuration = isDailyLimit ? 60000 : 15000; // 60s nếu quota hồi phục, 15s nếu vượt 15 RPM
+          lastError = new Error(`HTTP 429 Rate Limit (${isDailyLimit ? 'Hồi phục quota 60s' : 'Vượt 15 RPM'}): ${errMsg}`);
           modelKeyCooldownMap.set(cooldownKey, Date.now() + cooldownDuration);
           continue;
         }
