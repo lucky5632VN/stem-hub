@@ -141,7 +141,6 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
               email: user.email,
               displayName: preset.displayName,
               name: preset.displayName,
-              role: 'student',
               isBotAccount: true,
               botStatus: 'available',
               inventory: testInventory,

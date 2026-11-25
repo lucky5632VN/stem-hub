@@ -260,7 +260,7 @@ export default function DashboardLayout({ children }) {
             subjectStrengths: data.stats?.subjectStrengths || { math: 50, physics: 50, chemistry: 50, biology: 50 }
           });
         } else {
-          // Nếu chưa có doc trong Firestore, tạo mới với thông tin mặc định hoặc theo preset
+          // Nếu chưa có doc trong Firestore, tạo mới với thông tin mặc định hoặc theo preset (không ghi trường 'role' từ client để tuân thủ firestore.rules)
           const testInventory = EQUIPMENT_CATALOG.map(card => ({ cardId: card.id, quantity: 10 }));
           const displayNameToUse = preset ? preset.displayName : (user.displayName || 'Học viên');
           const initialData = {
@@ -269,7 +269,6 @@ export default function DashboardLayout({ children }) {
             displayName: displayNameToUse,
             name: displayNameToUse,
             createdAt: new Date().toISOString(),
-            role: 'student',
             inventory: preset ? testInventory : [],
             isBotAccount: preset ? true : false,
             botStatus: preset ? 'available' : 'disabled',
@@ -308,13 +307,21 @@ export default function DashboardLayout({ children }) {
             }
           };
           
-          // Ghi dữ liệu an toàn thông qua Safe Call
-          await safeFirestoreCall(() => setDoc(userDocRef, initialData));
+          // Ghi dữ liệu an toàn thông qua Safe Call (bọc try-catch để luôn đảm bảo setUser thành công)
+          try {
+            await safeFirestoreCall(() => setDoc(userDocRef, initialData));
+          } catch (createDocErr) {
+            console.warn("⚠️ Không thể tạo document người dùng trên Firestore (sẽ dùng bộ nhớ tạm):", createDocErr?.message || createDocErr);
+          }
           
           setUser({
             uid: user.uid,
             email: user.email,
             displayName: displayNameToUse,
+            role: 'student',
+            photoURL: user.photoURL || null,
+            createdAt: initialData.createdAt,
+            stats: initialData.stats
           });
 
           let initialCrystals = 500;
