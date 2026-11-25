@@ -17,6 +17,7 @@ import {
   evaluateReportComparisonAccess,
   evaluateReviewPortalAccess
 } from '../src/lib/reviewAgreement.js';
+import { dedupePoolQuestions, sampleForReviewer } from '../src/lib/reviewSampler.js';
 
 let passed = 0;
 let total = 0;
@@ -179,6 +180,36 @@ it('5. evaluateReportComparisonAccess chỉ mở 3 chế độ 150 ca cho Admin 
       reportRoute.includes('canViewComparisonTabs: reportAccess.canViewComparisonTabs') &&
       reportRoute.includes("r.reviewerType === 'teacher' && !r.isDemo && !r.skipped"),
     'API report phải đồng bộ phân quyền và giữ nguyên bộ lọc !r.isDemo'
+  );
+});
+
+it('6. Khử trùng lặp câu hỏi và mặc định ẩn câu đã chấm để tránh lặp lại/409', () => {
+  const deduped = dedupePoolQuestions([
+    { sampleId: 'a1', question: 'chuỗi DNA' },
+    { sampleId: 'a2', question: '  Chuỗi   DNA ' },
+    { sampleId: 'b1', question: 'Câu khác' }
+  ]);
+  assert.strictEqual(deduped.length, 2);
+  assert.strictEqual(deduped[0].sampleId, 'a1');
+
+  for (const subj of ['toan', 'ly', 'hoa', 'sinh']) {
+    const res = sampleForReviewer({ subject: subj, seed: 2026, sampleSize: 999, reviewerUid: 'test_uid' });
+    const normQuestions = res.samples.map(s => String(s.question || '').trim().toLowerCase().replace(/\s+/g, ' '));
+    const uniqueQCount = new Set(normQuestions).size;
+    assert.strictEqual(normQuestions.length, uniqueQCount, `Môn ${subj} không được chứa câu hỏi trùng lặp nội dung`);
+  }
+
+  assert(
+    samplesRoute.includes('dedupePoolQuestions(') &&
+      samplesRoute.includes('if (d.isDemo) return;') &&
+      samplesRoute.includes('!currentReviewedSet.has(s.sampleId)'),
+    'API samples phải khử trùng lặp và đẩy câu chưa chấm lên trước'
+  );
+  assert(
+    portalPage.includes('showReviewedSamples') &&
+      portalPage.includes('visibleSamples') &&
+      portalPage.includes('isAmendment: needsAmendment'),
+    'UI phải ẩn câu đã chấm theo mặc định và hỗ trợ gửi bản sửa đổi (amendment) hợp lệ'
   );
 });
 

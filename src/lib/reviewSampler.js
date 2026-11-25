@@ -160,6 +160,19 @@ export function cleanSystemResponse(text) {
     .trim();
 }
 
+// Hàm loại bỏ các câu hỏi trùng lặp hoàn toàn nội dung trong cùng một môn (giữ mục đầu tiên)
+export function dedupePoolQuestions(items = []) {
+  const seenQuestions = new Set();
+  const deduped = [];
+  for (const item of items) {
+    const normQ = String(item?.question || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    if (normQ && seenQuestions.has(normQ)) continue;
+    if (normQ) seenQuestions.add(normQ);
+    deduped.push(item);
+  }
+  return deduped;
+}
+
 /**
  * Lấy danh sách mẫu đã được làm mù cho một người chấm cụ thể
  * @param {Object} params
@@ -173,8 +186,8 @@ export function sampleForReviewer({ subject, seed = 2026, sampleSize = 999, revi
   const normSubj = (subject || 'toan').toLowerCase();
   const fullPool = buildUnifiedSamplePool(true);
 
-  // Lọc theo môn học
-  const subjectPool = fullPool.filter(item => item.subject === normSubj);
+  // Lọc theo môn học và loại bỏ câu hỏi trùng lặp nội dung
+  const subjectPool = dedupePoolQuestions(fullPool.filter(item => item.subject === normSubj));
   if (subjectPool.length === 0) {
     return {
       seed,

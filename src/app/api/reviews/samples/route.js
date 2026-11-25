@@ -3,7 +3,7 @@ import path from 'path';
 import { NextResponse } from 'next/server';
 import { getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
 import { verifyFirebaseIdToken, getFirebaseAdmin } from '@/lib/firebaseAdmin';
-import { sampleForReviewer, generateMathTeacherBlindReviewSet, buildUnifiedSamplePool } from '@/lib/reviewSampler';
+import { sampleForReviewer, generateMathTeacherBlindReviewSet, buildUnifiedSamplePool, dedupePoolQuestions } from '@/lib/reviewSampler';
 import { evaluateReviewPortalAccess } from '@/lib/reviewAgreement';
 
 export async function OPTIONS(request) {
@@ -95,18 +95,22 @@ export async function GET(request) {
     reviewerUid: uid
   });
 
-  // 5. Thống kê số lượng câu hỏi hiện có của tất cả các môn
+  // 5. Thống kê số lượng câu hỏi duy nhất hiện có của tất cả các môn
   const fullPool = buildUnifiedSamplePool(true);
   const subjectCounts = {
-    toan: fullPool.filter(i => i.subject === 'toan').length,
-    ly: fullPool.filter(i => i.subject === 'ly').length,
-    hoa: fullPool.filter(i => i.subject === 'hoa').length,
-    sinh: fullPool.filter(i => i.subject === 'sinh').length
+    toan: dedupePoolQuestions(fullPool.filter(i => i.subject === 'toan')).length,
+    ly: dedupePoolQuestions(fullPool.filter(i => i.subject === 'ly')).length,
+    hoa: dedupePoolQuestions(fullPool.filter(i => i.subject === 'hoa')).length,
+    sinh: dedupePoolQuestions(fullPool.filter(i => i.subject === 'sinh')).length
   };
 
-  // 6. Tra cứu danh sách mẫu người này đã chấm (để tính số lượng còn lại cho từng môn)
-  let reviewedSampleIds = [];
-  const reviewedCountsBySubject = { toan: 0, ly: 0, hoa: 0, sinh: 0 };
+  // 6. Tra cứu danh sách mẫu người này đã chấm (lọc bỏ isDemo và khử trùng lặp amendment theo sampleId)
+  const reviewedSetBySubject = {
+    toan: new Set(),
+    ly: new Set(),
+    hoa: new Set(),
+    sinh: new Set()
+  };
   const admin = getFirebaseAdmin();
   if (admin) {
     try {
@@ -115,17 +119,31 @@ export async function GET(request) {
         .get();
       existingSnap.docs.forEach(doc => {
         const d = doc.data();
-        if (d.subject && reviewedCountsBySubject[d.subject] !== undefined) {
-          reviewedCountsBySubject[d.subject]++;
-        }
-        if (d.subject === requestedSubject) {
-          reviewedSampleIds.push(d.sampleId);
+        if (d.isDemo) return;
+        const subj = (d.subject || '').toLowerCase();
+        if (subj && reviewedSetBySubject[subj] && d.sampleId) {
+          reviewedSetBySubject[subj].add(d.sampleId);
         }
       });
     } catch (err) {
       console.warn('[ReviewSamples] Không thể đọc tiến độ chấm cũ:', err.message);
     }
   }
+
+  const reviewedSampleIds = Array.from(reviewedSetBySubject[requestedSubject] || []);
+  const reviewedCountsBySubject = {
+    toan: reviewedSetBySubject.toan.size,
+    ly: reviewedSetBySubject.ly.size,
+    hoa: reviewedSetBySubject.hoa.size,
+    sinh: reviewedSetBySubject.sinh.size
+  };
+
+  // Đẩy toàn bộ câu chưa chấm lên đầu danh sách để giáo viên không chạm lại câu đã chấm
+  const currentReviewedSet = reviewedSetBySubject[requestedSubject] || new Set();
+  const orderedSamples = [
+    ...samplingResult.samples.filter(s => !currentReviewedSet.has(s.sampleId)),
+    ...samplingResult.samples.filter(s => currentReviewedSet.has(s.sampleId))
+  ];
 
   return NextResponse.json({
     success: true,
@@ -134,13 +152,13 @@ export async function GET(request) {
     subject: requestedSubject,
     authorizedSubjects: subjects,
     seed: samplingResult.seed,
-    sampleSize: samplingResult.sampleSize,
+    sampleSize: orderedSamples.length,
     totalAvailable: samplingResult.totalAvailable,
     subjectCounts,
     reviewedCountsBySubject,
     studentFlagsCount: samplingResult.studentFlagsCount || 0,
     reviewedCount: reviewedSampleIds.length,
     reviewedSampleIds,
-    samples: samplingResult.samples
+    samples: orderedSamples
   }, { headers: getCorsHeaders(request) });
 }

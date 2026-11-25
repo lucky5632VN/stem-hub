@@ -109,6 +109,7 @@ export default function TeacherReviewPortalPage() {
   const [samples, setSamples] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [reviewedSampleIds, setReviewedSampleIds] = useState([]);
+  const [showReviewedSamples, setShowReviewedSamples] = useState(false);
 
   // Form chấm điểm tinh gọn (2 Tiêu chí: Đáp án đúng/sai & Trình bày đúng chưa)
   const [dapAn, setDapAn] = useState('dung'); // 'dung' | 'sai'
@@ -116,6 +117,7 @@ export default function TeacherReviewPortalPage() {
   const [scores, setScores] = useState({ knowledge: 2, grounding: 2, pedagogy: 2, safety: 2 });
   const [primaryError, setPrimaryError] = useState('none');
   const [notes, setNotes] = useState('');
+  const [amendmentReason, setAmendmentReason] = useState('');
   const [showReference, setShowReference] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -210,10 +212,10 @@ export default function TeacherReviewPortalPage() {
       setSamples(data.samples || []);
       setReviewedSampleIds(data.reviewedSampleIds || []);
       
-      // Tự động nhảy tới câu hỏi đầu tiên chưa được chấm
+      // Đặt chỉ số về câu đầu tiên chưa được chấm
       const reviewedSet = new Set(data.reviewedSampleIds || []);
       const firstUnreviewedIdx = (data.samples || []).findIndex(s => !reviewedSet.has(s.sampleId));
-      setCurrentIndex(firstUnreviewedIdx >= 0 ? firstUnreviewedIdx : 0);
+      setCurrentIndex(showReviewedSamples && firstUnreviewedIdx >= 0 ? firstUnreviewedIdx : 0);
       resetForm();
     } catch (err) {
       setErrorMsg(err.message);
@@ -276,13 +278,19 @@ export default function TeacherReviewPortalPage() {
     setScores({ knowledge: 2, grounding: 2, pedagogy: 2, safety: 2 });
     setPrimaryError('none');
     setNotes('');
+    setAmendmentReason('');
     setIsSkipping(false);
     setSkipReason('');
     setShowReference(false);
   };
 
-  const currentSample = samples[currentIndex] || null;
-  const isCurrentReviewed = currentSample && reviewedSampleIds.includes(currentSample.sampleId);
+  const reviewedSampleSet = new Set(reviewedSampleIds);
+  const visibleSamples = showReviewedSamples
+    ? samples
+    : samples.filter(s => !reviewedSampleSet.has(s.sampleId));
+  const safeCurrentIndex = visibleSamples.length > 0 ? Math.min(currentIndex, visibleSamples.length - 1) : 0;
+  const currentSample = visibleSamples[safeCurrentIndex] || null;
+  const isCurrentReviewed = Boolean(currentSample && reviewedSampleSet.has(currentSample.sampleId));
   const isTeacherEditor = canEditReviews || reviewerType === 'teacher';
   const isReadOnlyJudge = reviewerType === 'judge' && !isTeacherEditor;
   const isReadOnlyViewer = !isTeacherEditor;
@@ -298,6 +306,13 @@ export default function TeacherReviewPortalPage() {
       return;
     }
     if (!currentSample) return;
+
+    const needsAmendment = Boolean(isCurrentReviewed);
+    if (needsAmendment && amendmentReason.trim().length < 5) {
+      setErrorMsg('Mẫu này đã được bạn chấm trước đó. Vui lòng nhập lý do sửa đổi (tối thiểu 5 ký tự) ở ô bên dưới.');
+      return;
+    }
+
     setSubmitting(true);
     setErrorMsg('');
     setSuccessMsg('');
@@ -309,9 +324,10 @@ export default function TeacherReviewPortalPage() {
       }
       const token = await currentUser.getIdToken();
 
+      const submittedSampleId = currentSample.sampleId;
       const isOverallPass = dapAn === 'dung' && trinhBay === 'dung';
       const bodyPayload = {
-        sampleId: currentSample.sampleId,
+        sampleId: submittedSampleId,
         subject: currentSample.subject,
         timeSpentSeconds: 30,
         skipped: isSkipping,
@@ -329,6 +345,8 @@ export default function TeacherReviewPortalPage() {
         },
         primaryError: isOverallPass ? 'none' : primaryError,
         notes,
+        isAmendment: needsAmendment,
+        amendmentReason: needsAmendment ? amendmentReason.trim() : '',
         isDemo: false
       };
 
@@ -347,21 +365,27 @@ export default function TeacherReviewPortalPage() {
       }
 
       playSound.success();
-      setSuccessMsg(`Đã ghi nhận phiếu thẩm định (${data.reviewerCode})!`);
-      setReviewedSampleIds(prev => [...prev, currentSample.sampleId]);
-      setReviewedCountsBySubject(prev => ({
-        ...prev,
-        [selectedSubject]: (prev[selectedSubject] || 0) + 1
-      }));
+      setSuccessMsg(needsAmendment ? `Đã ghi nhận bản sửa đổi (${data.reviewerCode})!` : `Đã ghi nhận phiếu thẩm định (${data.reviewerCode})!`);
 
-      // Tự động chuyển câu tiếp theo nếu chưa phải câu cuối
-      if (currentIndex < samples.length - 1) {
-        setTimeout(() => {
-          setCurrentIndex(prev => prev + 1);
-          resetForm();
-          setSuccessMsg('');
-        }, 1200);
-      }
+      setTimeout(() => {
+        if (!needsAmendment) {
+          setReviewedSampleIds(prev => (prev.includes(submittedSampleId) ? prev : [...prev, submittedSampleId]));
+          setReviewedCountsBySubject(prev => ({
+            ...prev,
+            [selectedSubject]: (prev[selectedSubject] || 0) + 1
+          }));
+        }
+        if (showReviewedSamples) {
+          setCurrentIndex(prev => Math.min(prev + 1, Math.max(0, visibleSamples.length - 1)));
+        } else {
+          setCurrentIndex(prev => {
+            const nextLen = Math.max(0, visibleSamples.length - (needsAmendment ? 0 : 1));
+            return nextLen > 0 ? Math.min(prev, nextLen - 1) : 0;
+          });
+        }
+        resetForm();
+        setSuccessMsg('');
+      }, 900);
     } catch (err) {
       playSound.error();
       setErrorMsg(err.message);
@@ -620,8 +644,43 @@ export default function TeacherReviewPortalPage() {
                 <HelpCircle className="w-10 h-10 mx-auto mb-3 text-slate-400 dark:text-slate-500" />
                 Không tìm thấy mẫu nào cho môn này hoặc bạn chưa được cấp quyền.
               </div>
+            ) : visibleSamples.length === 0 ? (
+              <div className="bg-white dark:bg-slate-900 border border-emerald-500/30 rounded-2xl p-12 text-center text-slate-700 dark:text-slate-300 space-y-4">
+                <CheckCircle2 className="w-12 h-12 mx-auto text-emerald-500" />
+                <div className="text-lg font-black text-slate-900 dark:text-white">
+                  Đã hoàn thành toàn bộ câu chưa chấm của môn này!
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+                  Bạn đã chấm xong {reviewedSampleIds.length}/{samples.length} câu thuộc môn hiện tại. Bạn có thể chọn môn khác ở phía trên hoặc mở xem lại các câu đã chấm.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => { setShowReviewedSamples(true); setCurrentIndex(0); resetForm(); }}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-bold"
+                >
+                  Xem lại {reviewedSampleIds.length} câu đã chấm
+                </button>
+              </div>
             ) : (
               <>
+                <div className="flex flex-wrap items-center justify-between gap-3 bg-white/80 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-xs">
+                  <div className="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-200">
+                    <span className="px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 font-mono">
+                      Câu {safeCurrentIndex + 1} / {visibleSamples.length}
+                    </span>
+                    <span className="text-slate-500 dark:text-slate-400 font-normal">
+                      ({showReviewedSamples ? `Đang hiện tất cả ${samples.length} câu` : `Đang ẩn ${reviewedSampleIds.length} câu đã chấm để tránh lặp`})
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setShowReviewedSamples(prev => !prev); setCurrentIndex(0); resetForm(); }}
+                    className="px-3 py-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200"
+                  >
+                    {showReviewedSamples ? 'Chỉ hiện câu chưa chấm' : `Xem lại ${reviewedSampleIds.length} câu đã chấm`}
+                  </button>
+                </div>
+
                 {isReadOnlyViewer && (
                   <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-400/60 dark:border-amber-500/40 rounded-2xl p-4 flex items-start gap-3 text-xs text-amber-950 dark:text-amber-200 shadow-sm">
                     <Eye className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
@@ -925,13 +984,29 @@ export default function TeacherReviewPortalPage() {
                     />
                   </div>
 
+                  {/* LÝ DO SỬA ĐỔI KHI CHẤM LẠI MẪU ĐÃ CHẤM (AMENDMENT) */}
+                  {isCurrentReviewed && !isReadOnlyViewer && (
+                    <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700/60 rounded-xl p-4 space-y-2">
+                      <label className="text-xs font-bold text-amber-900 dark:text-amber-300 block">
+                        Mẫu này đã được chấm trước đó — Nhập lý do sửa đổi (bắt buộc tối thiểu 5 ký tự):
+                      </label>
+                      <input
+                        type="text"
+                        value={amendmentReason}
+                        onChange={(e) => setAmendmentReason(e.target.value)}
+                        placeholder="Ví dụ: Bổ sung nhận xét chi tiết hoặc điều chỉnh đánh giá trình bày..."
+                        className="w-full bg-white dark:bg-slate-900 border border-amber-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+                  )}
+
                   {/* CÁC NÚT ĐIỀU KHIỂN & GỬI PHIẾU */}
                   <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        disabled={currentIndex === 0}
-                        onClick={() => { setCurrentIndex(prev => prev - 1); resetForm(); }}
+                        disabled={safeCurrentIndex === 0}
+                        onClick={() => { setCurrentIndex(Math.max(0, safeCurrentIndex - 1)); resetForm(); }}
                         className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-transparent disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold flex items-center gap-1.5"
                       >
                         <ArrowLeft className="w-3.5 h-3.5" />
@@ -940,8 +1015,8 @@ export default function TeacherReviewPortalPage() {
 
                       <button
                         type="button"
-                        disabled={currentIndex === samples.length - 1}
-                        onClick={() => { setCurrentIndex(prev => prev + 1); resetForm(); }}
+                        disabled={safeCurrentIndex >= visibleSamples.length - 1}
+                        onClick={() => { setCurrentIndex(Math.min(visibleSamples.length - 1, safeCurrentIndex + 1)); resetForm(); }}
                         className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-transparent disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold flex items-center gap-1.5"
                       >
                         Câu tiếp
@@ -1352,9 +1427,9 @@ export default function TeacherReviewPortalPage() {
                               Theo quy tắc thống kê, các tỷ lệ phần trăm (Accuracy, Precision, Recall, F1) và chỉ số Kappa bị ẩn trên cỡ mẫu nhỏ (n &lt; 30) nhằm tránh gây ngộ nhận về ý nghĩa thực nghiệm.
                             </p>
                             <div className="text-[11px] bg-amber-100/80 dark:bg-amber-900/40 p-2.5 rounded-lg border border-amber-300/60 dark:border-amber-700/60 font-mono text-amber-950 dark:text-amber-100">
-                              <strong>Đối chứng &quot;Luôn trả lời Đạt&quot; (All-Positive baseline):</strong> Acc = 50.0%, F1 lớp Đạt = 66.67%, Kappa = 0.0000.
+                              <strong>Đối chứng &quot;Luôn trả lời Đạt&quot; (All-Positive baseline):</strong> Acc = {activeMat.metrics?.baselineAccuracy ?? 0}%, F1 lớp Đạt = {activeMat.metrics?.baselineF1Positive ?? 0}%, Kappa = 0.0000.
                               <div className="text-[10px] text-amber-800 dark:text-amber-300 mt-0.5">
-                                Kết luận: Mô hình trên 2 mẫu này trùng khớp hoàn toàn với bộ đoán ngẫu nhiên/đa số, chưa thể hiện năng lực phân biệt.
+                                Kết luận: Cỡ mẫu nhỏ (n = {activeMat.totalSamples} &lt; 30) chưa đủ điều kiện suy diễn thống kê; cần thu thập thêm phiếu chấm độc lập.
                               </div>
                             </div>
                           </div>
