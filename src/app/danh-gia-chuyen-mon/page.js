@@ -1149,22 +1149,122 @@ export default function TeacherReviewPortalPage() {
               </div>
 
               {/* BẢNG ĐỘ ĐỒNG THUẬN COHEN'S KAPPA */}
-              <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800 space-y-3">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <Award className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
-                  Độ Đồng Thuận Đánh Giá Giáo Viên (Cohen's Kappa & % Agreement)
-                </h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400">
-                  Tính toán độc lập giữa các giáo viên khi có ≥ 2 thầy/cô cùng chuyên môn chấm trên cùng mẫu để đảm bảo độ tin cậy khoa học.
-                </p>
-
-                <div className="pt-2">
-                  <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
-                    <div className="text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-2">Đồng thuận giữa các Giáo viên:</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400 italic">
-                      Hiện tại chưa có đủ ≥ 2 giáo viên cùng chấm một môn để tính toán hệ số Cohen's Kappa.
-                    </div>
+              <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800 space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                      <Award className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                      Độ Đồng Thuận Đánh Giá Giáo Viên (Cohen's Kappa & % Agreement)
+                    </h3>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                      Đo lường mức độ đồng thuận độc lập giữa các thầy/cô cùng chuyên môn chấm chéo trên cùng mẫu (Inter-Rater Reliability).
+                    </p>
                   </div>
+                </div>
+
+                {/* Grid hiển thị 4 môn */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {[
+                    { key: 'toan', name: 'Toán học' },
+                    { key: 'ly', name: 'Vật lý' },
+                    { key: 'hoa', name: 'Hóa học' },
+                    { key: 'sinh', name: 'Sinh học' }
+                  ].map(({ key, name }) => {
+                    const agr = reportData?.agreements?.teacher?.[key];
+                    const numReviewers = agr?.knowledge?.numReviewers || 0;
+                    const commonCount = agr?.knowledge?.pairs?.[0]?.commonCount || 0;
+                    const criteriaKeys = ['knowledge', 'grounding', 'pedagogy', 'safety'];
+                    const validAgreements = criteriaKeys
+                      .map(c => agr?.[c]?.meanPercentAgreement)
+                      .filter(v => typeof v === 'number');
+                    const avgAgreement = validAgreements.length > 0
+                      ? Number((validAgreements.reduce((a, b) => a + b, 0) / validAgreements.length).toFixed(1))
+                      : null;
+                    const validKappas = criteriaKeys
+                      .map(c => agr?.[c]?.meanKappa)
+                      .filter(v => typeof v === 'number');
+                    const avgKappa = validKappas.length > 0
+                      ? Number((validKappas.reduce((a, b) => a + b, 0) / validKappas.length).toFixed(2))
+                      : null;
+
+                    const hasCrossGrading = numReviewers >= 2 && commonCount > 0;
+
+                    return (
+                      <div 
+                        key={key} 
+                        className={`p-4 rounded-xl border transition-all ${
+                          hasCrossGrading
+                            ? 'bg-slate-50 dark:bg-slate-950/70 border-slate-200 dark:border-slate-800'
+                            : 'bg-slate-50/50 dark:bg-slate-950/30 border-dashed border-slate-200 dark:border-slate-800/60'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-bold text-sm text-slate-800 dark:text-slate-200">{name}</span>
+                          {hasCrossGrading ? (
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 font-bold">
+                              ✓ {numReviewers} GV ({commonCount} mẫu trùng)
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-500">
+                              {numReviewers} GV ({commonCount} trùng)
+                            </span>
+                          )}
+                        </div>
+
+                        {hasCrossGrading ? (
+                          <div className="space-y-2 mt-3">
+                            <div className="flex items-baseline justify-between">
+                              <span className="text-xs text-slate-500 dark:text-slate-400">Đồng thuận TB:</span>
+                              <span className="text-base font-black text-emerald-600 dark:text-emerald-400">
+                                {avgAgreement}%
+                              </span>
+                            </div>
+                            <div className="flex items-baseline justify-between">
+                              <span className="text-xs text-slate-500 dark:text-slate-400">Cohen&apos;s Kappa (κ):</span>
+                              <span className="text-sm font-mono font-bold text-cyan-600 dark:text-cyan-400">
+                                {avgKappa !== null ? avgKappa : 'N/A'}
+                              </span>
+                            </div>
+                            
+                            {/* Phân rã theo 4 tiêu chí */}
+                            <div className="pt-2 border-t border-slate-200/80 dark:border-slate-800/80 grid grid-cols-2 gap-1.5 text-[10px]">
+                              <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                                <span>Đúng KT:</span>
+                                <span className="font-bold font-mono text-slate-900 dark:text-slate-200">{agr?.knowledge?.meanPercentAgreement ?? 0}%</span>
+                              </div>
+                              <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                                <span>Căn cứ SGK:</span>
+                                <span className="font-bold font-mono text-slate-900 dark:text-slate-200">{agr?.grounding?.meanPercentAgreement ?? 0}%</span>
+                              </div>
+                              <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                                <span>Sư phạm:</span>
+                                <span className="font-bold font-mono text-slate-900 dark:text-slate-200">{agr?.pedagogy?.meanPercentAgreement ?? 0}%</span>
+                              </div>
+                              <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                                <span>An toàn:</span>
+                                <span className="font-bold font-mono text-slate-900 dark:text-slate-200">{agr?.safety?.meanPercentAgreement ?? 0}%</span>
+                              </div>
+                            </div>
+
+                            <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium pt-1">
+                              {avgAgreement >= 95 ? '★ Đồng thuận hoàn hảo (Near-Perfect)' : (avgAgreement >= 80 ? '✓ Đồng thuận rất cao (Substantial)' : 'Đồng thuận mức độ khá')}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-xs text-slate-400 italic py-3 text-center">
+                            Chưa có đủ mẫu chấm chéo độc lập giữa các giáo viên để tính Kappa.
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Ghi chú chuẩn khoa học Landis & Koch */}
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 bg-slate-100/70 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                  <span>
+                    💡 <strong>Độ tin cậy liên thẩm định (Inter-Rater Reliability):</strong> Theo chuẩn phân loại Landis &amp; Koch (1977), tỷ lệ đồng thuận &ge; 85% và hệ số &kappa; &ge; 0.80 thể hiện mức độ nhất quán rất cao giữa các giáo viên độc lập, khẳng định phiếu chấm có giá trị khoa học vững chắc.
+                  </span>
                 </div>
               </div>
 
