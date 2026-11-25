@@ -50,6 +50,7 @@ export async function GET(request) {
   const uid = payload.user_id || payload.sub || payload.uid;
 
   // 2. Xác định vai trò thẩm định (reviewerType) và danh sách môn được cấp quyền CHỈ từ Custom Claims
+  const isJudge = payload.reviewerType === 'judge' || payload.isJudge === true;
   let reviewerType = payload.reviewerType || (payload.role === 'teacher' ? 'teacher' : (payload.role === 'team_self' ? 'team_self' : null));
   let subjects = Array.isArray(payload.subjects) ? payload.subjects : [];
 
@@ -60,6 +61,12 @@ export async function GET(request) {
   const isAdmin = payload.admin === true || payload.role === 'admin' || (uid && adminUids.includes(uid));
   if (isAdmin && !reviewerType) {
     reviewerType = 'team_self'; // Admin mặc định chạy thử ở cohort nhóm nội bộ
+    subjects = ['toan', 'ly', 'hoa', 'sinh'];
+  }
+
+  // Ban Giám Khảo (judge): Được phép xem toàn bộ 4 môn ở chế độ Read-Only để kiểm tra giao diện & quy trình
+  if (isJudge && !isAdmin) {
+    reviewerType = 'judge';
     subjects = ['toan', 'ly', 'hoa', 'sinh'];
   }
 

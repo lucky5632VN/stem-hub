@@ -13,6 +13,7 @@ import {
   ArrowLeft, 
   RefreshCw, 
   Lock, 
+  Eye,
   EyeOff, 
   Sparkles,
   BarChart3,
@@ -174,7 +175,8 @@ export default function TeacherReviewPortalPage() {
       }
 
       const isTeacher = data.reviewerType === 'teacher' || tokenResult.claims.role === 'teacher';
-      setReviewerType(isTeacher ? 'teacher' : (adminClaim ? 'admin' : (data.reviewerType || 'teacher')));
+      const isJudgeAccount = data.reviewerType === 'judge' || tokenResult.claims.isJudge === true || tokenResult.claims.reviewerType === 'judge';
+      setReviewerType(isTeacher ? 'teacher' : (adminClaim ? 'admin' : (isJudgeAccount ? 'judge' : (data.reviewerType || 'guest'))));
       setAuthorizedSubjects(data.authorizedSubjects || ['toan']);
       if (data.subjectCounts) {
         setSubjectCounts(data.subjectCounts);
@@ -252,9 +254,14 @@ export default function TeacherReviewPortalPage() {
 
   const currentSample = samples[currentIndex] || null;
   const isCurrentReviewed = currentSample && reviewedSampleIds.includes(currentSample.sampleId);
+  const isReadOnlyJudge = reviewerType === 'judge' && !isAdmin;
 
   // 4. Xử lý gửi phiếu chấm tinh gọn (Đáp án đúng/sai & Trình bày đúng chưa)
   const handleSubmitReview = async () => {
+    if (isReadOnlyJudge) {
+      setErrorMsg('Tài khoản Ban Giám Khảo chỉ có quyền xem giao diện và quy trình (Read-Only), không thể gửi hoặc sửa đánh giá.');
+      return;
+    }
     if (!currentSample) return;
     setSubmitting(true);
     setErrorMsg('');
@@ -373,6 +380,10 @@ export default function TeacherReviewPortalPage() {
 
   // 6. Lưu phiếu consent
   const handleSaveConsent = async () => {
+    if (isReadOnlyJudge) {
+      setErrorMsg('Tài khoản Ban Giám Khảo chỉ có quyền xem (Read-Only), không thể chỉnh sửa cam kết.');
+      return;
+    }
     setSavingConsent(true);
     try {
       const currentUser = auth.currentUser;
@@ -538,7 +549,7 @@ export default function TeacherReviewPortalPage() {
                   👉 Vui lòng bấm vào nút Đăng nhập ở góc trên bên phải màn hình.
                 </p>
               </div>
-            ) : reviewerType !== 'teacher' && !isAdmin ? (
+            ) : reviewerType !== 'teacher' && reviewerType !== 'judge' && !isAdmin ? (
               <div className="bg-white dark:bg-slate-900 border border-amber-500/30 rounded-3xl p-10 text-center text-slate-700 dark:text-slate-300 space-y-5 shadow-sm dark:shadow-xl max-w-xl mx-auto my-6">
                 <div className="w-16 h-16 bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-2xl flex items-center justify-center mx-auto">
                   <Lock className="w-8 h-8" />
@@ -572,6 +583,20 @@ export default function TeacherReviewPortalPage() {
               </div>
             ) : (
               <>
+                {isReadOnlyJudge && (
+                  <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-400/60 dark:border-amber-500/40 rounded-2xl p-4 flex items-start gap-3 text-xs text-amber-950 dark:text-amber-200 shadow-sm">
+                    <Eye className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <div className="font-extrabold uppercase tracking-wide text-amber-900 dark:text-amber-300">
+                        Chế Độ Ban Giám Khảo Chỉ Xem (Read-Only)
+                      </div>
+                      <p className="leading-relaxed">
+                        Quý Ban Giám Khảo có thể chuyển đổi các môn học, xem đầy đủ câu hỏi làm mù, câu trả lời AI, đáp án đối chiếu SGK và quy trình rubric đánh giá. Các nút chấm điểm và gửi phiếu được khóa để bảo toàn tính độc lập của dữ liệu thẩm định giáo viên.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {/* THẺ CÂU HỎI & CÂU TRẢ LỜI CỦA HỆ THỐNG */}
                 <div className="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-6 shadow-sm dark:shadow-xl">
                   {/* Metadata mẫu (Đã làm mù Model & RAG status) */}
@@ -710,12 +735,13 @@ export default function TeacherReviewPortalPage() {
                         <div className="grid grid-cols-2 gap-3 pt-1">
                           <button
                             type="button"
+                            disabled={isReadOnlyJudge}
                             onClick={() => setDapAn('dung')}
                             className={`p-3.5 rounded-xl border text-left transition-all ${
                               dapAn === 'dung'
                                 ? 'bg-emerald-50 border-2 border-emerald-600 text-emerald-950 shadow-sm dark:bg-emerald-500/20 dark:border-emerald-400 dark:text-emerald-200'
                                 : 'bg-white border-slate-200 text-slate-700 hover:border-slate-400 hover:bg-slate-100/60 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'
-                            }`}
+                            } ${isReadOnlyJudge ? 'opacity-75 cursor-not-allowed' : ''}`}
                           >
                             <div className="font-extrabold text-xs mb-1 flex items-center gap-1.5">
                               <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -728,12 +754,13 @@ export default function TeacherReviewPortalPage() {
 
                           <button
                             type="button"
+                            disabled={isReadOnlyJudge}
                             onClick={() => setDapAn('sai')}
                             className={`p-3.5 rounded-xl border text-left transition-all ${
                               dapAn === 'sai'
                                 ? 'bg-rose-50 border-2 border-rose-600 text-rose-950 shadow-sm dark:bg-rose-500/20 dark:border-rose-400 dark:text-rose-200'
                                 : 'bg-white border-slate-200 text-slate-700 hover:border-slate-400 hover:bg-slate-100/60 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'
-                            }`}
+                            } ${isReadOnlyJudge ? 'opacity-75 cursor-not-allowed' : ''}`}
                           >
                             <div className="font-extrabold text-xs mb-1 flex items-center gap-1.5">
                               <XCircle className="w-4 h-4 text-rose-600 dark:text-rose-400" />
@@ -760,12 +787,13 @@ export default function TeacherReviewPortalPage() {
                         <div className="grid grid-cols-2 gap-3 pt-1">
                           <button
                             type="button"
+                            disabled={isReadOnlyJudge}
                             onClick={() => setTrinhBay('dung')}
                             className={`p-3.5 rounded-xl border text-left transition-all ${
                               trinhBay === 'dung'
                                 ? 'bg-cyan-50 border-2 border-cyan-600 text-cyan-950 shadow-sm dark:bg-cyan-500/20 dark:border-cyan-400 dark:text-cyan-200'
                                 : 'bg-white border-slate-200 text-slate-700 hover:border-slate-400 hover:bg-slate-100/60 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'
-                            }`}
+                            } ${isReadOnlyJudge ? 'opacity-75 cursor-not-allowed' : ''}`}
                           >
                             <div className="font-extrabold text-xs mb-1 flex items-center gap-1.5">
                               <CheckCircle2 className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
@@ -778,12 +806,13 @@ export default function TeacherReviewPortalPage() {
 
                           <button
                             type="button"
+                            disabled={isReadOnlyJudge}
                             onClick={() => setTrinhBay('chua_dung')}
                             className={`p-3.5 rounded-xl border text-left transition-all ${
                               trinhBay === 'chua_dung'
                                 ? 'bg-amber-50 border-2 border-amber-600 text-amber-950 shadow-sm dark:bg-amber-500/20 dark:border-amber-400 dark:text-amber-200'
                                 : 'bg-white border-slate-200 text-slate-700 hover:border-slate-400 hover:bg-slate-100/60 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'
-                            }`}
+                            } ${isReadOnlyJudge ? 'opacity-75 cursor-not-allowed' : ''}`}
                           >
                             <div className="font-extrabold text-xs mb-1 flex items-center gap-1.5">
                               <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
@@ -822,9 +851,10 @@ export default function TeacherReviewPortalPage() {
                         Phân Loại Lỗi Chính (Nếu phát hiện khuyết điểm):
                       </label>
                       <select
+                        disabled={isReadOnlyJudge}
                         value={primaryError}
                         onChange={(e) => setPrimaryError(e.target.value)}
-                        className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl p-3 text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-cyan-500"
+                        className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl p-3 text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-cyan-500 disabled:opacity-60 disabled:cursor-not-allowed"
                       >
                         {ERROR_OPTIONS.map(opt => (
                           <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -839,11 +869,12 @@ export default function TeacherReviewPortalPage() {
                       Ghi Chú & Nhận Xét Sư Phạm (Tùy chọn):
                     </label>
                     <textarea
+                      disabled={isReadOnlyJudge}
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       rows={2}
-                      placeholder="Ghi chú thêm về từ ngữ, cấu trúc phản hồi hoặc lỗi ngộ nhận chi tiết..."
-                      className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl p-3 text-xs text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-cyan-500"
+                      placeholder={isReadOnlyJudge ? 'Chế độ chỉ xem: Ban Giám Khảo không nhập hoặc sửa nhận xét.' : 'Ghi chú thêm về từ ngữ, cấu trúc phản hồi hoặc lỗi ngộ nhận chi tiết...'}
+                      className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl p-3 text-xs text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 disabled:opacity-60 disabled:cursor-not-allowed"
                     />
                   </div>
 
@@ -874,26 +905,32 @@ export default function TeacherReviewPortalPage() {
                     <div className="flex items-center gap-3">
                       <button
                         type="button"
+                        disabled={isReadOnlyJudge}
                         onClick={() => setIsSkipping(!isSkipping)}
                         className={`px-3 py-2 rounded-xl text-xs font-bold border transition-colors ${
                           isSkipping 
                             ? 'bg-rose-100 border-rose-400 text-rose-800 dark:bg-rose-500/20 dark:border-rose-400 dark:text-rose-300' 
                             : 'bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200 dark:bg-slate-800/80 dark:border-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-                        }`}
+                        } disabled:opacity-40 disabled:cursor-not-allowed`}
                       >
                         {isSkipping ? 'Hủy Bỏ Qua' : 'Không Đủ Chuyên Môn Để Chấm'}
                       </button>
 
                       <button
                         type="button"
-                        disabled={submitting}
+                        disabled={submitting || isReadOnlyJudge}
                         onClick={handleSubmitReview}
-                        className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-black text-xs md:text-sm shadow-md shadow-cyan-500/20 disabled:opacity-50 flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-black text-xs md:text-sm shadow-md shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                       >
                         {submitting ? (
                           <>
                             <RefreshCw className="w-4 h-4 animate-spin" />
                             Đang lưu phiếu bất biến...
+                          </>
+                        ) : isReadOnlyJudge ? (
+                          <>
+                            <Lock className="w-4 h-4" />
+                            Chế Độ Chỉ Xem (BGK Không Chấm Điểm)
                           </>
                         ) : (
                           <>
@@ -1516,12 +1553,12 @@ export default function TeacherReviewPortalPage() {
 
               <button
                 type="button"
-                disabled={savingConsent}
+                disabled={savingConsent || isReadOnlyJudge}
                 onClick={handleSaveConsent}
-                className="px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white dark:bg-cyan-500 dark:hover:bg-cyan-400 dark:text-slate-950 font-bold text-xs flex items-center gap-2 shadow-sm transition-colors"
+                className="px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white dark:bg-cyan-500 dark:hover:bg-cyan-400 dark:text-slate-950 font-bold text-xs flex items-center gap-2 shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {savingConsent ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                Lưu Lựa Chọn Đồng Thuận
+                {savingConsent ? <RefreshCw className="w-4 h-4 animate-spin" /> : (isReadOnlyJudge ? <Lock className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />)}
+                {isReadOnlyJudge ? 'Chế Độ Chỉ Xem (BGK)' : 'Lưu Lựa Chọn Đồng Thuận'}
               </button>
             </div>
           </div>

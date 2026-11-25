@@ -121,11 +121,13 @@ export async function GET(request) {
     }
 
     let filtered = list;
-    if (onlyVerified) {
-      // Bắt buộc tri thức phải được giáo viên thẩm định thật, không bị cách ly và không phải dữ liệu DEMO
-      filtered = list.filter(item => (item.status === 'verified_by_teacher' || item.teacherVerified === true) && !item.quarantined && !item.isDemo);
-    } else if (!all) {
-      filtered = list.filter(item => (item.status === 'verified_by_teacher' || item.teacherVerified === true) && !item.quarantined && !item.isDemo);
+    const isRealVerifiedItem = item => {
+      const isNotAuto = !String(item.verifiedBy || '').includes('Auto-Verified') && !String(item.id || '').startsWith('bench_verified_');
+      return (item.status === 'verified_by_teacher' || item.teacherVerified === true) && !item.quarantined && !item.isDemo && isNotAuto;
+    };
+    if (onlyVerified || !all) {
+      // Bắt buộc tri thức phải được giáo viên thẩm định thật, không Auto-Verified/bench_verified_, không bị cách ly và không phải dữ liệu DEMO
+      filtered = list.filter(isRealVerifiedItem);
     }
 
     // 🛡️ PHÂN QUYỀN MÔN THEO CUSTOM CLAIMS (Trừ Admin, Giáo viên chỉ thấy câu hỏi môn được cấp quyền)

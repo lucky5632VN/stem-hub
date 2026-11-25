@@ -66,7 +66,15 @@ export async function POST(request) {
     return NextResponse.json({ error: tokenVerify.error }, { status: 401, headers: getCorsHeaders(request) });
   }
 
-  const uid = tokenVerify.decoded.user_id || tokenVerify.decoded.sub;
+  const payload = tokenVerify.decoded;
+  const uid = payload.user_id || payload.sub;
+  const isAdmin = payload.admin === true || payload.role === 'admin';
+  if ((payload.reviewerType === 'judge' || payload.isJudge === true) && !isAdmin) {
+    return NextResponse.json(
+      { error: 'Tài khoản Ban Giám Khảo chỉ có quyền xem (Read-Only), không thể lưu phiếu đồng ý.' },
+      { status: 403, headers: getCorsHeaders(request) }
+    );
+  }
   const body = await request.json().catch(() => ({}));
   const {
     publicNameConsent = false,

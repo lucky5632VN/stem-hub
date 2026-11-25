@@ -97,16 +97,18 @@ export async function ensureGlobalCorpusLoaded() {
       if (data.success && Array.isArray(data.learnedDocs) && data.learnedDocs.length > 0) {
         const local = getDynamicCorpus();
         const map = new Map();
-        // 🛡️ BẢO VỆ RAG: Lọc nghiêm ngặt chỉ lấy tri thức đã giáo viên duyệt thật, không bị cách ly, không phải demo
+        // 🛡️ BẢO VỆ RAG: Lọc nghiêm ngặt chỉ lấy tri thức đã giáo viên duyệt thật, không bị cách ly, không phải demo, không Auto-Verified
         data.learnedDocs.forEach(item => {
+          const isNotAuto = !String(item.verifiedBy || '').includes('Auto-Verified') && !String(item.id || '').startsWith('bench_verified_');
           const isVerified = (item.status === 'verified_by_teacher' || item.teacherVerified === true || item.isTeacherVerified === true) && !item.quarantined && !item.isDemo;
-          if (isVerified) {
+          if (isVerified && isNotAuto) {
             map.set(item.id, item);
           }
         });
         local.forEach(item => {
+          const isNotAuto = !String(item.verifiedBy || '').includes('Auto-Verified') && !String(item.id || '').startsWith('bench_verified_');
           const isVerified = (item.status === 'verified_by_teacher' || item.teacherVerified === true || item.isTeacherVerified === true) && !item.quarantined && !item.isDemo;
-          if (isVerified) {
+          if (isVerified && isNotAuto) {
             map.set(item.id, item);
           }
         });
@@ -126,9 +128,10 @@ export function getDynamicCorpus() {
       const parsed = raw ? JSON.parse(raw) : [];
       // Tự động thanh lọc mọi item chưa được giáo viên duyệt, bị cách ly, là dữ liệu DEMO hoặc dính thông tin cá nhân
       dynamicCorpusCache = (Array.isArray(parsed) ? parsed : []).filter(item => {
+        const isNotAuto = !String(item.verifiedBy || '').includes('Auto-Verified') && !String(item.id || '').startsWith('bench_verified_');
         const isVerified = (item.status === 'verified_by_teacher' || item.teacherVerified === true || item.isTeacherVerified === true) && !item.quarantined && !item.isDemo;
         const full = ((item.query || '') + ' ' + (item.answer || '')).toLowerCase();
-        return isVerified && !containsPersonalOrSystemInfo(full) && !isGreetingOrChitchat(item.query);
+        return isVerified && isNotAuto && !containsPersonalOrSystemInfo(full) && !isGreetingOrChitchat(item.query);
       });
       // Kích hoạt đồng bộ nền từ API server để luôn có dữ liệu mới nhất
       ensureGlobalCorpusLoaded().catch(() => {});
@@ -140,9 +143,10 @@ export function getDynamicCorpus() {
     try {
       const raw = Array.isArray(globalLearnedData) ? globalLearnedData : [];
       dynamicCorpusCache = raw.filter(item => {
+        const isNotAuto = !String(item.verifiedBy || '').includes('Auto-Verified') && !String(item.id || '').startsWith('bench_verified_');
         const isVerified = (item.status === 'verified_by_teacher' || item.teacherVerified === true || item.isTeacherVerified === true) && !item.quarantined && !item.isDemo;
         const full = ((item.query || '') + ' ' + (item.answer || '')).toLowerCase();
-        return isVerified && !containsPersonalOrSystemInfo(full) && !isGreetingOrChitchat(item.query);
+        return isVerified && isNotAuto && !containsPersonalOrSystemInfo(full) && !isGreetingOrChitchat(item.query);
       });
     } catch (_) {
       dynamicCorpusCache = [];
@@ -156,11 +160,12 @@ export function getDynamicCorpus() {
  * Giúp TOÀN BỘ học sinh và máy tính trong hệ thống dùng chung 1 ngân hàng tri thức thời gian thực
  */
 export async function syncGlobalLearnedKnowledge(directDocs = null) {
+  const isCleanVerified = (item) => {
+    const isNotAuto = !String(item.verifiedBy || '').includes('Auto-Verified') && !String(item.id || '').startsWith('bench_verified_');
+    return (item.status === 'verified_by_teacher' || item.teacherVerified === true) && !item.quarantined && !item.isDemo && isNotAuto;
+  };
   if (Array.isArray(directDocs)) {
-    const verifiedDocs = directDocs.filter(item => {
-      const isVerified = (item.status === 'verified_by_teacher' || item.teacherVerified === true) && !item.quarantined && !item.isDemo;
-      return isVerified;
-    }).map(d => ({
+    const verifiedDocs = directDocs.filter(isCleanVerified).map(d => ({
       ...d,
       normalizedQuery: d.normalizedQuery || normalizeQuery(d.query),
       isLearned: true
@@ -172,45 +177,46 @@ export async function syncGlobalLearnedKnowledge(directDocs = null) {
   try {
     let firestoreDocs = [];
 
-    // 1. Ưu tiên tải từ Firebase Firestore Database
-    if (db) {
-      try {
-        const q = query(collection(db, 'learned_knowledge'), orderBy('createdAt', 'desc'), limit(500));
-        const snapshot = await getDocs(q);
-        snapshot.forEach((docSnap) => {
-          const data = docSnap.data();
-          if (data && data.query && data.answer) {
-            // 🛡️ CHỈ LẤY CÁC MỤC ĐÃ ĐƯỢC GIÁO VIÊN PHÊ DUYỆT THẬT, KHÔNG BỊ CÁCH LY, KHÔNG PHẢI DEMO
-            const isVerified = (data.status === 'verified_by_teacher' || data.teacherVerified === true) && !data.quarantined && !data.isDemo;
-            if (isVerified) {
-              const full = (data.query + ' ' + data.answer).toLowerCase();
-              if (!containsPersonalOrSystemInfo(full) && !isGreetingOrChitchat(data.query)) {
-                firestoreDocs.push({
-                  id: docSnap.id,
-                  ...data,
-                  normalizedQuery: data.normalizedQuery || normalizeQuery(data.query)
-                });
-              }
-            }
-          }
-        });
-      } catch (fErr) {
-        console.warn('[RAG FIRESTORE] Không thể tải từ Firestore, dùng API fallback:', fErr.message);
-      }
-    }
-
-    // 2. Dự phòng qua Server API nếu Firestore rỗng (API đã tự filter onlyVerified mặc định)
-    if (firestoreDocs.length === 0) {
+    // 1. Ưu tiên tải qua Server API (Admin SDK đọc an toàn theo quy tắc kiểm duyệt, không gây lỗi Permission cho client)
+    try {
       const res = await fetch(`/api/learned-knowledge?onlyVerified=true&t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
         if (data.success && Array.isArray(data.learnedDocs)) {
           firestoreDocs = data.learnedDocs.filter(item => {
-            const isVerified = (item.status === 'verified_by_teacher' || item.teacherVerified === true) && !item.quarantined && !item.isDemo;
             const full = ((item.query || '') + ' ' + (item.answer || '')).toLowerCase();
-            return isVerified && !containsPersonalOrSystemInfo(full) && !isGreetingOrChitchat(item.query);
+            return isCleanVerified(item) && !containsPersonalOrSystemInfo(full) && !isGreetingOrChitchat(item.query);
           });
         }
+      }
+    } catch (_) {}
+
+    // 2. Dự phòng tải trực tiếp từ Firebase Firestore Database với điều kiện lọc khớp firestore.rules
+    if (firestoreDocs.length === 0 && db) {
+      try {
+        const { where } = await import('firebase/firestore');
+        const q = query(
+          collection(db, 'learned_knowledge'),
+          where('status', '==', 'verified_by_teacher'),
+          where('teacherVerified', '==', true),
+          limit(500)
+        );
+        const snapshot = await getDocs(q);
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          if (data && data.query && data.answer && isCleanVerified({ id: docSnap.id, ...data })) {
+            const full = (data.query + ' ' + data.answer).toLowerCase();
+            if (!containsPersonalOrSystemInfo(full) && !isGreetingOrChitchat(data.query)) {
+              firestoreDocs.push({
+                id: docSnap.id,
+                ...data,
+                normalizedQuery: data.normalizedQuery || normalizeQuery(data.query)
+              });
+            }
+          }
+        });
+      } catch (fErr) {
+        console.warn('[RAG FIRESTORE] Không thể tải từ Firestore, dùng dữ liệu tĩnh dự phòng:', fErr.message);
       }
     }
 

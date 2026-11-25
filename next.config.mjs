@@ -17,6 +17,24 @@ const nextConfig = {
   poweredByHeader: false, // 🛡️ OWASP: Tắt X-Powered-By chống nhận diện máy chủ (Server Fingerprinting)
   turbopack: {}, // Cấu hình turbopack rỗng cho Next.js 16
   compress: true, // ⚡ Nén Gzip/Brotli tối đa băng thông và tăng tốc FCP
+  outputFileTracingIncludes: {
+    '/api/reviews/**/*': [
+      'src/ai-training/datasets/benchmark_150_cases.json',
+      'src/ai-training/datasets/rag_ablation_benchmark.json',
+      'src/ai-training/datasets/official_exam_questions_for_review.json',
+      'src/data/global-learned-knowledge.json',
+      'reports/ablation/ablation_dataset_100.json',
+      'reports/ablation/ablation_dataset_100.v1.4.2.json',
+      'reports/ablation/call_cache.json',
+      'reports/ablation/expert_reviews_local.json',
+    ],
+    '/api/learned-knowledge': [
+      'src/data/global-learned-knowledge.json',
+      'src/data/knowledge_audit_log.json',
+      'public/data/global-learned-knowledge.json',
+      'public/data/knowledge_audit_log.json',
+    ],
+  },
   env: {
     // 🛡️ Nguồn cấu hình duy nhất: Mặc định tắt (true) ở production, chỉ bật khi đặt rõ ràng 'false'
     NEXT_PUBLIC_DISABLE_AI_REASONING_LOG: String(

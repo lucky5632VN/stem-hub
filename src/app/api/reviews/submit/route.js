@@ -65,6 +65,12 @@ export async function POST(request) {
   const isAdmin = payload.admin === true || payload.role === 'admin' || (uid && adminUids.includes(uid));
 
   // QUY TẮC CỐT LÕI: Chỉ giáo viên (teacher) hoặc Admin mới được gửi đánh giá chuyên môn
+  if (reviewerType === 'judge' && !isAdmin) {
+    return NextResponse.json(
+      { error: 'Tài khoản Ban Giám Khảo chỉ có quyền xem giao diện và quy trình (Read-Only), không thể gửi hoặc sửa phiếu đánh giá.' },
+      { status: 403, headers: getCorsHeaders(request) }
+    );
+  }
   if (reviewerType !== 'teacher' && !isAdmin) {
     return NextResponse.json(
       { error: 'Chỉ tài khoản đã được cấp vai trò Giáo viên thẩm định (role: teacher) mới có quyền gửi phiếu đánh giá chuyên môn.' },
