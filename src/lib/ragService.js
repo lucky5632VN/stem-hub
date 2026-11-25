@@ -97,18 +97,20 @@ export async function ensureGlobalCorpusLoaded() {
       if (data.success && Array.isArray(data.learnedDocs) && data.learnedDocs.length > 0) {
         const local = getDynamicCorpus();
         const map = new Map();
-        // 🛡️ BẢO VỆ RAG: Lọc nghiêm ngặt chỉ lấy tri thức đã giáo viên duyệt thật, không bị cách ly, không phải demo, không Auto-Verified
+        // 🛡️ BẢO VỆ RAG: Lấy tri thức đã giáo viên duyệt hoặc được học sinh đánh giá hay, không bị cách ly, không phải demo, không Auto-Verified
         data.learnedDocs.forEach(item => {
           const isNotAuto = !String(item.verifiedBy || '').includes('Auto-Verified') && !String(item.id || '').startsWith('bench_verified_');
-          const isVerified = (item.status === 'verified_by_teacher' || item.teacherVerified === true || item.isTeacherVerified === true) && !item.quarantined && !item.isDemo;
-          if (isVerified && isNotAuto) {
+          const isVerified = (item.status === 'verified_by_teacher' || item.teacherVerified === true || item.isTeacherVerified === true);
+          const isStudentLiked = (item.studentLiked === true || item.status === 'student_upvoted' || item.sourceType === 'student_upvoted');
+          if ((isVerified || isStudentLiked) && !item.quarantined && !item.isDemo && isNotAuto) {
             map.set(item.id, item);
           }
         });
         local.forEach(item => {
           const isNotAuto = !String(item.verifiedBy || '').includes('Auto-Verified') && !String(item.id || '').startsWith('bench_verified_');
-          const isVerified = (item.status === 'verified_by_teacher' || item.teacherVerified === true || item.isTeacherVerified === true) && !item.quarantined && !item.isDemo;
-          if (isVerified && isNotAuto) {
+          const isVerified = (item.status === 'verified_by_teacher' || item.teacherVerified === true || item.isTeacherVerified === true);
+          const isStudentLiked = (item.studentLiked === true || item.status === 'student_upvoted' || item.sourceType === 'student_upvoted');
+          if ((isVerified || isStudentLiked) && !item.quarantined && !item.isDemo && isNotAuto) {
             map.set(item.id, item);
           }
         });
@@ -126,12 +128,14 @@ export function getDynamicCorpus() {
     try {
       const raw = localStorage.getItem(DYNAMIC_KNOWLEDGE_KEY);
       const parsed = raw ? JSON.parse(raw) : [];
-      // Tự động thanh lọc mọi item chưa được giáo viên duyệt, bị cách ly, là dữ liệu DEMO hoặc dính thông tin cá nhân
+      // Tự động thanh lọc: lấy tri thức đã được giáo viên duyệt hoặc học sinh khen hay, không bị cách ly, không phải DEMO
       dynamicCorpusCache = (Array.isArray(parsed) ? parsed : []).filter(item => {
         const isNotAuto = !String(item.verifiedBy || '').includes('Auto-Verified') && !String(item.id || '').startsWith('bench_verified_');
-        const isVerified = (item.status === 'verified_by_teacher' || item.teacherVerified === true || item.isTeacherVerified === true) && !item.quarantined && !item.isDemo;
+        const isVerified = (item.status === 'verified_by_teacher' || item.teacherVerified === true || item.isTeacherVerified === true);
+        const isStudentLiked = (item.studentLiked === true || item.status === 'student_upvoted' || item.sourceType === 'student_upvoted');
+        const isEligible = (isVerified || isStudentLiked) && !item.quarantined && !item.isDemo;
         const full = ((item.query || '') + ' ' + (item.answer || '')).toLowerCase();
-        return isVerified && isNotAuto && !containsPersonalOrSystemInfo(full) && !isGreetingOrChitchat(item.query);
+        return isEligible && isNotAuto && !containsPersonalOrSystemInfo(full) && !isGreetingOrChitchat(item.query);
       });
       // Kích hoạt đồng bộ nền từ API server để luôn có dữ liệu mới nhất
       ensureGlobalCorpusLoaded().catch(() => {});
@@ -139,14 +143,16 @@ export function getDynamicCorpus() {
       dynamicCorpusCache = [];
     }
   } else {
-    // Môi trường Server / Node runtime: Đọc trực tiếp từ tệp tri thức toàn cục đã import (chỉ lấy mục đã duyệt, không cách ly, không demo, loại bỏ thông tin cá nhân/chitchat)
+    // Môi trường Server / Node runtime: Đọc trực tiếp từ tệp tri thức toàn cục đã import (lấy mục đã duyệt hoặc học sinh khen hay, không cách ly, không demo)
     try {
       const raw = Array.isArray(globalLearnedData) ? globalLearnedData : [];
       dynamicCorpusCache = raw.filter(item => {
         const isNotAuto = !String(item.verifiedBy || '').includes('Auto-Verified') && !String(item.id || '').startsWith('bench_verified_');
-        const isVerified = (item.status === 'verified_by_teacher' || item.teacherVerified === true || item.isTeacherVerified === true) && !item.quarantined && !item.isDemo;
+        const isVerified = (item.status === 'verified_by_teacher' || item.teacherVerified === true || item.isTeacherVerified === true);
+        const isStudentLiked = (item.studentLiked === true || item.status === 'student_upvoted' || item.sourceType === 'student_upvoted');
+        const isEligible = (isVerified || isStudentLiked) && !item.quarantined && !item.isDemo;
         const full = ((item.query || '') + ' ' + (item.answer || '')).toLowerCase();
-        return isVerified && isNotAuto && !containsPersonalOrSystemInfo(full) && !isGreetingOrChitchat(item.query);
+        return isEligible && isNotAuto && !containsPersonalOrSystemInfo(full) && !isGreetingOrChitchat(item.query);
       });
     } catch (_) {
       dynamicCorpusCache = [];
@@ -356,7 +362,7 @@ export function sanitizeAnswerForStorage(answerText) {
  * Ghi nhận & Lưu trực tiếp câu trả lời mới từ AI lên FIREBASE FIRESTORE (Collection: learned_knowledge)
  * CHỈ LƯU KIẾN THỨC HỌC THUẬT CHUẨN - TUYỆT ĐỐI KHÔNG LƯU THÔNG TIN CÁ NHÂN HOẶC CÂU CHÀO HỎI
  */
-export async function saveLearnedAnswerToRAG(query, answer, subject = 'stem', topic = 'Tri thức tự học AI toàn hệ thống') {
+export async function saveLearnedAnswerToRAG(query, answer, subject = 'stem', topic = 'Tri thức tự học AI toàn hệ thống', options = {}) {
   if (!query || !answer || typeof window === 'undefined') return null;
   const cleanQ = query.trim();
 
@@ -409,6 +415,7 @@ export async function saveLearnedAnswerToRAG(query, answer, subject = 'stem', to
   const contentTokens = tokenize(`${cleanQ} ${cleanA}`);
   const contentTFIDF = buildQueryTFIDFVector(contentTokens);
 
+  const isStudentUpvoted = Boolean(options.studentLiked || options.sourceType === 'student_upvoted');
   const docId = `learned_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
   const newItem = {
     id: docId,
@@ -416,13 +423,15 @@ export async function saveLearnedAnswerToRAG(query, answer, subject = 'stem', to
     normalizedQuery: normQ,
     answer: cleanA,
     subject: normSubject,
-    topic: topic || 'Tri thức tự học AI toàn hệ thống',
-    content: `[Chờ giáo viên duyệt] ${cleanQ}: ${cleanA}`,
+    topic: topic || (isStudentUpvoted ? 'Câu trả lời hay được học sinh bình chọn' : 'Tri thức tự học AI toàn hệ thống'),
+    content: isStudentUpvoted ? `[Học sinh đánh giá Hay] ${cleanQ}: ${cleanA}` : `[Chờ giáo viên duyệt] ${cleanQ}: ${cleanA}`,
     queryTFIDF: queryTFIDF,
     tfidfVector: contentTFIDF,
     isLearned: true,
-    // 🛡️ BẢO VỆ RAG: Tri thức mới nạp mặc định pending, không vào RAG khi chưa được giáo viên duyệt
-    status: 'pending_review',
+    studentLiked: isStudentUpvoted,
+    studentUpvotes: isStudentUpvoted ? 1 : 0,
+    // 🛡️ BẢO VỆ RAG: Tri thức học sinh bình chọn có thể được AI học và suy luận, tri thức gửi giáo viên đợi duyệt
+    status: isStudentUpvoted ? 'student_upvoted' : 'pending_review',
     teacherVerified: false,
     quarantined: false,
     verifiedAt: null,
@@ -758,7 +767,8 @@ export function checkRAGCacheHit(query, minScoreThreshold = 0.55) {
   }
 
   if (bestMatch && maxScore >= minScoreThreshold) {
-    const isVerified = Boolean((bestMatch.isTeacherVerified || bestMatch.teacherVerified) && bestMatch.status === 'verified_by_teacher' && !bestMatch.quarantined && !bestMatch.isDemo);
+    const isVerified = Boolean((bestMatch.isTeacherVerified || bestMatch.teacherVerified || bestMatch.status === 'verified_by_teacher') && !bestMatch.quarantined && !bestMatch.isDemo);
+    const isStudentLiked = Boolean(bestMatch.studentLiked || bestMatch.status === 'student_upvoted' || bestMatch.sourceType === 'student_upvoted');
     return {
       hit: true,
       score: Math.min(1.0, maxScore),
@@ -769,12 +779,14 @@ export function checkRAGCacheHit(query, minScoreThreshold = 0.55) {
       isLearned: Boolean(bestMatch.isLearned),
       isTeacherVerified: isVerified,
       teacherVerified: isVerified,
+      isStudentLiked,
+      studentLiked: isStudentLiked,
       verifiedBy: bestMatch.verifiedBy || (isVerified ? 'Giáo viên THPT' : null),
       verifiedAt: bestMatch.verifiedAt || null,
       reviewId: bestMatch.reviewId || null,
       rubricScore: bestMatch.rubricScore || null,
       expertReviewUrl: null,
-      sourceType: bestMatch.isLearned ? 'learned_knowledge' : (bestMatch.sourceType || 'team_summary')
+      sourceType: isVerified ? 'teacher_verified_stem' : (isStudentLiked ? 'student_upvoted' : (bestMatch.isLearned ? 'learned_knowledge' : (bestMatch.sourceType || 'team_summary')))
     };
   }
 
@@ -800,9 +812,13 @@ export function retrieveTopK(query, k = 3, options = {}) {
     fullCorpus = corpus;
   } else {
     const dynamicDocs = getDynamicCorpus();
-    // 🛡️ Chỉ nạp vào ngữ cảnh RAG các tri thức tự học đã được giáo viên phê duyệt thật, không bị cách ly, không phải demo
-    const verifiedDynamic = dynamicDocs.filter(doc => (doc.status === 'verified_by_teacher' || doc.teacherVerified === true) && !doc.quarantined && !doc.isDemo);
-    fullCorpus = [...verifiedDynamic, ...corpus];
+    // 🛡️ Nạp vào ngữ cảnh RAG các tri thức tự học đã được giáo viên phê duyệt hoặc học sinh khen hay
+    const validDynamic = dynamicDocs.filter(doc => {
+      const isVerified = (doc.status === 'verified_by_teacher' || doc.teacherVerified === true || doc.isTeacherVerified === true);
+      const isStudentLiked = (doc.studentLiked === true || doc.status === 'student_upvoted' || doc.sourceType === 'student_upvoted');
+      return (isVerified || isStudentLiked) && !doc.quarantined && !doc.isDemo;
+    });
+    fullCorpus = [...validDynamic, ...corpus];
   }
 
   // 🛡️ CHẾ ĐỘ ABLATION GUARD: Nếu chỉ định allowedChunkIds, lọc nghiêm ngặt và chặn mọi chunk ngoài danh sách
@@ -859,13 +875,14 @@ export function retrieveTopK(query, k = 3, options = {}) {
 
     const finalScore = Math.min(1.0, hybridScore);
 
-    const isVerified = Boolean((doc.isTeacherVerified || doc.teacherVerified) && doc.status === 'verified_by_teacher' && !doc.quarantined && !doc.isDemo);
+    const isVerified = Boolean((doc.isTeacherVerified || doc.teacherVerified || doc.status === 'verified_by_teacher') && !doc.quarantined && !doc.isDemo);
+    const isStudentLiked = Boolean(doc.studentLiked || doc.status === 'student_upvoted' || doc.sourceType === 'student_upvoted');
     return {
       id: doc.id,
       sampleId: doc.sampleId,
       subject: doc.subject,
       topic: doc.topic,
-      sourceType: doc.isLearned ? 'learned_knowledge' : (doc.sourceType || 'team_summary'),
+      sourceType: isVerified ? 'teacher_verified_stem' : (isStudentLiked ? 'student_upvoted' : (doc.isLearned ? 'learned_knowledge' : (doc.sourceType || 'team_summary'))),
       content: doc.content || doc.answer,
       score: finalScore,
       rawTFIDF: rawCos,
@@ -874,6 +891,8 @@ export function retrieveTopK(query, k = 3, options = {}) {
       isLearned: Boolean(doc.isLearned),
       isTeacherVerified: isVerified,
       teacherVerified: isVerified,
+      isStudentLiked,
+      studentLiked: isStudentLiked,
       verifiedBy: doc.verifiedBy || (isVerified ? 'Giáo viên THPT' : null),
       verifiedAt: doc.verifiedAt || null,
       reviewId: doc.reviewId || null,

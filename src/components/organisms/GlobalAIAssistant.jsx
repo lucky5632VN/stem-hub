@@ -418,7 +418,7 @@ function GroundingEvidenceBox({ evidence, isDark = true }) {
   if (typeof evidence.score === 'number' && evidence.score < 0.30) return null;
   if (!evidence.snippet && !evidence.fullContent && !evidence.topic && !evidence.chunkId) return null;
 
-  const { chunkId, topic, sourceType, isTeacherVerified, verifiedTeacherCount, verifiedTeachers, snippet, sgkReference } = evidence;
+  const { chunkId, topic, sourceType, isTeacherVerified, isStudentLiked, verifiedTeacherCount, verifiedTeachers, snippet, sgkReference } = evidence;
 
   const isLearned = chunkId?.startsWith('learned_') || sourceType === 'teacher_verified_stem' || sourceType === 'student_query';
 
@@ -448,9 +448,15 @@ function GroundingEvidenceBox({ evidence, isDark = true }) {
 
   if (!citationText) {
     if (isLearned) {
-      citationText = topic && topic !== 'Tri thức tự học AI từ tương tác học sinh'
-        ? `Tri thức bổ trợ của học sinh (đã qua giáo viên duyệt) — ${topic}`
-        : 'Tri thức bổ trợ của học sinh (đã qua giáo viên duyệt)';
+      if (isTeacherVerified) {
+        citationText = topic && topic !== 'Tri thức tự học AI từ tương tác học sinh'
+          ? `Tri thức bổ trợ học sinh — Đã có GV kiểm định (${topic})`
+          : 'Tri thức bổ trợ học sinh — Đã có GV kiểm định';
+      } else if (isStudentLiked) {
+        citationText = 'Tri thức tự học AI — Câu trả lời hay do học sinh bình chọn';
+      } else {
+        citationText = 'Tri thức bổ trợ học sinh (đang chờ duyệt)';
+      }
     } else {
       citationText = topic || 'Sách giáo khoa Chương trình GDPT 2018';
     }
@@ -458,7 +464,6 @@ function GroundingEvidenceBox({ evidence, isDark = true }) {
 
   // Mác / Huy hiệu kiểm duyệt rõ ràng
   const teacherCount = verifiedTeacherCount || (Array.isArray(verifiedTeachers) ? verifiedTeachers.length : 1);
-  const showTeacherBadge = isTeacherVerified || isLearned;
 
   return (
     <div className={`mt-2.5 pt-2 border-t rounded-xl p-2.5 text-xs transition-all ${
@@ -474,10 +479,15 @@ function GroundingEvidenceBox({ evidence, isDark = true }) {
           <span>{isLearned ? 'Nguồn học liệu tham chiếu:' : 'Nguồn trích dẫn SGK:'}</span>
         </strong>
 
-        {showTeacherBadge ? (
-          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+        {isTeacherVerified ? (
+          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full shadow-xs">
             <span>🛡️</span>
-            <span>{teacherCount >= 2 ? `Đã được giáo viên xem xét (${teacherCount} giáo viên)` : 'Đã được giáo viên kiểm duyệt'}</span>
+            <span>{teacherCount >= 2 ? `Đã có GV kiểm định (${teacherCount} GV)` : 'Đã có GV kiểm định'}</span>
+          </span>
+        ) : isStudentLiked ? (
+          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-full shadow-xs">
+            <span>👍</span>
+            <span>Câu trả lời hay do học sinh bình chọn</span>
           </span>
         ) : (
           <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 rounded-full">
@@ -769,6 +779,74 @@ export default function GlobalAIAssistant() {
     }
   };
 
+  // 🧑‍🏫 Lưu câu trả lời hay được học sinh bình chọn vào dữ liệu học của AI
+  const handleStudentLike = async (botMsg, msgIndex) => {
+    recordFeedback(true);
+
+    let userQuestion = botMsg.query || '';
+    if (!userQuestion) {
+      for (let i = msgIndex - 1; i >= 0; i--) {
+        if (messages[i]?.sender === 'user' && messages[i]?.text) {
+          userQuestion = messages[i].text;
+          break;
+        }
+      }
+    }
+
+    const cleanQuery = userQuestion.trim();
+    const cleanAnswer = botMsg.text?.trim() || '';
+    if (!cleanQuery || !cleanAnswer || cleanQuery.length < 3 || cleanAnswer.length < 10) return;
+
+    setMessages(prev => prev.map(m => m.id === botMsg.id ? { ...m, liked: true } : m));
+    setFlagSuccessToast('✓ Đã lưu câu trả lời hay vào bộ dữ liệu học máy của AI!');
+    setTimeout(() => setFlagSuccessToast(null), 3500);
+
+    const detectedSubj = botMsg.groundingEvidence?.subject || detectQuerySubject(cleanQuery) || 'toan';
+    const normSubj = detectedSubj === 'general' || detectedSubj === 'stem' ? 'toan' : detectedSubj;
+
+    // Lưu ngay vào RAG Cache cục bộ
+    try {
+      await saveLearnedAnswerToRAG(
+        cleanQuery,
+        cleanAnswer,
+        normSubj,
+        'Câu trả lời hay được học sinh bình chọn',
+        { studentLiked: true, sourceType: 'student_upvoted' }
+      );
+    } catch (_) {}
+
+    // Gửi lên Server API để lưu vào dữ liệu tri thức học máy toàn cục
+    try {
+      let token = null;
+      try {
+        if (auth?.currentUser) {
+          token = await auth.currentUser.getIdToken();
+        }
+      } catch (_) {}
+
+      await fetch('/api/learned-knowledge', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          query: cleanQuery,
+          answer: cleanAnswer,
+          subject: normSubj,
+          topic: 'Câu trả lời hay được học sinh bình chọn',
+          sourceType: 'student_upvoted',
+          studentLiked: true,
+          status: 'student_upvoted',
+          teacherVerified: false,
+          quarantined: false
+        })
+      });
+    } catch (err) {
+      console.warn('Lỗi ghi nhận like vào tri thức AI:', err);
+    }
+  };
+
   const handleOpenTeacherFlagModal = (botMsg, msgIndex) => {
     let userQuestion = botMsg.query || '';
     if (!userQuestion) {
@@ -835,7 +913,7 @@ export default function GlobalAIAssistant() {
           flaggedSubject: subject
         } : m));
 
-        setFlagSuccessToast(`Đã chuyển câu hỏi & lời giải đến Giáo viên môn ${getSubjectDisplayName(subject)}! Thầy/Cô sẽ kiểm tra và hiệu đính sớm.`);
+        setFlagSuccessToast(`Đã gửi GV kiểm tra môn ${getSubjectDisplayName(subject)} thành công! Thầy/Cô sẽ kiểm tra và hiệu đính sớm.`);
         setTimeout(() => setFlagSuccessToast(null), 5000);
       } else {
         const errData = await res.json().catch(() => ({}));
@@ -2216,9 +2294,10 @@ ${conciseInstruction}
       citedChunkIds: topChunk ? [topChunk.id] : []
     });
 
-    const verifiedTeacherCount = Number(topChunk?.verifiedTeacherCount || (Array.isArray(topChunk?.verifiedTeachers) ? topChunk.verifiedTeachers.length : 0));
-    // 🛡️ Chỉ kích hoạt huy hiệu khi có ít nhất 2 giáo viên khác nhau đồng ý (reviewerType === 'teacher', team_self không bao giờ kích hoạt)
-    const isTeacherVerified = topChunk ? Boolean(topChunk.isTeacherVerified && verifiedTeacherCount >= 2 && topChunk.reviewerType !== 'team_self') : false;
+    const verifiedTeacherCount = Number(topChunk?.verifiedTeacherCount || (Array.isArray(topChunk?.verifiedTeachers) ? topChunk.verifiedTeachers.length : (topChunk?.isTeacherVerified || topChunk?.teacherVerified ? 1 : 0)));
+    // 🛡️ Kích hoạt huy hiệu khi tri thức đã được giáo viên thẩm định duyệt
+    const isTeacherVerified = topChunk ? Boolean((topChunk.isTeacherVerified || topChunk.teacherVerified || topChunk.status === 'verified_by_teacher') && topChunk.reviewerType !== 'team_self' && !topChunk.quarantined && !topChunk.isDemo) : false;
+    const isStudentLiked = topChunk ? Boolean(topChunk.isStudentLiked || topChunk.studentLiked || topChunk.sourceType === 'student_upvoted') : false;
     const isRefusalResponse = Boolean(isOutOfScopeRefusal || isNonStemQuery);
     const groundingEvidence = {
       status: isRefusalResponse ? 'ungrounded' : groundingStatus,
@@ -2232,6 +2311,7 @@ ${conciseInstruction}
       isRefusal: isRefusalResponse,
       isOutOfScope: Boolean(isNonStemQuery),
       isTeacherVerified,
+      isStudentLiked,
       verifiedTeacherCount,
       verifiedTeachers: topChunk?.verifiedTeachers || [],
       verifiedBy: topChunk?.verifiedBy || (isTeacherVerified ? `${verifiedTeacherCount} Giáo viên THPT` : null),
@@ -2339,8 +2419,8 @@ ${conciseInstruction}
                     🧑‍🏫
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold">Lưu Để Giáo Viên Xem Xét Sau (Chưa Có GV Nhận)</h3>
-                    <p className="text-[10px] text-zinc-400">Ghi nhận câu hỏi băn khoăn vào danh sách chờ duyệt</p>
+                    <h3 className="text-sm font-bold">Gửi GV kiểm tra</h3>
+                    <p className="text-[10px] text-zinc-400">Gửi câu hỏi và lời giải để Thầy/Cô bộ môn kiểm tra & hiệu đính</p>
                   </div>
                 </div>
                 <button
@@ -2427,7 +2507,7 @@ ${conciseInstruction}
                   disabled={isSubmittingFlag}
                   className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-black font-bold text-xs transition-all shadow-lg shadow-amber-500/20 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
-                  {isSubmittingFlag ? 'Đang gửi...' : '📤 Gửi cho Thầy/Cô'}
+                  {isSubmittingFlag ? 'Đang gửi...' : '📤 Gửi GV kiểm tra'}
                 </button>
               </div>
             </div>
@@ -2741,6 +2821,12 @@ ${conciseInstruction}
                       }`}>
                         {isBot ? (
                           <>
+                            {m.groundingEvidence?.isTeacherVerified && (
+                              <div className="mb-2 flex items-center gap-1.5 text-[10px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/35 px-2.5 py-1 rounded-xl w-fit shadow-xs">
+                                <span>🛡️</span>
+                                <span>Đã có GV kiểm định</span>
+                              </div>
+                            )}
                             <FormattedAIMessage
                               text={m.text}
                               onNavigate={(url) => handleSmartNavigation(url)}
@@ -2767,14 +2853,20 @@ ${conciseInstruction}
                             {/* Feedback Adaptive Loop Controls & Nút Gửi Giáo Viên Kiểm Tra */}
                             <div className="flex flex-wrap items-center justify-between gap-2 mt-2 pt-1.5 border-t border-cyan-500/15 text-[10px]">
                               <div className="flex items-center gap-3">
-                                <button
-                                  type="button"
-                                  onClick={() => recordFeedback(true)}
-                                  className="text-emerald-400 hover:text-emerald-300 font-medium flex items-center gap-1 cursor-pointer transition-colors"
-                                  title="Câu trả lời hữu ích"
-                                >
-                                  👍 Hay
-                                </button>
+                                {m.liked ? (
+                                  <span className="text-emerald-400 font-semibold flex items-center gap-1 text-[10px]">
+                                    👍 Đã lưu vào tri thức học của AI
+                                  </span>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleStudentLike(m, index)}
+                                    className="text-emerald-400 hover:text-emerald-300 font-medium flex items-center gap-1 cursor-pointer transition-colors"
+                                    title="Bình chọn câu trả lời hay & lưu vào dữ liệu học máy của AI"
+                                  >
+                                    👍 Hay
+                                  </button>
+                                )}
                                 <button
                                   type="button"
                                   onClick={() => recordFeedback(false)}
@@ -2785,20 +2877,20 @@ ${conciseInstruction}
                                 </button>
                               </div>
 
-                              {/* 🧑‍🏫 Nút gửi cho giáo viên kiểm tra khi học sinh băn khoăn / thấy sai */}
+                              {/* 🧑‍🏫 Nút gửi cho giáo viên kiểm tra */}
                               {m.flaggedForTeacher ? (
                                 <span className="inline-flex items-center gap-1 text-[9px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-                                  ✓ Đã lưu để GV xem xét sau (môn {getSubjectDisplayName(m.flaggedSubject)})
+                                  ✓ Đã gửi GV kiểm tra (môn {getSubjectDisplayName(m.flaggedSubject)})
                                 </span>
                               ) : (
                                 <button
                                   type="button"
                                   onClick={() => handleOpenTeacherFlagModal(m, index)}
                                   className="inline-flex items-center gap-1 text-[10px] font-medium text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 px-2.5 py-0.5 rounded-full transition-all cursor-pointer shadow-2xs"
-                                  title="Lưu câu hỏi và câu trả lời vào danh sách chờ để giáo viên xem xét sau (hiện tại chưa có giáo viên nhận trực tuyến)."
+                                  title="Gửi câu hỏi và lời giải để Giáo viên kiểm tra."
                                 >
                                   <span>🧑‍🏫</span>
-                                  <span>Lưu để giáo viên xem xét sau (chưa có giáo viên nhận)</span>
+                                  <span>Gửi GV kiểm tra</span>
                                 </button>
                               )}
                             </div>

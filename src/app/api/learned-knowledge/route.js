@@ -120,10 +120,14 @@ export async function GET(request) {
       // Bỏ qua cảnh báo quyền khi chạy môi trường local fallback
     }
 
+    const includeStudentLiked = url.searchParams.get('includeStudentLiked') === 'true' || url.searchParams.get('forRag') === 'true';
+
     let filtered = list;
     const isRealVerifiedItem = item => {
       const isNotAuto = !String(item.verifiedBy || '').includes('Auto-Verified') && !String(item.id || '').startsWith('bench_verified_');
-      return (item.status === 'verified_by_teacher' || item.teacherVerified === true) && !item.quarantined && !item.isDemo && isNotAuto;
+      const isVerified = (item.status === 'verified_by_teacher' || item.teacherVerified === true);
+      const isStudentLiked = includeStudentLiked && (item.studentLiked === true || item.status === 'student_upvoted' || item.sourceType === 'student_upvoted');
+      return (isVerified || isStudentLiked) && !item.quarantined && !item.isDemo && isNotAuto;
     };
     if (onlyVerified || !all) {
       // Bắt buộc tri thức phải được giáo viên thẩm định thật, không Auto-Verified/bench_verified_, không bị cách ly và không phải dữ liệu DEMO
@@ -218,7 +222,7 @@ export async function POST(request) {
       }
     }
 
-    const isStudentFlag = body?.sourceType === 'student_flagged_for_teacher';
+    const isStudentFlag = body?.sourceType === 'student_flagged_for_teacher' || body?.sourceType === 'student_upvoted';
 
     if (!authenticatedUid && !isStudentFlag) {
       return NextResponse.json(
@@ -256,7 +260,8 @@ export async function POST(request) {
     const cleanNormQ = normalizedQuery || cleanQuery.toLowerCase();
     const cleanId = id || `learned_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
 
-    // 🛡️ BẢO VỆ RAG (Quy tắc trung thực): Tri thức mới nạp mặc định pending, không vào RAG khi chưa qua giáo viên duyệt
+    // 🛡️ BẢO VỆ RAG (Quy tắc trung thực): Tri thức mới nạp mặc định pending hoặc student_upvoted khi học sinh khen hay
+    const isStudentUpvoted = body.sourceType === 'student_upvoted';
     const isDemoRecord = Boolean(body.isDemo || false);
     const newItem = {
       id: cleanId,
@@ -271,11 +276,15 @@ export async function POST(request) {
       studentName: body.studentName || (userPayload?.name || (userPayload?.email ? userPayload.email.split('@')[0] : 'Học sinh')),
       studentEmail: userPayload?.email || null,
       isDemo: isDemoRecord,
-      content: `[Chờ giáo viên duyệt] ${cleanQuery}: ${cleanAnswer}`,
+      studentLiked: isStudentUpvoted || Boolean(body.studentLiked),
+      studentUpvotes: isStudentUpvoted ? 1 : 0,
+      content: isStudentUpvoted
+        ? `[Học sinh đánh giá Hay] ${cleanQuery}: ${cleanAnswer}`
+        : `[Chờ giáo viên duyệt] ${cleanQuery}: ${cleanAnswer}`,
       queryTFIDF: queryTFIDF || {},
       tfidfVector: tfidfVector || {},
       isLearned: true,
-      status: 'pending_review',
+      status: isStudentUpvoted ? 'student_upvoted' : 'pending_review',
       teacherVerified: false,
       quarantined: false,
       verifiedAt: null,
@@ -286,12 +295,15 @@ export async function POST(request) {
     };
 
     const list = readGlobalKnowledge();
-    const existingIdx = isStudentFlag
-      ? -1 // Học sinh gửi câu hỏi băn khoăn tạo một phiếu thẩm định mới độc lập, không đè lên tri thức chuẩn hiện có
-      : list.findIndex(item => item.id === cleanId || item.normalizedQuery === cleanNormQ);
+    const existingIdx = list.findIndex(item => item.id === cleanId || item.normalizedQuery === cleanNormQ);
 
     if (existingIdx >= 0) {
-      list[existingIdx] = newItem;
+      if (isStudentUpvoted) {
+        list[existingIdx].studentLiked = true;
+        list[existingIdx].studentUpvotes = (list[existingIdx].studentUpvotes || 0) + 1;
+      } else {
+        list[existingIdx] = newItem;
+      }
     } else {
       list.unshift(newItem);
     }

@@ -655,12 +655,17 @@ export default function KnowledgeReviewAdminPage() {
                     {isVerified ? (
                       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 text-xs font-mono font-bold">
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        Đã Phê Duyệt (Active Cache Hit)
+                        Đã có GV kiểm định
                       </span>
                     ) : isRejected ? (
                       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-400/50 text-rose-300 text-xs font-mono font-bold">
                         <XCircle className="w-3.5 h-3.5" />
                         Đã Từ Chối
+                      </span>
+                    ) : item.studentLiked ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/50 text-blue-300 text-xs font-mono font-bold">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        Học sinh khen Hay (Dữ liệu học máy AI)
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-300 text-xs font-mono font-bold animate-pulse">
