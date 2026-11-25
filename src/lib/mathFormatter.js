@@ -61,12 +61,14 @@ const renderKaTeXSafe = (latex, displayMode = false) => {
 
     clean = protectKaTeXVietnamese(clean);
 
-    return katex.renderToString(clean, {
+    const rendered = katex.renderToString(clean, {
       displayMode,
       throwOnError: false,
       strict: 'ignore',
       output: 'html'
     });
+    // KaTeX outputs SVGs with newlines inside path coordinates and tags, which break downstream line-by-line renderers (e.g. chat HUD)
+    return (rendered || '').replace(/\r?\n/g, ' ');
   } catch (e) {
     return latex;
   } finally {
@@ -381,7 +383,7 @@ export const formatMathText = (text) => {
     if (!latex || !latex.trim()) return '';
     const html = renderKaTeXSafe(latex.trim(), displayMode);
     const idx = katexPlaceholders.length;
-    katexPlaceholders.push(html);
+    katexPlaceholders.push(html.replace(/\r?\n/g, ' '));
     return `⟦MATH:${idx}⟧`;
   };
 
@@ -611,6 +613,10 @@ export function toNaturalVietnameseMathText(text) {
   // 8. Dấu nhân, chấm
   s = s.replace(/\\times\b/g, '×');
   s = s.replace(/\\cdot\b/g, '·');
+
+  // 8.1 Ký hiệu vectơ: \vec{n}, \overrightarrow{AB} -> vectơ n, vectơ AB
+  s = s.replace(/(?:vectơ\s*)?\\(?:vec|overrightarrow)\{([A-Za-z0-9_']+)\}/gi, 'vectơ $1');
+  s = s.replace(/(?:vectơ\s*)?\\(?:vec|overrightarrow)\s+([A-Za-z0-9_'])/gi, 'vectơ $1');
 
   // 9. Dấu phẩy A^\prime -> A'
   s = s.replace(/([A-Za-z])\s*\^\s*\{?\\prime\}?/g, "$1'");

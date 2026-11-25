@@ -1,5 +1,14 @@
 [
   {
+    "timestamp": "2026-11-25T08:01:52.734Z",
+    "action": "student_submit_knowledge",
+    "itemId": "learned_1795593711388_8umz",
+    "subject": "stem",
+    "querySnippet": "Trong không gian Oxyz, cho mặt phẳng (P):2x+3y+z+2=0. Khi đó, (P) có một vectơ p",
+    "operator": "7jmOy8lyr1hsmrflTMvdoXOJmew1",
+    "status": "pending_review"
+  },
+  {
     "timestamp": "2026-11-24T07:30:57.706Z",
     "action": "student_submit_knowledge",
     "itemId": "learned_1795505455863_j5xn",

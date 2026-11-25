@@ -41,9 +41,21 @@ const EXCLUSION_PATTERNS = [
   /(^|[/\\])reports[/\\]ablation[/\\]raw([/\\]|$)/i,
   /(^|[/\\])reports[/\\]ablation[/\\]pilot([/\\]|$)/i,
   /(^|[/\\])reports[/\\]ablation[/\\]secret_mapping([/\\]|$)/i,
-  /(^|[/\\])reports[/\\]ablation[/\\]evidence[/\\]official_pages([/\\]|$)/i,
-  /(^|[/\\])reports[/\\]ablation[/\\]evidence[/\\]google_form_.*\.csv$/i,
-  /(^|[/\\])reports[/\\]ablation[/\\]evidence[/\\].*\.csv$/i,
+  /(^|[/\\])reports[/\\]ablation[/\\]archive([/\\]|$)/i,
+  /(^|[/\\])reports[/\\]ablation[/\\]archive_.*([/\\]|$)/i,
+  /(^|[/\\])archive_.*([/\\]|$)/i,
+  /(^|[/\\])reports[/\\]backup([/\\]|$)/i,
+  /(^|[/\\])backup([/\\]|$)/i,
+  /(^|[/\\])evidence([/\\]|$)/i,
+  /(^|[/\\])reports[/\\]ablation[/\\]evidence([/\\]|$)/i,
+  /(^|[/\\]).*crop_.*\.png$/i,
+  /(^|[/\\]).*crop_.*\.jpg$/i,
+  /(^|[/\\]).*grade_all_150_benchmark_cases\.mjs$/i,
+  /(^|[/\\]).*seed_.*\.mjs$/i,
+  /(^|[/\\]).*bench_verified.*\.json$/i,
+  /(^|[/\\]).*call_cache.*\.json$/i,
+  /(^|[/\\])reports[/\\]ablation[/\\]call_cache\.json$/i,
+  /(^|[/\\])reports[/\\]ablation[/\\]checkpoint\.json$/i,
   /(^|[/\\]).*\.EXAMPLE\.csv$/i,
   /(^|[/\\])docs[/\\]mau-csv-google-form.*\.csv$/i
 ];
@@ -235,7 +247,7 @@ async function main() {
   console.log('🏁 KẾT QUẢ THỬ NGHIỆM ĐÓNG GÓI: SẴN SÀNG');
   console.log('========================================================================');
   console.log('🛑 LƯU Ý: Chưa tạo gói nộp chính thức submission_final.zip.');
-  console.log('Chỉ khi bạn xác nhận hài lòng 100%, gói nộp chính thức mới được xuất.');
+  console.log('Chỉ khi bạn xác nhận hoàn toàn đồng ý, gói nộp chính thức mới được xuất.');
 }
 
 main().catch(err => {

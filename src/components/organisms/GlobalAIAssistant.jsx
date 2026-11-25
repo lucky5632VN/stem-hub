@@ -82,7 +82,7 @@ function FormattedAIMessage({ text, onNavigate, onTriggerExpandedAI, isDark = tr
         );
       }
 
-      const containsHTML = vPart.includes('<span') || vPart.includes('<sub') || vPart.includes('<sup') || vPart.includes('<img');
+      const containsHTML = /<[a-z/][^>]*>/i.test(vPart) || vPart.includes('<span') || vPart.includes('<sub') || vPart.includes('<sup') || vPart.includes('<img') || vPart.includes('<svg') || vPart.includes('<path');
       if (containsHTML) {
         return (
           <span

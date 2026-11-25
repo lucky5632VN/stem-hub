@@ -1,12 +1,9 @@
 /**
- * 🛡️ Kịch bản Dry-run: Cách ly phiếu đánh giá kịch bản và gỡ Claims giáo viên
- * Tuân thủ Quy tắc trung thực: Mặc định DRY-RUN, chỉ đọc dữ liệu, KHÔNG ghi hoặc sửa Firestore khi chưa có cờ --execute
- * 
- * Cách chạy dry-run (an toàn):
- *   node scripts/dryrun_remediate_reviews_and_claims.cjs
- * 
- * Cách chạy thực thi (chỉ khi có lệnh trực tiếp):
- *   node scripts/dryrun_remediate_reviews_and_claims.cjs --execute
+ * 🛡️ Kịch bản Kiểm toán, Cách ly Phiếu Đánh giá rev_150_* và Gỡ Claims Giáo viên
+ * Tuân thủ Quy tắc trung thực Prompt 0:
+ * - Mặc định DRY-RUN (CHỈ ĐỌC), TUYỆT ĐỐI KHÔNG GHI FIRESTORE NẾU THIẾU CỜ --execute.
+ * - Luôn tự động xuất bản sao lưu đầy đủ ra reports/backup/expert_reviews_<thời_điểm>.json trước khi có bất kỳ thao tác ghi nào.
+ * - Hỗ trợ cờ --rollback=<path> để hoàn tác trạng thái từ file sao lưu.
  */
 
 const fs = require('fs');
@@ -52,40 +49,124 @@ function maskUid(uid) {
 }
 
 async function run() {
-  const isExecute = process.argv.includes('--execute');
+  const args = process.argv.slice(2);
+  const isExecute = args.includes('--execute');
+  const rollbackArg = args.find(a => a.startsWith('--rollback'));
 
   console.log('========================================================================');
-  console.log(`🛡️ KIỂM TOÁN VÀ ĐỀ XUẤT CÁCH LY PHIẾU ĐÁNH GIÁ & CLAIMS GIÁO VIÊN`);
-  console.log(`Chế độ: ${isExecute ? '⚠️ THỰC THI THẬT (--execute)' : '🔍 DRY-RUN (CHỈ ĐỌC - KHÔNG GHI VÀO FIRESTORE)'}`);
+  console.log(`🛡️ KIỂM TOÁN VÀ CÁCH LY PHIẾU ĐÁNH GIÁ (expert_reviews) & CLAIMS GIÁO VIÊN`);
+  console.log(`Chế độ: ${isExecute ? '⚠️ THỰC THI THẬT (--execute)' : (rollbackArg ? '🔄 HOÀN TÁC (--rollback)' : '🔍 DRY-RUN (CHỈ ĐỌC - KHÔNG GHI)')}`);
   console.log('========================================================================\n');
 
-  // PHẦN A: KIỂM TOÁN BỘ PHIẾU rev_150_*
-  console.log('--- PHẦN A: KIỂM TOÁN 150 PHIẾU ĐÁNH GIÁ SCRIPT TẠO (rev_150_*) ---');
+  const targetUid = 'sZmjOcLHQlcLfKEtpQmGxJfAbHI3';
+
+  // 1. XỬ LÝ HOÀN TÁC ROLLBACK
+  if (rollbackArg) {
+    let backupFilePath = rollbackArg.includes('=') ? rollbackArg.split('=')[1].trim().replace(/^['"]|['"]$/g, '') : null;
+    if (!backupFilePath) {
+      console.error('❌ Vui lòng chỉ định file sao lưu: --rollback="reports/backup/expert_reviews_xxx.json"');
+      process.exit(1);
+    }
+    const fullPath = path.resolve(backupFilePath);
+    if (!fs.existsSync(fullPath)) {
+      console.error(`❌ Không tìm thấy file sao lưu tại: ${fullPath}`);
+      process.exit(1);
+    }
+    const backupData = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
+    console.log(`🔄 Bắt đầu hoàn tác cho ${backupData.reviews?.length || 0} phiếu từ: ${path.basename(fullPath)}...`);
+
+    const reviews = backupData.reviews || [];
+    const batchSize = 100;
+    let restored = 0;
+    for (let i = 0; i < reviews.length; i += batchSize) {
+      const chunk = reviews.slice(i, i + batchSize);
+      const batch = db.batch();
+      for (const item of chunk) {
+        const ref = db.collection('expert_reviews').doc(item.id);
+        batch.set(ref, item.data, { merge: true });
+      }
+      await batch.commit();
+      restored += chunk.length;
+      console.log(`  Đã khôi phục ${restored}/${reviews.length} phiếu...`);
+    }
+
+    // Khôi phục Claims người dùng nếu có trong backup
+    if (backupData.targetUserClaims) {
+      console.log(`🔄 Đang khôi phục Custom Claims cho tài khoản ${maskUid(targetUid)}...`);
+      await auth.setCustomUserClaims(targetUid, backupData.targetUserClaims);
+      if (backupData.targetUserDoc) {
+        await db.collection('users').doc(targetUid).set(backupData.targetUserDoc, { merge: true });
+      }
+      console.log(`✅ Đã khôi phục Claims cho tài khoản ${maskUid(targetUid)}.`);
+    }
+
+    console.log(`✅ Đã hoàn tất khôi phục trạng thái từ bản sao lưu.`);
+    return;
+  }
+
+  // 2. ĐỌC DỮ LIỆU TỪ FIRESTORE
   const reviewsSnap = await db.collection('expert_reviews').get();
+  console.log(`Tổng số tài liệu trong expert_reviews: ${reviewsSnap.size}`);
+
+  const allReviewsBackup = [];
   const scriptDocs = [];
+  const otherDocs = [];
+
   reviewsSnap.forEach(docSnap => {
-    if (docSnap.id.startsWith('rev_150_')) {
-      scriptDocs.push({
-        id: docSnap.id,
-        ref: docSnap.ref,
-        data: docSnap.data()
-      });
+    const id = docSnap.id;
+    const data = docSnap.data();
+    const createTime = docSnap.createTime ? docSnap.createTime.toDate().toISOString() : 'N/A';
+    allReviewsBackup.push({ id, data, createTime });
+
+    if (id.startsWith('rev_150_')) {
+      scriptDocs.push({ id, ref: docSnap.ref, data, createTime });
+    } else {
+      otherDocs.push({ id, ref: docSnap.ref, data, createTime });
     }
   });
 
-  console.log(`Tổng số phiếu rev_150_* phát hiện trong Firestore: ${scriptDocs.length}`);
-  const currentDemoCount = scriptDocs.filter(d => d.data.isDemo === true).length;
-  const currentTeacherTypeCount = scriptDocs.filter(d => d.data.reviewerType === 'teacher').length;
-  console.log(`- Số phiếu hiện có isDemo === true: ${currentDemoCount}`);
-  console.log(`- Số phiếu hiện có reviewerType === 'teacher': ${currentTeacherTypeCount}`);
+  console.log(`- Phiếu kịch bản rev_150_*: ${scriptDocs.length} phiếu`);
+  console.log(`- Phiếu nguồn khác:         ${otherDocs.length} phiếu`);
 
-  console.log('\nKế hoạch xử lý (Dry-run proposal):');
-  console.log(`- Đặt isDemo: true cho ${scriptDocs.length} phiếu`);
-  console.log(`- Đặt reviewerType: 'demo' cho ${scriptDocs.length} phiếu`);
-  console.log(`- Giữ nguyên createdAt, scores, notes phục vụ nghiên cứu kịch bản, không tính vào giáo viên thật`);
+  // Lấy trạng thái tài khoản mục tiêu
+  let userRecord = null;
+  let currentClaims = {};
+  let targetUserDoc = null;
+  try {
+    userRecord = await auth.getUser(targetUid);
+    currentClaims = userRecord.customClaims || {};
+    const uDoc = await db.collection('users').doc(targetUid).get();
+    if (uDoc.exists) targetUserDoc = uDoc.data();
+  } catch (err) {
+    console.warn(`⚠️ Không thể đọc tài khoản ${maskUid(targetUid)}:`, err.message);
+  }
+
+  // 3. XUẤT BẢN SAO LƯU AN TOÀN TRƯỚC KHI GHI
+  const backupDir = path.resolve('reports/backup');
+  if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
+  const timestampStr = new Date().toISOString().replace(/[:.]/g, '-');
+  const backupFilePath = path.join(backupDir, `expert_reviews_${timestampStr}.json`);
+  const fullBackupPayload = {
+    exportedAt: new Date().toISOString(),
+    totalReviews: allReviewsBackup.length,
+    rev150Count: scriptDocs.length,
+    otherCount: otherDocs.length,
+    targetUid: targetUid,
+    targetUserClaims: currentClaims,
+    targetUserDoc: targetUserDoc,
+    reviews: allReviewsBackup
+  };
+  fs.writeFileSync(backupFilePath, JSON.stringify(fullBackupPayload, null, 2), 'utf8');
+  console.log(`\n💾 [SAO LƯU AN TOÀN]: Đã xuất toàn bộ ${allReviewsBackup.length} phiếu và Claims sang file:`);
+  console.log(`   ${backupFilePath} (Đã thêm vào .gitignore, loại bỏ khỏi gói nộp)\n`);
+
+  console.log('--- KẾ HOẠCH XỬ LÝ CÁCH LY PHIẾU rev_150_* ---');
+  console.log(`- Đặt isDemo: true cho ${scriptDocs.length} phiếu rev_150_*`);
+  console.log(`- Đặt reviewerType: 'demo' cho ${scriptDocs.length} phiếu rev_150_*`);
+  console.log(`- Gỡ claims teacher khỏi tài khoản ${maskUid(targetUid)}, đặt role: 'student', reviewerType: null, isTeacher: false`);
 
   if (isExecute) {
-    console.log('\n⏳ Đang thực thi ghi dữ liệu lên Firestore...');
+    console.log('\n⏳ Đang thực thi cập nhật cách ly trên Firestore...');
     const batchSize = 100;
     let updated = 0;
     for (let i = 0; i < scriptDocs.length; i += batchSize) {
@@ -95,70 +176,55 @@ async function run() {
         batch.update(d.ref, {
           isDemo: true,
           reviewerType: 'demo',
-          quarantineReason: 'Script-generated benchmark review; isolated from real teacher consensus'
+          quarantined: true,
+          quarantineReason: 'Kịch bản thẩm định đối đầu kỹ thuật; cách ly khỏi dữ liệu đồng thuận giáo viên thật',
+          updatedAt: new Date().toISOString()
         });
       }
       await batch.commit();
       updated += chunk.length;
-      console.log(`  Đã cập nhật ${updated}/${scriptDocs.length} phiếu.`);
+      console.log(`  Đã cách ly ${updated}/${scriptDocs.length} phiếu trên Firestore...`);
     }
-    console.log('✅ Hoàn tất cập nhật 150 phiếu về diện demo!');
+
+    // Gỡ claims
+    console.log(`⏳ Đang gỡ quyền teacher khỏi tài khoản ${maskUid(targetUid)}...`);
+    const safeClaims = {
+      ...currentClaims,
+      role: 'student',
+      reviewerType: null,
+      isTeacher: false,
+      subjects: []
+    };
+    await auth.setCustomUserClaims(targetUid, safeClaims);
+    await db.collection('users').doc(targetUid).set({
+      role: 'student',
+      reviewerType: null,
+      isTeacher: false,
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+
+    // Ghi admin_logs
+    await db.collection('admin_logs').add({
+      action: 'QUARANTINE_REVIEWS_AND_REVOKE_CLAIMS_EXECUTED',
+      rev150Quarantined: scriptDocs.length,
+      targetUid: targetUid,
+      backupFile: path.basename(backupFilePath),
+      performedBy: 'dryrun_remediate_reviews_and_claims_script',
+      executedAt: new Date().toISOString()
+    });
+
+    console.log(`\n✅ HOÀN TẤT THỰC THI CÁCH LY 150 PHIẾU VÀ GỠ CLAIMS TRÊN FIRESTORE & AUTH!`);
   } else {
-    console.log('ℹ️ [DRY-RUN] Chưa áp dụng thay đổi nào trên Firestore. Thêm --execute để thực thi khi có lệnh.');
+    console.log('\nℹ️ [CHẾ ĐỘ DRY-RUN]:');
+    console.log('- Đã tạo bản sao lưu an toàn tại thư mục reports/backup/');
+    console.log('- CHƯA THỰC THI BẤT KỲ THAO TÁC GHI/SỬA NÀO TRÊN FIRESTORE HOẶC FIREBASE AUTH.');
+    console.log('- Khi bạn sẵn sàng thực thi, hãy gửi đúng lệnh: "cách ly phiếu execute".');
   }
 
-  // PHẦN B: KIỂM TOÁN VÀ GỠ CLAIMS CHO TÀI KHOẢN sZmj...bHI3
-  console.log('\n--- PHẦN B: KIỂM TOÁN CUSTOM CLAIMS TÀI KHOẢN REVIEWER ---');
-  const targetUid = 'sZmjOcLHQlcLfKEtpQmGxJfAbHI3';
-  console.log(`Tài khoản mục tiêu: ${maskUid(targetUid)}`);
-
-  try {
-    const userRecord = await auth.getUser(targetUid);
-    const currentClaims = userRecord.customClaims || {};
-    console.log(`Trạng thái Claims hiện tại:`, JSON.stringify(currentClaims));
-
-    console.log('\nKế hoạch xử lý (Dry-run proposal):');
-    console.log(`- Gỡ quyền teacher khỏi Custom Claims`);
-    console.log(`- Thiết lập Claims mới: { role: 'student', reviewerType: null, isTeacher: false }`);
-    console.log(`- Cập nhật Firestore document users/${maskUid(targetUid)} về role: 'student'`);
-
-    if (isExecute) {
-      console.log('\n⏳ Đang gỡ Claims trên Firebase Auth và Firestore...');
-      const safeClaims = {
-        ...currentClaims,
-        role: 'student',
-        reviewerType: null,
-        isTeacher: false,
-        subjects: []
-      };
-      await auth.setCustomUserClaims(targetUid, safeClaims);
-      await db.collection('users').doc(targetUid).set({
-        role: 'student',
-        reviewerType: null,
-        isTeacher: false,
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
-
-      // Ghi audit log
-      await db.collection('admin_logs').add({
-        action: 'REVOKE_TEACHER_ROLE_DRYRUN_EXECUTED',
-        targetUid: targetUid,
-        performedBy: 'academic_integrity_script',
-        createdAt: new Date().toISOString(),
-        reason: 'Temporary revocation of synthetic teacher claims until real teacher verification onboarded'
-      });
-      console.log('✅ Đã gỡ thành công Claims teacher trên Firebase Auth và users doc!');
-    } else {
-      console.log('ℹ️ [DRY-RUN] Chưa thay đổi Claims của tài khoản. Thêm --execute để thực thi khi có lệnh.');
-    }
-  } catch (err) {
-    console.log(`⚠️ Không thể truy xuất thông tin tài khoản ${maskUid(targetUid)}:`, err.message);
-  }
-
-  console.log('\n========================================================================');
-  console.log('🏁 KẾT THÚC KIỂM TOÁN DRY-RUN');
-  console.log('========================================================================');
+  console.log('========================================================================\n');
 }
 
-run().catch(console.error);
-
+run().catch(err => {
+  console.error('Fatal error:', err);
+  process.exit(1);
+});

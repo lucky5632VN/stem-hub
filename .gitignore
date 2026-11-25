@@ -67,6 +67,8 @@ graphify-repo/
 # Scratch, test dumps & backups
 scratch/
 tmp/
+reports/backup/
+reports/ablation/archive_*/
 *-BACKUP*/
 *.bak
 *.zip

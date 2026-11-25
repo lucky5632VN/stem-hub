@@ -169,10 +169,12 @@
     "file": "reports/ablation/ablation_dataset_100.v1.4.2.json",
     "sha256": "cefc6ce343f01692dc4b9e83b9ac257ed833f70bb7c3d366d05259057c2c65c6",
     "locked_at": "2026-11-24T12:44:16.227415+00:00",
+    "locked_by": "user_command",
+    "command": "khóa v1.4.2",
     "status": "LOCKED_OFFICIAL (Khóa chính thức theo lệnh 'khóa v1.4.2')",
     "total_cases": 100,
     "numeric_gate": 24,
-    "notes": "Đã khóa chính thức theo lệnh người dùng 'khóa v1.4.2'. 24 câu số học khớp 100% với official_candidates.json."
+    "notes": "Đã khóa chính thức theo lệnh người dùng 'khóa v1.4.2'. 24 câu số học khớp với official_candidates.json."
   },
   "v1_4_2_draft": {
     "file": "reports/ablation/ablation_dataset_100.v1.4.2.json",

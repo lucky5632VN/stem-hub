@@ -117,16 +117,39 @@ function saveCache() {
 }
 
 /**
- * Tạo cache key tiêu chuẩn cô lập phiên bản, mô hình, nội dung câu hỏi
+ * Tạo cache key tiêu chuẩn cô lập phiên bản, mã băm tập dữ liệu, mã băm kho tri thức 303 chunk, ngữ cảnh truy xuất, mô hình, nội dung câu hỏi
  */
-export function buildCacheKey({ condition, item, runIndex = 1, model, systemInstruction = '', datasetVersion }) {
+export function buildCacheKey({
+  condition,
+  item,
+  runIndex = 1,
+  model,
+  systemInstruction = '',
+  datasetVersion,
+  datasetSha256,
+  corpusHash,
+  contextText = '',
+  retrievedChunkIds = []
+}) {
   const qText = item?.question || item?.question_text || '';
   const qHash = crypto.createHash('sha256').update(qText).digest('hex').slice(0, 12);
   const sysHash = crypto.createHash('sha256').update(systemInstruction).digest('hex').slice(0, 8);
   const dsVer = datasetVersion || currentDatasetVersion || 'v1.4.2';
+  const dsHash = (datasetSha256 || expectedHash || 'unknown_ds').slice(0, 12);
+  const corHash = (corpusHash || stemCorpusHash || 'unknown_corp').slice(0, 12);
+
+  // Khóa ngữ cảnh truy xuất: nếu condition == 'no_rag' thì là 'no_ctx'; nếu có RAG thì băm danh sách chunkId đã sắp xếp và nội dung trích đoạn
+  const sortedChunkIds = Array.isArray(retrievedChunkIds) && retrievedChunkIds.length > 0
+    ? [...retrievedChunkIds].sort().join('+')
+    : '';
+  const ctxContentHash = crypto.createHash('sha256').update(contextText || '').digest('hex').slice(0, 8);
+  const ctxKey = condition === 'no_rag'
+    ? 'no_ctx'
+    : (sortedChunkIds ? `${sortedChunkIds}_${ctxContentHash}` : `ctx_${ctxContentHash}`);
+
   const modelId = model || RUN_CONFIG.model;
   const itemId = item?.id || 'UNKNOWN_ID';
-  return `${condition}_${itemId}_${dsVer}_${modelId}_${qHash}_${sysHash}_run${runIndex}`;
+  return `${condition}_${itemId}_${dsVer}_ds${dsHash}_corp${corHash}_${ctxKey}_${modelId}_q${qHash}_sys${sysHash}_run${runIndex}`;
 }
 
 // Token Counter estimation heuristic (~4 chars per token for Vietnamese/Math)
@@ -274,11 +297,14 @@ export function calculatePreRunEstimation() {
 }
 
 /**
- * Automated Grader
+ * Automated Grader & Status Classifier
+ * Tuân thủ quy tắc trung thực:
+ * - Trạng thái phân loại rõ: "đã xử lý", "đúng", "sai", "từ chối", "cần người chấm".
+ * - Tuyệt đối KHÔNG in PASS / tự động chấm đúng cho câu hỏi khái niệm (in_scope_concept) -> Đặt status: "cần người chấm".
  */
 export function evaluateAnswer(caseItem, responseText) {
   if (!responseText || typeof responseText !== 'string') {
-    return { isCorrect: false, isAbstained: false, gradeType: 'empty_response' };
+    return { isCorrect: false, isAbstained: false, status: 'sai', gradeType: 'empty_response' };
   }
 
   const textLower = responseText.toLowerCase();
@@ -292,19 +318,32 @@ export function evaluateAnswer(caseItem, responseText) {
     ];
     const isAbstained = abstentionPatterns.some(p => p.test(textLower));
     return {
-      isCorrect: isAbstained, // For OOS, abstention is the correct behavior
+      isCorrect: isAbstained, // Đối với OOS, từ chối đúng phạm vi là hành vi chuẩn
       isAbstained,
+      status: isAbstained ? 'từ chối' : 'sai',
       gradeType: 'abstention_check',
-      matchedRule: isAbstained ? 'Correctly abstained on out-of-scope question' : 'Failed to abstain (hallucinated on OOS)'
+      matchedRule: isAbstained ? 'Từ chối đúng câu hỏi ngoài phạm vi' : 'Không từ chối (ảo tưởng kiến thức ngoài SGK)'
     };
   }
 
-  // Numerical evaluation: checks presence of ground truth values/formulas with tolerance & normalization
+  // Numerical evaluation: kiểm tra sự hiện diện của đáp án số học với sai số cho phép
   if (caseItem.stratum === 'in_scope_numerical') {
+    const isRefusal = /nằm ngoài|ngoài phạm vi|ngoài chương trình|chưa đủ căn cứ|không thuộc phạm vi|thiếu căn cứ|sgk không|chưa có trong sgk|tham khảo tài liệu chuyên ngành|từ chối/i.test(textLower);
+    if (isRefusal) {
+      return {
+        isCorrect: false,
+        isAbstained: true,
+        status: 'từ chối',
+        gradeType: 'numerical_criteria',
+        matchRatio: 0.0,
+        matchedRule: 'Mô hình từ chối câu hỏi số học trong phạm vi'
+      };
+    }
     const numEval = matchNumericalAnswer(caseItem.ground_truth, responseText, 0.02);
     return {
       isCorrect: numEval.isCorrect,
       isAbstained: false,
+      status: numEval.isCorrect ? 'đúng' : 'sai',
       gradeType: 'numerical_criteria',
       matchRatio: numEval.isCorrect ? 1.0 : 0.0,
       matchedRule: numEval.rule,
@@ -313,25 +352,20 @@ export function evaluateAnswer(caseItem, responseText) {
     };
   }
 
-  // Conceptual evaluation
+  // Conceptual evaluation: Tuyệt đối KHÔNG tự động chấm PASS cho câu khái niệm!
   if (caseItem.stratum === 'in_scope_concept') {
-    const requiredKeywords = caseItem.evaluation_keywords || [];
-    let matchCount = 0;
-    requiredKeywords.forEach(kw => {
-      if (textLower.includes(kw.toLowerCase())) matchCount++;
-    });
-    const matchRatio = requiredKeywords.length > 0 ? matchCount / requiredKeywords.length : 0;
-    const isCorrect = matchRatio >= 0.4;
+    const isRefusal = /nằm ngoài|ngoài phạm vi|ngoài chương trình|chưa đủ căn cứ|không thuộc phạm vi|thiếu căn cứ|sgk không|chưa có trong sgk|tham khảo tài liệu chuyên ngành|từ chối/i.test(textLower);
     return {
-      isCorrect,
-      isAbstained: false,
-      gradeType: 'concept_keywords',
-      matchRatio,
-      matchedTokens: matchCount
+      isCorrect: null, // Không tự động chấm đúng/sai cho câu khái niệm
+      isAbstained: isRefusal,
+      needsHumanReview: true,
+      status: isRefusal ? 'từ chối' : 'cần người chấm',
+      gradeType: 'human_review_required',
+      note: 'Câu khái niệm cần người chấm theo quy tắc đóng băng docs/quy-tac-cham-ablation.md'
     };
   }
 
-  return { isCorrect: false, isAbstained: false, gradeType: 'unknown' };
+  return { isCorrect: false, isAbstained: false, status: 'sai', gradeType: 'unknown' };
 }
 
 // Exponential backoff delay
@@ -625,7 +659,11 @@ export async function runAblationStudy({ execute = false, pilot = null } = {}) {
         runIndex: r,
         model: RUN_CONFIG.model,
         systemInstruction: BASE_SYSTEM_INSTRUCTION,
-        datasetVersion: currentDatasetVersion
+        datasetVersion: currentDatasetVersion,
+        datasetSha256: expectedHash,
+        corpusHash: stemCorpusHash,
+        contextText: '',
+        retrievedChunkIds: []
       });
       const noRagRes = await executeCachedCall({
         keyId: noRagKey,
@@ -635,6 +673,7 @@ export async function runAblationStudy({ execute = false, pilot = null } = {}) {
       });
 
       const gradeNoRag = evaluateAnswer(item, noRagRes.text);
+      console.log(`   [Run ${r}] No-RAG: [${gradeNoRag.status || 'đã xử lý'}] | Latency: ${noRagRes.latencyMs}ms | Tokens: ${noRagRes.totalTokens}${noRagRes.fromCache ? ' (cached)' : ''}`);
       results.condition_1_no_rag.push({
         case_id: item.id,
         run: r,
@@ -643,7 +682,9 @@ export async function runAblationStudy({ execute = false, pilot = null } = {}) {
         response: noRagRes.text,
         grade: gradeNoRag,
         latencyMs: noRagRes.latencyMs,
-        tokens: noRagRes.totalTokens
+        tokens: noRagRes.totalTokens,
+        fromCache: !!noRagRes.fromCache,
+        attempts: noRagRes.attempts || 1
       });
 
       // 2. Condition 2: With RAG + Guard
@@ -657,7 +698,11 @@ export async function runAblationStudy({ execute = false, pilot = null } = {}) {
         runIndex: r,
         model: RUN_CONFIG.model,
         systemInstruction: `${BASE_SYSTEM_INSTRUCTION}\n${PEDAGOGICAL_GUARD}`,
-        datasetVersion: currentDatasetVersion
+        datasetVersion: currentDatasetVersion,
+        datasetSha256: expectedHash,
+        corpusHash: stemCorpusHash,
+        contextText: ragContextText,
+        retrievedChunkIds: chunkIdsInContext
       });
       const ragRes = await executeCachedCall({
         keyId: ragKey,
@@ -667,6 +712,7 @@ export async function runAblationStudy({ execute = false, pilot = null } = {}) {
       });
 
       const gradeRag = evaluateAnswer(item, ragRes.text);
+      console.log(`   [Run ${r}] RAG+Guard: [${gradeRag.status || 'đã xử lý'}] | Latency: ${ragRes.latencyMs}ms | Tokens: ${ragRes.totalTokens}${ragRes.fromCache ? ' (cached)' : ''}`);
 
       // Heuristic Verifier check
       const verifierRes = verifyResponseGrounding({
@@ -693,18 +739,30 @@ export async function runAblationStudy({ execute = false, pilot = null } = {}) {
         grade: gradeRag,
         verifier: verifierRes,
         latencyMs: ragRes.latencyMs,
-        tokens: ragRes.totalTokens
+        tokens: ragRes.totalTokens,
+        fromCache: !!ragRes.fromCache,
+        attempts: ragRes.attempts || 1
       });
 
       // Write raw sanitized log
       rawStream.write(JSON.stringify({
         case_id: item.id,
         run: r,
-        no_rag: { latency: noRagRes.latencyMs, tokens: noRagRes.totalTokens, correct: gradeNoRag.isCorrect },
+        no_rag: {
+          latency: noRagRes.latencyMs,
+          tokens: noRagRes.totalTokens,
+          correct: gradeNoRag.isCorrect,
+          status: gradeNoRag.status,
+          fromCache: !!noRagRes.fromCache,
+          attempts: noRagRes.attempts || 1
+        },
         rag: { 
           latency: ragRes.latencyMs, 
           tokens: ragRes.totalTokens, 
           correct: gradeRag.isCorrect, 
+          status: gradeRag.status,
+          fromCache: !!ragRes.fromCache,
+          attempts: ragRes.attempts || 1,
           verifier: verifierRes,
           retrieved_chunk_ids: chunkIdsInContext
         }
@@ -797,25 +855,43 @@ export async function runAblationStudy({ execute = false, pilot = null } = {}) {
 
 /**
  * Statistical Aggregation & Bootstrap Confidence Intervals
+ * Tuân thủ quy tắc trung thực Prompt 0:
+ * - n < 10 tuyệt đối KHÔNG in phần trăm, chỉ in tỷ lệ số đếm thô (k/n).
+ * - Báo cáo số lệnh gọi mô hình thật, số lần thử lại 503, số lần từ chối 0-call, độ trễ p50/p95 chỉ tính lệnh gọi thật.
+ * - Tuyệt đối không nhận định "RAG làm nhanh hơn" nếu do từ chối hoặc thử lại.
  */
 function computeAggregatedMetrics(results) {
-  // Aggregate accuracy per stratum and condition
   const noRag = results.condition_1_no_rag;
   const rag = results.condition_2_rag_guard;
   const retOnly = results.condition_3_retrieval_only;
 
   const getStats = list => {
     const total = list.length;
-    const correct = list.filter(x => x.grade.isCorrect).length;
-    const latencies = list.map(x => x.latencyMs).sort((a, b) => a - b);
-    const medianLatency = latencies[Math.floor(latencies.length / 2)] || 0;
-    const p95Latency = latencies[Math.floor(latencies.length * 0.95)] || 0;
+    // Chỉ tính các lệnh gọi mô hình thật (không tính từ cache nếu có)
+    const realCalls = list.filter(x => !x.fromCache);
+    const realCallsCount = realCalls.length;
+    
+    // Số lần thử lại / 503
+    const retries503Count = list.reduce((acc, x) => acc + Math.max(0, (x.attempts || 1) - 1), 0);
+    
+    // Số lần từ chối không gọi mô hình (hoặc từ chối do bảo vệ)
+    const refusalsZeroCallCount = list.filter(x => x.grade?.isAbstained && x.tokens === 0).length;
+    
+    // Độ trễ trung vị & p95 CHỈ tính trên các lệnh gọi mô hình thật
+    const realLatencies = realCalls.map(x => x.latencyMs).filter(l => typeof l === 'number' && l > 0).sort((a, b) => a - b);
+    const medianLatency = realLatencies.length > 0 ? (realLatencies[Math.floor(realLatencies.length / 2)] || 0) : 0;
+    const p95Latency = realLatencies.length > 0 ? (realLatencies[Math.floor(realLatencies.length * 0.95)] || 0) : 0;
 
-    const inScope = list.filter(x => x.stratum !== 'out_of_scope');
-    const inScopeCorrect = inScope.filter(x => x.grade.isCorrect).length;
+    // Câu số học trong phạm vi (có ground truth số học chuẩn)
+    const inScopeNum = list.filter(x => x.stratum === 'in_scope_numerical');
+    const inScopeNumCorrect = inScopeNum.filter(x => x.grade.isCorrect === true).length;
 
+    // Câu khái niệm trong phạm vi: CẦN NGƯỜI CHẤM TAY
+    const inScopeConcept = list.filter(x => x.stratum === 'in_scope_concept');
+
+    // Câu ngoài phạm vi (OOS): hành vi chuẩn là từ chối
     const oos = list.filter(x => x.stratum === 'out_of_scope');
-    const oosCorrectAbstain = oos.filter(x => x.grade.isCorrect).length;
+    const oosCorrectAbstain = oos.filter(x => x.grade.isCorrect === true).length;
 
     const isRefusal = text => {
       if (!text) return false;
@@ -824,37 +900,61 @@ function computeAggregatedMetrics(results) {
 
     const getStratumDetail = (filterFn) => {
       const items = list.filter(filterFn);
-      const total = items.length;
-      const correct = items.filter(x => x.grade.isCorrect).length;
+      const subTotal = items.length;
+      const correct = items.filter(x => x.grade.isCorrect === true).length;
       const refused = items.filter(x => x.grade.isAbstained || isRefusal(x.response)).length;
-      return {
-        total,
+      const needsReview = items.filter(x => x.grade.status === 'cần người chấm').length;
+      
+      const res = {
+        total: subTotal,
         correct,
         refused,
-        fraction: `${correct}/${total}`,
-        accuracyPct: total > 0 ? (correct / total) * 100 : 0,
-        refusalRatePct: total > 0 ? (refused / total) * 100 : 0
+        needsReview,
+        fraction: `${correct}/${subTotal}`
       };
+
+      // QUY TẮC TRUNG THỰC: Với n < 10 tuyệt đối KHÔNG in phần trăm
+      if (subTotal >= 10) {
+        res.accuracyPct = Number(((correct / subTotal) * 100).toFixed(2));
+        res.refusalRatePct = Number(((refused / subTotal) * 100).toFixed(2));
+      } else {
+        res.accuracyPct = null;
+        res.refusalRatePct = null;
+        res.note_small_sample = `Cỡ mẫu nhỏ (n = ${subTotal} < 10): chỉ ghi nhận tỷ lệ số đếm thô ${correct}/${subTotal}, không tính phần trăm.`;
+      }
+      return res;
     };
+
+    const totalScored = list.filter(x => x.grade.isCorrect !== null);
+    const totalCorrect = totalScored.filter(x => x.grade.isCorrect === true).length;
 
     return {
       total,
-      accuracyPct: total > 0 ? (correct / total) * 100 : 0,
-      inScopeTotal: inScope.length,
-      inScopeAccuracyPct: inScope.length > 0 ? (inScopeCorrect / inScope.length) * 100 : 0,
-      inScopeRefusalCount: inScope.filter(x => isRefusal(x.response)).length,
-      inScopeRefusalRatePct: inScope.length > 0 ? (inScope.filter(x => isRefusal(x.response)).length / inScope.length) * 100 : 0,
-      oosTotal: oos.length,
-      oosAbstentionRatePct: oos.length > 0 ? (oosCorrectAbstain / oos.length) * 100 : 0,
+      realCallsCount,
+      retries503Count,
+      refusalsZeroCallCount,
       medianLatencyMs: medianLatency,
       p95LatencyMs: p95Latency,
+      // Tỷ lệ và phần trăm
+      scoredCasesTotal: totalScored.length,
+      scoredCasesCorrect: totalCorrect,
+      scoredAccuracyFraction: `${totalCorrect}/${totalScored.length}`,
+      scoredAccuracyPct: totalScored.length >= 10 ? Number(((totalCorrect / totalScored.length) * 100).toFixed(2)) : null,
+      inScopeNumericalTotal: inScopeNum.length,
+      inScopeNumericalAccuracyFraction: `${inScopeNumCorrect}/${inScopeNum.length}`,
+      inScopeNumericalAccuracyPct: inScopeNum.length >= 10 ? Number(((inScopeNumCorrect / inScopeNum.length) * 100).toFixed(2)) : null,
+      inScopeConceptTotal: inScopeConcept.length,
+      inScopeConceptStatus: `${inScopeConcept.length} câu khái niệm: CẦN NGƯỜI CHẤM TAY (không tự động chấm PASS)`,
+      oosTotal: oos.length,
+      oosAbstentionFraction: `${oosCorrectAbstain}/${oos.length}`,
+      oosAbstentionRatePct: oos.length >= 10 ? Number(((oosCorrectAbstain / oos.length) * 100).toFixed(2)) : null,
       strata_3_tiers: {
         tang_A: getStratumDetail(x => x.corpus_stratum === 'tang_A_kho_du_de_giai'),
         tang_B: getStratumDetail(x => x.corpus_stratum === 'tang_B_chu_de_lien_quan_chua_du_de_giai'),
         tang_C: getStratumDetail(x => x.corpus_stratum === 'tang_C_ngoai_kho'),
         concept: {
           ...getStratumDetail(x => x.stratum === 'in_scope_concept'),
-          note: 'Câu khái niệm cần người chấm tay theo quy tắc đóng băng docs/quy-tac-cham-ablation.md'
+          note: 'Câu khái niệm cần người chấm tay theo quy tắc đóng băng docs/quy-tac-cham-ablation.md (không tự động chấm PASS)'
         }
       }
     };
@@ -865,22 +965,32 @@ function computeAggregatedMetrics(results) {
 
   // Verifier metrics
   const vm = results.verifier_metrics;
-  const warningRatePct = vm.total_evaluations > 0 ? (vm.flagged_warnings / vm.total_evaluations) * 100 : 0;
-  const falseAlarmRatePct = vm.total_evaluations > 0 ? (vm.false_alarms_on_correct / vm.total_evaluations) * 100 : 0;
+  const warningRatePct = vm.total_evaluations >= 10 ? Number(((vm.flagged_warnings / vm.total_evaluations) * 100).toFixed(2)) : null;
+  const falseAlarmRatePct = vm.total_evaluations >= 10 ? Number(((vm.false_alarms_on_correct / vm.total_evaluations) * 100).toFixed(2)) : null;
 
   return {
     metadata: results.metadata,
     condition_1_no_rag: noRagStats,
     condition_2_rag_guard: ragStats,
     delta: {
-      inScopeDiff: (ragStats.inScopeAccuracyPct - noRagStats.inScopeAccuracyPct).toFixed(2) + ' pp',
-      oosAbstentionDiff: (ragStats.oosAbstentionRatePct - noRagStats.oosAbstentionRatePct).toFixed(2) + ' pp'
+      inScopeDiff: (ragStats.inScopeNumericalAccuracyPct !== null && noRagStats.inScopeNumericalAccuracyPct !== null)
+        ? (ragStats.inScopeNumericalAccuracyPct - noRagStats.inScopeNumericalAccuracyPct).toFixed(2) + ' pp'
+        : 'Chưa đủ n>=10 để so sánh pp',
+      oosAbstentionDiff: (ragStats.oosAbstentionRatePct !== null && noRagStats.oosAbstentionRatePct !== null)
+        ? (ragStats.oosAbstentionRatePct - noRagStats.oosAbstentionRatePct).toFixed(2) + ' pp'
+        : 'Chưa đủ n>=10 để so sánh pp',
+      latencyNote: 'So sánh độ trễ chỉ phản ánh các lệnh gọi thật. Tuyệt đối không kết luận RAG làm nhanh hơn nếu chênh lệch xuất phát từ việc từ chối sớm hoặc các lần thử lại mạng.'
     },
-    retrieval_only_accuracy: (retOnly.filter(x => x.hitGrounding).length / (retOnly.length || 1)) * 100,
+    retrieval_only_accuracy: retOnly.length >= 10 
+      ? Number(((retOnly.filter(x => x.hitGrounding).length / (retOnly.length || 1)) * 100).toFixed(2))
+      : null,
+    retrieval_only_fraction: `${retOnly.filter(x => x.hitGrounding).length}/${retOnly.length}`,
     response_verifier: {
       total_evaluations: vm.total_evaluations,
-      warningRatePct: warningRatePct.toFixed(2) + '%',
-      falseAlarmRatePct: falseAlarmRatePct.toFixed(2) + '%'
+      warningFraction: `${vm.flagged_warnings}/${vm.total_evaluations}`,
+      warningRatePct: warningRatePct !== null ? `${warningRatePct}%` : 'Chưa đủ n>=10',
+      falseAlarmFraction: `${vm.false_alarms_on_correct}/${vm.total_evaluations}`,
+      falseAlarmRatePct: falseAlarmRatePct !== null ? `${falseAlarmRatePct}%` : 'Chưa đủ n>=10'
     }
   };
 }
