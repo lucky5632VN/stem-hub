@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
 import { verifyFirebaseIdToken, getFirebaseAdmin } from '@/lib/firebaseAdmin';
 import { sampleForReviewer, generateMathTeacherBlindReviewSet, buildUnifiedSamplePool } from '@/lib/reviewSampler';
+import { evaluateReviewPortalAccess } from '@/lib/reviewAgreement';
 
 export async function OPTIONS(request) {
   return new NextResponse(null, { status: 204, headers: getCorsHeaders(request) });
@@ -49,31 +50,23 @@ export async function GET(request) {
   const payload = tokenVerify.decoded;
   const uid = payload.user_id || payload.sub || payload.uid;
 
-  // 2. Xác định vai trò thẩm định (reviewerType) và danh sách môn được cấp quyền CHỈ từ Custom Claims
-  const isJudge = payload.reviewerType === 'judge' || payload.isJudge === true;
-  let reviewerType = payload.reviewerType || (payload.role === 'teacher' ? 'teacher' : (payload.role === 'team_self' ? 'team_self' : null));
-  let subjects = Array.isArray(payload.subjects) ? payload.subjects : [];
-
-  // BẢO MẬT: TUYỆT ĐỐI KHÔNG fallback đọc trường role/reviewerType từ Firestore document để chống leo thang đặc quyền.
-
-  // Admin có thể truy cập để kiểm thử/quản lý nếu cần
+  // 2. Xác định quyền vào cổng và vai trò thẩm định CHỈ từ Custom Claims
+  // - Trừ tài khoản Học sinh (student / chưa cấp vai trò), mọi vai trò khác đều có thể vào xem
+  // - Chỉ vai trò Giáo viên (teacher) mới có quyền chỉnh sửa / gửi phiếu
   const adminUids = (process.env.ADMIN_UIDS || process.env.NEXT_PUBLIC_ADMIN_UIDS || '').split(',').map(u => u.trim()).filter(Boolean);
-  const isAdmin = payload.admin === true || payload.role === 'admin' || (uid && adminUids.includes(uid));
-  if (isAdmin && !reviewerType) {
-    reviewerType = 'team_self'; // Admin mặc định chạy thử ở cohort nhóm nội bộ
-    subjects = ['toan', 'ly', 'hoa', 'sinh'];
+  const portalAccess = evaluateReviewPortalAccess(payload, { adminUids });
+
+  if (!portalAccess.canEnterPortal) {
+    return NextResponse.json(
+      { error: 'Tài khoản Học sinh không có quyền truy cập khu vực thẩm định chuyên môn.' },
+      { status: 403, headers: getCorsHeaders(request) }
+    );
   }
 
-  // Ban Giám Khảo (judge): Được phép xem toàn bộ 4 môn ở chế độ Read-Only để kiểm tra giao diện & quy trình
-  if (isJudge && !isAdmin) {
-    reviewerType = 'judge';
-    subjects = ['toan', 'ly', 'hoa', 'sinh'];
-  }
-
-  // Nếu người dùng đã đăng nhập hợp lệ nhưng chưa có claim giáo viên độc lập:
-  // Mặc định phân quyền vào nhóm "team_self" (Thành viên nhóm phát triển tự chấm nội bộ)
-  if (!reviewerType) {
-    reviewerType = 'team_self';
+  const isAdmin = portalAccess.isAdmin;
+  const reviewerType = portalAccess.effectiveRole;
+  let subjects = Array.isArray(payload.subjects) ? payload.subjects : [];
+  if (!portalAccess.isTeacher || isAdmin || subjects.length === 0) {
     subjects = ['toan', 'ly', 'hoa', 'sinh'];
   }
 
@@ -137,6 +130,7 @@ export async function GET(request) {
   return NextResponse.json({
     success: true,
     reviewerType,
+    canEditReviews: portalAccess.canEditReviews,
     subject: requestedSubject,
     authorizedSubjects: subjects,
     seed: samplingResult.seed,

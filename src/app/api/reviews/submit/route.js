@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
 import { verifyFirebaseIdToken, getFirebaseAdmin } from '@/lib/firebaseAdmin';
 import { hashString } from '@/lib/reviewSampler';
+import { evaluateReviewPortalAccess } from '@/lib/reviewAgreement';
 
 export async function OPTIONS(request) {
   return new NextResponse(null, { status: 204, headers: getCorsHeaders(request) });
@@ -58,29 +59,24 @@ export async function POST(request) {
   const uid = payload.user_id || payload.sub || payload.uid;
 
   // 2. Xác định vai trò thẩm định thực tế CHỈ từ server-side token/claims
-  let reviewerType = payload.reviewerType || (payload.role === 'teacher' ? 'teacher' : (payload.role === 'team_self' ? 'team_self' : null));
-  let subjects = Array.isArray(payload.subjects) ? payload.subjects : [];
-
   const adminUids = (process.env.ADMIN_UIDS || process.env.NEXT_PUBLIC_ADMIN_UIDS || '').split(',').map(u => u.trim()).filter(Boolean);
-  const isAdmin = payload.admin === true || payload.role === 'admin' || (uid && adminUids.includes(uid));
+  const portalAccess = evaluateReviewPortalAccess(payload, { adminUids });
+  const isAdmin = portalAccess.isAdmin;
 
-  // QUY TẮC CỐT LÕI: Chỉ giáo viên (teacher) hoặc Admin mới được gửi đánh giá chuyên môn
-  if (reviewerType === 'judge' && !isAdmin) {
+  // QUY TẮC CỐT LÕI: Chỉ tài khoản có vai trò Giáo viên (teacher) mới được chấm, chỉnh sửa và cập nhật phiếu
+  if (!portalAccess.canEditReviews) {
+    const denyMsg = portalAccess.isJudge
+      ? 'Tài khoản Ban Giám Khảo chỉ có quyền xem giao diện và quy trình (Read-Only), không thể gửi hoặc sửa phiếu đánh giá.'
+      : 'Chỉ tài khoản có vai trò Giáo viên (role: teacher) mới được phép chấm, chỉnh sửa hoặc cập nhật phiếu đánh giá.';
     return NextResponse.json(
-      { error: 'Tài khoản Ban Giám Khảo chỉ có quyền xem giao diện và quy trình (Read-Only), không thể gửi hoặc sửa phiếu đánh giá.' },
-      { status: 403, headers: getCorsHeaders(request) }
-    );
-  }
-  if (reviewerType !== 'teacher' && !isAdmin) {
-    return NextResponse.json(
-      { error: 'Chỉ tài khoản đã được cấp vai trò Giáo viên thẩm định (role: teacher) mới có quyền gửi phiếu đánh giá chuyên môn.' },
+      { error: denyMsg },
       { status: 403, headers: getCorsHeaders(request) }
     );
   }
 
-  // Nếu là admin chưa có claim teacher, cho phép admin tạm thời đóng vai trò giáo viên để kiểm thử
-  if (isAdmin && reviewerType !== 'teacher') {
-    reviewerType = 'teacher';
+  const reviewerType = 'teacher';
+  let subjects = Array.isArray(payload.subjects) ? payload.subjects : [];
+  if (isAdmin && subjects.length === 0) {
     subjects = ['toan', 'ly', 'hoa', 'sinh'];
   }
 

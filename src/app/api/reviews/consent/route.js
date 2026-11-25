@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getCorsHeaders, getClientIp, checkRateLimit } from '@/lib/serverSecurity';
 import { verifyFirebaseIdToken, getFirebaseAdmin } from '@/lib/firebaseAdmin';
+import { evaluateReviewPortalAccess } from '@/lib/reviewAgreement';
 
 export async function OPTIONS(request) {
   return new NextResponse(null, { status: 204, headers: getCorsHeaders(request) });
@@ -68,10 +69,11 @@ export async function POST(request) {
 
   const payload = tokenVerify.decoded;
   const uid = payload.user_id || payload.sub;
-  const isAdmin = payload.admin === true || payload.role === 'admin';
-  if ((payload.reviewerType === 'judge' || payload.isJudge === true) && !isAdmin) {
+  const adminUids = (process.env.ADMIN_UIDS || process.env.NEXT_PUBLIC_ADMIN_UIDS || '').split(',').map(u => u.trim()).filter(Boolean);
+  const portalAccess = evaluateReviewPortalAccess(payload, { adminUids });
+  if (!portalAccess.canEditReviews) {
     return NextResponse.json(
-      { error: 'Tài khoản Ban Giám Khảo chỉ có quyền xem (Read-Only), không thể lưu phiếu đồng ý.' },
+      { error: 'Chỉ tài khoản có vai trò Giáo viên (role: teacher) mới được phép chỉnh sửa hoặc cập nhật phiếu đồng ý.' },
       { status: 403, headers: getCorsHeaders(request) }
     );
   }

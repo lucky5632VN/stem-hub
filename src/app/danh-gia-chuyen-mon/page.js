@@ -27,6 +27,7 @@ import { playSound } from '@/lib/sound';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { formatMathText } from '@/lib/mathFormatter';
+import { evaluateReviewPortalAccess } from '@/lib/reviewAgreement';
 
 const RUBRIC_CRITERIA = [
   {
@@ -100,7 +101,8 @@ export default function TeacherReviewPortalPage() {
   const [successMsg, setSuccessMsg] = useState('');
 
   // Dữ liệu thẩm định viên
-  const [reviewerType, setReviewerType] = useState('teacher'); // 'teacher' | 'team_self' | 'admin' | 'guest'
+  const [reviewerType, setReviewerType] = useState('guest'); // 'teacher' | 'judge' | 'admin' | 'team_self' | 'student' | 'guest'
+  const [canEditReviews, setCanEditReviews] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState('toan');
   const [authorizedSubjects, setAuthorizedSubjects] = useState(['toan']);
@@ -158,19 +160,21 @@ export default function TeacherReviewPortalPage() {
     }
   }, [canViewComparisonTabs, confusionSource]);
 
-  // 1. Tải danh sách mẫu đã làm mù (mặc định lấy toàn bộ câu hỏi của môn, ưu tiên câu hỏi học sinh gửi)
+  // 1. Tải danh sách mẫu đã làm mù (trừ học sinh, mọi vai trò khác đều có thể vào xem; chỉ giáo viên mới được chấm/chỉnh sửa)
   const loadSamples = async (subj = selectedSubject) => {
     setLoading(true);
     setErrorMsg('');
     try {
       const currentUser = auth.currentUser;
       if (!currentUser) {
+        setReviewerType('guest');
+        setCanEditReviews(false);
         setLoading(false);
         return;
       }
       const tokenResult = await currentUser.getIdTokenResult();
-      const adminClaim = Boolean(tokenResult.claims.admin || tokenResult.claims.role === 'admin');
-      setIsAdmin(adminClaim);
+      const portalAccess = evaluateReviewPortalAccess(tokenResult.claims);
+      setIsAdmin(portalAccess.isAdmin);
 
       const token = await currentUser.getIdToken();
       const res = await fetch(`/api/reviews/samples?subject=${subj}&seed=2026&sampleSize=999`, {
@@ -185,12 +189,17 @@ export default function TeacherReviewPortalPage() {
         throw new Error(`Máy chủ phản hồi không đúng định dạng JSON (${res.status} ${res.statusText || 'Server Error'}).`);
       }
       if (!res.ok) {
+        if (res.status === 403) {
+          setReviewerType(portalAccess.canEnterPortal ? portalAccess.effectiveRole : 'student');
+          setCanEditReviews(false);
+        }
         throw new Error(data.error || 'Không thể tải danh sách mẫu.');
       }
 
-      const isTeacher = data.reviewerType === 'teacher' || tokenResult.claims.role === 'teacher';
-      const isJudgeAccount = data.reviewerType === 'judge' || tokenResult.claims.isJudge === true || tokenResult.claims.reviewerType === 'judge';
-      setReviewerType(isTeacher ? 'teacher' : (adminClaim ? 'admin' : (isJudgeAccount ? 'judge' : (data.reviewerType || 'guest'))));
+      const effectiveRole = data.reviewerType || portalAccess.effectiveRole;
+      const canEdit = Boolean(data.canEditReviews ?? portalAccess.canEditReviews);
+      setReviewerType(effectiveRole);
+      setCanEditReviews(canEdit);
       setAuthorizedSubjects(data.authorizedSubjects || ['toan']);
       if (data.subjectCounts) {
         setSubjectCounts(data.subjectCounts);
@@ -274,12 +283,18 @@ export default function TeacherReviewPortalPage() {
 
   const currentSample = samples[currentIndex] || null;
   const isCurrentReviewed = currentSample && reviewedSampleIds.includes(currentSample.sampleId);
-  const isReadOnlyJudge = reviewerType === 'judge' && !isAdmin;
+  const isTeacherEditor = canEditReviews || reviewerType === 'teacher';
+  const isReadOnlyJudge = reviewerType === 'judge' && !isTeacherEditor;
+  const isReadOnlyViewer = !isTeacherEditor;
 
   // 4. Xử lý gửi phiếu chấm tinh gọn (Đáp án đúng/sai & Trình bày đúng chưa)
   const handleSubmitReview = async () => {
-    if (isReadOnlyJudge) {
-      setErrorMsg('Tài khoản Ban Giám Khảo chỉ có quyền xem giao diện và quy trình (Read-Only), không thể gửi hoặc sửa đánh giá.');
+    if (isReadOnlyViewer) {
+      setErrorMsg(
+        isReadOnlyJudge
+          ? 'Tài khoản Ban Giám Khảo chỉ có quyền xem giao diện và quy trình (Read-Only), không thể gửi hoặc sửa đánh giá.'
+          : 'Chỉ tài khoản có vai trò Giáo viên (role: teacher) mới được phép chấm, chỉnh sửa hoặc cập nhật phiếu đánh giá.'
+      );
       return;
     }
     if (!currentSample) return;
@@ -400,8 +415,12 @@ export default function TeacherReviewPortalPage() {
 
   // 6. Lưu phiếu consent
   const handleSaveConsent = async () => {
-    if (isReadOnlyJudge) {
-      setErrorMsg('Tài khoản Ban Giám Khảo chỉ có quyền xem (Read-Only), không thể chỉnh sửa cam kết.');
+    if (isReadOnlyViewer) {
+      setErrorMsg(
+        isReadOnlyJudge
+          ? 'Tài khoản Ban Giám Khảo chỉ có quyền xem (Read-Only), không thể chỉnh sửa cam kết.'
+          : 'Chỉ tài khoản có vai trò Giáo viên (role: teacher) mới được phép chỉnh sửa hoặc cập nhật cam kết.'
+      );
       return;
     }
     setSavingConsent(true);
@@ -569,26 +588,26 @@ export default function TeacherReviewPortalPage() {
                   👉 Vui lòng bấm vào nút Đăng nhập ở góc trên bên phải màn hình.
                 </p>
               </div>
-            ) : reviewerType !== 'teacher' && reviewerType !== 'judge' && !isAdmin ? (
+            ) : reviewerType === 'student' || reviewerType === 'guest' ? (
               <div className="bg-white dark:bg-slate-900 border border-amber-500/30 rounded-3xl p-10 text-center text-slate-700 dark:text-slate-300 space-y-5 shadow-sm dark:shadow-xl max-w-xl mx-auto my-6">
                 <div className="w-16 h-16 bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-2xl flex items-center justify-center mx-auto">
                   <Lock className="w-8 h-8" />
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-xl font-black text-slate-900 dark:text-white">
-                    Yêu Cầu Quyền Giáo Viên Thẩm Định
+                    Không Dành Cho Tài Khoản Học Sinh
                   </h3>
                   <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                    Khu vực đánh giá chuyên môn chỉ dành cho các Thầy/Cô đã được cấp vai trò Giáo viên thẩm định độc lập (Custom Claims: <code>role: teacher</code>).
+                    Khu vực thẩm định chuyên môn mở cho các vai trò không phải học sinh (Giáo viên, Ban Giám Khảo, Quản trị viên...) để xem giao diện và quy trình; chỉ tài khoản Giáo viên (<code>role: teacher</code>) mới được chấm, chỉnh sửa và cập nhật.
                   </p>
                 </div>
                 <div className="p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 text-left text-xs space-y-1.5">
                   <div className="font-bold text-slate-700 dark:text-slate-300">Tài khoản hiện tại:</div>
                   <div className="text-slate-500">UID: <span className="font-mono text-cyan-600 dark:text-cyan-400">{firebaseUser?.uid ? `${firebaseUser.uid.slice(0, 10)}...` : 'Chưa đăng nhập'}</span></div>
-                  <div className="text-slate-500">Vai trò: <span className="font-semibold text-amber-600 dark:text-amber-400">Chưa cấp quyền Giáo viên</span></div>
+                  <div className="text-slate-500">Vai trò: <span className="font-semibold text-amber-600 dark:text-amber-400">Học sinh / Chưa cấp quyền thẩm định</span></div>
                 </div>
                 <p className="text-[11px] text-slate-500">
-                  Vui lòng liên hệ Quản trị viên để được phân quyền theo môn phụ trách (Toán, Lý, Hóa, Sinh).
+                  Vui lòng liên hệ Quản trị viên nếu bạn là Giáo viên hoặc thành viên Ban Giám Khảo cần cấp quyền truy cập.
                 </p>
               </div>
             ) : loading ? (
@@ -603,15 +622,19 @@ export default function TeacherReviewPortalPage() {
               </div>
             ) : (
               <>
-                {isReadOnlyJudge && (
+                {isReadOnlyViewer && (
                   <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-400/60 dark:border-amber-500/40 rounded-2xl p-4 flex items-start gap-3 text-xs text-amber-950 dark:text-amber-200 shadow-sm">
                     <Eye className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                     <div className="space-y-1">
                       <div className="font-extrabold uppercase tracking-wide text-amber-900 dark:text-amber-300">
-                        Chế Độ Ban Giám Khảo Chỉ Xem (Read-Only)
+                        {isReadOnlyJudge
+                          ? 'Chế Độ Ban Giám Khảo Chỉ Xem (Read-Only)'
+                          : `Chế Độ Chỉ Xem (${reviewerType}) — Chỉ Giáo Viên Được Chỉnh Sửa`}
                       </div>
                       <p className="leading-relaxed">
-                        Quý Ban Giám Khảo có thể chuyển đổi các môn học, xem đầy đủ câu hỏi làm mù, câu trả lời AI, đáp án đối chiếu SGK và quy trình rubric đánh giá. Các nút chấm điểm và gửi phiếu được khóa để bảo toàn tính độc lập của dữ liệu thẩm định giáo viên.
+                        {isReadOnlyJudge
+                          ? 'Quý Ban Giám Khảo có thể chuyển đổi các môn học, xem đầy đủ câu hỏi làm mù, câu trả lời AI, đáp án đối chiếu SGK và quy trình rubric đánh giá. Các nút chấm điểm và gửi phiếu được khóa để bảo toàn tính độc lập của dữ liệu thẩm định giáo viên.'
+                          : 'Vai trò hiện tại được phép vào xem toàn bộ giao diện, câu hỏi làm mù, câu trả lời AI và báo cáo đối chiếu; chỉ tài khoản Giáo viên (role: teacher) mới được phép chấm điểm, chỉnh sửa và cập nhật dữ liệu.'}
                       </p>
                     </div>
                   </div>
@@ -755,13 +778,13 @@ export default function TeacherReviewPortalPage() {
                         <div className="grid grid-cols-2 gap-3 pt-1">
                           <button
                             type="button"
-                            disabled={isReadOnlyJudge}
+                            disabled={isReadOnlyViewer}
                             onClick={() => setDapAn('dung')}
                             className={`p-3.5 rounded-xl border text-left transition-all ${
                               dapAn === 'dung'
                                 ? 'bg-emerald-50 border-2 border-emerald-600 text-emerald-950 shadow-sm dark:bg-emerald-500/20 dark:border-emerald-400 dark:text-emerald-200'
                                 : 'bg-white border-slate-200 text-slate-700 hover:border-slate-400 hover:bg-slate-100/60 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'
-                            } ${isReadOnlyJudge ? 'opacity-75 cursor-not-allowed' : ''}`}
+                            } ${isReadOnlyViewer ? 'opacity-75 cursor-not-allowed' : ''}`}
                           >
                             <div className="font-extrabold text-xs mb-1 flex items-center gap-1.5">
                               <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -774,13 +797,13 @@ export default function TeacherReviewPortalPage() {
 
                           <button
                             type="button"
-                            disabled={isReadOnlyJudge}
+                            disabled={isReadOnlyViewer}
                             onClick={() => setDapAn('sai')}
                             className={`p-3.5 rounded-xl border text-left transition-all ${
                               dapAn === 'sai'
                                 ? 'bg-rose-50 border-2 border-rose-600 text-rose-950 shadow-sm dark:bg-rose-500/20 dark:border-rose-400 dark:text-rose-200'
                                 : 'bg-white border-slate-200 text-slate-700 hover:border-slate-400 hover:bg-slate-100/60 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'
-                            } ${isReadOnlyJudge ? 'opacity-75 cursor-not-allowed' : ''}`}
+                            } ${isReadOnlyViewer ? 'opacity-75 cursor-not-allowed' : ''}`}
                           >
                             <div className="font-extrabold text-xs mb-1 flex items-center gap-1.5">
                               <XCircle className="w-4 h-4 text-rose-600 dark:text-rose-400" />
@@ -807,13 +830,13 @@ export default function TeacherReviewPortalPage() {
                         <div className="grid grid-cols-2 gap-3 pt-1">
                           <button
                             type="button"
-                            disabled={isReadOnlyJudge}
+                            disabled={isReadOnlyViewer}
                             onClick={() => setTrinhBay('dung')}
                             className={`p-3.5 rounded-xl border text-left transition-all ${
                               trinhBay === 'dung'
                                 ? 'bg-cyan-50 border-2 border-cyan-600 text-cyan-950 shadow-sm dark:bg-cyan-500/20 dark:border-cyan-400 dark:text-cyan-200'
                                 : 'bg-white border-slate-200 text-slate-700 hover:border-slate-400 hover:bg-slate-100/60 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'
-                            } ${isReadOnlyJudge ? 'opacity-75 cursor-not-allowed' : ''}`}
+                            } ${isReadOnlyViewer ? 'opacity-75 cursor-not-allowed' : ''}`}
                           >
                             <div className="font-extrabold text-xs mb-1 flex items-center gap-1.5">
                               <CheckCircle2 className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
@@ -826,13 +849,13 @@ export default function TeacherReviewPortalPage() {
 
                           <button
                             type="button"
-                            disabled={isReadOnlyJudge}
+                            disabled={isReadOnlyViewer}
                             onClick={() => setTrinhBay('chua_dung')}
                             className={`p-3.5 rounded-xl border text-left transition-all ${
                               trinhBay === 'chua_dung'
                                 ? 'bg-amber-50 border-2 border-amber-600 text-amber-950 shadow-sm dark:bg-amber-500/20 dark:border-amber-400 dark:text-amber-200'
                                 : 'bg-white border-slate-200 text-slate-700 hover:border-slate-400 hover:bg-slate-100/60 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'
-                            } ${isReadOnlyJudge ? 'opacity-75 cursor-not-allowed' : ''}`}
+                            } ${isReadOnlyViewer ? 'opacity-75 cursor-not-allowed' : ''}`}
                           >
                             <div className="font-extrabold text-xs mb-1 flex items-center gap-1.5">
                               <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
@@ -871,7 +894,7 @@ export default function TeacherReviewPortalPage() {
                         Phân Loại Lỗi Chính (Nếu phát hiện khuyết điểm):
                       </label>
                       <select
-                        disabled={isReadOnlyJudge}
+                        disabled={isReadOnlyViewer}
                         value={primaryError}
                         onChange={(e) => setPrimaryError(e.target.value)}
                         className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl p-3 text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-cyan-500 disabled:opacity-60 disabled:cursor-not-allowed"
@@ -889,11 +912,15 @@ export default function TeacherReviewPortalPage() {
                       Ghi Chú & Nhận Xét Sư Phạm (Tùy chọn):
                     </label>
                     <textarea
-                      disabled={isReadOnlyJudge}
+                      disabled={isReadOnlyViewer}
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       rows={2}
-                      placeholder={isReadOnlyJudge ? 'Chế độ chỉ xem: Ban Giám Khảo không nhập hoặc sửa nhận xét.' : 'Ghi chú thêm về từ ngữ, cấu trúc phản hồi hoặc lỗi ngộ nhận chi tiết...'}
+                      placeholder={
+                        isReadOnlyViewer
+                          ? (isReadOnlyJudge ? 'Chế độ chỉ xem: Ban Giám Khảo không nhập hoặc sửa nhận xét.' : 'Chế độ chỉ xem: Chỉ vai trò Giáo viên mới được nhập hoặc sửa nhận xét.')
+                          : 'Ghi chú thêm về từ ngữ, cấu trúc phản hồi hoặc lỗi ngộ nhận chi tiết...'
+                      }
                       className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl p-3 text-xs text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 disabled:opacity-60 disabled:cursor-not-allowed"
                     />
                   </div>
@@ -925,7 +952,7 @@ export default function TeacherReviewPortalPage() {
                     <div className="flex items-center gap-3">
                       <button
                         type="button"
-                        disabled={isReadOnlyJudge}
+                        disabled={isReadOnlyViewer}
                         onClick={() => setIsSkipping(!isSkipping)}
                         className={`px-3 py-2 rounded-xl text-xs font-bold border transition-colors ${
                           isSkipping 
@@ -938,7 +965,7 @@ export default function TeacherReviewPortalPage() {
 
                       <button
                         type="button"
-                        disabled={submitting || isReadOnlyJudge}
+                        disabled={submitting || isReadOnlyViewer}
                         onClick={handleSubmitReview}
                         className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-black text-xs md:text-sm shadow-md shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                       >
@@ -947,10 +974,10 @@ export default function TeacherReviewPortalPage() {
                             <RefreshCw className="w-4 h-4 animate-spin" />
                             Đang lưu phiếu bất biến...
                           </>
-                        ) : isReadOnlyJudge ? (
+                        ) : isReadOnlyViewer ? (
                           <>
                             <Lock className="w-4 h-4" />
-                            Chế Độ Chỉ Xem (BGK Không Chấm Điểm)
+                            {isReadOnlyJudge ? 'Chế Độ Chỉ Xem (BGK Không Chấm Điểm)' : 'Chế Độ Chỉ Xem (Chỉ Giáo Viên Được Chấm)'}
                           </>
                         ) : (
                           <>
@@ -1512,10 +1539,10 @@ export default function TeacherReviewPortalPage() {
 
             <div className="space-y-4 max-w-xl">
               <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
-                <label className={`flex items-start gap-3 ${isReadOnlyJudge ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'}`}>
+                <label className={`flex items-start gap-3 ${isReadOnlyViewer ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'}`}>
                   <input
                     type="checkbox"
-                    disabled={isReadOnlyJudge}
+                    disabled={isReadOnlyViewer}
                     checked={consentData.publicNameConsent}
                     onChange={(e) => setConsentData(prev => ({ ...prev, publicNameConsent: e.target.checked }))}
                     className="mt-1 w-4 h-4 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-cyan-600 focus:ring-0 disabled:cursor-not-allowed"
@@ -1534,7 +1561,7 @@ export default function TeacherReviewPortalPage() {
                       <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block mb-1">Họ và tên Thầy/Cô:</label>
                       <input
                         type="text"
-                        disabled={isReadOnlyJudge}
+                        disabled={isReadOnlyViewer}
                         value={consentData.teacherDisplayName || ''}
                         onChange={(e) => setConsentData(prev => ({ ...prev, teacherDisplayName: e.target.value }))}
                         placeholder="Thầy/Cô Nguyễn Văn A..."
@@ -1545,7 +1572,7 @@ export default function TeacherReviewPortalPage() {
                       <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block mb-1">Đơn vị công tác / Trường THPT:</label>
                       <input
                         type="text"
-                        disabled={isReadOnlyJudge}
+                        disabled={isReadOnlyViewer}
                         value={consentData.institution || ''}
                         onChange={(e) => setConsentData(prev => ({ ...prev, institution: e.target.value }))}
                         placeholder="Trường THPT Chuyên..."
@@ -1558,10 +1585,10 @@ export default function TeacherReviewPortalPage() {
 
               {/* Rút khỏi thẩm định */}
               <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2">
-                <label className={`flex items-center gap-3 ${isReadOnlyJudge ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'}`}>
+                <label className={`flex items-center gap-3 ${isReadOnlyViewer ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'}`}>
                   <input
                     type="checkbox"
-                    disabled={isReadOnlyJudge}
+                    disabled={isReadOnlyViewer}
                     checked={consentData.withdrawn}
                     onChange={(e) => setConsentData(prev => ({ ...prev, withdrawn: e.target.checked }))}
                     className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-rose-600 focus:ring-0 disabled:cursor-not-allowed"
@@ -1577,12 +1604,12 @@ export default function TeacherReviewPortalPage() {
 
               <button
                 type="button"
-                disabled={savingConsent || isReadOnlyJudge}
+                disabled={savingConsent || isReadOnlyViewer}
                 onClick={handleSaveConsent}
                 className="px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white dark:bg-cyan-500 dark:hover:bg-cyan-400 dark:text-slate-950 font-bold text-xs flex items-center gap-2 shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {savingConsent ? <RefreshCw className="w-4 h-4 animate-spin" /> : (isReadOnlyJudge ? <Lock className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />)}
-                {isReadOnlyJudge ? 'Chế Độ Chỉ Xem (BGK)' : 'Lưu Lựa Chọn Đồng Thuận'}
+                {savingConsent ? <RefreshCw className="w-4 h-4 animate-spin" /> : (isReadOnlyViewer ? <Lock className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />)}
+                {isReadOnlyViewer ? (isReadOnlyJudge ? 'Chế Độ Chỉ Xem (BGK)' : 'Chế Độ Chỉ Xem (Chỉ GV Sửa)') : 'Lưu Lựa Chọn Đồng Thuận'}
               </button>
             </div>
           </div>

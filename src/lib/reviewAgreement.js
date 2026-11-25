@@ -458,11 +458,78 @@ export function evaluateReportComparisonAccess(callerClaims = null, enableSynthe
   };
 }
 
+/**
+ * Kiểm tra quyền vào Cổng Thẩm Định Chuyên Môn (/danh-gia-chuyen-mon) và quyền chỉnh sửa/cập nhật:
+ * - Học sinh (student hoặc tài khoản mặc định chưa cấp vai trò) và khách chưa đăng nhập: KHÔNG được vào.
+ * - Mọi vai trò khác không phải học sinh (teacher, judge, admin, team_self...): ĐƯỢC vào xem.
+ * - Duy nhất vai trò Giáo viên (teacher) mới được chỉnh sửa, chấm điểm và cập nhật phiếu.
+ */
+export function evaluateReviewPortalAccess(callerClaims = null, options = {}) {
+  const { adminUids = [], profileFallback = null } = options;
+  if (!callerClaims && !profileFallback) {
+    return {
+      canEnterPortal: false,
+      canEditReviews: false,
+      isStudent: true,
+      effectiveRole: 'guest',
+      isAdmin: false,
+      isTeacher: false,
+      isJudge: false
+    };
+  }
+
+  const c = callerClaims || {};
+  const uid = c.user_id || c.sub || c.uid || profileFallback?.uid || '';
+  const isAdmin = Boolean(
+    c.admin === true ||
+    c.role === 'admin' ||
+    (uid && Array.isArray(adminUids) && adminUids.includes(uid)) ||
+    profileFallback?.role === 'admin'
+  );
+  const isTeacher = Boolean(
+    c.reviewerType === 'teacher' ||
+    c.role === 'teacher' ||
+    profileFallback?.reviewerType === 'teacher' ||
+    profileFallback?.role === 'teacher'
+  );
+  const isJudge = Boolean(
+    c.reviewerType === 'judge' ||
+    c.isJudge === true ||
+    profileFallback?.isJudgeAccount === true ||
+    profileFallback?.role === 'judge'
+  );
+
+  const rawRole = c.reviewerType || c.role || profileFallback?.role || '';
+  const isExplicitNonStudentRole = Boolean(
+    rawRole && rawRole !== 'student' && rawRole !== 'guest'
+  );
+
+  const canEnterPortal = Boolean(isAdmin || isTeacher || isJudge || isExplicitNonStudentRole);
+  const canEditReviews = Boolean(isTeacher);
+
+  let effectiveRole = 'student';
+  if (isTeacher) effectiveRole = 'teacher';
+  else if (isAdmin) effectiveRole = 'admin';
+  else if (isJudge) effectiveRole = 'judge';
+  else if (isExplicitNonStudentRole) effectiveRole = rawRole;
+
+  return {
+    canEnterPortal,
+    canEditReviews,
+    isStudent: !canEnterPortal,
+    effectiveRole,
+    isAdmin,
+    isTeacher,
+    isJudge
+  };
+}
+
 export default {
   wilsonInterval,
   computeCohenKappa,
   computeCohortAgreement,
   aggregateReviewsBySubjectAndCohort,
   computeTeacherAiConfusionMatrix,
-  evaluateReportComparisonAccess
+  evaluateReportComparisonAccess,
+  evaluateReviewPortalAccess
 };

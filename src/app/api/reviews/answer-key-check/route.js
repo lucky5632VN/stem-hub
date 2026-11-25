@@ -84,15 +84,15 @@ export async function POST(request) {
   const uid = payload.user_id || payload.sub || payload.uid;
   const email = payload.email || '';
 
-  // 2. Kiểm tra quyền hạn từ Custom Claims (chỉ Giáo viên Toán hoặc Admin, chặn judge/học sinh ghi phiếu)
+  // 2. Kiểm tra quyền hạn từ Custom Claims (chỉ Giáo viên Toán mới được gửi/cập nhật phiếu kiểm tra đáp án)
   const reviewerType = payload.reviewerType || (payload.role === 'teacher' ? 'teacher' : (payload.role === 'team_self' ? 'team_self' : null));
   const subjects = Array.isArray(payload.subjects) ? payload.subjects : [];
   const isAdmin = payload.admin === true || payload.role === 'admin';
   const isTeacher = reviewerType === 'teacher' || payload.role === 'teacher';
 
-  if (!isAdmin && (!isTeacher || (subjects.length > 0 && !subjects.includes('toan')))) {
+  if (!isTeacher || (!isAdmin && subjects.length > 0 && !subjects.includes('toan'))) {
     return NextResponse.json(
-      { error: 'Tài khoản không có quyền gửi phiếu kiểm tra đáp án môn Toán (chỉ Giáo viên Toán hoặc Quản trị viên).' },
+      { error: 'Chỉ tài khoản có vai trò Giáo viên môn Toán (role: teacher) mới được phép cập nhật phiếu kiểm tra đáp án.' },
       { status: 403, headers: getCorsHeaders(request) }
     );
   }

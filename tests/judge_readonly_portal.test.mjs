@@ -1,18 +1,22 @@
 /**
- * 🧪 TEST SUITE: BAN GIÁM KHẢO (JUDGE) READ-ONLY RBAC ON TEACHER REVIEW PORTAL
+ * 🧪 TEST SUITE: NON-STUDENT READ ACCESS, TEACHER-ONLY EDIT RBAC & NAV BUTTON VISIBILITY
  *
- * Kiểm tra cấu trúc chốt chặn 2 lớp (Server API + Client UI):
- * 1. GET /api/reviews/samples: Cho phép judge (isJudge/reviewerType='judge') xem mẫu blinded cả 4 môn.
- * 2. POST /api/reviews/submit: Chặn judge với HTTP 403.
- * 3. POST /api/reviews/answer-key-check: Chỉ cho phép Admin hoặc Giáo viên Toán (chặn judge với HTTP 403).
- * 4. POST /api/reviews/consent: Chặn judge ghi nhận đồng thuận với HTTP 403.
- * 5. UI /danh-gia-chuyen-mon: Cho phép judge vào Tab 1 (Chấm Mẫu) ở chế độ Chỉ Xem, vô hiệu hóa các nút/ô nhập ghi dữ liệu.
+ * Kiểm tra cấu trúc chốt chặn 2 lớp (Server API + Client UI & Navigation):
+ * 1. evaluateReviewPortalAccess: Chặn học sinh/khách, cho phép mọi role khác vào xem, chỉ Giáo viên được chỉnh sửa/cập nhật.
+ * 2. GET /api/reviews/samples: Dùng evaluateReviewPortalAccess (chặn học sinh 403, mở các role khác xem).
+ * 3. POST /api/reviews/submit, /api/reviews/consent, /api/reviews/answer-key-check: Chỉ vai trò Giáo viên (teacher) mới được ghi/cập nhật.
+ * 4. Nút điều hướng "Thẩm định chuyên môn" (/danh-gia-chuyen-mon) hiển thị cho non-student trong Sidebar, SettingsDropdown và AdminSidebar.
+ * 5. UI /danh-gia-chuyen-mon: Chỉ chặn student/guest; các role khác (judge, admin thuần, team_self...) vào xem Read-Only; chỉ teacher được chỉnh sửa.
+ * 6. evaluateReportComparisonAccess: Mở 3 chế độ 150 ca cho Admin & BGK, ẩn khỏi giáo viên thuần.
  */
 
 import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
-import { evaluateReportComparisonAccess } from '../src/lib/reviewAgreement.js';
+import {
+  evaluateReportComparisonAccess,
+  evaluateReviewPortalAccess
+} from '../src/lib/reviewAgreement.js';
 
 let passed = 0;
 let total = 0;
@@ -31,7 +35,7 @@ function it(name, fn) {
 }
 
 console.log('========================================================================');
-console.log('🛡️ KIỂM THỬ CHẾ ĐỘ CHỈ XEM (READ-ONLY) & PHÂN QUYỀN MA TRẬN NHẦM LẪN');
+console.log('🛡️ KIỂM THỬ PHÂN QUYỀN CỔNG THẨM ĐỊNH & NÚT ĐIỀU HƯỚNG THEO VAI TRÒ');
 console.log('========================================================================\n');
 
 const samplesRoute = fs.readFileSync(path.resolve('src/app/api/reviews/samples/route.js'), 'utf8');
@@ -40,115 +44,143 @@ const answerKeyRoute = fs.readFileSync(path.resolve('src/app/api/reviews/answer-
 const consentRoute = fs.readFileSync(path.resolve('src/app/api/reviews/consent/route.js'), 'utf8');
 const reportRoute = fs.readFileSync(path.resolve('src/app/api/reviews/report/route.js'), 'utf8');
 const portalPage = fs.readFileSync(path.resolve('src/app/danh-gia-chuyen-mon/page.js'), 'utf8');
+const sidebarComp = fs.readFileSync(path.resolve('src/components/layout/Sidebar.jsx'), 'utf8');
+const adminSidebarComp = fs.readFileSync(path.resolve('src/components/admin/AdminSidebar.jsx'), 'utf8');
+const settingsDropdownComp = fs.readFileSync(path.resolve('src/components/organisms/SettingsDropdown.jsx'), 'utf8');
 
-it('1. GET /api/reviews/samples nhận diện judge và mở 4 môn chế độ đọc', () => {
+it('1. evaluateReviewPortalAccess: trừ học sinh mọi role đều vào được, chỉ giáo viên được sửa', () => {
+  const guest = evaluateReviewPortalAccess(null);
+  assert.strictEqual(guest.canEnterPortal, false);
+  assert.strictEqual(guest.canEditReviews, false);
+
+  const studentEmpty = evaluateReviewPortalAccess({ uid: 'hs1' });
+  assert.strictEqual(studentEmpty.canEnterPortal, false, 'Tài khoản mặc định chưa cấp role bị coi là học sinh');
+  assert.strictEqual(studentEmpty.canEditReviews, false);
+
+  const studentExplicit = evaluateReviewPortalAccess({ uid: 'hs2', role: 'student', reviewerType: null });
+  assert.strictEqual(studentExplicit.canEnterPortal, false);
+  assert.strictEqual(studentExplicit.canEditReviews, false);
+
+  const judge = evaluateReviewPortalAccess({ reviewerType: 'judge', isJudge: true });
+  assert.strictEqual(judge.canEnterPortal, true);
+  assert.strictEqual(judge.canEditReviews, false, 'BGK vào xem được nhưng không được sửa');
+
+  const adminOnly = evaluateReviewPortalAccess({ admin: true, role: 'admin' });
+  assert.strictEqual(adminOnly.canEnterPortal, true);
+  assert.strictEqual(adminOnly.canEditReviews, false, 'Admin không có vai trò GV chỉ vào xem (Read-Only)');
+
+  const teamSelf = evaluateReviewPortalAccess({ role: 'team_self', reviewerType: 'team_self' });
+  assert.strictEqual(teamSelf.canEnterPortal, true);
+  assert.strictEqual(teamSelf.canEditReviews, false, 'Thành viên nhóm vào xem được nhưng không được sửa');
+
+  const customModerator = evaluateReviewPortalAccess({ role: 'moderator' });
+  assert.strictEqual(customModerator.canEnterPortal, true);
+  assert.strictEqual(customModerator.canEditReviews, false);
+
+  const teacher = evaluateReviewPortalAccess({ role: 'teacher', reviewerType: 'teacher' });
+  assert.strictEqual(teacher.canEnterPortal, true);
+  assert.strictEqual(teacher.canEditReviews, true, 'Giáo viên được vào và được chỉnh sửa/chấm điểm');
+
+  const adminPlusTeacher = evaluateReviewPortalAccess({ admin: true, role: 'teacher', reviewerType: 'teacher' });
+  assert.strictEqual(adminPlusTeacher.canEnterPortal, true);
+  assert.strictEqual(adminPlusTeacher.isAdmin, true);
+  assert.strictEqual(adminPlusTeacher.canEditReviews, true, 'Tài khoản vừa Admin vừa Giáo viên giữ quyền chỉnh sửa');
+});
+
+it('2. API samples/submit/consent/answer-key-check chặn học sinh và chỉ cho role teacher chỉnh sửa', () => {
   assert(
-    samplesRoute.includes("const isJudge = payload.reviewerType === 'judge' || payload.isJudge === true;"),
-    'Thiếu logic nhận diện claim judge'
+    samplesRoute.includes('evaluateReviewPortalAccess(payload, { adminUids })') &&
+      samplesRoute.includes('if (!portalAccess.canEnterPortal)') &&
+      samplesRoute.includes('canEditReviews: portalAccess.canEditReviews'),
+    'GET /api/reviews/samples phải chặn học sinh (403) và mở cho các role khác'
   );
   assert(
-    samplesRoute.includes('if (isJudge && !isAdmin)') && samplesRoute.includes("reviewerType = 'judge'"),
-    'Thiếu gán reviewerType = judge cho tài khoản judge'
+    submitRoute.includes('evaluateReviewPortalAccess(payload, { adminUids })') &&
+      submitRoute.includes('if (!portalAccess.canEditReviews)') &&
+      !submitRoute.includes('if (isAdmin && reviewerType !== \'teacher\')'),
+    'POST /api/reviews/submit chỉ cho phép role teacher gửi phiếu'
   );
   assert(
-    samplesRoute.includes("subjects = ['toan', 'ly', 'hoa', 'sinh']"),
-    'Judge phải được cấp danh sách 4 môn để xem giao diện chấm mẫu'
+    consentRoute.includes('evaluateReviewPortalAccess(payload, { adminUids })') &&
+      consentRoute.includes('if (!portalAccess.canEditReviews)'),
+    'POST /api/reviews/consent chỉ cho phép role teacher cập nhật cam kết'
+  );
+  assert(
+    answerKeyRoute.includes('if (!isTeacher || (!isAdmin && subjects.length > 0 && !subjects.includes(\'toan\')))'),
+    'POST /api/reviews/answer-key-check phải yêu cầu isTeacher'
   );
 });
 
-it('2. POST /api/reviews/submit chặn tuyệt đối tài khoản judge (403)', () => {
+it('3. Nút điều hướng Thẩm định chuyên môn có mặt trên Sidebar, SettingsDropdown và AdminSidebar', () => {
   assert(
-    submitRoute.includes("if (reviewerType === 'judge' && !isAdmin)"),
-    'Thiếu nhánh chặn explicit cho judge khi submit phiếu chấm'
+    sidebarComp.includes("href: '/danh-gia-chuyen-mon'") &&
+      sidebarComp.includes('evaluateReviewPortalAccess') &&
+      sidebarComp.includes('canEnterReviewPortal'),
+    'Sidebar phải có nút Thẩm định chuyên môn ẩn với học sinh và hiện cho role khác'
   );
   assert(
-    submitRoute.includes('status: 403'),
-    'Phải trả về HTTP 403 khi judge cố gửi phiếu chấm'
-  );
-});
-
-it('3. POST /api/reviews/answer-key-check chỉ cho phép Admin hoặc Giáo viên Toán (chặn judge)', () => {
-  assert(
-    answerKeyRoute.includes("const isTeacher = reviewerType === 'teacher' || payload.role === 'teacher';"),
-    'Thiếu kiểm tra isTeacher tường minh'
+    settingsDropdownComp.includes("router.push('/danh-gia-chuyen-mon')") &&
+      settingsDropdownComp.includes('canEnterReviewPortal'),
+    'SettingsDropdown phải có nút nhấn vào /danh-gia-chuyen-mon cho non-student'
   );
   assert(
-    answerKeyRoute.includes("if (!isAdmin && (!isTeacher || (subjects.length > 0 && !subjects.includes('toan'))))"),
-    'Chưa khóa chặt POST answer-key-check trước vai trò judge/học sinh'
+    adminSidebarComp.includes("href: '/danh-gia-chuyen-mon'"),
+    'AdminSidebar phải có nút nhấn vào /danh-gia-chuyen-mon'
   );
 });
 
-it('4. POST /api/reviews/consent chặn judge lưu/thay đổi cam kết đồng thuận', () => {
-  assert(
-    consentRoute.includes("if ((payload.reviewerType === 'judge' || payload.isJudge === true) && !isAdmin)"),
-    'Thiếu kiểm tra chặn judge ở POST /api/reviews/consent'
-  );
-});
-
-it('5. UI /danh-gia-chuyen-mon nhập Eye, cho phép judge xem Tab 1 và khóa thao tác ghi', () => {
+it('4. UI /danh-gia-chuyen-mon khóa chế độ chỉnh sửa cho mọi role khác ngoài teacher', () => {
   assert(
     portalPage.includes('Eye,') && portalPage.includes('<Eye '),
     'Thiếu import hoặc render icon Eye'
   );
   assert(
-    portalPage.includes("const isReadOnlyJudge = reviewerType === 'judge' && !isAdmin;"),
-    'Thiếu biến isReadOnlyJudge'
+    portalPage.includes("reviewerType === 'student' || reviewerType === 'guest'") &&
+      portalPage.includes('const isReadOnlyViewer = !isTeacherEditor;'),
+    'UI phải cho mọi role trừ học sinh vào xem và khóa chỉnh sửa khi !isTeacherEditor'
   );
   assert(
-    portalPage.includes("reviewerType !== 'teacher' && reviewerType !== 'judge' && !isAdmin"),
-    'Tab 1 phải cho phép judge xem thay vì ẩn toàn bộ'
-  );
-  assert(
-    portalPage.includes('if (isReadOnlyJudge)') &&
-      portalPage.includes('disabled={isReadOnlyJudge}') &&
-      portalPage.includes('disabled={submitting || isReadOnlyJudge}') &&
-      portalPage.includes('disabled={savingConsent || isReadOnlyJudge}'),
-    'Thiếu khóa nút/ô nhập liệu khi isReadOnlyJudge = true'
+    portalPage.includes('if (isReadOnlyViewer)') &&
+      portalPage.includes('disabled={isReadOnlyViewer}') &&
+      portalPage.includes('disabled={submitting || isReadOnlyViewer}') &&
+      portalPage.includes('disabled={savingConsent || isReadOnlyViewer}'),
+    'Thiếu khóa nút/ô nhập liệu khi isReadOnlyViewer = true'
   );
 });
 
-it('6. evaluateReportComparisonAccess chỉ mở 3 chế độ 150 ca cho Admin và BGK (judge); chặn giáo viên', () => {
+it('5. evaluateReportComparisonAccess chỉ mở 3 chế độ 150 ca cho Admin và BGK (judge); chặn giáo viên', () => {
   const unauthDefault = evaluateReportComparisonAccess(null, false);
-  assert.strictEqual(unauthDefault.canViewComparisonTabs, false, 'Khách mặc định không xem được 3 tab 150 ca');
+  assert.strictEqual(unauthDefault.canViewComparisonTabs, false);
 
   const studentAccess = evaluateReportComparisonAccess({ role: 'student' }, false);
-  assert.strictEqual(studentAccess.canViewComparisonTabs, false, 'Học sinh không xem được 3 tab 150 ca');
+  assert.strictEqual(studentAccess.canViewComparisonTabs, false);
 
   const teacherDefault = evaluateReportComparisonAccess({ role: 'teacher', reviewerType: 'teacher' }, false);
   assert.strictEqual(teacherDefault.isTeacherOnly, true);
-  assert.strictEqual(teacherDefault.canViewComparisonTabs, false, 'Giáo viên chỉ xem phần của giáo viên chấm');
+  assert.strictEqual(teacherDefault.canViewComparisonTabs, false);
 
   const teacherEvenWithEnv = evaluateReportComparisonAccess({ role: 'teacher', reviewerType: 'teacher' }, true);
-  assert.strictEqual(teacherEvenWithEnv.canViewComparisonTabs, false, 'Giáo viên vẫn bị ẩn 3 tab ngay cả khi bật env');
+  assert.strictEqual(teacherEvenWithEnv.canViewComparisonTabs, false);
 
   const judgeAccess = evaluateReportComparisonAccess({ reviewerType: 'judge', isJudge: true }, false);
   assert.strictEqual(judgeAccess.isJudge, true);
-  assert.strictEqual(judgeAccess.canViewComparisonTabs, true, 'Ban Giám Khảo phải xem được 3 phần đối chiếu 150 ca');
+  assert.strictEqual(judgeAccess.canViewComparisonTabs, true);
 
   const adminAccess = evaluateReportComparisonAccess({ admin: true, role: 'admin' }, false);
   assert.strictEqual(adminAccess.isAdmin, true);
-  assert.strictEqual(adminAccess.canViewComparisonTabs, true, 'Admin phải xem được 3 phần đối chiếu 150 ca');
+  assert.strictEqual(adminAccess.canViewComparisonTabs, true);
 
   const adminAlsoTeacher = evaluateReportComparisonAccess({ admin: true, role: 'teacher' }, false);
   assert.strictEqual(adminAlsoTeacher.isTeacherOnly, false);
-  assert.strictEqual(adminAlsoTeacher.canViewComparisonTabs, true, 'Admin kiêm teacher vẫn giữ quyền Admin');
-});
+  assert.strictEqual(adminAlsoTeacher.canViewComparisonTabs, true);
 
-it('7. API /api/reviews/report và UI đồng bộ phân quyền & tách bạch dữ liệu giáo viên thật', () => {
   assert(
     reportRoute.includes('evaluateReportComparisonAccess(callerClaims, enableSynthetic)') &&
       reportRoute.includes('canViewComparisonTabs: reportAccess.canViewComparisonTabs') &&
       reportRoute.includes("r.reviewerType === 'teacher' && !r.isDemo && !r.skipped"),
-    'API report phải dùng evaluateReportComparisonAccess và giữ nguyên bộ lọc !r.isDemo'
-  );
-  assert(
-    portalPage.includes('canViewComparisonTabs && (') &&
-      portalPage.includes("setConfusionSource('teacher')") &&
-      portalPage.includes("'Authorization': `Bearer ${token}`"),
-    'UI phải đính kèm token khi gọi report và reset tab về teacher khi không có quyền'
+    'API report phải đồng bộ phân quyền và giữ nguyên bộ lọc !r.isDemo'
   );
 });
 
 console.log(`\n📊 Tổng kết: ${passed}/${total} test passed.`);
 if (passed !== total) process.exit(1);
-

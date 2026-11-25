@@ -2,7 +2,7 @@
 
 import { 
   LayoutDashboard, Users, BookOpen, Swords, 
-  MessageSquare, Settings, Trophy, ArrowLeft, Shield, FileText, Mail, GraduationCap
+  MessageSquare, Settings, Trophy, ArrowLeft, Shield, ShieldCheck, FileText, Mail, GraduationCap
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -13,6 +13,7 @@ export default function AdminSidebar() {
 
   const menuItems = [
     { icon: <LayoutDashboard className="w-5 h-5" />, label: 'Bảng tổng quan', href: '/admin' },
+    { icon: <ShieldCheck className="w-5 h-5 text-cyan-400" />, label: 'Thẩm định chuyên môn', href: '/danh-gia-chuyen-mon' },
     { icon: <GraduationCap className="w-5 h-5 text-emerald-400" />, label: 'Kiểm duyệt Tri thức AI', href: '/admin/knowledge-review' },
     { icon: <Mail className="w-5 h-5 text-pink-400" />, label: 'Hòm thư góp ý', href: '/admin/contact' },
     { icon: <Users className="w-5 h-5 text-indigo-400" />, label: 'Quản lý học sinh', href: '/admin/students' },

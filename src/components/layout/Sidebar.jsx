@@ -1,20 +1,47 @@
 'use client';
 
-import { Grid, Mail, Swords, Trophy, Sparkles, PanelLeftClose } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Grid, Mail, Swords, Trophy, PanelLeftClose, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAppStore } from '@/store/useAppStore';
 import { playSound } from '@/lib/sound';
+import { auth } from '@/lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { evaluateReviewPortalAccess } from '@/lib/reviewAgreement';
 
 export default function Sidebar() {
   const pathname = usePathname();
   const isSidebarOpen = useAppStore((state) => state.isSidebarOpen);
   const toggleSidebar = useAppStore((state) => state.toggleSidebar);
+  const user = useAppStore((state) => state.user);
+  const [authClaims, setAuthClaims] = useState(null);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (fbUser) => {
+      if (!fbUser) {
+        setAuthClaims(null);
+        return;
+      }
+      try {
+        const res = await fbUser.getIdTokenResult();
+        setAuthClaims(res?.claims || {});
+      } catch {
+        setAuthClaims(null);
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  const canEnterReviewPortal = evaluateReviewPortalAccess(authClaims, { profileFallback: user }).canEnterPortal;
 
   const menuItems = [
     { icon: <Grid className="w-5 h-5 transition-transform group-hover:scale-110" />, label: 'Danh mục phòng lab', href: '/' },
     { icon: <Swords className="w-5 h-5 text-accent-pink transition-transform group-hover:scale-110" />, label: 'Đấu trường 1v1', href: '/dau-truong', highlight: true },
     { icon: <Trophy className="w-5 h-5 text-warning transition-transform group-hover:scale-110" />, label: 'Bảng xếp hạng ELO', href: '/xep-hang' },
+    ...(canEnterReviewPortal
+      ? [{ icon: <ShieldCheck className="w-5 h-5 text-cyan-400 transition-transform group-hover:scale-110" />, label: 'Thẩm định chuyên môn', href: '/danh-gia-chuyen-mon' }]
+      : []),
     { icon: <Mail className="w-5 h-5 transition-transform group-hover:scale-110" />, label: 'Liên hệ', href: '/lien-he' },
   ];
 

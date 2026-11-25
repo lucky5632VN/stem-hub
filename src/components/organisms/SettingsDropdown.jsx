@@ -1,20 +1,22 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/store/useAppStore';
 import { clearFace2FASession } from '@/lib/faceAuthSecurity';
 import { playSound } from '@/lib/sound';
 import { auth, db } from '@/lib/firebase';
-import { signOut } from 'firebase/auth';
+import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, updateDoc } from 'firebase/firestore';
 import { 
   Sun, Moon, Volume2, VolumeX, MousePointer, 
-  LogOut, User, Sparkles, Trophy, Shield
+  LogOut, User, Sparkles, Trophy, Shield, ShieldCheck
 } from 'lucide-react';
 import { AvatarFrame } from '@/components/atoms/AvatarFrame';
 import STEMAvatarSVG from '@/components/atoms/STEMAvatarSVG';
 import { getTitleLabel } from '@/lib/titles';
+import { evaluateReviewPortalAccess } from '@/lib/reviewAgreement';
 
 export default function SettingsDropdown({ onClose }) {
   const router = useRouter();
@@ -27,6 +29,28 @@ export default function SettingsDropdown({ onClose }) {
   const setCursorType = useAppStore((state) => state.setCursorType);
   const language = useAppStore((state) => state.language);
   const toggleLanguage = useAppStore((state) => state.toggleLanguage);
+  const [authClaims, setAuthClaims] = useState(null);
+
+  useEffect(() => {
+    if (auth.currentUser) {
+      auth.currentUser.getIdTokenResult().then(r => setAuthClaims(r?.claims || {})).catch(() => {});
+    }
+    const unsub = onAuthStateChanged(auth, async (fbUser) => {
+      if (!fbUser) {
+        setAuthClaims(null);
+        return;
+      }
+      try {
+        const res = await fbUser.getIdTokenResult();
+        setAuthClaims(res?.claims || {});
+      } catch {
+        setAuthClaims(null);
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  const canEnterReviewPortal = evaluateReviewPortalAccess(authClaims, { profileFallback: user }).canEnterPortal;
 
   const getFrameStyle = (frame) => {
     switch (frame) {
@@ -293,6 +317,19 @@ export default function SettingsDropdown({ onClose }) {
 
       {/* Buttons Footer */}
       <div className="mt-4 space-y-2">
+        {canEnterReviewPortal && (
+          <button
+            onMouseEnter={playSound.hover}
+            onClick={() => {
+              playSound.click();
+              router.push('/danh-gia-chuyen-mon');
+              onClose();
+            }}
+            className="w-full py-2.5 bg-cyan-500/10 hover:bg-cyan-500 text-cyan-400 hover:text-slate-950 border border-cyan-500/30 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg active:scale-98"
+          >
+            <ShieldCheck className="w-3.5 h-3.5" /> Thẩm định chuyên môn
+          </button>
+        )}
         {(user?.role === 'admin' || user?.email?.toLowerCase() === 'admin123@gmail.com') && (
           <button 
             onMouseEnter={playSound.hover}
