@@ -284,21 +284,21 @@ export default function Home() {
       </div>
 
       {/* 🚀 LỚP GIAO DIỆN UI THAO TÁC NGƯỜI DÙNG (Z-INDEX 10) */}
-      <div className="relative z-10 w-full min-h-screen p-6 max-w-7xl mx-auto">
+      <div className="relative z-10 w-full min-h-screen p-4 sm:p-5 lg:p-6 max-w-7xl mx-auto">
       
       {/* 2-COLUMN HUB LAYOUT */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 xl:gap-6 items-start">
         
         {/* CỘT TRÁI (COL-SPAN-8): DANH SÁCH PHÒNG LABS THỰC HÀNH */}
         <div className="lg:col-span-8 flex flex-col gap-3.5 screenshot-full-width">
           <div className="flex flex-col mb-1">
-            <h2 className="text-lg font-bold text-text-primary tracking-tight uppercase flex items-center gap-2">
-              <Zap className="w-4.5 h-4.5 text-accent-pink animate-pulse motion-reduce:animate-none" /> HỆ THỐNG PHÒNG THÍ NGHIỆM ẢO STEM
+            <h2 className="text-base sm:text-lg font-bold text-text-primary tracking-tight uppercase flex items-center gap-2">
+              <Zap className="w-4 h-4 text-accent-pink animate-pulse motion-reduce:animate-none" /> HỆ THỐNG PHÒNG THÍ NGHIỆM ẢO STEM
             </h2>
-            <p className="text-text-secondary text-xs mt-1 tracking-wider uppercase font-mono">CHỌN PHÒNG THÍ NGHIỆM ĐỂ KHỞI CHẠY MÔ PHỎNG LƯỢNG TỬ</p>
+            <p className="text-text-secondary text-[11px] sm:text-xs mt-0.5 tracking-wider uppercase font-mono">CHỌN PHÒNG THÍ NGHIỆM ĐỂ KHỞI CHẠY MÔ PHỎNG LƯỢNG TỬ</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
             {labs.map((lab) => {
               const IconComponent = lab.icon;
               return (
@@ -403,10 +403,10 @@ export default function Home() {
         </div>
 
         {/* CỘT PHẢI (COL-SPAN-4): Spaceship Cockpit HUD */}
-        <div className="lg:col-span-4 flex flex-col gap-6 screenshot-hide">
+        <div className="lg:col-span-4 flex flex-col gap-4 sm:gap-6 screenshot-hide">
 
           {/* USER CONSOLE HUD: BẢNG ĐIỀU KHIỂN BẰNG KÍNH */}
-          <div className="bg-bg-secondary/95 border border-border-theme rounded-3xl p-6 shadow-2xl relative overflow-hidden neon-border-glow">
+          <div className="bg-bg-secondary/95 border border-border-theme rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-2xl relative overflow-hidden neon-border-glow">
             {/* Họa tiết trang trí góc điều khiển Sci-Fi HUD */}
             <div className="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-accent-pink/40 pointer-events-none" />
             <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-accent-pink/40 pointer-events-none" />
@@ -414,70 +414,70 @@ export default function Home() {
             <div className="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-accent-pink/40 pointer-events-none" />
             <div className="absolute top-0 right-0 w-32 h-32 bg-accent-pink/5 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="flex items-center justify-between mb-5 border-b border-border-theme pb-3 gap-2">
+            <div className="flex items-center justify-between mb-4 border-b border-border-theme pb-2.5 gap-2">
               <div className="flex items-center gap-2 min-w-0">
                 <Activity className="w-4 h-4 text-accent-pink animate-pulse motion-reduce:animate-none shrink-0" />
                 <span className="text-xs font-black text-text-primary uppercase tracking-wider cyber-glitch-text font-mono truncate">
                   TRẠM CHỈ HUY STEM
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-xs font-mono text-emerald-400 font-bold shrink-0 shadow-sm">
+              <div className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[11px] font-mono text-emerald-400 font-bold shrink-0 shadow-sm">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse motion-reduce:animate-none" />
                 <span>ONLINE</span>
               </div>
             </div>
 
             {user ? (
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-3.5">
                 {/* Khu vực thông tin Avatar và Rank */}
-                <div className="flex items-center gap-4 bg-bg-tertiary/80 p-4 border border-border-theme rounded-2xl relative">
-                  <div className="relative shrink-0 w-16 h-16 flex items-center justify-center">
-                    <AvatarFrame frame={personalization.avatarFrame || 'default'} className="w-16 h-16">
+                <div className="flex items-center gap-3 bg-bg-tertiary/80 p-3 sm:p-3.5 border border-border-theme rounded-2xl relative">
+                  <div className="relative shrink-0 w-14 h-14 flex items-center justify-center">
+                    <AvatarFrame frame={personalization.avatarFrame || 'default'} className="w-14 h-14">
                       {personalization.avatarUrl && (personalization.avatarUrl.startsWith('http') || personalization.avatarUrl.startsWith('data:image/')) ? (
                         <img src={personalization.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }} />
                       ) : personalization.avatarUrl && personalization.avatarUrl !== 'custom-avatar' ? (
-                        <span className="select-none flex items-center justify-center w-full h-full text-2xl">{personalization.avatarUrl}</span>
+                        <span className="select-none flex items-center justify-center w-full h-full text-xl">{personalization.avatarUrl}</span>
                       ) : (
-                        <STEMAvatarSVG parts={personalization.avatarParts} className="w-11 h-11" />
+                        <STEMAvatarSVG parts={personalization.avatarParts} className="w-10 h-10" />
                       )}
                     </AvatarFrame>
-                    <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-accent-pink border-2 border-bg-primary flex items-center justify-center text-xs font-black text-white font-mono shadow-md">
+                    <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-accent-pink border-2 border-bg-primary flex items-center justify-center text-[10px] font-black text-white font-mono shadow-md">
                       {personalization.level || 1}
                     </div>
                   </div>
 
                   <div className="text-left flex-1 min-w-0">
-                    <h4 className="text-sm font-black text-text-primary truncate font-mono uppercase tracking-wide">
+                    <h4 className="text-xs sm:text-sm font-black text-text-primary truncate font-mono uppercase tracking-wide">
                       {personalization.name || user.displayName || 'Người chơi ẩn danh'}
                     </h4>
-                    <span className="text-xs font-bold text-accent-pink bg-accent-pink/10 border border-accent-pink/20 px-2.5 py-0.5 rounded-full inline-block mt-1 font-mono uppercase tracking-wider">
+                    <span className="text-[10px] font-bold text-accent-pink bg-accent-pink/10 border border-accent-pink/20 px-2 py-0.5 rounded-full inline-block mt-0.5 font-mono uppercase tracking-wider truncate max-w-full">
                       {getTitleLabel(personalization.activeTitle || 'apprentice')}
                     </span>
-                    <p className="text-xs text-text-secondary font-mono mt-1 uppercase">
+                    <p className="text-[11px] text-text-secondary font-mono mt-0.5 uppercase">
                       HẠNG: <span className="text-amber-400 font-bold">{getRankTitle(personalization.elo)}</span>
                     </p>
                   </div>
                 </div>
 
                 {/* Grid Chỉ số phụ ELO & Tinh thể */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-bg-tertiary/80 border border-border-theme p-3 rounded-2xl flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-accent-pink/10 border border-accent-pink/20 flex items-center justify-center shrink-0">
-                      <Trophy className="w-5 h-5 text-accent-pink" />
+                <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
+                  <div className="bg-bg-tertiary/80 border border-border-theme p-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-accent-pink/10 border border-accent-pink/20 flex items-center justify-center shrink-0">
+                      <Trophy className="w-4 h-4 text-accent-pink" />
                     </div>
-                    <div className="text-left">
-                      <span className="text-xs text-text-secondary font-mono block">ĐIỂM ELO</span>
-                      <strong className="text-sm font-black text-text-primary font-mono">{personalization.elo || 1000}</strong>
+                    <div className="text-left min-w-0">
+                      <span className="text-[10px] text-text-secondary font-mono block uppercase">ĐIỂM ELO</span>
+                      <strong className="text-xs sm:text-sm font-black text-text-primary font-mono truncate block">{personalization.elo || 1000}</strong>
                     </div>
                   </div>
 
-                  <div className="bg-bg-tertiary/80 border border-border-theme p-3 rounded-2xl flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
-                      <CrystalIcon className="w-5.5 h-5.5" />
+                  <div className="bg-bg-tertiary/80 border border-border-theme p-2.5 rounded-xl sm:rounded-2xl flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
+                      <CrystalIcon className="w-5 h-5" />
                     </div>
-                    <div className="text-left">
-                      <span className="text-xs text-text-secondary font-mono block">TINH THỂ</span>
-                      <strong className="text-sm font-black text-amber-400 font-mono">+{personalization.crystals || 0}</strong>
+                    <div className="text-left min-w-0">
+                      <span className="text-[10px] text-text-secondary font-mono block uppercase">TINH THỂ</span>
+                      <strong className="text-xs sm:text-sm font-black text-amber-400 font-mono truncate block">+{personalization.crystals || 0}</strong>
                     </div>
                   </div>
                 </div>
@@ -485,22 +485,22 @@ export default function Home() {
                 {/* Nút hành động nhanh tới Trang cá nhân */}
                 <button
                   onClick={() => router.push('/ho-so')}
-                  className="w-full py-2.5 px-4 bg-gradient-to-r from-accent-pink/15 via-purple-600/15 to-accent-pink/15 hover:from-accent-pink/30 hover:to-purple-600/30 border border-accent-pink/40 hover:border-accent-pink rounded-2xl text-xs font-bold text-accent-pink hover:text-white flex items-center justify-center gap-2 transition-all shadow-md active:scale-98 cursor-pointer mt-1"
+                  className="w-full py-2.5 px-3.5 bg-gradient-to-r from-accent-pink/15 via-purple-600/15 to-accent-pink/15 hover:from-accent-pink/30 hover:to-purple-600/30 border border-accent-pink/40 hover:border-accent-pink rounded-xl text-xs font-bold text-accent-pink hover:text-white flex items-center justify-center gap-2 transition-all shadow-md active:scale-98 cursor-pointer mt-0.5"
                 >
-                  <User className="w-4 h-4" />
+                  <User className="w-3.5 h-3.5" />
                   <span>Mở Hồ Sơ & Trang Bị Nhân Vật</span>
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             ) : (
-              <div className="p-6 bg-bg-tertiary/80 border border-border-theme rounded-2xl text-center flex flex-col items-center">
-                <div className="w-12 h-12 rounded-full bg-accent-pink/10 border border-accent-pink/20 flex items-center justify-center mb-3">
-                  <User className="w-6 h-6 text-accent-pink" />
+              <div className="p-5 bg-bg-tertiary/80 border border-border-theme rounded-2xl text-center flex flex-col items-center">
+                <div className="w-11 h-11 rounded-full bg-accent-pink/10 border border-accent-pink/20 flex items-center justify-center mb-2.5">
+                  <User className="w-5 h-5 text-accent-pink" />
                 </div>
-                <h4 className="text-sm font-bold text-text-primary mb-1 font-mono uppercase tracking-wide">
+                <h4 className="text-xs sm:text-sm font-bold text-text-primary mb-1 font-mono uppercase tracking-wide">
                   CHƯA KÍCH HOẠT ĐIỀU KHIỂN
                 </h4>
-                <p className="text-xs text-text-secondary font-mono mb-4 leading-relaxed max-w-[240px]">
+                <p className="text-[11px] sm:text-xs text-text-secondary font-mono mb-3.5 leading-relaxed max-w-[220px]">
                   Đăng nhập để đồng bộ ELO, cấp bậc và trang bị phòng thí nghiệm
                 </p>
                 <button
@@ -508,7 +508,7 @@ export default function Home() {
                     playSound.click();
                     openAuth('login');
                   }}
-                  className="px-5 py-2.5 bg-gradient-to-r from-accent-pink to-purple-600 hover:opacity-90 text-white rounded-xl text-xs font-bold font-mono tracking-wide shadow-md transition-all active:scale-95 cursor-pointer flex items-center gap-2 focus-visible:ring-2 focus-visible:ring-accent-pink focus-visible:outline-none"
+                  className="px-4 py-2 bg-gradient-to-r from-accent-pink to-purple-600 hover:opacity-90 text-white rounded-xl text-xs font-bold font-mono tracking-wide shadow-md transition-all active:scale-95 cursor-pointer flex items-center gap-2 focus-visible:ring-2 focus-visible:ring-accent-pink focus-visible:outline-none"
                 >
                   <Zap className="w-3.5 h-3.5" />
                   <span>ĐĂNG NHẬP NGAY</span>

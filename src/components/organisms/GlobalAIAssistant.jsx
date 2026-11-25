@@ -2569,7 +2569,7 @@ ${conciseInstruction}
       </AnimatePresence>
 
       {!isOpen && !isMatchOrPracticeActive().active && isHomeOrLabDirectory && (
-        <div className="fixed bottom-6 right-24 z-[999] screenshot-hide">
+        <div className="fixed bottom-6 right-24 z-30 screenshot-hide">
           <button
             onClick={handleOpenHUD}
             className={`group relative flex items-center gap-2.5 px-4 py-3 border rounded-full backdrop-blur-xl transition-all duration-300 active:scale-95 cursor-pointer ${

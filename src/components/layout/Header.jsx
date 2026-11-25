@@ -573,7 +573,7 @@ export default function Header() {
               {/* Lớp phủ bắt sự kiện nhấp ra bất kỳ vị trí nào bên ngoài để đóng menu */}
               {isDropdownOpen && (
                 <div 
-                  className="fixed inset-0 z-[990] bg-transparent cursor-default pointer-events-auto"
+                  className="fixed inset-0 z-[1001] bg-black/40 backdrop-blur-[2px] cursor-default pointer-events-auto"
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsDropdownOpen(false);
@@ -587,7 +587,7 @@ export default function Header() {
                   playSound.click();
                   setIsDropdownOpen(!isDropdownOpen);
                 }}
-                className="flex items-center gap-3 px-3 py-1.5 rounded-full hover:bg-bg-tertiary border border-transparent hover:border-border-theme transition-all select-none active:scale-95 relative z-[1001]"
+                className="flex items-center gap-3 px-3 py-1.5 rounded-full hover:bg-bg-tertiary border border-transparent hover:border-border-theme transition-all select-none active:scale-95 relative z-[1002]"
               >
                 <AvatarFrame frame={personalization.avatarFrame} className="w-9 h-9 text-base">
                   {personalization.avatarUrl && (personalization.avatarUrl.startsWith('http') || personalization.avatarUrl.startsWith('data:image/')) ? (

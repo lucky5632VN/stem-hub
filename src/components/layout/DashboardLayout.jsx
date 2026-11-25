@@ -799,7 +799,7 @@ export default function DashboardLayout({ children }) {
 
       {/* Global Floating Screenshot Shutter FAB (Game-like Camera tool) */}
       {showFloatingShutter && (
-        <div className={`fixed screenshot-hide group select-none transition-all duration-300 ${pathname === '/ho-so' ? 'bottom-28 right-6 z-[30]' : pathname === '/xep-hang' ? 'bottom-22 right-6 z-[999]' : 'bottom-6 right-6 z-[999]'}`}>
+        <div className={`fixed screenshot-hide group select-none transition-all duration-300 ${pathname === '/ho-so' ? 'bottom-28 right-6 z-30' : pathname === '/xep-hang' ? 'bottom-22 right-6 z-30' : 'bottom-6 right-6 z-30'}`}>
           {/* Neon Floating Tooltip */}
           <div className="absolute bottom-16 right-0 w-max invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 pointer-events-none bg-bg-secondary/95 border border-border-theme backdrop-blur-md px-3.5 py-2 rounded-2xl text-[10px] font-black text-accent-pink tracking-wider shadow-lg select-none flex items-center gap-1.5 uppercase">
             <Sparkles className="w-3.5 h-3.5 text-warning animate-pulse" /> Chụp & Đăng Story 📸

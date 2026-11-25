@@ -153,13 +153,13 @@ export default function SettingsDropdown({ onClose }) {
 
   return (
     <div 
-      className="absolute right-0 w-[340px] bg-bg-secondary backdrop-blur-2xl border border-border-theme rounded-2xl shadow-2xl p-5 z-[999] animate-in fade-in slide-in-from-top-3 duration-200 text-text-primary"
-      style={{ top: '68px' }}
+      className="absolute right-0 w-[320px] max-h-[calc(100vh-85px)] overflow-y-auto custom-scrollbar bg-bg-secondary/98 backdrop-blur-2xl border border-border-theme rounded-2xl shadow-2xl p-4 z-[1002] animate-in fade-in slide-in-from-top-2 duration-200 text-text-primary"
+      style={{ top: '64px' }}
       onClick={(e) => e.stopPropagation()}
     >
       {/* User Info Header */}
       {user && (
-        <div className="flex flex-col items-center border-b border-border-theme pb-4 mb-4 select-none">
+        <div className="flex flex-col items-center border-b border-border-theme pb-3 mb-3 select-none">
           {/* Avatar with selected frame */}
           <div 
             onClick={() => {
@@ -170,15 +170,15 @@ export default function SettingsDropdown({ onClose }) {
             className="relative group/avatar cursor-pointer animate-in fade-in zoom-in-50 duration-200"
             title="Thiết kế Avatar Chibi cá nhân"
           >
-            <AvatarFrame frame={personalization.avatarFrame} className="w-16 h-16 text-2xl mb-2 transition-all duration-300 group-hover/avatar:scale-105">
+            <AvatarFrame frame={personalization.avatarFrame} className="w-14 h-14 text-xl mb-1.5 transition-all duration-300 group-hover/avatar:scale-105">
               {personalization.avatarUrl && (personalization.avatarUrl.startsWith('http') || personalization.avatarUrl.startsWith('data:image/')) ? (
                 <img src={personalization.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }} />
               ) : personalization.avatarUrl && personalization.avatarUrl !== 'custom-avatar' ? (
-                <span className="select-none flex items-center justify-center w-full h-full text-2xl">{personalization.avatarUrl}</span>
+                <span className="select-none flex items-center justify-center w-full h-full text-xl">{personalization.avatarUrl}</span>
               ) : personalization.avatarParts ? (
-                <STEMAvatarSVG parts={personalization.avatarParts} />
+                <STEMAvatarSVG parts={personalization.avatarParts} className="w-10 h-10" />
               ) : (
-                <span className="font-extrabold text-accent-pink select-none">
+                <span className="font-extrabold text-accent-pink select-none text-xl">
                   {user?.displayName ? user.displayName.charAt(0).toUpperCase() : 'H'}
                 </span>
               )}
@@ -189,15 +189,15 @@ export default function SettingsDropdown({ onClose }) {
               </div>
               
               {/* Level badge */}
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-accent-pink border-2 border-bg-secondary text-[10px] font-bold text-white flex items-center justify-center shadow-lg z-30">
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-accent-pink border-2 border-bg-secondary text-[9px] font-bold text-white flex items-center justify-center shadow-lg z-30 font-mono">
                 {personalization.level}
               </div>
             </AvatarFrame>
           </div>
 
           <div className="text-center flex flex-col items-center">
-            <h4 className="text-text-primary font-semibold text-base leading-snug">{user.displayName || 'Học viên'}</h4>
-            <span className="text-[10px] text-accent-pink font-bold px-2 py-0.5 bg-accent-pink/10 rounded-full inline-block mt-1 border border-accent-pink/20">
+            <h4 className="text-text-primary font-semibold text-sm leading-snug">{user.displayName || 'Học viên'}</h4>
+            <span className="text-[10px] text-accent-pink font-bold px-2 py-0.5 bg-accent-pink/10 rounded-full inline-block mt-0.5 border border-accent-pink/20">
               {getTitleLabel(personalization.activeTitle)}
             </span>
             <button
@@ -206,22 +206,22 @@ export default function SettingsDropdown({ onClose }) {
                 router.push('/ho-so?tab=personalization&subtab=character');
                 onClose();
               }}
-              className="mt-2 text-[10px] font-bold text-accent-pink hover:opacity-80 transition-all flex items-center gap-1 bg-accent-pink/5 px-2.5 py-1 rounded-lg border border-accent-pink/20 active:scale-95 shadow-sm"
+              className="mt-1.5 text-[10px] font-bold text-accent-pink hover:opacity-80 transition-all flex items-center gap-1 bg-accent-pink/5 px-2.5 py-0.5 rounded-lg border border-accent-pink/20 active:scale-95 shadow-sm"
             >
               🎨 Thiết kế Avatar Chibi
             </button>
           </div>
 
           {/* EXP Progress bar */}
-          <div className="w-full mt-3">
-            <div className="flex justify-between text-[10px] text-text-secondary mb-1">
+          <div className="w-full mt-2.5">
+            <div className="flex justify-between text-[10px] text-text-secondary mb-1 font-mono">
               <span>Tiến trình EXP</span>
               <span>{personalization.exp} / {personalization.nextLevelExp}</span>
             </div>
             <div className="w-full h-1.5 bg-bg-tertiary rounded-full overflow-hidden border border-border-theme">
               <div 
                 className="h-full bg-gradient-to-r from-accent-pink to-accent-purple rounded-full transition-all duration-300"
-                style={{ width: `${(personalization.exp / personalization.nextLevelExp) * 100}%` }}
+                style={{ width: `${Math.min(100, Math.max(0, (personalization.exp / personalization.nextLevelExp) * 100))}%` }}
               />
             </div>
           </div>
@@ -229,27 +229,27 @@ export default function SettingsDropdown({ onClose }) {
       )}
 
       {/* Settings Options */}
-      <div className="space-y-4 text-xs sm:text-sm text-text-primary">
-        <h5 className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-1.5 select-none">Cài đặt hệ thống</h5>
+      <div className="space-y-3 text-xs text-text-primary">
+        <h5 className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-1 select-none">Cài đặt hệ thống</h5>
 
         {/* 1. Theme Switch */}
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-2 text-text-primary font-medium whitespace-nowrap">
-            {theme === 'dark' ? <Moon className="w-4 h-4 text-accent-pink" /> : <Sun className="w-4 h-4 text-warning" />}
+            {theme === 'dark' ? <Moon className="w-3.5 h-3.5 text-accent-pink" /> : <Sun className="w-3.5 h-3.5 text-warning" />}
             Chủ đề sáng/tối
           </span>
           <div className="flex bg-bg-tertiary p-0.5 rounded-lg border border-border-theme select-none">
             <button 
               onMouseEnter={playSound.hover}
               onClick={() => handleThemeChange('light')}
-              className={`p-1 px-2.5 rounded-md transition-all text-xs font-semibold ${theme === 'light' ? 'bg-accent-pink text-white shadow-md' : 'text-text-secondary hover:text-text-primary'}`}
+              className={`p-0.5 px-2.5 rounded-md transition-all text-xs font-semibold ${theme === 'light' ? 'bg-accent-pink text-white shadow-md' : 'text-text-secondary hover:text-text-primary'}`}
             >
               Sáng
             </button>
             <button 
               onMouseEnter={playSound.hover}
               onClick={() => handleThemeChange('dark')}
-              className={`p-1 px-2.5 rounded-md transition-all text-xs font-semibold ${theme === 'dark' ? 'bg-accent-pink text-white shadow-md' : 'text-text-secondary hover:text-text-primary'}`}
+              className={`p-0.5 px-2.5 rounded-md transition-all text-xs font-semibold ${theme === 'dark' ? 'bg-accent-pink text-white shadow-md' : 'text-text-secondary hover:text-text-primary'}`}
             >
               Tối
             </button>
@@ -259,7 +259,7 @@ export default function SettingsDropdown({ onClose }) {
         {/* 2. Sound FX Toggle */}
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-2 text-text-primary font-medium whitespace-nowrap">
-            {soundEnabled ? <Volume2 className="w-4 h-4 text-accent-pink" /> : <VolumeX className="w-4 h-4 text-text-secondary" />}
+            {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-accent-pink" /> : <VolumeX className="w-3.5 h-3.5 text-text-secondary" />}
             Âm thanh hiệu ứng
           </span>
           <button 
@@ -272,12 +272,12 @@ export default function SettingsDropdown({ onClose }) {
         </div>
 
         {/* 3. Custom Cursor Select */}
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           <span className="flex items-center gap-2 text-text-primary font-medium whitespace-nowrap">
-            <MousePointer className="w-4 h-4 text-accent-pink" />
+            <MousePointer className="w-3.5 h-3.5 text-accent-pink" />
             Con trỏ chuột tùy biến
           </span>
-          <div className="grid grid-cols-3 gap-1 bg-bg-tertiary p-1 rounded-xl border border-border-theme select-none">
+          <div className="grid grid-cols-3 gap-1 bg-bg-tertiary p-0.5 rounded-xl border border-border-theme select-none">
             {[
               { id: 'default', label: 'Thường' },
               { id: 'neon', label: 'Neon' },
@@ -300,15 +300,15 @@ export default function SettingsDropdown({ onClose }) {
         </div>
 
         {/* 4. Language Switch */}
-        <div className="flex items-center justify-between border-b border-border-theme pb-4">
+        <div className="flex items-center justify-between border-b border-border-theme pb-3">
           <span className="flex items-center gap-2 text-text-primary font-medium whitespace-nowrap">
-            <Sparkles className="w-4 h-4 text-accent-pink" />
+            <Sparkles className="w-3.5 h-3.5 text-accent-pink" />
             Ngôn ngữ
           </span>
           <button 
             onMouseEnter={playSound.hover}
             onClick={handleLanguageToggle}
-            className="text-xs font-bold px-3 py-1 bg-bg-tertiary border border-border-theme rounded-lg text-text-primary hover:opacity-80 transition-all select-none"
+            className="text-xs font-bold px-2.5 py-0.5 bg-bg-tertiary border border-border-theme rounded-lg text-text-primary hover:opacity-80 transition-all select-none"
           >
             {language === 'vi' ? 'Tiếng Việt' : 'English'}
           </button>
@@ -316,7 +316,7 @@ export default function SettingsDropdown({ onClose }) {
       </div>
 
       {/* Buttons Footer */}
-      <div className="mt-4 space-y-2">
+      <div className="mt-3 space-y-1.5">
         {canEnterReviewPortal && (
           <button
             onMouseEnter={playSound.hover}
@@ -325,7 +325,7 @@ export default function SettingsDropdown({ onClose }) {
               router.push('/danh-gia-chuyen-mon');
               onClose();
             }}
-            className="w-full py-2.5 bg-cyan-500/10 hover:bg-cyan-500 text-cyan-400 hover:text-slate-950 border border-cyan-500/30 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg active:scale-98"
+            className="w-full py-2 bg-cyan-500/10 hover:bg-cyan-500 text-cyan-400 hover:text-slate-950 border border-cyan-500/30 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm active:scale-98"
           >
             <ShieldCheck className="w-3.5 h-3.5" /> Thẩm định chuyên môn
           </button>
@@ -338,7 +338,7 @@ export default function SettingsDropdown({ onClose }) {
               router.push('/admin');
               onClose();
             }}
-            className="w-full py-2.5 bg-gradient-to-r from-accent-pink/20 to-accent-purple/20 hover:from-accent-pink hover:to-accent-purple text-accent-pink hover:text-white border border-accent-pink/30 hover:border-accent-pink text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg active:scale-98 animate-pulse hover:animate-none"
+            className="w-full py-2 bg-gradient-to-r from-accent-pink/20 to-accent-purple/20 hover:from-accent-pink hover:to-accent-purple text-accent-pink hover:text-white border border-accent-pink/30 hover:border-accent-pink text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm active:scale-98 animate-pulse hover:animate-none"
           >
             <Shield className="w-3.5 h-3.5" /> Vào Trang Quản Trị
           </button>
@@ -346,7 +346,7 @@ export default function SettingsDropdown({ onClose }) {
         <button 
           onMouseEnter={playSound.hover}
           onClick={handleProfileClick}
-          className="w-full py-2.5 bg-bg-tertiary hover:opacity-90 border border-border-theme text-text-primary text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg active:scale-98"
+          className="w-full py-2 bg-bg-tertiary hover:opacity-90 border border-border-theme text-text-primary text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm active:scale-98"
         >
           <Trophy className="w-3.5 h-3.5 text-warning" /> Xem Hồ sơ Khoa học
         </button>
@@ -354,7 +354,7 @@ export default function SettingsDropdown({ onClose }) {
         <button 
           onMouseEnter={playSound.hover}
           onClick={handleLogout}
-          className="w-full py-2.5 bg-danger/10 hover:bg-danger hover:text-white border border-danger/20 text-danger text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 active:scale-98"
+          className="w-full py-2 bg-danger/10 hover:bg-danger hover:text-white border border-danger/20 text-danger text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 active:scale-98"
         >
           <LogOut className="w-3.5 h-3.5" /> Đăng xuất tài khoản
         </button>
