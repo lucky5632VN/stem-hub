@@ -190,9 +190,49 @@ export async function GET(request) {
     }
   });
 
+  // Bảng phân bố chéo 2 tiêu chí (Cross-Tabulation: Đáp Án x Trình Bày) cho thẩm định giáo viên
+  let bothPassed = 0; // Đáp án ĐÚNG + Trình bày ĐÚNG (Đạt chuẩn toàn diện)
+  let presentationOnly = 0; // Đáp án SAI + Trình bày ĐÚNG (Lệch số học nhưng logic tốt)
+  let answerOnly = 0; // Đáp án ĐÚNG + Trình bày CHƯA ĐÚNG (Đúng đáp án, chưa tối ưu sư phạm)
+  let bothFailed = 0; // Đáp án SAI + Trình bày CHƯA ĐÚNG (Chưa đạt cả 2)
+
+  teacherReviews.forEach(r => {
+    const dapAnOk = r.dap_an ? (r.dap_an === 'dung') : (r.scores?.knowledge >= 2);
+    const trinhBayOk = r.trinh_bay ? (r.trinh_bay === 'dung') : (r.scores?.pedagogy >= 1);
+    if (dapAnOk && trinhBayOk) bothPassed++;
+    else if (!dapAnOk && trinhBayOk) presentationOnly++;
+    else if (dapAnOk && !trinhBayOk) answerOnly++;
+    else bothFailed++;
+  });
+
+  const totalTeacherSamples = teacherReviews.length;
+  const wilsonPass = wilsonInterval(bothPassed, totalTeacherSamples, 0.95);
+
+  const criteriaCrossTabulation = {
+    total: totalTeacherSamples,
+    bothPassed,
+    bothPassedPct: totalTeacherSamples > 0 ? Number(((bothPassed / totalTeacherSamples) * 100).toFixed(2)) : 0,
+    presentationOnly,
+    presentationOnlyPct: totalTeacherSamples > 0 ? Number(((presentationOnly / totalTeacherSamples) * 100).toFixed(2)) : 0,
+    answerOnly,
+    answerOnlyPct: totalTeacherSamples > 0 ? Number(((answerOnly / totalTeacherSamples) * 100).toFixed(2)) : 0,
+    bothFailed,
+    bothFailedPct: totalTeacherSamples > 0 ? Number(((bothFailed / totalTeacherSamples) * 100).toFixed(2)) : 0,
+    dapAnCorrect: bothPassed + answerOnly,
+    dapAnCorrectPct: totalTeacherSamples > 0 ? Number((((bothPassed + answerOnly) / totalTeacherSamples) * 100).toFixed(2)) : 0,
+    trinhBayCorrect: bothPassed + presentationOnly,
+    trinhBayCorrectPct: totalTeacherSamples > 0 ? Number((((bothPassed + presentationOnly) / totalTeacherSamples) * 100).toFixed(2)) : 0,
+    wilsonPassRate: {
+      lowerPct: Number((wilsonPass.lower * 100).toFixed(2)),
+      upperPct: Number((wilsonPass.upper * 100).toFixed(2)),
+      meanPct: Number((wilsonPass.mean * 100).toFixed(2))
+    }
+  };
+
   const confusionMatrix = {
     ...computeTeacherAiConfusionMatrix(pairedForConfusion),
-    disagreementSamples
+    disagreementSamples,
+    criteriaCrossTabulation
   };
 
   // 4. TÍNH TOÁN MA TRẬN NHẦM LẪN TRÊN TOÀN BỘ 150 CA BENCHMARK (ĐỐI ĐẦU 2 MÔ HÌNH)

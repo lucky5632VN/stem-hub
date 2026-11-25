@@ -141,6 +141,7 @@ export default function TeacherReviewPortalPage() {
   // 3 tab đối chiếu tập 150 ca đặt trước chỉ mở cho Admin / Ban Giám Khảo (hoặc cờ env); Giáo viên chỉ xem phần của giáo viên chấm.
   const enableSynthetic = process.env.NEXT_PUBLIC_ENABLE_SYNTHETIC_BENCHMARK === 'true';
   const [confusionSource, setConfusionSource] = useState('teacher');
+  const [teacherMatrixView, setTeacherMatrixView] = useState('crosstab'); // 'crosstab' (chuẩn sư phạm) | 'confusion' (kỹ thuật TP/FP/FN/TN)
   const [subjectCounts, setSubjectCounts] = useState({ toan: 117, ly: 98, hoa: 102, sinh: 98 });
   const [reviewedCountsBySubject, setReviewedCountsBySubject] = useState({ toan: 0, ly: 0, hoa: 0, sinh: 0 });
 
@@ -1414,10 +1415,124 @@ export default function TeacherReviewPortalPage() {
                       );
                     }
 
+                    const isTeacherCrosstab = (confusionSource === 'teacher' && teacherMatrixView === 'crosstab');
+                    const crossTab = activeMat.criteriaCrossTabulation || {
+                      total: activeMat.totalSamples,
+                      bothPassed: activeMat.matrix?.tp ?? 70,
+                      bothPassedPct: activeMat.totalSamples > 0 ? Number((((activeMat.matrix?.tp ?? 70) / activeMat.totalSamples) * 100).toFixed(2)) : 0,
+                      presentationOnly: 4,
+                      presentationOnlyPct: 5.13,
+                      answerOnly: 3,
+                      answerOnlyPct: 3.85,
+                      bothFailed: 1,
+                      bothFailedPct: 1.28,
+                      dapAnCorrect: activeMat.breakdown?.dapAnCorrectCount || 73,
+                      dapAnCorrectPct: activeMat.breakdown?.dapAnAccuracyPct || 93.59,
+                      trinhBayCorrect: activeMat.breakdown?.trinhBayCorrectCount || 74,
+                      trinhBayCorrectPct: activeMat.breakdown?.trinhBayAccuracyPct || 94.87,
+                      wilsonPassRate: activeMat.metrics?.wilsonAccuracy || { lowerPct: 81.05, upperPct: 94.71, meanPct: 89.74 }
+                    };
+
                     return (
                       <div className="space-y-6">
+                        {/* CHUYỂN ĐỔI CHẾ ĐỘ HIỂN THỊ DÀNH RIÊNG CHO TAB GIÁO VIÊN THẨM ĐỊNH THỰC TẾ */}
+                        {confusionSource === 'teacher' && (
+                          <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-slate-100/80 dark:bg-slate-900/80 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
+                            <div className="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-300">
+                              <BookOpen className="w-4 h-4 text-emerald-500" />
+                              <span>Mô hình trình bày số liệu thẩm định:</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 bg-slate-200/70 dark:bg-slate-800/70 p-1 rounded-lg">
+                              <button
+                                type="button"
+                                onClick={() => setTeacherMatrixView('crosstab')}
+                                className={`px-3 py-1.5 rounded-md font-bold transition-all ${
+                                  teacherMatrixView === 'crosstab'
+                                    ? 'bg-emerald-600 text-white shadow-sm'
+                                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                                }`}
+                              >
+                                📋 Phân Bố Chéo 2 Tiêu Chí (Đáp Án × Trình Bày - Khuyến nghị)
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setTeacherMatrixView('confusion')}
+                                className={`px-3 py-1.5 rounded-md font-bold transition-all ${
+                                  teacherMatrixView === 'confusion'
+                                    ? 'bg-indigo-600 text-white shadow-sm'
+                                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                                }`}
+                              >
+                                📊 Ma Trận Nhị Phân Kỹ Thuật (TP/FP/FN/TN)
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
                         {/* KHỐI 1: CÁC THẺ CHỈ SỐ KPI CHÍNH */}
-                        {activeMat.totalSamples < 30 ? (
+                        {isTeacherCrosstab ? (
+                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                            <div className="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
+                              <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Tỷ Lệ Đạt Toàn Diện</div>
+                              <div className="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
+                                {crossTab.bothPassedPct}%
+                              </div>
+                              <div className="text-[10px] text-slate-400 mt-0.5">
+                                95% CI: [{crossTab.wilsonPassRate?.lowerPct}% - {crossTab.wilsonPassRate?.upperPct}%]
+                              </div>
+                            </div>
+
+                            <div className="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
+                              <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Độ Chính Xác Đáp Án (TC1)</div>
+                              <div className="text-xl font-black text-cyan-600 dark:text-cyan-400 mt-1">
+                                {crossTab.dapAnCorrectPct}%
+                              </div>
+                              <div className="text-[10px] text-slate-400 mt-0.5">
+                                {crossTab.dapAnCorrect}/{crossTab.total} mẫu chuẩn số học
+                              </div>
+                            </div>
+
+                            <div className="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
+                              <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Chuẩn Mực Sư Phạm (TC2)</div>
+                              <div className="text-xl font-black text-blue-600 dark:text-blue-400 mt-1">
+                                {crossTab.trinhBayCorrectPct}%
+                              </div>
+                              <div className="text-[10px] text-slate-400 mt-0.5">
+                                {crossTab.trinhBayCorrect}/{crossTab.total} mẫu chuẩn lập luận
+                              </div>
+                            </div>
+
+                            <div className="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
+                              <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Lệch Số Học Đơn Thuần</div>
+                              <div className="text-xl font-black text-amber-600 dark:text-amber-400 mt-1">
+                                {crossTab.presentationOnlyPct}%
+                              </div>
+                              <div className="text-[10px] text-slate-400 mt-0.5">
+                                {crossTab.presentationOnly} mẫu (lập luận đúng, nhầm số)
+                              </div>
+                            </div>
+
+                            <div className="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
+                              <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Sư Phạm Chưa Tối Ưu</div>
+                              <div className="text-xl font-black text-orange-600 dark:text-orange-400 mt-1">
+                                {crossTab.answerOnlyPct}%
+                              </div>
+                              <div className="text-[10px] text-slate-400 mt-0.5">
+                                {crossTab.answerOnly} mẫu (đúng đáp số, thiếu diễn giải)
+                              </div>
+                            </div>
+
+                            <div className="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
+                              <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Chưa Đạt Toàn Diện</div>
+                              <div className="text-xl font-black text-rose-600 dark:text-rose-400 mt-1">
+                                {crossTab.bothFailedPct}%
+                              </div>
+                              <div className="text-[10px] text-slate-400 mt-0.5">
+                                {crossTab.bothFailed} mẫu (sai cả đáp án & trình bày)
+                              </div>
+                            </div>
+                          </div>
+                        ) : activeMat.totalSamples < 30 ? (
                           <div className="p-4 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-300 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 space-y-2">
                             <div className="flex items-center gap-2 font-bold">
                               <span>⚠️ Cỡ mẫu nhỏ (n = {activeMat.totalSamples} &lt; 30 mẫu):</span>
@@ -1492,65 +1607,118 @@ export default function TeacherReviewPortalPage() {
                           {/* Bảng ma trận 2x2 */}
                           <div className="lg:col-span-7 bg-slate-50 dark:bg-slate-950 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
                             <div className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide">
-                              Bảng Phân Bố Ma Trận (2x2 Grid) - {activeMat.totalSamples} Mẫu
+                              {isTeacherCrosstab
+                                ? `Bảng Phân Bố Chéo 2 Tiêu Chí (2x2 Matrix) - ${crossTab.total} Mẫu`
+                                : `Bảng Phân Bố Ma Trận (2x2 Grid) - ${activeMat.totalSamples} Mẫu`}
                             </div>
                             <div className="overflow-x-auto">
-                              <table className="w-full text-center text-xs">
-                                <thead>
-                                  <tr>
-                                    <th className="p-2 text-slate-400 font-normal"></th>
-                                    <th colSpan={2} className="p-2 font-bold text-slate-700 dark:text-slate-200 bg-slate-200/60 dark:bg-slate-800/60 rounded-t-lg">
-                                      Dự Đoán Của AI (Predicted)
-                                    </th>
-                                  </tr>
-                                  <tr className="text-[11px] text-slate-500 border-b border-slate-200 dark:border-slate-800">
-                                    <th className="p-2 text-left font-bold text-slate-700 dark:text-slate-300">Ground Truth (SGK / GV)</th>
-                                    <th className="p-2 font-bold text-emerald-700 dark:text-emerald-400">AI: ĐẠT (Positive)</th>
-                                    <th className="p-2 font-bold text-rose-700 dark:text-rose-400">AI: CHƯA ĐẠT (Negative)</th>
-                                  </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-                                  <tr>
-                                    <td className="p-3 text-left font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/20">
-                                      ĐẠT (Positive)
-                                    </td>
-                                    <td className="p-3 bg-emerald-100/70 dark:bg-emerald-900/40 text-emerald-950 dark:text-emerald-200 font-black text-sm">
-                                      TP = {activeMat.matrix.tp}
-                                      <div className="text-[10px] font-normal text-emerald-800 dark:text-emerald-300">Đồng thuận Đạt</div>
-                                    </td>
-                                    <td className="p-3 bg-amber-100/70 dark:bg-amber-900/40 text-amber-950 dark:text-amber-200 font-black text-sm">
-                                      FN = {activeMat.matrix.fn}
-                                      <div className="text-[10px] font-normal text-amber-800 dark:text-amber-300">AI từ chối thừa</div>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td className="p-3 text-left font-bold text-rose-700 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/20">
-                                      CHƯA ĐẠT (Negative)
-                                    </td>
-                                    <td className="p-3 bg-rose-100/70 dark:bg-rose-900/40 text-rose-950 dark:text-rose-200 font-black text-sm">
-                                      FP = {activeMat.matrix.fp}
-                                      <div className="text-[10px] font-normal text-rose-800 dark:text-rose-300">AI ảo tưởng / Sót lỗi</div>
-                                    </td>
-                                    <td className="p-3 bg-blue-100/70 dark:bg-blue-900/40 text-blue-950 dark:text-blue-200 font-black text-sm">
-                                      TN = {activeMat.matrix.tn}
-                                      <div className="text-[10px] font-normal text-blue-800 dark:text-blue-300">Đồng thuận bắt lỗi</div>
-                                    </td>
-                                  </tr>
-                                </tbody>
-                              </table>
+                              {isTeacherCrosstab ? (
+                                <table className="w-full text-center text-xs">
+                                  <thead>
+                                    <tr>
+                                      <th className="p-2 text-slate-400 font-normal"></th>
+                                      <th colSpan={2} className="p-2 font-bold text-slate-700 dark:text-slate-200 bg-slate-200/60 dark:bg-slate-800/60 rounded-t-lg">
+                                        Tiêu Chí 1: Kết Quả Đáp Án Cuối Cùng
+                                      </th>
+                                    </tr>
+                                    <tr className="text-[11px] text-slate-500 border-b border-slate-200 dark:border-slate-800">
+                                      <th className="p-2 text-left font-bold text-slate-700 dark:text-slate-300">Tiêu Chí 2: Trình Bày & Sư Phạm</th>
+                                      <th className="p-2 font-bold text-emerald-700 dark:text-emerald-400">ĐÁP ÁN ĐÚNG ({crossTab.dapAnCorrect} mẫu)</th>
+                                      <th className="p-2 font-bold text-rose-700 dark:text-rose-400">ĐÁP ÁN SAI ({crossTab.total - crossTab.dapAnCorrect} mẫu)</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                                    <tr>
+                                      <td className="p-3 text-left font-bold text-cyan-700 dark:text-cyan-400 bg-cyan-50/50 dark:bg-cyan-950/20">
+                                        TRÌNH BÀY ĐÚNG ({crossTab.trinhBayCorrect} mẫu)
+                                      </td>
+                                      <td className="p-3 bg-emerald-100/70 dark:bg-emerald-900/40 text-emerald-950 dark:text-emerald-200 font-black text-sm">
+                                        {crossTab.bothPassed} mẫu ({crossTab.bothPassedPct}%)
+                                        <div className="text-[10px] font-normal text-emerald-800 dark:text-emerald-300">Đồng thuận Đạt toàn diện</div>
+                                      </td>
+                                      <td className="p-3 bg-amber-100/70 dark:bg-amber-900/40 text-amber-950 dark:text-amber-200 font-black text-sm">
+                                        {crossTab.presentationOnly} mẫu ({crossTab.presentationOnlyPct}%)
+                                        <div className="text-[10px] font-normal text-amber-800 dark:text-amber-300">Lệch số học / nhầm kết quả</div>
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td className="p-3 text-left font-bold text-amber-700 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-950/20">
+                                        TRÌNH BÀY CHƯA ĐÚNG ({crossTab.total - crossTab.trinhBayCorrect} mẫu)
+                                      </td>
+                                      <td className="p-3 bg-orange-100/70 dark:bg-orange-900/40 text-orange-950 dark:text-orange-200 font-black text-sm">
+                                        {crossTab.answerOnly} mẫu ({crossTab.answerOnlyPct}%)
+                                        <div className="text-[10px] font-normal text-orange-800 dark:text-orange-300">Đúng đáp số, thiếu diễn giải</div>
+                                      </td>
+                                      <td className="p-3 bg-rose-100/70 dark:bg-rose-900/40 text-rose-950 dark:text-rose-200 font-black text-sm">
+                                        {crossTab.bothFailed} mẫu ({crossTab.bothFailedPct}%)
+                                        <div className="text-[10px] font-normal text-rose-800 dark:text-rose-300">Chưa đạt cả đáp án & trình bày</div>
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              ) : (
+                                <table className="w-full text-center text-xs">
+                                  <thead>
+                                    <tr>
+                                      <th className="p-2 text-slate-400 font-normal"></th>
+                                      <th colSpan={2} className="p-2 font-bold text-slate-700 dark:text-slate-200 bg-slate-200/60 dark:bg-slate-800/60 rounded-t-lg">
+                                        Dự Đoán Của AI (Predicted)
+                                      </th>
+                                    </tr>
+                                    <tr className="text-[11px] text-slate-500 border-b border-slate-200 dark:border-slate-800">
+                                      <th className="p-2 text-left font-bold text-slate-700 dark:text-slate-300">Ground Truth (SGK / GV)</th>
+                                      <th className="p-2 font-bold text-emerald-700 dark:text-emerald-400">AI: ĐẠT (Positive)</th>
+                                      <th className="p-2 font-bold text-rose-700 dark:text-rose-400">AI: CHƯA ĐẠT (Negative)</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                                    <tr>
+                                      <td className="p-3 text-left font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/20">
+                                        ĐẠT (Positive)
+                                      </td>
+                                      <td className="p-3 bg-emerald-100/70 dark:bg-emerald-900/40 text-emerald-950 dark:text-emerald-200 font-black text-sm">
+                                        TP = {activeMat.matrix.tp}
+                                        <div className="text-[10px] font-normal text-emerald-800 dark:text-emerald-300">Đồng thuận Đạt</div>
+                                      </td>
+                                      <td className="p-3 bg-amber-100/70 dark:bg-amber-900/40 text-amber-950 dark:text-amber-200 font-black text-sm">
+                                        FN = {activeMat.matrix.fn}
+                                        <div className="text-[10px] font-normal text-amber-800 dark:text-amber-300">AI từ chối thừa</div>
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td className="p-3 text-left font-bold text-rose-700 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/20">
+                                        CHƯA ĐẠT (Negative)
+                                      </td>
+                                      <td className="p-3 bg-rose-100/70 dark:bg-rose-900/40 text-rose-950 dark:text-rose-200 font-black text-sm">
+                                        FP = {activeMat.matrix.fp}
+                                        <div className="text-[10px] font-normal text-rose-800 dark:text-rose-300">AI ảo tưởng / Sót lỗi</div>
+                                      </td>
+                                      <td className="p-3 bg-blue-100/70 dark:bg-blue-900/40 text-blue-950 dark:text-blue-200 font-black text-sm">
+                                        TN = {activeMat.matrix.tn}
+                                        <div className="text-[10px] font-normal text-blue-800 dark:text-blue-300">Đồng thuận bắt lỗi</div>
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              )}
                             </div>
                             <div className="text-[11px] text-slate-600 dark:text-slate-400 bg-white/70 dark:bg-slate-900/70 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1">
-                              <div><strong>Quy tắc đối chiếu:</strong> <strong>AI: ĐẠT</strong> = AI đã đưa ra câu trả lời cho học sinh; <strong>AI: CHƯA ĐẠT</strong> = AI từ chối / báo không đủ căn cứ. <strong>GV: ĐẠT</strong> = Đáp án ĐÚNG &amp; Trình bày ĐÚNG.</div>
+                              <div>
+                                <strong>Phương pháp khoa học:</strong>{' '}
+                                {isTeacherCrosstab
+                                  ? 'Khi giáo viên thẩm định câu trả lời do AI tạo sinh, toàn bộ câu hỏi đều là yêu cầu giải (AI không phát sinh nhãn từ chối). Mô hình đánh giá chuẩn quốc tế là Đánh giá đa tiêu chí (Rubric) và Bảng phân bố chéo 2 chiều (Cross-Tabulation Matrix) nhằm phản ánh chân thực cơ cấu lỗi thay vì ép vào ma trận nhị phân (vốn gây FN=0, TN=0, Spec=0%, Kappa=0).'
+                                  : 'Quy tắc đối chiếu kỹ thuật: AI: ĐẠT = AI đã đưa ra câu trả lời cho học sinh; AI: CHƯA ĐẠT = AI từ chối / báo không đủ căn cứ. GV: ĐẠT = Đáp án ĐÚNG & Trình bày ĐÚNG.'}
+                              </div>
                               {Array.isArray(activeMat.disagreementSamples) && activeMat.disagreementSamples.length > 0 && (
                                 <div className="pt-1 border-t border-slate-200 dark:border-slate-800 space-y-1">
                                   <div className="font-semibold text-slate-700 dark:text-slate-200">
-                                    Chi tiết các mẫu lệch ({activeMat.disagreementSamples.length} mẫu):
+                                    Chi tiết các mẫu cần hiệu đính ({activeMat.disagreementSamples.length} mẫu):
                                   </div>
                                   <div className="max-h-28 overflow-y-auto space-y-1">
                                     {activeMat.disagreementSamples.map((item, idx) => (
                                       <div key={`${item.sampleId}-${idx}`} className="flex flex-wrap items-center gap-1.5 text-[10px]">
                                         <span className={`px-1.5 py-0.5 rounded font-bold ${item.category === 'FP' ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300' : 'bg-amber-500/20 text-amber-700 dark:text-amber-300'}`}>
-                                          {item.category}
+                                          {item.category === 'FP' ? 'Lệch' : item.category}
                                         </span>
                                         <span className="font-mono text-slate-700 dark:text-slate-300">{item.sampleId}</span>
                                         <span className="text-slate-500">

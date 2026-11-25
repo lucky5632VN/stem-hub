@@ -242,5 +242,24 @@ it('7. inferAiPredictionVerdict & dedupeLatestReviews không gán nhầm FN cho 
   );
 });
 
+it('8. Bảng phân bố chéo 2 tiêu chí (Cross-Tabulation: Đáp Án x Trình Bày) thay thế ma trận nhị phân suy biến', () => {
+  assert(
+    reportRoute.includes('criteriaCrossTabulation') &&
+      reportRoute.includes('bothPassed') &&
+      reportRoute.includes('presentationOnly') &&
+      reportRoute.includes('answerOnly') &&
+      reportRoute.includes('bothFailed'),
+    'API report phải tính toán bảng phân bố chéo 2 tiêu chí cho thẩm định giáo viên'
+  );
+
+  assert(
+    portalPage.includes('teacherMatrixView') &&
+      portalPage.includes('isTeacherCrosstab') &&
+      portalPage.includes('Bảng Phân Bố Chéo 2 Tiêu Chí') &&
+      portalPage.includes('Tỷ Lệ Đạt Toàn Diện'),
+    'UI phải hỗ trợ chế độ xem Bảng Phân Bố Chéo 2 Tiêu Chí với 4 ô phân loại có ý nghĩa'
+  );
+});
+
 console.log(`\n📊 Tổng kết: ${passed}/${total} test passed.`);
 if (passed !== total) process.exit(1);
