@@ -141,7 +141,6 @@ export default function TeacherReviewPortalPage() {
   // 3 tab đối chiếu tập 150 ca đặt trước chỉ mở cho Admin / Ban Giám Khảo (hoặc cờ env); Giáo viên chỉ xem phần của giáo viên chấm.
   const enableSynthetic = process.env.NEXT_PUBLIC_ENABLE_SYNTHETIC_BENCHMARK === 'true';
   const [confusionSource, setConfusionSource] = useState('teacher');
-  const [teacherMatrixView, setTeacherMatrixView] = useState('crosstab'); // 'crosstab' (chuẩn sư phạm) | 'confusion' (kỹ thuật TP/FP/FN/TN)
   const [subjectCounts, setSubjectCounts] = useState({ toan: 117, ly: 98, hoa: 102, sinh: 98 });
   const [reviewedCountsBySubject, setReviewedCountsBySubject] = useState({ toan: 0, ly: 0, hoa: 0, sinh: 0 });
 
@@ -1415,7 +1414,7 @@ export default function TeacherReviewPortalPage() {
                       );
                     }
 
-                    const isTeacherCrosstab = (confusionSource === 'teacher' && teacherMatrixView === 'crosstab');
+                    const isTeacherCrosstab = (confusionSource === 'teacher');
                     const crossTab = activeMat.criteriaCrossTabulation || {
                       total: activeMat.totalSamples,
                       bothPassed: activeMat.matrix?.tp ?? 70,
@@ -1435,39 +1434,6 @@ export default function TeacherReviewPortalPage() {
 
                     return (
                       <div className="space-y-6">
-                        {/* CHUYỂN ĐỔI CHẾ ĐỘ HIỂN THỊ DÀNH RIÊNG CHO TAB GIÁO VIÊN THẨM ĐỊNH THỰC TẾ */}
-                        {confusionSource === 'teacher' && (
-                          <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-slate-100/80 dark:bg-slate-900/80 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
-                            <div className="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-300">
-                              <BookOpen className="w-4 h-4 text-emerald-500" />
-                              <span>Mô hình trình bày số liệu thẩm định:</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 bg-slate-200/70 dark:bg-slate-800/70 p-1 rounded-lg">
-                              <button
-                                type="button"
-                                onClick={() => setTeacherMatrixView('crosstab')}
-                                className={`px-3 py-1.5 rounded-md font-bold transition-all ${
-                                  teacherMatrixView === 'crosstab'
-                                    ? 'bg-emerald-600 text-white shadow-sm'
-                                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                                }`}
-                              >
-                                📋 Phân Bố Chéo 2 Tiêu Chí (Đáp Án × Trình Bày - Khuyến nghị)
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setTeacherMatrixView('confusion')}
-                                className={`px-3 py-1.5 rounded-md font-bold transition-all ${
-                                  teacherMatrixView === 'confusion'
-                                    ? 'bg-indigo-600 text-white shadow-sm'
-                                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                                }`}
-                              >
-                                📊 Ma Trận Nhị Phân Kỹ Thuật (TP/FP/FN/TN)
-                              </button>
-                            </div>
-                          </div>
-                        )}
 
                         {/* KHỐI 1: CÁC THẺ CHỈ SỐ KPI CHÍNH */}
                         {isTeacherCrosstab ? (
