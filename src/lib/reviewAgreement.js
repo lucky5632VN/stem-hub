@@ -524,6 +524,55 @@ export function evaluateReviewPortalAccess(callerClaims = null, options = {}) {
   };
 }
 
+const REFUSAL_PATTERNS = [
+  'từ chối',
+  'không giải được',
+  'không thể trả lời',
+  'chưa đủ căn cứ',
+  'không đủ dữ liệu',
+  'không thể xác minh',
+  'ngoài phạm vi'
+];
+
+/**
+ * Suy luận nhãn dự đoán của AI (aiVerdict) dựa trên nội dung câu trả lời thực tế.
+ * - Nếu AI từ chối / báo không đủ căn cứ / phản hồi quá ngắn (< 10 ký tự): aiVerdict = false (AI: CHƯA ĐẠT / Từ chối).
+ * - Nếu AI đưa ra câu trả lời hoàn chỉnh cho học sinh: aiVerdict = true (AI: ĐẠT).
+ * @param {string|null|undefined} systemResponse
+ * @returns {boolean}
+ */
+export function inferAiPredictionVerdict(systemResponse) {
+  if (typeof systemResponse !== 'string') return true;
+  const normalized = systemResponse.trim().toLowerCase();
+  if (normalized.length < 10) return false;
+  return !REFUSAL_PATTERNS.some(pattern => normalized.includes(pattern));
+}
+
+/**
+ * Khử trùng lặp các bản sửa đổi (amendment): chỉ giữ lại phiếu chấm mới nhất
+ * cho mỗi cặp (reviewerUid, sampleId) trên các phiếu không phải demo.
+ * @param {Array<Object>} reviews
+ * @returns {Array<Object>}
+ */
+export function dedupeLatestReviews(reviews = []) {
+  const latestMap = new Map();
+  reviews.forEach(r => {
+    if (!r || r.isDemo) return;
+    const key = `${r.reviewerUid || 'anon'}__${r.sampleId || r.reviewId}`;
+    const prev = latestMap.get(key);
+    if (!prev) {
+      latestMap.set(key, r);
+      return;
+    }
+    const prevTime = Date.parse(prev.timestamp || '') || 0;
+    const currTime = Date.parse(r.timestamp || '') || 0;
+    if (currTime > prevTime || (currTime === prevTime && r.isAmendment && !prev.isAmendment)) {
+      latestMap.set(key, r);
+    }
+  });
+  return Array.from(latestMap.values());
+}
+
 export default {
   wilsonInterval,
   computeCohenKappa,
@@ -531,5 +580,7 @@ export default {
   aggregateReviewsBySubjectAndCohort,
   computeTeacherAiConfusionMatrix,
   evaluateReportComparisonAccess,
-  evaluateReviewPortalAccess
+  evaluateReviewPortalAccess,
+  inferAiPredictionVerdict,
+  dedupeLatestReviews
 };

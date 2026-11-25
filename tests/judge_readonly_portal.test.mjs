@@ -15,7 +15,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   evaluateReportComparisonAccess,
-  evaluateReviewPortalAccess
+  evaluateReviewPortalAccess,
+  inferAiPredictionVerdict,
+  dedupeLatestReviews
 } from '../src/lib/reviewAgreement.js';
 import { dedupePoolQuestions, sampleForReviewer } from '../src/lib/reviewSampler.js';
 
@@ -210,6 +212,33 @@ it('6. Khử trùng lặp câu hỏi và mặc định ẩn câu đã chấm đ�
       portalPage.includes('visibleSamples') &&
       portalPage.includes('isAmendment: needsAmendment'),
     'UI phải ẩn câu đã chấm theo mặc định và hỗ trợ gửi bản sửa đổi (amendment) hợp lệ'
+  );
+});
+
+it('7. inferAiPredictionVerdict & dedupeLatestReviews không gán nhầm FN cho câu AI đã trả lời', () => {
+  assert.strictEqual(inferAiPredictionVerdict("y' = 2e^{2x} + 1/x (với x > 0)."), true);
+  assert.strictEqual(inferAiPredictionVerdict('Phân tích phản hồi học tập: Gốc etyl...'), true);
+  assert.strictEqual(inferAiPredictionVerdict('Hệ thống từ chối trả lời do không đủ căn cứ SGK.'), false);
+  assert.strictEqual(inferAiPredictionVerdict('Xin lỗi, không giải được bài toán này.'), false);
+  assert.strictEqual(inferAiPredictionVerdict(''), false);
+
+  const deduped = dedupeLatestReviews([
+    { reviewerUid: 'u1', sampleId: 's1', verdict: 'sai', timestamp: '2026-11-25T01:00:00Z', isAmendment: false },
+    { reviewerUid: 'u1', sampleId: 's1', verdict: 'dung', timestamp: '2026-11-25T02:00:00Z', isAmendment: true },
+    { reviewerUid: 'u1', sampleId: 's2', verdict: 'dung', timestamp: '2026-11-25T02:00:00Z', isDemo: true }
+  ]);
+  assert.strictEqual(deduped.length, 1);
+  assert.strictEqual(deduped[0].verdict, 'dung');
+
+  assert(
+    !submitRoute.includes("sampleId.startsWith('ablation_') || sampleId.startsWith('learned_')"),
+    'submitRoute không được ép cứng aiVerdict = false theo tiền tố sampleId'
+  );
+  assert(
+    reportRoute.includes('inferAiPredictionVerdict(') &&
+      reportRoute.includes('dedupeLatestReviews(') &&
+      reportRoute.includes('disagreementSamples'),
+    'reportRoute phải suy luận aiVerdict từ phản hồi thực tế, khử trùng lặp amendment và trả chi tiết mẫu lệch'
   );
 });
 

@@ -1539,6 +1539,31 @@ export default function TeacherReviewPortalPage() {
                                 </tbody>
                               </table>
                             </div>
+                            <div className="text-[11px] text-slate-600 dark:text-slate-400 bg-white/70 dark:bg-slate-900/70 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1">
+                              <div><strong>Quy tắc đối chiếu:</strong> <strong>AI: ĐẠT</strong> = AI đã đưa ra câu trả lời cho học sinh; <strong>AI: CHƯA ĐẠT</strong> = AI từ chối / báo không đủ căn cứ. <strong>GV: ĐẠT</strong> = Đáp án ĐÚNG &amp; Trình bày ĐÚNG.</div>
+                              {Array.isArray(activeMat.disagreementSamples) && activeMat.disagreementSamples.length > 0 && (
+                                <div className="pt-1 border-t border-slate-200 dark:border-slate-800 space-y-1">
+                                  <div className="font-semibold text-slate-700 dark:text-slate-200">
+                                    Chi tiết các mẫu lệch ({activeMat.disagreementSamples.length} mẫu):
+                                  </div>
+                                  <div className="max-h-28 overflow-y-auto space-y-1">
+                                    {activeMat.disagreementSamples.map((item, idx) => (
+                                      <div key={`${item.sampleId}-${idx}`} className="flex flex-wrap items-center gap-1.5 text-[10px]">
+                                        <span className={`px-1.5 py-0.5 rounded font-bold ${item.category === 'FP' ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300' : 'bg-amber-500/20 text-amber-700 dark:text-amber-300'}`}>
+                                          {item.category}
+                                        </span>
+                                        <span className="font-mono text-slate-700 dark:text-slate-300">{item.sampleId}</span>
+                                        <span className="text-slate-500">
+                                          (Đáp án: {item.dap_an === 'dung' ? 'Đúng' : 'Sai'}, Trình bày: {item.trinh_bay === 'dung' ? 'Đúng' : 'Chưa đúng'}
+                                          {item.primaryError && item.primaryError !== 'none' ? `, Lỗi: ${item.primaryError}` : ''}
+                                          {item.notes ? `, Ghi chú: ${item.notes}` : ''})
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           </div>
 
                           {/* Phân rã 2 Tiêu chí Đáp Án & Trình Bày */}

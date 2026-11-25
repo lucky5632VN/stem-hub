@@ -8,7 +8,9 @@ import {
   computeCohortAgreement, 
   wilsonInterval,
   computeTeacherAiConfusionMatrix,
-  evaluateReportComparisonAccess
+  evaluateReportComparisonAccess,
+  inferAiPredictionVerdict,
+  dedupeLatestReviews
 } from '@/lib/reviewAgreement';
 import { buildUnifiedSamplePool } from '@/lib/reviewSampler';
 
@@ -74,8 +76,9 @@ export async function GET(request) {
     } catch (_) {}
   }
 
-  // 1. Phân tách và tổng hợp dữ liệu (Loại bỏ isDemo)
-  const aggregated = aggregateReviewsBySubjectAndCohort(allReviews);
+  // 1. Phân tách và tổng hợp dữ liệu (Loại bỏ isDemo và chỉ giữ bản chấm mới nhất nếu có amendment)
+  const latestReviews = dedupeLatestReviews(allReviews);
+  const aggregated = aggregateReviewsBySubjectAndCohort(latestReviews);
 
   // 2. Tính toán độ đồng thuận cho từng Cohort (Giáo viên riêng, Nhóm tự chấm riêng)
   const agreements = {
@@ -124,8 +127,9 @@ export async function GET(request) {
     }
   } catch (_) {}
 
-  const teacherReviews = allReviews.filter(r => r.reviewerType === 'teacher' && !r.isDemo && !r.skipped);
+  const teacherReviews = latestReviews.filter(r => r.reviewerType === 'teacher' && !r.isDemo && !r.skipped);
   const pairedForConfusion = [];
+  const disagreementSamples = [];
 
   // Nạp pool mẫu để tra cứu metadata và phản hồi của AI
   let samplePoolMap = new Map();
@@ -136,92 +140,60 @@ export async function GET(request) {
 
   teacherReviews.forEach(r => {
     const sid = r.sampleId;
-    const teacherVerdict = (r.verdict === 'dung') || 
-      (r.dap_an === 'dung' && r.trinh_bay === 'dung') || 
-      (r.totalScore !== null && r.totalScore >= 5);
+    const dapAnOk = r.dap_an ? (r.dap_an === 'dung') : (r.scores?.knowledge >= 2);
+    const trinhBayOk = r.trinh_bay ? (r.trinh_bay === 'dung') : (r.scores?.pedagogy >= 1);
+    const teacherVerdict = (r.verdict === 'dung') || (dapAnOk && trinhBayOk);
     
     const mapEntry = blindMap.find(m => m.blindId === sid);
-    let aiVerdict = null;
+    const poolItem = samplePoolMap.get(sid);
+    let aiVerdict = true;
 
-    // 0. Ưu tiên tuyệt đối: Nếu bản ghi thẩm định có trường aiVerdict được gán rõ
-    if (r.aiVerdict !== undefined && r.aiVerdict !== null) {
-      aiVerdict = Boolean(r.aiVerdict);
+    // 1. Ưu tiên đối chiếu theo phản hồi thực tế của AI trong kho mẫu (AI trả lời = ĐẠT, AI từ chối = CHƯA ĐẠT)
+    if (poolItem) {
+      aiVerdict = inferAiPredictionVerdict(poolItem.systemResponse);
     }
-    // 1. Nếu là mẫu mù MATH_BLIND_*
+    // 2. Nếu là mẫu mù MATH_BLIND_* từ bộ đối chiếu
     else if (mapEntry) {
       const parentId = mapEntry.parentQuestionId;
       const cond = mapEntry.condition;
       const keyPrefix = cond === 'condition_1_no_rag' ? `no_rag_${parentId}_run1` : `rag_guard_${parentId}_run1`;
-      
-      if (callCache[keyPrefix]) {
-        const text = (callCache[keyPrefix].text || '').toLowerCase();
-        const gt = (mapEntry.groundTruth || '').toLowerCase();
-        aiVerdict = gt ? gt.split(/\s+/).some(w => w.length > 2 && text.includes(w)) : true;
+      if (callCache[keyPrefix]?.text) {
+        aiVerdict = inferAiPredictionVerdict(callCache[keyPrefix].text);
       } else {
-        // Condition No-RAG có tỷ lệ sai sót thực tế, Condition RAG đạt chuẩn
         aiVerdict = (cond !== 'condition_1_no_rag');
       }
-    } 
-    // 2. Nếu là tri thức tự học đang cách ly (learned_*)
-    else if (sid.startsWith('learned_')) {
-      // Tri thức chưa qua thẩm định: Bộ lọc kiểm duyệt AI ban đầu đã cách ly (AI = Chưa đạt chuẩn production)
-      // Nếu bản ghi có gán rõ aiVerdict thì lấy, ngược lại mặc định là false
-      aiVerdict = (r.aiVerdict !== undefined) ? Boolean(r.aiVerdict) : false;
     }
-    // 3. Nếu là câu cạm bẫy đối chứng (ablation_*)
-    else if (sid.startsWith('ablation_')) {
-      const poolItem = samplePoolMap.get(sid);
-      if (poolItem) {
-        const resp = (poolItem.systemResponse || '').toLowerCase();
-        const ref = (poolItem.referenceAnswer || '').toLowerCase();
-        // Kiểm tra xem phản hồi AI có bắt được cạm bẫy hoặc khớp đáp án không
-        const isTrapResolved = resp.includes('bẫy') || resp.includes('sai') || (ref.length > 5 && resp.includes(ref.slice(0, 15)));
-        aiVerdict = isTrapResolved;
-      } else {
-        aiVerdict = (r.aiVerdict !== undefined) ? Boolean(r.aiVerdict) : false;
-      }
-    }
-    // 4. Nếu là câu đề thi chính thức (exam_*) hoặc benchmark 150 (bench_*)
-    else if (sid.startsWith('exam_') || sid.startsWith('bench_')) {
-      const poolItem = samplePoolMap.get(sid);
-      if (poolItem) {
-        const resp = (poolItem.systemResponse || '').toLowerCase();
-        const ref = (poolItem.referenceAnswer || '').toLowerCase();
-
-        // So khớp phương án trắc nghiệm A, B, C, D giữa lời giải AI và đáp án chuẩn
-        const refMatch = ref.match(/(?:đáp án|chọn|phương án)\s*([A-D])/i) || ref.match(/^([A-D])\./i);
-        const respMatch = resp.match(/(?:đáp án|chọn|phương án)\s*([A-D])/i) || resp.match(/(?:chọn phương án|đáp án đúng là)\s*[:\*\s]*([A-D])/i);
-
-        if (refMatch && respMatch) {
-          aiVerdict = (refMatch[1].toUpperCase() === respMatch[1].toUpperCase());
-        } else if (resp.includes('không giải được') || resp.includes('từ chối') || resp.length < 20) {
-          aiVerdict = false;
-        } else {
-          // So khớp từ khóa / công thức
-          aiVerdict = ref.length > 5 ? (resp.includes(ref.slice(0, 12)) || !resp.includes('sai')) : true;
-        }
-      } else {
-        aiVerdict = (r.aiVerdict !== undefined) ? Boolean(r.aiVerdict) : true;
-      }
-    }
-    // 5. Trường hợp khác
-    else {
-      aiVerdict = (r.aiVerdict !== undefined) ? Boolean(r.aiVerdict) : true;
+    // 3. Nếu không tìm thấy trong kho mẫu: chỉ dùng aiVerdict đã lưu nếu không phải quy tắc prefix cũ
+    else if (typeof r.aiVerdict === 'boolean' && !sid.startsWith('ablation_') && !sid.startsWith('learned_')) {
+      aiVerdict = r.aiVerdict;
     }
 
-    if (aiVerdict !== null) {
-      pairedForConfusion.push({
+    pairedForConfusion.push({
+      sampleId: sid,
+      subject: r.subject,
+      teacherVerdict,
+      aiVerdict,
+      dapAnVerdict: dapAnOk,
+      trinhBayVerdict: trinhBayOk
+    });
+
+    if (teacherVerdict !== aiVerdict) {
+      disagreementSamples.push({
         sampleId: sid,
         subject: r.subject,
-        teacherVerdict,
-        aiVerdict,
-        dapAnVerdict: r.dap_an === 'dung' || (r.scores?.knowledge >= 2),
-        trinhBayVerdict: r.trinh_bay === 'dung' || (r.scores?.pedagogy >= 1)
+        category: !teacherVerdict && aiVerdict ? 'FP' : 'FN',
+        dap_an: dapAnOk ? 'dung' : 'sai',
+        trinh_bay: trinhBayOk ? 'dung' : 'chua_dung',
+        primaryError: r.primaryError || 'none',
+        notes: r.notes || ''
       });
     }
   });
 
-  const confusionMatrix = computeTeacherAiConfusionMatrix(pairedForConfusion);
+  const confusionMatrix = {
+    ...computeTeacherAiConfusionMatrix(pairedForConfusion),
+    disagreementSamples
+  };
 
   // 4. TÍNH TOÁN MA TRẬN NHẦM LẪN TRÊN TOÀN BỘ 150 CA BENCHMARK (ĐỐI ĐẦU 2 MÔ HÌNH)
   // 🛡️ QUY TẮC TRUNG THỰC: Mặc định ẩn khỏi giáo viên / công khai; mở cho Admin và Ban Giám Khảo trình diễn kỹ thuật với nhãn preset rõ ràng

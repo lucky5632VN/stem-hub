@@ -3,8 +3,8 @@ import path from 'path';
 import { NextResponse } from 'next/server';
 import { getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
 import { verifyFirebaseIdToken, getFirebaseAdmin } from '@/lib/firebaseAdmin';
-import { hashString } from '@/lib/reviewSampler';
-import { evaluateReviewPortalAccess } from '@/lib/reviewAgreement';
+import { hashString, buildUnifiedSamplePool } from '@/lib/reviewSampler';
+import { evaluateReviewPortalAccess, inferAiPredictionVerdict } from '@/lib/reviewAgreement';
 
 export async function OPTIONS(request) {
   return new NextResponse(null, { status: 204, headers: getCorsHeaders(request) });
@@ -235,15 +235,15 @@ export async function POST(request) {
     }
   }
 
-  // 6. Xác định nhãn dự đoán của AI (aiVerdict) cho ma trận nhầm lẫn
+  // 6. Xác định nhãn dự đoán của AI (aiVerdict) cho ma trận nhầm lẫn dựa trên phản hồi thực tế của AI
   let determinedAiVerdict = true;
-  if (body.aiVerdict !== undefined && body.aiVerdict !== null) {
-    determinedAiVerdict = Boolean(body.aiVerdict);
+  if (typeof body.aiVerdict === 'boolean') {
+    determinedAiVerdict = body.aiVerdict;
   } else {
-    // Nếu là câu cạm bẫy đối chứng hoặc câu tri thức cách ly
-    if (sampleId.startsWith('ablation_') || sampleId.startsWith('learned_')) {
-      determinedAiVerdict = false;
-    } else {
+    try {
+      const poolItem = buildUnifiedSamplePool().find(p => p.sampleId === sampleId);
+      determinedAiVerdict = inferAiPredictionVerdict(poolItem?.systemResponse);
+    } catch (_) {
       determinedAiVerdict = true;
     }
   }
