@@ -126,9 +126,30 @@ export default function DashboardLayout({ children }) {
           const isFaceVerified = isFace2FAValid(user.uid);
 
           if (isFace2FAEnabled && !isFaceVerified) {
-            // Tài khoản bật Face 2FA nhưng chưa hoàn tất xác thực 2FA trong phiên làm việc này -> Giữ trạng thái chưa đăng nhập!
-            setUser(null);
-            return;
+            // Kiểm tra xem người dùng có thực sự có dữ liệu khuôn mặt hợp lệ trong Firestore không
+            let hasValidBio = false;
+            try {
+              const bioDoc = await safeFirestoreCall(() => getDoc(doc(db, 'users', user.uid, 'private', 'biometrics')));
+              hasValidBio = bioDoc?.exists() && !!bioDoc.data()?.faceDescriptor;
+            } catch (_) {}
+
+            if (!hasValidBio) {
+              // Tự động khắc phục cờ 2FA rác khi chưa đăng ký sinh trắc học
+              setFace2FASession(user.uid);
+              try {
+                await safeFirestoreCall(() => setDoc(userDocRef, {
+                  face2FAEnabled: false,
+                  personalization: {
+                    ...(data.personalization || {}),
+                    face2FAEnabled: false
+                  }
+                }, { merge: true }));
+              } catch (_) {}
+            } else {
+              // Có dữ liệu khuôn mặt nhưng chưa xác thực phiên làm việc -> Tạm thời giữ trạng thái đăng xuất
+              setUser(null);
+              return;
+            }
           }
 
           // Nếu là tài khoản test và thông tin chưa chuẩn (hoặc tên là Học viên), cập nhật theo preset

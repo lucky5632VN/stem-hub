@@ -219,11 +219,24 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }) {
               faceDescriptor: descriptor
             });
             return;
+          } else {
+            // Không bật Face 2FA hoặc chưa có vector khuôn mặt -> Khởi tạo phiên 2FA hợp lệ
+            setFace2FASession(user.uid);
           }
+        } else {
+          setFace2FASession(user.uid);
         }
       } catch (err2fa) {
         console.warn("Lỗi kiểm tra trạng thái Face 2FA:", err2fa);
+        setFace2FASession(user.uid);
       }
+
+      // Cập nhật trạng thái người dùng vào Store ngay lập tức
+      useAppStore.getState().setUser({
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName || user.email?.split('@')[0] || 'Học viên',
+      });
 
       // Đồng bộ cookie session cho Next.js Middleware
       try {
