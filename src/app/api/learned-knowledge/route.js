@@ -4,7 +4,7 @@ import path from 'path';
 import { db } from '@/lib/firebase';
 import { collection, doc, setDoc, deleteDoc, getDocs, serverTimestamp } from 'firebase/firestore';
 import { ALLOWED_HOSTS, getCorsHeaders, getClientIp, getClientIdentifier, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
-import { verifyFirebaseIdToken, getFirebaseAdmin } from '@/lib/firebaseAdmin';
+import { verifyFirebaseIdToken, getSafetyFirestore } from '@/lib/firebaseAdmin';
 
 export async function OPTIONS(request) {
   return new NextResponse(null, { status: 204, headers: getCorsHeaders(request) });
@@ -83,12 +83,11 @@ export async function GET(request) {
     const all = searchParams.get('all') === 'true';
     const limitCount = parseInt(searchParams.get('limit') || '100', 10);
 
-    // Đồng bộ thêm dữ liệu tri thức từ Firestore (ưu tiên Admin SDK để không bị chặn bởi rules)
+    // Đồng bộ thêm dữ liệu tri thức từ Firestore (ưu tiên Safety DB Admin SDK để không bị hết quota / chặn rules)
     try {
-      const admin = getFirebaseAdmin();
+      const adminDb = getSafetyFirestore();
       let firestoreDocs = [];
-      if (admin) {
-        const adminDb = admin.firestore();
+      if (adminDb) {
         const snap = await adminDb.collection('learned_knowledge').get();
         snap.forEach(docSnap => {
           const d = docSnap.data();
@@ -321,11 +320,10 @@ export async function POST(request) {
       status: 'pending_review'
     });
 
-    // Đồng bộ lên Firestore với trạng thái pending (ưu tiên Admin SDK để không bị chặn bởi rules khi chạy phía server)
+    // Đồng bộ lên Firestore với trạng thái pending (ưu tiên Safety DB Admin SDK)
     try {
-      const admin = getFirebaseAdmin();
-      if (admin) {
-        const adminDb = admin.firestore();
+      const adminDb = getSafetyFirestore();
+      if (adminDb) {
         await adminDb.collection('learned_knowledge').doc(cleanId).set(newItem, { merge: true });
       } else if (db) {
         const docRef = doc(collection(db, 'learned_knowledge'), cleanId);
@@ -587,9 +585,8 @@ export async function PATCH(request) {
         ...(action === 'edit' && updatedAnswer ? { answer: targetItem.answer, content: targetItem.content } : {})
       };
 
-      const admin = getFirebaseAdmin();
-      if (admin) {
-        const adminDb = admin.firestore();
+      const adminDb = getSafetyFirestore();
+      if (adminDb) {
         await adminDb.collection('learned_knowledge').doc(id).set(patchData, { merge: true });
       } else if (db) {
         const docRef = doc(collection(db, 'learned_knowledge'), id);
@@ -639,9 +636,8 @@ export async function DELETE(request) {
 
     // Đồng bộ xóa trên Firestore
     try {
-      const admin = getFirebaseAdmin();
-      if (admin) {
-        const adminDb = admin.firestore();
+      const adminDb = getSafetyFirestore();
+      if (adminDb) {
         await adminDb.collection('learned_knowledge').doc(id).delete();
       } else if (db) {
         const docRef = doc(collection(db, 'learned_knowledge'), id);
