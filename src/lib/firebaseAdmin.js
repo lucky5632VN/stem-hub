@@ -18,8 +18,9 @@ export function getFirebaseAdmin() {
   }
 
   const existingApps = getApps();
-  if (existingApps.length > 0) {
-    initializedApp = existingApps[0];
+  const defaultApp = existingApps.find((app) => app.name === '[DEFAULT]');
+  if (defaultApp) {
+    initializedApp = defaultApp;
     const auth = getAuth(initializedApp);
     const db = getFirestore(initializedApp);
     return {
@@ -205,4 +206,46 @@ export async function verifyFirebaseIdToken(token, options = {}) {
       status: 401
     };
   }
+}
+
+let safetyApp = null;
+
+/**
+ * Trả về Firestore instance riêng cho Lab Safety Reviews (dự án phụ stemhub-safety-db)
+ * nhằm tách biệt hoàn toàn quota đọc/ghi khỏi dự án Auth chính.
+ * Nếu chưa cấu hình biến SAFETY_FIREBASE_*, tự động fallback về Firestore của dự án chính.
+ */
+export function getSafetyFirestore() {
+  const safetyProjectId = process.env.SAFETY_FIREBASE_PROJECT_ID;
+  const safetyClientEmail = process.env.SAFETY_FIREBASE_CLIENT_EMAIL;
+  const safetyPrivateKey = process.env.SAFETY_FIREBASE_PRIVATE_KEY;
+
+  if (safetyProjectId && safetyClientEmail && safetyPrivateKey) {
+    try {
+      if (!safetyApp) {
+        const existing = getApps().find((app) => app.name === 'safety-db');
+        if (existing) {
+          safetyApp = existing;
+        } else {
+          const cleanKey = safetyPrivateKey.replace(/\\r/g, '').replace(/\r/g, '').replace(/\\n/g, '\n').trim();
+          safetyApp = initializeApp(
+            {
+              credential: cert({
+                projectId: safetyProjectId,
+                clientEmail: safetyClientEmail,
+                privateKey: cleanKey
+              })
+            },
+            'safety-db'
+          );
+        }
+      }
+      return getFirestore(safetyApp);
+    } catch (err) {
+      console.warn('[FirebaseAdmin] Lỗi khởi tạo Safety Firestore (fallback về DB chính):', err.message);
+    }
+  }
+
+  const primary = getFirebaseAdmin();
+  return primary ? primary.firestore() : null;
 }

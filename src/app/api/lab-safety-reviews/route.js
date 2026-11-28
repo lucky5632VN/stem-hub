@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { getCorsHeaders, getClientIdentifier, checkRateLimit } from '@/lib/serverSecurity';
-import { verifyFirebaseIdToken, getFirebaseAdmin } from '@/lib/firebaseAdmin';
+import { verifyFirebaseIdToken, getSafetyFirestore } from '@/lib/firebaseAdmin';
 
 export const dynamic = 'force-dynamic';
 
@@ -109,9 +109,9 @@ async function loadAllReviews() {
   let firestoreError = null;
 
   try {
-    const admin = getFirebaseAdmin();
-    if (admin) {
-      const snap = await admin.firestore().collection('lab_safety_reviews').get();
+    const db = getSafetyFirestore();
+    if (db) {
+      const snap = await db.collection('lab_safety_reviews').get();
       snap.forEach(docSnap => {
         const d = docSnap.data();
         if (d && d.id) map.set(d.id, d);
@@ -201,7 +201,7 @@ export async function POST(request) {
 
     const reactionKey = normalizeReactionKey(equation, experimentTitle);
     const docId = makeSafeDocId(reactionKey);
-    const admin = getFirebaseAdmin();
+    const db = getSafetyFirestore();
     const localList = readLocalReviews();
 
     // Kiểm tra nhanh 1 doc duy nhất thay vì quét toàn bộ collection
@@ -209,9 +209,9 @@ export async function POST(request) {
       it.id === docId || (it.reactionKey || normalizeReactionKey(it.equation, it.experimentTitle)) === reactionKey
     ) || null;
 
-    if (admin) {
+    if (db) {
       try {
-        const docSnap = await admin.firestore().collection('lab_safety_reviews').doc(docId).get();
+        const docSnap = await db.collection('lab_safety_reviews').doc(docId).get();
         if (docSnap.exists) {
           existingItem = docSnap.data();
         }
@@ -268,9 +268,9 @@ export async function POST(request) {
     writeLocalReviews(localList.slice(0, 500));
     globalThis.__labSafetyCache = null;
 
-    if (admin) {
+    if (db) {
       try {
-        await admin.firestore().collection('lab_safety_reviews').doc(id).set(newItem);
+        await db.collection('lab_safety_reviews').doc(id).set(newItem);
       } catch (fsErr) {
         console.warn('[API lab-safety-reviews] Ghi Firestore lỗi (đã lưu local):', fsErr.message);
       }
@@ -297,12 +297,12 @@ export async function PATCH(request) {
       return NextResponse.json({ success: false, error: 'Thiếu ID phiếu thí nghiệm.' }, { status: 400, headers: corsHeaders });
     }
 
-    const admin = getFirebaseAdmin();
+    const db = getSafetyFirestore();
     const localList = readLocalReviews();
     let target = localList.find(it => it.id === id) || null;
-    if (admin) {
+    if (db) {
       try {
-        const snap = await admin.firestore().collection('lab_safety_reviews').doc(id).get();
+        const snap = await db.collection('lab_safety_reviews').doc(id).get();
         if (snap.exists) target = snap.data();
       } catch (fsErr) {
         console.warn('[API lab-safety-reviews] PATCH đọc 1 doc lỗi:', fsErr.message);
@@ -351,8 +351,8 @@ export async function PATCH(request) {
     globalThis.__labSafetyCache = null;
 
     try {
-      if (admin) {
-        await admin.firestore().collection('lab_safety_reviews').doc(id).set(patchData, { merge: true });
+      if (db) {
+        await db.collection('lab_safety_reviews').doc(id).set(patchData, { merge: true });
       }
     } catch (fsErr) {
       console.warn('[API lab-safety-reviews] Cập nhật Firestore lỗi:', fsErr.message);

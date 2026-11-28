@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { NextResponse } from 'next/server';
 import { getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
-import { verifyFirebaseIdToken, getFirebaseAdmin } from '@/lib/firebaseAdmin';
+import { verifyFirebaseIdToken, getSafetyFirestore } from '@/lib/firebaseAdmin';
 import { hashString, buildUnifiedSamplePool } from '@/lib/reviewSampler';
 import { evaluateReviewPortalAccess, inferAiPredictionVerdict } from '@/lib/reviewAgreement';
 
@@ -203,15 +203,14 @@ export async function POST(request) {
     ? `${baseDocId}_rev_${Date.now()}`
     : baseDocId;
 
-  const admin = getFirebaseAdmin();
-  if (!admin) {
+  const firestore = getSafetyFirestore();
+  if (!firestore) {
     return NextResponse.json(
       { error: 'Không thể kết nối Firebase Admin để lưu trữ phiếu chấm.' },
       { status: 500, headers: getCorsHeaders(request) }
     );
   }
 
-  const firestore = admin.firestore();
   const reviewRef = firestore.collection('expert_reviews').doc(targetDocId);
 
   // Nếu không phải là phiếu sửa đổi (amendment), kiểm tra xem phiếu gốc đã tồn tại chưa

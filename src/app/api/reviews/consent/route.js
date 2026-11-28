@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCorsHeaders, getClientIp, checkRateLimit } from '@/lib/serverSecurity';
-import { verifyFirebaseIdToken, getFirebaseAdmin } from '@/lib/firebaseAdmin';
+import { verifyFirebaseIdToken, getSafetyFirestore } from '@/lib/firebaseAdmin';
 import { evaluateReviewPortalAccess } from '@/lib/reviewAgreement';
 
 export async function OPTIONS(request) {
@@ -27,8 +27,8 @@ export async function GET(request) {
   }
 
   const uid = tokenVerify.decoded.user_id || tokenVerify.decoded.sub;
-  const admin = getFirebaseAdmin();
-  if (!admin) {
+  const db = getSafetyFirestore();
+  if (!db) {
     return NextResponse.json({
       exists: false,
       fallback: true,
@@ -41,7 +41,7 @@ export async function GET(request) {
   }
 
   try {
-    const snap = await admin.firestore().collection('teacher_consents').doc(uid).get();
+    const snap = await db.collection('teacher_consents').doc(uid).get();
     if (!snap.exists) {
       return NextResponse.json({
         exists: false,
@@ -104,8 +104,8 @@ export async function POST(request) {
     withdrawReason = ''
   } = body;
 
-  const admin = getFirebaseAdmin();
-  if (!admin) {
+  const db = getSafetyFirestore();
+  if (!db) {
     return NextResponse.json({ error: 'Lỗi kết nối Firebase Admin.' }, { status: 500, headers: getCorsHeaders(request) });
   }
 
@@ -122,7 +122,7 @@ export async function POST(request) {
     updatedAt: new Date().toISOString()
   };
 
-  await admin.firestore().collection('teacher_consents').doc(uid).set(consentRecord, { merge: true });
+  await db.collection('teacher_consents').doc(uid).set(consentRecord, { merge: true });
 
   return NextResponse.json({
     success: true,

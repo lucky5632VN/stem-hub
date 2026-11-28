@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
-import { verifyFirebaseIdToken, getFirebaseAdmin } from '@/lib/firebaseAdmin';
+import { verifyFirebaseIdToken, getSafetyFirestore } from '@/lib/firebaseAdmin';
 
 export async function OPTIONS(request) {
   return new NextResponse(null, { status: 204, headers: getCorsHeaders(request) });
@@ -116,9 +116,9 @@ export async function POST(request) {
     );
   }
 
-  // 4. Lưu vào collection riêng biệt `teacher_answer_key_reviews` trong Firestore
-  const admin = getFirebaseAdmin();
-  if (!admin) {
+  // 4. Lưu vào collection riêng biệt `teacher_answer_key_reviews` trong Firestore (Safety DB)
+  const db = getSafetyFirestore();
+  if (!db) {
     return NextResponse.json(
       { error: 'Lỗi cấu hình Firebase Admin.' },
       { status: 500, headers: getCorsHeaders(request) }
@@ -126,7 +126,6 @@ export async function POST(request) {
   }
 
   try {
-    const db = admin.firestore();
     const docRef = db.collection('teacher_answer_key_reviews').doc();
     const submissionRecord = {
       reviewId: docRef.id,

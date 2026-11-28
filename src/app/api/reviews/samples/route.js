@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { NextResponse } from 'next/server';
 import { getCorsHeaders, getClientIp, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
-import { verifyFirebaseIdToken, getFirebaseAdmin } from '@/lib/firebaseAdmin';
+import { verifyFirebaseIdToken, getSafetyFirestore } from '@/lib/firebaseAdmin';
 import { sampleForReviewer, generateMathTeacherBlindReviewSet, buildUnifiedSamplePool, dedupePoolQuestions } from '@/lib/reviewSampler';
 import { evaluateReviewPortalAccess } from '@/lib/reviewAgreement';
 
@@ -111,10 +111,10 @@ export async function GET(request) {
     hoa: new Set(),
     sinh: new Set()
   };
-  const admin = getFirebaseAdmin();
-  if (admin) {
+  const db = getSafetyFirestore();
+  if (db) {
     try {
-      const existingSnap = await admin.firestore().collection('expert_reviews')
+      const existingSnap = await db.collection('expert_reviews')
         .where('reviewerUid', '==', uid)
         .get();
       existingSnap.docs.forEach(doc => {

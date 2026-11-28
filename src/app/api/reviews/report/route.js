@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { NextResponse } from 'next/server';
 import { getCorsHeaders, getClientIp, checkRateLimit } from '@/lib/serverSecurity';
-import { getFirebaseAdmin, verifyFirebaseIdToken } from '@/lib/firebaseAdmin';
+import { getSafetyFirestore, verifyFirebaseIdToken } from '@/lib/firebaseAdmin';
 import { 
   aggregateReviewsBySubjectAndCohort, 
   computeCohortAgreement, 
@@ -50,8 +50,8 @@ export async function GET(request) {
     }
   }
 
-  const admin = getFirebaseAdmin();
-  if (!admin) {
+  const db = getSafetyFirestore();
+  if (!db) {
     return NextResponse.json({
       error: 'Không thể kết nối Firestore để đọc dữ liệu báo cáo.',
       bySubject: {}
@@ -60,7 +60,7 @@ export async function GET(request) {
 
   let allReviews = [];
   try {
-    const snap = await admin.firestore().collection('expert_reviews').get();
+    const snap = await db.collection('expert_reviews').get();
     allReviews = snap.docs.map(doc => doc.data());
   } catch (err) {
     console.warn('[ReviewReport] Lỗi đọc collection expert_reviews:', err.message);
