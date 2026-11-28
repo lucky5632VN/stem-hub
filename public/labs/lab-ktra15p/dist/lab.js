@@ -301,6 +301,9 @@ function startExperience() {
   playQuantumSound(1200, 0.1, 'sine');
   const intro = document.getElementById('introOverlay');
   intro.classList.add('hide');
+  if (typeof renderSupervisedGuidePanel === 'function') {
+    setTimeout(() => renderSupervisedGuidePanel(), 150);
+  }
   
   // Show lab rules modal FIRST, then safety gear modal
   setTimeout(() => {
@@ -336,6 +339,9 @@ function enterLab() {
   const intro = document.getElementById('introOverlay');
   if (intro) {
     intro.classList.add('hide');
+  if (typeof renderSupervisedGuidePanel === 'function') {
+    setTimeout(() => renderSupervisedGuidePanel(), 150);
+  }
     intro.style.display = 'none';
   }
   const rulesModal = document.getElementById('labRulesModal');
@@ -379,6 +385,9 @@ function initLab() {
     if (intro) {
       intro.style.display = 'none';
       intro.classList.add('hide');
+  if (typeof renderSupervisedGuidePanel === 'function') {
+    setTimeout(() => renderSupervisedGuidePanel(), 150);
+  }
     }
     const rulesModal = document.getElementById('labRulesModal');
     if (rulesModal) {
@@ -2275,6 +2284,15 @@ function executeReaction(container, rawReaction) {
       addLog('warning', '📤 AI đã cảnh báo trước và tự động gửi thí nghiệm + phản ứng tới Giáo viên Hóa.');
     }
 
+    if (typeof renderSupervisedGuidePanel === 'function') {
+      renderSupervisedGuidePanel(
+        reaction.description || reaction.observation || 'Thực hiện theo đúng quy trình an toàn SGK.',
+        reviewedInfo
+          ? '✅ Đã có Giáo viên Hóa thẩm định (không gửi lại).'
+          : '📤 Đã tự động gửi thí nghiệm + phản ứng cho Giáo viên Hóa.'
+      );
+    }
+
     showDanger(titleType, warnMsg, () => {
       AudioSystem.stopAlert();
       container.isReacting = false;
@@ -3109,7 +3127,82 @@ function updateDropHint() {
 
 // ——— SAFETY STATUS ———
 function updateSafetyStatus() {
-  // Badge đã bị xóa theo yêu cầu
+  if (typeof renderSupervisedGuidePanel === 'function') {
+    renderSupervisedGuidePanel();
+  }
+}
+
+window._supervisedGuideVisible = true;
+function toggleHazardFilterModal() {
+  const modal = document.getElementById('hazardFilterModal');
+  if (!modal) return;
+  modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+}
+
+function toggleSupervisedGuidePanel() {
+  window._supervisedGuideVisible = !window._supervisedGuideVisible;
+  const panel = document.getElementById('supervisedGuidePanel');
+  const btn = document.getElementById('btnSupervisedGuideToggle');
+  if (panel) panel.style.display = window._supervisedGuideVisible ? 'block' : 'none';
+  if (btn) btn.textContent = window._supervisedGuideVisible ? '📋 Hướng dẫn Có Giám sát: BẬT' : '📋 Hướng dẫn Có Giám sát: TẮT';
+  if (window._supervisedGuideVisible) renderSupervisedGuidePanel();
+}
+
+function renderSupervisedGuidePanel(customStep2, customStep3) {
+  const panel = document.getElementById('supervisedGuidePanel');
+  if (!panel || !window._supervisedGuideVisible) return;
+  const intro = document.getElementById('introOverlay');
+  if (intro && !intro.classList.contains('hide')) {
+    panel.style.display = 'none';
+    return;
+  }
+  panel.style.display = 'block';
+
+  const ppeEl = document.getElementById('sgPpeStatus');
+  if (ppeEl && typeof state !== 'undefined' && state.safetyEquipped) {
+    const req = [
+      { id: 'goggles', label: 'Kính' },
+      { id: 'gloves', label: 'Găng tay' },
+      { id: 'lab-coat', label: 'Áo Blouse' },
+      { id: 'fume-hood', label: 'Tủ hút' }
+    ];
+    const items = req.map(r => `${state.safetyEquipped.has(r.id) ? '✅' : '⬜'} ${r.label}`);
+    ppeEl.textContent = items.join(' • ');
+  }
+
+  const procEl = document.getElementById('sgProcedureText');
+  if (procEl && customStep2) procEl.textContent = customStep2;
+  const teacherEl = document.getElementById('sgTeacherStatus');
+  if (teacherEl && customStep3) teacherEl.textContent = customStep3;
+}
+
+function runQuickSafetyFilterCheck(sampleText) {
+  const inputEl = document.getElementById('quickSafetyTestInput');
+  const outEl = document.getElementById('quickSafetyTestResult');
+  const text = (sampleText !== undefined ? sampleText : (inputEl ? inputEl.value : '')).trim();
+  if (inputEl && sampleText !== undefined) inputEl.value = sampleText;
+  if (!outEl) return;
+  if (!text) {
+    outEl.textContent = 'Vui lòng nhập nội dung cần kiểm tra.';
+    return;
+  }
+  const blockedRx = /(chế\s*tạo|tổng\s*hợp|pha\s*chế|điều\s*chế)\s*[^.!?\n]{0,40}\b(thuốc\s*nổ|chất\s*nổ|bom|mìn|tnt|hcn|xyanua|phosgene|ma\s*túy|vũ\s*khí)\b|\b(hcn|xyanua|phosgene)\b/i;
+  const approvalRx = /(xác\s*nhận|duyệt|cam\s*kết|cho\s*phép)\s*[^.!?\n]{0,45}(?:an\s*toàn|không\s*nổ|tự\s*làm)|(?:tự\s*làm.*ở\s*nhà|không\s*cần\s*giáo\s*viên)/i;
+  const riskRx = /\b(h2so4\s*đặc|hno3\s*đặc|na|k|cl2|photpho\s*trắng)\b/i;
+
+  if (blockedRx.test(text)) {
+    outEl.style.color = '#f87171';
+    outEl.textContent = '⛔ KẾT QUẢ: BLOCKED_HAZARD — Bộ lọc chặn cứng trước khi gọi LLM. Không cung cấp hướng dẫn chế tạo chất nổ/chất độc.';
+  } else if (approvalRx.test(text)) {
+    outEl.style.color = '#fbbf24';
+    outEl.textContent = '🛡️ KẾT QUẢ: NO_AI_RISK_APPROVAL — AI từ chối xác nhận thao tác rủi ro thay Giáo viên. Yêu cầu Giáo viên Hóa kiểm tra trực tiếp.';
+  } else if (riskRx.test(text)) {
+    outEl.style.color = '#fcd34d';
+    outEl.textContent = '⚠️ KẾT QUẢ: SUPERVISED_RISK — Bật chế độ Hướng dẫn có giám sát, kiểm tra PPE & tự động gửi GV Hóa theo dõi.';
+  } else {
+    outEl.style.color = '#34d399';
+    outEl.textContent = '✅ KẾT QUẢ: SAFE — Câu hỏi học tập SGK hợp lệ.';
+  }
 }
 
 // ——— CHECK INTERACTIONS ———
