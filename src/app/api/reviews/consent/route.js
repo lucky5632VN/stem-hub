@@ -29,7 +29,15 @@ export async function GET(request) {
   const uid = tokenVerify.decoded.user_id || tokenVerify.decoded.sub;
   const admin = getFirebaseAdmin();
   if (!admin) {
-    return NextResponse.json({ error: 'Lỗi kết nối Firebase Admin.' }, { status: 500, headers: getCorsHeaders(request) });
+    return NextResponse.json({
+      exists: false,
+      fallback: true,
+      consent: {
+        teacherUid: uid,
+        publicNameConsent: false,
+        withdrawn: false
+      }
+    }, { status: 200, headers: getCorsHeaders(request) });
   }
 
   try {
@@ -50,7 +58,16 @@ export async function GET(request) {
       consent: snap.data()
     }, { headers: getCorsHeaders(request) });
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500, headers: getCorsHeaders(request) });
+    console.warn('[API /api/reviews/consent] Fallback do lỗi Firestore:', err.message);
+    return NextResponse.json({
+      exists: false,
+      fallback: true,
+      consent: {
+        teacherUid: uid,
+        publicNameConsent: false,
+        withdrawn: false
+      }
+    }, { status: 200, headers: getCorsHeaders(request) });
   }
 }
 
