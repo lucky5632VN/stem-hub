@@ -41,6 +41,31 @@ function writeLocalReviews(items) {
   }
 }
 
+async function authenticateViewer(request) {
+  const authHeader = request.headers.get('authorization') || '';
+  if (!authHeader.startsWith('Bearer ')) {
+    return { ok: false, status: 401, error: 'Thiếu token xác thực.' };
+  }
+  const token = authHeader.substring(7);
+  const host = request.headers.get('host') || '';
+  const verified = await verifyFirebaseIdToken(token, { host });
+  if (!verified.valid) {
+    return { ok: false, status: 401, error: 'Token không hợp lệ hoặc đã hết hạn.' };
+  }
+  const payload = verified.decoded || {};
+  const uid = payload.user_id || payload.sub || '';
+  const adminUids = (process.env.ADMIN_UIDS || process.env.NEXT_PUBLIC_ADMIN_UIDS || '')
+    .split(',').map(s => s.trim()).filter(Boolean);
+  const isAdmin = Boolean(payload.admin === true || payload.role === 'admin' || (uid && adminUids.includes(uid)));
+  const isTeacher = Boolean(payload.role === 'teacher' || payload.reviewerType === 'teacher');
+  const isJudge = Boolean(payload.isJudge === true || payload.reviewerType === 'judge');
+
+  if (!isAdmin && !isTeacher && !isJudge) {
+    return { ok: false, status: 403, error: 'Chỉ Giáo viên, Ban Giám Khảo hoặc Quản trị viên mới được xem mục Kiểm soát Thí nghiệm.' };
+  }
+  return { ok: true, uid, isAdmin, isTeacher, isJudge };
+}
+
 async function authenticateChemistryTeacherOrAdmin(request) {
   const authHeader = request.headers.get('authorization') || '';
   if (!authHeader.startsWith('Bearer ')) {
@@ -73,9 +98,15 @@ async function authenticateChemistryTeacherOrAdmin(request) {
 }
 
 async function loadAllReviews() {
+  const now = Date.now();
+  if (globalThis.__labSafetyCache && (now - globalThis.__labSafetyCache.ts) < 20000) {
+    return { items: globalThis.__labSafetyCache.items, firestoreError: globalThis.__labSafetyCache.firestoreError || null };
+  }
+
   const localItems = readLocalReviews();
   const map = new Map();
   localItems.forEach(item => { if (item?.id) map.set(item.id, item); });
+  let firestoreError = null;
 
   try {
     const admin = getFirebaseAdmin();
@@ -87,10 +118,11 @@ async function loadAllReviews() {
       });
     }
   } catch (err) {
-    console.warn('[API lab-safety-reviews] Lỗi đọc Firestore:', err.message);
+    firestoreError = err.message || 'Firestore read error';
+    console.warn('[API lab-safety-reviews] Lỗi đọc Firestore:', firestoreError);
   }
 
-  return Array.from(map.values()).sort((a, b) => {
+  const sorted = Array.from(map.values()).sort((a, b) => {
     const revA = (a.teacherVerified === true && a.status === 'reviewed_by_teacher') ? 1 : 0;
     const revB = (b.teacherVerified === true && b.status === 'reviewed_by_teacher') ? 1 : 0;
     if (revA !== revB) return revA - revB;
@@ -98,6 +130,9 @@ async function loadAllReviews() {
     const tB = new Date(b.createdAt || 0).getTime();
     return tB - tA;
   });
+
+  globalThis.__labSafetyCache = { ts: now, items: sorted, firestoreError };
+  return { items: sorted, firestoreError };
 }
 
 export async function GET(request) {
@@ -105,7 +140,7 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const publicOverrides = searchParams.get('publicOverrides') === 'true';
-    const items = await loadAllReviews();
+    const { items, firestoreError } = await loadAllReviews();
 
     if (publicOverrides) {
       const approved = items
@@ -126,7 +161,7 @@ export async function GET(request) {
       return NextResponse.json({ success: true, overrides: approved }, { status: 200, headers: corsHeaders });
     }
 
-    const auth = await authenticateChemistryTeacherOrAdmin(request);
+    const auth = await authenticateViewer(request);
     if (!auth.ok) {
       return NextResponse.json({ success: false, error: auth.error }, { status: auth.status, headers: corsHeaders });
     }
@@ -135,6 +170,7 @@ export async function GET(request) {
       success: true,
       totalCount: items.length,
       pendingCount: items.filter(it => it.status !== 'reviewed_by_teacher').length,
+      quotaExhausted: Boolean(firestoreError && firestoreError.includes('RESOURCE_EXHAUSTED')),
       items
     }, { status: 200, headers: corsHeaders });
   } catch (err) {
@@ -230,6 +266,7 @@ export async function POST(request) {
 
     localList.unshift(newItem);
     writeLocalReviews(localList.slice(0, 500));
+    globalThis.__labSafetyCache = null;
 
     if (admin) {
       try {
@@ -311,6 +348,7 @@ export async function PATCH(request) {
       localList[idx] = updatedItem;
       writeLocalReviews(localList);
     }
+    globalThis.__labSafetyCache = null;
 
     try {
       if (admin) {

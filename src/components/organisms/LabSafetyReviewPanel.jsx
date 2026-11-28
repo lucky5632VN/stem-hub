@@ -24,6 +24,9 @@ export default function LabSafetyReviewPanel({ firebaseUser, canEditReviews }) {
       if (!res.ok) {
         setError(data.error || 'Không thể tải danh sách kiểm soát thí nghiệm.');
       } else {
+        if (data.quotaExhausted) {
+          setError('Cảnh báo: Firebase Firestore gói miễn phí (Spark) đã chạm ngưỡng 50.000 lượt đọc/ngày nên tạm thời không đồng bộ được dữ liệu mới giữa các máy. Vui lòng kiểm tra hạn mức trên Firebase Console.');
+        }
         const list = Array.isArray(data.items) ? data.items : [];
         setItems(list);
         const initDrafts = {};
