@@ -150,6 +150,7 @@ export async function GET(request) {
           reactionKey: it.reactionKey || normalizeReactionKey(it.equation, it.experimentTitle),
           editedExperimentTitle: it.editedExperimentTitle || it.experimentTitle,
           experimentTitle: it.editedExperimentTitle || it.experimentTitle,
+          originalExperimentTitle: it.experimentTitle,
           equation: it.editedEquation || it.equation,
           observation: it.editedObservation || it.observation,
           editedEffect: it.editedEffect || 'auto',

@@ -3285,6 +3285,11 @@ function getTeacherReviewedInfo(equation = '', title = '') {
           if (item.reactionKey) window.__TEACHER_REVIEWED_MAP__[item.reactionKey] = item;
           if (item.originalEquation) window.__TEACHER_REVIEWED_MAP__[normalizeLabReactionKey(item.originalEquation, '')] = item;
           if (item.experimentTitle) window.__TEACHER_REVIEWED_MAP__[normalizeLabReactionKey('', item.experimentTitle)] = item;
+          if (item.originalExperimentTitle) {
+            window.__TEACHER_REVIEWED_MAP__[normalizeLabReactionKey('', item.originalExperimentTitle)] = item;
+            const strippedTitle = String(item.originalExperimentTitle).replace(/^\[Chưa có dữ liệu - Có rủi ro\]\s*/i, '').trim();
+            if (strippedTitle) window.__TEACHER_REVIEWED_MAP__[normalizeLabReactionKey('', strippedTitle)] = item;
+          }
         });
       }
     })
