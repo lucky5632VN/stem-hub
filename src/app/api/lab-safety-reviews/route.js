@@ -305,7 +305,6 @@ export async function PATCH(request) {
       reviewedAt: new Date().toISOString()
     };
 
-    const localList = readLocalReviews();
     const idx = localList.findIndex(it => it.id === id);
     let updatedItem = { ...target, ...patchData };
     if (idx !== -1) {
@@ -314,7 +313,6 @@ export async function PATCH(request) {
     }
 
     try {
-      const admin = getFirebaseAdmin();
       if (admin) {
         await admin.firestore().collection('lab_safety_reviews').doc(id).set(patchData, { merge: true });
       }
