@@ -65,6 +65,7 @@ function createFirestoreDb(appInstance) {
   cleanupLocalStorage();
   try {
     return initializeFirestore(appInstance, {
+      experimentalAutoDetectLongPolling: true,
       localCache: persistentLocalCache({
         tabManager: persistentMultipleTabManager()
       })
