@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { NextResponse } from 'next/server';
 import { getCorsHeaders, getClientIp, checkRateLimit } from '@/lib/serverSecurity';
-import { getSafetyFirestore, verifyFirebaseIdToken } from '@/lib/firebaseAdmin';
+import { getFirebaseAdmin, getSafetyFirestore, verifyFirebaseIdToken } from '@/lib/firebaseAdmin';
 import { 
   aggregateReviewsBySubjectAndCohort, 
   computeCohortAgreement, 
@@ -50,8 +50,9 @@ export async function GET(request) {
     }
   }
 
-  const db = getSafetyFirestore();
-  if (!db) {
+  const primaryAdmin = getFirebaseAdmin();
+  const safetyDb = getSafetyFirestore();
+  if (!primaryAdmin && !safetyDb) {
     return NextResponse.json({
       error: 'Không thể kết nối Firestore để đọc dữ liệu báo cáo.',
       bySubject: {}
@@ -59,12 +60,35 @@ export async function GET(request) {
   }
 
   let allReviews = [];
-  try {
-    const snap = await db.collection('expert_reviews').get();
-    allReviews = snap.docs.map(doc => doc.data());
-  } catch (err) {
-    console.warn('[ReviewReport] Lỗi đọc collection expert_reviews:', err.message);
+  const reviewMap = new Map();
+
+  // Ưu tiên đọc từ Firebase cũ (cuoc-thi-ai-e2044) cho Báo cáo Thẩm định Chuyên môn Độc lập
+  if (primaryAdmin) {
+    try {
+      const snap = await primaryAdmin.firestore().collection('expert_reviews').get();
+      snap.docs.forEach((doc, idx) => {
+        const d = doc.data();
+        if (d) reviewMap.set(doc.id || d.reviewId || `primary_${idx}`, d);
+      });
+    } catch (err) {
+      console.warn('[ReviewReport] Lỗi đọc expert_reviews từ Firebase cũ:', err.message);
+    }
   }
+
+  // Gộp thêm các phiếu mới ghi trên Firebase phụ (nếu có)
+  if (safetyDb) {
+    try {
+      const snap = await safetyDb.collection('expert_reviews').get();
+      snap.docs.forEach((doc, idx) => {
+        const d = doc.data();
+        if (d) reviewMap.set(doc.id || d.reviewId || `safety_${idx}`, d);
+      });
+    } catch (err) {
+      console.warn('[ReviewReport] Lỗi đọc expert_reviews từ Firebase phụ:', err.message);
+    }
+  }
+
+  allReviews = Array.from(reviewMap.values());
 
   // Fallback đọc bản sao local nếu Firestore rỗng (hỗ trợ môi trường test / offline)
   if (allReviews.length === 0) {
