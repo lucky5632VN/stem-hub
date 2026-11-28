@@ -29,7 +29,6 @@ const AudioSystem = {
       console.log('[AudioSystem] 🔊 Hệ thống âm thanh sẵn sàng (chế độ không phụ thuộc file MP3).');
     } catch(e) {}
   },
-  },
 
   /**
    * Phát âm thanh cảnh báo
@@ -2056,13 +2055,54 @@ function executeReaction(container, reaction) {
         headerColor = '#dc2626'; // Red
     }
 
+    const experimentTitle = reaction.name || (container.chemicals || []).map(c => c.formula || c.name || c.id).join(' + ');
+    const reviewedInfo = typeof getTeacherReviewedInfo === 'function'
+      ? getTeacherReviewedInfo(reaction.equation || '', experimentTitle)
+      : null;
+
+    let supervisionStatusText = '';
+    if (reviewedInfo) {
+      const verdictText = reviewedInfo.isDangerousVerdict === 'safe'
+        ? 'An toàn'
+        : reviewedInfo.isDangerousVerdict === 'warning'
+          ? 'Cần giám sát'
+          : 'Nguy hiểm cao';
+      const corrText = reviewedInfo.isReactionCorrect === false ? 'Phản ứng đã được GV chỉnh sửa' : 'Phản ứng đúng';
+      supervisionStatusText = `✅ Phản ứng này đã được Giáo viên Hóa thẩm định (${verdictText} • ${corrText}).${reviewedInfo.equation ? `\nPƯ chuẩn GV: ${reviewedInfo.equation}` : ''}\n(Đã chấm — không gửi lại cho Giáo viên)`;
+      addLog('info', `✅ Phản ứng "${experimentTitle}" đã được Giáo viên Hóa chấm trước đó — không gửi lại.`);
+    } else {
+      supervisionStatusText = '📤 Đã tự động gửi thí nghiệm và phương trình phản ứng lên hệ thống cho Giáo viên Hóa chấm.';
+      const dangerPayload = {
+        experimentTitle,
+        reactants: (container.chemicals || []).map(c => c.formula || c.name || c.id),
+        equation: reaction.equation || '',
+        observation: reaction.observation || warnMsg,
+        hazardLevel: Number(reaction.hazardLevel || 2),
+        hazardType: reaction.hazardType || 'warning',
+        missingSafety: translatedMissing,
+        aiWarning: `${titleType}: ${warnMsg}`,
+        source: 'lab_hoa_experiment_auto'
+      };
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'chemistry_danger_report', payload: dangerPayload }, '*');
+      } else {
+        fetch('/api/lab-safety-reviews', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dangerPayload)
+        }).catch(() => {});
+      }
+      addLog('warning', '📤 AI đã cảnh báo trước và tự động gửi thí nghiệm + phản ứng tới Giáo viên Hóa.');
+    }
+
     showDanger(titleType, warnMsg, () => {
-      // Dừng cảnh báo khi người dùng đã xác nhận
       AudioSystem.stopAlert();
       container.isReacting = false;
-      // Đợi một chút sau khi tắt cảnh báo mới nổ (tạo độ kịch tính)
       setTimeout(performEffects, 500);
-    }, headerColor);
+    }, headerColor, {
+      showSupervisionBox: true,
+      supervisionStatusText
+    });
   } else {
     performEffects();
   }
@@ -2877,13 +2917,59 @@ function clearLog() {
   addLog('info', '[HỆ_THỐNG] NHẬT KÝ ĐÃ ĐƯỢC LÀM SẠCH. SẴN SÀNG TIẾP NHẬN DỮ LIỆU.');
 }
 
-function showDanger(title, message, callback, headerColor = '#dc2626') {
+window.__TEACHER_REVIEWED_MAP__ = window.__TEACHER_REVIEWED_MAP__ || {};
+
+function normalizeLabReactionKey(equation = '', title = '') {
+  const eq = String(equation || '').toLowerCase().replace(/\s+/g, '').trim();
+  if (eq) return 'eq:' + eq;
+  return 'title:' + String(title || '').toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+function getTeacherReviewedInfo(equation = '', title = '') {
+  const map = window.__TEACHER_REVIEWED_MAP__ || {};
+  const kEq = normalizeLabReactionKey(equation, '');
+  const kTitle = normalizeLabReactionKey('', title);
+  return map[kEq] || map[kTitle] || null;
+}
+
+(function syncTeacherReviewedReactions() {
+  if (typeof fetch !== 'function') return;
+  fetch('/api/lab-safety-reviews?publicOverrides=true')
+    .then(r => r.ok ? r.json() : null)
+    .then(data => {
+      if (data && Array.isArray(data.overrides)) {
+        data.overrides.forEach(item => {
+          if (item.reactionKey) window.__TEACHER_REVIEWED_MAP__[item.reactionKey] = item;
+          if (item.originalEquation) window.__TEACHER_REVIEWED_MAP__[normalizeLabReactionKey(item.originalEquation, '')] = item;
+          if (item.experimentTitle) window.__TEACHER_REVIEWED_MAP__[normalizeLabReactionKey('', item.experimentTitle)] = item;
+        });
+      }
+    })
+    .catch(() => {});
+})();
+
+function showDanger(title, message, callback, headerColor = '#dc2626', options = {}) {
   document.getElementById('dangerTitle').textContent = title;
-  document.getElementById('dangerTitle').style.color = headerColor; // Appplying color
+  document.getElementById('dangerTitle').style.color = headerColor;
   document.getElementById('dangerMessage').textContent = message;
+  const approvalBox = document.getElementById('teacherApprovalBox');
+  const statusEl = document.getElementById('teacherSupervisionStatus');
+  const okBtn = document.getElementById('btnDangerOk');
+
+  if (approvalBox) {
+    if (options && options.showSupervisionBox) {
+      approvalBox.style.display = 'block';
+      if (statusEl) statusEl.textContent = options.supervisionStatusText || '';
+    } else {
+      approvalBox.style.display = 'none';
+    }
+  }
+  if (okBtn) okBtn.style.display = 'inline-block';
+
   document.getElementById('dangerOverlay').classList.add('show');
   _dangerCallback = callback;
 }
+
 function dismissDanger() {
   document.getElementById('dangerOverlay').classList.remove('show');
   if (typeof _dangerCallback === 'function') {

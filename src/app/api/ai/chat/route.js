@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { callResilientGemini } from '@/lib/geminiCaller';
 import { getCorsHeaders, getClientIdentifier, checkRateLimit, maskErrorMessage } from '@/lib/serverSecurity';
 import { verifyResponseGrounding } from '@/lib/responseVerifier';
+import { evaluateSafetyPolicy, sanitizeLLMResponseForRisk } from '@/lib/safetyFilter';
 
 export async function OPTIONS(req) {
   return new NextResponse(null, { status: 204, headers: getCorsHeaders(req) });
@@ -9,6 +10,7 @@ export async function OPTIONS(req) {
 
 export async function POST(req) {
   const corsHeaders = getCorsHeaders(req);
+  let prompt = '';
   try {
     const clientId = getClientIdentifier(req);
     // Rate limit: Tối đa 120 requests / phút trên mỗi định danh học sinh / IP (cho phép cả phòng máy trường học cùng dùng)
@@ -28,7 +30,7 @@ export async function POST(req) {
         { status: 400, headers: corsHeaders }
       );
     }
-    const prompt = rawPrompt.trim();
+    prompt = rawPrompt.trim();
     let { systemInstruction, contents, temperature = 0.3, maxOutputTokens = 1500, responseMimeType } = body;
 
     // Hỗ trợ ảnh từ client gửi lên (Gemini Vision OCR & Multimodal Problem Solver)
@@ -93,6 +95,36 @@ export async function POST(req) {
       );
     }
 
+    // 🛡️ LỚP 1 (TẤT ĐỊNH): Kiểm soát an toàn học tập trước khi gọi LLM
+    const safetyPolicy = evaluateSafetyPolicy(prompt);
+    const safetyDecision = {
+      level: safetyPolicy.level,
+      blocked: safetyPolicy.blocked,
+      requiresTeacherApproval: safetyPolicy.requiresTeacherApproval,
+      isApprovalAttempt: safetyPolicy.isApprovalAttempt,
+      matchedRules: safetyPolicy.matchedRules,
+      reason: safetyPolicy.reason,
+      supervisionNotice: safetyPolicy.supervisionNotice
+    };
+
+    if (safetyPolicy.blocked || safetyPolicy.isApprovalAttempt) {
+      return NextResponse.json(
+        {
+          success: true,
+          text: safetyPolicy.safeResponse,
+          model: 'stemhub-deterministic-safety-guard',
+          safetyDecision,
+          candidates: [
+            {
+              content: { parts: [{ text: safetyPolicy.safeResponse }] },
+              role: 'model'
+            }
+          ]
+        },
+        { status: 200, headers: corsHeaders }
+      );
+    }
+
     const latexSystemGuide = `
 [QUY TẮC BẮT BUỘC VỀ ĐỊNH DẠNG CÔNG THỨC TOÁN, LÝ, HÓA, SINH (LATEX / KATEX)]:
 - Mọi công thức Toán, Lý, Hóa, Sinh, phương trình hóa học, đại lượng, chỉ số phân tử, hằng số BẮT BUỘC viết bằng chuẩn LaTeX bọc trong dấu đô la:
@@ -113,8 +145,12 @@ export async function POST(req) {
 3. AN TOÀN HỆ THỐNG: Tuyệt đối từ chối yêu cầu chế tạo vũ khí, chất nổ, hành vi bạo lực, và không bao giờ tiết lộ API key hay biến môi trường.
 `;
 
+    const supervisionRule = safetyPolicy.requiresTeacherApproval
+      ? '\n[CHẾ ĐỘ HƯỚNG DẪN CÓ GIÁM SÁT BẮT BUỘC]: Câu hỏi liên quan hóa chất/thao tác rủi ro cao. Chỉ giải thích kiến thức SGK và nhắc quy tắc bảo hộ dưới sự giám sát trực tiếp của giáo viên. TUYỆT ĐỐI KHÔNG xác nhận an toàn hoặc cho phép học sinh tự làm thay giáo viên.'
+      : '';
+
     const baseInstruction = (typeof systemInstruction === 'string' ? systemInstruction : (systemInstruction?.parts?.[0]?.text || ''));
-    const finalSystemInstruction = `${baseInstruction}\nQuy tắc: bạn là thầy giáo STEM HUB vui tính, luôn bắt đầu câu trả lời bằng lời khen ngợi hoặc động viên học sinh.\n${pedagogicalGuardrail}\n${latexSystemGuide}`;
+    const finalSystemInstruction = `${baseInstruction}\nQuy tắc: bạn là thầy giáo STEM HUB vui tính, luôn bắt đầu câu trả lời bằng lời khen ngợi hoặc động viên học sinh.\n${pedagogicalGuardrail}${supervisionRule}\n${latexSystemGuide}`;
 
     const result = await callResilientGemini({
       prompt,
@@ -125,9 +161,12 @@ export async function POST(req) {
       responseMimeType
     });
 
+    const sanitized = sanitizeLLMResponseForRisk(result.text, safetyPolicy);
+    const finalText = sanitized.text;
+
     // 🛡️ Hậu kiểm suy nghiệm (Heuristic Verifier) câu trả lời đối chiếu với ngữ liệu RAG
     const verifier = verifyResponseGrounding({
-      answerText: result.text,
+      answerText: finalText,
       citedChunkIds: body.citedChunkIds || [],
       retrievedChunks: body.retrievedChunks || [],
       deterministicFacts: body.deterministicFacts || []
@@ -136,12 +175,16 @@ export async function POST(req) {
     return NextResponse.json(
       {
         success: true,
-        text: result.text,
+        text: finalText,
         model: result.model,
         verifier,
-        candidates: result.candidates || [
+        safetyDecision: {
+          ...safetyDecision,
+          llmOverridden: sanitized.overridden
+        },
+        candidates: [
           {
-            content: { parts: [{ text: result.text }] },
+            content: { parts: [{ text: finalText }] },
             role: 'model'
           }
         ]
@@ -151,6 +194,7 @@ export async function POST(req) {
   } catch (error) {
     console.error('[API /api/ai/chat] Lỗi:', error.message);
     const isLocationBlocked = error.message && error.message.includes('User location is not supported');
+    const fallbackPolicy = evaluateSafetyPolicy(prompt);
 
     // 🛡️ DỰ PHÒNG TỰ ĐỘNG KHI TẤT CẢ MÔ HÌNH BẬN (RESILIENT FAILOVER):
     // Cố gắng tra cứu trong kho tri thức nội bộ RAG (303 chủ đề SGK STEM + tri thức tự học)
@@ -160,12 +204,22 @@ export async function POST(req) {
       if (hits && hits.length > 0 && (hits[0].content || hits[0].answer)) {
         const topHit = hits[0];
         const bodyText = topHit.content || topHit.answer;
-        const answerText = topHit.topic ? `[Chủ đề: ${topHit.topic}]\n\n${bodyText}` : bodyText;
+        const rawAnswerText = topHit.topic ? `[Chủ đề: ${topHit.topic}]\n\n${bodyText}` : bodyText;
+        const safeFallback = sanitizeLLMResponseForRisk(rawAnswerText, fallbackPolicy);
         return NextResponse.json({
           success: true,
-          text: `[Trợ lý STEM HUB - Tri thức Chuẩn]: ${answerText}`,
+          text: `[Trợ lý STEM HUB - Tri thức Chuẩn]: ${safeFallback.text}`,
           model: 'stemhub-rag-offline-resilient',
-          candidates: [{ content: { parts: [{ text: answerText }] }, role: 'model' }]
+          safetyDecision: {
+            level: fallbackPolicy.level,
+            blocked: fallbackPolicy.blocked,
+            requiresTeacherApproval: fallbackPolicy.requiresTeacherApproval,
+            isApprovalAttempt: fallbackPolicy.isApprovalAttempt,
+            matchedRules: fallbackPolicy.matchedRules,
+            reason: fallbackPolicy.reason,
+            supervisionNotice: fallbackPolicy.supervisionNotice
+          },
+          candidates: [{ content: { parts: [{ text: safeFallback.text }] }, role: 'model' }]
         }, { status: 200, headers: corsHeaders });
       }
     } catch (ragErr) {

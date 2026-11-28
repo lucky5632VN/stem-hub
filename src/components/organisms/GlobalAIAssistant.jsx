@@ -31,6 +31,7 @@ import { predictUserIntent } from '@/lib/intentClassifier';
 import { retrieveTopKMemories } from '@/lib/memoryService';
 import { getAdaptiveDifficultyRecommendation, processInteractionFeedback } from '@/lib/continuousLearningPipeline';
 import { formatMathText } from '@/lib/mathFormatter';
+import { evaluateSafetyPolicy } from '@/lib/safetyFilter';
 
 // Bộ giải mã chống bot quét chuỗi thô tĩnh trên mã nguồn client
 const _d = (s) => (typeof window !== 'undefined' ? window.atob(s) : Buffer.from(s, 'base64').toString('utf-8'));
@@ -882,12 +883,15 @@ export default function GlobalAIAssistant() {
       const cleanAnswer = flaggingMessage.text || '';
       const subject = flagSubject || 'toan';
 
+      const isSafetySupervision = Boolean(flagModalMessage?.safetyDecision && flagModalMessage.safetyDecision.level !== 'SAFE');
       const payload = {
         query: cleanQuery,
         answer: cleanAnswer,
         subject: subject,
-        topic: `Học sinh băn khoăn gửi giáo viên môn ${getSubjectDisplayName(subject)}`,
-        sourceType: 'student_flagged_for_teacher',
+        topic: isSafetySupervision
+          ? `[CẦN GV GIÁM SÁT AN TOÀN] Yêu cầu xác nhận môn ${getSubjectDisplayName(subject)}`
+          : `Học sinh băn khoăn gửi giáo viên môn ${getSubjectDisplayName(subject)}`,
+        sourceType: isSafetySupervision ? 'safety_supervision_request' : 'student_flagged_for_teacher',
         studentNote: flagStudentNote.trim(),
         studentUid: currentUser?.uid || 'student_anonymous',
         studentName: currentUser?.displayName || 'Học sinh',
@@ -1985,6 +1989,25 @@ CuO (đen) + H₂ -t°→ Cu (đỏ) + H₂O
       return; // 🎯 HOÀN TOÀN BỎ QUA GEMINI API KEY!
     }
 
+    // 🛡️ LỚP 1 (TẤT ĐỊNH): Kiểm soát an toàn học tập trước khi tra cache hay gọi LLM
+    const clientSafety = evaluateSafetyPolicy(textToSend);
+    if (clientSafety.blocked || clientSafety.isApprovalAttempt) {
+      setIsLoading(false);
+      const botMsgId = 'bot_' + Date.now();
+      const safeBotMsg = {
+        id: botMsgId,
+        sender: 'bot',
+        text: clientSafety.safeResponse,
+        query: textToSend,
+        safetyDecision: clientSafety,
+        timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+      };
+      const finalMsgList = [...newMessages, safeBotMsg];
+      setMessages(finalMsgList);
+      saveCurrentSession(finalMsgList, currentSessionId);
+      return;
+    }
+
     // 🛡️ YÊU CẦU 2 (CẢNH BÁO THAY VÌ CỐ TRẢ LỜI & STRICT GROUNDING ABSTENTION):
     const ragResults = retrieveTopK(textToSend, 3);
     const topScore = (ragResults && ragResults.length > 0) ? (ragResults[0].score || 0) : 0;
@@ -2152,6 +2175,7 @@ ${conciseInstruction}
 
     let aiSuccess = false;
     let responseText = '';
+    let serverSafetyDecision = clientSafety;
 
     // Định tuyến an toàn qua Local Next.js Gateway (/api/ai/chat - Zero Geo-block)
     const endpointsToTry = ['/api/ai/chat'];
@@ -2160,6 +2184,7 @@ ${conciseInstruction}
     }
 
     const bodyPayload = {
+      prompt: textToSend,
       contents: conversationHistory,
       systemInstruction: systemInstructionText,
       temperature: 0.3,
@@ -2185,6 +2210,9 @@ ${conciseInstruction}
 
         if (response.ok) {
           const data = await response.json().catch(() => ({}));
+          if (data.safetyDecision) {
+            serverSafetyDecision = data.safetyDecision;
+          }
           const replyText = data.text || data.candidates?.[0]?.content?.parts?.[0]?.text;
           if (replyText) {
             responseText = replyText;
@@ -2255,7 +2283,7 @@ ${conciseInstruction}
       finalText.toLowerCase().includes('cảnh báo thiếu căn cứ')
     );
 
-    if (aiSuccess && finalText && textToSend.length >= 4 && !isErrorOrOffline(finalText) && !isGreeting && !hasPersonalInfo && !isNonStemQuery && !isOutOfScopeRefusal) {
+    if (aiSuccess && finalText && textToSend.length >= 4 && !isErrorOrOffline(finalText) && !isGreeting && !hasPersonalInfo && !isNonStemQuery && !isOutOfScopeRefusal && serverSafetyDecision?.level === 'SAFE') {
       try {
         const detectedSubj = (intentResult?.subject && intentResult.subject !== 'general')
           ? intentResult.subject.toLowerCase()
@@ -2329,6 +2357,7 @@ ${conciseInstruction}
       text: '',
       query: textToSend,
       groundingEvidence,
+      safetyDecision: serverSafetyDecision,
       timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
     };
 
@@ -2825,6 +2854,20 @@ ${conciseInstruction}
                               <div className="mb-2 flex items-center gap-1.5 text-[10px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/35 px-2.5 py-1 rounded-xl w-fit shadow-xs">
                                 <span>🛡️</span>
                                 <span>Đã có GV kiểm định</span>
+                              </div>
+                            )}
+                            {m.safetyDecision && m.safetyDecision.level !== 'SAFE' && (
+                              <div className={`mb-2 flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-xl w-fit border ${
+                                m.safetyDecision.blocked
+                                  ? 'text-red-300 bg-red-500/15 border-red-500/40'
+                                  : 'text-amber-300 bg-amber-500/15 border-amber-500/40'
+                              }`}>
+                                <span>{m.safetyDecision.blocked ? '⛔' : '🛡️'}</span>
+                                <span>
+                                  {m.safetyDecision.blocked
+                                    ? 'Bộ lọc an toàn: Đã chặn yêu cầu nguy hiểm'
+                                    : 'Hướng dẫn có giám sát — AI không thay GV xác nhận rủi ro'}
+                                </span>
                               </div>
                             )}
                             <FormattedAIMessage

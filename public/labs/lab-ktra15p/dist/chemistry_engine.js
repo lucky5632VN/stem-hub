@@ -21,6 +21,25 @@ const ChemistryEngine = {
    * Module giám sát an toàn IDCL (Mars Genesis)
    */
   SafetyWatcher: {
+    RESTRICTED_CHEMICALS: new Set([
+      'oleum', 'hf', 'h2so4_conc', 'h2so4', 'hno3_conc', 'hno3',
+      'cl2', 'na', 'k', 'white_phosphorus', 'phosphorus', 'kclo3'
+    ]),
+
+    requiresTeacherApproval: function(reaction, missingSafety = []) {
+      if (!reaction) return false;
+      const level = Number(reaction.hazardLevel || 0);
+      if (level >= 3 || reaction.toxicGas === true || reaction.shatter === true) return true;
+      if (level >= 2 && Array.isArray(missingSafety) && missingSafety.length > 0) return true;
+      return false;
+    },
+
+    verifyTeacherApproval: function({ isTeacherRole = false, pin = '' } = {}) {
+      if (isTeacherRole === true) return true;
+      const expectedPin = (typeof window !== 'undefined' && window.__STEM_TEACHER_PIN__) || 'GV2026';
+      return typeof pin === 'string' && pin.trim() === expectedPin;
+    },
+
     checkViolation: function(chemicalId, currentEnvironment) {
       // Tìm hóa chất trong DATABASE chuẩn hoặc FALLBACK
       const chem = (typeof CHEMICAL_DATABASE !== 'undefined' && CHEMICAL_DATABASE[chemicalId]) || 

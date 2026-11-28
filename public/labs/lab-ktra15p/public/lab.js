@@ -29,7 +29,6 @@ const AudioSystem = {
       console.log('[AudioSystem] 🔊 Hệ thống âm thanh sẵn sàng (chế độ không phụ thuộc file MP3).');
     } catch(e) {}
   },
-  },
 
   /**
    * Phát âm thanh cảnh báo
@@ -3799,17 +3798,6 @@ const MusicSystem = {
       };
 
       // AudioContext dành cho Drone synthesized
-      try {
-        this._ctx = new (window.AudioContext || window.webkitAudioContext)();
-        this._gainNode = this._ctx.createGain();
-        this._gainNode.connect(this._ctx.destination);
-      } catch(e) {}
-    } catch(e) {
-      console.warn('[MusicSystem] Init error:', e);
-    }
-  },
-
-      // AudioContext dành cho Drone
       try {
         this._ctx = new (window.AudioContext || window.webkitAudioContext)();
         this._gainNode = this._ctx.createGain();

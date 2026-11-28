@@ -1,0 +1,10 @@
+{
+  "timestamp": "2026-11-28T08:56:39+07:00",
+  "command": "npm run test:unit && node tests/safety_control.test.mjs",
+  "unit_suites_passed": 17,
+  "unit_suites_total": 17,
+  "safety_control_cases_passed": 12,
+  "safety_control_cases_total": 12,
+  "next_build_status": "passed",
+  "next_build_pages": 52
+}

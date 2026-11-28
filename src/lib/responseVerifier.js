@@ -39,6 +39,9 @@ export function getSourceTypeLabel(sourceType) {
   if (sourceType === 'student_flagged_for_teacher') {
     return 'Học sinh băn khoăn gửi giáo viên';
   }
+  if (sourceType === 'safety_supervision_request') {
+    return 'Yêu cầu Giáo viên giám sát an toàn thí nghiệm';
+  }
   return 'Nguồn chưa xác định';
 }
 

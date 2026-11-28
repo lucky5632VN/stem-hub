@@ -120,7 +120,7 @@ export async function GET(request) {
       // Bỏ qua cảnh báo quyền khi chạy môi trường local fallback
     }
 
-    const includeStudentLiked = url.searchParams.get('includeStudentLiked') === 'true' || url.searchParams.get('forRag') === 'true';
+    const includeStudentLiked = searchParams.get('includeStudentLiked') === 'true' || searchParams.get('forRag') === 'true';
 
     let filtered = list;
     const isRealVerifiedItem = item => {

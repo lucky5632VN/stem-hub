@@ -1149,6 +1149,44 @@ class UnifiedChatbot {
     }
 
     // ⚡ Zero Exposure: Định tuyến qua Next.js Gateway nội bộ (/api/ai/chat)
+    const checkLabPromptSafety = (rawText) => {
+      const q = (rawText || '').replace(/\s+/g, ' ').trim();
+      if (!q) return null;
+      const blockedRx = /(chế\s*tạo|tổng\s*hợp|pha\s*chế|điều\s*chế)\s*[^.!?\n]{0,40}\b(thuốc\s*nổ|chất\s*nổ|bom|mìn|kíp\s*nổ|pháo\s*nổ|tnt|nitroglycerin|tatp|rdx|khí\s*độc|chất\s*độc|hcn|xyanua|cyanide|phosgene|sarin|ma\s*túy|vũ\s*khí)\b|\b(hcn|xyanua|phosgene|sarin)\b/i;
+      if (blockedRx.test(q)) {
+        return '⛔ TỪ CHỐI YÊU CẦU AN TOÀN HỌC TẬP: Phòng Lab không cung cấp hướng dẫn chế tạo chất nổ, khí độc hoặc hóa chất cấm. Hãy trao đổi trực tiếp với Giáo viên bộ môn.';
+      }
+      const approvalRx = /(xác\s*nhận|duyệt|cam\s*kết|bảo\s*đảm|cho\s*phép)\s*[^.!?\n]{0,40}\b(an\s*toàn|không\s*nổ|không\s*độc|thao\s*tác\s*này|tự\s*làm)\b|\b(tự\s*làm\s*(?:ở|tại)\s*nhà|không\s*cần\s*giáo\s*viên)\b/i;
+      if (approvalRx.test(q)) {
+        return '🛡️ YÊU CẦU GIÁO VIÊN XÁC NHẬN: Trợ lý AI không được phép thay giáo viên xác nhận thao tác rủi ro. Vui lòng gọi Giáo viên trực tiếp kiểm tra đồ bảo hộ và xác nhận.';
+      }
+      return null;
+    };
+    const labSafetyBlockMsg = checkLabPromptSafety(prompt);
+    if (labSafetyBlockMsg) {
+      const chatDangerPayload = {
+        experimentTitle: `[AI Lab Hóa] ${String(prompt || '').slice(0, 100)}`,
+        reactants: [],
+        equation: '(Yêu cầu qua AI Chatbot Lab Hóa)',
+        observation: String(prompt || ''),
+        hazardLevel: 3,
+        hazardType: 'ai_prompt_hazard',
+        missingSafety: [],
+        aiWarning: labSafetyBlockMsg,
+        source: 'lab_hoa_ai_chat'
+      };
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'chemistry_danger_report', payload: chatDangerPayload }, '*');
+      } else {
+        fetch('/api/lab-safety-reviews', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(chatDangerPayload)
+        }).catch(() => {});
+      }
+      return `${labSafetyBlockMsg}\n\n📤 Hệ thống đã tự động gửi nội dung này tới Giáo viên kiểm soát.`;
+    }
+
     const proxyUrl = '/api/ai/chat';
     try {
       const gwRes = await fetch(proxyUrl, {

@@ -1,0 +1,59 @@
+{
+  "version": "1.0",
+  "updatedAt": "2026-11-28T08:00:00+07:00",
+  "claims": [
+    {
+      "id": "baseline_unit_tests",
+      "description": "Bộ 16 suite unit test nền tảng hiện có đều đạt trước khi chỉnh sửa",
+      "command": "npm run test:unit",
+      "outputFile": "reports/unit_test_summary.json",
+      "status": "verified",
+      "placeholders": []
+    },
+    {
+      "id": "safety_eval_cases",
+      "description": "Đo lường bộ ca thử yêu cầu nguy hiểm, hướng dẫn giám sát, chặn AI xác nhận thay GV và ca an toàn",
+      "command": "node scripts/eval_safety_cases.mjs",
+      "outputFile": "reports/safety_eval_result.json",
+      "status": "verified",
+      "placeholders": [
+        "safety_eval_timestamp",
+        "blocked_total",
+        "blocked_pass",
+        "supervised_total",
+        "supervised_pass",
+        "no_ai_approval_total",
+        "no_ai_approval_pass",
+        "safe_total",
+        "safe_pass",
+        "sample_blocked_prompt",
+        "sample_blocked_response",
+        "sample_supervised_prompt",
+        "sample_supervised_response",
+        "sample_no_ai_prompt",
+        "sample_no_ai_response"
+      ]
+    },
+    {
+      "id": "final_unit_and_safety_tests",
+      "description": "Chạy toàn bộ unit test và test kiểm soát an toàn sau khi hoàn tất code",
+      "command": "npm run test:unit && node tests/safety_control.test.mjs",
+      "outputFile": "reports/unit_test_summary.json",
+      "status": "verified",
+      "placeholders": [
+        "unit_suites_passed",
+        "unit_suites_total"
+      ]
+    },
+    {
+      "id": "security_and_packaging",
+      "description": "Đóng gói staging sạch và quét bí mật gitleaks",
+      "command": "node scripts/package_submission.mjs",
+      "outputFile": "reports/security_package_summary.json",
+      "status": "verified",
+      "placeholders": [
+        "gitleaks_leaks"
+      ]
+    }
+  ]
+}

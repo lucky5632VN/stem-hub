@@ -94,6 +94,7 @@ export default function VirtualLabSandbox({
   const [showShareConfirm, setShowShareConfirm] = useState(false);
   const [showMolecularViewer, setShowMolecularViewer] = useState(false);
   const [iframeKey, setIframeKey] = useState(() => Date.now());
+  const [safetyReportToast, setSafetyReportToast] = useState('');
 
   const containerRef = useRef(null);
   const iframeRef = useRef(null);
@@ -137,6 +138,39 @@ export default function VirtualLabSandbox({
       setActiveLab(null);
     };
   }, [subjectKey, title, labUrl, setActiveLab]);
+
+  // 🛡️ Lắng nghe báo cáo thí nghiệm nguy hiểm tự động từ iframe Lab Hóa -> gửi cho Giáo viên kiểm soát
+  useEffect(() => {
+    const handleLabMessage = async (event) => {
+      const data = event?.data;
+      if (!data || typeof data !== 'object') return;
+      if (data.type === 'chemistry_danger_report') {
+        try {
+          const res = await fetch('/api/lab-safety-reviews', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...data.payload,
+              studentName: user?.displayName || 'Học sinh Lab Hóa'
+            })
+          });
+          const resData = await res.json().catch(() => ({}));
+          if (res.ok) {
+            if (resData.alreadyReviewed) {
+              setSafetyReportToast('✅ Phản ứng này đã được Giáo viên Hóa thẩm định trước đó (không gửi lại).');
+            } else {
+              setSafetyReportToast('🛡️ AI đã cảnh báo trước và tự động gửi thí nghiệm + phản ứng tới Giáo viên Hóa.');
+            }
+            setTimeout(() => setSafetyReportToast(''), 6000);
+          }
+        } catch (err) {
+          console.warn('[VirtualLabSandbox] Lỗi gửi báo cáo thí nghiệm cho GV:', err.message);
+        }
+      }
+    };
+    window.addEventListener('message', handleLabMessage);
+    return () => window.removeEventListener('message', handleLabMessage);
+  }, [user?.displayName]);
 
   const handleReload = () => {
     playSound.click?.();
@@ -273,6 +307,12 @@ export default function VirtualLabSandbox({
     >
       {/* 🚀 MAIN CONTENT: FULLSCREEN IFRAME SANDBOX (EDGE-TO-EDGE) */}
       <div className="flex-1 w-full h-full relative overflow-hidden bg-[#0a0b12]">
+        {safetyReportToast && (
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl bg-amber-500/95 text-slate-950 font-bold text-xs shadow-lg flex items-center gap-2 border border-amber-300">
+            <Shield className="w-4 h-4 shrink-0" />
+            <span>{safetyReportToast}</span>
+          </div>
+        )}
         {/* Lab Iframe */}
         <div className="flex-1 h-full w-full relative">
           <iframe 

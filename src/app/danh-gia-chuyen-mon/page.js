@@ -28,6 +28,7 @@ import { auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { formatMathText } from '@/lib/mathFormatter';
 import { evaluateReviewPortalAccess } from '@/lib/reviewAgreement';
+import LabSafetyReviewPanel from '@/components/organisms/LabSafetyReviewPanel';
 
 const RUBRIC_CRITERIA = [
   {
@@ -579,6 +580,18 @@ export default function TeacherReviewPortalPage() {
           >
             <UserCheck className="w-4 h-4" />
             Cam Kết & Quyền Riêng Tư
+          </button>
+
+          <button
+            onClick={() => setActiveTab('lab_safety')}
+            className={`pb-3 px-2 flex items-center gap-2 border-b-2 transition-all ${
+              activeTab === 'lab_safety'
+                ? 'border-amber-500 text-amber-600 dark:border-amber-400 dark:text-amber-400'
+                : 'border-transparent text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+            }`}
+          >
+            <AlertTriangle className="w-4 h-4" />
+            Kiểm Soát Thí Nghiệm Lab Hóa
           </button>
         </div>
 
@@ -1947,6 +1960,10 @@ export default function TeacherReviewPortalPage() {
               </button>
             </div>
           </div>
+        )}
+
+        {activeTab === 'lab_safety' && (
+          <LabSafetyReviewPanel firebaseUser={firebaseUser} canEditReviews={canEditReviews} />
         )}
       </div>
   );

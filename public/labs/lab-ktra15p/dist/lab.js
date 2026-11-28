@@ -29,7 +29,6 @@ const AudioSystem = {
       console.log('[AudioSystem] 🔊 Hệ thống âm thanh sẵn sàng (chế độ không phụ thuộc file MP3).');
     } catch(e) {}
   },
-  },
 
   /**
    * Phát âm thanh cảnh báo
@@ -1600,6 +1599,7 @@ function getPrecipitation(chemA, chemB) {
 function checkReaction(beaker) {
   const contents = beaker.chemicals;
   if (contents.length < 1) return;
+  beaker._reactionMatchedInPass = false;
 
   // 1. THERMODYNAMIC PRECIPITATION CHECK (Global)
   if (window.ChemistryEngine) {
@@ -1850,6 +1850,10 @@ function checkReaction(beaker) {
       }
     }
   }
+
+  if (contents.length >= 2 && !beaker._reactionMatchedInPass && typeof handleUnknownCombination === 'function') {
+    handleUnknownCombination(beaker);
+  }
 }
 
 // ——— PHÁT HIỆN KẾT TỦA TỪ PHENOMENA_DB ———
@@ -1942,8 +1946,146 @@ function checkDissolution(container, reagent) {
   });
 }
 
+// ——— XỬ LÝ THÍ NGHIỆM CHƯA CÓ TRONG DỮ LIỆU & ĐỒNG BỘ HIỆU ỨNG HIỆN TƯỢNG ———
+function handleUnknownCombination(beaker) {
+  const contents = beaker.chemicals || [];
+  if (contents.length < 2) return;
+  const names = contents.map(c => c.formula || c.name || c.id);
+  const comboKey = [...new Set(names)].sort().join(' + ') + (beaker.isHeating ? ' [Đun nóng]' : '');
+  if (beaker._lastUnknownComboKey === comboKey) return;
+  beaker._lastUnknownComboKey = comboKey;
+
+  const reviewedInfo = typeof getTeacherReviewedInfo === 'function'
+    ? getTeacherReviewedInfo('', comboKey)
+    : null;
+
+  if (reviewedInfo) {
+    const verdictText = reviewedInfo.isDangerousVerdict === 'safe'
+      ? 'An toàn'
+      : reviewedInfo.isDangerousVerdict === 'warning'
+        ? 'Cần giám sát'
+        : 'Nguy hiểm cao';
+    addLog('info', `✅ Tổ hợp "${comboKey}" đã được Giáo viên Hóa thẩm định (${verdictText})${reviewedInfo.equation ? `: ${reviewedInfo.equation}` : ''}.`);
+    if (reviewedInfo.isDangerousVerdict !== 'safe' || (reviewedInfo.editedEffect && reviewedInfo.editedEffect !== 'auto' && reviewedInfo.editedEffect !== 'none')) {
+      executeReaction(beaker, {
+        name: reviewedInfo.experimentTitle || comboKey,
+        equation: reviewedInfo.equation || comboKey,
+        observation: reviewedInfo.observation || 'Theo thẩm định của Giáo viên Hóa.',
+        hazardLevel: reviewedInfo.isDangerousVerdict === 'dangerous' ? 3 : (reviewedInfo.isDangerousVerdict === 'warning' ? 2 : 0),
+        effect: reviewedInfo.editedEffect !== 'auto' ? reviewedInfo.editedEffect : 'gas',
+        type: reviewedInfo.editedEffect === 'explosion' ? 'explosion' : 'info'
+      });
+    }
+    return;
+  }
+
+  const restrictedSet = window.ChemistryEngine?.SafetyWatcher?.RESTRICTED_CHEMICALS;
+  const hasHazardChem = contents.some(c =>
+    (Array.isArray(c.hazards) && c.hazards.length > 0) ||
+    (restrictedSet && restrictedSet.has(c.id))
+  );
+
+  if (hasHazardChem || beaker.isHeating) {
+    const warnMsg = `Tổ hợp "${comboKey}" chưa có dữ liệu phản ứng chuẩn trong hệ thống nhưng có chứa hóa chất/điều kiện rủi ro.\nHệ thống tạm dừng mô phỏng hiệu ứng để tránh sai lệch an toàn.`;
+    const dangerPayload = {
+      experimentTitle: `[Chưa có dữ liệu - Có rủi ro] ${comboKey}`,
+      reactants: names,
+      equation: `${names.join(' + ')} -> (Chưa có trong dữ liệu chuẩn)`,
+      observation: warnMsg,
+      hazardLevel: 2,
+      hazardType: 'warning',
+      missingSafety: [],
+      aiWarning: warnMsg,
+      source: 'lab_hoa_unmapped_hazard'
+    };
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'chemistry_danger_report', payload: dangerPayload }, '*');
+    } else {
+      fetch('/api/lab-safety-reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dangerPayload)
+      }).catch(() => {});
+    }
+    addLog('warning', `⚠️ "${comboKey}" chưa có trong dữ liệu chuẩn (có yếu tố rủi ro) — Đã tự động gửi Giáo viên Hóa kiểm tra.`);
+    showDanger(
+      '⚠️ THÍ NGHIỆM CHƯA CÓ TRONG DỮ LIỆU CHUẨN',
+      warnMsg,
+      () => { AudioSystem.stopAlert(); },
+      '#d97706',
+      {
+        showSupervisionBox: true,
+        supervisionStatusText: '📤 Đã tự động gửi tổ hợp chất này lên hệ thống để Giáo viên Hóa kiểm tra tính nguy hiểm và bổ sung phương trình chuẩn.'
+      }
+    );
+  } else {
+    addLog('info', `ℹ️ Hỗn hợp (${names.join(' + ')}) chưa ghi nhận phản ứng trong dữ liệu SGK ở điều kiện thường (An toàn).`);
+  }
+}
+
+function applyTeacherOverrideAndReconcileEffect(container, reaction) {
+  if (!reaction) return reaction;
+  const cloned = { ...reaction };
+  const expTitle = cloned.name || (container.chemicals || []).map(c => c.formula || c.name || c.id).join(' + ');
+  const reviewedInfo = typeof getTeacherReviewedInfo === 'function'
+    ? getTeacherReviewedInfo(cloned.equation || '', expTitle)
+    : null;
+
+  if (reviewedInfo) {
+    if (reviewedInfo.experimentTitle) cloned.name = reviewedInfo.experimentTitle;
+    if (reviewedInfo.equation) cloned.equation = reviewedInfo.equation;
+    if (reviewedInfo.observation) cloned.observation = reviewedInfo.observation;
+    if (reviewedInfo.isDangerousVerdict === 'safe') {
+      cloned.hazardLevel = 0;
+      cloned.shatter = false;
+      cloned.toxicGas = null;
+      cloned.hazardType = 'safe';
+    } else if (reviewedInfo.isDangerousVerdict === 'warning') {
+      cloned.hazardLevel = Math.max(1, Math.min(2, Number(cloned.hazardLevel || 2)));
+      cloned.shatter = false;
+    } else if (reviewedInfo.isDangerousVerdict === 'dangerous') {
+      cloned.hazardLevel = Math.max(2, Number(cloned.hazardLevel || 2));
+    }
+
+    if (reviewedInfo.editedEffect && reviewedInfo.editedEffect !== 'auto') {
+      if (reviewedInfo.editedEffect === 'none') {
+        cloned.effect = 'none';
+        cloned.type = 'safe';
+        cloned.shatter = false;
+        cloned.toxicGas = null;
+      } else if (reviewedInfo.editedEffect === 'explosion') {
+        cloned.effect = 'explosion';
+        cloned.type = 'explosion';
+        cloned.hazardType = 'explosion';
+      } else if (reviewedInfo.editedEffect === 'gas') {
+        cloned.effect = 'gas';
+        cloned.type = 'gas';
+        cloned.shatter = false;
+      } else if (reviewedInfo.editedEffect === 'burn') {
+        cloned.effect = 'burn';
+        cloned.hazardType = 'burn';
+        cloned.shatter = false;
+      } else if (reviewedInfo.editedEffect === 'precipitate-color') {
+        cloned.effect = 'precipitate-color';
+        cloned.shatter = false;
+      }
+    }
+  }
+
+  // Kiểm tra tính nhất quán giữa loại phản ứng (nổ/cháy/độc) và hiệu ứng hiển thị trên màn hình
+  if ((cloned.type === 'explosion' || cloned.hazardType === 'explosion') && (!cloned.effect || !String(cloned.effect).includes('explosion'))) {
+    cloned.effect = 'explosion';
+  } else if (Number(cloned.hazardLevel || 0) < 2 && cloned.effect === 'explosion' && cloned.type !== 'explosion') {
+    cloned.effect = 'gas';
+  }
+
+  return cloned;
+}
+
 // ——— EXECUTE REACTION ———
-function executeReaction(container, reaction) {
+function executeReaction(container, rawReaction) {
+  container._reactionMatchedInPass = true;
+  const reaction = applyTeacherOverrideAndReconcileEffect(container, rawReaction);
   // Clear old display info before starting new one
   const rd = document.getElementById('activeReactionDisplay');
   if (rd) rd.style.opacity = '1';
@@ -2093,13 +2235,54 @@ function executeReaction(container, reaction) {
         headerColor = '#dc2626'; // Red
     }
 
+    const experimentTitle = reaction.name || (container.chemicals || []).map(c => c.formula || c.name || c.id).join(' + ');
+    const reviewedInfo = typeof getTeacherReviewedInfo === 'function'
+      ? getTeacherReviewedInfo(reaction.equation || '', experimentTitle)
+      : null;
+
+    let supervisionStatusText = '';
+    if (reviewedInfo) {
+      const verdictText = reviewedInfo.isDangerousVerdict === 'safe'
+        ? 'An toàn'
+        : reviewedInfo.isDangerousVerdict === 'warning'
+          ? 'Cần giám sát'
+          : 'Nguy hiểm cao';
+      const corrText = reviewedInfo.isReactionCorrect === false ? 'Phản ứng đã được GV chỉnh sửa' : 'Phản ứng đúng';
+      supervisionStatusText = `✅ Phản ứng này đã được Giáo viên Hóa thẩm định (${verdictText} • ${corrText}).${reviewedInfo.equation ? `\nPƯ chuẩn GV: ${reviewedInfo.equation}` : ''}\n(Đã chấm — không gửi lại cho Giáo viên)`;
+      addLog('info', `✅ Phản ứng "${experimentTitle}" đã được Giáo viên Hóa chấm trước đó — không gửi lại.`);
+    } else {
+      supervisionStatusText = '📤 Đã tự động gửi thí nghiệm và phương trình phản ứng lên hệ thống cho Giáo viên Hóa chấm.';
+      const dangerPayload = {
+        experimentTitle,
+        reactants: (container.chemicals || []).map(c => c.formula || c.name || c.id),
+        equation: reaction.equation || '',
+        observation: reaction.observation || warnMsg,
+        hazardLevel: Number(reaction.hazardLevel || 2),
+        hazardType: reaction.hazardType || 'warning',
+        missingSafety: translatedMissing,
+        aiWarning: `${titleType}: ${warnMsg}`,
+        source: 'lab_hoa_experiment_auto'
+      };
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'chemistry_danger_report', payload: dangerPayload }, '*');
+      } else {
+        fetch('/api/lab-safety-reviews', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dangerPayload)
+        }).catch(() => {});
+      }
+      addLog('warning', '📤 AI đã cảnh báo trước và tự động gửi thí nghiệm + phản ứng tới Giáo viên Hóa.');
+    }
+
     showDanger(titleType, warnMsg, () => {
-      // Dừng cảnh báo khi người dùng đã xác nhận
       AudioSystem.stopAlert();
       container.isReacting = false;
-      // Đợi một chút sau khi tắt cảnh báo mới nổ (tạo độ kịch tính)
       setTimeout(performEffects, 500);
-    }, headerColor);
+    }, headerColor, {
+      showSupervisionBox: true,
+      supervisionStatusText
+    });
   } else {
     performEffects();
   }
@@ -2984,13 +3167,59 @@ function clearLog() {
   addLog('info', '[HỆ_THỐNG] NHẬT KÝ ĐÃ ĐƯỢC LÀM SẠCH. SẴN SÀNG TIẾP NHẬN DỮ LIỆU.');
 }
 
-function showDanger(title, message, callback, headerColor = '#dc2626') {
+window.__TEACHER_REVIEWED_MAP__ = window.__TEACHER_REVIEWED_MAP__ || {};
+
+function normalizeLabReactionKey(equation = '', title = '') {
+  const eq = String(equation || '').toLowerCase().replace(/\s+/g, '').trim();
+  if (eq) return 'eq:' + eq;
+  return 'title:' + String(title || '').toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+function getTeacherReviewedInfo(equation = '', title = '') {
+  const map = window.__TEACHER_REVIEWED_MAP__ || {};
+  const kEq = normalizeLabReactionKey(equation, '');
+  const kTitle = normalizeLabReactionKey('', title);
+  return map[kEq] || map[kTitle] || null;
+}
+
+(function syncTeacherReviewedReactions() {
+  if (typeof fetch !== 'function') return;
+  fetch('/api/lab-safety-reviews?publicOverrides=true')
+    .then(r => r.ok ? r.json() : null)
+    .then(data => {
+      if (data && Array.isArray(data.overrides)) {
+        data.overrides.forEach(item => {
+          if (item.reactionKey) window.__TEACHER_REVIEWED_MAP__[item.reactionKey] = item;
+          if (item.originalEquation) window.__TEACHER_REVIEWED_MAP__[normalizeLabReactionKey(item.originalEquation, '')] = item;
+          if (item.experimentTitle) window.__TEACHER_REVIEWED_MAP__[normalizeLabReactionKey('', item.experimentTitle)] = item;
+        });
+      }
+    })
+    .catch(() => {});
+})();
+
+function showDanger(title, message, callback, headerColor = '#dc2626', options = {}) {
   document.getElementById('dangerTitle').textContent = title;
-  document.getElementById('dangerTitle').style.color = headerColor; // Appplying color
+  document.getElementById('dangerTitle').style.color = headerColor;
   document.getElementById('dangerMessage').textContent = message;
+  const approvalBox = document.getElementById('teacherApprovalBox');
+  const statusEl = document.getElementById('teacherSupervisionStatus');
+  const okBtn = document.getElementById('btnDangerOk');
+
+  if (approvalBox) {
+    if (options && options.showSupervisionBox) {
+      approvalBox.style.display = 'block';
+      if (statusEl) statusEl.textContent = options.supervisionStatusText || '';
+    } else {
+      approvalBox.style.display = 'none';
+    }
+  }
+  if (okBtn) okBtn.style.display = 'inline-block';
+
   document.getElementById('dangerOverlay').classList.add('show');
   _dangerCallback = callback;
 }
+
 function dismissDanger() {
   document.getElementById('dangerOverlay').classList.remove('show');
   if (typeof _dangerCallback === 'function') {
@@ -3799,17 +4028,6 @@ const MusicSystem = {
       };
 
       // AudioContext dành cho Drone synthesized
-      try {
-        this._ctx = new (window.AudioContext || window.webkitAudioContext)();
-        this._gainNode = this._ctx.createGain();
-        this._gainNode.connect(this._ctx.destination);
-      } catch(e) {}
-    } catch(e) {
-      console.warn('[MusicSystem] Init error:', e);
-    }
-  },
-
-      // AudioContext dành cho Drone
       try {
         this._ctx = new (window.AudioContext || window.webkitAudioContext)();
         this._gainNode = this._ctx.createGain();
