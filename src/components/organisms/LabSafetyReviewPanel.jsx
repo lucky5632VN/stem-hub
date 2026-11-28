@@ -78,7 +78,15 @@ export default function LabSafetyReviewPanel({ firebaseUser, canEditReviews }) {
       if (!res.ok) {
         setError(data.error || 'Lưu thẩm định thất bại.');
       } else {
-        setItems((prev) => prev.map((it) => (it.id === id ? data.item : it)));
+        setItems((prev) => {
+          const updated = prev.map((it) => (it.id === id ? data.item : it));
+          return [...updated].sort((a, b) => {
+            const revA = (a.teacherVerified === true && a.status === 'reviewed_by_teacher') ? 1 : 0;
+            const revB = (b.teacherVerified === true && b.status === 'reviewed_by_teacher') ? 1 : 0;
+            if (revA !== revB) return revA - revB;
+            return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+          });
+        });
         setSuccess(`Đã lưu thẩm định & chỉnh sửa của Giáo viên cho ca "${data.item?.editedExperimentTitle || data.item?.experimentTitle}".`);
       }
     } catch (err) {

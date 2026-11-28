@@ -91,6 +91,9 @@ async function loadAllReviews() {
   }
 
   return Array.from(map.values()).sort((a, b) => {
+    const revA = (a.teacherVerified === true && a.status === 'reviewed_by_teacher') ? 1 : 0;
+    const revB = (b.teacherVerified === true && b.status === 'reviewed_by_teacher') ? 1 : 0;
+    if (revA !== revB) return revA - revB;
     const tA = new Date(a.createdAt || 0).getTime();
     const tB = new Date(b.createdAt || 0).getTime();
     return tB - tA;
