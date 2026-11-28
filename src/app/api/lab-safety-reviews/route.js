@@ -260,8 +260,17 @@ export async function PATCH(request) {
       return NextResponse.json({ success: false, error: 'Thiếu ID phiếu thí nghiệm.' }, { status: 400, headers: corsHeaders });
     }
 
-    const allItems = await loadAllReviews();
-    const target = allItems.find(it => it.id === id);
+    const admin = getFirebaseAdmin();
+    const localList = readLocalReviews();
+    let target = localList.find(it => it.id === id) || null;
+    if (admin) {
+      try {
+        const snap = await admin.firestore().collection('lab_safety_reviews').doc(id).get();
+        if (snap.exists) target = snap.data();
+      } catch (fsErr) {
+        console.warn('[API lab-safety-reviews] PATCH đọc 1 doc lỗi:', fsErr.message);
+      }
+    }
     if (!target) {
       return NextResponse.json({ success: false, error: 'Không tìm thấy phiếu thí nghiệm.' }, { status: 404, headers: corsHeaders });
     }
