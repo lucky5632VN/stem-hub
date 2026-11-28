@@ -143,6 +143,10 @@ export async function GET(request) {
   }
 }
 
+function makeSafeDocId(reactionKey) {
+  return 'rx_' + Buffer.from(String(reactionKey || 'unknown')).toString('base64url').slice(0, 64);
+}
+
 export async function POST(request) {
   const corsHeaders = getCorsHeaders(request);
   try {
@@ -160,37 +164,44 @@ export async function POST(request) {
     }
 
     const reactionKey = normalizeReactionKey(equation, experimentTitle);
-    const existing = await loadAllReviews();
+    const docId = makeSafeDocId(reactionKey);
+    const admin = getFirebaseAdmin();
+    const localList = readLocalReviews();
 
-    // Nếu phản ứng/thí nghiệm này ĐÃ được Giáo viên chấm -> KHÔNG gửi lại cho GV chấm nữa
-    const reviewedItem = existing.find(it =>
-      (it.reactionKey || normalizeReactionKey(it.equation, it.experimentTitle)) === reactionKey &&
-      it.teacherVerified === true &&
-      it.status === 'reviewed_by_teacher'
-    );
-    if (reviewedItem) {
+    // Kiểm tra nhanh 1 doc duy nhất thay vì quét toàn bộ collection
+    let existingItem = localList.find(it =>
+      it.id === docId || (it.reactionKey || normalizeReactionKey(it.equation, it.experimentTitle)) === reactionKey
+    ) || null;
+
+    if (admin) {
+      try {
+        const docSnap = await admin.firestore().collection('lab_safety_reviews').doc(docId).get();
+        if (docSnap.exists) {
+          existingItem = docSnap.data();
+        }
+      } catch (fsReadErr) {
+        console.warn('[API lab-safety-reviews] Lỗi đọc 1 doc Firestore:', fsReadErr.message);
+      }
+    }
+
+    if (existingItem && existingItem.teacherVerified === true && existingItem.status === 'reviewed_by_teacher') {
       return NextResponse.json({
         success: true,
         alreadyReviewed: true,
-        item: reviewedItem
+        item: existingItem
       }, { status: 200, headers: corsHeaders });
     }
 
-    // Nếu đang có phiếu chờ GV chấm cho cùng phản ứng -> không tạo trùng lặp
-    const pendingItem = existing.find(it =>
-      (it.reactionKey || normalizeReactionKey(it.equation, it.experimentTitle)) === reactionKey &&
-      it.status === 'pending_review'
-    );
-    if (pendingItem) {
+    if (existingItem && existingItem.status === 'pending_review') {
       return NextResponse.json({
         success: true,
         deduplicated: true,
-        item: pendingItem
+        item: existingItem
       }, { status: 200, headers: corsHeaders });
     }
 
     const now = new Date();
-    const id = `lab_safe_${now.getTime()}_${Math.random().toString(36).slice(2, 7)}`;
+    const id = docId;
     const newItem = {
       id,
       reactionKey,
@@ -217,17 +228,15 @@ export async function POST(request) {
       createdAt: now.toISOString()
     };
 
-    const localList = readLocalReviews();
     localList.unshift(newItem);
     writeLocalReviews(localList.slice(0, 500));
 
-    try {
-      const admin = getFirebaseAdmin();
-      if (admin) {
+    if (admin) {
+      try {
         await admin.firestore().collection('lab_safety_reviews').doc(id).set(newItem);
+      } catch (fsErr) {
+        console.warn('[API lab-safety-reviews] Ghi Firestore lỗi (đã lưu local):', fsErr.message);
       }
-    } catch (fsErr) {
-      console.warn('[API lab-safety-reviews] Ghi Firestore lỗi (đã lưu local):', fsErr.message);
     }
 
     return NextResponse.json({ success: true, item: newItem }, { status: 200, headers: corsHeaders });

@@ -4,7 +4,7 @@ import {
   getFirestore, 
   initializeFirestore, 
   persistentLocalCache, 
-  persistentSingleTabManager, 
+  persistentMultipleTabManager, 
   connectFirestoreEmulator 
 } from "firebase/firestore";
 import { clientFunctions } from "./clientFunctions.js";
@@ -66,7 +66,7 @@ function createFirestoreDb(appInstance) {
   try {
     return initializeFirestore(appInstance, {
       localCache: persistentLocalCache({
-        tabManager: persistentSingleTabManager()
+        tabManager: persistentMultipleTabManager()
       })
     });
   } catch (err) {
