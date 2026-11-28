@@ -354,6 +354,25 @@ export async function PATCH(request) {
     try {
       if (db) {
         await db.collection('lab_safety_reviews').doc(id).set(patchData, { merge: true });
+        // Đồng bộ bản đã kiểm định/chỉnh sửa của Giáo viên vào kho `lab_reactions_catalog` trên stemhub-safety-db
+        const catalogHazardLevel =
+          isDangerousVerdict === 'safe' ? 0 : isDangerousVerdict === 'warning' ? 2 : 3;
+        await db.collection('lab_reactions_catalog').doc(id).set({
+          reactionId: id,
+          category: 'teacher_verified',
+          name: patchData.editedExperimentTitle || updatedItem.experimentTitle || '',
+          reactants: Array.isArray(updatedItem.reactants) ? updatedItem.reactants : [],
+          equation: patchData.editedEquation || updatedItem.equation || '',
+          observation: patchData.editedObservation || updatedItem.observation || '',
+          hazardLevel: catalogHazardLevel,
+          hazardType: isDangerousVerdict,
+          effect: patchData.editedEffect || 'auto',
+          teacherVerified: true,
+          isReactionCorrect,
+          teacherNote: patchData.teacherNote || '',
+          reviewedByUid: auth.uid,
+          reviewedAt: patchData.reviewedAt
+        }, { merge: true });
       }
     } catch (fsErr) {
       console.warn('[API lab-safety-reviews] Cập nhật Firestore lỗi:', fsErr.message);
